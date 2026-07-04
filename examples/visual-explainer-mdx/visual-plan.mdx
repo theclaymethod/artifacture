@@ -1,0 +1,86 @@
+import { Callout, DecisionMatrix, ExplainerShell, Pipeline, RiskLedger, Section } from '../../visual-explainer-mdx/components';
+
+export default function VisualPlanExample() {
+  return (
+    <ExplainerShell
+      eyebrow="visual plan command"
+      title="Point-And-Click Annotation Plan"
+      summary="This example represents the migrated /generate-visual-plan path: verified facts first, then MDX source, reusable sections, and generated standalone HTML."
+    >
+      <Section kicker="problem" title="Current vs Desired">
+        <DecisionMatrix
+          rows={[
+            {
+              Area: 'Source',
+              Current: 'Agents write a final HTML page directly.',
+              Desired: 'Agents author MDX or TSX and generate HTML artifacts.',
+            },
+            {
+              Area: 'Review',
+              Current: 'Feedback arrives as chat notes or screenshots.',
+              Desired: 'Reviewers click page elements and attach structured annotations.',
+            },
+            {
+              Area: 'Verification',
+              Current: 'Mostly procedural browser checks.',
+              Desired: 'Export checks plus browser proof for desktop and mobile.',
+            },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="state" title="State Machine">
+        <Pipeline
+          steps={[
+            { title: 'Draft', body: 'Collect verified codebase facts before composing the plan.' },
+            { title: 'Author', body: 'Use MDX sections and React components for structure.' },
+            { title: 'Preview', body: 'Open the generated page and collect point-and-click notes.' },
+            { title: 'Revise', body: 'Apply feedback to source, then re-export the artifact.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="api" title="Command Contract">
+        <Callout>
+          <code>npm run ve:export -- &lt;source.mdx&gt; --out ~/.agent/diagrams/&lt;slug&gt;.html</code>
+          is the only path from editable implementation plan source to shareable static HTML.
+        </Callout>
+      </Section>
+
+      <Section kicker="files" title="File Map">
+        <DecisionMatrix
+          rows={[
+            { File: 'plan.mdx', Change: 'Canonical editable source for the implementation plan.' },
+            { File: 'components.tsx', Change: 'Reusable explainer primitives imported by the plan.' },
+            { File: 'plan.html', Change: 'Generated standalone artifact; never edited by hand.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="risks" title="Edge Cases">
+        <RiskLedger
+          risks={[
+            {
+              risk: 'Unverified claims',
+              signal: 'Plan mentions files or behavior without source evidence.',
+              mitigation: 'Mark uncertain facts before export and fact-check after edits.',
+              level: 'high',
+            },
+            {
+              risk: 'Wide tables',
+              signal: 'Mobile body scroll width exceeds viewport.',
+              mitigation: 'Use component wrappers that keep wide content internally scrollable.',
+              level: 'medium',
+            },
+            {
+              risk: 'Artifact drift',
+              signal: 'Generated HTML differs from the MDX source intent.',
+              mitigation: 'Treat HTML as disposable and regenerate after every source change.',
+              level: 'medium',
+            },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

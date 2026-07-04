@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>How our cache saved $40k/month — Long-form demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --panel: #111110;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.62);
+    --dim: rgba(242, 237, 229, 0.32);
+    --accent: #d97706;
+    --warn: #f59e0b;
+    --rule: rgba(242, 237, 229, 0.12);
+    --grid: rgba(242, 237, 229, 0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.015) 0%, rgba(0,0,0,0) 100%),
+      repeating-linear-gradient(0deg, transparent 0 59px, var(--grid) 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, var(--grid) 59px 60px),
+      var(--bg);
+    overflow: hidden;
+  }
+
+  /* Terminal chrome */
+  .chrome {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .chrome::before,
+  .chrome::after {
+    content: "";
+    position: absolute;
+    left: 48px;
+    right: 48px;
+    height: 1px;
+    background: var(--rule);
+  }
+  .chrome::before { top: 48px; }
+  .chrome::after  { bottom: 48px; }
+
+  .chrome-tag {
+    position: absolute;
+    top: 56px;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .chrome-tag.left  { left: 56px; }
+  .chrome-tag.right { right: 56px; }
+
+  .chrome-foot {
+    position: absolute;
+    bottom: 56px;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .chrome-foot.left  { left: 56px; }
+  .chrome-foot.right { right: 56px; }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 128px 160px;
+    opacity: 0;
+  }
+
+  .eyebrow {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 22px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .headline {
+    font-size: 120px;
+    line-height: 1.02;
+    font-weight: 500;
+    text-align: center;
+    max-width: 1500px;
+    letter-spacing: -0.02em;
+  }
+  .headline .accent { color: var(--accent); }
+  .headline .word { display: inline-block; }
+
+  .body {
+    font-size: 40px;
+    line-height: 1.4;
+    color: var(--muted);
+    margin-top: 48px;
+    max-width: 1200px;
+    text-align: center;
+  }
+
+  .stat {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 280px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--warn);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 26px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 36px;
+    text-align: center;
+    max-width: 900px;
+  }
+
+  .delta {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 32px;
+    letter-spacing: 0.1em;
+    color: var(--fg);
+    margin-top: 24px;
+    opacity: 0;
+  }
+  .delta .minus { color: var(--warn); }
+
+  /* Scene 3 diagram */
+  .diagram {
+    width: 1500px;
+    height: 480px;
+    margin-top: 40px;
+  }
+  .node-rect {
+    fill: var(--panel);
+    stroke: var(--rule);
+    stroke-width: 2;
+  }
+  .node-rect.active {
+    stroke: var(--accent);
+  }
+  .node-label {
+    fill: var(--fg);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 34px;
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .node-sub {
+    fill: var(--muted);
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .arrow {
+    stroke: var(--accent);
+    stroke-width: 3;
+    fill: none;
+  }
+  .arrow-head {
+    fill: var(--accent);
+  }
+
+  .tldr {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    color: var(--muted);
+    margin-top: 40px;
+    letter-spacing: 0.08em;
+  }
+  .tldr .caret { color: var(--accent); }
+</style>
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="longform-demo"
+  data-width="1920"
+  data-height="1080"
+  data-start="0"
+  data-duration="60"
+>
+  <!-- Terminal chrome (static) -->
+  <div class="chrome">
+    <span class="chrome-tag left">// case-study.log</span>
+    <span class="chrome-tag right">01 / 05</span>
+    <span class="chrome-foot left">aldea.infra // postmortem</span>
+    <span class="chrome-foot right">60s • 1920x1080 • 30fps</span>
+  </div>
+
+  <!-- Scene 1: Title (0-8s) -->
+  <div class="scene scene1">
+    <span class="eyebrow">Chapter 01</span>
+    <h1 class="headline">
+      <span class="word">How</span>
+      <span class="word">our</span>
+      <span class="word"><span class="accent">cache</span></span>
+      <span class="word">saved</span>
+      <br/>
+      <span class="word"><span class="accent">$40k</span></span>
+      <span class="word">a</span>
+      <span class="word">month.</span>
+    </h1>
+    <p class="body">A 60-second postmortem on the join query that almost ate the quarter.</p>
+  </div>
+
+  <!-- Scene 2: Problem (8-22s) -->
+  <div class="scene scene2">
+    <span class="eyebrow">The Cost</span>
+    <p class="body" style="margin-top: 0; margin-bottom: 48px; max-width: 1300px;">
+      A single analytics join ran 9M times a day. Postgres CPU sat at 94%.
+      The monthly bill for that one query kept climbing.
+    </p>
+    <div class="stat">$0</div>
+    <div class="stat-label">projected monthly spend — Q4</div>
+  </div>
+
+  <!-- Scene 3: Mechanism (22-36s) -->
+  <div class="scene scene3">
+    <span class="eyebrow">The Mechanism</span>
+    <h2 class="headline" style="font-size: 80px; margin-bottom: 24px;">
+      Cache the expensive join. <span class="accent">Not the whole result.</span>
+    </h2>
+    <svg class="diagram" viewBox="0 0 1500 480" xmlns="http://www.w3.org/2000/svg">
+      <!-- Node 1: Request -->
+      <g class="node node-1">
+        <rect class="node-rect" x="40" y="140" width="340" height="200" rx="8" />
+        <text class="node-sub" x="210" y="200">01 / ingress</text>
+        <text class="node-label" x="210" y="250">Request</text>
+        <text class="node-sub" x="210" y="295" style="fill: var(--dim);">GET /analytics</text>
+      </g>
+
+      <!-- Arrow 1: Request -> Cache -->
+      <path class="arrow arrow-1" d="M 395 240 L 575 240" pathLength="1"
+            stroke-dasharray="1" stroke-dashoffset="1" />
+      <polygon class="arrow-head arrow-head-1" points="575,240 558,231 558,249" />
+
+      <!-- Node 2: Cache (hero) -->
+      <g class="node node-2">
+        <rect class="node-rect" x="590" y="120" width="340" height="240" rx="8" />
+        <text class="node-sub" x="760" y="180" style="fill: var(--warn);">02 / hot path</text>
+        <text class="node-label" x="760" y="235" style="fill: var(--warn); font-size: 42px; font-weight: 600;">Cache</text>
+        <text class="node-sub" x="760" y="285">join fragment</text>
+        <text class="node-sub" x="760" y="315" style="fill: var(--dim);">ttl=300s</text>
+      </g>
+
+      <!-- Arrow 2: Cache -> DB (with fallback label) -->
+      <path class="arrow arrow-2" d="M 945 240 L 1125 240" pathLength="1"
+            stroke-dasharray="1" stroke-dashoffset="1" />
+      <polygon class="arrow-head arrow-head-2" points="1125,240 1108,231 1108,249" />
+      <text class="node-sub arrow-2-label" x="1035" y="210" style="fill: var(--dim);">miss</text>
+
+      <!-- Node 3: DB -->
+      <g class="node node-3">
+        <rect class="node-rect" x="1140" y="140" width="340" height="200" rx="8" />
+        <text class="node-sub" x="1310" y="200">03 / cold path</text>
+        <text class="node-label" x="1310" y="250">Postgres</text>
+        <text class="node-sub" x="1310" y="295" style="fill: var(--dim);">9M joins/day</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Scene 4: Result (36-50s) -->
+  <div class="scene scene4">
+    <span class="eyebrow">The Impact</span>
+    <p class="body" style="margin-top: 0; margin-bottom: 48px;">
+      After deploying the fragment cache, our monthly analytics spend collapsed.
+    </p>
+    <div class="stat scene4-stat">$0</div>
+    <div class="stat-label">projected monthly spend — Q1 rollout</div>
+    <div class="delta scene4-delta"><span class="minus">-76%</span> &nbsp;/&nbsp; -$40,000 / month</div>
+  </div>
+
+  <!-- Scene 5: Takeaway (50-60s) -->
+  <div class="scene scene5">
+    <span class="eyebrow">TL;DR</span>
+    <h2 class="headline">
+      Cache the <span class="accent">expensive join</span>,
+      <br/>
+      not the whole result.
+    </h2>
+    <div class="tldr"><span class="caret">&gt;</span> smaller keys. higher hit rate. cheaper month.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const tl = gsap.timeline({ paused: true });
+
+  // ---------- Scene 1: Title (0-8s) ----------
+  tl.addLabel("s1", 0);
+  tl.fromTo(".scene1", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, "s1");
+  tl.from(".scene1 .eyebrow", { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, "s1+=0.3");
+  tl.from(".scene1 .headline .word", {
+    y: 60,
+    opacity: 0,
+    duration: 0.7,
+    ease: "power3.out",
+    stagger: 0.08,
+  }, "s1+=0.7");
+  tl.from(".scene1 .body", { y: 24, opacity: 0, duration: 0.6, ease: "power2.out" }, "s1+=1.8");
+  tl.to(".scene1", { opacity: 0, duration: 0.6, ease: "power2.in" }, "s1+=7.2");
+
+  // ---------- Scene 2: Problem (8-22s) ----------
+  tl.addLabel("s2", 8);
+  tl.fromTo(".scene2", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, "s2");
+  tl.from(".scene2 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s2+=0.3");
+  tl.from(".scene2 .body", { y: 24, opacity: 0, duration: 0.6 }, "s2+=0.6");
+
+  const problemCounter = { val: 0 };
+  tl.to(problemCounter, {
+    val: 52000,
+    duration: 2.2,
+    ease: "power2.out",
+    onUpdate: () => {
+      const el = document.querySelector(".scene2 .stat");
+      if (el) el.textContent = "$" + Math.floor(problemCounter.val).toLocaleString();
+    },
+  }, "s2+=1.6");
+  tl.from(".scene2 .stat-label", { y: 20, opacity: 0, duration: 0.5 }, "s2+=3.8");
+  tl.to(".scene2", { opacity: 0, duration: 0.6, ease: "power2.in" }, "s2+=13.2");
+
+  // ---------- Scene 3: Mechanism (22-36s) ----------
+  tl.addLabel("s3", 22);
+  tl.fromTo(".scene3", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, "s3");
+  tl.from(".scene3 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s3+=0.3");
+  tl.from(".scene3 .headline", { y: 40, opacity: 0, duration: 0.6, ease: "power2.out" }, "s3+=0.6");
+
+  // Diagram staged reveal
+  tl.from(".node-1", { y: 24, opacity: 0, duration: 0.5, ease: "power2.out" }, "s3+=1.4");
+  tl.to(".arrow-1", { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, "s3+=2.0");
+  tl.from(".arrow-head-1", { opacity: 0, duration: 0.2 }, "s3+=2.5");
+  tl.from(".node-2", { y: 24, opacity: 0, duration: 0.5, ease: "power2.out" }, "s3+=2.6");
+  tl.to(".arrow-2", { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, "s3+=3.2");
+  tl.from(".arrow-head-2", { opacity: 0, duration: 0.2 }, "s3+=3.7");
+  tl.from(".arrow-2-label", { opacity: 0, y: 8, duration: 0.4 }, "s3+=3.7");
+  tl.from(".node-3", { y: 24, opacity: 0, duration: 0.5, ease: "power2.out" }, "s3+=3.8");
+
+  tl.to(".scene3", { opacity: 0, duration: 0.6, ease: "power2.in" }, "s3+=13.2");
+
+  // ---------- Scene 4: Result (36-50s) ----------
+  tl.addLabel("s4", 36);
+  tl.fromTo(".scene4", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, "s4");
+  tl.from(".scene4 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s4+=0.3");
+  tl.from(".scene4 .body", { y: 24, opacity: 0, duration: 0.5 }, "s4+=0.6");
+
+  const resultCounter = { val: 0 };
+  tl.to(resultCounter, {
+    val: 12000,
+    duration: 2.2,
+    ease: "power2.out",
+    onUpdate: () => {
+      const el = document.querySelector(".scene4 .stat");
+      if (el) el.textContent = "$" + Math.floor(resultCounter.val).toLocaleString();
+    },
+  }, "s4+=1.4");
+  tl.from(".scene4 .stat-label", { y: 20, opacity: 0, duration: 0.5 }, "s4+=3.6");
+  tl.to(".scene4 .delta", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "s4+=4.2");
+  tl.to(".scene4", { opacity: 0, duration: 0.6, ease: "power2.in" }, "s4+=13.2");
+
+  // ---------- Scene 5: Takeaway (50-60s) ----------
+  tl.addLabel("s5", 50);
+  tl.fromTo(".scene5", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, "s5");
+  tl.from(".scene5 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s5+=0.3");
+  tl.from(".scene5 .headline", { y: 40, opacity: 0, duration: 0.7, ease: "power2.out" }, "s5+=0.6");
+  tl.from(".scene5 .tldr", { y: 16, opacity: 0, duration: 0.5 }, "s5+=1.6");
+
+  // Register synchronously for Hyperframes.
+  window.__timelines = window.__timelines || {};
+  window.__timelines["longform-demo"] = tl;
+
+  // Dual-mode: if NOT running under Hyperframes capture, autoplay for browser preview.
+  const isHyperframes = typeof window.__hyperframesCapture !== 'undefined';
+  if (!isHyperframes) {
+    tl.play();
+  }
+</script>
+</body>
+</html>

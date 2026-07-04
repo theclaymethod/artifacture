@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SVG Diagram — Starter</title>
+<!--
+  Editorial-grade inline-SVG diagram starter.
+
+  This is a reference template for the SVG-primary diagram approach defined in
+  references/diagrams-svg.md and references/diagram-tokens.md. Paraphrased from
+  cathrynlavery/diagram-design (MIT) and adapted to work with any host aesthetic.
+
+  HOW TO USE:
+    1. Pick a diagram type from the Type Selection Gate in diagrams-svg.md.
+    2. Pick an aesthetic. Swap the token block in :root below with the matching
+       block from diagram-tokens.md (MI, Nothing, Editorial-Diagram, Blueprint,
+       Paper/ink, Terminal, or IDE-inspired).
+    3. Replace the example architecture diagram in <svg id="diagram"> with your
+       content. Keep the <defs> block intact — it holds the dot-pattern,
+       arrow markers, and the sketchy filter.
+    4. Run the Removal Test from diagrams-svg.md before delivering.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Default token block uses the Editorial-Diagram aesthetic.
+     Swap to your host aesthetic's block from diagram-tokens.md. -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    /* Editorial-Diagram (light). Override from diagram-tokens.md. */
+    --paper:        #faf7f2;
+    --paper-2:      #f2ede4;
+    --ink:          #1c1917;
+    --muted:        #57534e;
+    --soft:         #78716c;
+    --rule:         rgba(28, 25, 23, 0.12);
+    --rule-solid:   rgba(120, 113, 108, 0.25);
+    --accent:       #b5523a;
+    --accent-tint:  rgba(181, 82, 58, 0.08);
+    --link:         #2563eb;
+
+    --font-display: "Instrument Serif", Georgia, serif;
+    --font-body:    "Geist", system-ui, sans-serif;
+    --font-mono:    "Geist Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #1c1917;
+      --paper-2:     #292524;
+      --ink:         #faf7f2;
+      --muted:       #a8a29e;
+      --soft:        #8e8680;
+      --rule:        rgba(250, 247, 242, 0.12);
+      --rule-solid:  rgba(168, 162, 158, 0.25);
+      --accent:      #d6724a;
+      --accent-tint: rgba(214, 114, 74, 0.10);
+      --link:        #60a5fa;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+    gap: 32px;
+  }
+
+  /* Page chrome (optional — remove if embedding diagram elsewhere) */
+  .page-header {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--ink);
+    margin: 0;
+  }
+  .subtitle {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--muted);
+    max-width: 68ch;
+    line-height: 1.55;
+  }
+
+  /* The diagram canvas */
+  .diagram-frame {
+    width: 100%;
+    max-width: 1000px;
+    aspect-ratio: 1000 / 660;
+    display: block;
+  }
+
+  /* SVG defaults inherit tokens via var(...) */
+  svg.diagram {
+    width: 100%;
+    height: 100%;
+    display: block;
+    font-family: var(--font-body);
+  }
+
+  /* Text roles used inside the SVG (class selectors on <text>) */
+  .t-title      { font-family: var(--font-display); font-size: 28px; font-weight: 400; fill: var(--ink); }
+  .t-node-name  { font-family: var(--font-body);    font-size: 12px; font-weight: 600; fill: var(--ink); }
+  .t-sublabel   { font-family: var(--font-mono);    font-size: 9px;  font-weight: 400; fill: var(--muted); }
+  .t-eyebrow    { font-family: var(--font-mono);    font-size: 8px;  font-weight: 500; fill: var(--muted); letter-spacing: 0.18em; text-transform: uppercase; }
+  .t-arrow-lbl  { font-family: var(--font-mono);    font-size: 8px;  font-weight: 400; fill: var(--ink); letter-spacing: 0.06em; }
+  .t-callout    { font-family: var(--font-display); font-size: 14px; font-style: italic; font-weight: 400; fill: var(--ink); }
+  .t-legend     { font-family: var(--font-mono);    font-size: 9px;  fill: var(--soft); letter-spacing: 0.06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <header class="page-header">
+    <span class="eyebrow">FIG. 01 — REFERENCE ARCHITECTURE</span>
+    <h1 class="title">Pipeline topology</h1>
+    <p class="subtitle">
+      A minimal three-tier architecture rendered as inline SVG. Replace this block with your own content. Rules live in <code>references/diagrams-svg.md</code>; tokens in <code>references/diagram-tokens.md</code>.
+    </p>
+  </header>
+
+  <div class="diagram-frame">
+    <svg
+      id="diagram"
+      class="diagram"
+      viewBox="0 0 1000 660"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Reference architecture diagram"
+    >
+      <!-- ===== defs ===== -->
+      <defs>
+        <!-- Dot-pattern texture: 22x22 cell, 0.9 radius at 10% ink opacity. -->
+        <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+
+        <!-- Arrow markers. Use refX=10 so the arrowhead lands on the node edge. -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+        </marker>
+        <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+        </marker>
+        <marker id="arrow-link" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--link)" />
+        </marker>
+
+        <!-- Sketchy filter. Apply to a shape-only group; never to text. -->
+        <filter id="sketchy" x="-2%" y="-2%" width="104%" height="104%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+        </filter>
+      </defs>
+
+      <!-- ===== background stack ===== -->
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots)" opacity="0.55" />
+
+      <!-- ===== arrows (drawn BEFORE nodes — z-order rule) ===== -->
+      <!-- Ingest -> Transform -->
+      <path data-diagram-role="arrow" d="M 240 200 L 400 200" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arrow)" />
+      <!-- Transform -> Store (happy path, accent) -->
+      <path data-diagram-role="arrow" d="M 600 200 L 760 200" stroke="var(--accent)" stroke-width="1.2" fill="none" marker-end="url(#arrow-accent)" />
+      <!-- Transform -> Error sink (degraded) -->
+      <path data-diagram-role="arrow" d="M 500 260 C 500 340, 300 340, 300 420" stroke="var(--muted)" stroke-width="1" fill="none" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+
+      <!-- ===== arrow labels with masking rects ===== -->
+      <g data-diagram-role="arrow-label">
+        <rect x="300" y="188" width="40" height="18" fill="var(--paper)" />
+        <text x="320" y="200" class="t-arrow-lbl" text-anchor="middle" dominant-baseline="middle">batch</text>
+      </g>
+      <g data-diagram-role="arrow-label">
+        <rect x="656" y="188" width="48" height="18" fill="var(--paper)" />
+        <text x="680" y="200" class="t-arrow-lbl" text-anchor="middle" dominant-baseline="middle">commit</text>
+      </g>
+
+      <!-- ===== nodes (drawn AFTER arrows) ===== -->
+      <!-- Ingest -->
+      <g data-diagram-role="node">
+        <rect x="80" y="160" width="160" height="80" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="160" y="190" class="t-eyebrow" text-anchor="middle">01 · INGEST</text>
+        <text x="160" y="212" class="t-node-name" text-anchor="middle">Event stream</text>
+        <text x="160" y="228" class="t-sublabel" text-anchor="middle">kafka · 3 partitions</text>
+      </g>
+
+      <!-- Transform -->
+      <g data-diagram-role="node">
+        <rect x="400" y="160" width="200" height="80" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="190" class="t-eyebrow" text-anchor="middle">02 · TRANSFORM</text>
+        <text x="500" y="212" class="t-node-name" text-anchor="middle">Validator + mapper</text>
+        <text x="500" y="228" class="t-sublabel" text-anchor="middle">lambda · cold start 320ms</text>
+      </g>
+
+      <!-- Store (focal — accent border) -->
+      <g data-diagram-role="node">
+        <rect x="760" y="160" width="160" height="80" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.2" />
+        <text x="840" y="190" class="t-eyebrow" text-anchor="middle" fill="var(--accent)">03 · STORE</text>
+        <text x="840" y="212" class="t-node-name" text-anchor="middle">Warehouse</text>
+        <text x="840" y="228" class="t-sublabel" text-anchor="middle">snowflake · prod-01</text>
+      </g>
+
+      <!-- Error sink -->
+      <g data-diagram-role="node">
+        <rect x="220" y="420" width="160" height="72" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 3" />
+        <text x="300" y="450" class="t-eyebrow" text-anchor="middle">DEGRADED</text>
+        <text x="300" y="472" class="t-node-name" text-anchor="middle">Dead letter queue</text>
+      </g>
+
+      <!-- ===== annotation callout (editorial primitive) ===== -->
+      <g data-diagram-role="item">
+        <path d="M 600 500 C 640 490, 720 480, 780 480" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+        <circle cx="780" cy="480" r="2.5" fill="var(--muted)" />
+        <text x="440" y="508" class="t-callout">The primary success path is annotated here. Max two callouts per diagram.</text>
+      </g>
+
+      <!-- ===== legend (horizontal strip at bottom; 60px of reserved height) ===== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <!-- Legend item: happy path -->
+      <g data-diagram-role="legend">
+        <line x1="60" y1="634" x2="90" y2="634" stroke="var(--accent)" stroke-width="1.2" />
+        <text x="100" y="637" class="t-legend">Happy path</text>
+      </g>
+      <!-- Legend item: neutral flow -->
+      <g data-diagram-role="legend">
+        <line x1="240" y1="634" x2="270" y2="634" stroke="var(--muted)" stroke-width="1" />
+        <text x="280" y="637" class="t-legend">Neutral flow</text>
+      </g>
+      <!-- Legend item: degraded -->
+      <g data-diagram-role="legend">
+        <line x1="420" y1="634" x2="450" y2="634" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" />
+        <text x="460" y="637" class="t-legend">Degraded</text>
+      </g>
+      <!-- Legend item: focal node -->
+      <g data-diagram-role="legend">
+        <rect x="620" y="628" width="14" height="12" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1" />
+        <text x="644" y="637" class="t-legend">Focal element</text>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

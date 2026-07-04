@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Ledger — Mono-Industrial Slides</title>
+<!--
+  Mono-Industrial slide-deck reference template.
+  Companion to mono-industrial.html (scrollable architecture reference).
+  See ./references/mono-industrial.md for the full design system.
+
+  Patterns demonstrated here:
+  - 9 slides, all 10 slide-type roles covered across them
+  - Instant-cut transitions: slides pop in without fade/scale/reveal stagger
+  - Three-layer composition per slide (display / body / metadata)
+  - Font budget: Space Grotesk + Space Mono + one Geist Pixel hero
+  - Grayscale Mermaid at presentation scale
+  - One slide per deck breaks its own grid (the "moment of surprise")
+  - Status colors only on values, never row backgrounds
+  - Nav chrome is flat (no backdrop-blur, hairline borders)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* Geist Pixel Square — the hero/display font (SIL OFL, Vercel + basement.studio).
+     Loaded from jsDelivr because Geist Pixel is npm-only, not on Google Fonts. */
+  @font-face {
+    font-family: 'Geist Pixel Square';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.7.0/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* ============ TOKENS ============ */
+  :root {
+    --font-body: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+    --font-display: 'Geist Pixel Square', 'Space Grotesk', system-ui, sans-serif;
+
+    --bg: #000000;
+    --fg: #f2ede5;
+
+    --text-display: rgba(242, 237, 229, 1.00);
+    --text-primary: rgba(242, 237, 229, 0.90);
+    --text-secondary: rgba(242, 237, 229, 0.58);
+    --text-disabled: rgba(242, 237, 229, 0.36);
+
+    --rule: rgba(242, 237, 229, 0.14);
+    --rule-strong: rgba(242, 237, 229, 0.28);
+
+    --ok:   #6bd48e;
+    --warn: #f0b05a;
+    --err:  #ef7b7b;
+
+    --mermaid-container: #0c0c0c;
+  }
+
+  /* Light mode applies when:
+       (1) OS prefers light AND no explicit override, OR
+       (2) the user picked "light" via the theme toggle ([data-theme="light"]).
+     The [data-theme="dark"] override pins the page to dark regardless of OS. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f6f4f0;
+      --fg: #16130f;
+      --text-display: rgba(22, 19, 15, 1.00);
+      --text-primary: rgba(22, 19, 15, 0.90);
+      --text-secondary: rgba(22, 19, 15, 0.56);
+      --text-disabled: rgba(22, 19, 15, 0.36);
+      --rule: rgba(22, 19, 15, 0.12);
+      --rule-strong: rgba(22, 19, 15, 0.24);
+      --ok:   #2f7a3e;
+      --warn: #8f5600;
+      --err:  #a51818;
+      --mermaid-container: #ffffff;
+    }
+  }
+
+  /* Explicit toggle override — beats the media query either way. */
+  :root[data-theme="light"] {
+    --bg: #f6f4f0;
+    --fg: #16130f;
+    --text-display: rgba(22, 19, 15, 1.00);
+    --text-primary: rgba(22, 19, 15, 0.90);
+    --text-secondary: rgba(22, 19, 15, 0.56);
+    --text-disabled: rgba(22, 19, 15, 0.36);
+    --rule: rgba(22, 19, 15, 0.12);
+    --rule-strong: rgba(22, 19, 15, 0.24);
+    --ok:   #2f7a3e;
+    --warn: #8f5600;
+    --err:  #a51818;
+    --mermaid-container: #ffffff;
+  }
+
+  /* ============ THEME TOGGLE ============
+     Always top-right. Collapsed to a single centered icon at rest; unfurls on
+     hover or focus-within (tap-to-focus on touch). Never moves bottom-right,
+     never stretches full-width. Same contract as ./mono-industrial.html. */
+  .theme-toggle {
+    position: fixed;
+    top: clamp(12px, 2vw, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 99;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: background 120ms ease-out, border-color 120ms ease-out,
+                padding 120ms ease-out, gap 120ms ease-out,
+                backdrop-filter 120ms ease-out;
+  }
+  .theme-toggle button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 999px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: color 120ms ease-out, background 120ms ease-out,
+                padding 120ms ease-out, gap 120ms ease-out,
+                max-width 120ms ease-out, opacity 120ms ease-out;
+  }
+  .theme-toggle__glyph { display: block; flex-shrink: 0; width: 12px; height: 12px; }
+  .theme-toggle__label {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 120ms ease-out, opacity 120ms ease-out 40ms;
+  }
+  .theme-toggle button:hover { color: var(--text-display); }
+  .theme-toggle button:focus-visible {
+    outline: 1px solid var(--text-display);
+    outline-offset: 2px;
+  }
+
+  /* Collapsed default: only the active indicator is visible. */
+  .theme-toggle button:not([aria-checked="true"]) {
+    max-width: 0; padding: 0; opacity: 0;
+  }
+  .theme-toggle button[aria-checked="true"] {
+    color: var(--text-display);
+    background: transparent;
+  }
+
+  /* Expanded on hover or focus-within. Pill chrome only appears here. */
+  .theme-toggle:hover,
+  .theme-toggle:focus-within {
+    background: color-mix(in srgb, var(--fg) 8%, transparent);
+    border-color: var(--rule-strong);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    padding: 4px;
+    gap: 2px;
+  }
+  .theme-toggle:hover button:not([aria-checked="true"]),
+  .theme-toggle:focus-within button:not([aria-checked="true"]) {
+    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
+  }
+  .theme-toggle:hover button[aria-checked="true"],
+  .theme-toggle:focus-within button[aria-checked="true"] {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    padding: 7px 12px; gap: 6px;
+  }
+  .theme-toggle:hover .theme-toggle__label,
+  .theme-toggle:focus-within .theme-toggle__label {
+    max-width: 80px; opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle,
+    .theme-toggle button,
+    .theme-toggle__label { transition: none; }
+  }
+
+  /* ============ RESET ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--bg);
+    overflow: hidden;
+    font-weight: 400;
+    font-size: 18px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ DECK ENGINE ============ */
+  .deck {
+    height: 100dvh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* INSTANT CUT: no opacity transition, no transform, no reveal stagger.
+     The slide is fully composed on paint. This is the Mono-Industrial
+     default posture — percussive, not fluid. */
+  .slide {
+    height: 100dvh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(32px, 5vh, 72px) clamp(32px, 7vw, 112px);
+    isolation: isolate;
+  }
+
+  .slide > * { min-width: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  /* ============ NAV CHROME (flat, no blur) ============ */
+  .deck-progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--text-primary); z-index: 100;
+    pointer-events: none;
+    transition: width 120ms ease-out;
+  }
+
+  .deck-dots {
+    position: fixed;
+    right: clamp(12px, 2vw, 20px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 100;
+    padding: 6px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+  }
+
+  .deck-dot {
+    width: 8px; height: 8px;
+    background: var(--text-disabled);
+    border: none; padding: 0;
+    cursor: pointer;
+    transition: background 120ms ease-out;
+  }
+
+  .deck-dot:hover { background: var(--text-secondary); }
+  .deck-dot.active { background: var(--text-display); }
+
+  .deck-counter {
+    position: fixed;
+    bottom: clamp(12px, 2vh, 20px);
+    right: clamp(12px, 2vw, 20px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    z-index: 100;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .deck-hints {
+    position: fixed;
+    bottom: clamp(12px, 2vh, 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    z-index: 100;
+    transition: opacity 120ms ease-out;
+    white-space: nowrap;
+  }
+
+  .deck-hints.faded { opacity: 0; pointer-events: none; }
+
+  /* ============ SHARED SLIDE ELEMENTS ============ */
+  .slide__label {
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.2vw, 13px);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .slide__display {
+    font-size: clamp(56px, 10vw, 132px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    color: var(--text-display);
+    text-wrap: balance;
+  }
+
+  .slide__heading {
+    font-size: clamp(32px, 5.2vw, 56px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    color: var(--text-display);
+    text-wrap: balance;
+    max-width: 24ch;
+  }
+
+  .slide__subheading {
+    font-size: clamp(20px, 2.6vw, 28px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--text-primary);
+    max-width: 34ch;
+  }
+
+  .slide__body {
+    font-size: clamp(15px, 1.6vw, 19px);
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 58ch;
+  }
+
+  .slide__foot {
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.1vw, 12px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Vertical rhythm: label top, body center, foot bottom. */
+  .slide--layered {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: clamp(24px, 4vh, 48px);
+  }
+
+  /* ============ SLIDE TYPES ============ */
+
+  /* TITLE: one big headline, vast empty space. Metadata top, a single mono caption bottom. */
+  .slide--title {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: clamp(32px, 5vh, 64px);
+  }
+
+  .slide--title .slide__heading {
+    font-size: clamp(48px, 8vw, 108px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    max-width: 16ch;
+    align-self: end;
+  }
+
+  /* SECTION: just a number and a heading. No body. Push a vast amount of space. */
+  .slide--section {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .slide--section .section-number {
+    font-family: var(--font-display);
+    font-size: clamp(120px, 22vw, 300px);
+    font-weight: 400;
+    color: var(--text-display);
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    align-self: end;
+  }
+
+  .slide--section .section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 500;
+    color: var(--text-display);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    align-self: end;
+    max-width: 28ch;
+    margin-top: 16px;
+  }
+
+  /* CONTENT: heading + body, left-anchored. */
+  .slide--content .slide__body {
+    margin-top: clamp(12px, 2vh, 20px);
+  }
+
+  /* SPLIT: left-heavy two-column composition. */
+  .slide--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    gap: clamp(24px, 4vw, 56px);
+  }
+
+  .slide--split .slide__label { grid-column: 1 / -1; }
+  .slide--split .slide__foot  { grid-column: 1 / -1; }
+
+  .split__points {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 2vh, 22px);
+    align-self: center;
+  }
+
+  .split__item {
+    display: grid;
+    grid-template-columns: 3ch 1fr;
+    gap: 12px;
+  }
+
+  .split__item-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--text-disabled);
+    padding-top: 4px;
+  }
+
+  .split__item-text {
+    font-size: clamp(16px, 1.8vw, 20px);
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  .split__item-text strong {
+    color: var(--text-display);
+    font-weight: 500;
+  }
+
+  /* DASHBOARD / KPIs */
+  .slide--dashboard {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: clamp(16px, 2.5vh, 28px);
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: clamp(24px, 4vw, 56px);
+    align-self: center;
+  }
+
+  .kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .kpi__label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .kpi__val {
+    font-family: var(--font-mono);
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi__val--hero {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(72px, 11vw, 160px);
+    letter-spacing: -0.02em;
+  }
+
+  .kpi__delta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .kpi__delta--ok { color: var(--ok); }
+  .kpi__delta--warn { color: var(--warn); }
+  .kpi__delta--err { color: var(--err); }
+
+  /* DIAGRAM */
+  .slide--diagram {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: clamp(12px, 2vh, 20px);
+  }
+
+  .mermaid-wrap {
+    position: relative;
+    background: var(--mermaid-container);
+    border: 1px solid var(--rule);
+    padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 28px);
+    overflow: auto;
+    cursor: grab;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
+
+  .mermaid-wrap .mermaid {
+    display: block;
+    width: calc(100% + (clamp(16px, 3vw, 28px) * 2));
+    max-width: none;
+    margin-inline: calc(clamp(16px, 3vw, 28px) * -1);
+  }
+
+  .mermaid-wrap .mermaid svg {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+  }
+
+  .mermaid-wrap .zoom-controls {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 2px;
+    z-index: 10;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 2px;
+  }
+
+  .mermaid-wrap .zoom-controls button {
+    width: 28px; height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 120ms ease-out;
+  }
+
+  .mermaid-wrap .zoom-controls button:hover {
+    color: var(--text-display);
+  }
+
+  .mermaid .nodeLabel {
+    font-family: var(--font-body) !important;
+    font-size: 20px !important;
+    color: var(--text-primary) !important;
+  }
+
+  .mermaid .edgeLabel {
+    font-family: var(--font-mono) !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary) !important;
+    background-color: var(--mermaid-container) !important;
+  }
+
+  .mermaid .edgeLabel rect {
+    fill: var(--mermaid-container) !important;
+  }
+
+  .mermaid .node rect,
+  .mermaid .node circle,
+  .mermaid .node polygon {
+    stroke-width: 1px !important;
+  }
+
+  .mermaid .edgePath path,
+  .mermaid .flowchart-link {
+    stroke-width: 2px !important;
+  }
+
+  /* TABLE */
+  .slide--table {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: clamp(12px, 2vh, 20px);
+  }
+
+  .table-scroll {
+    overflow: auto;
+    max-height: 100%;
+  }
+
+  .data-row {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(14px, 1.5vw, 17px);
+  }
+
+  .data-row th, .data-row td {
+    padding: 14px 0;
+    text-align: left;
+    vertical-align: baseline;
+    font-weight: 400;
+    padding-right: 24px;
+  }
+
+  .data-row thead th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    font-weight: 400;
+  }
+
+  .data-row tbody td {
+    color: var(--text-primary);
+    border-top: 1px solid var(--rule);
+  }
+
+  .data-row .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  .data-row .status-ok  { color: var(--ok); }
+  .data-row .status-warn { color: var(--warn); }
+  .data-row .status-err { color: var(--err); }
+
+  /* CODE */
+  .slide--code {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: clamp(12px, 2vh, 20px);
+  }
+
+  .code-block {
+    border: 1px solid var(--rule);
+    padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 28px);
+    overflow: auto;
+    min-height: 0;
+    background: var(--mermaid-container);
+  }
+
+  .code-filename {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .code-block pre {
+    font-family: var(--font-mono);
+    font-size: clamp(13px, 1.4vw, 16px);
+    line-height: 1.65;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .code-block .kw { color: var(--text-display); font-weight: 700; }
+  .code-block .cm { color: var(--text-disabled); }
+
+  /* QUOTE: vast empty space, one sentence centered, one attribution below. */
+  .slide--quote {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .quote-body {
+    align-self: center;
+    max-width: 22ch;
+    font-size: clamp(32px, 4.8vw, 56px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+    color: var(--text-display);
+    text-wrap: balance;
+  }
+
+  .quote-cite {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: 24px;
+    align-self: end;
+  }
+
+  /* FULL-BLEED / BREAK-THE-GRID:
+     This is the one moment of surprise. A single Geist Pixel display character
+     fills the slide; everything else is pushed to the corners. */
+  .slide--bleed {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .slide--bleed .break-grid {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(180px, 36vw, 520px);
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--text-display);
+    align-self: center;
+    justify-self: start;
+  }
+
+  .slide--bleed .break-grid-caption {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    align-self: end;
+    justify-self: end;
+    max-width: 24ch;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .slide { padding: 24px 20px; }
+    .slide--split { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle: Light / Dark / Auto. Choice persists to localStorage. -->
+<div class="theme-toggle" role="radiogroup" aria-label="Theme">
+  <button type="button" role="radio" data-theme="light"  aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Light</span>
+  </button>
+  <button type="button" role="radio" data-theme="dark"   aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Dark</span>
+  </button>
+  <button type="button" role="radio" data-theme="system" aria-checked="true">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+    </svg>
+    <span class="theme-toggle__label">Auto</span>
+  </button>
+</div>
+
+
+<div class="deck">
+
+  <!-- SLIDE 1 — TITLE -->
+  <section class="slide slide--title">
+    <header class="slide__label">
+      <span>Request Ledger / Architecture Review</span>
+      <span>2026 &middot; 04 &middot; 16</span>
+    </header>
+    <h1 class="slide__heading">A write-first ledger for request and response telemetry.</h1>
+    <footer class="slide__foot">
+      <span>Deck 01 &middot; Mono-Industrial</span>
+      <span>Platform Eng</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 2 — SECTION DIVIDER (break: huge Geist Pixel number) -->
+  <section class="slide slide--section">
+    <header class="slide__label">
+      <span>Part One</span>
+      <span>Context</span>
+    </header>
+    <div>
+      <div class="section-number">01</div>
+      <div class="section-title">Why a ledger, and why now.</div>
+    </div>
+    <footer class="slide__foot">
+      <span>01 / 04</span>
+      <span>Context</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 3 — CONTENT (three-layer) -->
+  <section class="slide slide--layered slide--content">
+    <header class="slide__label">
+      <span>Context &middot; The problem</span>
+      <span>Slide 03</span>
+    </header>
+    <div>
+      <h2 class="slide__heading">We were losing telemetry during handler failures.</h2>
+      <p class="slide__body" style="margin-top: 16px;">
+        Whenever a handler panicked, its request/response was never logged. That blind spot
+        made incident reconstruction unreliable and billing impossible to reconcile. The fix is
+        to decouple logging from handling: write first, then route.
+      </p>
+    </div>
+    <footer class="slide__foot">
+      <span>Owner &middot; Platform</span>
+      <span>Ref &middot; RFC-204</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 4 — SPLIT (three principles) -->
+  <section class="slide slide--split">
+    <header class="slide__label">
+      <span>Design Principles</span>
+      <span>Slide 04</span>
+    </header>
+    <div>
+      <h2 class="slide__heading">Three rules the ledger enforces.</h2>
+      <p class="slide__body" style="margin-top: 16px;">
+        Every component in the system derives its behavior from these three properties.
+        Nothing downstream is allowed to violate them.
+      </p>
+    </div>
+    <div class="split__points">
+      <div class="split__item">
+        <span class="split__item-num">01</span>
+        <div class="split__item-text"><strong>Write before handle.</strong> No handler runs until the request is durably logged.</div>
+      </div>
+      <div class="split__item">
+        <span class="split__item-num">02</span>
+        <div class="split__item-text"><strong>Read from the ledger, not the stream.</strong> Downstream services subscribe by offset.</div>
+      </div>
+      <div class="split__item">
+        <span class="split__item-num">03</span>
+        <div class="split__item-text"><strong>Replay is free.</strong> Any consumer can rewind to any offset at any time.</div>
+      </div>
+    </div>
+    <footer class="slide__foot">
+      <span>Source &middot; design-doc</span>
+      <span>Owner &middot; Platform</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 5 — DIAGRAM -->
+  <section class="slide slide--diagram">
+    <header class="slide__label">
+      <span>Data Flow &middot; Write &rarr; Read</span>
+      <span>Slide 05</span>
+    </header>
+    <h2 class="slide__subheading">The durability boundary separates who can lose data from who can't.</h2>
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button type="button" onclick="zoomDiagram(this, 1.1)" title="Zoom in">+</button>
+        <button type="button" onclick="zoomDiagram(this, 0.9)" title="Zoom out">&minus;</button>
+        <button type="button" onclick="resetZoom(this)" title="Reset">1:1</button>
+        <button type="button" onclick="openDiagramFullscreen(this)" title="Open full size">&#x26F6;</button>
+      </div>
+      <pre class="mermaid">
+graph LR
+  CLIENT[Client] --> GW[Gateway]
+  GW --> LEDGER[(Append-only Ledger)]
+  LEDGER --> IDX[Indexer]
+  LEDGER --> BILL[Billing Consumer]
+  IDX --> API[Query API]
+      </pre>
+    </div>
+    <footer class="slide__foot">
+      <span>Mermaid &middot; grayscale theme</span>
+      <span>Ctrl/Cmd + scroll to zoom</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 6 — DASHBOARD (one hero KPI + supporting metrics) -->
+  <section class="slide slide--dashboard">
+    <header class="slide__label">
+      <span>Capacity &middot; Production</span>
+      <span>Slide 06</span>
+    </header>
+    <h2 class="slide__subheading">Peak load, sustained throughput, and headroom.</h2>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi__label">Events / sec &middot; peak</div>
+        <div class="kpi__val kpi__val--hero">1.2M</div>
+        <div class="kpi__delta kpi__delta--ok">+ 18% vs Q4</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__label">Sustained throughput</div>
+        <div class="kpi__val">480k/s</div>
+        <div class="kpi__delta kpi__delta--ok">Within SLO</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__label">Headroom to ceiling</div>
+        <div class="kpi__val">2.6&times;</div>
+        <div class="kpi__delta kpi__delta--warn">Below 3&times; target</div>
+      </div>
+    </div>
+    <footer class="slide__foot">
+      <span>Source &middot; 24h p99</span>
+      <span>Target &middot; 3&times; headroom</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 7 — TABLE -->
+  <section class="slide slide--table">
+    <header class="slide__label">
+      <span>Latency &middot; Write Path</span>
+      <span>Slide 07</span>
+    </header>
+    <h2 class="slide__subheading">End-to-end budget is 80ms. We are on it, but one hop is over.</h2>
+    <div class="table-scroll">
+      <table class="data-row">
+        <thead>
+          <tr>
+            <th>Hop</th>
+            <th>Target</th>
+            <th class="num">p99 (ms)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Client &rarr; Gateway</td>
+            <td>&le; 15 ms</td>
+            <td class="num">12</td>
+            <td class="status-ok">WITHIN</td>
+          </tr>
+          <tr>
+            <td>Gateway validate</td>
+            <td>&le; 10 ms</td>
+            <td class="num">9</td>
+            <td class="status-ok">WITHIN</td>
+          </tr>
+          <tr>
+            <td>Ledger quorum ack</td>
+            <td>&le; 40 ms</td>
+            <td class="num">47</td>
+            <td class="status-warn">OVER &middot; 17%</td>
+          </tr>
+          <tr>
+            <td>Gateway &rarr; Client</td>
+            <td>&le; 15 ms</td>
+            <td class="num">11</td>
+            <td class="status-ok">WITHIN</td>
+          </tr>
+          <tr>
+            <td>End-to-end</td>
+            <td>&le; 80 ms</td>
+            <td class="num">79</td>
+            <td class="status-ok">WITHIN</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <footer class="slide__foot">
+      <span>Window &middot; 24h</span>
+      <span>p99 per hop</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 8 — CODE -->
+  <section class="slide slide--code">
+    <header class="slide__label">
+      <span>Interface &middot; Gateway</span>
+      <span>Slide 08</span>
+    </header>
+    <h2 class="slide__subheading">Producers call one function. Everything else is routing.</h2>
+    <div class="code-block">
+      <span class="code-filename">gateway/write.ts</span>
+<pre><span class="kw">export async function</span> writeRequest(req: Request): <span class="kw">Promise</span>&lt;LedgerAck&gt; {
+  <span class="cm">// Validate, then persist before any handler is notified.</span>
+  <span class="kw">const</span> record = <span class="kw">await</span> validate(req);
+  <span class="kw">const</span> ack = <span class="kw">await</span> ledger.append(record, { quorum: <span class="kw">true</span> });
+  <span class="cm">// At this point the request is durable. Handlers read from ack.offset.</span>
+  <span class="kw">return</span> ack;
+}</pre>
+    </div>
+    <footer class="slide__foot">
+      <span>Module &middot; gateway</span>
+      <span>v 2.4.0</span>
+    </footer>
+  </section>
+
+  <!-- SLIDE 9 — QUOTE -->
+  <section class="slide slide--quote">
+    <header class="slide__label">
+      <span>Operating Principle</span>
+      <span>Slide 09</span>
+    </header>
+    <blockquote class="quote-body">If it isn't in the ledger, it didn't happen.</blockquote>
+    <cite class="quote-cite">Platform Eng &middot; internal wiki</cite>
+  </section>
+
+  <!-- SLIDE 10 — FULL-BLEED / BREAK-THE-GRID (the moment of surprise) -->
+  <section class="slide slide--bleed">
+    <header class="slide__label">
+      <span>End of deck</span>
+      <span>Slide 10</span>
+    </header>
+    <div class="break-grid">END.</div>
+    <div class="break-grid-caption">
+      Questions &rarr; #platform-eng<br>
+      Next review: 2026 &middot; 05 &middot; 07
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  const html = document.documentElement;
+  const STORAGE_KEY = 'mono-industrial-theme';
+
+  function effectiveMode() {
+    const forced = html.dataset.theme;
+    if (forced === 'light' || forced === 'dark') return forced;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function mermaidTheme() {
+    const isDark = effectiveMode() === 'dark';
+    const nodeFill   = isDark ? '#000000' : '#ffffff';
+    const nodeBorder = isDark ? 'rgba(242, 237, 229, 0.58)' : 'rgba(22, 19, 15, 0.56)';
+    const nodeText   = isDark ? 'rgba(242, 237, 229, 0.95)' : 'rgba(22, 19, 15, 0.95)';
+    const edgeColor  = isDark ? 'rgba(242, 237, 229, 0.40)' : 'rgba(22, 19, 15, 0.40)';
+    return {
+      primaryColor: nodeFill,
+      primaryBorderColor: nodeBorder,
+      primaryTextColor: nodeText,
+      secondaryColor: nodeFill,
+      secondaryBorderColor: nodeBorder,
+      secondaryTextColor: nodeText,
+      tertiaryColor: nodeFill,
+      tertiaryBorderColor: nodeBorder,
+      tertiaryTextColor: nodeText,
+      lineColor: edgeColor,
+      fontSize: '20px',
+      fontFamily: "'Space Grotesk', system-ui, sans-serif",
+      noteBkgColor: nodeFill,
+      noteTextColor: nodeText,
+      noteBorderColor: nodeBorder,
+    };
+  }
+
+  function initMermaid() {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      look: 'classic',
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      themeVariables: mermaidTheme(),
+    });
+  }
+
+  // Preserve each block's source so theme flips can re-render cleanly.
+  document.querySelectorAll('pre.mermaid, div.mermaid').forEach(el => {
+    el.dataset.source = el.textContent.trim();
+  });
+
+  function autoFit() {
+    document.querySelectorAll('.mermaid svg').forEach(function(svg) {
+      svg.removeAttribute('height');
+      svg.style.width = '100%';
+      svg.style.maxWidth = '100%';
+      svg.style.height = 'auto';
+    });
+  }
+
+  async function renderMermaid() {
+    initMermaid();
+    document.querySelectorAll('pre.mermaid, div.mermaid').forEach(el => {
+      if (el.dataset.source) el.textContent = el.dataset.source;
+      el.removeAttribute('data-processed');
+    });
+    await mermaid.run();
+    autoFit();
+  }
+
+  renderMermaid().then(function() {
+    new SlideEngine();
+  });
+
+  // ============ THEME TOGGLE WIRING ============
+  const toggle = document.querySelector('.theme-toggle');
+  const buttons = toggle ? [...toggle.querySelectorAll('button')] : [];
+
+  function applyMode(choice) {
+    if (choice === 'system') {
+      delete html.dataset.theme;
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      html.dataset.theme = choice;
+      localStorage.setItem(STORAGE_KEY, choice);
+    }
+    buttons.forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.theme === choice));
+    });
+    renderMermaid();
+  }
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const markup = html.dataset.theme;
+  const initial = saved === 'light' || saved === 'dark'
+    ? saved
+    : (markup === 'light' || markup === 'dark' ? markup : 'system');
+  if (initial === 'system') delete html.dataset.theme;
+  else html.dataset.theme = initial;
+  buttons.forEach(b => {
+    b.setAttribute('aria-checked', String(b.dataset.theme === initial));
+    b.addEventListener('click', () => applyMode(b.dataset.theme));
+  });
+
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!html.dataset.theme) renderMermaid();
+  });
+</script>
+
+<script>
+  // Mermaid zoom + click-to-expand (scoped per .mermaid-wrap).
+  var INITIAL_ZOOM = 1;
+
+  function zoomDiagram(btn, factor) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    var cur = parseFloat(target.dataset.zoom || INITIAL_ZOOM);
+    var next = Math.min(Math.max(cur * factor, 0.5), 5);
+    target.dataset.zoom = next;
+    target.style.zoom = next;
+  }
+
+  function resetZoom(btn) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    target.dataset.zoom = INITIAL_ZOOM;
+    target.style.zoom = INITIAL_ZOOM;
+  }
+
+  function openDiagramFullscreen(btn) {
+    openMermaidInNewTab(btn.closest('.mermaid-wrap'));
+  }
+
+  function openMermaidInNewTab(wrap) {
+    var svg = wrap.querySelector('.mermaid svg');
+    if (!svg) return;
+    var clone = svg.cloneNode(true);
+    clone.style.zoom = '';
+    clone.style.transform = '';
+    var serialized = new XMLSerializer().serializeToString(clone);
+    var blob = new Blob([serialized], { type: 'image/svg+xml' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  }
+
+  document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
+    wrap.addEventListener('wheel', function(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      var target = wrap.querySelector('.mermaid');
+      var cur = parseFloat(target.dataset.zoom || INITIAL_ZOOM);
+      var factor = e.deltaY < 0 ? 1.1 : 0.9;
+      var next = Math.min(Math.max(cur * factor, 0.5), 5);
+      target.dataset.zoom = next;
+      target.style.zoom = next;
+    }, { passive: false });
+
+    var sX, sY, sL, sT, sTime, didPan;
+    wrap.addEventListener('mousedown', function(e) {
+      if (e.target instanceof Element && e.target.closest('.zoom-controls')) return;
+      wrap.classList.add('is-panning');
+      sX = e.clientX; sY = e.clientY;
+      sL = wrap.scrollLeft; sT = wrap.scrollTop;
+      sTime = Date.now(); didPan = false;
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!wrap.classList.contains('is-panning')) return;
+      var dx = e.clientX - sX, dy = e.clientY - sY;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) didPan = true;
+      wrap.scrollLeft = sL - dx;
+      wrap.scrollTop = sT - dy;
+    });
+    window.addEventListener('mouseup', function() {
+      if (!wrap.classList.contains('is-panning')) return;
+      wrap.classList.remove('is-panning');
+      if (!didPan && Date.now() - sTime < 300) openMermaidInNewTab(wrap);
+    });
+  });
+
+  // SlideEngine — instant-cut variant.
+  function SlideEngine() {
+    this.deck = document.querySelector('.deck');
+    this.slides = [].slice.call(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.total = this.slides.length;
+    this.buildChrome();
+    this.bindEvents();
+    this.observe();
+    this.update();
+  }
+
+  SlideEngine.prototype.buildChrome = function() {
+    var bar = document.createElement('div');
+    bar.className = 'deck-progress';
+    document.body.appendChild(bar);
+    this.bar = bar;
+
+    var dots = document.createElement('div');
+    dots.className = 'deck-dots';
+    var self = this;
+    this.slides.forEach(function(_, i) {
+      var d = document.createElement('button');
+      d.className = 'deck-dot';
+      d.title = 'Slide ' + (i + 1);
+      d.onclick = function() { self.goTo(i); };
+      dots.appendChild(d);
+    });
+    document.body.appendChild(dots);
+    this.dots = [].slice.call(dots.children);
+
+    var ctr = document.createElement('div');
+    ctr.className = 'deck-counter';
+    document.body.appendChild(ctr);
+    this.counter = ctr;
+
+    var hints = document.createElement('div');
+    hints.className = 'deck-hints';
+    hints.textContent = '\u2190 \u2192 / scroll to navigate';
+    document.body.appendChild(hints);
+    this.hints = hints;
+    this.hintTimer = setTimeout(function() { hints.classList.add('faded'); }, 4000);
+  };
+
+  SlideEngine.prototype.bindEvents = function() {
+    var self = this;
+    document.addEventListener('keydown', function(e) {
+      if (e.target instanceof Element && e.target.closest('.mermaid-wrap,.table-scroll,.code-block,input,textarea,[contenteditable]')) return;
+      if (['ArrowDown','ArrowRight',' ','PageDown'].indexOf(e.key) > -1) { e.preventDefault(); self.next(); }
+      else if (['ArrowUp','ArrowLeft','PageUp'].indexOf(e.key) > -1) { e.preventDefault(); self.prev(); }
+      else if (e.key === 'Home') { e.preventDefault(); self.goTo(0); }
+      else if (e.key === 'End')  { e.preventDefault(); self.goTo(self.total - 1); }
+      self.fadeHints();
+    });
+
+    var tY;
+    this.deck.addEventListener('touchstart', function(e) { tY = e.touches[0].clientY; }, { passive: true });
+    this.deck.addEventListener('touchend', function(e) {
+      var dy = tY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 50) { dy > 0 ? self.next() : self.prev(); }
+    });
+  };
+
+  SlideEngine.prototype.observe = function() {
+    var self = this;
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          self.current = self.slides.indexOf(entry.target);
+          self.update();
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(function(s) { obs.observe(s); });
+  };
+
+  SlideEngine.prototype.goTo = function(i) {
+    this.slides[Math.max(0, Math.min(i, this.total - 1))].scrollIntoView({ behavior: 'smooth' });
+  };
+  SlideEngine.prototype.next = function() { if (this.current < this.total - 1) this.goTo(this.current + 1); };
+  SlideEngine.prototype.prev = function() { if (this.current > 0) this.goTo(this.current - 1); };
+
+  SlideEngine.prototype.update = function() {
+    this.bar.style.width = ((this.current + 1) / this.total * 100) + '%';
+    var c = this.current;
+    this.dots.forEach(function(d, i) { d.classList.toggle('active', i === c); });
+    this.counter.textContent = (this.current + 1) + ' / ' + this.total;
+  };
+
+  SlideEngine.prototype.fadeHints = function() {
+    clearTimeout(this.hintTimer);
+    this.hints.classList.add('faded');
+  };
+</script>
+
+</body>
+</html>

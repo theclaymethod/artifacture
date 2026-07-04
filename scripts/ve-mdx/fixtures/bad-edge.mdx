@@ -1,0 +1,20 @@
+import { DiagramCanvas, ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function BadEdgeFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Bad edge fixture">
+      <Section title="Fixture">
+        <DiagramCanvas
+          nodes={[
+            { id: 'start', label: 'Start', shape: 'oval' },
+            { id: 'done', label: 'Done', shape: 'oval' },
+          ]}
+          edges={[
+            { from: 'start', to: 'missing', label: 'broken' },
+            { from: 'ghost', to: 'done', label: 'also broken' },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

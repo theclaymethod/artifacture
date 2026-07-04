@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- violates: bounce-elastic-easing | v2 seeded violation -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bounce-elastic-easing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --font-body: "IBM Plex Sans", Arial, sans-serif; --font-mono: "IBM Plex Mono", monospace; --bg: #f7f7f4; --surface: #ffffff; --text: #161616; --text-dim: #555555; --border: #b8b8b2; --border-bright: #777770; --accent: #2f5d50; --ok: #2f6f50; --warn: #8a6500; --err: #9b2f2f; }
+@media (prefers-color-scheme: dark) { :root { --bg: #111111; --surface: #1b1b1b; --text: #eeeeee; --text-dim: #b8b8b8; --border: #464646; --border-bright: #777777; --accent: #8fb7a8; --ok: #8fbf9e; --warn: #d1ad55; --err: #dd8585; } }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
+body :where(.grid, .flex, [class*="-grid"], [class*="-row"]) > * { min-width: 0; }
+body { overflow-wrap: anywhere; font-family: var(--font-body); background: var(--bg); color: var(--text); }
+.scroll-x { max-width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+@media (max-width: 768px) { body { padding: 16px; } .arch-grid, .comparison, .diff-panels, .dir-compare, [class$="-grid"] { grid-template-columns: 1fr; } .pipeline { flex-wrap: nowrap; } .kpi-row { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
+main { width: min(100% - 48px, 960px); margin: 0 auto; padding: 56px 0; }
+h1 { margin: 0 0 24px; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; font-weight: 600; }
+section { border-top: 1px solid var(--border); padding: 24px 0; }
+.card { background: var(--surface); border: 1px solid var(--border); padding: 20px; }
+pre, pre code, .code-block, .code-file__body, .dir-tree { white-space: pre-wrap; }
+a { color: var(--accent); }
+
+.card{transition:transform .2s cubic-bezier(0.34,1.56,0.64,1)}
+</style>
+
+</head>
+<body>
+<main><h1>Architecture Brief</h1><section><p>A compact, compliant baseline section for seeded verifier fixtures.</p><div class="card">Elastic card.</div></section></main>
+</body>
+</html>

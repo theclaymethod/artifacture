@@ -1,0 +1,25 @@
+import { ExplainerShell, MermaidBlock, Section } from '../../visual-explainer-mdx/components';
+
+export default function MermaidBlockExample() {
+  return (
+    <ExplainerShell
+      eyebrow="mermaid shell"
+      preset="custom"
+      reviewTools={false}
+      title="Grammar-Owned Diagrams"
+      summary="Complex diagram grammars stay in Mermaid while the shell owns zoom, expansion, and token theming."
+    >
+      <Section kicker="state" title="Review Lifecycle">
+        <MermaidBlock
+          caption="Runtime Mermaid, themed from --ve-* tokens."
+          chart={`stateDiagram-v2
+  [*] --> Draft
+  Draft --> Review: share
+  Review --> Draft: comments
+  Review --> Approved: done
+  Approved --> [*]`}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

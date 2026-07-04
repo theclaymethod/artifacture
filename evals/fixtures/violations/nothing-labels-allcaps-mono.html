@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- violates: nothing-labels-allcaps-mono | seeded violation -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nothing Fixture Base</title>
+<style>
+:root{--bg:#f7f7f2;--surface:#ffffff;--text:#111111;--border:#b8b8b2;--accent:#d71921;--font-body:"Space Grotesk",sans-serif;--font-mono:"Space Mono",monospace;--font-display:"Doto",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0f0f0f;--surface:#171717;--text:#f2f2ed;--border:#454545;--accent:#d71921}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;overflow-x:clip}
+body{overflow-wrap:anywhere;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+main{width:min(100% - 48px,960px);margin:0 auto;padding:56px 0}
+h1{font-family:var(--font-display);font-size:clamp(4rem,12vw,9rem);line-height:.9}
+a{color:var(--text)}
+.label,th,button{font-family:var(--font-mono);text-transform:uppercase}
+.dot-grid{border:1px solid var(--border);width:96px;height:96px}
+.segment{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}.segment span{height:12px;border:1px solid var(--border)}
+</style>
+</head>
+<body data-ve-preset="nothing">
+<main>
+<h1 class="doto">01</h1>
+<p class="label mono uppercase">READY STATE</p>
+<div class="dot-grid motif"></div>
+<div class="segment motif"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+<p class="label" style="font-family:var(--font-body);text-transform:none">Title Case</p>
+</main>
+</body>
+</html>

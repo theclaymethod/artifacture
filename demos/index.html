@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>visual-explainer — Verify demos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg:         #f6f4f0;
+    --bg-2:       #efe9df;
+    --fg:         #16130f;
+    --muted:      #57534e;
+    --soft:       #78716c;
+    --rule:       rgba(22, 19, 15, 0.10);
+    --rule-solid: rgba(22, 19, 15, 0.22);
+    --accent:     #d97706;
+    --ok:         #2f7d3b;
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body:    "Space Grotesk", system-ui, sans-serif;
+    --font-mono:    "Space Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:         #0a0a0a;
+      --bg-2:       #141414;
+      --fg:         #f2ede5;
+      --muted:      rgba(242, 237, 229, 0.68);
+      --soft:       rgba(242, 237, 229, 0.42);
+      --rule:       rgba(242, 237, 229, 0.12);
+      --rule-solid: rgba(242, 237, 229, 0.22);
+      --accent:     #f59e0b;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font-family: var(--font-body);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 80px 32px 120px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+    margin: 0 0 20px;
+  }
+  .lede {
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 56px;
+  }
+  .meta-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 64px;
+  }
+  .meta dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin: 0 0 4px;
+  }
+  .meta dd {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--fg);
+    margin: 0;
+    font-feature-settings: "tnum";
+  }
+
+  section.card {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+  }
+  section.card:last-of-type { border-bottom: 1px solid var(--rule); }
+  .card__num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--soft);
+  }
+  .card__body h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .card__kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 20px;
+  }
+  .card__desc { color: var(--muted); margin: 0 0 16px; max-width: 60ch; }
+
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 28px;
+    display: grid;
+    gap: 6px;
+  }
+  .checklist li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .checklist li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px;
+    width: 8px; height: 8px;
+    border: 1px solid var(--rule-solid);
+    border-radius: 1px;
+  }
+
+  .card__links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: var(--bg-2);
+    border: 1px solid var(--rule-solid);
+    padding: 12px 20px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 120ms;
+  }
+  .btn:hover { background: var(--fg); color: var(--bg); }
+  .btn--primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn--primary:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--soft);
+    letter-spacing: 0.08em;
+  }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    color: var(--soft);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+  @media (max-width: 640px) {
+    section.card { grid-template-columns: 1fr; gap: 8px; }
+    .card__num { color: var(--accent); }
+    .meta-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Verify · claude/video-and-fullscreen-layouts-dPDFB</p>
+  <h1>Five commits, four demos, one verification pass.</h1>
+  <p class="lede">
+    The four HTML files below each exercise one of the capabilities added in this branch. Open each in a browser and confirm the listed checks. No build step, no server needed — static HTML.
+  </p>
+
+  <dl class="meta-row">
+    <div class="meta">
+      <dt>Branch</dt>
+      <dd>claude/video-and-fullscreen-layouts-dPDFB</dd>
+    </div>
+    <div class="meta">
+      <dt>Rendered MP4s</dt>
+      <dd>3 · in <code style="font-family: var(--font-mono); font-size: 12px;">demos/videos/</code></dd>
+    </div>
+    <div class="meta">
+      <dt>Plugin version</dt>
+      <dd>0.7.0</dd>
+    </div>
+  </dl>
+
+  <section class="card">
+    <div class="card__num">01</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 1 · Inline SVG diagrams</p>
+      <h2>Editorial diagrams gallery</h2>
+      <p class="card__desc">
+        Five figures on a single page — architecture, flowchart, sequence, quadrant, funnel — each rendered with the rules paraphrased from diagram-design (MIT). Editorial-Diagram aesthetic: Instrument Serif + Geist + Geist Mono, rust accent.
+      </p>
+      <ul class="checklist">
+        <li>Shape carries meaning: oval / rect / diamond / merge-dot in the flowchart</li>
+        <li>Arrows drawn before nodes — nodes sit on top</li>
+        <li>Every arrow label has a paper-colored masking rect behind it</li>
+        <li>Bottom horizontal legend strip, never floating</li>
+        <li>≤ 2 accent uses per figure; one italic-serif annotation callout with dashed leader</li>
+        <li>Funnel widths honest to the conversion numbers</li>
+      </ul>
+      <div class="card__links">
+        <a class="btn btn--primary" href="diagrams-gallery.html">Open gallery →</a>
+        <span class="note">references/diagrams-svg.md · diagram-tokens.md</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__num">02</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 3 · Magazine mode</p>
+      <h2>Horizontal-scroll magazine</h2>
+      <p class="card__desc">
+        Twelve full-bleed 100vw × 100vh pages on the topic "The queue that outgrew itself." Mono-Industrial tint ramp across interior pages; cover + interior reframe + back cover are dark. One 8.4× stat page anchors the read.
+      </p>
+      <ul class="checklist">
+        <li>Arrow Left / Right / PageUp / PageDown / Space / Home / End all navigate horizontally</li>
+        <li>Touch swipe works; trackpad horizontal scroll works; mouse-wheel-to-horizontal works</li>
+        <li>Nav dots at bottom update live as you scroll; page counter top-right advances</li>
+        <li>Three dark pages (cover, interior reframe on page 7, back cover)</li>
+        <li>No two consecutive interior pages share a tint</li>
+        <li>No vertical scrollbar at any viewport size</li>
+      </ul>
+      <div class="card__links">
+        <a class="btn btn--primary" href="magazine-populated.html">Open magazine →</a>
+        <span class="note">templates/mono-industrial-magazine.html · slide-patterns.md § Magazine</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__num">03</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 2 · Hyperframes long-form</p>
+      <h2>Long-form explainer composition</h2>
+      <p class="card__desc">
+        A 60-second 16:9 explainer on "How our cache saved $40k/month." Five scenes with eyebrow + headline fade-ups, a $52,000 → $12,000 count-up pair, and a three-node progressive SVG diagram reveal. Works as a live HTML preview (auto-plays) and as a Hyperframes composition (`window.__timelines["longform-demo"]`, paused and ready for the engine).
+      </p>
+      <ul class="checklist">
+        <li>On page load, the timeline plays — you should see scene 1 fade in, stagger, then dwell before scene 2</li>
+        <li>No console errors (open DevTools and confirm)</li>
+        <li>Diagram reveal in scene 3: nodes fade-scale in, then arrows stroke-dasharray in</li>
+        <li>Count-up animates smoothly from 0 to the target number</li>
+        <li>GSAP timeline is paused in Hyperframes capture mode (gated by `window.__hyperframesCapture`)</li>
+      </ul>
+      <div class="card__links">
+        <a class="btn btn--primary" href="video-longform.html">Open HTML preview →</a>
+        <a class="btn" href="videos/longform-16x9.mp4">Rendered MP4 (3.2 MB)</a>
+        <span class="note">templates/hyperframes-longform.html</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__num">04</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 2 · Hyperframes reel · 9:16 vertical</p>
+      <h2>Brain-rot reel — phone / Shorts / Reels</h2>
+      <p class="card__desc">
+        A 32-second vertical reel on "Partition by tenant, not by type." Seven beats (HOOK → PROBLEM → CONTEXT → MECHANISM → PROOF → RESOLUTION → CTA), hard cuts every 1.2–1.8s, word-by-word kinetic typography, two-stage progressive diagram reveal, burned-in captions in the phone safe-zone.
+      </p>
+      <ul class="checklist">
+        <li>HOOK (0–2s): 4,200 counts up; "requests per second" label lands</li>
+        <li>PROBLEM (2–5s): "Your queue chokes at 500." word-stagger, "chokes" in accent</li>
+        <li>MECHANISM (9–18s): two SVG stages — shared queue → per-tenant lanes</li>
+        <li>PROOF: 8.4× scale-in with back-ease; "throughput in prod" label</li>
+        <li>Captions fade in at each beat, out at the end, all readable in the bottom third</li>
+        <li>No console errors; all GSAP constraints satisfied</li>
+      </ul>
+      <div class="card__links">
+        <a class="btn btn--primary" href="video-reel.html">Open HTML preview →</a>
+        <a class="btn" href="videos/reel-9x16.mp4">Rendered MP4 (2.6 MB)</a>
+        <span class="note">templates/hyperframes-reel.html</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__num">05</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 2 · Hyperframes reel · 16:9 landscape</p>
+      <h2>Same reel, landscape canvas</h2>
+      <p class="card__desc">
+        Same 32-second 7-beat reel content, rendered at 1920×1080 instead of 1080×1920. Same pacing, same kinetic typography, same captions — but the MECHANISM beat becomes a native before/after split-screen, the hook stat sits beside its label on one row, and the caption track is a centered bar instead of a bottom strip. Use this aspect for X/LinkedIn/desktop shares.
+      </p>
+      <ul class="checklist">
+        <li>Hook row: "4,200 / requests per second" on one line (side-by-side, not stacked)</li>
+        <li>MECHANISM: "One shared queue / every tenant fights" ← → "One queue per tenant / nobody waits", both halves stagger in</li>
+        <li>Caption bar centered 48px from bottom, max-width 1400px</li>
+        <li>Safe zone relaxes to 60px top, 140px bottom (no phone chrome)</li>
+        <li>Same 32s duration, same cut pacing, same dual-mode gate</li>
+      </ul>
+      <div class="card__links">
+        <a class="btn btn--primary" href="video-reel-landscape.html">Open HTML preview →</a>
+        <a class="btn" href="videos/reel-16x9.mp4">Rendered MP4 (2.1 MB)</a>
+        <span class="note">templates/hyperframes-reel-landscape.html · reel-patterns.md § Two aspect ratios</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__num">06</div>
+    <div class="card__body">
+      <p class="card__kicker">Commit 4 · Clarify policy</p>
+      <h2>Not demo-able as an artifact</h2>
+      <p class="card__desc">
+        The tiered AskUserQuestion policy changes how Claude behaves, not what a browser renders. To verify: invoke <code>/generate-video</code> or <code>/generate-slides --magazine</code> — Claude should ask at minimum for style + duration (Tier 0). Invoke <code>/fact-check</code> — Claude should just run (Tier 2). Add <code>--no-ask</code> to any command to skip.
+      </p>
+      <div class="card__links">
+        <span class="note">references/clarify.md · SKILL.md §0 Clarify before generating</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>visual-explainer-custom · v0.7.0</span>
+    <span><a href="../README.md">README</a> · <a href="../CHANGELOG.md">CHANGELOG</a> · <a href="https://github.com/theclaymethod/visual-explainer-custom/tree/claude/video-and-fullscreen-layouts-dPDFB">branch on GitHub</a></span>
+  </footer>
+</main>
+</body>
+</html>

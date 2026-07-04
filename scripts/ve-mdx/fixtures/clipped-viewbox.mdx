@@ -1,0 +1,20 @@
+import { DiagramCanvas, ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function ClippedViewBoxFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Clipped viewBox fixture">
+      <Section title="Fixture">
+        <DiagramCanvas
+          integrityViewBox={[0, 0, 160, 120]}
+          nodes={[
+            { id: 'alpha', label: 'Alpha' },
+            { id: 'beta', label: 'Beta' },
+          ]}
+          edges={[
+            { from: 'alpha', to: 'beta' },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

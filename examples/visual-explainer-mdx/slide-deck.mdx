@@ -1,0 +1,30 @@
+import { Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
+
+export default function SlideDeckExample() {
+  return (
+    <SlideDeck eyebrow="slides command" title="Generated Deck">
+      <Slide kicker="01 / contract" title="Slides Are Source Files" tone="dark">
+        <p>
+          The migrated slide path keeps MDX or TSX as the editable source and exports standalone HTML as the artifact.
+        </p>
+      </Slide>
+
+      <Slide kicker="02 / pipeline" title="Author, Review, Export" tone="light">
+        <Pipeline
+          steps={[
+            { title: 'Prompt', body: 'Capture audience, format, and story arc.' },
+            { title: 'MDX', body: 'Compose slides with shared React components.' },
+            { title: 'Annotate', body: 'Use point-and-click feedback in the generated preview.' },
+            { title: 'HTML', body: 'Ship the generated static artifact.' },
+          ]}
+        />
+      </Slide>
+
+      <Slide kicker="03 / parity" title="Secondary Exports Stay Optional" tone="accent">
+        <p>
+          PDF and per-slide poster exports remain follow-on artifacts. The interactive HTML deck stays canonical.
+        </p>
+      </Slide>
+    </SlideDeck>
+  );
+}

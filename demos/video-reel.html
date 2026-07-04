@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Partition by tenant, not by type — Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;500;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.70);
+    --dim: rgba(242, 237, 229, 0.45);
+    --accent: #f7591f;
+    --warn: #d97706;
+    --grid: rgba(242, 237, 229, 0.06);
+    --caption-bg: rgba(0, 0, 0, 0.82);
+    --line: rgba(242, 237, 229, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: var(--fg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #stage {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(247, 89, 31, 0.08), transparent 60%),
+      var(--bg);
+    overflow: hidden;
+    transform-origin: center center;
+  }
+
+  /* Subtle grain/grid texture for industrial feel */
+  #stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* Top chrome strip — mimics brand tag */
+  .chrome {
+    position: absolute;
+    top: 56px;
+    left: 48px;
+    right: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 22px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    z-index: 20;
+  }
+  .chrome .dot {
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 14px;
+    vertical-align: middle;
+  }
+
+  .safe {
+    position: absolute;
+    inset: 140px 48px 240px 48px;
+  }
+
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    padding: 0 48px;
+  }
+
+  .kicker {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 56px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .kicker::before {
+    content: "";
+    width: 44px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .hook-stat {
+    font-size: 340px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 120px rgba(247, 89, 31, 0.35);
+  }
+  .hook-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 36px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 40px;
+    max-width: 800px;
+  }
+  .hook-rule {
+    width: 160px;
+    height: 3px;
+    background: var(--fg);
+    margin: 48px 0 0 0;
+    opacity: 0.35;
+  }
+
+  .claim {
+    font-size: 112px;
+    line-height: 1.02;
+    font-weight: 600;
+    text-align: center;
+    max-width: 940px;
+    letter-spacing: -0.02em;
+  }
+  .claim .w { display: inline-block; }
+  .claim .accent { color: var(--accent); }
+
+  .claim-lines {
+    font-size: 92px;
+    line-height: 1.08;
+    font-weight: 600;
+    text-align: center;
+    max-width: 900px;
+    letter-spacing: -0.015em;
+  }
+  .claim-lines .ln {
+    display: block;
+  }
+  .claim-lines .ln .hl {
+    color: var(--warn);
+  }
+
+  /* MECHANISM — mini diagram stages */
+  .mech-wrap {
+    width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .mech-stage {
+    position: relative;
+    width: 960px;
+    height: 960px;
+  }
+  .stage-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 22px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  .stage-label .tag {
+    color: var(--accent);
+    margin-right: 10px;
+    font-weight: 700;
+  }
+  .stage-label.bad .tag { color: var(--warn); }
+
+  svg.diagram {
+    width: 960px;
+    height: 900px;
+    display: block;
+    position: absolute;
+    top: 60px;
+    left: 0;
+  }
+  svg.diagram text {
+    font-family: "Space Mono", ui-monospace, monospace;
+    fill: var(--fg);
+  }
+
+  /* Proof */
+  .proof-stat {
+    font-size: 480px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 140px rgba(247, 89, 31, 0.45);
+  }
+  .proof-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 40px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 40px;
+  }
+  .proof-meta {
+    margin-top: 28px;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    color: var(--dim);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* CTA */
+  .cta-meta {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 34px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .cta-handle {
+    font-size: 120px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .cta-handle .at { color: var(--accent); }
+  .cta-rule {
+    width: 240px;
+    height: 2px;
+    background: var(--line);
+    margin: 48px 0 24px;
+  }
+  .cta-sub {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 26px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  /* Captions — burned-in, bottom third. Each cap absolutely stacks in the same slot. */
+  .captions {
+    position: absolute;
+    left: 48px;
+    right: 48px;
+    bottom: 140px;
+    height: 160px;
+    pointer-events: none;
+    z-index: 30;
+  }
+  .cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    padding: 22px 32px;
+    background: var(--caption-bg);
+    color: var(--fg);
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.22;
+    text-align: center;
+    width: fit-content;
+    max-width: 100%;
+    opacity: 0;
+    border-radius: 2px;
+    border-left: 3px solid var(--accent);
+    letter-spacing: -0.005em;
+  }
+</style>
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="reel-demo"
+  data-width="1080"
+  data-height="1920"
+  data-start="0"
+  data-duration="32"
+>
+  <div class="chrome">
+    <span><span class="dot"></span>QUEUE / 001</span>
+    <span>32 SEC</span>
+  </div>
+
+  <!-- HOOK: 0-2s -->
+  <div class="beat beat-hook">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div class="hook-stat">0</div>
+      <div class="hook-label">requests per second</div>
+      <div class="hook-rule"></div>
+    </div>
+  </div>
+
+  <!-- PROBLEM: 2-5s -->
+  <div class="beat beat-problem">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE PROBLEM</span>
+      <h2 class="claim">
+        <span class="w">Your</span>
+        <span class="w">queue</span>
+        <span class="w accent">chokes</span>
+        <span class="w">at</span>
+        <span class="w">500.</span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- CONTEXT: 5-9s — line-by-line -->
+  <div class="beat beat-context">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHY IT MATTERS</span>
+      <h2 class="claim-lines">
+        <span class="ln">Every backed-up job</span>
+        <span class="ln">is a <span class="hl">user waiting.</span></span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- MECHANISM: 9-18s -->
+  <div class="beat beat-mechanism">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">HOW WE FIXED IT</span>
+
+      <div class="mech-wrap">
+        <!-- Stage 1: per-type queue (bad) -->
+        <div class="mech-stage mech-stage-1">
+          <div class="stage-label bad"><span class="tag">BEFORE</span>per-type queue</div>
+          <svg class="diagram" viewBox="0 0 960 900" xmlns="http://www.w3.org/2000/svg" aria-label="Before: per-type queue shared across tenants">
+            <!-- Tenants column -->
+            <g class="s1-tenants">
+              <g class="s1-t s1-t-a">
+                <rect x="40" y="80" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.4)" stroke-width="2"/>
+                <text x="140" y="130" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT A</text>
+                <text x="140" y="162" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">1,800 rps</text>
+              </g>
+              <g class="s1-t s1-t-b">
+                <rect x="40" y="395" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.4)" stroke-width="2"/>
+                <text x="140" y="445" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT B</text>
+                <text x="140" y="477" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">1,600 rps</text>
+              </g>
+              <g class="s1-t s1-t-c">
+                <rect x="40" y="710" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.4)" stroke-width="2"/>
+                <text x="140" y="760" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT C</text>
+                <text x="140" y="792" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">800 rps</text>
+              </g>
+            </g>
+
+            <!-- Shared queue node (focal / bottleneck) -->
+            <g class="s1-queue">
+              <rect x="380" y="355" width="220" height="190" rx="2" fill="#1a0f0a" stroke="#d97706" stroke-width="3"/>
+              <text x="490" y="410" text-anchor="middle" font-size="28" font-weight="700" fill="#d97706">SHARED</text>
+              <text x="490" y="446" text-anchor="middle" font-size="28" font-weight="700" fill="#d97706">QUEUE</text>
+              <text x="490" y="494" text-anchor="middle" font-size="22" font-family="Space Mono, monospace" fill="rgba(217,119,6,0.85)">cap = 500/s</text>
+              <text x="490" y="522" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="#f7591f" font-weight="700" class="s1-choke">[ CHOKE ]</text>
+            </g>
+
+            <!-- Contention arrows: all three tenants → shared queue -->
+            <g class="s1-arrows" fill="none" stroke="rgba(217,119,6,0.85)" stroke-width="3" stroke-linecap="round">
+              <path class="s1-arrow s1-arrow-a" d="M 240 135 Q 310 220 380 420" marker-end="url(#s1-arrowhead)"/>
+              <path class="s1-arrow s1-arrow-b" d="M 240 450 L 380 450" marker-end="url(#s1-arrowhead)"/>
+              <path class="s1-arrow s1-arrow-c" d="M 240 765 Q 310 680 380 480" marker-end="url(#s1-arrowhead)"/>
+            </g>
+
+            <!-- Downstream "capacity" pool -->
+            <g class="s1-down">
+              <rect x="720" y="355" width="200" height="190" rx="2" fill="#141414" stroke="rgba(242,237,229,0.3)" stroke-width="2"/>
+              <text x="820" y="430" text-anchor="middle" font-size="22" font-weight="700" fill="rgba(242,237,229,0.7)">WORKERS</text>
+              <text x="820" y="465" text-anchor="middle" font-size="22" font-family="Space Mono, monospace" fill="rgba(242,237,229,0.5)">shared</text>
+            </g>
+            <g class="s1-tail" fill="none" stroke="rgba(242,237,229,0.3)" stroke-width="3" stroke-linecap="round">
+              <path class="s1-arrow-tail" d="M 600 450 L 720 450" marker-end="url(#s1-arrowhead-dim)"/>
+            </g>
+
+            <defs>
+              <marker id="s1-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706"/>
+              </marker>
+              <marker id="s1-arrowhead-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(242,237,229,0.3)"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Stage 2: per-tenant queue (good) -->
+        <div class="mech-stage mech-stage-2" style="display: none;">
+          <div class="stage-label"><span class="tag">AFTER</span>per-tenant queue</div>
+          <svg class="diagram" viewBox="0 0 960 900" xmlns="http://www.w3.org/2000/svg" aria-label="After: per-tenant queue with isolated capacity">
+            <!-- Three parallel lanes -->
+            <g class="s2-lane s2-lane-a">
+              <rect x="40" y="80" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.5)" stroke-width="2"/>
+              <text x="140" y="130" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT A</text>
+              <text x="140" y="162" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">1,800 rps</text>
+
+              <rect class="s2-q" x="380" y="80" width="200" height="110" rx="2" fill="#0f1a12" stroke="#f7591f" stroke-width="3"/>
+              <text x="480" y="128" text-anchor="middle" font-size="22" font-weight="700" fill="#f7591f">QUEUE A</text>
+              <text x="480" y="158" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(247,89,31,0.85)">cap = 2,000/s</text>
+
+              <rect x="720" y="80" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.3)" stroke-width="2"/>
+              <text x="820" y="128" text-anchor="middle" font-size="22" font-weight="700" fill="rgba(242,237,229,0.8)">WORKERS A</text>
+              <text x="820" y="158" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(242,237,229,0.5)">isolated</text>
+            </g>
+
+            <g class="s2-lane s2-lane-b">
+              <rect x="40" y="395" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.5)" stroke-width="2"/>
+              <text x="140" y="445" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT B</text>
+              <text x="140" y="477" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">1,600 rps</text>
+
+              <rect class="s2-q" x="380" y="395" width="200" height="110" rx="2" fill="#0f1a12" stroke="#f7591f" stroke-width="3"/>
+              <text x="480" y="443" text-anchor="middle" font-size="22" font-weight="700" fill="#f7591f">QUEUE B</text>
+              <text x="480" y="473" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(247,89,31,0.85)">cap = 2,000/s</text>
+
+              <rect x="720" y="395" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.3)" stroke-width="2"/>
+              <text x="820" y="443" text-anchor="middle" font-size="22" font-weight="700" fill="rgba(242,237,229,0.8)">WORKERS B</text>
+              <text x="820" y="473" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(242,237,229,0.5)">isolated</text>
+            </g>
+
+            <g class="s2-lane s2-lane-c">
+              <rect x="40" y="710" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.5)" stroke-width="2"/>
+              <text x="140" y="760" text-anchor="middle" font-size="26" font-weight="700" fill="#f2ede5">TENANT C</text>
+              <text x="140" y="792" text-anchor="middle" font-size="20" fill="rgba(242,237,229,0.6)">800 rps</text>
+
+              <rect class="s2-q" x="380" y="710" width="200" height="110" rx="2" fill="#0f1a12" stroke="#f7591f" stroke-width="3"/>
+              <text x="480" y="758" text-anchor="middle" font-size="22" font-weight="700" fill="#f7591f">QUEUE C</text>
+              <text x="480" y="788" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(247,89,31,0.85)">cap = 2,000/s</text>
+
+              <rect x="720" y="710" width="200" height="110" rx="2" fill="#141414" stroke="rgba(242,237,229,0.3)" stroke-width="2"/>
+              <text x="820" y="758" text-anchor="middle" font-size="22" font-weight="700" fill="rgba(242,237,229,0.8)">WORKERS C</text>
+              <text x="820" y="788" text-anchor="middle" font-size="20" font-family="Space Mono, monospace" fill="rgba(242,237,229,0.5)">isolated</text>
+            </g>
+
+            <!-- Straight isolated arrows -->
+            <g class="s2-arrows" fill="none" stroke="#f7591f" stroke-width="3" stroke-linecap="round">
+              <path class="s2-a1" d="M 240 135 L 380 135" marker-end="url(#s2-arrowhead)"/>
+              <path class="s2-a2" d="M 580 135 L 720 135" marker-end="url(#s2-arrowhead)"/>
+              <path class="s2-a3" d="M 240 450 L 380 450" marker-end="url(#s2-arrowhead)"/>
+              <path class="s2-a4" d="M 580 450 L 720 450" marker-end="url(#s2-arrowhead)"/>
+              <path class="s2-a5" d="M 240 765 L 380 765" marker-end="url(#s2-arrowhead)"/>
+              <path class="s2-a6" d="M 580 765 L 720 765" marker-end="url(#s2-arrowhead)"/>
+            </g>
+
+            <defs>
+              <marker id="s2-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f7591f"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROOF: 18-25s -->
+  <div class="beat beat-proof">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE RESULT</span>
+      <div class="proof-stat">8.4&times;</div>
+      <div class="proof-label">throughput in prod</div>
+      <div class="proof-meta">500/s &rarr; 4,200/s</div>
+    </div>
+  </div>
+
+  <!-- RESOLUTION: 25-30s — word-by-word -->
+  <div class="beat beat-resolution">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHAT YOU DO</span>
+      <h2 class="claim">
+        <span class="w">Partition</span>
+        <span class="w">by</span>
+        <span class="w accent">tenant,</span>
+        <span class="w">not</span>
+        <span class="w">by</span>
+        <span class="w">type.</span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- CTA: 30-32s -->
+  <div class="beat beat-cta">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div class="cta-meta">FULL WRITEUP</div>
+      <div class="cta-handle"><span class="at">@</span>your-handle</div>
+      <div class="cta-rule"></div>
+      <div class="cta-sub">QUEUE REDESIGN / 001</div>
+    </div>
+  </div>
+
+  <!-- Captions (burned-in) -->
+  <div class="captions">
+    <div class="cap cap-1">four thousand two hundred requests per second</div>
+    <div class="cap cap-2">your queue chokes at five hundred</div>
+    <div class="cap cap-3">every backed-up job is a user waiting</div>
+    <div class="cap cap-4">tenants contend for shared capacity</div>
+    <div class="cap cap-5">give each tenant its own lane</div>
+    <div class="cap cap-6">eight-point-four-x throughput in production</div>
+    <div class="cap cap-7">partition by tenant, not by type</div>
+    <div class="cap cap-8">full writeup at the handle</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  // Fit-to-viewport scale (preview only; Hyperframes engine captures the unscaled 1080x1920).
+  function fit() {
+    const stage = document.getElementById("stage");
+    const sx = window.innerWidth / 1080;
+    const sy = window.innerHeight / 1920;
+    const s = Math.min(sx, sy);
+    stage.style.transform = "scale(" + s + ")";
+  }
+  fit();
+  window.addEventListener("resize", fit);
+
+  // Prep SVG stroke dashes for arrows (stage 1 and stage 2)
+  function prepPath(selector) {
+    document.querySelectorAll(selector).forEach((p) => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+    });
+  }
+  prepPath(".s1-arrow");
+  prepPath(".s1-arrow-tail");
+  prepPath(".s2-a1, .s2-a2, .s2-a3, .s2-a4, .s2-a5, .s2-a6");
+
+  const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
+
+  // ---------- HOOK 0-2s ----------
+  tl.addLabel("hook", 0);
+  tl.fromTo(".beat-hook", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "hook+=0");
+  const n = { v: 0 };
+  tl.to(n, {
+    v: 4200,
+    duration: 1.0,
+    ease: "power3.out",
+    onUpdate: () => {
+      document.querySelector(".beat-hook .hook-stat").textContent = Math.floor(n.v).toLocaleString();
+    },
+  }, "hook+=0.1");
+  tl.from(".beat-hook .hook-label", { y: 20, opacity: 0, duration: 0.4 }, "hook+=1.0");
+  tl.from(".beat-hook .hook-rule", { scaleX: 0, opacity: 0, duration: 0.4, transformOrigin: "left center" }, "hook+=1.2");
+  tl.to(".beat-hook", { opacity: 0, duration: 0.2 }, "hook+=1.85");
+
+  // ---------- PROBLEM 2-5s — word-by-word ----------
+  tl.addLabel("problem", 2);
+  tl.fromTo(".beat-problem", { opacity: 0 }, { opacity: 1, duration: 0.15 }, "problem+=0");
+  tl.from(".beat-problem .kicker", { y: 20, opacity: 0, duration: 0.3 }, "problem+=0.1");
+  tl.from(".beat-problem .w", {
+    y: 70, opacity: 0, duration: 0.45, stagger: 0.09, ease: "power3.out",
+  }, "problem+=0.45");
+  tl.to(".beat-problem .w.accent", {
+    scale: 1.08, duration: 0.3, yoyo: true, repeat: 1, ease: "power2.inOut", transformOrigin: "center",
+  }, "problem+=1.6");
+  tl.to(".beat-problem", { opacity: 0, duration: 0.2 }, "problem+=2.8");
+
+  // ---------- CONTEXT 5-9s — line-by-line slide ----------
+  tl.addLabel("context", 5);
+  tl.fromTo(".beat-context", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "context+=0");
+  tl.from(".beat-context .kicker", { y: 20, opacity: 0, duration: 0.3 }, "context+=0.1");
+  tl.from(".beat-context .ln", {
+    x: -60, opacity: 0, duration: 0.55, stagger: 0.35, ease: "power3.out",
+  }, "context+=0.4");
+  tl.to(".beat-context", { opacity: 0, duration: 0.25 }, "context+=3.75");
+
+  // ---------- MECHANISM 9-18s ----------
+  tl.addLabel("mech", 9);
+  tl.fromTo(".beat-mechanism", { opacity: 0 }, { opacity: 1, duration: 0.25 }, "mech+=0");
+  tl.from(".beat-mechanism .kicker", { y: 20, opacity: 0, duration: 0.3 }, "mech+=0.1");
+
+  // --- Stage 1 reveal: per-type queue (9.4 -> 13.0s) ---
+  tl.from(".mech-stage-1 .stage-label", { y: -20, opacity: 0, duration: 0.35 }, "mech+=0.35");
+  // Tenants (reading order)
+  tl.from(".s1-t-a", { scale: 0.7, opacity: 0, duration: 0.35, ease: "back.out(1.5)", transformOrigin: "center" }, "mech+=0.6");
+  tl.from(".s1-t-b", { scale: 0.7, opacity: 0, duration: 0.35, ease: "back.out(1.5)", transformOrigin: "center" }, "mech+=0.85");
+  tl.from(".s1-t-c", { scale: 0.7, opacity: 0, duration: 0.35, ease: "back.out(1.5)", transformOrigin: "center" }, "mech+=1.1");
+  // Shared queue (focal)
+  tl.from(".s1-queue", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.7)", transformOrigin: "center" }, "mech+=1.45");
+  // Contention arrows (stroke-in)
+  tl.to(".s1-arrow-a", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, "mech+=1.9");
+  tl.to(".s1-arrow-b", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, "mech+=2.05");
+  tl.to(".s1-arrow-c", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, "mech+=2.2");
+  // Downstream
+  tl.from(".s1-down", { opacity: 0, duration: 0.3 }, "mech+=2.7");
+  tl.to(".s1-arrow-tail", { strokeDashoffset: 0, duration: 0.4, ease: "power2.inOut" }, "mech+=2.8");
+  // Choke pulse
+  tl.from(".s1-choke", { opacity: 0, duration: 0.2 }, "mech+=3.2");
+  tl.to(".s1-choke", {
+    opacity: 0.3, duration: 0.25, yoyo: true, repeat: 3, ease: "power1.inOut",
+  }, "mech+=3.4");
+
+  // Cross to stage 2 (swap at 13s mark = mech+=4)
+  tl.to(".mech-stage-1", { opacity: 0, duration: 0.3 }, "mech+=4.0");
+  tl.set(".mech-stage-1", { display: "none" }, "mech+=4.3");
+  tl.set(".mech-stage-2", { display: "block", opacity: 0 }, "mech+=4.3");
+  tl.to(".mech-stage-2", { opacity: 1, duration: 0.3 }, "mech+=4.35");
+
+  // --- Stage 2 reveal: per-tenant queue (13.0 -> 17.7s) ---
+  tl.from(".mech-stage-2 .stage-label", { y: -20, opacity: 0, duration: 0.35 }, "mech+=4.45");
+  tl.from(".s2-lane-a", { opacity: 0, y: 30, duration: 0.4, ease: "power2.out" }, "mech+=4.75");
+  tl.from(".s2-lane-b", { opacity: 0, y: 30, duration: 0.4, ease: "power2.out" }, "mech+=5.0");
+  tl.from(".s2-lane-c", { opacity: 0, y: 30, duration: 0.4, ease: "power2.out" }, "mech+=5.25");
+  // Stroke-in all isolated arrows
+  tl.to(".s2-a1, .s2-a3, .s2-a5", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, "mech+=5.6");
+  tl.to(".s2-a2, .s2-a4, .s2-a6", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, "mech+=5.95");
+  // Queue pulse (isolation = no contention)
+  tl.to(".s2-q", {
+    scale: 1.04, duration: 0.35, yoyo: true, repeat: 1, ease: "power2.inOut", transformOrigin: "center", stagger: 0.08,
+  }, "mech+=6.6");
+
+  tl.to(".beat-mechanism", { opacity: 0, duration: 0.25 }, "mech+=8.75");
+
+  // ---------- PROOF 18-25s ----------
+  tl.addLabel("proof", 18);
+  tl.fromTo(".beat-proof", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "proof+=0");
+  tl.from(".beat-proof .kicker", { y: 20, opacity: 0, duration: 0.3 }, "proof+=0.1");
+  tl.from(".beat-proof .proof-stat", {
+    scale: 0.5, opacity: 0, duration: 0.7, ease: "back.out(1.8)", transformOrigin: "center",
+  }, "proof+=0.4");
+  tl.from(".beat-proof .proof-label", { y: 20, opacity: 0, duration: 0.4 }, "proof+=1.1");
+  tl.from(".beat-proof .proof-meta", { opacity: 0, duration: 0.4 }, "proof+=1.5");
+  // Subtle emphasis breath
+  tl.to(".beat-proof .proof-stat", {
+    scale: 1.05, duration: 0.5, yoyo: true, repeat: 1, ease: "power1.inOut", transformOrigin: "center",
+  }, "proof+=3.0");
+  tl.to(".beat-proof", { opacity: 0, duration: 0.25 }, "proof+=6.75");
+
+  // ---------- RESOLUTION 25-30s — word-by-word ----------
+  tl.addLabel("res", 25);
+  tl.fromTo(".beat-resolution", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "res+=0");
+  tl.from(".beat-resolution .kicker", { y: 20, opacity: 0, duration: 0.3 }, "res+=0.1");
+  tl.from(".beat-resolution .w", {
+    y: 60, opacity: 0, duration: 0.45, stagger: 0.1, ease: "power3.out",
+  }, "res+=0.5");
+  tl.to(".beat-resolution .w.accent", {
+    scale: 1.1, duration: 0.35, yoyo: true, repeat: 1, ease: "power2.inOut", transformOrigin: "center",
+  }, "res+=2.0");
+  tl.to(".beat-resolution", { opacity: 0, duration: 0.25 }, "res+=4.75");
+
+  // ---------- CTA 30-32s ----------
+  tl.addLabel("cta", 30);
+  tl.fromTo(".beat-cta", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "cta+=0");
+  tl.from(".beat-cta .cta-meta", { y: 20, opacity: 0, duration: 0.3 }, "cta+=0.1");
+  tl.from(".beat-cta .cta-handle", { y: 40, opacity: 0, duration: 0.5, ease: "power3.out" }, "cta+=0.35");
+  tl.from(".beat-cta .cta-rule", { scaleX: 0, opacity: 0, duration: 0.4, transformOrigin: "center" }, "cta+=0.9");
+  tl.from(".beat-cta .cta-sub", { opacity: 0, duration: 0.3 }, "cta+=1.1");
+
+  // ---------- CAPTIONS (hard fade-in / fade-out) ----------
+  const caps = [
+    { sel: ".cap-1", s: 0.2,  e: 1.8  },
+    { sel: ".cap-2", s: 2.2,  e: 4.8  },
+    { sel: ".cap-3", s: 5.2,  e: 8.7  },
+    { sel: ".cap-4", s: 9.4,  e: 12.9 },
+    { sel: ".cap-5", s: 13.3, e: 17.6 },
+    { sel: ".cap-6", s: 18.3, e: 24.6 },
+    { sel: ".cap-7", s: 25.2, e: 29.7 },
+    { sel: ".cap-8", s: 30.2, e: 31.9 },
+  ];
+  caps.forEach((c) => {
+    tl.to(c.sel, { opacity: 1, duration: 0.18 }, c.s);
+    tl.to(c.sel, { opacity: 0, duration: 0.2 }, c.e);
+  });
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["reel-demo"] = tl;
+
+  // Dual-mode: standalone preview autoplay; Hyperframes engine owns playback.
+  const isHyperframes = typeof window.__hyperframesCapture !== "undefined";
+  if (!isHyperframes) { tl.play(); }
+</script>
+</body>
+</html>

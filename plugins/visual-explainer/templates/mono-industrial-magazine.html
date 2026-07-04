@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magazine — Mono-Industrial</title>
+<!--
+  Horizontal scroll-snap magazine in the Mono-Industrial aesthetic.
+
+  Tokens inherit directly from templates/mono-industrial.html:
+  --bg / --fg, opacity-tier text tokens, --rule / --rule-strong, status
+  colors (--ok/--warn/--err), spacing + size scale, Space Grotesk +
+  Space Mono + optional Geist Pixel Square for the one hero moment.
+
+  Magazine-only additions: --panel-1..3 interior tint levels (derived
+  from --fg via color-mix so they follow mode changes automatically)
+  plus the scroll-snap engine, nav dots, counter, keyboard/wheel nav.
+
+  Dark panels are absolute #000000 in both modes — the spec (see
+  references/slide-patterns.md § Magazine Mode) treats the cover /
+  back cover / interior dark panel as mode-independent.
+
+  Engine:   100vw x 100vh pages, horizontal scroll-snap-type: x mandatory.
+  Nav:      Arrow keys (left/right), PgUp/PgDn, Space (forward), Home/End,
+            touch swipe, nav dots (click to jump).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /* Geist Pixel Square — the one hero moment of surprise. Loaded from
+     jsDelivr because Geist Pixel is npm-only, not on Google Fonts. */
+  @font-face {
+    font-family: 'Geist Pixel Square';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.7.0/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* ============ TOKENS (mirror templates/mono-industrial.html) ============ */
+  :root {
+    --font-body:    'Space Grotesk', system-ui, sans-serif;
+    --font-mono:    'Space Mono', 'SF Mono', Consolas, monospace;
+    --font-display: 'Geist Pixel Square', 'Space Grotesk', system-ui, sans-serif;
+
+    /* Light mode — warm off-white canvas, near-black ink */
+    --bg: #f6f4f0;
+    --fg: #16130f;
+
+    --text-display:   rgba(22, 19, 15, 1.00);
+    --text-primary:   rgba(22, 19, 15, 0.90);
+    --text-secondary: rgba(22, 19, 15, 0.56);
+    --text-disabled:  rgba(22, 19, 15, 0.36);
+
+    --rule:        rgba(22, 19, 15, 0.12);
+    --rule-strong: rgba(22, 19, 15, 0.24);
+
+    --ok:   #2f7a3e;
+    --warn: #b36b00;
+    --err:  #a51818;
+
+    /* Size + spacing scale (inherited) */
+    --size-display: clamp(72px, 12vw, 144px);
+    --size-body:    15px;
+    --size-caption: 11px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 32px;
+    --space-5: 64px;
+    --space-6: 96px;
+
+    /* Magazine-only: neutral interior tint ramp derived from --fg.
+       color-mix lets tints inherit mode changes for free — no ramp drift. */
+    --panel-0: var(--bg);
+    --panel-1: color-mix(in srgb, var(--fg) 3%,  var(--bg));
+    --panel-2: color-mix(in srgb, var(--fg) 6%,  var(--bg));
+    --panel-3: color-mix(in srgb, var(--fg) 10%, var(--bg));
+
+    /* Absolute dark used by .page--dark — matches base dark-mode canvas */
+    --dark-bg: #000000;
+    --dark-fg: #f2ede5;
+  }
+
+  /* Dark mode applies when (1) OS prefers dark and no explicit override,
+     or (2) the toggle pins [data-theme="dark"]. Light override pins light. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --fg: #f2ede5;
+      --text-display:   rgba(242, 237, 229, 1.00);
+      --text-primary:   rgba(242, 237, 229, 0.90);
+      --text-secondary: rgba(242, 237, 229, 0.58);
+      --text-disabled:  rgba(242, 237, 229, 0.36);
+      --rule:        rgba(242, 237, 229, 0.14);
+      --rule-strong: rgba(242, 237, 229, 0.28);
+      --ok:   #6bd48e;
+      --warn: #f0b05a;
+      --err:  #ef7b7b;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --fg: #f2ede5;
+    --text-display:   rgba(242, 237, 229, 1.00);
+    --text-primary:   rgba(242, 237, 229, 0.90);
+    --text-secondary: rgba(242, 237, 229, 0.58);
+    --text-disabled:  rgba(242, 237, 229, 0.36);
+    --rule:        rgba(242, 237, 229, 0.14);
+    --rule-strong: rgba(242, 237, 229, 0.28);
+    --ok:   #6bd48e;
+    --warn: #f0b05a;
+    --err:  #ef7b7b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--bg);
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ THEME TOGGLE (inherited from base mono-industrial) ============ */
+  .theme-toggle {
+    position: fixed;
+    top: clamp(12px, 2vw, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 200;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: background 240ms ease-out, border-color 240ms ease-out,
+                padding 260ms ease-out, gap 260ms ease-out,
+                backdrop-filter 240ms ease-out;
+  }
+  .theme-toggle button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 999px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: color 180ms ease-out, background 180ms ease-out,
+                padding 260ms ease-out, gap 240ms ease-out,
+                max-width 320ms ease-out, opacity 220ms ease-out;
+  }
+  .theme-toggle__glyph { display: block; flex-shrink: 0; width: 12px; height: 12px; }
+  .theme-toggle__label {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 300ms ease-out, opacity 220ms ease-out 40ms;
+  }
+  .theme-toggle button:hover { color: var(--text-display); }
+  .theme-toggle button:focus-visible {
+    outline: 1px solid var(--text-display);
+    outline-offset: 2px;
+  }
+  .theme-toggle button:not([aria-checked="true"]) {
+    max-width: 0; padding: 0; opacity: 0;
+  }
+  .theme-toggle button[aria-checked="true"] {
+    color: var(--text-display);
+  }
+  .theme-toggle:hover,
+  .theme-toggle:focus-within {
+    background: color-mix(in srgb, var(--fg) 8%, transparent);
+    border-color: var(--rule-strong);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    padding: 4px;
+    gap: 2px;
+  }
+  .theme-toggle:hover button:not([aria-checked="true"]),
+  .theme-toggle:focus-within button:not([aria-checked="true"]) {
+    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
+  }
+  .theme-toggle:hover button[aria-checked="true"],
+  .theme-toggle:focus-within button[aria-checked="true"] {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    padding: 7px 12px; gap: 6px;
+  }
+  .theme-toggle:hover .theme-toggle__label,
+  .theme-toggle:focus-within .theme-toggle__label {
+    max-width: 80px; opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle,
+    .theme-toggle button,
+    .theme-toggle__label { transition: none; }
+  }
+
+  /* ============ MAGAZINE ENGINE ============ */
+  .mag {
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: row;
+    scrollbar-width: none;
+  }
+  .mag::-webkit-scrollbar { display: none; }
+
+  .page {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel-0);
+  }
+
+  /* Tint rotation across interior pages */
+  .page--t0 { background: var(--panel-0); }
+  .page--t1 { background: var(--panel-1); }
+  .page--t2 { background: var(--panel-2); }
+  .page--t3 { background: var(--panel-3); }
+
+  /* Dark panels: absolute black, mode-independent. Text tokens re-bind
+     locally so descendants resolve against the dark surface. */
+  .page--dark {
+    background: var(--dark-bg);
+    --text-display:   rgba(242, 237, 229, 1.00);
+    --text-primary:   rgba(242, 237, 229, 0.92);
+    --text-secondary: rgba(242, 237, 229, 0.58);
+    --text-disabled:  rgba(242, 237, 229, 0.32);
+    --rule:        rgba(242, 237, 229, 0.14);
+    --rule-strong: rgba(242, 237, 229, 0.28);
+    color: var(--text-primary);
+  }
+
+  /* ============ TYPOGRAPHY (magazine scale) ============ */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.9vw, 14px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .display {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(56px, 7.5vw, 128px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+  }
+
+  .body-lg {
+    font-weight: 400;
+    font-size: clamp(20px, 1.6vw, 28px);
+    line-height: 1.5;
+    color: var(--text-secondary);
+    max-width: 62ch;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.85vw, 13px);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+  }
+
+  /* Stat anchor. Geist Pixel is the one moment of surprise per spec. */
+  .stat-xl {
+    font-family: var(--font-display);
+    font-size: clamp(160px, 22vw, 360px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+  }
+  .stat-xl--accent { color: var(--warn); }
+  .stat-suffix {
+    font-family: var(--font-body);
+    font-size: 0.32em;
+    color: var(--text-secondary);
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: clamp(14px, 1vw, 20px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: var(--space-4);
+  }
+
+  /* ============ PAGE LAYOUTS ============ */
+
+  /* Cover — single focal. Padding follows spacing tiers. */
+  .page--cover {
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: clamp(48px, 5vh, 96px);
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .page--cover .display-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--space-4);
+    max-width: 80%;
+  }
+
+  /* Content page — anchored to bottom-left with a generous top gap. */
+  .page--content {
+    padding: clamp(64px, 7vh, 120px);
+    justify-content: flex-end;
+    gap: var(--space-4);
+  }
+
+  /* Split — 50/50 color block */
+  .page--split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+  .half {
+    padding: clamp(48px, 6vh, 96px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-3);
+    overflow: hidden;
+  }
+  .half--dark {
+    background: var(--dark-bg);
+    --text-display:   rgba(242, 237, 229, 1.00);
+    --text-primary:   rgba(242, 237, 229, 0.92);
+    --text-secondary: rgba(242, 237, 229, 0.65);
+    color: var(--text-primary);
+  }
+  .half--tint { background: var(--panel-2); }
+  .half .half-stat {
+    font-weight: 500;
+    font-size: clamp(48px, 5.5vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+  }
+
+  /* 2x2 quadrant */
+  .page--quadrant {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 0;
+  }
+  .q {
+    padding: clamp(40px, 5vh, 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-2);
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .q:nth-child(2n) { border-right: none; }
+  .q:nth-child(n+3) { border-bottom: none; }
+  .q-head {
+    font-weight: 500;
+    font-size: clamp(32px, 3.2vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    color: var(--text-display);
+  }
+  .q-body {
+    font-size: clamp(16px, 1.2vw, 20px);
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .q-1 { background: var(--panel-0); }
+  .q-2 { background: var(--panel-1); }
+  .q-3 { background: var(--panel-2); }
+  .q-4 {
+    background: var(--dark-bg);
+    --text-display:   rgba(242, 237, 229, 1.00);
+    --text-primary:   rgba(242, 237, 229, 0.90);
+    --text-secondary: rgba(242, 237, 229, 0.65);
+    color: var(--text-primary);
+  }
+
+  /* Full-bleed stat */
+  .page--stat {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(48px, 6vh, 96px);
+  }
+  .stat-anchor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 3x2 viewport grid */
+  .page--grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    padding: 0;
+  }
+  .cell {
+    padding: clamp(24px, 3vh, 48px);
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-3);
+    overflow: hidden;
+  }
+  .cell:nth-child(3n) { border-right: none; }
+  .cell:nth-child(n+4) { border-bottom: none; }
+  .cell-head {
+    font-weight: 500;
+    font-size: clamp(24px, 2.2vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--text-display);
+  }
+
+  /* ============ NAV DOTS + COUNTER ============ */
+  .nav-dots {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    padding: 10px 16px;
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    transition: background 120ms ease, transform 120ms ease, border-color 120ms ease;
+  }
+  .nav-dot:hover { background: var(--text-secondary); }
+  .nav-dot.active {
+    background: var(--text-display);
+    border-color: var(--text-display);
+    transform: scale(1.4);
+  }
+
+  .counter {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--text-secondary);
+    z-index: 100;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .page--split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .page--quadrant { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+    .q:nth-child(2n) { border-right: 1px solid var(--rule); }
+    .q:nth-child(n+3) { border-bottom: 1px solid var(--rule); }
+    .page--grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .cell:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .cell:nth-child(2n) { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle: Light / Dark / Auto. Choice persists to localStorage. -->
+<div class="theme-toggle" role="radiogroup" aria-label="Theme">
+  <button type="button" role="radio" data-theme="light" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Light</span>
+  </button>
+  <button type="button" role="radio" data-theme="dark" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Dark</span>
+  </button>
+  <button type="button" role="radio" data-theme="system" aria-checked="true">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+    </svg>
+    <span class="theme-toggle__label">Auto</span>
+  </button>
+</div>
+
+<div class="counter"><span id="counter-current">01</span> / <span id="counter-total">08</span></div>
+
+<div class="mag" id="mag" aria-label="Magazine">
+
+  <!-- Page 1 — COVER (dark) -->
+  <section class="page page--dark page--cover" aria-label="Cover">
+    <div class="meta-row">
+      <span class="eyebrow">Issue 01 · 2026</span>
+      <span class="eyebrow">Dispatch</span>
+    </div>
+    <div class="display-stack">
+      <span class="eyebrow">Feature</span>
+      <h1 class="display" style="font-size: clamp(72px, 9vw, 160px);">The queue that outgrew itself.</h1>
+      <p class="body-lg">A post-mortem on the failure mode nobody saw coming — and the one line of config that made it go away.</p>
+    </div>
+    <div class="meta-row">
+      <span class="mono-label">24 min read</span>
+      <span class="mono-label">visual-explainer</span>
+    </div>
+  </section>
+
+  <!-- Page 2 — Opening (tint 1) -->
+  <section class="page page--t1 page--content" aria-label="Opening">
+    <span class="eyebrow">01 · Opening</span>
+    <h2 class="display">What looked like a spike turned out to be a ceiling.</h2>
+    <p class="body-lg">The dashboard said throughput was fine. The queue depth graph said otherwise. Between the two, we lost three customers before anyone reconciled the gap.</p>
+  </section>
+
+  <!-- Page 3 — Split (dark / tinted) -->
+  <section class="page page--split" aria-label="Before and after">
+    <div class="half half--dark">
+      <span class="eyebrow">Before</span>
+      <div class="half-stat">500 rps</div>
+      <p class="body-lg">Throughput ceiling. Not the average — the ceiling. Past this point the queue depth climbed linearly until workers OOM'd.</p>
+    </div>
+    <div class="half half--tint">
+      <span class="eyebrow">After</span>
+      <div class="half-stat">4,200 rps</div>
+      <p class="body-lg">Throughput ceiling after partitioning by tenant rather than by message type. 8.4&times; the previous headroom, same hardware.</p>
+    </div>
+  </section>
+
+  <!-- Page 4 — Full-bleed stat (tint 3, accent on the number) -->
+  <section class="page page--t3 page--stat" aria-label="Key stat">
+    <div class="stat-anchor">
+      <div class="stat-xl stat-xl--accent">8.4<span class="stat-suffix">&times;</span></div>
+      <div class="stat-label">throughput in production</div>
+    </div>
+  </section>
+
+  <!-- Page 5 — Quadrant -->
+  <section class="page page--quadrant" aria-label="Four trade-offs">
+    <div class="q q-1">
+      <span class="eyebrow">Latency</span>
+      <h3 class="q-head">P99 down 68%.</h3>
+      <p class="q-body">No head-of-line blocking from oversize payloads anymore.</p>
+    </div>
+    <div class="q q-2">
+      <span class="eyebrow">Throughput</span>
+      <h3 class="q-head">8.4&times; ceiling.</h3>
+      <p class="q-body">Same hardware, no horizontal scaling event.</p>
+    </div>
+    <div class="q q-3">
+      <span class="eyebrow">Cost</span>
+      <h3 class="q-head">No change.</h3>
+      <p class="q-body">The fix was a partition key, not more boxes.</p>
+    </div>
+    <div class="q q-4">
+      <span class="eyebrow">Regressions</span>
+      <h3 class="q-head">Zero so far.</h3>
+      <p class="q-body">Tenant ordering is already our contract; partitioning by it is lossless.</p>
+    </div>
+  </section>
+
+  <!-- Page 6 — Interior dark panel (the third required dark page) -->
+  <section class="page page--dark page--content" aria-label="Reframe">
+    <span class="eyebrow">Reframe</span>
+    <h2 class="display">Partition by tenant, not by type.</h2>
+    <p class="body-lg">One line in the topic config. The rest of the architecture stays untouched.</p>
+  </section>
+
+  <!-- Page 7 — 6-cell grid (tint 2, at-a-glance) -->
+  <section class="page page--t2 page--grid" aria-label="Takeaways at a glance">
+    <div class="cell">
+      <span class="eyebrow">01</span>
+      <h4 class="cell-head">Read the two graphs together, or don't read either.</h4>
+      <span class="mono-label">Observability</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">02</span>
+      <h4 class="cell-head">Throughput ceilings hide in averages.</h4>
+      <span class="mono-label">Measurement</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">03</span>
+      <h4 class="cell-head">Partition keys encode your real contract.</h4>
+      <span class="mono-label">Design</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">04</span>
+      <h4 class="cell-head">The fix is almost always a config change.</h4>
+      <span class="mono-label">Operations</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">05</span>
+      <h4 class="cell-head">Write the post-mortem before the memory fades.</h4>
+      <span class="mono-label">Postmortem</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">06</span>
+      <h4 class="cell-head">Ship the one-line fix. Then write the essay.</h4>
+      <span class="mono-label">Follow-up</span>
+    </div>
+  </section>
+
+  <!-- Page 8 — BACK COVER (dark) -->
+  <section class="page page--dark page--cover" aria-label="Back cover">
+    <div class="meta-row">
+      <span class="eyebrow">End of dispatch</span>
+      <span class="eyebrow">No. 01</span>
+    </div>
+    <div class="display-stack" style="justify-content: center;">
+      <span class="eyebrow">Closing</span>
+      <h2 class="display" style="font-size: clamp(64px, 8vw, 140px);">Next issue — the cache key that outlived the cache.</h2>
+    </div>
+    <div class="meta-row">
+      <span class="mono-label">visual-explainer · mono-industrial</span>
+      <span class="mono-label">issue 01 / 2026</span>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav-dots" aria-label="Page navigation">
+  <!-- Generated by script. -->
+</nav>
+
+<script>
+  (function () {
+    const html = document.documentElement;
+    const STORAGE_KEY = 'mono-industrial-magazine-theme';
+
+    // ============ THEME TOGGLE ============
+    const toggle = document.querySelector('.theme-toggle');
+    const themeButtons = toggle ? [...toggle.querySelectorAll('button')] : [];
+
+    function applyMode(choice) {
+      if (choice === 'system') {
+        delete html.dataset.theme;
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        html.dataset.theme = choice;
+        localStorage.setItem(STORAGE_KEY, choice);
+      }
+      themeButtons.forEach(b => {
+        b.setAttribute('aria-checked', String(b.dataset.theme === choice));
+      });
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const markup = html.dataset.theme;
+    const initial = saved === 'light' || saved === 'dark'
+      ? saved
+      : (markup === 'light' || markup === 'dark' ? markup : 'system');
+    if (initial === 'system') delete html.dataset.theme;
+    else html.dataset.theme = initial;
+    themeButtons.forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.theme === initial));
+      b.addEventListener('click', () => applyMode(b.dataset.theme));
+    });
+
+    // ============ MAGAZINE NAV ============
+    const mag = document.getElementById('mag');
+    const pages = Array.from(mag.querySelectorAll('.page'));
+    const nav = document.querySelector('.nav-dots');
+    const counterCurrent = document.getElementById('counter-current');
+    const counterTotal = document.getElementById('counter-total');
+
+    pages.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('data-page', String(i + 1));
+      btn.setAttribute('aria-label', 'Go to page ' + (i + 1));
+      btn.addEventListener('click', () => {
+        mag.scrollTo({ left: i * window.innerWidth, behavior: 'smooth' });
+      });
+      nav.appendChild(btn);
+    });
+
+    counterTotal.textContent = String(pages.length).padStart(2, '0');
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const idx = pages.indexOf(entry.target);
+          if (idx >= 0) {
+            document.querySelectorAll('.nav-dot').forEach((d, i) =>
+              d.classList.toggle('active', i === idx)
+            );
+            counterCurrent.textContent = String(idx + 1).padStart(2, '0');
+          }
+        }
+      });
+    }, { root: mag, threshold: [0.5] });
+
+    pages.forEach((p) => io.observe(p));
+
+    document.addEventListener('keydown', (e) => {
+      const w = window.innerWidth;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        mag.scrollBy({ left: w, behavior: 'smooth' });
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        mag.scrollBy({ left: -w, behavior: 'smooth' });
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        mag.scrollTo({ left: 0, behavior: 'smooth' });
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        mag.scrollTo({ left: mag.scrollWidth, behavior: 'smooth' });
+      }
+    });
+
+    mag.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        mag.scrollBy({ left: e.deltaY, behavior: 'auto' });
+      }
+    }, { passive: false });
+  })();
+</script>
+</body>
+</html>

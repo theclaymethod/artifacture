@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Reel · landscape — Partition by tenant, not by type</title>
+<!--
+  16:9 reel demo — same content as demos/video-reel.html (9:16) at 1920x1080.
+  Pacing: hard cuts every 1.2-1.8s; 7-beat brain-rot structure; kinetic typography;
+          burned-in captions (centered bar instead of bottom strip);
+          split-screen MECHANISM (native landscape affordance).
+  Duration: 32s.
+  Pair:    templates/hyperframes-reel-landscape.html, references/reel-patterns.md.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.70);
+    --accent: #f7591f;
+    --warn: #d97706;
+    --caption-bg: rgba(0, 0, 0, 0.78);
+    --grid: rgba(242, 237, 229, 0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #050505; color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; overflow: hidden; }
+
+  /* Preview scaling (for browser preview only; Hyperframes captures unscaled) */
+  body { display: flex; align-items: center; justify-content: center; }
+
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Chrome strip */
+  .chrome {
+    position: absolute;
+    top: 24px; left: 24px; right: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(242, 237, 229, 0.42);
+    pointer-events: none;
+  }
+
+  .safe {
+    position: absolute;
+    inset: 60px 96px 140px 96px;
+  }
+
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+  }
+
+  /* HOOK: stat + label side-by-side */
+  .hook-row {
+    display: flex;
+    align-items: baseline;
+    gap: 56px;
+    justify-content: center;
+  }
+  .hook-stat {
+    font-size: 360px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+  }
+  .hook-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 40px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.15;
+    max-width: 480px;
+  }
+
+  .claim {
+    font-size: 128px;
+    line-height: 1.05;
+    font-weight: 600;
+    text-align: center;
+    max-width: 1600px;
+    letter-spacing: -0.01em;
+  }
+  .claim .w { display: inline-block; }
+  .claim .accent { color: var(--accent); }
+
+  .kicker {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 30px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+
+  /* MECHANISM — split left/right (native 16:9) */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .split__side {
+    padding: 80px 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    position: relative;
+  }
+  .split__side--before {
+    background: #0a0a0a;
+  }
+  .split__side--after {
+    background: #141414;
+    border-left: 1px solid rgba(242, 237, 229, 0.12);
+  }
+  .side-kicker {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 22px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .side-claim {
+    font-size: 72px;
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .side-claim .accent { color: var(--accent); }
+  .side-meta {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    color: rgba(242, 237, 229, 0.55);
+    margin-top: 16px;
+  }
+  .side-stat {
+    font-size: 96px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--warn);
+    margin-top: 16px;
+    font-feature-settings: "tnum";
+  }
+  .side-stat--accent { color: var(--accent); }
+
+  /* CTA */
+  .cta-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .cta-handle {
+    font-size: 120px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .cta-handle .accent { color: var(--accent); }
+
+  /* Burned-in captions — centered bar */
+  .captions {
+    position: absolute;
+    left: 50%;
+    bottom: 48px;
+    transform: translateX(-50%);
+    max-width: 1400px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .cap {
+    display: inline-block;
+    padding: 16px 28px;
+    background: var(--caption-bg);
+    color: var(--fg);
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    opacity: 0;
+    border-radius: 4px;
+  }
+
+  /* Preview scale */
+  @media (max-width: 1920px), (max-height: 1080px) {
+    body { padding: 0; }
+    #stage { transform-origin: center center; }
+  }
+</style>
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="reel-landscape-demo"
+  data-width="1920"
+  data-height="1080"
+  data-start="0"
+  data-duration="32"
+>
+  <div class="chrome">
+    <span>Queue redesign · 001</span>
+    <span>32 sec · 16:9 · 30 fps</span>
+  </div>
+
+  <!-- HOOK: 0-2s -->
+  <div class="beat beat-hook">
+    <div class="safe" style="display: flex; align-items: center; justify-content: center;">
+      <div class="hook-row">
+        <div class="hook-stat">0</div>
+        <div class="hook-label">requests<br/>per<br/>second</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM: 2-5s -->
+  <div class="beat beat-problem">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE PROBLEM</span>
+      <h2 class="claim">
+        <span class="w">Your</span> <span class="w">queue</span> <span class="w accent">chokes</span> <span class="w">at</span> <span class="w">500.</span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- CONTEXT: 5-9s -->
+  <div class="beat beat-context">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHY IT MATTERS</span>
+      <h2 class="claim">Every backed-up job is a user waiting.</h2>
+    </div>
+  </div>
+
+  <!-- MECHANISM: 9-18s — split-screen before/after -->
+  <div class="beat beat-mechanism">
+    <div class="split">
+      <div class="split__side split__side--before">
+        <span class="side-kicker">BEFORE</span>
+        <h3 class="side-claim">One shared queue.<br/>Every tenant fights.</h3>
+        <div class="side-meta">messages partitioned by type → hot partitions choke</div>
+        <div class="side-stat">500<span style="font-size: 0.45em; color: var(--muted); margin-left: 8px;">rps ceiling</span></div>
+      </div>
+      <div class="split__side split__side--after">
+        <span class="side-kicker">AFTER</span>
+        <h3 class="side-claim">One queue <span class="accent">per tenant.</span><br/>Nobody waits.</h3>
+        <div class="side-meta">partition key = tenant_id → isolation is automatic</div>
+        <div class="side-stat side-stat--accent">4,200<span style="font-size: 0.45em; color: var(--muted); margin-left: 8px;">rps ceiling</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROOF: 18-25s -->
+  <div class="beat beat-proof">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE RESULT</span>
+      <div class="hook-row">
+        <div class="hook-stat" style="font-size: 360px;">8.4<span style="font-size: 0.55em; color: var(--muted);">&times;</span></div>
+        <div class="hook-label">throughput<br/>in<br/>prod</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESOLUTION: 25-30s -->
+  <div class="beat beat-resolution">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHAT YOU DO</span>
+      <h2 class="claim"><span class="w">Partition</span> <span class="w">by</span> <span class="w accent">tenant,</span> <span class="w">not</span> <span class="w">by</span> <span class="w">type.</span></h2>
+    </div>
+  </div>
+
+  <!-- CTA: 30-32s -->
+  <div class="beat beat-cta">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">FULL WRITEUP</span>
+      <div class="cta-stack">
+        <div class="cta-handle"><span class="accent">@</span>your-handle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="captions">
+    <div class="cap cap-1">the one stat that matters</div>
+    <div class="cap cap-2">your queue chokes at five hundred</div>
+    <div class="cap cap-3">every backed-up job is a user waiting</div>
+    <div class="cap cap-4">one queue per tenant — nobody waits</div>
+    <div class="cap cap-5">eight point four times throughput</div>
+    <div class="cap cap-6">partition by tenant, not by type</div>
+    <div class="cap cap-7">full writeup at the handle</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  // Scale #stage to fit the preview viewport without clipping. Preview-only.
+  (function fit() {
+    const stage = document.getElementById('stage');
+    function apply() {
+      const sw = window.innerWidth / 1920;
+      const sh = window.innerHeight / 1080;
+      const s = Math.min(sw, sh, 1);
+      stage.style.transform = `scale(${s})`;
+    }
+    apply();
+    window.addEventListener('resize', apply);
+  })();
+
+  const tl = gsap.timeline({ paused: true });
+
+  // HOOK 0-2s
+  tl.addLabel("hook", 0);
+  tl.fromTo(".beat-hook", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "hook+=0");
+  const n = { v: 0 };
+  tl.to(n, {
+    v: 4200,
+    duration: 0.9,
+    ease: "power3.out",
+    onUpdate: () => { document.querySelector(".beat-hook .hook-stat").textContent = Math.floor(n.v).toLocaleString(); },
+  }, "hook+=0.1");
+  tl.from(".beat-hook .hook-label", { x: 40, opacity: 0, duration: 0.4 }, "hook+=1.0");
+  tl.to(".beat-hook", { opacity: 0, duration: 0.2 }, "hook+=1.8");
+
+  // PROBLEM 2-5s (word stagger)
+  tl.addLabel("problem", 2);
+  tl.fromTo(".beat-problem", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "problem+=0");
+  tl.from(".beat-problem .kicker", { y: 20, opacity: 0, duration: 0.3 }, "problem+=0.1");
+  tl.from(".beat-problem .w", { y: 70, opacity: 0, duration: 0.45, stagger: 0.08, ease: "power3.out" }, "problem+=0.4");
+  tl.to(".beat-problem", { opacity: 0, duration: 0.2 }, "problem+=2.8");
+
+  // CONTEXT 5-9s
+  tl.addLabel("context", 5);
+  tl.fromTo(".beat-context", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "context+=0");
+  tl.from(".beat-context .kicker", { y: 20, opacity: 0, duration: 0.3 }, "context+=0.1");
+  tl.from(".beat-context .claim", { y: 40, opacity: 0, duration: 0.55 }, "context+=0.4");
+  tl.to(".beat-context", { opacity: 0, duration: 0.25 }, "context+=3.75");
+
+  // MECHANISM 9-18s — split reveal
+  tl.addLabel("mech", 9);
+  tl.fromTo(".beat-mechanism", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "mech+=0");
+  tl.from(".beat-mechanism .split__side--before", { xPercent: -10, opacity: 0, duration: 0.55, ease: "power2.out" }, "mech+=0.1");
+  tl.from(".beat-mechanism .split__side--before > *",
+    { y: 30, opacity: 0, duration: 0.4, stagger: 0.08 }, "mech+=0.35");
+  tl.from(".beat-mechanism .split__side--after", { xPercent: 10, opacity: 0, duration: 0.55, ease: "power2.out" }, "mech+=1.2");
+  tl.from(".beat-mechanism .split__side--after > *",
+    { y: 30, opacity: 0, duration: 0.4, stagger: 0.08 }, "mech+=1.45");
+  tl.to(".beat-mechanism", { opacity: 0, duration: 0.3 }, "mech+=8.7");
+
+  // PROOF 18-25s
+  tl.addLabel("proof", 18);
+  tl.fromTo(".beat-proof", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "proof+=0");
+  tl.from(".beat-proof .kicker", { y: 20, opacity: 0, duration: 0.3 }, "proof+=0.1");
+  tl.from(".beat-proof .hook-stat", { scale: 0.6, opacity: 0, duration: 0.55, ease: "back.out(1.6)" }, "proof+=0.4");
+  tl.from(".beat-proof .hook-label", { x: 40, opacity: 0, duration: 0.4 }, "proof+=1.0");
+  tl.to(".beat-proof", { opacity: 0, duration: 0.25 }, "proof+=6.75");
+
+  // RESOLUTION 25-30s
+  tl.addLabel("res", 25);
+  tl.fromTo(".beat-resolution", { opacity: 0 }, { opacity: 1, duration: 0.25 }, "res+=0");
+  tl.from(".beat-resolution .kicker", { y: 20, opacity: 0, duration: 0.3 }, "res+=0.1");
+  tl.from(".beat-resolution .w", { y: 50, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power3.out" }, "res+=0.4");
+  tl.to(".beat-resolution", { opacity: 0, duration: 0.25 }, "res+=4.75");
+
+  // CTA 30-32s
+  tl.addLabel("cta", 30);
+  tl.fromTo(".beat-cta", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "cta+=0");
+  tl.from(".beat-cta .kicker", { y: 20, opacity: 0, duration: 0.3 }, "cta+=0.1");
+  tl.from(".beat-cta .cta-handle", { y: 30, opacity: 0, duration: 0.4 }, "cta+=0.4");
+
+  // Captions — same timing, fade in/out
+  const caps = [
+    { sel: ".cap-1", s: 0.1,  e: 1.9 },
+    { sel: ".cap-2", s: 2.1,  e: 4.8 },
+    { sel: ".cap-3", s: 5.1,  e: 8.8 },
+    { sel: ".cap-4", s: 9.3,  e: 17.7 },
+    { sel: ".cap-5", s: 18.3, e: 24.6 },
+    { sel: ".cap-6", s: 25.1, e: 29.7 },
+    { sel: ".cap-7", s: 30.1, e: 31.9 },
+  ];
+  caps.forEach(c => {
+    tl.to(c.sel, { opacity: 1, duration: 0.15 }, c.s);
+    tl.to(c.sel, { opacity: 0, duration: 0.2 },  c.e);
+  });
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["reel-landscape-demo"] = tl;
+
+  // Dual-mode: autoplay in browser preview, pause under Hyperframes capture.
+  const isHyperframes = typeof window.__hyperframesCapture !== 'undefined';
+  if (!isHyperframes) { tl.play(); }
+</script>
+</body>
+</html>

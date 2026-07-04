@@ -1,0 +1,296 @@
+[
+  {
+    "family": "F1_slop_global",
+    "topic": "Forbidden-font check targets the body font role, not any string occurrence",
+    "decision": "forbidden-body-font only inspects the PRIMARY (first) family in `--font-body` / `body{font-family}`. Inter/Roboto/Arial/Helvetica as trailing fallbacks, or in --font-mono/headings/code, pass; a stack of only system-ui/sans-serif with no named webfont fails.",
+    "rationale": "The charter's known decision plus SKILL.md: these are forbidden as the primary body typeface, but may legitimately appear as fallbacks in a stack. String-occurrence matching would false-positive on fallback stacks and prose."
+  },
+  {
+    "family": "F1_slop_global",
+    "topic": "Pull-quote count contradiction (1/page in SKILL.md vs 1-2/article in css-patterns)",
+    "decision": "Threshold is > 2 per rendered page/slide = flag, severity warn (folded into prose-accent-overuse).",
+    "rationale": "css-patterns gives the more specific count (one or two max); SKILL.md's 'one per page' is soft-warn advisory. Using <=2 as the pass band and warn severity reconciles both without over-blocking a page that intentionally uses two."
+  },
+  {
+    "family": "F1_slop_global",
+    "topic": "Severity of subjective design-quality checks",
+    "decision": "hierarchy-squint-test and the two unslop checks are warn, not error, despite SKILL.md calling the squint test a hard-fail.",
+    "rationale": "These are llm-judgment / stylistic passes with real false-positive risk (dense data pages read flatter by design; terse technical copy is not slop). Advisory severity keeps them honest and avoids blocking ship on a subjective call."
+  },
+  {
+    "family": "F1_slop_global",
+    "topic": "Ownership of the global runtime-error gate",
+    "decision": "This family owns the single canonical no-console-errors browser check; the diagrams, mono-tokens, and clarify duplicates defer to it.",
+    "rationale": "No dedicated verification family exists; console-clean-on-load is a global file-quality gate that fits the slop/global charter, and consolidating avoids four near-identical checks."
+  },
+  {
+    "family": "F1_slop_global",
+    "topic": "no-default-link-color and prose-readability severity downgraded to warn",
+    "decision": "Both are warn even though css-patterns marks them hard-fail.",
+    "rationale": "They are craft/advisory readability rules with legitimate exceptions (design may intentionally tune link color; captions/labels are exempt); warn matches their real ship-impact and reduces nagging."
+  },
+  {
+    "family": "F1_slop_global",
+    "topic": "css-class-node-collision scoped to Mermaid pages",
+    "decision": "The .node-class-collision check only fires when the page actually uses Mermaid.",
+    "rationale": "The rule's entire rationale is Mermaid's internal `.node` SVG class; on a page with no Mermaid a `.node` class is harmless, so gating on Mermaid presence eliminates false positives."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "Body-overflow gate tolerance",
+    "decision": "Use `documentElement.scrollWidth - innerWidth <= 1` (1px tolerance) instead of the doc's strict `=== window.innerWidth`.",
+    "rationale": "Chromium sub-pixel rounding on transforms/scrollbars produces off-by-one scrollWidth even on correct pages; strict equality would false-fail. The census (overflowX visible + scrollWidth>clientWidth+1) already uses +1, so this keeps the two browser checks consistent."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "overflow-wrap severity contradiction",
+    "decision": "body overflow-wrap/word-break is warn, not error.",
+    "rationale": "Family file soft-warns it while css-patterns hard-fails (body-overflow-wrap-break-word). The authoritative ship-blocker is the measured body-overflow gate; targeted word-break on the offending long-token element is an equally valid fix, so presence of the global rule is advisory."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "Breakpoint whitelist / responsive-nav 1000px conflict",
+    "decision": "Allowed breakpoints = {768, 820} standard, plus sanctioned exceptions {640 Nothing grid-lines, 1000 responsive-nav TOC collapse}.",
+    "rationale": "responsive-contract.md Layer 3 mandates 768/820, but responsive-nav.md's own TOC pattern collapses at `@media (max-width:1000px)`, and Layer 4 names 640 (Nothing). Whitelisting these resolves the intra-skill contradiction; everything else is a warn."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "'magazine' contract applicability contradiction",
+    "decision": "F2 responsive checks apply to profile `page` only; the horizontal `magazine` deck, `poster`, `slides`, and `video-comp` profiles are exempt.",
+    "rationale": "responsive-contract.md line 5 says the contract applies to 'magazine' layouts, but Layer 4 (line 135) exempts fixed-canvas magazine/poster decks. The line-5 'magazine' means a scrollable magazine-style page (page profile); the `--magazine` horizontal fixed-canvas deck is the exempt profile. Responsive/overflow rules must not run on fixed-canvas profiles per engine constraints."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "min-width:0 enforcement method",
+    "decision": "Enforce grid/flex child shrinkability via a browser check gated on measured child overflow, not via static presence of the `:where(...)>*{min-width:0}` rule.",
+    "rationale": "Family FP note: grids whose children are naturally narrow never overflow even without min-width:0, so a static presence requirement would be noisy. The browser check only fires when a grid/flex child actually overflows its own box while computing min-width:auto — high signal, actionable fix."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "SVG 640px scroll-x threshold",
+    "decision": "Fold the ~640px inline-SVG threshold into the measured wide-content-scroll-x-wrapper browser check; do not fail on raw viewBox width.",
+    "rationale": "An SVG with viewBox width>640 but width:100%;height:auto scales down and never overflows at 390. Measured overflow (scrollWidth>clientWidth+1) is the honest trigger; the raw viewBox number produces false positives."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "Hybrid visual rules (text clipping, fixed-UI overlap)",
+    "decision": "Each becomes TWO entries sharing source_rules: a deterministic browser candidate check (warn) that flags geometry, plus an llm-pass (error) that confirms the visual defect from the 390px screenshots.",
+    "rationale": "Curation rule 3: the mechanical half (clip+overflow+text without ellipsis; fixed-element rect intersecting content) is deterministic and seedable; the ship-blocking verdict (real text chopped vs intentional ellipsis; content actually obscured) needs vision and cannot be honestly mechanized."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "Body gate + census kept as two checks",
+    "decision": "Keep no-horizontal-body-overflow (documentElement scrollWidth gate) and overflow-source-census (per-element overflowX:visible filter) as separate checks.",
+    "rationale": "Charter explicitly wants both. They have distinct semantics: the gate proves the page is viewport-wide; the census attributes the culprit and also catches visibly-overflowing elements even when an ancestor happens to clip them. Matches the doc's own snippet which fails on either condition."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "Body gate viewports",
+    "decision": "Run the body-overflow gate at BOTH 390x844 and 1440x900 (both color schemes).",
+    "rationale": "responsive-contract Layer 5 specifies 390, but mono-tokens (no-horizontal-body-overflow) and clarify-commands (no-horizontal-scroll-body / web-diagram-browser-verify) require desktop 1440 too. One check covering both viewports consolidates all four cross-family duplicates."
+  },
+  {
+    "family": "F2_responsive",
+    "topic": "F2 is canonical owner of duplicated responsive rules",
+    "decision": "F2 owns the merged responsive/overflow/scroll-x/breakpoint/min-width/dir-tree rules; the duplicate copies in css-patterns, clarify-commands, skill-md, and mono-tokens families should be dropped there as owned by F2.",
+    "rationale": "Charter designates F2 the responsive-contract owner. Merged source_rules explicitly list the cross-family duplicate ids (e.g. responsive-page-overflow-contract-applied, wrap-wide-content-in-scroll-x, grid-flex-child-shrinkable, dir-tree-whitespace-pre-required, standard-breakpoint-values, no-horizontal-scroll-body) so those families can defer here."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "rx corner radius vs 4px grid divisibility (charter decision a)",
+    "decision": "Corner radii (rx/ry) are EXEMPT from the 4px-grid divisibility check. Radii are validated separately against their per-shape spec (flowchart step rx=6, oval rx=20, state rect rx=8; rounded-2xl/rx=16 forbidden) in diagram-shape-semantics and diagram-forbidden-fx.",
+    "rationale": "The 4px rule text enumerates 'coordinate, font size, width, height, and gap' — radius is not in that list. The docs simultaneously MANDATE rx=6 and rx=20, which are not multiples of 4, so treating radius as grid-exempt resolves the doc's own contradiction cleanly instead of flagging its mandated values. Semantic correctness of radii is still enforced by the shape-spec check."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "JetBrains Mono ban vs IDE-inspired token mapping (charter decision b)",
+    "decision": "JetBrains Mono is universally forbidden in diagrams EXCEPT when the page declares an IDE-inspired aesthetic (Dracula/Nord/Catppuccin/Solarized/Gruvbox/One Dark/Rose Pine) whose canonical published palette maps --font-mono to JetBrains Mono. The ban check carries an aesthetic-scoped allowlist guard.",
+    "rationale": "The universal Removal Test checklist and Editorial-Diagram notes forbid JetBrains Mono as a stylistic tell, but diagram-tokens.md's IDE-inspired section sets --font-display/body/mono to JetBrains Mono by design for Dracula. Scoping the exception to explicitly-declared IDE-inspired aesthetics honors both."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "data-diagram-role tagging convention for counting/classification checks (charter decision c)",
+    "decision": "Generation templates and skill docs MUST emit a data-diagram-role attribute on emitted SVG elements (values e.g. node, arrow, arrow-label, legend, lifeline, step, decision, merge, entity, lane, layer, ring, item). Counting/classification checks (density-budget, complexity-budget-by-type, z-order, typography-mono-scope, focal-accent-count, arrow-endpoint-air-gap, shape-semantics) guard applies_when on the presence of data-diagram-role and degrade to a warn-level best-effort heuristic when it is absent. The convention is an ATTRIBUTE, not a class named 'node', deliberately to avoid the Mermaid .node CSS collision (owned by css-patterns/no-node-class-name and skill-md/mermaid-no-page-level-node-class).",
+    "rationale": "Every node/arrow/legend count and z-order/typography classification is unreliable without a tagging convention; class='node' cannot be reused because Mermaid claims .node internally. A dedicated data-attribute gives deterministic classification without collision."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "Ownership of complexity budgets and shape semantics (charter)",
+    "decision": "F3_diagrams is the canonical home for diagram complexity budgets and shape-semantics conventions. The skill-md duplicates (venn-max-3-circles, swimlane-max-5-lanes, quadrant-axis-and-fill-rules, tree-orthogonal-connectors-only, pyramid-honest-proportional-widths, timeline-honest-interval-spacing) should defer to the F3 checks (diagram-complexity-budget-by-type, diagram-shape-semantics, diagram-quadrant-conventions, diagram-proportional-honesty).",
+    "rationale": "The charter assigns budgets + shape semantics to this family; consolidating them here prevents double-firing across families and keeps one budget table authoritative."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "Mermaid-rendered SVG subject to the same rules (mermaid-inherits-same-rules)",
+    "decision": "The diagram anti-pattern / focal-accent / arrow-label-masking / 4px-grid / forbidden-fx checks run on Mermaid-rendered SVG output as well as hand-authored SVG; this is encoded in each check's applies_when scope rather than as a separate rule.",
+    "rationale": "The doc explicitly states Mermaid fallback is not an escape hatch from the aesthetic rules; scoping the existing checks over rendered .mermaid SVG enforces this without a redundant check."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "legend-matches-diagram determinism",
+    "decision": "Kept as a single llm-pass (diagram-legend-matches-figure), not split into a deterministic half.",
+    "rationale": "The deterministic half requires extracting the set of distinct semantic categories drawn in the figure body, which is unreliable without exhaustive role tagging; visual swatch-to-figure matching is more robustly judged from the screenshot."
+  },
+  {
+    "family": "F3_diagrams",
+    "topic": "Removal Test and Screenshot QA Gate handling",
+    "decision": "The Removal Test's mechanical facets (4px, mono scope, focal, masking, z-order) are covered by dedicated deterministic checks; its judgment residue (over-complexity, padding, identical boxes) becomes the diagram-removal-simplicity llm-pass; the 'must run before emit' and 'must screenshot each figure before reporting done' obligations move to protocol_requirements.",
+    "rationale": "Rules 3 and 7: split hybrid gates into a mechanical check + one crisp llm rubric, and relocate process/transcript obligations out of the artifact checker."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "(a) dark-first vs light-first :root base mode",
+    "decision": "The checker sniffs the base mode from bare :root token values FIRST, then validates gating direction: the opposite-mode @media(prefers-color-scheme) block must be gated with :root:not([data-theme='<base-mode>']), and both :root[data-theme='light'] and :root[data-theme='dark'] explicit override blocks must exist. token-values-exact-match is compared per-mode after base detection.",
+    "rationale": "mono-industrial.md's example is dark-first (light gated via :not([data-theme='dark'])) while tokens.md lists light values first; the doc explicitly says 'the reverse applies if the page is light-first'. Both are valid — only the gating direction relative to the detected base is verifiable, so base detection must precede validation."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "(b) 3-vs-4 type sizes",
+    "decision": "Per-page budget is 4 distinct sizes (display / section / body / caption) — error at >4 distinct rendered sizes, warn at exactly 4 when the 4th does not map to --size-section (Mono) or a numeric hero (). Nothing is stricter at 3 (error >3).",
+    "rationale": "tokens.md's header says '3 sizes max' but its own token table defines 4 (--size-display/--size-section/--size-body/--size-caption). The 4th (--size-section) is a sanctioned system token, so treating 4 as the hard ceiling reconciles the contradiction without failing compliant pages; Nothing.md restates the budget unconditionally at 3."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "(c) Doto minimum size 36 vs 48",
+    "decision": "48px is the authoritative floor (§4.1, the dedicated motif section). Below 36px is a hard error; 36–47px is a warn band flagged as a doc-ambiguity; ≥48px passes.",
+    "rationale": "nothing.md §2 says 36px and §4.1 says 48px. The more specific motif section (§4.1) wins as the target, but the 36–47px range is surfaced as a warning rather than an auto-fail so authors who read §2 aren't hard-blocked until the doc is reconciled."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "Canonical ownership of preset conformance",
+    "decision": "F4 (this family) is the canonical home for detailed per-aesthetic preset checks. The skill-md family's summary rules (mono-industrial-font-budget, mono-industrial-zero-onload-motion, nothing-three-fonts-and-doto-cap, named-aesthetics-both-themes-verified, forbidden-primary-body-fonts, forbidden-glow-pulse-animations, mono-industrial-terminal-code-block-tokens) are subsumed into the detailed F4 checks via source_rules and should be dropped from skill-md pointing here.",
+    "rationale": "The charter explicitly assigns per-aesthetic preset conformance to F4; the skill-md entries are gate-level restatements. Keeping one detailed check per invariant avoids double-reporting the same violation across families."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "Both-mode inversion elevated to a first-class cross-preset check",
+    "decision": "Split verify-both-theme-modes into a deterministic browser check (contrast ratio ≥4.5:1 + invisible-text guard in light and dark) plus one llm-pass (visual correctness), applied to any detected named aesthetic; the static signature and browser check remain as complements.",
+    "rationale": "Both-mode inversion is the single most common named-aesthetic regression per the docs; a contrast/invisible-text measurement is mechanically honest while a screenshot llm-pass catches mode-mismatch artifacts (stuck panels) that contrast math cannot."
+  },
+  {
+    "family": "F4_presets",
+    "topic": "Hybrid rules split per curation rule 3",
+    "decision": "one-moment-of-surprise → deterministic mono-hero-and-surprise-count (static-dom candidate/hero count) + mono-one-surprise (llm-pass). status-color-value-only → deterministic mono-grayscale-status-color + mono-status-value-judgment (llm-pass for the small-dot ambiguity). and nothing-accent-red similarly split.",
+    "rationale": "Each hybrid has a genuine mechanical half (count/selector-scan) worth failing deterministically and a residual judgment half (is this THE surprise / a legit acronym / genuinely urgent) that only a screenshot or text slice can settle."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Divider number: prose '200px+' vs CSS clamp(100px,22vw,260px)",
+    "decision": "Validate the CSS PATTERN (an oversized clamp with a viewport-unit preferred term and max>=160px), never a computed font-size >= 200px.",
+    "rationale": "The authored clamp floor is 100px, so at narrow viewports the number legitimately renders below 200px; a computed-px assertion would false-fail every responsive divider. The prose '200px+' describes intent, the CSS is the contract. Same principle noted in the family charter."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Density budgets (bullets/rows/code lines/KPIs/steps/quote) severity",
+    "decision": "Consolidate all per-type count budgets into one static-dom warn check (slide-density-budget); the authoritative ship-blocker for overflow is the browser slide-viewport-fit check.",
+    "rationale": "Raw rules marked table (>8) and code (>10) as hard-fail, but their real failure mode is overflow, which slide-viewport-fit-no-internal-scroll already catches as an error at runtime. Making the counts a predictive warn avoids double-counting and keeps the error reserved for actual measured overflow."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Stat-page 100px+ measurement vs the divider clamp decision",
+    "decision": "Keep magazine stat anchor as a browser-measure computed font-size >= 100px at 1440x900.",
+    "rationale": "Unlike the divider (clamp floor 100px), the authored stat clamp is clamp(160px,22vw,360px) whose floor (160px) never drops below 100px at any viewport, so a computed-px assertion is honest and robust here."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "prefers-reduced-motion for slides severity",
+    "decision": "warn, gated on the deck actually declaring entrance animation.",
+    "rationale": "A missing reduced-motion block is an advisory accessibility regression (the deck still functions); aligns with css-patterns/reduced-motion-media-query-present being soft. Instant-cut decks (Mono-Industrial) with zero on-load motion are exempt via applies_when."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Magazine + slide-sizing rules duplicated in skill-md and clarify-commands families",
+    "decision": "These are canonically F5_slides-owned per the family charter; the skill-md and clarify-commands copies (slide-single-viewport-no-internal-scroll, magazine-dark-page-count, magazine-tint-no-repeat-consecutive, magazine-fullbleed-stat-*, magazine-single-snap-axis, magazine-nav-chrome, deck-content-completeness) fold into the corresponding F5 checks via source_rules and should drop in those families.",
+    "rationale": "Charter explicitly assigns deck sizing, snap type, nav chrome, density budgets, magazine dark-page invariance, and content-completeness to this family; centralizing avoids divergent duplicate checks."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Merge of vertical + magazine viewport-fit into one check",
+    "decision": "One browser check (slide-viewport-fit-no-internal-scroll) with a vertical branch (100dvh) and magazine branch (100vw x 100vh + no vertical scrollbar), applied ONLY at the deck's fixed canvas, not swept across responsive widths.",
+    "rationale": "It is a single invariant ('one viewport, no internal scroll'); running it as a responsive sweep would violate the docs' rule that fixed-canvas profiles are exempt from responsive/overflow contracts."
+  },
+  {
+    "family": "F5_slides",
+    "topic": "Hybrid presentation-readability rule",
+    "decision": "Split into a deterministic browser contrast pre-filter (slide-dim-text-contrast, warn) and an llm-pass focal-point judgment (slide-single-focal-point, warn) sharing source_rules.",
+    "rationale": "Contrast is mechanically computable (WCAG ratio); 'one focal point vs three competing elements' is irreducibly visual judgment restricted to single-focus slide types."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "F6 scope boundary vs the 'libraries-poster' slice",
+    "decision": "Keep only poster.md-derived checks and the video/hyperframes/reel/demo checks; drop the libraries.md Mermaid, Chart.js, anime.js, font, and Prism rules that were bundled into the slice.",
+    "rationale": "The charter limits F6 to poster and video. Per the global index those library rules have canonical homes in skill-md (Mermaid validity, theme:'base', C4, forbidden fonts/colors), mono-tokens-section (Mermaid grayscale/label typography, code-block terminal theme, font budget), css-patterns (Mermaid CSS overrides, reduced-motion), and diagrams (fallback threshold, focal rule). Keeping them here would duplicate other families."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "mmd-edge-label-no-double-quotes (charter flag)",
+    "decision": "Drop entirely.",
+    "rationale": "Double-quoted pipe edge labels (-->|\"text\"|) are valid standard Mermaid flowchart syntax; the rule is stale and would false-fail correct diagrams."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "GSAP/JS forbidden-API consolidation",
+    "decision": "Merge 7 determinism rules (Math.random, Date.now/new Date, gsap.ticker.add, WAAPI .animate, requestAnimationFrame, repeat:-1/iteration-count:infinite, engine-owned transport calls) into one check video-forbidden-nondeterministic-apis with a shared pattern table.",
+    "rationale": "All are the same class — a static grep for a banned pattern in composition JS/CSS. One high-signal check with per-pattern fixtures beats seven near-identical checks (fold micro-rules into a parent)."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "Timeline registration consolidation",
+    "decision": "Merge gsap-timeline-sync-registration + gsap-composition-id-key-match + gsap-one-timeline-per-composition into gsap-timeline-registration-contract (parsed with acorn).",
+    "rationale": "All three assert correctness of the same window.__timelines[id] assignment and need real scope/AST analysis; a single parser pass verifies all three cheaply and avoids naive-regex false positives."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "Duration hard-fail vs soft nuance",
+    "decision": "video-duration-format-limits hard-fails only a reel exceeding 60s; merely-outside-ideal-range durations/resolutions are warn, and the AskUserQuestion confirmation that legitimizes out-of-range renders lives in protocol_requirements.",
+    "rationale": "Reconciles reel-duration-range (60s absolute max) with video-duration-targets-longform-reel (out-of-range allowed with explicit user confirmation) — the artifact alone can't see the confirmation, so it must not hard-fail an in-range-but-non-ideal duration."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "Poster canvas-fit split (hybrid)",
+    "decision": "Split into a deterministic browser check (poster-content-within-canvas: bounding boxes within [0,0,w,h]) and one llm-pass squint on the PNG (poster-visual-fit-squint), sharing the poster-canvas-overflow-clipping source rule.",
+    "rationale": "Rule 3: the mechanical half (DOM overflow) is deterministic; rasterization-only clipping, hierarchy degradation, and collapsed-grid blank space genuinely need a visual judgment on the exported PNG."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "Poster and reel process/verification rules",
+    "decision": "Move poster export-verification, bounded-rework, availability fallback, HTML-deck-first, and the full hyperframes render workflow (doctor→build→lint→validate→draft→keyframes→approval→standard, --strict, contrast audit, keyframe timestamps/fixes) into protocol_requirements rather than artifact checks.",
+    "rationale": "These are agent-behavior/transcript obligations with no signature in the final artifact; rule 7 requires their substance become concrete workflow obligations."
+  },
+  {
+    "family": "F6_poster_video",
+    "topic": "track-index-not-zorder dropped",
+    "decision": "Drop from the catalog (record in decisions only).",
+    "rationale": "Its check requires detecting overlapping bounding boxes that rely on data-track-index for visual stacking — no clean mechanical signature, high false-positive rate, and rarely the actual failure; not worth a reliable fixture."
+  },
+  {
+    "family": "F7_process",
+    "topic": "Where clarify-tier / AskUserQuestion-shape rules land",
+    "decision": "All clarify-* rules (tier-0 must-ask, tier-2 no-ask, tier-1 judgment, dialog shape, header length, recommended-first) become protocol_requirements, not transcript-stage checks.",
+    "rationale": "Curation rule 7 and the F7 charter are explicit that agent-behavior/asking-questions rules are not artifact checks. Although a transcript stage exists in the schema, these are process obligations best enforced by the workflow doc and human/reviewer, not the deterministic artifact verifier."
+  },
+  {
+    "family": "F7_process",
+    "topic": "Fact-check verification summary: presence vs shape",
+    "decision": "Split the source hard-fail into (a) a protocol_requirement that the agent MUST add the summary with the four fields and classify every claim, and (b) a warn-level static-text check that validates a summary WHEN one is present (four fields, valid label vocabulary, reconciling counts).",
+    "rationale": "The engine receives an artifact and a profile but not the originating sub-command, so it cannot reliably detect that an arbitrary HTML file was supposed to be a fact-check output — meaning it cannot enforce presence without false positives on every non-fact-check page. Presence is therefore a protocol obligation; the shape check runs only under a reliable content guard (a verification-summary region exists)."
+  },
+  {
+    "family": "F7_process",
+    "topic": "F7 defers aesthetic/responsive/video/poster/slide/mermaid duplicates",
+    "decision": "Every artifact-checkable rule that the components.md and command docs restated but that has a canonical home in another family (mono-tokens, responsive, css-patterns, slide-patterns, libraries-poster, video, skill-md, diagrams) is dropped here as owned-by, not re-implemented.",
+    "rationale": "The components.md / per-command extractions overlap heavily with the aesthetic and structural families that already own the mechanical signature. Duplicating would create two check ids for one fixture and split maintenance. F7 keeps only command-output-structure rules with no other owner (review quadrants, decision log, fact-check summary, stacked-table data-label)."
+  },
+  {
+    "family": "F7_process",
+    "topic": "video duration numeric conflict (60-180 vs 30-180 global)",
+    "decision": "Not resolved in F7; deferred to the video family which owns video-duration-targets-longform-reel and reel-duration-range.",
+    "rationale": "The contradiction (style-specific band vs the flag table's global 30-180 envelope) is a video-family concern; F7 only holds the clarify/opt-in and workflow-gate obligations around video, not the duration check itself."
+  },
+  {
+    "family": "F7_process",
+    "topic": "Browser-verify mechanical half vs process half",
+    "decision": "F7 keeps only the process obligation (must browser-verify at both viewports/themes, must disclose when no browser is available) as protocol_requirements; the mechanical assertions (no horizontal overflow, clean console, screenshot capture) are owned by responsive/skill-md families.",
+    "rationale": "Avoids duplicating the overflow/console checks that responsive and skill-md already define, while preserving the F7-specific delivery-message disclosure contract."
+  }
+]

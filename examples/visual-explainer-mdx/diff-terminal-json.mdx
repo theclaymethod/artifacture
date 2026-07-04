@@ -1,0 +1,48 @@
+import { DiffBlock, ExplainerShell, JsonTree, Section, TerminalBlock } from '../../visual-explainer-mdx/components';
+
+export default function DiffTerminalJsonExample() {
+  return (
+    <ExplainerShell
+      eyebrow="components"
+      preset="terminal"
+      reviewTools={false}
+      title="Diff, Terminal, JSON"
+      summary="Three reusable blocks cover code deltas, command output, and structured payloads without hand-built chrome."
+    >
+      <Section kicker="diff" title="Unified change">
+        <DiffBlock
+          filename="src/cache.ts"
+          language="ts"
+          patch={`--- a/src/cache.ts
++++ b/src/cache.ts
+@@ -1,5 +1,7 @@
+ export function readCache(key: string) {
+-  return store.get(key);
++  const hit = store.get(key);
++  metrics.count(hit ? 'hit' : 'miss');
++  return hit;
+ }`}
+        />
+      </Section>
+
+      <Section kicker="terminal" title="Command output">
+        <TerminalBlock
+          title="npm run ve:check"
+          content={`\u001b[36mexport\u001b[0m examples/visual-explainer-mdx/diff-terminal-json.mdx
+\u001b[32mve:check passed\u001b[0m`}
+        />
+      </Section>
+
+      <Section kicker="json" title="Payload">
+        <JsonTree
+          collapsedDepth={2}
+          data={{
+            artifact: 'diff-terminal-json.html',
+            checks: { export: true, verify: true },
+            warnings: [],
+          }}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

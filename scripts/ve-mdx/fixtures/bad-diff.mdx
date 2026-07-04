@@ -1,0 +1,16 @@
+import { DiffBlock, ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function BadDiffFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Bad Diff">
+      <Section title="Diff">
+        <DiffBlock
+          language="ts"
+          patch={`--- a/a.ts
++++ b/a.ts
++const value = 1;`}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

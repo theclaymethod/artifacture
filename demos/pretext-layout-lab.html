@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pretext Layout Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #f6f4f0;
+    --bg-2: #efe9df;
+    --panel: rgba(255, 255, 255, 0.74);
+    --panel-strong: rgba(255, 255, 255, 0.92);
+    --fg: #16130f;
+    --muted: #5f594f;
+    --soft: #857a6d;
+    --rule: rgba(22, 19, 15, 0.1);
+    --rule-strong: rgba(22, 19, 15, 0.18);
+    --ok: #2f7d3b;
+    --warn: #b36b00;
+    --accent: #1a5fb4;
+    --accent-2: #7c3f00;
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body: "Space Grotesk", system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #090909;
+      --bg-2: #131313;
+      --panel: rgba(20, 20, 20, 0.72);
+      --panel-strong: rgba(20, 20, 20, 0.92);
+      --fg: #f2ede5;
+      --muted: rgba(242, 237, 229, 0.7);
+      --soft: rgba(242, 237, 229, 0.44);
+      --rule: rgba(242, 237, 229, 0.12);
+      --rule-strong: rgba(242, 237, 229, 0.24);
+      --ok: #7ee787;
+      --warn: #f0b05a;
+      --accent: #8ab4ff;
+      --accent-2: #ffb278;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background:
+      radial-gradient(circle at top left, rgba(26, 95, 180, 0.08), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(179, 107, 0, 0.08), transparent 30%),
+      var(--bg);
+    color: var(--fg);
+  }
+
+  body {
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 48px 24px 96px;
+  }
+
+  main {
+    max-width: 1320px;
+    margin: 0 auto;
+    display: grid;
+    gap: 28px;
+  }
+
+  .hero,
+  .controls,
+  .notes,
+  .code-card {
+    background: var(--panel);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--rule);
+    border-radius: 28px;
+  }
+
+  .hero {
+    padding: 34px 36px 32px;
+    display: grid;
+    gap: 18px;
+  }
+
+  .eyebrow,
+  .chip,
+  .metric-label,
+  .node-meta,
+  .badge,
+  .code-card code {
+    font-family: var(--font-mono);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 11ch;
+    font-size: clamp(42px, 6vw, 86px);
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 72ch;
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--muted);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
+    gap: 24px;
+    align-items: end;
+  }
+
+  .hero-points {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero-points li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .hero-points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: var(--fg);
+  }
+
+  .summary {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    padding: 20px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .summary p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .controls {
+    padding: 22px 24px 24px;
+    display: grid;
+    gap: 22px;
+  }
+
+  .controls-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .slider-wrap {
+    display: grid;
+    gap: 10px;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: baseline;
+  }
+
+  .slider-label strong {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .slider-label span {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--fg);
+  }
+
+  .range-scale {
+    display: flex;
+    justify-content: space-between;
+    color: var(--soft);
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+
+  .scenario-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chip {
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    padding: 10px 14px;
+    background: transparent;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .chip.is-active {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+
+  .badge {
+    justify-self: start;
+    align-self: start;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--rule-strong);
+    background: var(--panel-strong);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  .panel {
+    background: var(--panel);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--rule);
+    border-radius: 28px;
+    overflow: hidden;
+    display: grid;
+  }
+
+  .panel-head {
+    padding: 22px 24px 20px;
+    display: grid;
+    gap: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  .panel-head p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .metric {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 12px 14px;
+  }
+
+  .metric-label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin-bottom: 4px;
+  }
+
+  .metric strong {
+    font-size: 21px;
+    letter-spacing: -0.04em;
+  }
+
+  .svg-wrap {
+    padding: 18px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.015));
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .notes {
+    padding: 26px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .note-card {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .note-card h3 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+  }
+
+  .note-card p,
+  .note-card ul {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .note-card ul {
+    padding-left: 18px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .code-card {
+    padding: 24px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .code-card p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  pre {
+    margin: 0;
+    overflow: auto;
+    background: #111;
+    color: #f5efe6;
+    border-radius: 20px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .footer {
+    color: var(--soft);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .footer a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .compare-grid,
+    .notes,
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    body {
+      padding: 18px 14px 56px;
+    }
+
+    .hero,
+    .controls,
+    .panel-head,
+    .notes,
+    .code-card {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .controls-top {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="eyebrow">Diagram Lab · Optional Text Measurement Layer</div>
+    <div class="hero-grid">
+      <div>
+        <h1>Pretext makes the label box honest.</h1>
+        <p class="lede">
+          This exploration keeps our existing inline-SVG diagram style and only swaps in
+          <code>pretext</code> at the text-measurement layer. The win is not global graph layout.
+          The win is that node heights, edge anchors, and label masks stop being guessed.
+        </p>
+      </div>
+      <aside class="summary">
+        <p><strong>What changes:</strong> line breaking, node height, shrink-wrap widths, connector anchors.</p>
+        <p><strong>What stays:</strong> our diagram rules, 4px grid, typography, focal-accent discipline, Mermaid fallback.</p>
+        <p><strong>Best fit:</strong> inline SVG diagrams with mixed scripts, dense labels, or responsive widths.</p>
+      </aside>
+    </div>
+    <ul class="hero-points">
+      <li>The left panel uses a crude word-count heuristic. Good enough for short English labels, brittle everywhere else.</li>
+      <li>The right panel prepares each label once, then reflows it with <code>layoutWithLines()</code> whenever width changes.</li>
+      <li>Move the width slider to see why this belongs between content generation and SVG box placement.</li>
+    </ul>
+  </section>
+
+  <section class="controls">
+    <div class="controls-top">
+      <div class="slider-wrap">
+        <div class="slider-label">
+          <strong>Node width</strong>
+          <span><span id="width-value">248</span> px</span>
+        </div>
+        <label class="sr-only" for="width-slider">Node width</label>
+        <input id="width-slider" type="range" min="180" max="340" step="4" value="248" />
+        <div class="range-scale">
+          <span>180</span>
+          <span>260</span>
+          <span>340</span>
+        </div>
+      </div>
+      <div class="badge" id="status">Loading Pretext…</div>
+    </div>
+    <div class="scenario-list" id="scenario-list"></div>
+  </section>
+
+  <section class="compare-grid">
+    <article class="panel">
+      <div class="panel-head">
+        <div class="eyebrow">Panel A · Heuristic Wrap</div>
+        <h2>Approximate line counts</h2>
+        <p>
+          Splits on spaces and assumes every glyph is roughly the same width. This is the sort of
+          logic we fall back to when we do not measure real text.
+        </p>
+        <div class="metrics" id="naive-metrics"></div>
+      </div>
+      <div class="svg-wrap">
+        <svg id="naive-svg" viewBox="0 0 560 760" role="img" aria-label="Naive diagram layout"></svg>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <div class="eyebrow">Panel B · Pretext</div>
+        <h2>Measured line breaks</h2>
+        <p>
+          <code>prepareWithSegments()</code> caches the label and <code>layoutWithLines()</code>
+          recomputes the wrapped lines against the current width. Boxes and anchors derive from that.
+        </p>
+        <div class="metrics" id="pretext-metrics"></div>
+      </div>
+      <div class="svg-wrap">
+        <svg id="pretext-svg" viewBox="0 0 560 760" role="img" aria-label="Pretext diagram layout"></svg>
+      </div>
+    </article>
+  </section>
+
+  <section class="notes">
+    <article class="note-card">
+      <h3>Where it helps</h3>
+      <ul>
+        <li>Inline SVG node labels with 2–5 lines.</li>
+        <li>Arrow-label masks sized from real text, not hard-coded rectangles.</li>
+        <li>Legends and annotation callouts that need honest widths.</li>
+      </ul>
+    </article>
+    <article class="note-card">
+      <h3>Where it does not</h3>
+      <ul>
+        <li>It does not replace ELK, dagre, or any graph-packing step.</li>
+        <li>It does not buy much for a single short line inside a fixed box.</li>
+        <li>Mermaid still owns Mermaid. This is for our SVG-first path.</li>
+      </ul>
+    </article>
+    <article class="note-card">
+      <h3>Integration shape</h3>
+      <p>
+        Build one cached helper that returns <code>lines</code>, <code>maxLineWidth</code>,
+        <code>boxWidth</code>, <code>boxHeight</code>, and anchor points. Then let the figure
+        layout code consume those numbers instead of hard-coded heights.
+      </p>
+    </article>
+  </section>
+
+  <section class="code-card">
+    <div class="eyebrow">Recommended Wrapper</div>
+    <p>Minimal shape for a reusable SVG label helper.</p>
+    <pre><code>const handle = prepareWithSegments(text, font);
+const { lines } = layoutWithLines(handle, contentWidth, lineHeight);
+const stats = measureLineStats(handle, contentWidth);
+
+return {
+  lines: lines.map((line) =&gt; line.text),
+  lineCount: stats.lineCount,
+  contentWidth: Math.ceil(stats.maxLineWidth),
+  boxWidth: Math.ceil(stats.maxLineWidth + paddingX * 2),
+  boxHeight: Math.ceil(stats.lineCount * lineHeight + paddingY * 2),
+};</code></pre>
+    <p class="footer">
+      Official source: <a href="https://github.com/chenglou/pretext">github.com/chenglou/pretext</a>.
+      Keep the prepared handle cache keyed by <code>text + font + options</code>, and prepare only
+      after the font has loaded.
+    </p>
+  </section>
+</main>
+
+<script type="module">
+  const scenarioListEl = document.getElementById("scenario-list");
+  const widthSlider = document.getElementById("width-slider");
+  const widthValue = document.getElementById("width-value");
+  const statusEl = document.getElementById("status");
+  const naiveSvg = document.getElementById("naive-svg");
+  const pretextSvg = document.getElementById("pretext-svg");
+  const naiveMetrics = document.getElementById("naive-metrics");
+  const pretextMetrics = document.getElementById("pretext-metrics");
+
+  const FONT_SIZE = 16;
+  const LINE_HEIGHT = 24;
+  const LABEL_FONT = `${FONT_SIZE}px "Space Grotesk"`;
+  const KICKER_FONT = `11px "Space Mono"`;
+  const PANEL_WIDTH = 560;
+  const PANEL_HEIGHT = 760;
+  const NODE_PADDING_X = 18;
+  const NODE_PADDING_Y = 16;
+  const NODE_MIN_HEIGHT = 92;
+  const NODE_GAP = 40;
+  const PANEL_PADDING_TOP = 54;
+  const PANEL_PADDING_SIDE = 44;
+
+  const scenarios = [
+    {
+      id: "mixed",
+      label: "Mixed scripts",
+      caption: "English + CJK + Arabic",
+      nodes: [
+        "Capture browser state and queue a visual diff review",
+        "生成双语图例并保持节点对齐",
+        "راجع الحالة النهائية ثم انقل الشرح إلى المخطط الرئيسي",
+        "Emit SVG connectors from the updated bounds instead of hard-coded Y values",
+      ],
+    },
+    {
+      id: "dense",
+      label: "Dense product copy",
+      caption: "Long editorial labels",
+      nodes: [
+        "Map the before-state debt so the page can explain why the refactor is necessary",
+        "Merge adjacent steps when two operations always travel together through the pipeline",
+        "Promote the focal path without turning every node into an accent card",
+        "Reserve the legend strip for what the figure actually draws and nothing else",
+      ],
+    },
+    {
+      id: "technical",
+      label: "Technical tokens",
+      caption: "paths, params, mixed widths",
+      nodes: [
+        "Read /api/tasks?missionId=msn_50It5N7VUlYnctsk and normalize the response",
+        "Collapse relay.db / relay.db-shm / relay.db-wal into one storage status box",
+        "Label the fallback path as worker:ve-diagram-builder instead of prose-heavy copy",
+        "Route the export job through render-video --style=reel once the figure is approved",
+      ],
+    },
+  ];
+
+  const state = {
+    width: Number(widthSlider.value),
+    scenarioId: scenarios[0].id,
+  };
+
+  const textCache = new Map();
+  let pretextApi = null;
+
+  function escapeHtml(text) {
+    return text
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function buildMetricCard(label, value) {
+    return `
+      <div class="metric">
+        <span class="metric-label">${escapeHtml(label)}</span>
+        <strong>${escapeHtml(String(value))}</strong>
+      </div>
+    `;
+  }
+
+  function naiveWrap(text, width) {
+    const maxChars = Math.max(10, Math.floor(width / 8.4));
+    const words = text.trim().split(/\s+/);
+    const lines = [];
+    let line = "";
+
+    for (const word of words) {
+      const next = line ? `${line} ${word}` : word;
+      if (next.length <= maxChars) {
+        line = next;
+      } else if (!line) {
+        lines.push(word);
+      } else {
+        lines.push(line);
+        line = word;
+      }
+    }
+
+    if (line) {
+      lines.push(line);
+    }
+
+    return lines.length ? lines : [text];
+  }
+
+  function getPreparedHandle(text) {
+    const key = `${LABEL_FONT}::${text}`;
+    if (!textCache.has(key)) {
+      textCache.set(key, pretextApi.prepareWithSegments(text, LABEL_FONT));
+    }
+    return textCache.get(key);
+  }
+
+  function measureWithPretext(text, width) {
+    const handle = getPreparedHandle(text);
+    const { lines } = pretextApi.layoutWithLines(handle, width, LINE_HEIGHT);
+    const stats = pretextApi.measureLineStats(handle, width);
+    return {
+      lines: lines.map((line) => line.text),
+      lineCount: stats.lineCount,
+      maxLineWidth: Math.ceil(stats.maxLineWidth),
+    };
+  }
+
+  function buildNodeLayout(measureMode) {
+    const scenario = scenarios.find((item) => item.id === state.scenarioId);
+    const nodes = [];
+    let y = PANEL_PADDING_TOP;
+
+    for (let index = 0; index < scenario.nodes.length; index += 1) {
+      const label = scenario.nodes[index];
+      const contentWidth = state.width - NODE_PADDING_X * 2;
+      const measurement =
+        measureMode === "pretext"
+          ? measureWithPretext(label, contentWidth)
+          : (() => {
+              const lines = naiveWrap(label, contentWidth);
+              return {
+                lines,
+                lineCount: lines.length,
+                maxLineWidth: Math.max(...lines.map((line) => line.length * 8)),
+              };
+            })();
+
+      const boxWidth =
+        measureMode === "pretext"
+          ? Math.max(state.width, measurement.maxLineWidth + NODE_PADDING_X * 2)
+          : state.width;
+      const boxHeight = Math.max(
+        NODE_MIN_HEIGHT,
+        measurement.lineCount * LINE_HEIGHT + NODE_PADDING_Y * 2 + 26
+      );
+      const x = Math.round((PANEL_WIDTH - boxWidth) / 2);
+      const lineStartY = y + NODE_PADDING_Y + 26;
+
+      nodes.push({
+        index,
+        label,
+        lines: measurement.lines,
+        lineCount: measurement.lineCount,
+        x,
+        y,
+        width: boxWidth,
+        height: boxHeight,
+        lineStartY,
+      });
+
+      y += boxHeight + NODE_GAP;
+    }
+
+    return nodes;
+  }
+
+  function renderPanel(svg, metricsEl, mode) {
+    const nodes = buildNodeLayout(mode);
+    const totalLines = nodes.reduce((sum, node) => sum + node.lineCount, 0);
+    const tallestNode = Math.max(...nodes.map((node) => node.height));
+    const widestNode = Math.max(...nodes.map((node) => node.width));
+    const overflowRisk = nodes.filter((node) => node.width > state.width).length;
+    const lastNode = nodes[nodes.length - 1];
+    const panelHeight = Math.max(PANEL_HEIGHT, lastNode.y + lastNode.height + 40);
+
+    metricsEl.innerHTML = [
+      buildMetricCard("Total lines", totalLines),
+      buildMetricCard("Tallest box", `${tallestNode}px`),
+      buildMetricCard(
+        mode === "pretext" ? "Expanded boxes" : "Overflow risk",
+        overflowRisk
+      ),
+    ].join("");
+
+    const connectors = nodes
+      .slice(0, -1)
+      .map((node, index) => {
+        const next = nodes[index + 1];
+        const x = Math.round(node.x + node.width / 2);
+        const y1 = node.y + node.height;
+        const y2 = next.y;
+        return `
+          <path
+            d="M ${x} ${y1} L ${x} ${y2}"
+            fill="none"
+            stroke="${mode === "pretext" ? "var(--ok)" : "var(--warn)"}"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-dasharray="${mode === "pretext" ? "0" : "6 6"}"
+          />
+          <circle cx="${x}" cy="${y1}" r="4" fill="${mode === "pretext" ? "var(--ok)" : "var(--warn)"}" />
+        `;
+      })
+      .join("");
+
+    const nodeMarkup = nodes
+      .map((node) => {
+        const kickerY = node.y + 22;
+        const labelLines = node.lines
+          .map((line, lineIndex) => {
+            const textY = node.lineStartY + lineIndex * LINE_HEIGHT;
+            return `
+              <text
+                x="${node.x + node.width / 2}"
+                y="${textY}"
+                font-family="var(--font-body)"
+                font-size="${FONT_SIZE}"
+                font-weight="600"
+                text-anchor="middle"
+                fill="var(--fg)"
+              >${escapeHtml(line)}</text>
+            `;
+          })
+          .join("");
+
+        return `
+          <g>
+            <rect
+              x="${node.x}"
+              y="${node.y}"
+              width="${node.width}"
+              height="${node.height}"
+              rx="18"
+              fill="var(--panel-strong)"
+              stroke="${mode === "pretext" ? "var(--ok)" : "var(--rule-strong)"}"
+              stroke-width="${mode === "pretext" ? "1.8" : "1.2"}"
+            />
+            <text
+              x="${node.x + NODE_PADDING_X}"
+              y="${kickerY}"
+              font-family="var(--font-mono)"
+              font-size="11"
+              letter-spacing="1.6"
+              fill="var(--soft)"
+            >STEP 0${node.index + 1}</text>
+            ${labelLines}
+            <text
+              x="${node.x + NODE_PADDING_X}"
+              y="${node.y + node.height - 14}"
+              font-family="var(--font-mono)"
+              font-size="10"
+              letter-spacing="0.9"
+              fill="var(--soft)"
+            >${escapeHtml(`${node.lineCount} lines`)}</text>
+          </g>
+        `;
+      })
+      .join("");
+
+    svg.setAttribute("viewBox", `0 0 ${PANEL_WIDTH} ${panelHeight}`);
+    svg.innerHTML = `
+      <defs>
+        <pattern id="${mode}-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="1" fill="var(--fg)" opacity="0.08"></circle>
+        </pattern>
+      </defs>
+      <rect width="${PANEL_WIDTH}" height="${panelHeight}" rx="28" fill="var(--bg-2)"></rect>
+      <rect width="${PANEL_WIDTH}" height="${panelHeight}" rx="28" fill="url(#${mode}-dots)"></rect>
+      <text
+        x="${PANEL_PADDING_SIDE}"
+        y="34"
+        font-family="var(--font-mono)"
+        font-size="11"
+        letter-spacing="1.8"
+        fill="var(--soft)"
+      >${escapeHtml(scenarios.find((item) => item.id === state.scenarioId).caption)}</text>
+      <text
+        x="${PANEL_WIDTH - PANEL_PADDING_SIDE}"
+        y="34"
+        font-family="var(--font-mono)"
+        font-size="11"
+        letter-spacing="1.8"
+        text-anchor="end"
+        fill="var(--soft)"
+      >NODE WIDTH ${state.width}px · WIDEST BOX ${widestNode}px</text>
+      ${connectors}
+      ${nodeMarkup}
+    `;
+  }
+
+  function renderScenarioChips() {
+    scenarioListEl.innerHTML = scenarios
+      .map((scenario) => {
+        const isActive = scenario.id === state.scenarioId ? " is-active" : "";
+        return `<button class="chip${isActive}" type="button" data-scenario="${scenario.id}">${escapeHtml(
+          scenario.label
+        )}</button>`;
+      })
+      .join("");
+  }
+
+  function render() {
+    widthValue.textContent = String(state.width);
+    renderScenarioChips();
+    renderPanel(naiveSvg, naiveMetrics, "naive");
+    renderPanel(pretextSvg, pretextMetrics, "pretext");
+  }
+
+  scenarioListEl.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-scenario]");
+    if (!target) {
+      return;
+    }
+    state.scenarioId = target.getAttribute("data-scenario");
+    render();
+  });
+
+  widthSlider.addEventListener("input", () => {
+    state.width = Number(widthSlider.value);
+    render();
+  });
+
+  try {
+    await document.fonts.load(LABEL_FONT);
+    await document.fonts.load(KICKER_FONT);
+    await document.fonts.ready;
+    pretextApi = await import("https://esm.sh/@chenglou/pretext@0.0.5");
+    statusEl.textContent = "Pretext loaded";
+    statusEl.style.color = "var(--ok)";
+    render();
+  } catch (error) {
+    statusEl.textContent = "Pretext failed to load";
+    statusEl.style.color = "var(--warn)";
+    pretextSvg.innerHTML = `
+      <rect width="${PANEL_WIDTH}" height="${PANEL_HEIGHT}" rx="28" fill="var(--bg-2)"></rect>
+      <foreignObject x="20" y="20" width="${PANEL_WIDTH - 40}" height="${PANEL_HEIGHT - 40}">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: var(--font-body); color: var(--fg); padding: 18px;">
+          <h3 style="margin: 0 0 10px;">Unable to import @chenglou/pretext</h3>
+          <p style="margin: 0; color: var(--muted); line-height: 1.6;">
+            The exploration page still renders the heuristic panel, but the measured panel depends on the CDN import.
+            Error: ${escapeHtml(error.message || String(error))}
+          </p>
+        </div>
+      </foreignObject>
+    `;
+    renderPanel(naiveSvg, naiveMetrics, "naive");
+    pretextMetrics.innerHTML = [
+      buildMetricCard("Status", "Import failed"),
+      buildMetricCard("Fallback", "Heuristic only"),
+      buildMetricCard("Next step", "Check network"),
+    ].join("");
+  }
+</script>
+</body>
+</html>

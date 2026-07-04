@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Explainer — Long-form</title>
+<!--
+  Hyperframes long-form explainer starter.
+
+  Format:    16:9 landscape, 1920 x 1080, 30 fps.
+  Duration:  60-180 seconds (6-12 dwell scenes of ~10s each).
+  Audience:  Team meetings, onboarding, LinkedIn posts, docs embeds.
+  Pacing:    Slide-paced with TTS narration. Each scene dwells long enough
+             for the viewer to read + internalize before moving on.
+
+  Pair with: references/hyperframes.md, references/gsap-rules.md.
+  Render:    npx hyperframes render --output out.mp4 --quality standard
+
+  HARD RULES (breaking these breaks the render — see gsap-rules.md):
+    - Timeline constructed with { paused: true }
+    - Timeline registered synchronously on window.__timelines before DOMContentLoaded
+    - No Math.random / Date.now / real-time logic
+    - No repeat: -1
+    - Video elements have muted + playsinline (none in this template)
+    - Audio lives in a separate <audio> element
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.62);
+    --accent: #d97706;
+    --rule: rgba(242, 237, 229, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; overflow: hidden; }
+
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 96px 128px;
+    opacity: 0;
+  }
+
+  .eyebrow {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 22px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .headline {
+    font-size: 120px;
+    line-height: 1.05;
+    font-weight: 500;
+    text-align: center;
+    max-width: 1500px;
+  }
+  .headline .accent { color: var(--accent); }
+
+  .body {
+    font-size: 40px;
+    line-height: 1.4;
+    color: var(--muted);
+    margin-top: 40px;
+    max-width: 1200px;
+    text-align: center;
+  }
+
+  .stat {
+    font-size: 240px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 24px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<!--
+  Root composition. data-composition-id matches the key in window.__timelines below.
+  data-duration here is 60 seconds — adjust as needed.
+-->
+<div
+  id="stage"
+  data-composition-id="longform-explainer"
+  data-width="1920"
+  data-height="1080"
+  data-start="0"
+  data-duration="60"
+>
+  <!-- Scene 1: Title + kicker -->
+  <div class="scene scene1">
+    <span class="eyebrow">CHAPTER 01</span>
+    <h1 class="headline">Explainer title <span class="accent">goes here</span></h1>
+    <p class="body">A single-line subtitle that frames the piece. Keep it under 14 words.</p>
+  </div>
+
+  <!-- Scene 2: Key stat anchor -->
+  <div class="scene scene2">
+    <div class="stat">4,200</div>
+    <div class="stat-label">requests per second after optimization</div>
+  </div>
+
+  <!-- Scene 3: Body insight -->
+  <div class="scene scene3">
+    <span class="eyebrow">THE MECHANISM</span>
+    <h2 class="headline">How it actually works.</h2>
+    <p class="body">Replace this with the explanation. Keep each scene to a single claim + a single visual anchor.</p>
+  </div>
+
+  <!-- Scene 4: Resolution -->
+  <div class="scene scene4">
+    <span class="eyebrow">TAKEAWAY</span>
+    <h2 class="headline">What to do with this.</h2>
+    <p class="body">One concrete next action. Keep the CTA human and specific.</p>
+  </div>
+
+  <!-- Narration track. Generate via: npx hyperframes tts "script" -v af_nova -o narration.wav -->
+  <!-- <audio data-start="0" data-duration="60" data-track-index="0" src="narration.wav"></audio> -->
+</div>
+
+<!-- GSAP -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  // Timeline MUST be { paused: true } and registered synchronously.
+  const tl = gsap.timeline({ paused: true });
+
+  // Scene 1: 0-12s
+  tl.addLabel("s1", 0);
+  tl.fromTo(".scene1", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, "s1+=0.2");
+  tl.from(".scene1 .eyebrow", { y: 30, opacity: 0, duration: 0.5 }, "s1+=0.4");
+  tl.from(".scene1 .headline", { y: 40, opacity: 0, duration: 0.7 }, "s1+=0.7");
+  tl.from(".scene1 .body", { y: 20, opacity: 0, duration: 0.5 }, "s1+=1.2");
+  tl.to(".scene1", { opacity: 0, duration: 0.5 }, "s1+=11.5");
+
+  // Scene 2: 12-27s (stat anchor + count-up)
+  tl.addLabel("s2", 12);
+  tl.fromTo(".scene2", { opacity: 0 }, { opacity: 1, duration: 0.5 }, "s2+=0");
+  const counter = { val: 0 };
+  tl.to(counter, {
+    val: 4200,
+    duration: 1.6,
+    ease: "power2.out",
+    onUpdate: () => {
+      document.querySelector(".scene2 .stat").textContent = Math.floor(counter.val).toLocaleString();
+    },
+  }, "s2+=0.4");
+  tl.from(".scene2 .stat-label", { y: 16, opacity: 0, duration: 0.5 }, "s2+=1.8");
+  tl.to(".scene2", { opacity: 0, duration: 0.5 }, "s2+=14.5");
+
+  // Scene 3: 27-45s
+  tl.addLabel("s3", 27);
+  tl.fromTo(".scene3", { opacity: 0 }, { opacity: 1, duration: 0.5 }, "s3+=0");
+  tl.from(".scene3 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s3+=0.2");
+  tl.from(".scene3 .headline", { y: 40, opacity: 0, duration: 0.6 }, "s3+=0.5");
+  tl.from(".scene3 .body", { y: 20, opacity: 0, duration: 0.5 }, "s3+=1.0");
+  tl.to(".scene3", { opacity: 0, duration: 0.5 }, "s3+=17.5");
+
+  // Scene 4: 45-60s
+  tl.addLabel("s4", 45);
+  tl.fromTo(".scene4", { opacity: 0 }, { opacity: 1, duration: 0.5 }, "s4+=0");
+  tl.from(".scene4 .eyebrow", { y: 24, opacity: 0, duration: 0.5 }, "s4+=0.2");
+  tl.from(".scene4 .headline", { y: 40, opacity: 0, duration: 0.6 }, "s4+=0.5");
+  tl.from(".scene4 .body", { y: 20, opacity: 0, duration: 0.5 }, "s4+=1.0");
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["longform-explainer"] = tl;
+</script>
+</body>
+</html>

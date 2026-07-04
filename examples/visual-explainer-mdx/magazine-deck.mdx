@@ -1,0 +1,29 @@
+import { DecisionMatrix, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
+
+export default function MagazineDeckExample() {
+  return (
+    <SlideDeck eyebrow="magazine command" orientation="horizontal" title="Generated Magazine">
+      <Slide kicker="cover" title="Horizontal Source" tone="dark">
+        <p>
+          Magazine pages use the same MDX/React deck primitives, with a horizontal scroll-snap container and generated HTML output.
+        </p>
+      </Slide>
+
+      <Slide kicker="spread" title="Artifact Contract" tone="light">
+        <DecisionMatrix
+          rows={[
+            { Page: 'Cover', Role: 'Set the thesis and visual system.' },
+            { Page: 'Interior', Role: 'Change rhythm with tint, diagram, stat, or comparison.' },
+            { Page: 'Back cover', Role: 'Close with summary, source, or next action.' },
+          ]}
+        />
+      </Slide>
+
+      <Slide kicker="back cover" title="Generated, Never Hand-Written" tone="dark">
+        <p>
+          The editable magazine stays in MDX or TSX. Review notes apply to the source, then the HTML is regenerated.
+        </p>
+      </Slide>
+    </SlideDeck>
+  );
+}

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pretext Layout Examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #f6f4f0;
+    --bg-2: #ece5d8;
+    --panel: rgba(255, 255, 255, 0.76);
+    --panel-strong: rgba(255, 255, 255, 0.92);
+    --fg: #16130f;
+    --muted: #5f594f;
+    --soft: #857a6d;
+    --rule: rgba(22, 19, 15, 0.1);
+    --rule-strong: rgba(22, 19, 15, 0.18);
+    --ok: #2f7d3b;
+    --warn: #b36b00;
+    --err: #a63125;
+    --accent: #1a5fb4;
+    --accent-2: #7c3f00;
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body: "Space Grotesk", system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #090909;
+      --bg-2: #141414;
+      --panel: rgba(20, 20, 20, 0.74);
+      --panel-strong: rgba(20, 20, 20, 0.92);
+      --fg: #f2ede5;
+      --muted: rgba(242, 237, 229, 0.7);
+      --soft: rgba(242, 237, 229, 0.44);
+      --rule: rgba(242, 237, 229, 0.12);
+      --rule-strong: rgba(242, 237, 229, 0.24);
+      --ok: #7ee787;
+      --warn: #f0b05a;
+      --err: #ff8a80;
+      --accent: #8ab4ff;
+      --accent-2: #ffb278;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background:
+      radial-gradient(circle at top left, rgba(26, 95, 180, 0.08), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(179, 107, 0, 0.08), transparent 30%),
+      var(--bg);
+    color: var(--fg);
+  }
+
+  body {
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 42px 20px 96px;
+  }
+
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+  }
+
+  .hero,
+  .status-row,
+  .example,
+  .summary {
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--rule);
+    border-radius: 28px;
+  }
+
+  .hero {
+    padding: 34px 34px 30px;
+    display: grid;
+    gap: 18px;
+  }
+
+  .eyebrow,
+  .badge,
+  .meta strong,
+  .mini-label {
+    font-family: var(--font-mono);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(42px, 6vw, 82px);
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+    max-width: 11ch;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 74ch;
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--muted);
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .meta div {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    padding: 14px 16px;
+  }
+
+  .meta strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  .meta span {
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .status-row {
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: var(--panel-strong);
+    border: 1px solid var(--rule-strong);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .status-row p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .example {
+    overflow: hidden;
+  }
+
+  .example-head {
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    gap: 8px;
+  }
+
+  .example-head h2 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.04em;
+  }
+
+  .example-head p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: 78ch;
+  }
+
+  .example-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+    gap: 0;
+  }
+
+  .figure-wrap {
+    padding: 18px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.015));
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .example-notes {
+    border-left: 1px solid var(--rule);
+    padding: 18px;
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+
+  .note-block {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    padding: 14px 16px;
+  }
+
+  .note-block h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    letter-spacing: -0.03em;
+  }
+
+  .note-block p,
+  .note-block ul {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .note-block ul {
+    padding-left: 18px;
+    display: grid;
+    gap: 7px;
+  }
+
+  .summary {
+    padding: 22px 24px 24px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .summary h2 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: -0.04em;
+  }
+
+  .summary p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.65;
+    max-width: 78ch;
+  }
+
+  .summary ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--muted);
+    line-height: 1.6;
+    display: grid;
+    gap: 7px;
+  }
+
+  .responsive-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .mini-panel {
+    background: var(--panel-strong);
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    padding: 12px;
+  }
+
+  .mini-label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin: 0 0 10px;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  @media (max-width: 960px) {
+    .example-body,
+    .meta,
+    .responsive-pair {
+      grid-template-columns: 1fr;
+    }
+
+    .example-notes {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  @media (max-width: 680px) {
+    body {
+      padding: 16px 12px 56px;
+    }
+
+    .hero,
+    .example-head,
+    .summary {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="eyebrow">Exploration Branch · Pretext for Diagram Layout</div>
+    <h1>A bunch of examples, all focused on layout.</h1>
+    <p class="lede">
+      These examples keep our existing SVG-first diagram style and inject <code>pretext</code>
+      only where text measurement changes the figure geometry. The goal is to show several different
+      layout jobs we can hand off to the library without changing our broader rendering strategy.
+    </p>
+    <div class="meta">
+      <div>
+        <strong>Owns</strong>
+        <span>line wrapping, box height, shrink-wrap widths, label-mask sizing, responsive reflow</span>
+      </div>
+      <div>
+        <strong>Does Not Own</strong>
+        <span>Mermaid internals, graph packing, ELK routing, or the editorial SVG rules themselves</span>
+      </div>
+      <div>
+        <strong>Best Match</strong>
+        <span>inline SVG figures with long labels, mixed scripts, or multi-width rendering</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="status-row">
+    <span class="badge" id="status-badge">Loading Pretext…</span>
+    <p>
+      All figures on this page use the same measured text helper. If the CDN import fails, the examples
+      will show an import warning instead of the rendered SVG.
+    </p>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 01</div>
+      <h2>Measured node heights in a vertical architecture stack</h2>
+      <p>Same editorial card language, but box height and connector anchors come from the label block instead of a guessed constant.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap"><svg id="example-stack" viewBox="0 0 720 620" role="img" aria-label="Measured vertical stack"></svg></div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Wrapping each label at a fixed content width.</li>
+            <li>Returning the honest line count for each node.</li>
+            <li>Driving the Y position of every downstream node.</li>
+          </ul>
+        </div>
+        <div class="note-block">
+          <h3>Why it matters</h3>
+          <p>If the second node grows by one line, the connector below it stays correct automatically.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 02</div>
+      <h2>Flowchart boxes and the decision diamond sized from measured labels</h2>
+      <p>The overall flow is still hand-placed. `pretext` just keeps each shape honest to its own content.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap"><svg id="example-flowchart" viewBox="0 0 720 520" role="img" aria-label="Measured flowchart"></svg></div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Sizing the start pill and step boxes.</li>
+            <li>Increasing the diamond size when the decision text grows.</li>
+            <li>Keeping branch labels terse while the geometry expands.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 03</div>
+      <h2>Edge-label masks that actually fit the label</h2>
+      <p>Instead of a fixed 48px paper rectangle behind every arrow label, the mask width follows the real text width.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap"><svg id="example-edge-labels" viewBox="0 0 720 320" role="img" aria-label="Measured edge labels"></svg></div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Measuring mono edge labels.</li>
+            <li>Setting the white mask rectangle exactly once from the measured width.</li>
+            <li>Avoiding label bleed without leaving oversized blank slabs.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 04</div>
+      <h2>Legend strip items shrink-wrapped to their content</h2>
+      <p>This keeps the bottom legend from feeling arbitrary when one item is “OK” and the next is a full clause.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap"><svg id="example-legend" viewBox="0 0 720 360" role="img" aria-label="Measured legend strip"></svg></div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Measuring each legend label individually.</li>
+            <li>Letting us place item groups with consistent gap instead of equal-width guesses.</li>
+            <li>Preserving the “legend as strip” rule without wasting space.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 05</div>
+      <h2>Margin callouts sized before we draw the dashed leader</h2>
+      <p>Callouts stay in the margin, but the callout box itself can be measured before we choose the leader endpoint.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap"><svg id="example-callouts" viewBox="0 0 720 430" role="img" aria-label="Measured callouts"></svg></div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Measuring the multiline callout text block.</li>
+            <li>Giving the margin note an honest width and height.</li>
+            <li>Helping the leader land on a stable point after the note box is placed.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="example">
+    <div class="example-head">
+      <div class="eyebrow">Example 06</div>
+      <h2>Same figure at desktop and narrow widths</h2>
+      <p>Prepare once, re-layout many times. This is the strongest argument for using `pretext` in browser-rendered HTML artifacts.</p>
+    </div>
+    <div class="example-body">
+      <div class="figure-wrap">
+        <div class="responsive-pair">
+          <div class="mini-panel">
+            <span class="mini-label">Wide Panel</span>
+            <svg id="example-responsive-wide" viewBox="0 0 520 360" role="img" aria-label="Wide responsive diagram"></svg>
+          </div>
+          <div class="mini-panel">
+            <span class="mini-label">Narrow Panel</span>
+            <svg id="example-responsive-narrow" viewBox="0 0 320 420" role="img" aria-label="Narrow responsive diagram"></svg>
+          </div>
+        </div>
+      </div>
+      <aside class="example-notes">
+        <div class="note-block">
+          <h3>What Pretext is doing</h3>
+          <ul>
+            <li>Using the same cached handles for both widths.</li>
+            <li>Recomputing line breaks and box heights per width.</li>
+            <li>Keeping connectors attached after the reflow.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="summary">
+    <div class="eyebrow">Takeaway</div>
+    <h2>The useful adoption path is narrow and concrete.</h2>
+    <p>
+      We do not need to rebuild the diagram system around `pretext`. We only need one helper that measures
+      text honestly and returns the geometry the figure code already needs: lines, line count, max width, box size,
+      and anchor points.
+    </p>
+    <ul>
+      <li>Start with inline SVG node labels and edge-label masks.</li>
+      <li>Then use the same helper for legends and editorial callouts.</li>
+      <li>Keep Mermaid and manual graph layout exactly where they already belong.</li>
+    </ul>
+  </section>
+</main>
+
+<script type="module">
+  const statusBadge = document.getElementById("status-badge");
+
+  const BASE_FONT = `16px "Space Grotesk"`;
+  const SMALL_FONT = `13px "Space Grotesk"`;
+  const MONO_FONT = `11px "Space Mono"`;
+  const CALLOUT_FONT = `15px "Space Grotesk"`;
+  const LINE_HEIGHT = 22;
+  const cache = new Map();
+  let pretextApi = null;
+
+  function escapeHtml(text) {
+    return text
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function getHandle(text, font) {
+    const key = `${font}::${text}`;
+    if (!cache.has(key)) {
+      cache.set(key, pretextApi.prepareWithSegments(text, font));
+    }
+    return cache.get(key);
+  }
+
+  function measureBlock(text, maxWidth, {
+    font = BASE_FONT,
+    lineHeight = LINE_HEIGHT,
+    paddingX = 16,
+    paddingY = 14,
+    minWidth = 120,
+    minHeight = 56,
+  } = {}) {
+    const handle = getHandle(text, font);
+    const { lines } = pretextApi.layoutWithLines(handle, maxWidth, lineHeight);
+    const stats = pretextApi.measureLineStats(handle, maxWidth);
+    const width = Math.max(minWidth, Math.ceil(stats.maxLineWidth) + paddingX * 2);
+    const height = Math.max(minHeight, Math.ceil(stats.lineCount * lineHeight) + paddingY * 2);
+    return {
+      text,
+      font,
+      lines: lines.map((line) => line.text),
+      lineCount: stats.lineCount,
+      width,
+      height,
+      paddingX,
+      paddingY,
+      lineHeight,
+    };
+  }
+
+  function lineBlock(block, x, y, {
+    anchor = "middle",
+    fill = "var(--fg)",
+    font = block.font || BASE_FONT,
+    weight = 600,
+  } = {}) {
+    const fontSize = font.startsWith("1") ? font.split("px")[0] : "16";
+    const family = font.includes("Space Mono") ? "var(--font-mono)" : "var(--font-body)";
+    return block.lines
+      .map((line, index) => `
+        <text
+          x="${x}"
+          y="${y + index * block.lineHeight}"
+          text-anchor="${anchor}"
+          font-family="${family}"
+          font-size="${fontSize}"
+          font-weight="${weight}"
+          fill="${fill}"
+        >${escapeHtml(line)}</text>
+      `)
+      .join("");
+  }
+
+  function boxNode(x, y, block, {
+    kicker,
+    stroke = "var(--rule-strong)",
+    fill = "var(--panel-strong)",
+    radius = 18,
+    align = "middle",
+  } = {}) {
+    const labelY = y + block.paddingY + 26;
+    const textX = align === "start" ? x + block.paddingX : x + block.width / 2;
+    const anchor = align === "start" ? "start" : "middle";
+    return `
+      <g>
+        <rect x="${x}" y="${y}" width="${block.width}" height="${block.height}" rx="${radius}" fill="${fill}" stroke="${stroke}" stroke-width="1.4" />
+        ${kicker ? `<text x="${x + block.paddingX}" y="${y + 18}" font-family="var(--font-mono)" font-size="10" letter-spacing="1.5" fill="var(--soft)">${escapeHtml(kicker)}</text>` : ""}
+        ${lineBlock(block, textX, labelY, { anchor, font: block.font || BASE_FONT })}
+      </g>
+    `;
+  }
+
+  function pillNode(x, y, block) {
+    return boxNode(x, y, block, { radius: Math.round(block.height / 2), stroke: "var(--accent)", fill: "var(--panel-strong)" });
+  }
+
+  function diamondNode(cx, cy, block) {
+    const halfW = Math.round(block.width / 2);
+    const halfH = Math.round(block.height / 2);
+    const points = [
+      `${cx} ${cy - halfH}`,
+      `${cx + halfW} ${cy}`,
+      `${cx} ${cy + halfH}`,
+      `${cx - halfW} ${cy}`,
+    ].join(" ");
+    return `
+      <g>
+        <polygon points="${points}" fill="var(--panel-strong)" stroke="var(--accent-2)" stroke-width="1.4" />
+        ${lineBlock(block, cx, cy - ((block.lineCount - 1) * block.lineHeight) / 2 + 6, { anchor: "middle", font: block.font || BASE_FONT })}
+      </g>
+    `;
+  }
+
+  function edgeLabel(x, y, text) {
+    const block = measureBlock(text, 200, {
+      font: MONO_FONT,
+      lineHeight: 16,
+      paddingX: 10,
+      paddingY: 8,
+      minWidth: 0,
+      minHeight: 0,
+    });
+    return `
+      <g>
+        <rect x="${x - block.width / 2}" y="${y - block.height / 2}" width="${block.width}" height="${block.height}" rx="8" fill="var(--panel-strong)" stroke="var(--rule)" />
+        ${lineBlock(block, x, y + 4, { anchor: "middle", font: MONO_FONT, fill: "var(--soft)", weight: 400 })}
+      </g>
+    `;
+  }
+
+  function patternDefs(id) {
+    return `
+      <defs>
+        <pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="1" fill="var(--fg)" opacity="0.08"></circle>
+        </pattern>
+      </defs>
+    `;
+  }
+
+  function baseCanvas(width, height, patternId) {
+    return `
+      ${patternDefs(patternId)}
+      <rect width="${width}" height="${height}" rx="28" fill="var(--bg-2)"></rect>
+      <rect width="${width}" height="${height}" rx="28" fill="url(#${patternId})"></rect>
+    `;
+  }
+
+  function renderStack() {
+    const svg = document.getElementById("example-stack");
+    const labels = [
+      "Collect visual diff context from git status and the working tree",
+      "Normalize mixed-script labels before we place the editorial cards",
+      "Measure each SVG node so the connectors anchor to real bounds",
+      "Render the figure and inspect overflow at narrow widths",
+    ];
+    const nodes = [];
+    let y = 48;
+    for (const [index, label] of labels.entries()) {
+      const block = measureBlock(label, 228, { minHeight: 84 });
+      const x = 360 - block.width / 2;
+      nodes.push({ block, x, y, index });
+      y += block.height + 34;
+    }
+
+    const connectors = nodes.slice(0, -1).map((node, index) => {
+      const next = nodes[index + 1];
+      const x = node.x + node.block.width / 2;
+      return `<path d="M ${x} ${node.y + node.block.height} L ${x} ${next.y}" fill="none" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" />`;
+    }).join("");
+
+    svg.innerHTML = `
+      ${baseCanvas(720, Math.max(620, y + 20), "stack-dots")}
+      ${connectors}
+      ${nodes.map((node) => boxNode(node.x, node.y, node.block, { kicker: `STEP 0${node.index + 1}`, stroke: node.index === 2 ? "var(--ok)" : "var(--rule-strong)" })).join("")}
+    `;
+  }
+
+  function renderFlowchart() {
+    const svg = document.getElementById("example-flowchart");
+    const start = measureBlock("Open diagram brief", 160, { minWidth: 160, minHeight: 56 });
+    const choose = measureBlock("Pick the SVG-first figure type", 220, { minHeight: 82 });
+    const decision = measureBlock("Does any label overflow the safe one-line budget?", 170, { minWidth: 170, minHeight: 100 });
+    const measured = measureBlock("Use pretext for measured labels", 210, { minHeight: 82 });
+    const fixed = measureBlock("Keep fixed geometry", 160, { minHeight: 66 });
+
+    const startX = 280;
+    const chooseX = 240;
+    const startY = 36;
+    const chooseY = 126;
+    const decisionCx = 360;
+    const decisionCy = 292;
+    const measuredX = 72;
+    const measuredY = 368;
+    const fixedX = 470;
+    const fixedY = 372;
+
+    svg.innerHTML = `
+      ${baseCanvas(720, 520, "flowchart-dots")}
+      <path d="M ${startX + start.width / 2} ${startY + start.height} L ${chooseX + choose.width / 2} ${chooseY}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
+      <path d="M ${chooseX + choose.width / 2} ${chooseY + choose.height} L ${decisionCx} ${decisionCy - decision.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
+      <path d="M ${decisionCx - decision.width / 2} ${decisionCy} L ${measuredX + measured.width} ${measuredY + measured.height / 2}" fill="none" stroke="var(--ok)" stroke-width="2" />
+      <path d="M ${decisionCx + decision.width / 2} ${decisionCy} L ${fixedX} ${fixedY + fixed.height / 2}" fill="none" stroke="var(--warn)" stroke-width="2" stroke-dasharray="6 6" />
+      ${pillNode(startX, startY, start)}
+      ${boxNode(chooseX, chooseY, choose, { kicker: "SELECT", stroke: "var(--rule-strong)" })}
+      ${diamondNode(decisionCx, decisionCy, decision)}
+      ${boxNode(measuredX, measuredY, measured, { kicker: "YES", stroke: "var(--ok)" })}
+      ${boxNode(fixedX, fixedY, fixed, { kicker: "NO", stroke: "var(--warn)" })}
+      ${edgeLabel(226, 340, "YES")}
+      ${edgeLabel(496, 340, "NO")}
+    `;
+  }
+
+  function renderEdgeLabels() {
+    const svg = document.getElementById("example-edge-labels");
+    const left = measureBlock("Draft HTML", 140, { minWidth: 140, minHeight: 60 });
+    const middle = measureBlock("Inspect figure", 150, { minWidth: 150, minHeight: 60 });
+    const right = measureBlock("Ship review page", 170, { minWidth: 170, minHeight: 60 });
+
+    const x1 = 54;
+    const x2 = 276;
+    const x3 = 502;
+    const y = 118;
+
+    svg.innerHTML = `
+      ${baseCanvas(720, 320, "edge-label-dots")}
+      <path d="M ${x1 + left.width} ${y + left.height / 2} L ${x2} ${y + middle.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
+      <path d="M ${x2 + middle.width} ${y + middle.height / 2} L ${x3} ${y + right.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
+      ${boxNode(x1, y, left, { kicker: "01" })}
+      ${boxNode(x2, y, middle, { kicker: "02", stroke: "var(--accent)" })}
+      ${boxNode(x3, y, right, { kicker: "03" })}
+      ${edgeLabel(238, 150, "stage html")}
+      ${edgeLabel(482, 150, "render + inspect")}
+    `;
+  }
+
+  function renderLegend() {
+    const svg = document.getElementById("example-legend");
+    const items = [
+      { label: "Happy path", stroke: "var(--ok)", dash: "" },
+      { label: "Needs measured fallback label", stroke: "var(--warn)", dash: "6 6" },
+      { label: "User-visible regression", stroke: "var(--err)", dash: "" },
+    ];
+    const legendBlocks = items.map((item) => measureBlock(item.label, 240, {
+      font: MONO_FONT,
+      lineHeight: 16,
+      paddingX: 0,
+      paddingY: 0,
+      minWidth: 0,
+      minHeight: 0,
+    }));
+    const start = 60;
+    const gap = 42;
+    let cursor = start;
+    const legend = legendBlocks.map((block, index) => {
+      const item = items[index];
+      const x = cursor;
+      cursor += 32 + block.width + gap;
+      return `
+        <g transform="translate(${x}, 300)">
+          <line x1="0" y1="0" x2="24" y2="0" stroke="${item.stroke}" stroke-width="2" stroke-dasharray="${item.dash}" />
+          ${lineBlock({ ...block, lineHeight: 16 }, 36, 4, { anchor: "start", font: MONO_FONT, fill: "var(--soft)", weight: 400 })}
+        </g>
+      `;
+    }).join("");
+
+    const top = measureBlock("Diagram body above the legend strip", 240, { minWidth: 240, minHeight: 74 });
+    const left = measureBlock("Source", 100, { minWidth: 100, minHeight: 54 });
+    const right = measureBlock("Rendered figure", 150, { minWidth: 150, minHeight: 54 });
+
+    svg.innerHTML = `
+      ${baseCanvas(720, 360, "legend-dots")}
+      <line x1="40" y1="278" x2="680" y2="278" stroke="var(--rule)" stroke-width="1" />
+      <path d="M 180 132 L 300 132" fill="none" stroke="var(--accent)" stroke-width="2" />
+      <path d="M 420 132 L 540 132" fill="none" stroke="var(--rule-strong)" stroke-width="2" stroke-dasharray="6 6" />
+      ${boxNode(70, 104, left, { kicker: "IN" })}
+      ${boxNode(242, 94, top, { kicker: "FIGURE", stroke: "var(--accent)" })}
+      ${boxNode(526, 104, right, { kicker: "OUT" })}
+      ${legend}
+    `;
+  }
+
+  function renderCallouts() {
+    const svg = document.getElementById("example-callouts");
+    const main = measureBlock("Inline SVG figure", 180, { minWidth: 180, minHeight: 70 });
+    const leftCallout = measureBlock("Measure the callout block first so the dashed leader lands cleanly.", 150, {
+      font: CALLOUT_FONT,
+      lineHeight: 20,
+      paddingX: 14,
+      paddingY: 14,
+      minWidth: 130,
+      minHeight: 70,
+    });
+    const rightCallout = measureBlock("The figure still obeys the same editorial rules after the note box grows.", 150, {
+      font: CALLOUT_FONT,
+      lineHeight: 20,
+      paddingX: 14,
+      paddingY: 14,
+      minWidth: 130,
+      minHeight: 70,
+    });
+    const boxX = 270;
+    const boxY = 150;
+    const leftX = 42;
+    const leftY = 52;
+    const rightX = 528;
+    const rightY = 226;
+
+    svg.innerHTML = `
+      ${baseCanvas(720, 430, "callout-dots")}
+      <path d="M ${leftX + leftCallout.width} ${leftY + leftCallout.height - 24} C 240 130, 250 150, ${boxX} ${boxY + 30}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4" />
+      <path d="M ${boxX + main.width} ${boxY + 42} C 520 170, 520 230, ${rightX} ${rightY + 26}" fill="none" stroke="var(--accent-2)" stroke-width="1.5" stroke-dasharray="4 4" />
+      <circle cx="${boxX}" cy="${boxY + 30}" r="3" fill="var(--muted)" />
+      <circle cx="${rightX}" cy="${rightY + 26}" r="3" fill="var(--accent-2)" />
+      ${boxNode(boxX, boxY, main, { kicker: "FOCAL", stroke: "var(--accent)" })}
+      ${boxNode(leftX, leftY, leftCallout, { stroke: "var(--muted)", align: "start" })}
+      ${boxNode(rightX, rightY, rightCallout, { stroke: "var(--accent-2)", align: "start" })}
+    `;
+  }
+
+  function renderResponsive(svgId, width, height, contentWidth) {
+    const svg = document.getElementById(svgId);
+    const labels = [
+      "Compare the existing layout assumptions with the measured version",
+      "Repack the node stack after the label grows by one line",
+      "Keep the connector anchored to the measured bottom edge",
+    ];
+    const blocks = labels.map((label) => measureBlock(label, contentWidth, {
+      minWidth: Math.min(180, contentWidth + 32),
+      minHeight: 74,
+    }));
+    let y = 48;
+    const nodes = blocks.map((block, index) => {
+      const x = Math.round((width - block.width) / 2);
+      const node = { block, x, y, index };
+      y += block.height + 24;
+      return node;
+    });
+    const canvasHeight = Math.max(height, y + 18);
+    svg.setAttribute("viewBox", `0 0 ${width} ${canvasHeight}`);
+    svg.innerHTML = `
+      ${baseCanvas(width, canvasHeight, `${svgId}-dots`)}
+      ${nodes.slice(0, -1).map((node, index) => {
+        const next = nodes[index + 1];
+        const x = node.x + node.block.width / 2;
+        return `<path d="M ${x} ${node.y + node.block.height} L ${x} ${next.y}" fill="none" stroke="var(--ok)" stroke-width="2" />`;
+      }).join("")}
+      ${nodes.map((node) => boxNode(node.x, node.y, node.block, { kicker: `0${node.index + 1}`, stroke: node.index === 1 ? "var(--accent)" : "var(--rule-strong)" })).join("")}
+    `;
+  }
+
+  function renderAll() {
+    renderStack();
+    renderFlowchart();
+    renderEdgeLabels();
+    renderLegend();
+    renderCallouts();
+    renderResponsive("example-responsive-wide", 520, 360, 210);
+    renderResponsive("example-responsive-narrow", 320, 420, 144);
+  }
+
+  try {
+    await document.fonts.load(BASE_FONT);
+    await document.fonts.load(MONO_FONT);
+    await document.fonts.load(CALLOUT_FONT);
+    await document.fonts.ready;
+    pretextApi = await import("https://esm.sh/@chenglou/pretext@0.0.5");
+    statusBadge.textContent = "Pretext loaded";
+    statusBadge.style.color = "var(--ok)";
+    renderAll();
+  } catch (error) {
+    statusBadge.textContent = "Pretext failed to load";
+    statusBadge.style.color = "var(--warn)";
+    document.querySelectorAll("svg").forEach((svg) => {
+      svg.innerHTML = `
+        <rect width="100%" height="100%" rx="28" fill="var(--bg-2)"></rect>
+        <foreignObject x="16" y="16" width="90%" height="90%">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: var(--font-body); color: var(--fg); padding: 10px;">
+            <h3 style="margin: 0 0 8px;">Unable to import @chenglou/pretext</h3>
+            <p style="margin: 0; color: var(--muted); line-height: 1.6;">${escapeHtml(error.message || String(error))}</p>
+          </div>
+        </foreignObject>
+      `;
+    });
+  }
+</script>
+</body>
+</html>

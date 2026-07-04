@@ -1,0 +1,1227 @@
+{
+  "forbidden-body-font.html": {
+    "must_fire": [
+      "forbidden-body-font"
+    ],
+    "max_other_errors": 0
+  },
+  "forbidden-accent-colors.html": {
+    "must_fire": [
+      "forbidden-accent-colors"
+    ],
+    "max_other_errors": 0
+  },
+  "forbidden-gradient-text-headings.html": {
+    "must_fire": [
+      "forbidden-gradient-text-headings"
+    ],
+    "max_other_errors": 0
+  },
+  "forbidden-glow-pulse-animations.html": {
+    "must_fire": [
+      "forbidden-glow-pulse-animations"
+    ],
+    "max_other_errors": 0
+  },
+  "no-emoji-in-ui-chrome.html": {
+    "must_fire": [
+      "no-emoji-in-ui-chrome"
+    ],
+    "max_other_errors": 0
+  },
+  "no-three-dot-window-chrome.html": {
+    "must_fire": [
+      "no-three-dot-window-chrome"
+    ],
+    "max_other_errors": 0
+  },
+  "no-placeholder-leak.html": {
+    "must_fire": [
+      "no-placeholder-leak"
+    ],
+    "max_other_errors": 0
+  },
+  "self-contained-html-file.html": {
+    "must_fire": [
+      "self-contained-html-file"
+    ],
+    "max_other_errors": 0
+  },
+  "file-structure-head-contract.html": {
+    "must_fire": [
+      "file-structure-head-contract"
+    ],
+    "max_other_errors": 0
+  },
+  "theme-both-light-dark.html": {
+    "must_fire": [
+      "theme-both-light-dark"
+    ],
+    "max_other_errors": 0
+  },
+  "no-default-link-color.html": {
+    "must_fire": [
+      "no-default-link-color"
+    ],
+    "max_other_errors": 0
+  },
+  "css-class-node-collision.html": {
+    "must_fire": [
+      "css-class-node-collision"
+    ],
+    "max_other_errors": 0
+  },
+  "code-block-whitespace-preserved.html": {
+    "must_fire": [
+      "code-block-whitespace-preserved"
+    ],
+    "max_other_errors": 0
+  },
+  "code-block-length-constrained.html": {
+    "must_fire": [
+      "code-block-length-constrained"
+    ],
+    "max_other_errors": 0
+  },
+  "prose-readability-minimums.html": {
+    "must_fire": [
+      "prose-readability-minimums"
+    ],
+    "max_other_errors": 0
+  },
+  "prose-accent-overuse.html": {
+    "must_fire": [
+      "prose-accent-overuse"
+    ],
+    "max_other_errors": 0
+  },
+  "no-console-errors.html": {
+    "must_fire": [
+      "no-console-errors"
+    ],
+    "max_other_errors": 0
+  },
+  "unslop-prose-phrases.html": {
+    "must_fire": [
+      "unslop-prose-phrases"
+    ],
+    "max_other_errors": 0
+  },
+  "reduced-motion-media-query.html": {
+    "must_fire": [
+      "reduced-motion-media-query"
+    ],
+    "max_other_errors": 0
+  },
+  "page-overflow-clip-contract.html": {
+    "must_fire": [
+      "page-overflow-clip-contract"
+    ],
+    "max_other_errors": 0
+  },
+  "box-sizing-border-box-global.html": {
+    "must_fire": [
+      "box-sizing-border-box-global"
+    ],
+    "max_other_errors": 0
+  },
+  "body-overflow-wrap.html": {
+    "must_fire": [
+      "body-overflow-wrap"
+    ],
+    "max_other_errors": 0
+  },
+  "minmax0-not-bare-1fr.html": {
+    "must_fire": [
+      "minmax0-not-bare-1fr"
+    ],
+    "max_other_errors": 0
+  },
+  "mobile-breakpoint-standard.html": {
+    "must_fire": [
+      "mobile-breakpoint-standard"
+    ],
+    "max_other_errors": 0
+  },
+  "pipeline-mobile-nowrap.html": {
+    "must_fire": [
+      "pipeline-mobile-nowrap"
+    ],
+    "max_other_errors": 0
+  },
+  "kpi-row-autofit-minmax.html": {
+    "must_fire": [
+      "kpi-row-autofit-minmax"
+    ],
+    "max_other_errors": 0
+  },
+  "no-horizontal-body-overflow.html": {
+    "must_fire": [
+      "no-horizontal-body-overflow"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "overflow-source-census",
+      "wide-content-scroll-x-wrapper"
+    ]
+  },
+  "overflow-source-census.html": {
+    "must_fire": [
+      "overflow-source-census"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "no-horizontal-body-overflow",
+      "wide-content-scroll-x-wrapper"
+    ]
+  },
+  "grid-flex-child-min-width-0.html": {
+    "must_fire": [
+      "grid-flex-child-min-width-0"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "minmax0-not-bare-1fr",
+      "no-horizontal-body-overflow",
+      "overflow-source-census"
+    ]
+  },
+  "fixed-grid-collapses-single-column.html": {
+    "must_fire": [
+      "fixed-grid-collapses-single-column"
+    ],
+    "max_other_errors": 0
+  },
+  "wide-content-scroll-x-wrapper.html": {
+    "must_fire": [
+      "wide-content-scroll-x-wrapper"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "no-horizontal-body-overflow",
+      "overflow-source-census"
+    ]
+  },
+  "dir-tree-connectors-no-wrap.html": {
+    "must_fire": [
+      "dir-tree-connectors-no-wrap"
+    ],
+    "max_other_errors": 0
+  },
+  "text-clip-candidates.html": {
+    "must_fire": [
+      "text-clip-candidates"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "overflow-source-census"
+    ]
+  },
+  "content-behind-fixed-ui-candidates.html": {
+    "must_fire": [
+      "content-behind-fixed-ui-candidates"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "body-text-contrast-aa"
+    ]
+  },
+  "no-scroll-x-on-prose.html": {
+    "must_fire": [
+      "no-scroll-x-on-prose"
+    ],
+    "max_other_errors": 0
+  },
+  "toc-nav-structure.html": {
+    "must_fire": [
+      "toc-nav-structure"
+    ],
+    "max_other_errors": 0
+  },
+  "toc-anchors-resolve.html": {
+    "must_fire": [
+      "toc-anchors-resolve"
+    ],
+    "max_other_errors": 0
+  },
+  "skip-toc-under-four-sections.html": {
+    "must_fire": [
+      "skip-toc-under-four-sections"
+    ],
+    "max_other_errors": 0
+  },
+  "pretext-fonts-ready-before-measure.html": {
+    "must_fire": [
+      "pretext-fonts-ready-before-measure"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-no-hardcoded-hex.html": {
+    "must_fire": [
+      "diagram-no-hardcoded-hex"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-forbidden-fx.html": {
+    "must_fire": [
+      "diagram-forbidden-fx"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-no-hardcoded-hex"
+    ]
+  },
+  "diagram-jetbrains-mono-forbidden.html": {
+    "must_fire": [
+      "diagram-jetbrains-mono-forbidden"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-4px-grid.html": {
+    "must_fire": [
+      "diagram-4px-grid"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-typography-mono-scope.html": {
+    "must_fire": [
+      "diagram-typography-mono-scope"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-host-token-inheritance.html": {
+    "must_fire": [
+      "diagram-host-token-inheritance"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-z-order-arrows-before-nodes.html": {
+    "must_fire": [
+      "diagram-z-order-arrows-before-nodes"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-legend-placement.html": {
+    "must_fire": [
+      "diagram-legend-placement"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-arrow-label-masking-rect.html": {
+    "must_fire": [
+      "diagram-arrow-label-masking-rect"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-density-budget.html": {
+    "must_fire": [
+      "diagram-density-budget"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-focal-accent-count.html": {
+    "must_fire": [
+      "diagram-focal-accent-count"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-complexity-budget-by-type.html": {
+    "must_fire": [
+      "diagram-complexity-budget-by-type"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid"
+    ]
+  },
+  "diagram-shape-semantics.html": {
+    "must_fire": [
+      "diagram-shape-semantics"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-quadrant-conventions.html": {
+    "must_fire": [
+      "diagram-quadrant-conventions"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-annotation-callout-conventions.html": {
+    "must_fire": [
+      "diagram-annotation-callout-conventions"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-sketchy-filter-shapes-not-text.html": {
+    "must_fire": [
+      "diagram-sketchy-filter-shapes-not-text"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid",
+      "diagram-forbidden-fx"
+    ]
+  },
+  "diagram-proportional-honesty.html": {
+    "must_fire": [
+      "diagram-proportional-honesty"
+    ],
+    "max_other_errors": 0
+  },
+  "diagram-arrow-endpoint-air-gap.html": {
+    "must_fire": [
+      "diagram-arrow-endpoint-air-gap"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid",
+      "diagram-z-order-arrows-before-nodes"
+    ]
+  },
+  "diagram-text-clipping-overlap.html": {
+    "must_fire": [
+      "diagram-text-clipping-overlap"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid",
+      "overflow-source-census"
+    ]
+  },
+  "mono-type-budget.html": {
+    "must_fire": [
+      "mono-type-budget"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-grayscale-status-color.html": {
+    "must_fire": [
+      "mono-grayscale-status-color"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-theme-toggle-structure.html": {
+    "must_fire": [
+      "mono-theme-toggle-structure"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-theme-override-mechanism.html": {
+    "must_fire": [
+      "mono-theme-override-mechanism"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-toggle-styling.html": {
+    "must_fire": [
+      "mono-toggle-styling"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-mermaid-toggle-sync.html": {
+    "must_fire": [
+      "mono-mermaid-toggle-sync"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-token-values-exact.html": {
+    "must_fire": [
+      "mono-token-values-exact"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-motion-discipline.html": {
+    "must_fire": [
+      "mono-motion-discipline"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-mermaid-theming.html": {
+    "must_fire": [
+      "mono-mermaid-theming"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "mono-grayscale-status-color",
+      "mono-hero-and-surprise-count",
+      "mono-mermaid-toggle-sync",
+      "mono-theme-override-mechanism",
+      "mono-theme-toggle-structure",
+      "mono-token-values-exact",
+      "mono-type-budget"
+    ]
+  },
+  "mono-data-table.html": {
+    "must_fire": [
+      "mono-data-table"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-instrument-microcopy.html": {
+    "must_fire": [
+      "mono-instrument-microcopy"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-surface-spacing-discipline.html": {
+    "must_fire": [
+      "mono-surface-spacing-discipline"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-code-block-terminal.html": {
+    "must_fire": [
+      "mono-code-block-terminal"
+    ],
+    "max_other_errors": 0
+  },
+  "mono-hero-and-surprise-count.html": {
+    "must_fire": [
+      "mono-hero-and-surprise-count"
+    ],
+    "max_other_errors": 0
+  },
+  "preset-both-mode-inversion.html": {
+    "must_fire": [
+      "preset-both-mode-inversion"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "body-text-contrast-aa",
+      "mono-grayscale-status-color",
+      "mono-hero-and-surprise-count",
+      "mono-theme-override-mechanism",
+      "mono-theme-toggle-structure",
+      "mono-token-values-exact",
+      "mono-type-budget",
+      "theme-both-light-dark"
+    ]
+  },
+  "assembly-dedup-single-tokens.html": {
+    "must_fire": [
+      "assembly-dedup-single-tokens"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-font-allowlist.html": {
+    "must_fire": [
+      "nothing-font-allowlist"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-type-size-budget.html": {
+    "must_fire": [
+      "nothing-type-size-budget"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "nothing-doto-single-hero",
+      "nothing-font-allowlist",
+      "nothing-forbidden-ui-patterns"
+    ]
+  },
+  "nothing-doto-single-hero.html": {
+    "must_fire": [
+      "nothing-doto-single-hero"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "nothing-font-allowlist",
+      "nothing-forbidden-ui-patterns",
+      "nothing-motif-min3"
+    ]
+  },
+  "nothing-labels-allcaps-mono.html": {
+    "must_fire": [
+      "nothing-labels-allcaps-mono"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-accent-red-single-use.html": {
+    "must_fire": [
+      "nothing-accent-red-single-use"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "body-text-contrast-aa"
+    ]
+  },
+  "nothing-status-color-scope.html": {
+    "must_fire": [
+      "nothing-status-color-scope"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-flat-surface-and-motion.html": {
+    "must_fire": [
+      "nothing-flat-surface-and-motion"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-forbidden-ui-patterns.html": {
+    "must_fire": [
+      "nothing-forbidden-ui-patterns"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-button-shape.html": {
+    "must_fire": [
+      "nothing-button-shape"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-motif-min3.html": {
+    "must_fire": [
+      "nothing-motif-min3"
+    ],
+    "max_other_errors": 0
+  },
+  "nothing-chart-not-color-alone.html": {
+    "must_fire": [
+      "nothing-chart-not-color-alone"
+    ],
+    "max_other_errors": 0
+  },
+  "slide-viewport-fit-no-internal-scroll.html": {
+    "must_fire": [
+      "slide-viewport-fit-no-internal-scroll"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered"
+    ]
+  },
+  "deck-scroll-snap-axis.html": {
+    "must_fire": [
+      "deck-scroll-snap-axis"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "magazine-dark-cover-backcover-min3-invariant",
+      "magazine-nav-dots-and-keyboard",
+      "magazine-stat-page-anchor",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "nav-chrome-fixed-and-layered.html": {
+    "must_fire": [
+      "nav-chrome-fixed-and-layered"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered"
+    ]
+  },
+  "autofit-safety-net-present-and-ordered.html": {
+    "must_fire": [
+      "autofit-safety-net-present-and-ordered"
+    ],
+    "max_other_errors": 0
+  },
+  "slide-reduced-motion-support.html": {
+    "must_fire": [
+      "slide-reduced-motion-support"
+    ],
+    "max_other_errors": 0
+  },
+  "min-slide-body-text-16px.html": {
+    "must_fire": [
+      "min-slide-body-text-16px"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "split-bleed-zero-padding.html": {
+    "must_fire": [
+      "split-bleed-zero-padding"
+    ],
+    "max_other_errors": 0
+  },
+  "magazine-page-fullbleed.html": {
+    "must_fire": [
+      "magazine-page-fullbleed"
+    ],
+    "max_other_errors": 0
+  },
+  "magazine-dark-cover-backcover-min3-invariant.html": {
+    "must_fire": [
+      "magazine-dark-cover-backcover-min3-invariant"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "body-text-contrast-aa",
+      "magazine-nav-dots-and-keyboard",
+      "magazine-stat-page-anchor",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "magazine-stat-page-anchor.html": {
+    "must_fire": [
+      "magazine-stat-page-anchor"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "magazine-dark-cover-backcover-min3-invariant",
+      "magazine-nav-dots-and-keyboard",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "magazine-consecutive-layout-repeat.html": {
+    "must_fire": [
+      "magazine-consecutive-layout-repeat"
+    ],
+    "max_other_errors": 0
+  },
+  "magazine-tint-no-consecutive-repeat.html": {
+    "must_fire": [
+      "magazine-tint-no-consecutive-repeat"
+    ],
+    "max_other_errors": 0
+  },
+  "magazine-grid-frequency-cap.html": {
+    "must_fire": [
+      "magazine-grid-frequency-cap"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "magazine-consecutive-layout-repeat"
+    ]
+  },
+  "magazine-nav-dots-and-keyboard.html": {
+    "must_fire": [
+      "magazine-nav-dots-and-keyboard"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "magazine-dark-cover-backcover-min3-invariant",
+      "magazine-stat-page-anchor",
+      "nav-chrome-fixed-and-layered",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "diagram-slide-legibility.html": {
+    "must_fire": [
+      "diagram-slide-legibility"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered",
+      "min-slide-body-text-16px",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "slide-density-budget.html": {
+    "must_fire": [
+      "slide-density-budget"
+    ],
+    "max_other_errors": 0
+  },
+  "divider-number-oversized-clamp.html": {
+    "must_fire": [
+      "divider-number-oversized-clamp"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered"
+    ]
+  },
+  "decorative-svg-sparing-use.html": {
+    "must_fire": [
+      "decorative-svg-sparing-use"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered",
+      "diagram-4px-grid"
+    ]
+  },
+  "vertical-consecutive-composition-run.html": {
+    "must_fire": [
+      "vertical-consecutive-composition-run"
+    ],
+    "max_other_errors": 0
+  },
+  "keyboard-hints-autofade.html": {
+    "must_fire": [
+      "keyboard-hints-autofade"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "slide-dim-text-contrast.html": {
+    "must_fire": [
+      "slide-dim-text-contrast"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "autofit-safety-net-present-and-ordered",
+      "body-text-contrast-aa",
+      "slide-viewport-fit-no-internal-scroll"
+    ]
+  },
+  "poster-root-single-sized-element.html": {
+    "must_fire": [
+      "poster-root-single-sized-element"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-no-live-mermaid.html": {
+    "must_fire": [
+      "poster-no-live-mermaid"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-no-runtime-fs.html": {
+    "must_fire": [
+      "poster-no-runtime-fs"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-fonts-loaded-in-root.html": {
+    "must_fire": [
+      "poster-fonts-loaded-in-root"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-content-within-canvas.html": {
+    "must_fire": [
+      "poster-content-within-canvas"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-single-theme.html": {
+    "must_fire": [
+      "poster-single-theme"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-filename-convention.html": {
+    "must_fire": [
+      "poster-filename-convention"
+    ],
+    "max_other_errors": 0
+  },
+  "poster-export-wait-sufficient.html": {
+    "must_fire": [
+      "poster-export-wait-sufficient"
+    ],
+    "max_other_errors": 0
+  },
+  "gsap-timeline-paused.html": {
+    "must_fire": [
+      "gsap-timeline-paused"
+    ],
+    "max_other_errors": 0
+  },
+  "gsap-timeline-registration-contract.html": {
+    "must_fire": [
+      "gsap-timeline-registration-contract"
+    ],
+    "max_other_errors": 0
+  },
+  "video-forbidden-nondeterministic-apis.html": {
+    "must_fire": [
+      "video-forbidden-nondeterministic-apis"
+    ],
+    "max_other_errors": 0
+  },
+  "video-seed-literal.html": {
+    "must_fire": [
+      "video-seed-literal"
+    ],
+    "max_other_errors": 0
+  },
+  "hyperframes-video-muted-playsinline.html": {
+    "must_fire": [
+      "hyperframes-video-muted-playsinline"
+    ],
+    "max_other_errors": 0
+  },
+  "root-composition-no-template-wrapper.html": {
+    "must_fire": [
+      "root-composition-no-template-wrapper"
+    ],
+    "max_other_errors": 0
+  },
+  "audio-as-separate-elements.html": {
+    "must_fire": [
+      "audio-as-separate-elements"
+    ],
+    "max_other_errors": 0
+  },
+  "video-duration-format-limits.html": {
+    "must_fire": [
+      "video-duration-format-limits"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-beat-order.html": {
+    "must_fire": [
+      "reel-beat-order"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-cut-pacing.html": {
+    "must_fire": [
+      "reel-cut-pacing"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-transitions-at-boundaries.html": {
+    "must_fire": [
+      "reel-transitions-at-boundaries"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-caption-line-length.html": {
+    "must_fire": [
+      "reel-caption-line-length"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-caption-styling.html": {
+    "must_fire": [
+      "reel-caption-styling"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-full-bleed-no-gutters",
+      "reel-safe-zone-margins"
+    ]
+  },
+  "reel-safe-zone-margins.html": {
+    "must_fire": [
+      "reel-safe-zone-margins"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-full-bleed-no-gutters"
+    ]
+  },
+  "reel-full-bleed-no-gutters.html": {
+    "must_fire": [
+      "reel-full-bleed-no-gutters"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-safe-zone-margins"
+    ]
+  },
+  "reel-vertical-hierarchy-thirds.html": {
+    "must_fire": [
+      "reel-vertical-hierarchy-thirds"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-full-bleed-no-gutters",
+      "reel-safe-zone-margins"
+    ]
+  },
+  "reel-single-focal-element.html": {
+    "must_fire": [
+      "reel-single-focal-element"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-full-bleed-no-gutters"
+    ]
+  },
+  "reel-typography-roles.html": {
+    "must_fire": [
+      "reel-typography-roles"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "reel-full-bleed-no-gutters",
+      "reel-safe-zone-margins"
+    ]
+  },
+  "reel-no-paragraph-body-copy.html": {
+    "must_fire": [
+      "reel-no-paragraph-body-copy"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-kinetic-preauthored-spans.html": {
+    "must_fire": [
+      "reel-kinetic-preauthored-spans"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-progressive-reveal-order.html": {
+    "must_fire": [
+      "reel-progressive-reveal-order"
+    ],
+    "max_other_errors": 0
+  },
+  "reel-kenburns-scale.html": {
+    "must_fire": [
+      "reel-kenburns-scale"
+    ],
+    "max_other_errors": 0
+  },
+  "demo-format-webm-not-gif.html": {
+    "must_fire": [
+      "demo-format-webm-not-gif"
+    ],
+    "max_other_errors": 0
+  },
+  "demo-video-attributes.html": {
+    "must_fire": [
+      "demo-video-attributes"
+    ],
+    "max_other_errors": 0
+  },
+  "demo-embed-size-budget.html": {
+    "must_fire": [
+      "demo-embed-size-budget"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "demo-video-attributes"
+    ]
+  },
+  "review-quadrant-completeness.html": {
+    "must_fire": [
+      "review-quadrant-completeness"
+    ],
+    "max_other_errors": 0
+  },
+  "decision-log-confidence-styling.html": {
+    "must_fire": [
+      "decision-log-confidence-styling"
+    ],
+    "max_other_errors": 0
+  },
+  "factcheck-summary-shape.html": {
+    "must_fire": [
+      "factcheck-summary-shape"
+    ],
+    "max_other_errors": 0
+  },
+  "table-data-label-required.html": {
+    "must_fire": [
+      "table-data-label-required"
+    ],
+    "max_other_errors": 0
+  },
+  "gradient-hero-background.html": {
+    "must_fire": [
+      "gradient-hero-background"
+    ],
+    "max_other_errors": 0
+  },
+  "decorative-blur-orbs.html": {
+    "must_fire": [
+      "decorative-blur-orbs"
+    ],
+    "max_other_errors": 0
+  },
+  "glassmorphism-default-surface.html": {
+    "must_fire": [
+      "glassmorphism-default-surface"
+    ],
+    "max_other_errors": 0
+  },
+  "nested-cards.html": {
+    "must_fire": [
+      "nested-cards"
+    ],
+    "max_other_errors": 0
+  },
+  "side-stripe-border.html": {
+    "must_fire": [
+      "side-stripe-border"
+    ],
+    "max_other_errors": 0
+  },
+  "cream-sand-background.html": {
+    "must_fire": [
+      "cream-sand-background"
+    ],
+    "max_other_errors": 0
+  },
+  "font-family-sprawl.html": {
+    "must_fire": [
+      "font-family-sprawl"
+    ],
+    "max_other_errors": 0
+  },
+  "reflex-reject-fonts.html": {
+    "must_fire": [
+      "reflex-reject-fonts"
+    ],
+    "max_other_errors": 0
+  },
+  "flat-type-scale-weak-hierarchy.html": {
+    "must_fire": [
+      "flat-type-scale-weak-hierarchy"
+    ],
+    "max_other_errors": 0
+  },
+  "uppercase-no-tracking.html": {
+    "must_fire": [
+      "uppercase-no-tracking"
+    ],
+    "max_other_errors": 0
+  },
+  "unbounded-fluid-type-clamp.html": {
+    "must_fire": [
+      "unbounded-fluid-type-clamp"
+    ],
+    "max_other_errors": 0
+  },
+  "blocking-webfont-no-swap.html": {
+    "must_fire": [
+      "blocking-webfont-no-swap"
+    ],
+    "max_other_errors": 0
+  },
+  "unscalable-viewport.html": {
+    "must_fire": [
+      "unscalable-viewport"
+    ],
+    "max_other_errors": 0
+  },
+  "rainbow-accent-palette.html": {
+    "must_fire": [
+      "rainbow-accent-palette"
+    ],
+    "max_other_errors": 0
+  },
+  "gray-text-on-colored-surface.html": {
+    "must_fire": [
+      "gray-text-on-colored-surface"
+    ],
+    "max_other_errors": 0
+  },
+  "body-text-contrast-aa.html": {
+    "must_fire": [
+      "body-text-contrast-aa"
+    ],
+    "max_other_errors": 0
+  },
+  "focus-ring-stripped.html": {
+    "must_fire": [
+      "focus-ring-stripped"
+    ],
+    "max_other_errors": 0
+  },
+  "scroll-reveal-spam.html": {
+    "must_fire": [
+      "scroll-reveal-spam"
+    ],
+    "max_other_errors": 0
+  },
+  "hidden-until-js-reveal.html": {
+    "must_fire": [
+      "hidden-until-js-reveal"
+    ],
+    "max_other_errors": 0
+  },
+  "layout-property-animation.html": {
+    "must_fire": [
+      "layout-property-animation"
+    ],
+    "max_other_errors": 0
+  },
+  "bounce-elastic-easing.html": {
+    "must_fire": [
+      "bounce-elastic-easing"
+    ],
+    "max_other_errors": 0
+  },
+  "undersized-touch-targets.html": {
+    "must_fire": [
+      "undersized-touch-targets"
+    ],
+    "max_other_errors": 0
+  },
+  "fake-loading-theater.html": {
+    "must_fire": [
+      "fake-loading-theater"
+    ],
+    "max_other_errors": 0
+  },
+  "mixed-icon-systems.html": {
+    "must_fire": [
+      "mixed-icon-systems"
+    ],
+    "max_other_errors": 0
+  },
+  "inline-emoji-bullets.html": {
+    "must_fire": [
+      "inline-emoji-bullets"
+    ],
+    "max_other_errors": 0
+  },
+  "meaning-without-labels.html": {
+    "must_fire": [
+      "meaning-without-labels"
+    ],
+    "max_other_errors": 0
+  },
+  "copy-paste-drop-shadow.html": {
+    "must_fire": [
+      "copy-paste-drop-shadow"
+    ],
+    "max_other_errors": 0
+  },
+  "hero-metric-template.html": {
+    "must_fire": [
+      "hero-metric-template"
+    ],
+    "max_other_errors": 0
+  },
+  "card-as-universal-wrapper.html": {
+    "must_fire": [
+      "card-as-universal-wrapper"
+    ],
+    "max_other_errors": 0
+  },
+  "flat-wall-of-bullets.html": {
+    "must_fire": [
+      "flat-wall-of-bullets"
+    ],
+    "max_other_errors": 0
+  },
+  "arbitrary-spacing-scale.html": {
+    "must_fire": [
+      "arbitrary-spacing-scale"
+    ],
+    "max_other_errors": 0
+  },
+  "inconsistent-heading-case.html": {
+    "must_fire": [
+      "inconsistent-heading-case"
+    ],
+    "max_other_errors": 0
+  },
+  "copy-slop-phrases.html": {
+    "must_fire": [
+      "copy-slop-phrases"
+    ],
+    "max_other_errors": 0
+  }
+}

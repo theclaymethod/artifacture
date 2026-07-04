@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Explainer — Reel</title>
+<!--
+  Hyperframes reel (brain-rot) explainer starter.
+
+  Format:    9:16 vertical, 1080 x 1920, 30 fps.
+  Duration:  30-60 seconds. Default 45s.
+  Audience:  Silent-autoplay feeds: Shorts, Reels, TikTok.
+  Pacing:    Hard cuts every 1.2-1.8s during body beats. Kinetic typography.
+             Burned-in captions. TTS narration synced to beat boundaries.
+
+  Pair with: references/hyperframes.md, references/gsap-rules.md, references/reel-patterns.md.
+  Render:    npx hyperframes render --output out.mp4 --quality standard
+
+  Beat structure (reel-patterns.md):
+    0.0s  HOOK         Oversized stat / claim
+    2.0s  PROBLEM      What's broken; one-line tension
+    5.0s  CONTEXT      Why it matters
+    9.0s  MECHANISM    Progressive diagram reveal
+   18.0s  PROOF        Stat / chart / quote
+   25.0s  RESOLUTION   Takeaway in one line
+   30.0s  CTA          URL / handle (2s max)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.70);
+    --accent: #f7591f;
+    --caption-bg: rgba(0, 0, 0, 0.75);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; overflow: hidden; }
+
+  #stage {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* Safe zone: phone UI eats ~100px top and bottom. Keep primary content inside this. */
+  .safe {
+    position: absolute;
+    inset: 100px 48px 200px 48px; /* bottom 200px reserved for caption pill clearance */
+  }
+
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    padding: 0 48px;
+  }
+
+  /* Hook stat — enormous number, fills vertical space */
+  .hook-stat {
+    font-size: 320px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .hook-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 32px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 32px;
+    max-width: 720px;
+  }
+
+  .claim {
+    font-size: 104px;
+    line-height: 1.05;
+    font-weight: 600;
+    text-align: center;
+    max-width: 880px;
+  }
+  .claim .w { display: inline-block; }
+  .claim .accent { color: var(--accent); }
+
+  .kicker {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+
+  .body {
+    font-size: 44px;
+    line-height: 1.3;
+    color: var(--fg);
+    text-align: center;
+    max-width: 880px;
+    margin-top: 24px;
+  }
+
+  /* Burned-in captions — centered pill near the bottom.
+     One <div class="cap"> per narration sentence, generated from
+     transcript.json — never hand-authored. See reel-patterns.md
+     § "The verbatim-transcript rule". */
+  .captions {
+    position: absolute;
+    left: 48px;
+    right: 48px;
+    bottom: 140px;
+    height: 160px;
+    pointer-events: none;
+    z-index: 30;
+  }
+  .cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    padding: 22px 32px;
+    background: var(--caption-bg);
+    width: fit-content;
+    max-width: 100%;
+    border-radius: 999px;
+    border-left: 3px solid var(--accent);
+    font-size: 42px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--fg);
+    text-align: center;
+    opacity: 0;
+  }
+  .cap .accent { color: var(--accent); }
+</style>
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="reel-explainer"
+  data-width="1080"
+  data-height="1920"
+  data-start="0"
+  data-duration="32"
+>
+  <!-- HOOK: 0-2s -->
+  <div class="beat beat-hook">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div class="hook-stat">4,200</div>
+      <div class="hook-label">requests per second</div>
+    </div>
+  </div>
+
+  <!-- PROBLEM: 2-5s -->
+  <div class="beat beat-problem">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE PROBLEM</span>
+      <h2 class="claim">
+        <span class="w">Your</span> <span class="w">queue</span> <span class="w accent">chokes</span> <span class="w">at</span> <span class="w">500.</span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- CONTEXT: 5-9s -->
+  <div class="beat beat-context">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHY IT MATTERS</span>
+      <h2 class="claim">Every backed-up job is a user waiting.</h2>
+    </div>
+  </div>
+
+  <!-- MECHANISM: 9-18s — progressive diagram reveal slot -->
+  <div class="beat beat-mechanism">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">HOW WE FIXED IT</span>
+      <!-- Drop an inline SVG diagram here (authored per diagrams-svg.md).
+           Tag nodes with .m-node-1, .m-node-2, .m-arrow-1, etc. and animate
+           per reel-patterns.md § Progressive Diagram Reveal. -->
+      <div class="body">Replace this with your progressive SVG diagram reveal.</div>
+    </div>
+  </div>
+
+  <!-- PROOF: 18-25s -->
+  <div class="beat beat-proof">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE RESULT</span>
+      <div class="hook-stat" style="font-size: 240px;">8.4×</div>
+      <div class="hook-label">throughput in prod</div>
+    </div>
+  </div>
+
+  <!-- RESOLUTION: 25-30s -->
+  <div class="beat beat-resolution">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHAT YOU DO</span>
+      <h2 class="claim">Partition by tenant, not by type.</h2>
+    </div>
+  </div>
+
+  <!-- CTA: 30-32s -->
+  <div class="beat beat-cta">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div class="hook-label" style="font-size: 36px;">FULL WRITEUP</div>
+      <div class="claim" style="font-size: 80px;">@your-handle</div>
+    </div>
+  </div>
+
+  <!-- Captions layer (burned into the video).
+       REQUIRED: generate from transcript.json, one sentence per <div>.
+       Do NOT hand-author paraphrases of the visuals.
+
+         bash {{skill_dir}}/scripts/captions-from-transcript.sh transcript.json
+
+       Example output (paste below, then wire timings in the GSAP timeline
+       OR let the data-start/data-duration attributes drive the reveal). -->
+  <div class="captions">
+    <div class="cap cap-1" data-start="0.03" data-duration="1.57">Agent design is a fitting problem.</div>
+    <div class="cap cap-2" data-start="1.63" data-duration="1.08">Hold the model fixed.</div>
+    <div class="cap cap-3" data-start="2.79" data-duration="1.45">Search the harness around it.</div>
+    <!-- ...one <div> per narration sentence... -->
+  </div>
+
+  <!-- Narration track -->
+  <audio id="narration" data-start="0" data-duration="32" data-track-index="0" src="narration.wav"></audio>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const tl = gsap.timeline({ paused: true });
+
+  // HOOK 0-2s
+  tl.addLabel("hook", 0);
+  tl.fromTo(".beat-hook", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "hook+=0");
+  const n = { v: 0 };
+  tl.to(n, {
+    v: 4200,
+    duration: 0.9,
+    ease: "power3.out",
+    onUpdate: () => { document.querySelector(".hook-stat").textContent = Math.floor(n.v).toLocaleString(); },
+  }, "hook+=0.1");
+  tl.from(".hook-label", { y: 20, opacity: 0, duration: 0.4 }, "hook+=1.0");
+  tl.to(".beat-hook", { opacity: 0, duration: 0.2 }, "hook+=1.8");
+
+  // PROBLEM 2-5s (word-by-word)
+  tl.addLabel("problem", 2);
+  tl.fromTo(".beat-problem", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "problem+=0");
+  tl.from(".beat-problem .kicker", { y: 20, opacity: 0, duration: 0.3 }, "problem+=0.1");
+  tl.from(".beat-problem .w", { y: 60, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power3.out" }, "problem+=0.4");
+  tl.to(".beat-problem", { opacity: 0, duration: 0.2 }, "problem+=2.8");
+
+  // CONTEXT 5-9s
+  tl.addLabel("context", 5);
+  tl.fromTo(".beat-context", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "context+=0");
+  tl.from(".beat-context .kicker", { y: 20, opacity: 0, duration: 0.3 }, "context+=0.1");
+  tl.from(".beat-context .claim", { y: 40, opacity: 0, duration: 0.5 }, "context+=0.4");
+  tl.to(".beat-context", { opacity: 0, duration: 0.25 }, "context+=3.75");
+
+  // MECHANISM 9-18s
+  tl.addLabel("mech", 9);
+  tl.fromTo(".beat-mechanism", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "mech+=0");
+  tl.from(".beat-mechanism .kicker", { y: 20, opacity: 0, duration: 0.3 }, "mech+=0.1");
+  tl.from(".beat-mechanism .body", { y: 30, opacity: 0, duration: 0.5 }, "mech+=0.5");
+  // PLUG IN YOUR PROGRESSIVE DIAGRAM REVEAL HERE. See reel-patterns.md.
+  tl.to(".beat-mechanism", { opacity: 0, duration: 0.3 }, "mech+=8.7");
+
+  // PROOF 18-25s
+  tl.addLabel("proof", 18);
+  tl.fromTo(".beat-proof", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "proof+=0");
+  tl.from(".beat-proof .kicker", { y: 20, opacity: 0, duration: 0.3 }, "proof+=0.1");
+  tl.from(".beat-proof .hook-stat", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.6)" }, "proof+=0.4");
+  tl.from(".beat-proof .hook-label", { y: 16, opacity: 0, duration: 0.4 }, "proof+=1.0");
+  tl.to(".beat-proof", { opacity: 0, duration: 0.25 }, "proof+=6.75");
+
+  // RESOLUTION 25-30s
+  tl.addLabel("res", 25);
+  tl.fromTo(".beat-resolution", { opacity: 0 }, { opacity: 1, duration: 0.25 }, "res+=0");
+  tl.from(".beat-resolution .kicker", { y: 20, opacity: 0, duration: 0.3 }, "res+=0.1");
+  tl.from(".beat-resolution .claim", { y: 40, opacity: 0, duration: 0.5 }, "res+=0.4");
+  tl.to(".beat-resolution", { opacity: 0, duration: 0.25 }, "res+=4.75");
+
+  // CTA 30-32s
+  tl.addLabel("cta", 30);
+  tl.fromTo(".beat-cta", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "cta+=0");
+  tl.from(".beat-cta .hook-label", { y: 20, opacity: 0, duration: 0.3 }, "cta+=0.1");
+  tl.from(".beat-cta .claim", { y: 30, opacity: 0, duration: 0.4 }, "cta+=0.4");
+
+  // CAPTIONS — each appears during its beat, fades out at the end
+  const caps = [
+    { sel: ".cap-1", s: 0.1,  e: 1.9 },
+    { sel: ".cap-2", s: 2.1,  e: 4.8 },
+    { sel: ".cap-3", s: 5.1,  e: 8.8 },
+    { sel: ".cap-4", s: 9.3,  e: 17.7 },
+    { sel: ".cap-5", s: 18.3, e: 24.6 },
+    { sel: ".cap-6", s: 25.1, e: 29.7 },
+    { sel: ".cap-7", s: 30.1, e: 31.9 },
+  ];
+  caps.forEach(c => {
+    tl.to(c.sel, { opacity: 1, duration: 0.15 }, c.s);
+    tl.to(c.sel, { opacity: 0, duration: 0.2 },  c.e);
+  });
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["reel-explainer"] = tl;
+</script>
+</body>
+</html>

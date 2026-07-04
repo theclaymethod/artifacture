@@ -1,0 +1,98 @@
+import { CodeBlock, DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from '../../visual-explainer-mdx/components';
+
+export default function ExplainDiffDemo() {
+  return (
+    <ExplainerShell
+      eyebrow="explain-diff"
+      preset="blueprint"
+      reviewTools={false}
+      title="Why This Diff Adds a Cache"
+      summary="A literate walkthrough reads the surrounding behavior first, then uses the patch as evidence."
+    >
+      <Section kicker="background" title="The function was a direct database read">
+        <DiagramCanvas
+          layout="flow"
+          nodes={[
+            { id: 'caller', label: 'Caller', shape: 'oval' },
+            { id: 'loader', label: 'loadSession', accent: true },
+            { id: 'db', label: 'Database' },
+          ]}
+          edges={[
+            { from: 'caller', to: 'loader', label: 'id' },
+            { from: 'loader', to: 'db', label: 'find' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="intuition" title="The new branch avoids repeated work">
+        <DiagramCanvas
+          layout="flow"
+          nodes={[
+            { id: 'call', label: 'Request', shape: 'oval' },
+            { id: 'cache', label: 'Cache?', shape: 'diamond', accent: true },
+            { id: 'return', label: 'Return cached' },
+            { id: 'query', label: 'Query database' },
+          ]}
+          edges={[
+            { from: 'call', to: 'cache' },
+            { from: 'cache', to: 'return', label: 'hit' },
+            { from: 'cache', to: 'query', label: 'miss' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="code" title="Read the control-flow change before the storage calls">
+        <DiffBlock
+          filename="src/session.ts"
+          language="ts"
+          mode="split"
+          patch={`--- a/src/session.ts
++++ b/src/session.ts
+@@ -1,8 +1,11 @@
+ export async function loadSession(id: string) {
+-  const row = await db.sessions.find(id);
+-  return row;
++  const cached = cache.get(id);
++  if (cached) return cached;
++  const row = await db.sessions.find(id);
++  cache.set(id, row);
++  return row;
+ }`}
+        />
+        <CodeBlock
+          filename="session invariant"
+          language="ts"
+          code={`if (cached) return cached;
+cache.set(id, row);`}
+          annotations={[
+            { line: 1, note: 'The early return changes the common path.' },
+            { line: 2, note: 'The miss path seeds the next request.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="quiz" title="Check the mental model">
+        <Quiz
+          questions={[
+            {
+              q: 'Which line changes the common path for repeat requests?',
+              options: [
+                { text: 'if (cached) return cached;', correct: true, why: 'That branch returns before the database call on a cache hit.' },
+                { text: 'const row = await db.sessions.find(id);', why: 'That line still handles misses; it is not the new common-path exit.' },
+                { text: 'return row;', why: 'That return already existed conceptually after loading the row.' },
+              ],
+            },
+            {
+              q: 'What background fact matters before explaining this diff?',
+              options: [
+                { text: 'The caller provides a session id.', why: 'Useful, but it does not explain why caching changes behavior.' },
+                { text: 'The old function always asked the database.', correct: true, why: 'The cache only matters because the old path had no fast return.' },
+                { text: 'The file is TypeScript.', why: 'Language context helps syntax, not the design change.' },
+              ],
+            },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

@@ -1,0 +1,1370 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
+@import "tailwindcss";
+
+@source "../examples/visual-explainer-mdx/**/*.{mdx,tsx,ts,jsx,js}";
+@source "./**/*.{tsx,ts,jsx,js}";
+
+@theme {
+  --font-sans: var(--ve-font-body);
+  --font-mono: var(--ve-font-mono);
+}
+
+@layer base {
+  :root,
+  [data-ve-preset="mono-industrial"] {
+    --ve-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 650;
+    --ve-heading-weight: 650;
+    --ve-page-max: 80rem;
+    --ve-section-gap: 2.5rem;
+    --ve-radius: 0px;
+    --ve-poster-radius: 0px;
+    --ve-bg: #09090b;
+    --ve-bg-alt: #f4f1ea;
+    --ve-panel: rgb(9 9 11 / 0.04);
+    --ve-panel-strong: rgb(24 24 27 / 0.12);
+    --ve-row: rgb(24 24 27 / 0.08);
+    --ve-nav-bg: rgb(9 9 11 / 0.92);
+    --ve-review-bg: rgb(9 9 11 / 0.96);
+    --ve-rule: rgb(255 255 255 / 0.15);
+    --ve-heading: #fafafa;
+    --ve-text: #f4f4f5;
+    --ve-muted: #c3c7d1;
+    --ve-faint: #c3c7d1;
+    --ve-accent: #5eead4;
+    --ve-accent-soft: rgb(9 9 11 / 0.12);
+    --ve-accent-contrast: #09090b;
+    --ve-info: #93c5fd;
+    --ve-warn: #fbbf24;
+    --ve-danger: #f87171;
+    --ve-ok: #86efac;
+    --ve-err: #f87171;
+    --ve-diagram-bg: #09090b;
+    --ve-grid-line: #27272a;
+    --ve-node-bg: #18181b;
+    --ve-node-stroke: #71717a;
+    --ve-diagram-ink: #fafafa;
+    --ve-diagram-muted: #a1a1aa;
+    --ve-diagram-frame: rgb(255 255 255 / 0.16);
+    --ve-diagram-accent-fill: rgb(94 234 212 / 0.12);
+    --ve-diagram-grid-size: 22;
+    --ve-grid-dot-r: 0.9;
+    --ve-grid-dot-opacity: 0.58;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 6;
+    --ve-chip-radius: 0;
+    --ve-code-bg: #0a0a0a;
+    --ve-code-text: #f4f4f5;
+    --ve-code-muted: #a1a1aa;
+    --ve-code-rule: rgb(255 255 255 / 0.16);
+    --ve-code-accent: #5eead4;
+    --ve-poster-bg: #f4f1ea;
+    --ve-poster-text: #16130f;
+    --ve-poster-muted: rgb(22 19 15 / 0.62);
+    --ve-poster-rule: rgb(22 19 15 / 0.2);
+    --ve-poster-grid: rgb(22 19 15 / 0.08);
+  }
+
+  [data-ve-preset="nothing"] {
+    --ve-font-display: "Space Mono", ui-monospace, monospace;
+    --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 500;
+    --ve-heading-weight: 500;
+    --ve-radius: 0px;
+    --ve-bg: #000000;
+    --ve-bg-alt: #f5f5f5;
+    --ve-panel: rgb(0 0 0 / 0.045);
+    --ve-panel-strong: rgb(20 20 20 / 0.16);
+    --ve-row: rgb(20 20 20 / 0.1);
+    --ve-nav-bg: rgb(0 0 0 / 0.94);
+    --ve-review-bg: rgb(0 0 0 / 0.96);
+    --ve-rule: rgb(245 245 245 / 0.2);
+    --ve-heading: #f5f5f5;
+    --ve-text: #eeeeee;
+    --ve-muted: #d6d6d6;
+    --ve-faint: #d6d6d6;
+    --ve-accent: #d71921;
+    --ve-accent-soft: rgb(0 0 0 / 0.15);
+    --ve-accent-contrast: #ffffff;
+    --ve-info: #f5f5f5;
+    --ve-warn: #d71921;
+    --ve-danger: #d71921;
+    --ve-ok: #f5f5f5;
+    --ve-err: #d71921;
+    --ve-diagram-bg: #000000;
+    --ve-grid-line: #333333;
+    --ve-node-bg: #111111;
+    --ve-node-stroke: #333333;
+    --ve-diagram-ink: #e8e8e8;
+    --ve-diagram-muted: #999999;
+    --ve-diagram-frame: #222222;
+    --ve-diagram-accent-fill: rgb(215 25 33 / 0.13);
+    --ve-diagram-grid-size: 16;
+    --ve-grid-dot-r: 1;
+    --ve-grid-dot-opacity: 0.82;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 0;
+    --ve-chip-radius: 0;
+  }
+
+  [data-ve-preset="blueprint"] {
+    --ve-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 600;
+    --ve-heading-weight: 600;
+    --ve-radius: 4px;
+    --ve-bg: #07111f;
+    --ve-bg-alt: #e9f2ff;
+    --ve-panel: rgb(7 17 31 / 0.08);
+    --ve-panel-strong: rgb(11 27 49 / 0.16);
+    --ve-row: rgb(11 27 49 / 0.1);
+    --ve-nav-bg: rgb(7 17 31 / 0.94);
+    --ve-review-bg: rgb(7 17 31 / 0.96);
+    --ve-rule: rgb(147 197 253 / 0.24);
+    --ve-heading: #eff6ff;
+    --ve-text: #dbeafe;
+    --ve-muted: #c7d2e4;
+    --ve-faint: #c7d2e4;
+    --ve-accent: #60a5fa;
+    --ve-accent-soft: rgb(7 17 31 / 0.14);
+    --ve-accent-contrast: #06111f;
+    --ve-info: #7dd3fc;
+    --ve-warn: #facc15;
+    --ve-danger: #fb7185;
+    --ve-ok: #86efac;
+    --ve-err: #fb7185;
+    --ve-diagram-bg: #07111f;
+    --ve-grid-line: rgb(96 165 250 / 0.12);
+    --ve-node-bg: #0b1b31;
+    --ve-node-stroke: #60a5fa;
+    --ve-diagram-ink: #eff6ff;
+    --ve-diagram-muted: #93a8c2;
+    --ve-diagram-frame: rgb(147 197 253 / 0.24);
+    --ve-diagram-accent-fill: rgb(96 165 250 / 0.14);
+    --ve-diagram-grid-size: 20;
+    --ve-grid-line: rgb(102 179 255 / 0.34);
+    --ve-grid-dot-r: 0.45;
+    --ve-grid-dot-opacity: 0.24;
+    --ve-grid-line-opacity: 0.64;
+    --ve-grid-line-width: 0.7;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 2;
+    --ve-chip-radius: 0;
+    --ve-code-accent: #60a5fa;
+  }
+
+  [data-ve-preset="editorial"] {
+    --ve-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 500;
+    --ve-heading-weight: 600;
+    --ve-radius: 6px;
+    --ve-bg: #251f1a;
+    --ve-bg-alt: #f4eadc;
+    --ve-panel: rgb(37 31 26 / 0.08);
+    --ve-panel-strong: rgb(51 42 35 / 0.16);
+    --ve-row: rgb(51 42 35 / 0.1);
+    --ve-nav-bg: rgb(37 31 26 / 0.94);
+    --ve-review-bg: rgb(37 31 26 / 0.96);
+    --ve-rule: rgb(244 234 220 / 0.2);
+    --ve-heading: #fff4e5;
+    --ve-text: #f6ead8;
+    --ve-muted: #eadccb;
+    --ve-faint: #eadccb;
+    --ve-accent: #d9a441;
+    --ve-accent-soft: rgb(37 31 26 / 0.15);
+    --ve-accent-contrast: #251f1a;
+    --ve-info: #84a59d;
+    --ve-warn: #d9a441;
+    --ve-danger: #c76d5b;
+    --ve-ok: #8aa872;
+    --ve-err: #c76d5b;
+    --ve-diagram-bg: #1c1917;
+    --ve-grid-line: rgb(217 164 65 / 0.14);
+    --ve-node-bg: #2b241e;
+    --ve-node-stroke: rgb(217 164 65 / 0.48);
+    --ve-diagram-ink: #fff4e5;
+    --ve-diagram-muted: #c9aa80;
+    --ve-diagram-frame: rgb(217 164 65 / 0.2);
+    --ve-diagram-accent-fill: rgb(217 164 65 / 0.12);
+    --ve-diagram-grid-size: 28;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0.38;
+    --ve-grid-line-width: 0.6;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 8;
+    --ve-chip-radius: 4;
+  }
+
+  [data-ve-preset="paper-ink"] {
+    --ve-font-display: "Instrument Serif", Georgia, serif;
+    --ve-font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 650;
+    --ve-heading-weight: 650;
+    --ve-radius: 6px;
+    --ve-bg: #f7f1e7;
+    --ve-bg-alt: #201a16;
+    --ve-panel: rgb(247 241 231 / 0.055);
+    --ve-panel-strong: rgb(251 247 239 / 0.18);
+    --ve-row: rgb(251 247 239 / 0.12);
+    --ve-nav-bg: rgb(247 241 231 / 0.94);
+    --ve-review-bg: rgb(247 241 231 / 0.97);
+    --ve-rule: rgb(41 31 24 / 0.18);
+    --ve-heading: #241b16;
+    --ve-text: #2f261f;
+    --ve-muted: #6b6258;
+    --ve-faint: #6b6258;
+    --ve-accent: #9a3412;
+    --ve-accent-soft: rgb(247 241 231 / 0.13);
+    --ve-accent-contrast: #fff8ed;
+    --ve-info: #577c6a;
+    --ve-warn: #b87a2c;
+    --ve-danger: #a94338;
+    --ve-ok: #4f7c5b;
+    --ve-err: #a94338;
+    --ve-diagram-bg: #f7f1e7;
+    --ve-grid-line: rgb(41 31 24 / 0.09);
+    --ve-node-bg: #fbf7ef;
+    --ve-node-stroke: #9a3412;
+    --ve-diagram-ink: #241b16;
+    --ve-diagram-muted: #77695d;
+    --ve-diagram-frame: rgb(41 31 24 / 0.18);
+    --ve-diagram-accent-fill: rgb(154 52 18 / 0.12);
+    --ve-diagram-grid-size: 26;
+    --ve-grid-line: rgb(45 33 25 / 0.15);
+    --ve-grid-dot-r: 0.6;
+    --ve-grid-dot-opacity: 0.45;
+    --ve-grid-line-opacity: 0.18;
+    --ve-grid-line-width: 0.8;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 10;
+    --ve-chip-radius: 6;
+    --ve-code-accent: #f59e0b;
+    --ve-poster-bg: #f7f1e7;
+    --ve-poster-text: #241b16;
+    --ve-poster-muted: rgb(36 27 22 / 0.64);
+    --ve-poster-rule: rgb(36 27 22 / 0.2);
+    --ve-poster-grid: rgb(36 27 22 / 0.08);
+  }
+
+  [data-ve-preset="terminal"] {
+    --ve-font-display: "IBM Plex Mono", ui-monospace, monospace;
+    --ve-font-body: "IBM Plex Mono", ui-monospace, monospace;
+    --ve-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --ve-display-weight: 600;
+    --ve-heading-weight: 600;
+    --ve-radius: 0px;
+    --ve-bg: #030806;
+    --ve-bg-alt: #d8ffe6;
+    --ve-panel: rgb(3 8 6 / 0.07);
+    --ve-panel-strong: rgb(7 20 13 / 0.16);
+    --ve-row: rgb(7 20 13 / 0.1);
+    --ve-nav-bg: rgb(3 8 6 / 0.94);
+    --ve-review-bg: rgb(3 8 6 / 0.96);
+    --ve-rule: rgb(79 255 143 / 0.22);
+    --ve-heading: #d8ffe6;
+    --ve-text: #b8f7cf;
+    --ve-muted: #d0d7d3;
+    --ve-faint: #d0d7d3;
+    --ve-accent: #4fff8f;
+    --ve-accent-soft: rgb(3 8 6 / 0.13);
+    --ve-accent-contrast: #030806;
+    --ve-info: #7dd3fc;
+    --ve-warn: #f8e16c;
+    --ve-danger: #ff6b6b;
+    --ve-ok: #4fff8f;
+    --ve-err: #ff6b6b;
+    --ve-diagram-bg: #030806;
+    --ve-grid-line: rgb(79 255 143 / 0.11);
+    --ve-node-bg: #07140d;
+    --ve-node-stroke: #4fff8f;
+    --ve-diagram-ink: #d8ffe6;
+    --ve-diagram-muted: #93bba2;
+    --ve-diagram-frame: rgb(79 255 143 / 0.2);
+    --ve-diagram-accent-fill: rgb(79 255 143 / 0.12);
+    --ve-diagram-grid-size: 18;
+    --ve-grid-line: rgb(74 222 128 / 0.22);
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0.18;
+    --ve-grid-line-width: 0.8;
+    --ve-grid-scanline-opacity: 0.42;
+    --ve-grid-scanline-width: 0.6;
+    --ve-node-radius: 0;
+    --ve-chip-radius: 0;
+    --ve-code-accent: #4fff8f;
+  }
+
+  [data-ve-preset="custom"] {
+    --ve-diagram-ink: var(--ve-heading);
+    --ve-diagram-muted: var(--ve-muted);
+    --ve-diagram-frame: var(--ve-rule);
+    --ve-diagram-accent-fill: color-mix(in srgb, var(--ve-accent) 14%, transparent);
+  }
+
+  [data-ve-tone="dark"] {
+    --ve-slide-bg: var(--ve-bg);
+    --ve-slide-text: var(--ve-text);
+    --ve-slide-muted: var(--ve-muted);
+    --ve-slide-rule: var(--ve-rule);
+  }
+
+  [data-ve-tone="light"] {
+    --ve-slide-bg: var(--ve-bg-alt);
+    --ve-slide-text: var(--ve-accent-contrast);
+    --ve-slide-muted: color-mix(in srgb, var(--ve-accent-contrast) 68%, transparent);
+    --ve-slide-rule: color-mix(in srgb, var(--ve-accent-contrast) 22%, transparent);
+  }
+
+  [data-ve-tone="accent"] {
+    --ve-slide-bg: var(--ve-accent);
+    --ve-slide-text: var(--ve-accent-contrast);
+    --ve-slide-muted: color-mix(in srgb, var(--ve-accent-contrast) 72%, transparent);
+    --ve-slide-rule: color-mix(in srgb, var(--ve-accent-contrast) 25%, transparent);
+  }
+
+  html {
+    overflow-x: clip;
+    background: var(--ve-bg);
+  }
+
+  body {
+    margin: 0;
+    overflow-wrap: anywhere;
+    background: var(--ve-bg);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: var(--ve-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  code {
+    border: 1px solid var(--ve-rule);
+    background: var(--ve-panel);
+    padding: 0.08rem 0.28rem;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  [data-ve-code-block] code {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  .ve-code-shiki pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    background: #0a0a0a !important;
+    color: var(--ve-code-text);
+    font-family: var(--ve-font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-code-shiki code {
+    display: block;
+    min-width: min-content;
+  }
+
+  .ve-code-caption,
+  .ve-diff-block figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--ve-code-rule);
+    padding: 0.75rem 1rem;
+    color: var(--ve-code-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ve-scroll-x {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .ve-diagram-shell {
+    overflow-x: auto;
+  }
+
+  .ve-diagram-variant-desktop {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .ve-diagram-variant-mobile {
+    display: none;
+  }
+
+  .ve-diagram-mobile-list {
+    display: grid;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .ve-diagram-mobile-node {
+    min-width: 0;
+    border: 1px solid var(--ve-diagram-frame);
+    border-left: 3px solid var(--ve-node-stroke);
+    border-radius: var(--ve-radius);
+    background: var(--ve-node-bg);
+    padding: 0.85rem 0.95rem;
+    color: var(--ve-diagram-ink);
+  }
+
+  .ve-diagram-mobile-node[data-ve-accent="true"] {
+    border-left-color: var(--ve-accent);
+  }
+
+  .ve-diagram-mobile-lane {
+    margin: 0 0 0.35rem;
+    color: var(--ve-faint);
+    font-family: var(--ve-font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .ve-diagram-mobile-node h3 {
+    margin: 0;
+    color: var(--ve-diagram-ink);
+    font-family: var(--ve-font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .ve-diagram-mobile-node p:not(.ve-diagram-mobile-lane) {
+    margin: 0.45rem 0 0;
+    color: var(--ve-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-diagram-mobile-connector {
+    display: grid;
+    grid-template-columns: 1px minmax(0, 1fr);
+    gap: 0.8rem;
+    min-height: 3rem;
+    padding: 0.35rem 0 0.35rem 1rem;
+  }
+
+  .ve-diagram-mobile-line {
+    display: block;
+    width: 1px;
+    min-height: 2.3rem;
+    background: var(--ve-diagram-muted);
+  }
+
+  .ve-diagram-mobile-connector[data-ve-edge-style="dashed"] .ve-diagram-mobile-line {
+    background: repeating-linear-gradient(to bottom, var(--ve-diagram-muted) 0 5px, transparent 5px 10px);
+  }
+
+  .ve-diagram-mobile-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .ve-diagram-mobile-chip {
+    max-width: 100%;
+    border: 1px solid var(--ve-diagram-frame);
+    background: var(--ve-diagram-bg);
+    padding: 0.24rem 0.45rem;
+    color: var(--ve-diagram-ink);
+    font-family: var(--ve-font-mono);
+    font-size: 0.68rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-diagram-mobile-chip[data-ve-edge-style="dashed"] {
+    border-style: dashed;
+  }
+
+  [data-ve-preset="nothing"] [data-diagram-role="diagram"] .ve-diagram-node-label {
+    font-family: var(--ve-font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  [data-ve-preset="terminal"] [data-diagram-role="diagram"] text {
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 640px) {
+    .ve-diagram-has-mobile {
+      overflow-x: clip;
+      padding: 0.85rem;
+    }
+
+    .ve-diagram-has-mobile .ve-diagram-variant-desktop {
+      display: none;
+    }
+
+    .ve-diagram-has-mobile .ve-diagram-variant-mobile {
+      display: block;
+    }
+  }
+
+  .ve-diff-block,
+  .ve-terminal-block {
+    overflow: hidden;
+    border: 1px solid var(--ve-code-rule);
+    border-radius: var(--ve-radius);
+    background: var(--ve-code-bg);
+    color: var(--ve-code-text);
+  }
+
+  .ve-diff-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    font-family: var(--ve-font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  .ve-diff-table td {
+    border-bottom: 1px solid rgb(255 255 255 / 0.07);
+    vertical-align: top;
+  }
+
+  .ve-diff-gutter,
+  .ve-diff-mark {
+    width: 3rem;
+    padding: 0.2rem 0.5rem;
+    color: var(--ve-code-muted);
+    text-align: right;
+    user-select: none;
+  }
+
+  .ve-diff-mark {
+    width: 2rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .ve-diff-code {
+    min-width: 0;
+    padding: 0.2rem 0.75rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-diff-table [data-ve-diff-kind="add"] {
+    background: color-mix(in srgb, var(--ve-ok) 14%, transparent);
+  }
+
+  .ve-diff-table [data-ve-diff-kind="add"] .ve-diff-mark {
+    color: var(--ve-ok);
+  }
+
+  .ve-diff-table [data-ve-diff-kind="remove"] {
+    background: color-mix(in srgb, var(--ve-err) 14%, transparent);
+  }
+
+  .ve-diff-table [data-ve-diff-kind="remove"] .ve-diff-mark {
+    color: var(--ve-err);
+  }
+
+  .ve-diff-table [data-ve-diff-kind="hunk"] {
+    background: var(--ve-panel-strong);
+  }
+
+  .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-code,
+  .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-mark {
+    color: var(--ve-code-accent);
+  }
+
+  .ve-diff-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1px;
+    background: var(--ve-code-rule);
+  }
+
+  .ve-diff-side {
+    min-width: 0;
+    overflow-x: auto;
+    background: var(--ve-code-bg);
+  }
+
+  .ve-diff-split .ve-diff-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .ve-diff-side-title {
+    border-bottom: 1px solid var(--ve-code-rule);
+    padding: 0.5rem 0.75rem;
+    color: var(--ve-code-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 0.75rem;
+  }
+
+  .ve-terminal-content {
+    margin: 0;
+    max-height: 620px;
+    overflow: auto;
+    padding: 1rem;
+    color: var(--ve-code-text);
+    font-family: var(--ve-font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-ansi-bold { font-weight: 700; }
+  .ve-ansi-fg-0 { color: var(--ve-code-muted); }
+  .ve-ansi-fg-1 { color: var(--ve-err); }
+  .ve-ansi-fg-2 { color: var(--ve-ok); }
+  .ve-ansi-fg-3 { color: var(--ve-warn); }
+  .ve-ansi-fg-4 { color: var(--ve-info); }
+  .ve-ansi-fg-5 { color: var(--ve-accent); }
+  .ve-ansi-fg-6 { color: var(--ve-code-accent); }
+  .ve-ansi-fg-7 { color: var(--ve-code-text); }
+  .ve-ansi-fg-0-bright { color: var(--ve-faint); }
+  .ve-ansi-fg-1-bright { color: var(--ve-err); }
+  .ve-ansi-fg-2-bright { color: var(--ve-ok); }
+  .ve-ansi-fg-3-bright { color: var(--ve-warn); }
+  .ve-ansi-fg-4-bright { color: var(--ve-info); }
+  .ve-ansi-fg-5-bright { color: var(--ve-accent); }
+  .ve-ansi-fg-6-bright { color: var(--ve-code-accent); }
+  .ve-ansi-fg-7-bright { color: #ffffff; }
+
+  .ve-json-tree {
+    border: 1px solid var(--ve-rule);
+    border-radius: var(--ve-radius);
+    background: var(--ve-panel);
+    padding: 1rem;
+    color: var(--ve-text);
+    font-family: var(--ve-font-mono);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .ve-json-branch summary {
+    min-height: 44px;
+    cursor: pointer;
+    color: var(--ve-muted);
+  }
+
+  .ve-json-branch summary:focus-visible,
+  .ve-quiz-option:focus-visible {
+    outline: 2px solid var(--ve-accent);
+    outline-offset: 3px;
+  }
+
+  .ve-json-children {
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--ve-rule);
+  }
+
+  .ve-json-key {
+    color: var(--ve-code-accent);
+  }
+
+  .ve-json-type,
+  [data-ve-json-type="number"],
+  [data-ve-json-type="boolean"] {
+    color: var(--ve-info);
+  }
+
+  [data-ve-json-type="string"] {
+    color: var(--ve-ok);
+  }
+
+  [data-ve-json-type="null"],
+  [data-ve-json-type="undefined"] {
+    color: var(--ve-faint);
+  }
+
+  .ve-quiz {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .ve-quiz-question {
+    border: 1px solid var(--ve-rule);
+    border-radius: var(--ve-radius);
+    background: var(--ve-panel);
+    padding: 1rem;
+  }
+
+  .ve-quiz-question h3 {
+    margin: 0 0 0.75rem;
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-size: 1.1rem;
+    font-weight: var(--ve-heading-weight);
+    line-height: 1.35;
+  }
+
+  .ve-quiz-options {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .ve-quiz-option {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 44px;
+    width: 100%;
+    border: 1px solid var(--ve-rule);
+    background: var(--ve-bg);
+    padding: 0.75rem;
+    color: var(--ve-text);
+    text-align: left;
+  }
+
+  .ve-quiz-choice {
+    display: inline-grid;
+    place-items: center;
+    min-height: 2rem;
+    border: 1px solid var(--ve-rule);
+    color: var(--ve-muted);
+    font-family: var(--ve-font-mono);
+  }
+
+  .ve-quiz-result {
+    color: var(--ve-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 0.75rem;
+  }
+
+  .ve-quiz-option[data-ve-quiz-state="correct"],
+  .ve-quiz-feedback[data-ve-quiz-state="correct"] {
+    border-color: var(--ve-ok);
+    background: color-mix(in srgb, var(--ve-ok) 12%, transparent);
+  }
+
+  .ve-quiz-option[data-ve-quiz-state="incorrect"],
+  .ve-quiz-feedback[data-ve-quiz-state="incorrect"] {
+    border-color: var(--ve-err);
+    background: color-mix(in srgb, var(--ve-err) 12%, transparent);
+  }
+
+  .ve-quiz-feedback,
+  .ve-quiz-score {
+    margin: 0.75rem 0 0;
+    border: 1px solid var(--ve-rule);
+    padding: 0.75rem;
+    color: var(--ve-muted);
+    line-height: 1.55;
+    transition: opacity 120ms ease-out;
+  }
+
+  .ve-quiz-score {
+    color: var(--ve-heading);
+    font-family: var(--ve-font-mono);
+  }
+
+  [data-ve-mermaid-shell] svg {
+    max-width: none;
+  }
+
+}
+
+@layer components {
+  .ve-output {
+    --ve-page-pad-x: clamp(20px, 3vw, 44px);
+    --ve-page-pad-y: clamp(44px, 7vw, 108px);
+    --ve-copy-measure: 58ch;
+    min-height: 100vh;
+    overflow-x: clip;
+    background: var(--ve-bg);
+    color: var(--ve-text);
+    font-family: var(--ve-font-body);
+    font-kerning: normal;
+    font-feature-settings: "kern" 1;
+    line-height: 1.6;
+  }
+
+  .ve-output-inner {
+    width: min(1180px, calc(100vw - (var(--ve-page-pad-x) * 2)));
+    margin: 0 auto;
+    padding: var(--ve-page-pad-y) 0;
+  }
+
+  .ve-output-header {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.6fr);
+    gap: clamp(28px, 6vw, 88px);
+    align-items: start;
+    margin-bottom: clamp(48px, 8vw, 112px);
+  }
+
+  .ve-output-header h1 {
+    margin: 0;
+    max-width: 780px;
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-size: clamp(3.35rem, 7.2vw, 6rem);
+    font-weight: var(--ve-display-weight);
+    line-height: 0.9;
+    letter-spacing: 0;
+  }
+
+  .ve-output-header > p:last-child {
+    margin: 0;
+    max-width: var(--ve-copy-measure);
+    color: var(--ve-muted);
+    font-size: clamp(1.05rem, 1.45vw, 1.42rem);
+    line-height: 1.58;
+  }
+
+  .ve-kicker {
+    margin: 0 0 1.25rem;
+    color: var(--ve-faint);
+    font-family: var(--ve-font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.25;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .ve-muted {
+    margin: 0;
+    color: var(--ve-muted);
+  }
+
+  .ve-display-metric {
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-size: clamp(4rem, 10vw, 6rem);
+    font-weight: var(--ve-display-weight);
+    line-height: 0.85;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ve-process-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ve-rule);
+  }
+
+  .ve-process-list li {
+    display: grid;
+    grid-template-columns: minmax(3.5rem, 0.22fr) minmax(0, 1fr);
+    gap: clamp(1rem, 3vw, 2.25rem);
+    padding: 1.05rem 0;
+    border-bottom: 1px solid var(--ve-rule);
+    color: var(--ve-text);
+    font-size: clamp(0.98rem, 1.2vw, 1.12rem);
+    line-height: 1.45;
+  }
+
+  .ve-process-list span {
+    color: var(--ve-faint);
+    font-family: var(--ve-font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ve-output-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 72px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ve-rule);
+    color: var(--ve-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ve-ledger {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1fr);
+    gap: clamp(40px, 8vw, 132px);
+    align-items: end;
+  }
+
+  .ve-output--mono-industrial {
+    --ve-bg: #f6f4f0;
+    --ve-heading: #16130f;
+    --ve-text: rgb(22 19 15 / 0.9);
+    --ve-muted: #5f564c;
+    --ve-faint: #5f564c;
+    --ve-rule: rgb(22 19 15 / 0.14);
+  }
+
+  .ve-output--mono-industrial .ve-output-inner {
+    width: min(1280px, calc(100vw - 36px));
+    padding-top: clamp(36px, 5vw, 76px);
+  }
+
+  .ve-output--mono-industrial .ve-output-header {
+    grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 1fr);
+    padding-top: clamp(16px, 3vw, 40px);
+    border-top: 1px solid var(--ve-rule);
+  }
+
+  .ve-output--mono-industrial .ve-output-header h1 {
+    font-size: clamp(3.6rem, 9vw, 6rem);
+    letter-spacing: -0.015em;
+  }
+
+  .ve-output--mono-industrial .ve-output-header > p:last-child {
+    max-width: 34ch;
+    align-self: end;
+    font-size: clamp(1.18rem, 1.8vw, 1.7rem);
+    line-height: 1.35;
+  }
+
+  .ve-output--mono-industrial .ve-ledger {
+    padding-top: clamp(26px, 4vw, 48px);
+    border-top: 1px solid var(--ve-rule);
+  }
+
+  .ve-output--mono-industrial .ve-process-list li {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    padding: 1.35rem 0;
+    font-size: clamp(1.2rem, 2vw, 1.85rem);
+  }
+
+  .ve-output--nothing .ve-output-header h1 {
+    font-family: var(--ve-font-display);
+    font-size: clamp(2.75rem, 5.8vw, 5.15rem);
+    line-height: 0.98;
+    text-transform: uppercase;
+  }
+
+  .ve-output--nothing .ve-output-header {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr);
+    padding-bottom: clamp(16px, 3vw, 32px);
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  .ve-output--nothing .ve-output-header > p:last-child {
+    font-family: var(--ve-font-mono);
+    font-size: clamp(0.86rem, 1vw, 0.98rem);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .ve-instrument {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    gap: clamp(16px, 3vw, 32px);
+  }
+
+  .ve-dot-field,
+  .ve-panel-grid {
+    border: 1px solid var(--ve-rule);
+    background: rgb(255 255 255 / 0.025);
+  }
+
+  .ve-dot-field {
+    min-height: 420px;
+    padding: clamp(24px, 5vw, 56px);
+    background-image: radial-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .ve-output--nothing .ve-display-metric {
+    color: #fff;
+    font-family: var(--ve-font-mono);
+    font-size: clamp(3rem, 12vw, 6rem);
+    line-height: 0.78;
+  }
+
+  .ve-system-line {
+    margin: clamp(42px, 8vw, 86px) 0 0;
+    color: #d71921;
+    font-family: var(--ve-font-mono);
+    font-size: clamp(0.9rem, 1.4vw, 1.08rem);
+    letter-spacing: 0.08em;
+  }
+
+  .ve-panel-grid {
+    display: grid;
+    align-content: space-between;
+    gap: 32px;
+    padding: clamp(20px, 3vw, 34px);
+  }
+
+  .ve-segments {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(6px, 1fr));
+    gap: 4px;
+  }
+
+  .ve-segments span {
+    height: 24px;
+    border: 1px solid var(--ve-rule);
+  }
+
+  .ve-segments span.is-on {
+    background: #e8e8e8;
+  }
+
+  .ve-segments span.is-alert {
+    background: #d71921;
+    border-color: #d71921;
+  }
+
+  .ve-output--blueprint {
+    background-image:
+      linear-gradient(to right, rgb(96 165 250 / 0.11) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(96 165 250 / 0.11) 1px, transparent 1px),
+      linear-gradient(to right, rgb(96 165 250 / 0.18) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(96 165 250 / 0.18) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+  }
+
+  .ve-output--blueprint .ve-output-header {
+    grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr);
+    padding: 16px 0 24px;
+    border-top: 1px solid var(--ve-rule);
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  .ve-output--blueprint .ve-output-header h1 {
+    font-size: clamp(3.1rem, 6.6vw, 6rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .ve-blueprint-board {
+    position: relative;
+    min-height: clamp(380px, 43vw, 520px);
+    border: 1px solid var(--ve-rule);
+    overflow: hidden;
+  }
+
+  .ve-blueprint-label {
+    position: absolute;
+    z-index: 1;
+    margin: 0;
+    color: var(--ve-muted);
+    font-family: var(--ve-font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .ve-blueprint-label--top {
+    top: 16px;
+    left: 24px;
+  }
+
+  .ve-blueprint-label--side {
+    right: 16px;
+    bottom: 24px;
+    transform: rotate(-90deg);
+    transform-origin: right bottom;
+  }
+
+  .ve-blueprint-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--ve-accent);
+    stroke-width: 2;
+  }
+
+  .ve-blueprint-node {
+    position: absolute;
+    z-index: 1;
+    min-width: 132px;
+    padding: 0.95rem 1.15rem;
+    border: 1px solid var(--ve-accent);
+    background: var(--ve-bg);
+    color: var(--ve-heading);
+    font-family: var(--ve-font-mono);
+    font-size: 0.82rem;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ve-blueprint-node--a {
+    top: 72px;
+    left: 56px;
+  }
+
+  .ve-blueprint-node--b {
+    top: 208px;
+    left: 43%;
+  }
+
+  .ve-blueprint-node--c {
+    right: 56px;
+    bottom: 72px;
+  }
+
+  .ve-output--blueprint .ve-process-list {
+    margin-top: 36px;
+  }
+
+  .ve-editorial-spread {
+    display: grid;
+    grid-template-columns: minmax(4rem, 0.35fr) minmax(0, 1.45fr) minmax(14rem, 0.7fr);
+    gap: clamp(24px, 5vw, 72px);
+    padding: clamp(34px, 6vw, 78px) 0;
+    border-top: 1px solid var(--ve-rule);
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  .ve-output--editorial .ve-output-header {
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  }
+
+  .ve-output--editorial .ve-output-header h1 {
+    font-size: clamp(3.8rem, 8vw, 6rem);
+    line-height: 0.84;
+  }
+
+  .ve-folio {
+    color: var(--ve-accent);
+    font-family: var(--ve-font-display);
+    font-size: clamp(1.8rem, 4vw, 4.4rem);
+    font-style: italic;
+    line-height: 0.9;
+  }
+
+  .ve-editorial-spread p {
+    margin: 0;
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-size: clamp(2.45rem, 5vw, 5.8rem);
+    line-height: 0.98;
+  }
+
+  .ve-editorial-spread aside {
+    align-self: end;
+    padding-top: 16px;
+    border-top: 1px solid var(--ve-rule);
+    color: var(--ve-muted);
+    font-size: clamp(1rem, 1.35vw, 1.28rem);
+    line-height: 1.5;
+  }
+
+  .ve-output--editorial .ve-process-list {
+    margin-top: 48px;
+  }
+
+  .ve-output--paper-ink {
+    background-image:
+      linear-gradient(rgb(41 31 24 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(41 31 24 / 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .ve-paper-proof {
+    position: relative;
+    display: grid;
+    gap: clamp(14px, 3vw, 30px);
+    max-width: 880px;
+    padding: clamp(32px, 7vw, 86px);
+    border: 1px solid var(--ve-rule);
+    background: rgb(255 252 244 / 0.7);
+    box-shadow: 16px 16px 0 rgb(36 27 22 / 0.08);
+  }
+
+  .ve-paper-proof::before {
+    content: "";
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    width: 86px;
+    height: 86px;
+    border: 2px solid var(--ve-accent);
+    border-radius: 999px;
+    transform: rotate(-12deg);
+  }
+
+  .ve-paper-proof h2 {
+    margin: 0;
+    color: var(--ve-accent);
+    font-family: var(--ve-font-display);
+    font-size: clamp(6rem, 15vw, 13rem);
+    line-height: 0.9;
+  }
+
+  .ve-paper-proof p {
+    max-width: 600px;
+    margin: 0;
+    color: var(--ve-muted);
+    font-size: clamp(1.1rem, 1.45vw, 1.35rem);
+    line-height: 1.55;
+  }
+
+  .ve-paper-note {
+    color: var(--ve-accent) !important;
+    font-family: var(--ve-font-mono);
+    font-size: 0.78rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ve-output--terminal {
+    background-image:
+      linear-gradient(rgb(79 255 143 / 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(79 255 143 / 0.045) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .ve-terminal {
+    margin-bottom: clamp(28px, 5vw, 52px);
+    padding: clamp(20px, 4vw, 40px);
+    border: 1px solid var(--ve-rule);
+    background: rgb(0 0 0 / 0.44);
+    color: var(--ve-accent);
+    font-family: var(--ve-font-mono);
+    font-size: clamp(0.92rem, 1.5vw, 1.18rem);
+    line-height: 1.5;
+  }
+
+  .ve-terminal p {
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    gap: 1rem;
+    margin: 0 0 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  .ve-terminal span {
+    color: var(--ve-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ve-terminal .is-ok {
+    color: #d8ffe6;
+  }
+
+  @media (max-width: 760px) {
+    .ve-output-header,
+    .ve-ledger,
+    .ve-instrument,
+    .ve-editorial-spread {
+      grid-template-columns: 1fr;
+    }
+
+    .ve-output-header {
+      gap: 20px;
+    }
+
+    .ve-output-header h1 {
+      font-size: clamp(2.8rem, 13vw, 4.7rem);
+    }
+
+    .ve-blueprint-node--a,
+    .ve-blueprint-node--b,
+    .ve-blueprint-node--c {
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+      margin: 24px;
+    }
+
+    .ve-blueprint-board {
+      display: grid;
+      align-content: center;
+      min-height: auto;
+      padding: 3.75rem 0 1.5rem;
+    }
+
+    .ve-blueprint-lines {
+      opacity: 0.45;
+    }
+
+    .ve-paper-proof {
+      box-shadow: 10px 10px 0 rgb(36 27 22 / 0.08);
+    }
+  }
+
+  .ve-review-panel button {
+    min-height: 44px;
+  }
+
+  .ve-review-panel {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  /* The fixed review panel must never sit over content: the shell reserves its space. */
+  .ve-has-review {
+    padding-bottom: 240px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 1ms !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ve-diff-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ve-diff-table {
+      min-width: 520px;
+    }
+
+    .ve-review-panel {
+      position: static;
+      width: auto;
+      margin: 32px 20px 20px;
+      box-shadow: none;
+    }
+
+    .ve-has-review {
+      padding-bottom: 0;
+    }
+  }
+}

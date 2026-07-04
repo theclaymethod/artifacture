@@ -1,0 +1,7 @@
+[
+  {"slug":"kimi-k2.6","kind":"openrouter","id":"moonshotai/kimi-k2.6"},
+  {"slug":"glm-5.2","kind":"openrouter","id":"z-ai/glm-5.2"},
+  {"slug":"deepseek-v4","kind":"openrouter","id":"deepseek/deepseek-v4-pro"},
+  {"slug":"opus-4.8","kind":"openrouter","id":"anthropic/claude-opus-4.8"},
+  {"slug":"codex","kind":"codex-cli"}
+]

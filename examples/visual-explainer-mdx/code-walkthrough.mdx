@@ -1,0 +1,32 @@
+import { CodeBlock, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
+
+export default function CodeWalkthroughExample() {
+  return (
+    <ExplainerShell
+      eyebrow="code walkthrough"
+      preset="custom"
+      reviewTools={false}
+      title="Build-Time Highlighted Code"
+      summary="CodeBlock keeps code pages in MDX while the exporter injects static Shiki markup."
+    >
+      <Section kicker="tsx" title="Reusable Component">
+        <CodeBlock
+          filename="rank-layout.ts"
+          language="ts"
+          highlightLines={[2, 6]}
+          annotations={[
+            { line: 2, note: 'Stable order comes from declaration order.' },
+            { line: 6, note: 'Geometry is derived, not authored.' },
+          ]}
+          code={`const nodes = ['brief', 'source', 'artifact'];
+const ranks = new Map(nodes.map((id, index) => [id, index]));
+
+export function position(id: string) {
+  const rank = ranks.get(id) ?? 0;
+  return { x: 72 + rank * 270, y: 64 };
+}`}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

@@ -1,0 +1,11 @@
+import { ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function MissingCodeBlockFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Missing CodeBlock fixture">
+      <Section title="Fixture">
+        <CodeBlock language="ts" code={`const value = 1;`} />
+      </Section>
+    </ExplainerShell>
+  );
+}

@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Ledger — Mono-Industrial Reference</title>
+<!--
+  Mono-Industrial reference template for the visual-explainer skill.
+  This is the DEFAULT aesthetic. Swiss typography, monochrome, hierarchy-first.
+  See ./references/mono-industrial.md for the full design system.
+
+  Patterns demonstrated here:
+  - Three-layer hierarchy: display / body / metadata (Space Mono ALL CAPS)
+  - Font budget: Space Grotesk + Space Mono + one optional Geist Pixel hero
+  - Grayscale-only Mermaid theme (status colors reserved for edges if needed)
+  - Spacing-grouped sections, NOT bordered cards
+  - Asymmetric layout: headline left-anchored, metadata top-right
+  - One "moment of surprise" per page (here: the Geist Pixel hero number)
+  - Zero on-load motion. User-triggered interactions only.
+  - Status colors only on values (not row backgrounds, not labels)
+  - Full Mermaid zoom/pan/expand preserved
+
+  When the page has NO genuine hero number or display word, remove the
+  Geist Pixel @font-face and the .hero-number block entirely. The pixel
+  font is never loaded on pages that don't use it.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* Geist Pixel Square — the hero/display font (SIL OFL, Vercel + basement.studio).
+     Loaded from jsDelivr because Geist Pixel is npm-only, not on Google Fonts.
+     Other variants (Grid, Circle, Triangle, Line) available at the same path. */
+  @font-face {
+    font-family: 'Geist Pixel Square';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.7.0/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* ============ TOKENS ============ */
+  :root {
+    --font-body: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+    --font-display: 'Geist Pixel Square', 'Space Grotesk', system-ui, sans-serif;
+
+    /* Light mode — warm off-white, near-black */
+    --bg: #f6f4f0;
+    --fg: #16130f;
+
+    /* Text opacity tiers — the hierarchy IS the gray scale */
+    --text-display: rgba(22, 19, 15, 1.00);
+    --text-primary: rgba(22, 19, 15, 0.90);
+    --text-secondary: rgba(22, 19, 15, 0.56);
+    --text-disabled: rgba(22, 19, 15, 0.36);
+
+    /* Hairline — used once, sparingly */
+    --rule: rgba(22, 19, 15, 0.12);
+    --rule-strong: rgba(22, 19, 15, 0.24);
+
+    /* Status — the ONLY color on the page */
+    --ok: #2f7a3e;
+    --warn: #8f5600;
+    --err:  #a51818;
+
+    /* Type scale — 3 sizes total */
+    --size-display: clamp(72px, 12vw, 144px);
+    --size-section: 28px;
+    --size-body: 15px;
+    --size-caption: 11px;
+
+    /* Spacing rhythm — strict tiers */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 32px;
+    --space-5: 64px;
+    --space-6: 96px;
+
+    /* Mermaid palette mirrors tokens (see script for themeVariables) */
+    --mermaid-node-fill: #ffffff;
+    --mermaid-node-stroke: rgba(22, 19, 15, 0.56);
+    --mermaid-line: rgba(22, 19, 15, 0.40);
+    --mermaid-container: #ffffff;
+  }
+
+  /* Dark mode applies when:
+       (1) OS prefers dark AND no explicit override, OR
+       (2) the user picked "dark" via the theme toggle ([data-theme="dark"]).
+     The [data-theme="light"] override pins the page to light regardless of OS. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --fg: #f2ede5;
+      --text-display: rgba(242, 237, 229, 1.00);
+      --text-primary: rgba(242, 237, 229, 0.90);
+      --text-secondary: rgba(242, 237, 229, 0.58);
+      --text-disabled: rgba(242, 237, 229, 0.36);
+      --rule: rgba(242, 237, 229, 0.14);
+      --rule-strong: rgba(242, 237, 229, 0.28);
+      --ok: #6bd48e;
+      --warn: #f0b05a;
+      --err:  #ef7b7b;
+      --mermaid-node-fill: #0c0c0c;
+      --mermaid-node-stroke: rgba(242, 237, 229, 0.58);
+      --mermaid-line: rgba(242, 237, 229, 0.40);
+      --mermaid-container: #0c0c0c;
+    }
+  }
+
+  /* Explicit toggle override — beats the media query either way. */
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --fg: #f2ede5;
+    --text-display: rgba(242, 237, 229, 1.00);
+    --text-primary: rgba(242, 237, 229, 0.90);
+    --text-secondary: rgba(242, 237, 229, 0.58);
+    --text-disabled: rgba(242, 237, 229, 0.36);
+    --rule: rgba(242, 237, 229, 0.14);
+    --rule-strong: rgba(242, 237, 229, 0.28);
+    --ok: #6bd48e;
+    --warn: #f0b05a;
+    --err:  #ef7b7b;
+    --mermaid-node-fill: #0c0c0c;
+    --mermaid-node-stroke: rgba(242, 237, 229, 0.58);
+    --mermaid-line: rgba(242, 237, 229, 0.40);
+    --mermaid-container: #0c0c0c;
+  }
+
+  /* ============ THEME TOGGLE ============
+     Three labeled options — ○ Light · ● Dark · ◐ Auto.
+     Always top-right. Always collapsed to a single centered icon at rest —
+     unfurls on hover or focus-within (tap-to-focus on touch). Never moves
+     to the bottom or stretches full-width. */
+  .theme-toggle {
+    position: fixed;
+    top: clamp(12px, 2vw, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 99;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: background 120ms ease-out, border-color 120ms ease-out,
+                padding 120ms ease-out, gap 120ms ease-out,
+                backdrop-filter 120ms ease-out;
+  }
+  .theme-toggle button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 999px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: color 120ms ease-out, background 120ms ease-out,
+                padding 120ms ease-out, gap 120ms ease-out,
+                max-width 120ms ease-out, opacity 120ms ease-out;
+  }
+  .theme-toggle__glyph {
+    display: block;
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+  }
+  .theme-toggle__label {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 120ms ease-out, opacity 120ms ease-out 40ms;
+  }
+  .theme-toggle button:hover { color: var(--text-display); }
+  .theme-toggle button:focus-visible {
+    outline: 1px solid var(--text-display);
+    outline-offset: 2px;
+  }
+
+  /* Collapsed default: only the active indicator is visible. */
+  .theme-toggle button:not([aria-checked="true"]) {
+    max-width: 0; padding: 0; opacity: 0;
+  }
+  .theme-toggle button[aria-checked="true"] {
+    color: var(--text-display);
+    background: transparent;
+  }
+
+  /* Expanded on hover or focus-within (tap-to-focus on touch).
+     Pill chrome (bg, border, backdrop) only appears here — at rest the
+     toggle is a bare icon so it reads as chrome, not UI. */
+  .theme-toggle:hover,
+  .theme-toggle:focus-within {
+    background: color-mix(in srgb, var(--fg) 8%, transparent);
+    border-color: var(--rule-strong);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    padding: 4px;
+    gap: 2px;
+  }
+  .theme-toggle:hover button:not([aria-checked="true"]),
+  .theme-toggle:focus-within button:not([aria-checked="true"]) {
+    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
+  }
+  .theme-toggle:hover button[aria-checked="true"],
+  .theme-toggle:focus-within button[aria-checked="true"] {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    padding: 7px 12px; gap: 6px;
+  }
+  .theme-toggle:hover .theme-toggle__label,
+  .theme-toggle:focus-within .theme-toggle__label {
+    max-width: 80px; opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle,
+    .theme-toggle button,
+    .theme-toggle__label { transition: none; }
+  }
+
+  /* ============ RESET ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: var(--size-body);
+    font-weight: 400;
+    line-height: 1.55;
+    padding: var(--space-5) var(--space-4);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-wrap: anywhere;
+  }
+
+  body :where(.grid, .flex, [class*="-grid"], [class*="-row"]) > * {
+    min-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: var(--space-4) var(--space-3); }
+  }
+
+  /* ============ MOTION (near zero) ============ */
+  /* No on-load animation. Only interactive state changes transition. */
+  a, button, .linkish {
+    transition: opacity 120ms ease-out, color 120ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  /* ============ LAYOUT ============ */
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  /* Header: metadata row (caps Space Mono) above an oversized headline. */
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .meta-row .meta-right {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  /* Vast gap before the hero per the spacing vocabulary */
+  .hero {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-4);
+    align-items: end;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding-top: var(--space-5);
+      padding-bottom: var(--space-5);
+    }
+  }
+
+  .hero__headline {
+    font-size: clamp(36px, 5.5vw, 64px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    color: var(--text-display);
+    text-wrap: balance;
+    max-width: 20ch;
+  }
+
+  .hero__lede {
+    margin-top: var(--space-3);
+    max-width: 52ch;
+    color: var(--text-secondary);
+  }
+
+  /* The ONE moment of surprise: a Geist Pixel display number.
+     Omit this block entirely when the page has no genuine hero value. */
+  .hero-number {
+    font-family: var(--font-display);
+    font-size: var(--size-display);
+    font-weight: 400;
+    line-height: 0.9;
+    color: var(--text-display);
+    letter-spacing: -0.02em;
+    justify-self: end;
+    align-self: end;
+  }
+
+  .hero-number small {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  /* Section: spacing-grouped, no cards, no borders.
+     A single hairline precedes each section title. */
+  .section {
+    padding-top: var(--space-5);
+  }
+
+  .section__label {
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+    margin-bottom: var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .section__label .index {
+    color: var(--text-disabled);
+  }
+
+  .section__title {
+    font-size: var(--size-section);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    max-width: 32ch;
+    margin-bottom: var(--space-3);
+    text-wrap: balance;
+  }
+
+  .section__body {
+    max-width: 60ch;
+    color: var(--text-secondary);
+  }
+
+  .section__body strong {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* Cluster: spacing-grouped items, no containers. */
+  .cluster {
+    margin-top: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .module {
+    padding-top: var(--space-2);
+    /* Container tier 1: spacing alone. No border, no background. */
+  }
+
+  .module__tag {
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+
+  .module__name {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-display);
+    margin-bottom: var(--space-2);
+  }
+
+  .module__desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 40ch;
+  }
+
+  /* Data row: no zebra, no cell borders. Alignment + row gap structure the grid. */
+  .data-row {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-top: var(--space-3);
+  }
+
+  .data-row th, .data-row td {
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    text-align: left;
+    vertical-align: baseline;
+    font-weight: 400;
+  }
+
+  .data-row thead th {
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--rule);
+    font-weight: 400;
+    padding-bottom: var(--space-2);
+  }
+
+  .data-row tbody td {
+    color: var(--text-primary);
+  }
+
+  .data-row .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  .data-row .status-ok  { color: var(--ok); }
+  .data-row .status-warn { color: var(--warn); }
+  .data-row .status-err { color: var(--err); }
+
+  .data-row tbody tr td {
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ============ MERMAID ============ */
+  .diagram-shell {
+    position: relative;
+    margin-top: var(--space-3);
+  }
+
+  .diagram-shell__hint {
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    margin-bottom: var(--space-2);
+  }
+
+  .mermaid-wrap {
+    position: relative;
+    background: var(--mermaid-container);
+    border: 1px solid var(--rule);
+    padding: var(--space-4) var(--space-3);
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    cursor: grab;
+  }
+
+  .mermaid-wrap.is-panning {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .mermaid-viewport {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+  }
+
+  .mermaid-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* Zoom controls: mono pill buttons. Opacity on hover, not color. */
+  .zoom-controls {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    gap: 2px;
+    z-index: 10;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 2px;
+  }
+
+  .zoom-controls button {
+    width: 30px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .zoom-controls button:hover {
+    color: var(--text-display);
+  }
+
+  .zoom-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    padding: 0 var(--space-2);
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* Mermaid SVG overrides — text color and fonts follow tokens. */
+  .mermaid .nodeLabel {
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+    color: var(--text-primary) !important;
+  }
+
+  .mermaid .edgeLabel {
+    font-family: var(--font-mono) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary) !important;
+    background-color: var(--mermaid-container) !important;
+  }
+
+  .mermaid .edgeLabel rect {
+    fill: var(--mermaid-container) !important;
+  }
+
+  .mermaid .node rect,
+  .mermaid .node circle,
+  .mermaid .node polygon {
+    stroke-width: 1px !important;
+  }
+
+  .mermaid .edge-pattern-solid {
+    stroke-width: 1px !important;
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    margin-top: var(--space-6);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--size-caption);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle: Light / Dark / Auto. Choice persists to localStorage.
+     Inline SVG glyphs keep stroke weight identical across font renderers. -->
+<div class="theme-toggle" role="radiogroup" aria-label="Theme">
+  <button type="button" role="radio" data-theme="light"  aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Light</span>
+  </button>
+  <button type="button" role="radio" data-theme="dark"   aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Dark</span>
+  </button>
+  <button type="button" role="radio" data-theme="system" aria-checked="true">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+    </svg>
+    <span class="theme-toggle__label">Auto</span>
+  </button>
+</div>
+
+<div class="page">
+
+  <!-- METADATA ROW: Space Mono ALL CAPS, tertiary tier, top of page. -->
+  <header class="meta-row">
+    <span>Request Ledger / Architecture</span>
+    <span class="meta-right">
+      <span>v 2.4.0</span>
+      <span>2026&middot;04&middot;16</span>
+    </span>
+  </header>
+
+  <!-- HERO: oversized headline left, Geist Pixel display number right.
+       The pixel number is the one moment of surprise. -->
+  <section class="hero">
+    <div>
+      <h1 class="hero__headline">A write-first ledger for request and response telemetry.</h1>
+      <p class="hero__lede">
+        Every inbound request is logged to append-only storage before any handler runs.
+        Downstream services read from the ledger, never from the request stream directly.
+      </p>
+    </div>
+    <div class="hero-number" aria-label="Events per second, peak">
+      1.2M
+      <small>Events / sec &mdash; peak</small>
+    </div>
+  </section>
+
+  <!-- SECTION 01: Flow diagram. Grayscale Mermaid. -->
+  <section class="section">
+    <div class="section__label">
+      <span><span class="index">01</span> &nbsp; Data Flow</span>
+      <span>Mermaid / ELK</span>
+    </div>
+    <h2 class="section__title">Write path, read path, and the durability boundary.</h2>
+    <p class="section__body">
+      <strong>Producers</strong> write to the ledger via a thin gateway. <strong>Consumers</strong>
+      subscribe by shard and replay from any offset. The gateway is the only component that can
+      lose data; everything downstream is deterministic from the ledger tail.
+    </p>
+
+    <div class="diagram-shell">
+      <p class="diagram-shell__hint">
+        Ctrl/Cmd + wheel to zoom &middot; drag to pan &middot; dbl-click to fit
+      </p>
+      <div class="mermaid-wrap">
+        <div class="zoom-controls">
+          <button type="button" data-action="zoom-in" title="Zoom in">+</button>
+          <button type="button" data-action="zoom-out" title="Zoom out">&minus;</button>
+          <button type="button" data-action="zoom-fit" title="Smart fit">&#8634;</button>
+          <button type="button" data-action="zoom-one" title="1:1 zoom">1:1</button>
+          <button type="button" data-action="zoom-expand" title="Open full size">&#x26F6;</button>
+          <span class="zoom-label">Loading...</span>
+        </div>
+        <div class="mermaid-viewport">
+          <div class="mermaid mermaid-canvas"></div>
+        </div>
+      </div>
+      <script type="text/plain" class="diagram-source">
+        graph TD
+          CLIENT[Client] --> GW[Gateway]
+          GW --> LEDGER[(Append-only Ledger)]
+          LEDGER --> IDX[Indexer]
+          LEDGER --> BILL[Billing Consumer]
+          LEDGER --> AUDIT[Audit Consumer]
+          IDX --> API[Query API]
+          API --> UI[Admin UI]
+          BILL --> WAREHOUSE[(Warehouse)]
+          AUDIT --> WAREHOUSE
+      </script>
+    </div>
+  </section>
+
+  <!-- SECTION 02: Modules — spacing-grouped, NO cards. -->
+  <section class="section">
+    <div class="section__label">
+      <span><span class="index">02</span> &nbsp; Modules</span>
+      <span>4 services</span>
+    </div>
+    <h2 class="section__title">Each module owns one side of the durability boundary.</h2>
+
+    <div class="cluster">
+      <div class="module">
+        <div class="module__tag">Write &middot; Svc</div>
+        <div class="module__name">Gateway</div>
+        <p class="module__desc">
+          HTTP ingress. Validates, rate-limits, then writes to the ledger. Returns 2xx only after
+          durable ack from a quorum of ledger replicas.
+        </p>
+      </div>
+
+      <div class="module">
+        <div class="module__tag">Store &middot; Core</div>
+        <div class="module__name">Ledger</div>
+        <p class="module__desc">
+          Append-only log, sharded by tenant. No reads from producers. Retention is
+          configurable per shard; audit retention is pinned at 7 years.
+        </p>
+      </div>
+
+      <div class="module">
+        <div class="module__tag">Read &middot; Svc</div>
+        <div class="module__name">Indexer</div>
+        <p class="module__desc">
+          Consumes the ledger tail and maintains secondary indexes. Cold-starts by full
+          replay; recovers on its own after any failure.
+        </p>
+      </div>
+
+      <div class="module">
+        <div class="module__tag">Read &middot; Svc</div>
+        <div class="module__name">Query API</div>
+        <p class="module__desc">
+          Serves admin UI and internal tools. Reads only from indexer state; never touches
+          the ledger directly. No writes.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 03: Data row — no zebra, no cell borders, tabular nums, status on value only. -->
+  <section class="section">
+    <div class="section__label">
+      <span><span class="index">03</span> &nbsp; Latency Budget</span>
+      <span>p99 / 24h</span>
+    </div>
+    <h2 class="section__title">Write-path budget is 80ms end-to-end.</h2>
+
+    <table class="data-row">
+      <thead>
+        <tr>
+          <th>Hop</th>
+          <th>Target</th>
+          <th class="num">p99 (ms)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Client &rarr; Gateway</td>
+          <td>&le; 15 ms</td>
+          <td class="num">12</td>
+          <td class="status-ok">WITHIN</td>
+        </tr>
+        <tr>
+          <td>Gateway validate</td>
+          <td>&le; 10 ms</td>
+          <td class="num">9</td>
+          <td class="status-ok">WITHIN</td>
+        </tr>
+        <tr>
+          <td>Ledger quorum ack</td>
+          <td>&le; 40 ms</td>
+          <td class="num">47</td>
+          <td class="status-warn">OVER &middot; 17%</td>
+        </tr>
+        <tr>
+          <td>Gateway &rarr; Client</td>
+          <td>&le; 15 ms</td>
+          <td class="num">11</td>
+          <td class="status-ok">WITHIN</td>
+        </tr>
+        <tr>
+          <td>End-to-end</td>
+          <td>&le; 80 ms</td>
+          <td class="num">79</td>
+          <td class="status-ok">WITHIN</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="footer">
+    <span>Generated by visual-explainer &middot; Mono-Industrial</span>
+    <span>End of document</span>
+  </footer>
+
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+
+  const config = {
+    fitPadding: 28,
+    minHeight: 360,
+    maxHeightPx: 960,
+    maxHeightVh: 0.84,
+    maxInitialZoom: 1.8,
+    minZoom: 0.08,
+    maxZoom: 6.5,
+    zoomStep: 0.14,
+    readabilityFloor: 0.58
+  };
+
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+  let activeDrag = null;
+
+  addEventListener('mousemove', (e) => activeDrag?.onMove(e));
+  addEventListener('mouseup', () => {
+    activeDrag?.onEnd();
+    activeDrag = null;
+  });
+
+  const html = document.documentElement;
+  const STORAGE_KEY = 'mono-industrial-theme';
+
+  // Single source of truth: explicit data-theme override first, then OS.
+  function effectiveMode() {
+    const forced = html.dataset.theme;
+    if (forced === 'light' || forced === 'dark') return forced;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  // Grayscale-only Mermaid theme. Status colors go on individual edges/nodes
+  // via classDef when meaningful (see ./references/mono-industrial.md).
+  function mermaidTheme() {
+    const isDark = effectiveMode() === 'dark';
+    const nodeFill   = isDark ? '#000000' : '#ffffff';
+    const nodeBorder = isDark ? 'rgba(242, 237, 229, 0.58)' : 'rgba(22, 19, 15, 0.56)';
+    const nodeText   = isDark ? 'rgba(242, 237, 229, 0.95)' : 'rgba(22, 19, 15, 0.95)';
+    const edgeColor  = isDark ? 'rgba(242, 237, 229, 0.40)' : 'rgba(22, 19, 15, 0.40)';
+    return {
+      fontFamily: "'Space Grotesk', system-ui, sans-serif",
+      fontSize: '15px',
+      primaryColor: nodeFill,
+      primaryBorderColor: nodeBorder,
+      primaryTextColor: nodeText,
+      secondaryColor: nodeFill,
+      secondaryBorderColor: nodeBorder,
+      secondaryTextColor: nodeText,
+      tertiaryColor: nodeFill,
+      tertiaryBorderColor: nodeBorder,
+      tertiaryTextColor: nodeText,
+      lineColor: edgeColor,
+      noteBkgColor: nodeFill,
+      noteTextColor: nodeText,
+      noteBorderColor: nodeBorder,
+    };
+  }
+
+  mermaid.registerLayoutLoaders(elkLayouts);
+  function initMermaid() {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      look: 'classic',
+      layout: 'elk',
+      themeVariables: mermaidTheme(),
+    });
+  }
+  initMermaid();
+
+  // Safe SVG insertion: DOMParser + replaceChildren (avoids innerHTML).
+  function mountSvg(container, svgString) {
+    const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+    const node = doc.documentElement;
+    container.replaceChildren(document.importNode(node, true));
+    return container.firstElementChild;
+  }
+
+  function initDiagram(shell) {
+    const wrap = shell.querySelector('.mermaid-wrap');
+    const viewport = shell.querySelector('.mermaid-viewport');
+    const canvas = shell.querySelector('.mermaid-canvas');
+    const source = shell.querySelector('.diagram-source');
+    const label = shell.querySelector('.zoom-label');
+
+    if (!wrap || !viewport || !canvas || !source || !label) {
+      console.error('initDiagram: missing required elements in', shell);
+      return;
+    }
+
+    let zoom = 1;
+    let fitMode = 'contain';
+    let panX = 0;
+    let panY = 0;
+    let svgW = 0;
+    let svgH = 0;
+
+    let sx = 0;
+    let sy = 0;
+    let spx = 0;
+    let spy = 0;
+
+    let touchDist = 0;
+    let touchCx = 0;
+    let touchCy = 0;
+
+    function constrainPan() {
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      const rW = svgW * zoom;
+      const rH = svgH * zoom;
+      const pad = config.fitPadding;
+
+      panX = (rW + pad * 2 <= vpW)
+        ? (vpW - rW) / 2
+        : clamp(panX, vpW - rW - pad, pad);
+      panY = (rH + pad * 2 <= vpH)
+        ? (vpH - rH) / 2
+        : clamp(panY, vpH - rH - pad, pad);
+    }
+
+    function applyTransform() {
+      const svg = canvas.querySelector('svg');
+      if (!svg || !svgW) return;
+
+      constrainPan();
+      svg.style.width = (svgW * zoom) + 'px';
+      svg.style.height = (svgH * zoom) + 'px';
+      canvas.style.transform = `translate(${panX}px, ${panY}px)`;
+      label.textContent = Math.round(zoom * 100) + '% \u2014 ' + fitMode;
+    }
+
+    function canPan() {
+      const rW = svgW * zoom;
+      const rH = svgH * zoom;
+      return rW + config.fitPadding * 2 > viewport.clientWidth
+          || rH + config.fitPadding * 2 > viewport.clientHeight;
+    }
+
+    function computeSmartFit() {
+      const vpW = viewport.clientWidth;
+      const vpH = viewport.clientHeight;
+      const aW = Math.max(80, vpW - config.fitPadding * 2);
+      const aH = Math.max(80, vpH - config.fitPadding * 2);
+      const contain = Math.min(aW / svgW, aH / svgH);
+
+      let z = contain;
+      let mode = 'contain';
+      if (contain < config.readabilityFloor) {
+        const chartR = svgH / svgW;
+        const vpR = vpH / Math.max(vpW, 1);
+        if (chartR >= vpR) {
+          z = aW / svgW;
+          mode = 'width-priority';
+        } else {
+          z = aH / svgH;
+          mode = 'height-priority';
+        }
+      }
+      return { zoom: clamp(z, config.minZoom, config.maxInitialZoom), mode };
+    }
+
+    function fitDiagram() {
+      if (!svgW) return;
+      const fit = computeSmartFit();
+      zoom = fit.zoom;
+      fitMode = fit.mode;
+      panX = (viewport.clientWidth - svgW * zoom) / 2;
+      panY = (viewport.clientHeight - svgH * zoom) / 2;
+      applyTransform();
+    }
+
+    function setOneToOne() {
+      zoom = clamp(1, config.minZoom, config.maxZoom);
+      fitMode = '1:1';
+      panX = (viewport.clientWidth - svgW * zoom) / 2;
+      panY = (viewport.clientHeight - svgH * zoom) / 2;
+      applyTransform();
+    }
+
+    function zoomAround(factor, cx, cy) {
+      const next = clamp(zoom * factor, config.minZoom, config.maxZoom);
+      const ratio = next / zoom;
+      panX = cx - ratio * (cx - panX);
+      panY = cy - ratio * (cy - panY);
+      zoom = next;
+      fitMode = 'custom';
+      applyTransform();
+    }
+
+    function readSvgNaturalSize(svg) {
+      let w = 0;
+      let h = 0;
+      if (svg.viewBox?.baseVal?.width > 0) {
+        w = svg.viewBox.baseVal.width;
+        h = svg.viewBox.baseVal.height;
+      }
+      if (!w) {
+        w = parseFloat(svg.getAttribute('width')) || 0;
+        h = parseFloat(svg.getAttribute('height')) || 0;
+      }
+      if (!w) {
+        const b = svg.getBBox();
+        w = b.width;
+        h = b.height;
+      }
+      if (!w) {
+        const r = svg.getBoundingClientRect();
+        w = r.width || 1000;
+        h = r.height || 700;
+      }
+      if (!svg.getAttribute('viewBox')) {
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      }
+      return { w, h };
+    }
+
+    function setAdaptiveHeight() {
+      if (!svgW) return;
+      const usableW = Math.max(280, wrap.getBoundingClientRect().width - 2);
+      const idealH = (svgH / svgW) * usableW + config.fitPadding * 2;
+      const maxVp = Math.floor(innerHeight * config.maxHeightVh);
+      const hardMax = Math.min(config.maxHeightPx, Math.max(config.minHeight + 40, maxVp));
+      wrap.style.height = Math.round(clamp(idealH, config.minHeight, hardMax)) + 'px';
+    }
+
+    function openInNewTab() {
+      const svg = canvas.querySelector('svg');
+      if (!svg) return;
+      const serialized = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([serialized], { type: 'image/svg+xml' });
+      open(URL.createObjectURL(blob), '_blank');
+    }
+
+    async function render() {
+      try {
+        const code = source.textContent.trim();
+        if (!code) {
+          label.textContent = 'Error: Empty source';
+          return;
+        }
+
+        const id = 'diagram-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const { svg } = await mermaid.render(id, code);
+
+        const svgNode = mountSvg(canvas, svg);
+        if (!svgNode || svgNode.tagName.toLowerCase() !== 'svg') {
+          label.textContent = 'Error: No SVG';
+          return;
+        }
+
+        const size = readSvgNaturalSize(svgNode);
+        svgW = size.w;
+        svgH = size.h;
+
+        svgNode.removeAttribute('width');
+        svgNode.removeAttribute('height');
+        svgNode.style.maxWidth = 'none';
+        svgNode.style.display = 'block';
+
+        setAdaptiveHeight();
+        fitDiagram();
+      } catch (err) {
+        console.error('Mermaid render failed:', err);
+        label.textContent = 'Error: ' + (err.message || 'Render failed');
+      }
+    }
+
+    const actions = {
+      'zoom-in': () => zoomAround(1 + config.zoomStep, viewport.clientWidth / 2, viewport.clientHeight / 2),
+      'zoom-out': () => zoomAround(1 / (1 + config.zoomStep), viewport.clientWidth / 2, viewport.clientHeight / 2),
+      'zoom-fit': fitDiagram,
+      'zoom-one': setOneToOne,
+      'zoom-expand': openInNewTab
+    };
+
+    Object.entries(actions).forEach(([action, handler]) => {
+      wrap.querySelector(`[data-action="${action}"]`)?.addEventListener('click', handler);
+    });
+
+    viewport.addEventListener('dblclick', fitDiagram);
+
+    viewport.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const rect = viewport.getBoundingClientRect();
+        const factor = e.deltaY < 0 ? 1 + config.zoomStep : 1 / (1 + config.zoomStep);
+        zoomAround(factor, e.clientX - rect.left, e.clientY - rect.top);
+        return;
+      }
+      if (canPan()) {
+        e.preventDefault();
+        panX -= e.deltaX;
+        panY -= e.deltaY;
+        applyTransform();
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.zoom-controls') || !canPan()) return;
+      wrap.classList.add('is-panning');
+      sx = e.clientX;
+      sy = e.clientY;
+      spx = panX;
+      spy = panY;
+      e.preventDefault();
+
+      activeDrag = {
+        onMove: (ev) => {
+          panX = spx + (ev.clientX - sx);
+          panY = spy + (ev.clientY - sy);
+          applyTransform();
+        },
+        onEnd: () => {
+          wrap.classList.remove('is-panning');
+        }
+      };
+    });
+
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
+        spx = panX;
+        spy = panY;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchDist = Math.sqrt(dx * dx + dy * dy);
+        const r = viewport.getBoundingClientRect();
+        touchCx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+        touchCy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+      }
+    }, { passive: true });
+
+    viewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && canPan()) {
+        if (touchDist > 0) {
+          sx = e.touches[0].clientX;
+          sy = e.touches[0].clientY;
+          spx = panX;
+          spy = panY;
+          touchDist = 0;
+        }
+        e.preventDefault();
+        panX = spx + (e.touches[0].clientX - sx);
+        panY = spy + (e.touches[0].clientY - sy);
+        applyTransform();
+      } else if (e.touches.length === 2 && touchDist > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        zoomAround(d / touchDist, touchCx, touchCy);
+        touchDist = d;
+      }
+    }, { passive: false });
+
+    new ResizeObserver(() => {
+      if (svgW) {
+        setAdaptiveHeight();
+        fitDiagram();
+      }
+    }).observe(wrap);
+
+    render();
+    return render;
+  }
+
+  const shellRenderers = [];
+  document.querySelectorAll('.diagram-shell').forEach(shell => {
+    const renderer = initDiagram(shell);
+    if (renderer) shellRenderers.push(renderer);
+  });
+
+  // ============ THEME TOGGLE WIRING ============
+  const toggle = document.querySelector('.theme-toggle');
+  const buttons = toggle ? [...toggle.querySelectorAll('button')] : [];
+
+  async function reRenderAllMermaid() {
+    initMermaid();
+    const standardBlocks = [...document.querySelectorAll('pre.mermaid, div.mermaid:not(.mermaid-canvas)')];
+    standardBlocks.forEach(el => {
+      el.removeAttribute('data-processed');
+      if (el.dataset.source) el.textContent = el.dataset.source;
+    });
+    if (standardBlocks.length) await mermaid.run({ nodes: standardBlocks });
+    for (const r of shellRenderers) await r();
+  }
+
+  function applyMode(choice) {
+    if (choice === 'system') {
+      delete html.dataset.theme;
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      html.dataset.theme = choice;
+      localStorage.setItem(STORAGE_KEY, choice);
+    }
+    buttons.forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.theme === choice));
+    });
+    reRenderAllMermaid();
+  }
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const markup = html.dataset.theme;
+  const initial = saved === 'light' || saved === 'dark'
+    ? saved
+    : (markup === 'light' || markup === 'dark' ? markup : 'system');
+  if (initial === 'system') delete html.dataset.theme;
+  else html.dataset.theme = initial;
+  buttons.forEach(b => {
+    b.setAttribute('aria-checked', String(b.dataset.theme === initial));
+    b.addEventListener('click', () => applyMode(b.dataset.theme));
+  });
+
+  // In system mode, follow OS changes live.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!html.dataset.theme) reRenderAllMermaid();
+  });
+</script>
+
+</body>
+</html>

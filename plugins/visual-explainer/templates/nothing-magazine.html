@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magazine — Nothing</title>
+<!--
+  Horizontal scroll-snap magazine in the Nothing aesthetic.
+
+  Tokens inherit directly from templates/nothing.html:
+  OLED-black canvas in dark mode, warm off-white (#F5F5F5) in light. Three
+  fonts total — Doto (hero dot-matrix), Space Grotesk (body), Space Mono
+  (every label, ALL CAPS). Flat chrome — borders only, no shadows, no
+  gradients, no blur beyond the nav-dots pill.
+
+  Magazine-only additions: scroll-snap engine, nav dots, counter,
+  keyboard/wheel nav. Interior tints derive from --surface and
+  --surface-raised so they flow with mode changes; the dark cover /
+  back cover / interior dark panel stay absolute #000 in both modes.
+
+  Nothing-specific beats spread across the pages:
+  - Doto hero on cover + full-bleed stat (one per page, never multiples)
+  - Dot-grid background on dark panels
+  - Segmented progress bars as the primary data-viz motif on the quadrant
+  - Bracket-notation labels: [ STATUS ], [ NO DATA ], [ LIVE ]
+  - Accent red (#D71921) used exactly once — on the one critical stat
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /* ============ TOKENS (mirror templates/nothing.html) ============ */
+  :root {
+    --font-display: 'Doto', 'Space Mono', monospace;
+    --font-body:    'Space Grotesk', system-ui, sans-serif;
+    --font-mono:    'Space Mono', 'SF Mono', Consolas, monospace;
+
+    --black:           #000000;
+    --surface:         #111111;
+    --surface-raised:  #1A1A1A;
+    --border:          #222222;
+    --border-visible:  #333333;
+
+    --text-disabled:   #666666;
+    --text-secondary:  #999999;
+    --text-primary:    #E8E8E8;
+    --text-display:    #FFFFFF;
+
+    /* Brand accent — constant across modes, one use max per deck. */
+    --accent:          #D71921;
+    --accent-subtle:   rgba(215, 25, 33, 0.15);
+
+    --success:     #4A9E5C;
+    --warning:     #D4A843;
+    --interactive: #5B9BF6;
+
+    --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --black:           #F5F5F5;
+      --surface:         #FFFFFF;
+      --surface-raised:  #F0F0F0;
+      --border:          #E8E8E8;
+      --border-visible:  #CCCCCC;
+      --text-disabled:   #999999;
+      --text-secondary:  #666666;
+      --text-primary:    #1A1A1A;
+      --text-display:    #000000;
+      --interactive:     #007AFF;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --black: #F5F5F5; --surface: #FFFFFF; --surface-raised: #F0F0F0;
+    --border: #E8E8E8; --border-visible: #CCCCCC;
+    --text-disabled: #999999; --text-secondary: #666666;
+    --text-primary: #1A1A1A; --text-display: #000000;
+    --interactive: #007AFF;
+  }
+  :root[data-theme="dark"] {
+    --black: #000000; --surface: #111111; --surface-raised: #1A1A1A;
+    --border: #222222; --border-visible: #333333;
+    --text-disabled: #666666; --text-secondary: #999999;
+    --text-primary: #E8E8E8; --text-display: #FFFFFF;
+    --interactive: #5B9BF6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--black);
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  /* ============ THEME TOGGLE ============ */
+  .theme-toggle {
+    position: fixed;
+    top: clamp(12px, 2vw, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 200;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: background 200ms var(--ease-out), border-color 200ms var(--ease-out),
+                padding 240ms var(--ease-out), gap 240ms var(--ease-out);
+  }
+  .theme-toggle button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: color 180ms var(--ease-out), background 180ms var(--ease-out),
+                padding 240ms var(--ease-out), gap 220ms var(--ease-out),
+                max-width 300ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+  .theme-toggle__glyph { display: block; flex-shrink: 0; width: 12px; height: 12px; }
+  .theme-toggle__label {
+    display: inline-block;
+    max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+    transition: max-width 280ms var(--ease-out), opacity 200ms var(--ease-out) 40ms;
+  }
+  .theme-toggle button:hover { color: var(--text-display); }
+  .theme-toggle button:focus-visible { outline: 1px solid var(--text-display); outline-offset: 2px; }
+  .theme-toggle button:not([aria-checked="true"]) { max-width: 0; padding: 0; opacity: 0; }
+  .theme-toggle button[aria-checked="true"] { color: var(--text-display); }
+  .theme-toggle:hover,
+  .theme-toggle:focus-within {
+    background: var(--surface);
+    border-color: var(--border-visible);
+    padding: 3px;
+    gap: 2px;
+  }
+  .theme-toggle:hover button:not([aria-checked="true"]),
+  .theme-toggle:focus-within button:not([aria-checked="true"]) {
+    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
+  }
+  .theme-toggle:hover .theme-toggle__label,
+  .theme-toggle:focus-within .theme-toggle__label { max-width: 80px; opacity: 1; }
+
+  /* ============ MAGAZINE ENGINE ============ */
+  .mag {
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: row;
+    scrollbar-width: none;
+  }
+  .mag::-webkit-scrollbar { display: none; }
+
+  .page {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--black);
+    color: var(--text-primary);
+  }
+
+  /* Surface tints — follow the mode; no separate ramp. */
+  .page--surface         { background: var(--surface); }
+  .page--surface-raised  { background: var(--surface-raised); }
+
+  /* Absolute dark — cover, back cover, interior panel. Mode-independent. */
+  .page--dark {
+    background: #000000;
+    --text-display:   #FFFFFF;
+    --text-primary:   #E8E8E8;
+    --text-secondary: #999999;
+    --text-disabled:  #666666;
+    --border:         #222222;
+    --border-visible: #333333;
+    color: var(--text-primary);
+  }
+
+  /* Dot-grid backdrop — signature Nothing motif, reserved for dark pages. */
+  .page--dotgrid {
+    background-color: #000000;
+    background-image: radial-gradient(circle, #333333 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-position: -1px -1px;
+  }
+
+  /* ============ TYPOGRAPHY ============ */
+  .eyebrow,
+  .label {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.85vw, 13px);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .label--dim { color: var(--text-disabled); }
+  .label--on  { color: var(--text-display); }
+
+  .brk {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.9vw, 14px);
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+  .brk--ok  { color: var(--success); }
+  .brk--err { color: var(--accent); }
+  .brk--wrn { color: var(--warning); }
+
+  .display {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(44px, 5.4vw, 88px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: var(--text-display);
+  }
+
+  .body-lg {
+    font-weight: 400;
+    font-size: clamp(17px, 1.4vw, 24px);
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 60ch;
+  }
+
+  /* Doto hero — the moment of surprise. One per page, never more. */
+  .doto {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(120px, 18vw, 296px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+  }
+  .doto-unit {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1vw, 16px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: clamp(20px, 2.5vh, 40px);
+  }
+
+  .half-stat {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(56px, 6.8vw, 120px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============ SEGMENTED PROGRESS BAR (signature motif) ============ */
+  .seg-bar {
+    display: flex;
+    gap: 2px;
+    width: 100%;
+    height: clamp(14px, 1.6vh, 22px);
+  }
+  .seg {
+    flex: 1;
+    background: var(--border);
+  }
+  .seg--on  { background: var(--text-display); }
+  .seg--ok  { background: var(--success); }
+  .seg--wrn { background: var(--warning); }
+  .seg--err { background: var(--accent); }
+
+  /* ============ PAGE LAYOUTS ============ */
+
+  /* Cover */
+  .page--cover {
+    padding: clamp(48px, 5vh, 96px);
+    justify-content: space-between;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+  }
+  .page--cover .cover-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(32px, 4vw, 72px);
+    align-items: flex-end;
+    width: 100%;
+    flex: 1;
+  }
+  .cover-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 32ch;
+  }
+
+  /* Content page — anchored to bottom-left */
+  .page--content {
+    padding: clamp(64px, 7vh, 112px);
+    justify-content: flex-end;
+    gap: 24px;
+  }
+  .page--centered { justify-content: center; }
+
+  /* Split 50/50 */
+  .page--split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+  .half {
+    padding: clamp(48px, 6vh, 96px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+  .half:last-child { border-right: none; }
+  .half--dark {
+    background: #000000;
+    --text-display: #FFFFFF; --text-primary: #E8E8E8;
+    --text-secondary: #999999; --border: #222222;
+    color: var(--text-primary);
+  }
+  .half--surface  { background: var(--surface); }
+  .half--raised   { background: var(--surface-raised); }
+
+  /* Full-bleed Doto stat */
+  .page--stat {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(48px, 6vh, 96px);
+  }
+  .stat-anchor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* 2x2 quadrant — each cell a KPI w/ segmented bar */
+  .page--quadrant {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 0;
+  }
+  .q {
+    padding: clamp(40px, 5vh, 72px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .q:nth-child(2n) { border-right: none; }
+  .q:nth-child(n+3) { border-bottom: none; }
+  .q-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .q-value {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(40px, 4.2vw, 72px);
+    line-height: 1;
+    color: var(--text-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .q-value--ok  { color: var(--success); }
+  .q-value--wrn { color: var(--warning); }
+  .q-value--err { color: var(--accent); }
+  .q-unit {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1vw, 16px);
+    letter-spacing: 0.12em;
+    color: var(--text-secondary);
+  }
+  .q-body {
+    font-size: clamp(14px, 1vw, 18px);
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  /* 6-cell grid — bracket takeaways */
+  .page--grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    padding: 0;
+  }
+  .cell {
+    padding: clamp(24px, 3vh, 48px);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+  }
+  .cell:nth-child(3n) { border-right: none; }
+  .cell:nth-child(n+4) { border-bottom: none; }
+  .cell-head {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: clamp(20px, 1.8vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--text-display);
+  }
+
+  /* ============ NAV DOTS + COUNTER ============ */
+  .nav-dots {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 14px; height: 8px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    padding: 0;
+    transition: background 180ms var(--ease-out), border-color 180ms var(--ease-out);
+  }
+  .nav-dot:hover { background: rgba(255, 255, 255, 0.35); }
+  .nav-dot.active {
+    background: #FFFFFF;
+    border-color: #FFFFFF;
+  }
+
+  .counter {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--text-secondary);
+    z-index: 100;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .page--cover .cover-main { grid-template-columns: 1fr; gap: 32px; }
+    .page--split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .half { border-right: none; border-bottom: 1px solid var(--border); }
+    .half:last-child { border-bottom: none; }
+    .page--quadrant { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+    .q:nth-child(2n) { border-right: 1px solid var(--border); }
+    .q:nth-child(n+3) { border-bottom: 1px solid var(--border); }
+    .page--grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .cell:nth-child(3n) { border-right: 1px solid var(--border); }
+    .cell:nth-child(2n) { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="theme-toggle" role="radiogroup" aria-label="Theme">
+  <button type="button" role="radio" data-theme="light" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Light</span>
+  </button>
+  <button type="button" role="radio" data-theme="dark" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Dark</span>
+  </button>
+  <button type="button" role="radio" data-theme="system" aria-checked="true">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+    </svg>
+    <span class="theme-toggle__label">Auto</span>
+  </button>
+</div>
+
+<div class="counter"><span id="counter-current">01</span> / <span id="counter-total">08</span></div>
+
+<div class="mag" id="mag" aria-label="Magazine">
+
+  <!-- Page 1 — COVER. Dark canvas, dot-grid behind, Doto hero. -->
+  <section class="page page--dark page--dotgrid page--cover" aria-label="Cover">
+    <div class="meta-row">
+      <span class="label label--on">[ NOTHING · FIELD REPORT ]</span>
+      <span class="label">2026-Q2 · ISSUE 01</span>
+    </div>
+    <div class="cover-main">
+      <div class="cover-copy">
+        <span class="eyebrow">Post-incident review</span>
+        <h1 class="display" style="font-size: clamp(32px, 3.8vw, 64px);">One partition key. Eight-point-four times the ceiling.</h1>
+        <p class="body-lg">A dispatch from the on-call phone call at 03:14 UTC to the config commit at 03:41.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0;">
+        <div class="doto" aria-label="8.4 times" style="font-size: clamp(96px, 15vw, 248px);">8.4<span style="font-family: var(--font-mono); font-weight: 400; font-size: 0.18em; color: var(--text-secondary); margin-left: 0.08em; vertical-align: 0.55em;">×</span></div>
+        <span class="doto-unit">THROUGHPUT · MULTIPLIER · PROD</span>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span class="label">[ 24 MIN READ ]</span>
+      <span class="label">visual-explainer · nothing</span>
+    </div>
+  </section>
+
+  <!-- Page 2 — Opening. Surface tint. -->
+  <section class="page page--surface page--content" aria-label="Opening">
+    <span class="eyebrow">§ 01 · OPENING</span>
+    <h2 class="display">The dashboard said the queue was fine. The queue said otherwise.</h2>
+    <p class="body-lg">Between the two, we lost three customers before anyone reconciled the gap. Every metric that mattered was buried under an average that smoothed away the ceiling.</p>
+    <div class="brk brk--wrn" style="margin-top: 16px;">[ GAP DETECTED · 2026-03-22 03:14 UTC ]</div>
+  </section>
+
+  <!-- Page 3 — Split: before / after. -->
+  <section class="page page--split" aria-label="Before and after">
+    <div class="half half--dark">
+      <span class="label">[ BEFORE ]</span>
+      <div class="half-stat">500<span class="q-unit" style="margin-left: 8px;">RPS</span></div>
+      <div class="seg-bar" aria-label="Five of ten segments, warning">
+        <span class="seg seg--wrn"></span>
+        <span class="seg seg--wrn"></span>
+        <span class="seg seg--wrn"></span>
+        <span class="seg seg--wrn"></span>
+        <span class="seg seg--wrn"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg"></span>
+      </div>
+      <p class="body-lg">Throughput ceiling — not the average. Past this point the queue depth climbed linearly until workers OOM'd.</p>
+    </div>
+    <div class="half half--raised">
+      <span class="label">[ AFTER ]</span>
+      <div class="half-stat">4,200<span class="q-unit" style="margin-left: 8px;">RPS</span></div>
+      <div class="seg-bar" aria-label="Ten of ten segments, ok">
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+      </div>
+      <p class="body-lg">Partition by tenant instead of by message type. 8.4× the headroom on the same boxes, same binaries.</p>
+    </div>
+  </section>
+
+  <!-- Page 4 — Full-bleed stat. The one Doto per page rule still holds. -->
+  <section class="page page--dark page--dotgrid page--stat" aria-label="Key stat">
+    <div class="stat-anchor">
+      <div class="doto" aria-label="99.98 percent">99.98<span style="font-family: var(--font-mono); font-size: 0.18em; color: var(--text-secondary); margin-left: 0.1em; vertical-align: 0.6em;">%</span></div>
+      <span class="doto-unit">UPTIME · 30-DAY · POST-PARTITION</span>
+      <div class="seg-bar" style="max-width: 540px; margin-top: 48px;">
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 5 — Quadrant of KPIs. The one accent-red use sits here. -->
+  <section class="page page--quadrant" aria-label="Four trade-offs">
+    <div class="q" style="background: var(--black);">
+      <div class="q-head">
+        <span class="label">[ LATENCY ]</span>
+        <span class="brk brk--ok">↓ 68%</span>
+      </div>
+      <div class="q-value q-value--ok">P99 · 248<span class="q-unit" style="margin-left: 6px;">MS</span></div>
+      <div class="seg-bar">
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg"></span><span class="seg"></span>
+      </div>
+      <p class="q-body">Head-of-line blocking from oversize payloads, eliminated.</p>
+    </div>
+    <div class="q" style="background: var(--surface);">
+      <div class="q-head">
+        <span class="label">[ THROUGHPUT ]</span>
+        <span class="brk brk--ok">+ 8.4 ×</span>
+      </div>
+      <div class="q-value q-value--ok">4,200<span class="q-unit" style="margin-left: 6px;">RPS</span></div>
+      <div class="seg-bar">
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+        <span class="seg seg--ok"></span><span class="seg seg--ok"></span>
+      </div>
+      <p class="q-body">Same hardware. No horizontal scaling event triggered.</p>
+    </div>
+    <div class="q" style="background: var(--surface-raised);">
+      <div class="q-head">
+        <span class="label">[ COST ]</span>
+        <span class="brk">Δ 0</span>
+      </div>
+      <div class="q-value">$0<span class="q-unit" style="margin-left: 6px;">MO</span></div>
+      <div class="seg-bar">
+        <span class="seg seg--on"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+      </div>
+      <p class="q-body">The fix was a partition key, not more boxes. No invoice delta.</p>
+    </div>
+    <!-- The one accent-red use — the single open action item. -->
+    <div class="q" style="background: var(--black);">
+      <div class="q-head">
+        <span class="label">[ OPEN ACTION ]</span>
+        <span class="brk brk--err">[ 1 CRIT ]</span>
+      </div>
+      <div class="q-value q-value--err">01<span class="q-unit" style="margin-left: 6px;">WRITE-UP</span></div>
+      <div class="seg-bar">
+        <span class="seg seg--err"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+      </div>
+      <p class="q-body">Post-mortem doc — due before the next on-call rotation.</p>
+    </div>
+  </section>
+
+  <!-- Page 6 — Interior dark panel w/ dot-grid. The third required dark page. -->
+  <section class="page page--dark page--dotgrid page--content page--centered" aria-label="Reframe">
+    <div style="max-width: 28ch;">
+      <span class="eyebrow">§ 02 · REFRAME</span>
+      <h2 class="display" style="margin-top: 24px;">Partition keys encode the contract you actually sell.</h2>
+      <p class="body-lg" style="margin-top: 28px;">Everything else is commentary. When tenant ordering is the guarantee, partition by tenant. We had confused the two for eleven months.</p>
+      <div class="brk brk--ok" style="margin-top: 28px;">[ SHIPPED · TOPIC CONFIG · 1 LINE ]</div>
+    </div>
+  </section>
+
+  <!-- Page 7 — 6-cell grid of bracket takeaways, surface tint. -->
+  <section class="page page--surface page--grid" aria-label="Takeaways">
+    <div class="cell">
+      <span class="label">[ 01 · OBSERVABILITY ]</span>
+      <h4 class="cell-head">Read the two graphs together, or don't read either.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="label">[ 02 · MEASUREMENT ]</span>
+      <h4 class="cell-head">Throughput ceilings hide in averages.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="label">[ 03 · DESIGN ]</span>
+      <h4 class="cell-head">Partition keys encode the real contract.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="label">[ 04 · OPERATIONS ]</span>
+      <h4 class="cell-head">The fix is almost always a config change.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="label">[ 05 · POSTMORTEM ]</span>
+      <h4 class="cell-head">Write the write-up before the memory fades.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+    <div class="cell">
+      <span class="label">[ 06 · FOLLOW-UP ]</span>
+      <h4 class="cell-head">Ship the one-line fix. Then write the essay.</h4>
+      <div class="seg-bar" style="max-width: 140px; height: 6px;">
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span><span class="seg seg--on"></span>
+        <span class="seg seg--on"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 8 — BACK COVER. Dark, dot-grid. Closing brk line. -->
+  <section class="page page--dark page--dotgrid page--cover" aria-label="Back cover">
+    <div class="meta-row">
+      <span class="label label--on">[ END OF DISPATCH ]</span>
+      <span class="label">No. 01 · 2026-Q2</span>
+    </div>
+    <div class="cover-main" style="align-items: center;">
+      <div class="cover-copy" style="max-width: 36ch;">
+        <span class="eyebrow">Closing</span>
+        <h2 class="display" style="font-size: clamp(32px, 3.8vw, 64px);">Next issue — the cache key that outlived the cache.</h2>
+        <div class="brk" style="margin-top: 16px;">[ NO DATA · PENDING WRITE-UP ]</div>
+      </div>
+      <div style="text-align: right;">
+        <span class="label" style="display: block;">NEXT · SIGNAL</span>
+        <div style="font-family: var(--font-mono); font-size: clamp(14px, 1.2vw, 18px); color: var(--text-display); letter-spacing: 0.05em; margin-top: 8px;">02 / 2026-Q3</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span class="label">visual-explainer · nothing</span>
+      <span class="label">issue 01 / 2026</span>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav-dots" aria-label="Page navigation">
+  <!-- Generated by script. -->
+</nav>
+
+<script>
+  (function () {
+    const html = document.documentElement;
+    const STORAGE_KEY = 'nothing-magazine-theme';
+
+    // Theme toggle
+    const toggle = document.querySelector('.theme-toggle');
+    const themeButtons = toggle ? [...toggle.querySelectorAll('button')] : [];
+
+    function applyMode(choice) {
+      if (choice === 'system') {
+        delete html.dataset.theme;
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        html.dataset.theme = choice;
+        localStorage.setItem(STORAGE_KEY, choice);
+      }
+      themeButtons.forEach(b => {
+        b.setAttribute('aria-checked', String(b.dataset.theme === choice));
+      });
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const markup = html.dataset.theme;
+    const initial = saved === 'light' || saved === 'dark'
+      ? saved
+      : (markup === 'light' || markup === 'dark' ? markup : 'system');
+    if (initial === 'system') delete html.dataset.theme;
+    else html.dataset.theme = initial;
+    themeButtons.forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.theme === initial));
+      b.addEventListener('click', () => applyMode(b.dataset.theme));
+    });
+
+    // Magazine engine
+    const mag = document.getElementById('mag');
+    const pages = Array.from(mag.querySelectorAll('.page'));
+    const nav = document.querySelector('.nav-dots');
+    const counterCurrent = document.getElementById('counter-current');
+    const counterTotal = document.getElementById('counter-total');
+
+    pages.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('data-page', String(i + 1));
+      btn.setAttribute('aria-label', 'Go to page ' + (i + 1));
+      btn.addEventListener('click', () => {
+        mag.scrollTo({ left: i * window.innerWidth, behavior: 'smooth' });
+      });
+      nav.appendChild(btn);
+    });
+
+    counterTotal.textContent = String(pages.length).padStart(2, '0');
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const idx = pages.indexOf(entry.target);
+          if (idx >= 0) {
+            document.querySelectorAll('.nav-dot').forEach((d, i) =>
+              d.classList.toggle('active', i === idx)
+            );
+            counterCurrent.textContent = String(idx + 1).padStart(2, '0');
+          }
+        }
+      });
+    }, { root: mag, threshold: [0.5] });
+
+    pages.forEach((p) => io.observe(p));
+
+    document.addEventListener('keydown', (e) => {
+      const w = window.innerWidth;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        mag.scrollBy({ left: w, behavior: 'smooth' });
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        mag.scrollBy({ left: -w, behavior: 'smooth' });
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        mag.scrollTo({ left: 0, behavior: 'smooth' });
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        mag.scrollTo({ left: mag.scrollWidth, behavior: 'smooth' });
+      }
+    });
+
+    mag.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        mag.scrollBy({ left: e.deltaY, behavior: 'auto' });
+      }
+    }, { passive: false });
+  })();
+</script>
+</body>
+</html>

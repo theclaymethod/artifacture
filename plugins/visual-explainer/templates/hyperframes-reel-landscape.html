@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Explainer — Reel (landscape)</title>
+<!--
+  Hyperframes reel (brain-rot) explainer starter — LANDSCAPE variant.
+
+  Format:    16:9 landscape, 1920 x 1080, 30 fps.
+  Duration:  30-60 seconds. Default 45s.
+  Audience:  X/Twitter video embeds, LinkedIn posts, YouTube-embedded,
+             desktop Slack/Discord shares, conference intro stings.
+             Same brain-rot pacing as the 9:16 reel — just landscape.
+  Pacing:    Hard cuts every 1.2-1.8s during body beats. Kinetic typography.
+             Burned-in captions in a centered pill near the bottom.
+             TTS narration synced to beat boundaries.
+
+  Pair with: references/hyperframes.md, references/gsap-rules.md, references/reel-patterns.md.
+  Render:    npx hyperframes render --output out.mp4 --quality standard
+
+  Beat structure (reel-patterns.md) is IDENTICAL across aspects:
+    0.0s  HOOK         Oversized stat / claim
+    2.0s  PROBLEM      What's broken; one-line tension
+    5.0s  CONTEXT      Why it matters
+    9.0s  MECHANISM    Progressive diagram reveal
+   18.0s  PROOF        Stat / chart / quote
+   25.0s  RESOLUTION   Takeaway in one line
+   30.0s  CTA          URL / handle (2s max)
+
+  WHAT DIFFERS FROM 9:16:
+    - Stage is 1920x1080, not 1080x1920
+    - Safe zone: 60px top/bottom (desktop UI is forgiving; no phone chrome)
+    - Hook stat: scales horizontally (280-420px font), can sit next to a stat-label on the same line
+    - Claim text: max-width 1600px; splits into 2 lines of 6-8 words instead of 1-line-per-word stacks
+    - Captions: centered pill 48px from the bottom, max-width 1400px
+    - Mechanism diagrams: can use full horizontal width — split left/right is natural
+    - Split-screen layouts (before/after, problem/solution) become a native option
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f2ede5;
+    --muted: rgba(242, 237, 229, 0.70);
+    --accent: #f7591f;
+    --caption-bg: rgba(0, 0, 0, 0.78);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; overflow: hidden; }
+
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* Desktop safe zone: only 60px top/bottom (no phone chrome to avoid). */
+  .safe {
+    position: absolute;
+    inset: 60px 96px 140px 96px; /* bottom 140px reserved for caption pill clearance */
+  }
+
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    padding: 0 96px;
+  }
+
+  /* Hook stat + label on one line (native landscape pattern) */
+  .hook-row {
+    display: flex;
+    align-items: baseline;
+    gap: 48px;
+    justify-content: center;
+  }
+  .hook-stat {
+    font-size: 360px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .hook-label {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 32px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    max-width: 540px;
+  }
+
+  .claim {
+    font-size: 120px;
+    line-height: 1.05;
+    font-weight: 600;
+    text-align: center;
+    max-width: 1600px;
+  }
+  .claim .w { display: inline-block; }
+  .claim .accent { color: var(--accent); }
+
+  .kicker {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 28px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+
+  .body {
+    font-size: 44px;
+    line-height: 1.35;
+    color: var(--fg);
+    text-align: center;
+    max-width: 1400px;
+    margin-top: 24px;
+  }
+
+  /* Split layout — native landscape pattern */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .split__side {
+    padding: 0 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+  }
+  .split__side--dark  { background: var(--bg); }
+  .split__side--alt   { background: #141414; border-left: 1px solid rgba(242, 237, 229, 0.12); }
+
+  /* Burned-in captions — centered pill near the bottom.
+     One <div> per narration sentence, generated verbatim from
+     transcript.json. See reel-patterns.md § "The verbatim-transcript rule". */
+  .captions {
+    position: absolute;
+    left: 50%;
+    bottom: 48px;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 1400px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .cap {
+    display: inline-block;
+    padding: 16px 28px;
+    background: var(--caption-bg);
+    max-width: 100%;
+    border-radius: 999px;
+    border-left: 3px solid var(--accent);
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--fg);
+    text-align: center;
+    opacity: 0;
+  }
+  .cap .accent { color: var(--accent); }
+</style>
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="reel-landscape"
+  data-width="1920"
+  data-height="1080"
+  data-start="0"
+  data-duration="32"
+>
+  <!-- HOOK: 0-2s -->
+  <div class="beat beat-hook">
+    <div class="safe" style="display: flex; align-items: center; justify-content: center;">
+      <div class="hook-row">
+        <div class="hook-stat">4,200</div>
+        <div class="hook-label">requests<br />per<br />second</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM: 2-5s -->
+  <div class="beat beat-problem">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE PROBLEM</span>
+      <h2 class="claim">
+        <span class="w">Your</span> <span class="w">queue</span> <span class="w accent">chokes</span> <span class="w">at</span> <span class="w">500.</span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- CONTEXT: 5-9s -->
+  <div class="beat beat-context">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHY IT MATTERS</span>
+      <h2 class="claim">Every backed-up job is a user waiting.</h2>
+    </div>
+  </div>
+
+  <!-- MECHANISM: 9-18s — split-screen native to 16:9 -->
+  <div class="beat beat-mechanism">
+    <div class="split">
+      <div class="split__side split__side--dark">
+        <span class="kicker">BEFORE</span>
+        <h3 class="claim" style="font-size: 72px; text-align: left; max-width: 100%;">One shared queue.<br />Every tenant fights.</h3>
+      </div>
+      <div class="split__side split__side--alt">
+        <span class="kicker">AFTER</span>
+        <h3 class="claim" style="font-size: 72px; text-align: left; max-width: 100%;">One queue per tenant.<br />Nobody waits.</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROOF: 18-25s -->
+  <div class="beat beat-proof">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">THE RESULT</span>
+      <div class="hook-row">
+        <div class="hook-stat" style="font-size: 320px;">8.4<span style="font-size: 0.55em; color: var(--muted);">&times;</span></div>
+        <div class="hook-label">throughput<br />in<br />prod</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESOLUTION: 25-30s -->
+  <div class="beat beat-resolution">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">WHAT YOU DO</span>
+      <h2 class="claim">Partition by tenant, not by type.</h2>
+    </div>
+  </div>
+
+  <!-- CTA: 30-32s -->
+  <div class="beat beat-cta">
+    <div class="safe" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <span class="kicker">FULL WRITEUP</span>
+      <h2 class="claim">@your-handle</h2>
+    </div>
+  </div>
+
+  <!-- Burned-in caption layer -->
+  <!-- Captions: generate from transcript.json, one sentence per <div>.
+         bash {{skill_dir}}/scripts/captions-from-transcript.sh transcript.json
+       Do NOT hand-author paraphrases of the visuals. -->
+  <div class="captions">
+    <div class="cap cap-1" data-start="0.03" data-duration="1.57">Agent design is a fitting problem.</div>
+    <div class="cap cap-2" data-start="1.63" data-duration="1.08">Hold the model fixed.</div>
+    <div class="cap cap-3" data-start="2.79" data-duration="1.45">Search the harness around it.</div>
+    <!-- ...one <div> per narration sentence... -->
+  </div>
+
+  <!-- Narration track
+  <audio data-start="0" data-duration="32" data-track-index="0" src="narration.wav"></audio>
+  -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const tl = gsap.timeline({ paused: true });
+
+  // HOOK 0-2s
+  tl.addLabel("hook", 0);
+  tl.fromTo(".beat-hook", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "hook+=0");
+  const n = { v: 0 };
+  tl.to(n, {
+    v: 4200,
+    duration: 0.9,
+    ease: "power3.out",
+    onUpdate: () => { document.querySelector(".beat-hook .hook-stat").textContent = Math.floor(n.v).toLocaleString(); },
+  }, "hook+=0.1");
+  tl.from(".beat-hook .hook-label", { x: 40, opacity: 0, duration: 0.4 }, "hook+=1.0");
+  tl.to(".beat-hook", { opacity: 0, duration: 0.2 }, "hook+=1.8");
+
+  // PROBLEM 2-5s
+  tl.addLabel("problem", 2);
+  tl.fromTo(".beat-problem", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "problem+=0");
+  tl.from(".beat-problem .kicker", { y: 20, opacity: 0, duration: 0.3 }, "problem+=0.1");
+  tl.from(".beat-problem .w", { y: 60, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power3.out" }, "problem+=0.4");
+  tl.to(".beat-problem", { opacity: 0, duration: 0.2 }, "problem+=2.8");
+
+  // CONTEXT 5-9s
+  tl.addLabel("context", 5);
+  tl.fromTo(".beat-context", { opacity: 0 }, { opacity: 1, duration: 0.2 }, "context+=0");
+  tl.from(".beat-context .kicker", { y: 20, opacity: 0, duration: 0.3 }, "context+=0.1");
+  tl.from(".beat-context .claim", { y: 40, opacity: 0, duration: 0.5 }, "context+=0.4");
+  tl.to(".beat-context", { opacity: 0, duration: 0.25 }, "context+=3.75");
+
+  // MECHANISM 9-18s — split reveal
+  tl.addLabel("mech", 9);
+  tl.fromTo(".beat-mechanism", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "mech+=0");
+  tl.from(".beat-mechanism .split__side--dark",  { xPercent: -10, opacity: 0, duration: 0.6 }, "mech+=0.1");
+  tl.from(".beat-mechanism .split__side--alt",   { xPercent:  10, opacity: 0, duration: 0.6 }, "mech+=0.35");
+  tl.to(".beat-mechanism", { opacity: 0, duration: 0.3 }, "mech+=8.7");
+
+  // PROOF 18-25s
+  tl.addLabel("proof", 18);
+  tl.fromTo(".beat-proof", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "proof+=0");
+  tl.from(".beat-proof .kicker", { y: 20, opacity: 0, duration: 0.3 }, "proof+=0.1");
+  tl.from(".beat-proof .hook-stat", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.6)" }, "proof+=0.4");
+  tl.from(".beat-proof .hook-label", { x: 40, opacity: 0, duration: 0.4 }, "proof+=1.0");
+  tl.to(".beat-proof", { opacity: 0, duration: 0.25 }, "proof+=6.75");
+
+  // RESOLUTION 25-30s
+  tl.addLabel("res", 25);
+  tl.fromTo(".beat-resolution", { opacity: 0 }, { opacity: 1, duration: 0.25 }, "res+=0");
+  tl.from(".beat-resolution .kicker", { y: 20, opacity: 0, duration: 0.3 }, "res+=0.1");
+  tl.from(".beat-resolution .claim", { y: 40, opacity: 0, duration: 0.5 }, "res+=0.4");
+  tl.to(".beat-resolution", { opacity: 0, duration: 0.25 }, "res+=4.75");
+
+  // CTA 30-32s
+  tl.addLabel("cta", 30);
+  tl.fromTo(".beat-cta", { opacity: 0 }, { opacity: 1, duration: 0.3 }, "cta+=0");
+  tl.from(".beat-cta .kicker", { y: 20, opacity: 0, duration: 0.3 }, "cta+=0.1");
+  tl.from(".beat-cta .claim", { y: 30, opacity: 0, duration: 0.4 }, "cta+=0.4");
+
+  // CAPTIONS — each appears during its beat, fades out at the end
+  const caps = [
+    { sel: ".cap-1", s: 0.1,  e: 1.9 },
+    { sel: ".cap-2", s: 2.1,  e: 4.8 },
+    { sel: ".cap-3", s: 5.1,  e: 8.8 },
+    { sel: ".cap-4", s: 9.3,  e: 17.7 },
+    { sel: ".cap-5", s: 18.3, e: 24.6 },
+    { sel: ".cap-6", s: 25.1, e: 29.7 },
+    { sel: ".cap-7", s: 30.1, e: 31.9 },
+  ];
+  caps.forEach(c => {
+    tl.to(c.sel, { opacity: 1, duration: 0.15 }, c.s);
+    tl.to(c.sel, { opacity: 0, duration: 0.2 },  c.e);
+  });
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["reel-landscape"] = tl;
+
+  // Dual-mode: autoplay in a plain browser preview, stay paused under Hyperframes.
+  const isHyperframes = typeof window.__hyperframesCapture !== 'undefined';
+  if (!isHyperframes) { tl.play(); }
+</script>
+</body>
+</html>

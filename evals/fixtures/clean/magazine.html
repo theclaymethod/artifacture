@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magazine Fixture</title>
+<style>
+:root{--font-body:"IBM Plex Sans",sans-serif;--bg:#f7f7f4;--surface:#ffffff;--text:#161616;--border:#b8b8b2;--accent:#2f5d50}
+@media (prefers-color-scheme:dark){:root{--bg:#111111;--surface:#1b1b1b;--text:#eeeeee;--border:#464646;--accent:#8fb7a8}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;overflow-x:clip;overflow-y:hidden}
+body{overflow-wrap:anywhere;font-family:var(--font-body);background:var(--bg);color:var(--text)}
+.mag{height:100dvh;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory}
+.page{min-width:100vw;width:100vw;height:100dvh;scroll-snap-align:start;padding:56px;background:var(--surface)}
+.page--dark{background:#101010;color:#f3f3f0}.page--split{background:#f0eee6}.page--split.page--dark{background:#101010;color:#f3f3f0}.page--stat{background:#ffffff;color:#161616}
+.nav-dots{position:fixed;right:20px;top:50%;z-index:999;display:flex;flex-direction:column;gap:8px;color:#f8f8f2;background:#101010;padding:8px}.nav-dot{width:44px;height:44px;border:1px solid currentColor;background:transparent;color:inherit}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<nav class="nav-dots" aria-label="Pages"><button class="nav-dot" type="button" data-page="0"></button><button class="nav-dot" type="button" data-page="1"></button><button class="nav-dot" type="button" data-page="2"></button><button class="nav-dot" type="button" data-page="3"></button><button class="nav-dot" type="button" data-page="4"></button></nav>
+<main class="mag" data-layout="magazine">
+<section class="page page--dark" data-layout="cover"><h1>Cover</h1></section>
+<section class="page page--split page--dark" data-layout="split"><h2>Inside</h2></section>
+<section class="page page--stat" data-layout="stat"><h2 class="stat-xl" style="font-size:120px">72%</h2></section>
+<section class="page page--dark" data-layout="dark"><h2>Interlude</h2></section>
+<section class="page page--dark" data-layout="back"><h2>Back</h2></section>
+</main>
+<script>
+const mag=document.querySelector('.mag');
+const pages=[...document.querySelectorAll('.page')];
+function go(i){mag.scrollLeft=pages[Math.max(0,Math.min(i,pages.length-1))].offsetLeft}
+document.querySelectorAll('.nav-dot').forEach((button)=>button.addEventListener('click',()=>go(Number(button.dataset.page))));
+document.addEventListener('keydown',(event)=>{if(event.key==='ArrowRight')go(Math.round(mag.scrollLeft/window.innerWidth)+1);if(event.key==='ArrowLeft')go(Math.round(mag.scrollLeft/window.innerWidth)-1)});
+</script>
+</body>
+</html>

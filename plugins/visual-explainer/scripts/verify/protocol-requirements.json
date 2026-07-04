@@ -1,0 +1,238 @@
+[
+  {
+    "family": "F1_slop_global",
+    "req": "Before reporting any artifact as done, render it in a browser and inspect it at 1440x900 and 390x844, in both prefers-color-scheme light and dark; a clean file write is not a green signal. Capture screenshots for the LLM verification passes."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "If no browser automation tool is available, explicitly state that visual verification could not be performed and open the file for the user; never use unqualified affirmative language ('verified', 'renders correctly', 'looks good') when nothing rendered the page."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "Never fall back to ASCII-art tables or diagrams while this skill is loaded; render the content as a styled HTML artifact instead (proactively for any table with 4+ rows or 3+ columns)."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "Slide-deck and video output are opt-in only: never auto-select slide/magazine/video format without an explicit user request or flag (--slides/--magazine/generate-video/render-video)."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "Run all prose (headlines, leads, body paragraphs, card descriptions, callouts, pull quotes, slide body copy) through /unslop before writing it into the HTML."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "For any page that declares a named aesthetic or defines both palettes, verify both light and dark modes render legibly (no white-on-white or invisible text) before delivery."
+  },
+  {
+    "family": "F2_responsive",
+    "req": "Detect artifact profile before running any responsive check: fixed-canvas profiles (horizontal --magazine deck, poster, vertical/horizontal slide deck, reel, video-comp) are exempt from the mobile responsiveness contract and must never be failed by it. Detection signals: fixed px width+height on root/body matching a known canvas, a data-layout=slide|magazine|poster marker, or absence of any @media(max-width) query."
+  },
+  {
+    "family": "F2_responsive",
+    "req": "Before reporting any page-profile artifact as done, render it in a headless browser at 390x844 AND 1440x900, each in both prefers-color-scheme light and dark, and confirm the horizontal-overflow gate (documentElement.scrollWidth - innerWidth <= 1) passes at every viewport/scheme; capture the 390x844 light+dark screenshots for the text-clip and fixed-UI llm-pass reviews."
+  },
+  {
+    "family": "F2_responsive",
+    "req": "When the body-overflow gate fails, run the per-element overflow census to attribute the offending element, then apply the documented fix (wrap in .scroll-x, set min-width:0, or max-width:100%) and re-verify — never ship a page-profile artifact with known horizontal overflow."
+  },
+  {
+    "family": "F2_responsive",
+    "req": "If no browser automation is available, explicitly state that the responsive contract could not be verified and open the file for the user; never report the page as verified on the basis of a clean file write alone."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "Screenshot QA Gate: after authoring any inline-SVG diagram, the rendered output must be opened in a real browser and a per-figure screenshot captured (each figure scrolled into view) before the diagram is reported as done. A clean file write is explicitly NOT a green signal, and a single full-page screenshot is insufficient when multiple figures exist."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "Removal Test pre-output gate: the Removal Test checklist (Type-fit / Removal / Signal / Technical / Typography / Grid) must be walked against the SVG source BEFORE emit; any 'no' answer blocks emit."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "Bounded repair loop: the post-screenshot repair loop is capped at 2 attempts on hand-authored SVG; if defects remain after attempt 2, the figure must be replaced with Mermaid rather than iterating further."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "Diagram element tagging: generation templates must emit data-diagram-role on SVG elements (node/arrow/arrow-label/legend/lifeline/step/decision/merge/entity/lane/layer/ring/item) so downstream counting and classification checks can run deterministically; use the attribute, never a class named 'node' (Mermaid .node collision)."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "Mermaid gating: Mermaid is used only when genuinely superior (15+ node graph, uniform-shape forest where auto-layout beats hand placement, or explicit user request); when used, its rendered SVG remains subject to the diagram anti-pattern, focal, masking, and 4px-grid checks."
+  },
+  {
+    "family": "F3_diagrams",
+    "req": "If no browser automation is available to run the Screenshot QA Gate, the agent must say so explicitly and must not claim the diagram is verified."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Sub-agent fragment contract (enforced at stitch time by the orchestrator, before assembly): each sub-agent's final message must be a single valid JSON object (no prose/markdown/code fences) with required keys role, section_html, scoped_css, fonts_needed, libraries_needed, diagram_sources (notes optional), correct types, and role ∈ {hero,diagram,table,dashboard,prose}. Reject the fragment otherwise."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Sub-agent section_html must be a single <section> (or <header> for the metadata band) with no <style>/<script>/<link>/<head> tags and no inline style= attributes; every scoped_css selector must begin with .ve-{role} (no bare element selectors, *, or :root) and must never redefine root design tokens; scoped_css/section_html must contain no prefers-color-scheme media query, no @import, and no external API/fetch call."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Sub-agent fonts_needed entries must be drawn from {Geist Pixel variants, Doto, Space Grotesk, Space Mono} and libraries_needed from {mermaid, chart.js, anime}; reject unknown fonts/libraries at the fragment gate."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Every diagram_sources {id,source} entry must correspond to a .ve-diagram__canvas[data-id] element in the fragment's section_html and vice versa, so the render loop can find and render each declared diagram."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Fan-out policy: 1–2 sections build sequentially with no sub-agents; 3+ sections dispatch one sub-agent per section in a single parallel Task batch, unless --no-parallel is explicitly requested."
+  },
+  {
+    "family": "F4_presets",
+    "req": "All prose (headlines, leads, body, card descriptions, callouts, pull quotes, slide body copy) must be run through /unslop before it is emitted into HTML."
+  },
+  {
+    "family": "F4_presets",
+    "req": "Aesthetic selection: Mono-Industrial is the default; deviate only when the user names a different aesthetic, supplies a specific palette/typographic direction, or requests a creative/expressive piece. Confirm the chosen aesthetic matches the request before generating."
+  },
+  {
+    "family": "F4_presets",
+    "req": "The hero role/section is used at most once per assembled page, and {{NN}} section-index placeholders must be fully substituted before final output (final-artifact enforcement lives in mono-hero-and-surprise-count and skill-md/no-placeholder-leak respectively)."
+  },
+  {
+    "family": "F5_slides",
+    "req": "Before writing any deck HTML, inventory the source document: enumerate and count every section, subsection, card, table row, decision, specification, collapsible detail, and footnote (slide-patterns Step 1). A 7-section source typically yields 18-25 slides, not 10-13."
+  },
+  {
+    "family": "F5_slides",
+    "req": "After outlining, run the coverage-verify step (Step 5): scan the Step-1 inventory and confirm nothing is unmapped; if a reader of the source would notice something missing, add slides before generating HTML."
+  },
+  {
+    "family": "F5_slides",
+    "req": "Slide-deck and magazine output are opt-in only: never auto-select slide/magazine (or video) format without an explicit user request or --magazine/--slides flag; when ambiguous, ask via AskUserQuestion (vertical deck vs horizontal magazine vs video) before generating."
+  },
+  {
+    "family": "F5_slides",
+    "req": "When --magazine is passed, follow the flag workflow in order: use the horizontal engine, rotate tints (no consecutive repeats), enforce dark cover + dark back cover + >=1 interior dark panel, insert >=1 full-bleed 100px+ stat page, add the nav-dots strip + arrow-key handler, and apply consecutive-layout variety."
+  },
+  {
+    "family": "F5_slides",
+    "req": "During browser verification of a magazine, additionally confirm by interaction (not just measurement): horizontal scrolling works via mouse-wheel+shift, trackpad swipe, arrow keys, and nav dots; and the active nav dot correctly tracks the current page as pages snap into view."
+  },
+  {
+    "family": "F5_slides",
+    "req": "Every deck must be browser-rendered and inspected before being reported as done; assign a planned composition to each slide before writing HTML (layout rhythm, not just content order)."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Poster: after every `poster export`, load and visually inspect the exact exported PNG against the 6-point canvas-fit checklist (edge clipping, cut elements, unexplained blank space, hierarchy survives, hero/moment-of-surprise not shrunk away, status color still only on values) BEFORE reporting the poster done; never claim success if any check fails, even if it 'kind of' fits."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Poster: bound canvas-fit rework to at most 3 attempts (1 initial export + 3 reworks; 4 exports max for the same target). On continued failure, stop and report the specific problem, what was tried, and the last PNG instead of iterating blindly."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Poster: before the first `poster build`/`export`, run `which poster`; if absent, either `npm install -g poster-ai` or fall back to hand-written HTML / inline SVG-CSS — never terminate the task with an error. Apply the same graceful fallback for embedded-graphics poster use."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Poster/slides: for slide export, always produce the interactive HTML deck first, then add per-slide PNGs as a secondary artifact; never ship only PNGs."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Poster: during fit reworks, re-verify status color still appears only on values (not backgrounds, labels, or section headers) — a documented drift risk during 'fit more in' passes (visually enforced by mono-tokens status-color-value-only)."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Video: render in strict order — `npx hyperframes doctor` → `build` → `lint` (abort on error) → `validate` (WCAG contrast audit) → `render -q draft` → extract 3 keyframes → show the user for approval → `render -q standard` only after explicit approval."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Video: `npx hyperframes lint && npx hyperframes validate` must run and pass (or reported failures explicitly fixed) before any standard render; keep `--strict` on (lint errors fail the render) unless the user explicitly opts out."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Reel: extract the 3 review keyframes at the hook (≤2s), the middle of the MECHANISM reveal, and the CTA/RESOLUTION beat windows — not generic start/mid/end (pass explicit -ss timestamps when beat timing diverges from duration/2)."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Reel: if any keyframe shows safe-zone clipping, caption illegibility, or a static dead frame, fix it before the final render."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Video: durations outside the format targets (reel 30–60s, long-form 60–180s) require explicit user confirmation via AskUserQuestion before rendering."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Video/slides: slide-deck and video output are opt-in only — never auto-select slide or video format without an explicit user request or flag (cross-ref skill-md slide-format-opt-in-only)."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Typography: never reuse the same font pairing on two consecutive generated artifacts."
+  },
+  {
+    "family": "F6_poster_video",
+    "req": "Demo capture: target 6–12 screenshot frames per Path-A UI demo, and encode via the provided `frames-to-webm.sh` (VP9, -crf 32 -b:v 0, width capped at 1200px, yuv420p) without overriding its ffmpeg flags."
+  },
+  {
+    "family": "F7_process",
+    "req": "CLARIFY TIER 0 (must ask): When the invoked command is /generate-video, /render-video, /generate-slides --magazine, or /generate-poster, call AskUserQuestion exactly once (1-3 questions) BEFORE running any render/export/build command — UNLESS the user passed --no-ask, or the user's message already contains an escape-hatch phrase ('just generate', \"don't ask\", 'go ahead', 'use defaults'), or the user already supplied a complete brief answering the questions."
+  },
+  {
+    "family": "F7_process",
+    "req": "CLARIFY TIER 2 (never ask): When the invoked command is /fact-check or /share, do NOT call AskUserQuestion at all — operate on the existing target directly."
+  },
+  {
+    "family": "F7_process",
+    "req": "CLARIFY TIER 1 (ask only if unclear): For every other command, write a one-sentence brief covering topic, audience, depth, and aesthetic. If you can write it confidently, generate directly with no AskUserQuestion. If one or more of those four dimensions is unclear, call AskUserQuestion addressing only the unclear dimension(s), then generate."
+  },
+  {
+    "family": "F7_process",
+    "req": "ASKUSERQUESTION SHAPE: Each AskUserQuestion dialog has 1 to 4 questions. Each question that is not multiSelect has 2 to 4 mutually-exclusive options. Each question header is at most 12 characters. When a question has a sensible default, list that option first and label it '(recommended)'."
+  },
+  {
+    "family": "F7_process",
+    "req": "OPT-IN FORMATS: Never auto-select slide-deck or video output. Produce a deck or video only when the user explicitly requests that format or passes the corresponding flag."
+  },
+  {
+    "family": "F7_process",
+    "req": "SOURCE OF TRUTH: Make all content changes in the .mdx/.tsx source and re-export with `npm run ve:export`. Never hand-edit the generated HTML. If no MDX/React source exists and you must hand-write HTML, do it only because the MDX/React path is blocked, and state that fallback explicitly to the user in your final message."
+  },
+  {
+    "family": "F7_process",
+    "req": "FACT-CHECK CONTRACT: For /fact-check, classify every extracted claim as exactly one of Confirmed / Corrected / Unverifiable, and append a verification summary containing: total claims checked, confirmed count, a list of corrections made, and any unverifiable claims. If a sibling or referenced .mdx/.tsx source exists, apply corrections to the source and re-export the HTML; edit generated HTML directly only when it is legacy/no-source output, and record that limitation in the summary."
+  },
+  {
+    "family": "F7_process",
+    "req": "SHARE CONTRACT: For /share, if the input is an .mdx/.tsx source, run `npm run ve:export` to produce HTML first and deploy that HTML. Never deploy raw MDX/TSX source."
+  },
+  {
+    "family": "F7_process",
+    "req": "FLAG VALIDATION: Before rendering video, reject invalid flag values: --fps must be one of 24/30/60; --quality must be one of draft/standard/high; --aspect must be one of 9:16/16:9. Long-form is always 16:9; ignore or warn on any other --aspect for long-form."
+  },
+  {
+    "family": "F7_process",
+    "req": "VIDEO WORKFLOW ORDER: Run the render workflow strictly in this order: (1) run hyperframes-doctor.sh — if it exits non-zero, abort and forward the install hints, do not render; (2) build; (3) run `npx hyperframes lint` and `npx hyperframes validate` and resolve all errors before rendering; (4) render `-q draft`; (5) extract 3 draft keyframes; (6) show the keyframes and ask 'Ready for the final render, or anything to adjust?' and wait for user confirmation; (7) only then run the final render."
+  },
+  {
+    "family": "F7_process",
+    "req": "POSTER CANVAS-FIT LOOP: After each `poster export`, load the exported PNG and inspect it for clipped text, elements cut by the canvas boundary, or collapsed empty space. Fix and re-export at most 3 times; if it is still broken after the third attempt, stop and report the specific problem rather than looping."
+  },
+  {
+    "family": "F7_process",
+    "req": "BROWSER-VERIFY (mandatory): Before reporting any generated page as done, render it in a browser at 1440x900 and 390x844, in both light and dark schemes; confirm the console is clean (no JS errors, Mermaid parse errors, or font 404s) and that the document body does not scroll horizontally at either width. A clean file write is not verification."
+  },
+  {
+    "family": "F7_process",
+    "req": "DISCLOSURE WHEN UNVERIFIABLE: If no browser automation is available, say so explicitly in your final message, open the file for the user with open/xdg-open, and do NOT claim the output is verified."
+  },
+  {
+    "family": "F7_process",
+    "req": "DELIVERY MESSAGE: The final message must include the ve-verify report path (or the browser-verify result) OR an explicit 'could not verify' disclosure. Never imply verification happened when it did not."
+  },
+  {
+    "family": "F7_process",
+    "req": "FAN-OUT POLICY: If the outline has 3 or more sections and --no-parallel was not passed, dispatch one sub-agent Task per section in a single parallel batch. If it has 1-2 sections, build sequentially with no sub-agents."
+  },
+  {
+    "family": "F7_process",
+    "req": "SECTION RETRY LIMIT: If a sub-agent returns a fragment that violates the section-contract rejection conditions, re-dispatch it once with a corrected brief. Do not re-dispatch the same section more than once; fall back to building it yourself if the retry also fails."
+  }
+]

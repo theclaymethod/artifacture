@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Status — Nothing Reference</title>
+<!--
+  Nothing aesthetic reference template for visual-explainer.
+  This is a NAMED ALTERNATIVE aesthetic, not the default. Use when the
+  user explicitly asks for "nothing", "Nothing design", "instrument panel",
+  "dot-matrix", or "Ndot". See ./references/nothing.md for the full spec.
+
+  Patterns demonstrated here:
+  - Three-typeface stack: Doto (hero dot-matrix) + Space Grotesk (body) + Space Mono (labels)
+  - OLED-black default canvas with a light-mode inversion via prefers-color-scheme
+  - Token flip: same semantic names, different values per mode
+  - Explicit [data-theme] toggle overrides the OS preference
+  - Space Mono ALL CAPS labels on every field, unit, nav item, section kicker
+  - Doto hero number as the one moment-of-surprise
+  - Signature segmented progress bars (square ends, 2px gaps, status-color fills)
+  - Dot-grid hero background via radial-gradient
+  - Bracket-notation system messages ([LOADING…], [SAVED], [NO DATA])
+  - Accent red #D71921 used exactly once (on the one incident stat)
+  - Flat surfaces — borders only, no shadows, no gradients, no blur
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ TOKENS — DARK (default) ============ */
+  :root {
+    --font-display: 'Doto', 'Space Mono', monospace;
+    --font-body:    'Space Grotesk', system-ui, sans-serif;
+    --font-mono:    'Space Mono', 'SF Mono', Consolas, monospace;
+
+    --black:           #000000;
+    --surface:         #111111;
+    --surface-raised:  #1A1A1A;
+    --border:          #222222;
+    --border-visible:  #333333;
+
+    --text-disabled:   #8A8A8A;
+    --text-secondary:  #999999;
+    --text-primary:    #E8E8E8;
+    --text-display:    #FFFFFF;
+
+    /* Accent red — constant across modes, used at most once per page. */
+    --accent:          #D71921;
+    --accent-subtle:   rgba(215, 25, 33, 0.15);
+
+    --success:     #4A9E5C;
+    --warning:     #D4A843;
+    --interactive: #5B9BF6;
+
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px;
+    --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    --space-3xl: 64px; --space-4xl: 96px;
+
+    --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Light mode when OS prefers light and no toggle override. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --black:           #F5F5F5;
+      --surface:         #FFFFFF;
+      --surface-raised:  #F0F0F0;
+      --border:          #E8E8E8;
+      --border-visible:  #CCCCCC;
+
+      --text-disabled:   #666666;
+      --text-secondary:  #666666;
+      --text-primary:    #1A1A1A;
+      --text-display:    #000000;
+
+      --success:         #2F7A3E;
+      --warning:         #9A6200;
+      --interactive:     #007AFF;
+    }
+  }
+
+  /* Toggle overrides beat the media query either way. */
+  :root[data-theme="light"] {
+    --black: #F5F5F5; --surface: #FFFFFF; --surface-raised: #F0F0F0;
+    --border: #E8E8E8; --border-visible: #CCCCCC;
+    --text-disabled: #666666; --text-secondary: #666666;
+    --text-primary: #1A1A1A; --text-display: #000000;
+    --success: #2F7A3E; --warning: #9A6200;
+    --interactive: #007AFF;
+  }
+  :root[data-theme="dark"] {
+    --black: #000000; --surface: #111111; --surface-raised: #1A1A1A;
+    --border: #222222; --border-visible: #333333;
+    --text-disabled: #666666; --text-secondary: #999999;
+    --text-primary: #E8E8E8; --text-display: #FFFFFF;
+    --interactive: #5B9BF6;
+  }
+
+  /* ============ RESET ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  body {
+    background: var(--black);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    overflow-wrap: anywhere;
+  }
+
+  body :where(.grid, .flex, [class*="-grid"], [class*="-row"]) > * {
+    min-width: 0;
+  }
+
+  .scroll-x {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-visible) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  /* ============ LABEL PRIMITIVE (Space Mono ALL CAPS, everywhere) ============ */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    line-height: 1.2;
+  }
+  .label--dim { color: var(--text-disabled); }
+  .label--on  { color: var(--text-display); }
+
+  /* Bracket-notation system message */
+  .brk {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+  }
+  .brk--ok  { color: var(--success); }
+  .brk--err { color: var(--accent); }
+  .brk--wrn { color: var(--warning); }
+
+  /* ============ THEME TOGGLE ============
+     Same interaction pattern as mono-industrial: collapsed single
+     icon at rest, unfurls on hover / focus-within. Chrome appears only
+     when expanded so at rest it reads as a glyph, not a pill. */
+  .theme-toggle {
+    position: fixed;
+    top: clamp(12px, 2vw, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 99;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: background 200ms var(--ease-out), border-color 200ms var(--ease-out),
+                padding 240ms var(--ease-out), gap 240ms var(--ease-out);
+  }
+  .theme-toggle button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: color 180ms var(--ease-out), background 180ms var(--ease-out),
+                padding 240ms var(--ease-out), gap 220ms var(--ease-out),
+                max-width 300ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+  .theme-toggle__glyph { display: block; flex-shrink: 0; width: 12px; height: 12px; }
+  .theme-toggle__label {
+    display: inline-block;
+    max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+    transition: max-width 280ms var(--ease-out), opacity 200ms var(--ease-out) 40ms;
+  }
+  .theme-toggle button:hover { color: var(--text-display); }
+  .theme-toggle button:focus-visible {
+    outline: 1px solid var(--text-display);
+    outline-offset: 2px;
+  }
+  .theme-toggle button:not([aria-checked="true"]) { max-width: 0; padding: 0; opacity: 0; }
+  .theme-toggle button[aria-checked="true"] { color: var(--text-display); }
+
+  .theme-toggle:hover,
+  .theme-toggle:focus-within {
+    background: var(--surface);
+    border-color: var(--border-visible);
+    padding: 3px;
+    gap: 2px;
+  }
+  .theme-toggle:hover button:not([aria-checked="true"]),
+  .theme-toggle:focus-within button:not([aria-checked="true"]) {
+    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
+  }
+  .theme-toggle:hover .theme-toggle__label,
+  .theme-toggle:focus-within .theme-toggle__label {
+    max-width: 80px; opacity: 1;
+  }
+
+  /* ============ PAGE SHELL ============ */
+  .page {
+    width: 100%;
+    max-width: 1200px;
+    min-width: 0;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-xl);
+  }
+  @media (max-width: 640px) {
+    .page { padding: var(--space-xl) var(--space-md); }
+  }
+
+  /* ============ TOP NAV (bracket style) ============ */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .nav-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-display);
+  }
+  .nav-title::before { content: '[ '; color: var(--text-secondary); }
+  .nav-title::after  { content: ' ]'; color: var(--text-secondary); }
+  .nav-links {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 180ms var(--ease-out);
+  }
+  .nav-links a:hover,
+  .nav-links a[aria-current="page"] { color: var(--text-display); }
+  .nav-meta { display: flex; gap: var(--space-md); }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    padding: var(--space-4xl) 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xl);
+    align-items: end;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--border-visible) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-position: -1px -1px;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: -1;
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+  }
+  .hero__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .hero__eyebrow-row { display: flex; gap: var(--space-md); align-items: center; }
+  .hero__headline {
+    font-family: var(--font-body);
+    font-size: clamp(28px, 3.4vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: var(--text-display);
+    max-width: 22ch;
+  }
+  .hero__lede {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 58ch;
+    line-height: 1.6;
+  }
+
+  /* The one moment of surprise — Doto hero number */
+  .hero__doto {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(96px, 14vw, 188px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--text-display);
+    text-align: right;
+  }
+  .hero__doto-unit {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: var(--space-sm);
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: var(--space-3xl) 0; }
+    .hero__doto { text-align: left; }
+  }
+
+  /* ============ SECTION ============ */
+  .section { padding-top: var(--space-3xl); min-width: 0; }
+  .section__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-xl);
+  }
+  .section__num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-disabled);
+  }
+  .section__title {
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-display);
+    letter-spacing: -0.005em;
+  }
+  .section__actions { margin-left: auto; display: flex; gap: var(--space-md); }
+
+  /* ============ KPI GRID (stat rows + segmented bars) ============ */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+  }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .kpi--raised {
+    background: var(--surface-raised);
+    border-color: var(--border-visible);
+  }
+  .kpi__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
+  }
+  .kpi__value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 32px;
+    color: var(--text-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .kpi__value--ok  { color: var(--success); }
+  .kpi__value--wrn { color: var(--warning); }
+  .kpi__value--err { color: var(--accent); }
+  .kpi__unit {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+  }
+
+  /* Segmented progress bar — the signature Nothing motif. */
+  .seg-bar { display: flex; gap: 2px; height: 10px; }
+  .seg {
+    flex: 1;
+    background: var(--border);
+    transition: background 180ms var(--ease-out);
+  }
+  .seg--on  { background: var(--text-display); }
+  .seg--ok  { background: var(--success); }
+  .seg--wrn { background: var(--warning); }
+  .seg--err { background: var(--accent); }
+
+  /* ============ STATUS TABLE ============ */
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+    min-width: 760px;
+  }
+  .status-table th,
+  .status-table td {
+    padding: var(--space-md) var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: baseline;
+  }
+  .status-table th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-visible);
+  }
+  .status-table td { font-size: 14px; color: var(--text-primary); }
+  .status-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-display);
+  }
+  .status-table tr:last-child td { border-bottom: none; }
+  .status-table tr:hover td { background: var(--surface); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-visible);
+  }
+  .pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-secondary);
+  }
+  .pill--ok  { color: var(--success);  border-color: var(--success);  }
+  .pill--ok  .dot  { background: var(--success); }
+  .pill--wrn { color: var(--warning);  border-color: var(--warning);  }
+  .pill--wrn .dot  { background: var(--warning); }
+  .pill--err { color: var(--text-display);   border-color: var(--accent);   }
+  .pill--err .dot  { background: var(--accent); }
+
+  /* ============ CARDS ============ */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .card__title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-display);
+  }
+  .card__body { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+  .card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    appearance: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    min-height: 36px;
+    cursor: pointer;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: color 180ms var(--ease-out), background 180ms var(--ease-out),
+                border-color 180ms var(--ease-out);
+  }
+  .btn--primary {
+    background: var(--text-display);
+    color: var(--black);
+  }
+  .btn--primary:hover { background: var(--text-primary); }
+  .btn--secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: var(--border-visible);
+  }
+  .btn--secondary:hover { color: var(--text-display); border-color: var(--text-display); }
+  .btn--tech { border-radius: 4px; }
+
+  /* ============ EMPTY STATE ============ */
+  .empty {
+    padding: var(--space-3xl);
+    border: 1px dashed var(--border-visible);
+    border-radius: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+  .empty__caption { color: var(--text-secondary); font-size: 13px; }
+
+  /* ============ CODE BLOCK ============ */
+  .code {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #E8E8E8;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border);
+  }
+  .code .tok-key { color: var(--warning); }
+  .code .tok-str { color: var(--success); }
+  .code .tok-num { color: var(--warning); }
+  .code .tok-com { color: #666666; }
+  .code .label,
+  .code .label--dim { color: #999999; }
+  .code .tok-key,
+  .code .tok-num { color: #D4A843; }
+  .code .tok-str { color: #4A9E5C; }
+  .code .tok-com { color: #8A8A8A; }
+
+  /* ============ FOOTER ============ */
+  footer {
+    margin-top: var(--space-4xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle: Light / Dark / Auto. Choice persists to localStorage. -->
+<div class="theme-toggle" role="radiogroup" aria-label="Theme">
+  <button type="button" role="radio" data-theme="light" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Light</span>
+  </button>
+  <button type="button" role="radio" data-theme="dark" aria-checked="false">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="theme-toggle__label">Dark</span>
+  </button>
+  <button type="button" role="radio" data-theme="system" aria-checked="true">
+    <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+    </svg>
+    <span class="theme-toggle__label">Auto</span>
+  </button>
+</div>
+
+<div class="page">
+
+  <!-- TOP NAV: bracket-style title + instrument labels -->
+  <header class="nav">
+    <span class="nav-title">nothing.visual-explainer</span>
+    <ul class="nav-links">
+      <li><a href="#" aria-current="page">[ STATUS ]</a></li>
+      <li><a href="#">TELEMETRY</a></li>
+      <li><a href="#">INCIDENTS</a></li>
+      <li><a href="#">LOGS</a></li>
+    </ul>
+    <div class="nav-meta">
+      <span class="label">REGION · SFO-3</span>
+      <span class="label label--on">v 0.4.2</span>
+    </div>
+  </header>
+
+  <!-- HERO: one Doto number as the moment of surprise. Dot-grid faded behind. -->
+  <section class="hero">
+    <div class="hero__meta">
+      <div class="hero__eyebrow-row">
+        <span class="label">LAST UPDATED · 2026-04-19 07:14 UTC</span>
+        <span class="brk brk--ok">[ NOMINAL ]</span>
+      </div>
+      <h1 class="hero__headline">All systems operating within telemetry bounds.</h1>
+      <p class="hero__lede">
+        Request router, streaming decoder, and vector store are green. One degraded read replica in SFO-3; failover budget untouched. No incidents open.
+      </p>
+    </div>
+    <div>
+      <div class="hero__doto" aria-label="Uptime, 99.984 percent">99.984</div>
+      <span class="hero__doto-unit">UPTIME · 30-DAY · PCT</span>
+    </div>
+  </section>
+
+  <!-- SECTION 01 — KPI grid with segmented progress bars -->
+  <section class="section">
+    <header class="section__head">
+      <span class="section__num">§ 01</span>
+      <h2 class="section__title">Service Level Indicators</h2>
+      <div class="section__actions">
+        <button class="btn btn--secondary btn--tech">EXPORT</button>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="label">P99 LATENCY</span>
+          <span class="pill pill--ok"><span class="dot"></span>WITHIN SLO</span>
+        </div>
+        <div class="kpi__value kpi__value--ok">
+          248<span class="kpi__unit">MS</span>
+        </div>
+        <div class="seg-bar" aria-label="82 percent of SLO budget consumed">
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg seg--ok"></span>
+          <span class="seg"></span>
+          <span class="seg"></span>
+        </div>
+        <span class="label label--dim">SLO · 300 MS / 30 D</span>
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="label">ERROR RATE · 5XX</span>
+          <span class="pill pill--wrn"><span class="dot"></span>ELEVATED</span>
+        </div>
+        <div class="kpi__value kpi__value--wrn">
+          0.42<span class="kpi__unit">%</span>
+        </div>
+        <div class="seg-bar" aria-label="60 percent of SLO budget consumed">
+          <span class="seg seg--wrn"></span>
+          <span class="seg seg--wrn"></span>
+          <span class="seg seg--wrn"></span>
+          <span class="seg seg--wrn"></span>
+          <span class="seg seg--wrn"></span>
+          <span class="seg seg--wrn"></span>
+          <span class="seg"></span>
+          <span class="seg"></span>
+          <span class="seg"></span>
+          <span class="seg"></span>
+        </div>
+        <span class="label label--dim">SLO · &lt; 0.70% / 30 D</span>
+      </article>
+
+      <!-- The one accent-red stat — the only use on the page. -->
+      <article class="kpi kpi--raised">
+        <div class="kpi__row">
+          <span class="label">OPEN INCIDENTS</span>
+          <span class="pill pill--err"><span class="dot"></span>ACT REQUIRED</span>
+        </div>
+        <div class="kpi__value kpi__value--err">
+          1<span class="kpi__unit">CRIT</span>
+        </div>
+        <div class="seg-bar" aria-hidden="true">
+          <span class="seg seg--err"></span>
+          <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+          <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+          <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        </div>
+        <span class="label label--dim">ASSIGNED · ON-CALL · 07:14 UTC</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECTION 02 — Status table. No stripes; borders only. -->
+  <section class="section">
+    <header class="section__head">
+      <span class="section__num">§ 02</span>
+      <h2 class="section__title">Service Matrix</h2>
+      <div class="section__actions">
+        <span class="brk brk--ok">[ LIVE · 12 SERVICES ]</span>
+      </div>
+    </header>
+
+    <div class="scroll-x">
+    <table class="status-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Region</th>
+          <th>Status</th>
+          <th class="num">P99</th>
+          <th class="num">Error Rate</th>
+          <th class="num">Last Deploy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>router-edge</td>
+          <td>SFO-3 · ORD-1 · FRA-2</td>
+          <td><span class="pill pill--ok"><span class="dot"></span>GREEN</span></td>
+          <td class="num">142 ms</td>
+          <td class="num">0.08 %</td>
+          <td class="num">2h 14m</td>
+        </tr>
+        <tr>
+          <td>stream-decoder</td>
+          <td>SFO-3 · ORD-1</td>
+          <td><span class="pill pill--ok"><span class="dot"></span>GREEN</span></td>
+          <td class="num">212 ms</td>
+          <td class="num">0.11 %</td>
+          <td class="num">6h 02m</td>
+        </tr>
+        <tr>
+          <td>vector-store</td>
+          <td>SFO-3 · FRA-2</td>
+          <td><span class="pill pill--wrn"><span class="dot"></span>DEGRADED</span></td>
+          <td class="num">388 ms</td>
+          <td class="num">0.42 %</td>
+          <td class="num">1d 04h</td>
+        </tr>
+        <tr>
+          <td>ingest-queue</td>
+          <td>ORD-1</td>
+          <td><span class="pill pill--ok"><span class="dot"></span>GREEN</span></td>
+          <td class="num">96 ms</td>
+          <td class="num">0.02 %</td>
+          <td class="num">3d 07h</td>
+        </tr>
+        <tr>
+          <td>billing-sync</td>
+          <td>SFO-3</td>
+          <td><span class="pill pill--ok"><span class="dot"></span>GREEN</span></td>
+          <td class="num">178 ms</td>
+          <td class="num">0.05 %</td>
+          <td class="num">12d 02h</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- SECTION 03 — Cards + bracket-style empty state -->
+  <section class="section">
+    <header class="section__head">
+      <span class="section__num">§ 03</span>
+      <h2 class="section__title">Recent Activity</h2>
+    </header>
+
+    <div class="cards">
+      <article class="card">
+        <span class="label">07:14 UTC · ALERT</span>
+        <h3 class="card__title">Read replica latency spike</h3>
+        <p class="card__body">Replica lag climbed past 400 ms for 6 consecutive samples. Automatic failover paused; on-call notified.</p>
+        <div class="card__row">
+          <span class="label label--dim">OWNER · DATA</span>
+          <span class="label label--on">[ ACK ]</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="label">06:52 UTC · DEPLOY</span>
+        <h3 class="card__title">router-edge 2.4.8 → 2.4.9</h3>
+        <p class="card__body">Rolled out to 3 / 3 regions. Canary green for 14 minutes. No error-rate regression observed.</p>
+        <div class="card__row">
+          <span class="label label--dim">OWNER · EDGE</span>
+          <span class="label label--on">[ DONE ]</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="label">03:02 UTC · NOTE</span>
+        <h3 class="card__title">Budget checkpoint — week 16</h3>
+        <p class="card__body">Month-to-date error budget at 42 %. Trending within bounds, no action required. Audit scheduled week 17.</p>
+        <div class="card__row">
+          <span class="label label--dim">OWNER · ORA</span>
+          <span class="label label--on">[ READ ]</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECTION 04 — Empty state demo (bracket notation, no mascot) -->
+  <section class="section">
+    <header class="section__head">
+      <span class="section__num">§ 04</span>
+      <h2 class="section__title">Upcoming Maintenance</h2>
+    </header>
+
+    <div class="empty">
+      <span class="brk">[ NO DATA ]</span>
+      <p class="empty__caption">No scheduled maintenance in the next 30 days.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 05 — Code / config sample -->
+  <section class="section">
+    <header class="section__head">
+      <span class="section__num">§ 05</span>
+      <h2 class="section__title">Budget Configuration</h2>
+      <div class="section__actions">
+        <button class="btn btn--secondary btn--tech">COPY</button>
+      </div>
+    </header>
+
+    <div class="code">
+<span class="code__header"><span class="label">budget.toml</span><span class="label label--dim">READ-ONLY</span></span>
+<span class="tok-com"># SLO targets per service (30-day window)</span>
+[router-edge]
+<span class="tok-key">target</span> = <span class="tok-str">"99.95%"</span>
+<span class="tok-key">latency_p99_ms</span> = <span class="tok-num">300</span>
+<span class="tok-key">error_rate_max</span> = <span class="tok-num">0.0070</span>
+
+[stream-decoder]
+<span class="tok-key">target</span> = <span class="tok-str">"99.90%"</span>
+<span class="tok-key">latency_p99_ms</span> = <span class="tok-num">500</span>
+<span class="tok-key">error_rate_max</span> = <span class="tok-num">0.0100</span>
+    </div>
+  </section>
+
+  <footer>
+    <div><span class="label">nothing.visual-explainer · reference</span></div>
+    <div><span class="label label--dim">BUILD · 0.4.2 · 2026-04-19</span></div>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    const html = document.documentElement;
+    const STORAGE_KEY = 'nothing-theme';
+
+    const toggle = document.querySelector('.theme-toggle');
+    const buttons = toggle ? [...toggle.querySelectorAll('button')] : [];
+
+    function applyMode(choice) {
+      if (choice === 'system') {
+        delete html.dataset.theme;
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        html.dataset.theme = choice;
+        localStorage.setItem(STORAGE_KEY, choice);
+      }
+      buttons.forEach(b => {
+        b.setAttribute('aria-checked', String(b.dataset.theme === choice));
+      });
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const markup = html.dataset.theme;
+    const initial = saved === 'light' || saved === 'dark'
+      ? saved
+      : (markup === 'light' || markup === 'dark' ? markup : 'system');
+    if (initial === 'system') delete html.dataset.theme;
+    else html.dataset.theme = initial;
+    buttons.forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.theme === initial));
+      b.addEventListener('click', () => applyMode(b.dataset.theme));
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Queue That Outgrew Itself — Dispatch No. 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --paper:      #f6f4f0;
+    --paper-2:    #efe9df;
+    --paper-3:    #e8e0d0;
+    --paper-4:    #ddd3bf;
+    --paper-5:    #d0c2a8;
+
+    --ink:         #16130f;
+    --ink-deep:    #0a0a0a;
+    --muted:       #57534e;
+    --soft:        #78716c;
+    --rule:        rgba(22, 19, 15, 0.10);
+    --rule-solid:  rgba(22, 19, 15, 0.22);
+    --accent:      #d97706;
+
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body:    "Space Grotesk", system-ui, sans-serif;
+    --font-mono:    "Space Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--ink-deep);
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* ===== Magazine engine ===== */
+  .mag {
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: row;
+    scrollbar-width: none;
+  }
+  .mag::-webkit-scrollbar { display: none; }
+
+  .page {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== Tints ===== */
+  .page--t1 { background: var(--paper); }
+  .page--t2 { background: var(--paper-2); }
+  .page--t3 { background: var(--paper-3); }
+  .page--t4 { background: var(--paper-4); }
+  .page--t5 { background: var(--paper-5); }
+
+  .page--dark {
+    background: var(--ink-deep);
+    color: #f2ede5;
+  }
+  .page--dark .eyebrow { color: rgba(242, 237, 229, 0.55); }
+  .page--dark .muted { color: rgba(242, 237, 229, 0.60); }
+
+  /* ===== Typography ===== */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.9vw, 14px);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(56px, 7.5vw, 128px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .body-lg {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(18px, 1.5vw, 26px);
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 0;
+    max-width: 62ch;
+  }
+
+  .body-lg + .body-lg { margin-top: 12px; }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.85vw, 13px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  .byline {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 0.85vw, 13px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  .stat-xl {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(160px, 22vw, 360px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stat-suffix { font-size: 0.55em; color: var(--muted); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: clamp(14px, 1vw, 20px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 24px;
+  }
+
+  /* ===== Page layouts ===== */
+
+  /* Cover */
+  .page--cover {
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: clamp(48px, 5vh, 96px);
+  }
+  .page--cover .meta-row { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 24px; }
+  .page--cover .display-stack { max-width: 90%; }
+
+  /* Content */
+  .page--content {
+    padding: clamp(64px, 7vh, 120px);
+    justify-content: flex-end;
+    gap: 28px;
+  }
+  .page--content .kicker-row {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%;
+    position: absolute;
+    top: clamp(48px, 5vh, 80px);
+    left: clamp(64px, 7vh, 120px);
+    right: clamp(64px, 7vh, 120px);
+    width: auto;
+  }
+
+  /* Split */
+  .page--split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+  .page--split .half {
+    padding: clamp(48px, 6vh, 96px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+  }
+  .page--split .half--dark { background: var(--ink-deep); color: #f2ede5; }
+  .page--split .half--dark .muted { color: rgba(242, 237, 229, 0.65); }
+  .page--split .half--dark .eyebrow { color: rgba(242, 237, 229, 0.55); }
+  .page--split .half--warm { background: var(--paper-3); }
+  .page--split .big-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(80px, 10vw, 180px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .page--split .big-num .unit {
+    font-size: 0.35em;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-left: 8px;
+    text-transform: uppercase;
+  }
+  .page--split .half--dark .big-num { color: #f2ede5; }
+  .page--split .half--dark .big-num .unit { color: rgba(242, 237, 229, 0.55); }
+  .page--split .half--dark .big-num .accent { color: var(--accent); }
+
+  /* 2x2 quadrant */
+  .page--quadrant {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 0;
+  }
+  .q {
+    padding: clamp(40px, 5vh, 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .q:nth-child(2n) { border-right: none; }
+  .q:nth-child(n+3) { border-bottom: none; }
+  .q .eyebrow { margin-bottom: 4px; }
+  .q .q-head {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 3.4vw, 64px);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .q .q-body { font-size: clamp(15px, 1.1vw, 19px); line-height: 1.5; color: var(--muted); margin: 0; max-width: 44ch; }
+  .q-1 { background: var(--paper); }
+  .q-2 { background: var(--paper-2); }
+  .q-3 { background: var(--paper-3); }
+  .q-4 { background: var(--ink-deep); color: #f2ede5; }
+  .q-4 .q-body { color: rgba(242, 237, 229, 0.7); }
+  .q-4 .eyebrow { color: rgba(242, 237, 229, 0.55); }
+
+  /* Full-bleed stat */
+  .page--stat {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(48px, 6vh, 96px);
+  }
+  .page--stat .stat-anchor { display: flex; flex-direction: column; align-items: center; }
+  .page--stat .stat-ctx {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 0.9vw, 14px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin-top: 12px;
+  }
+
+  /* 6-cell grid */
+  .page--grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    padding: 0;
+  }
+  .cell {
+    padding: clamp(28px, 3.5vh, 52px);
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .cell:nth-child(3n) { border-right: none; }
+  .cell:nth-child(n+4) { border-bottom: none; }
+  .cell-head {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2vw, 36px);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  /* Content with inline SVG */
+  .page--fix {
+    padding: clamp(48px, 5vh, 80px) clamp(64px, 7vh, 120px);
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    gap: clamp(32px, 4vw, 72px);
+    align-items: center;
+  }
+  .page--fix .fix-text { display: flex; flex-direction: column; gap: 24px; }
+  .page--fix .fix-art { display: flex; align-items: center; justify-content: center; }
+  .page--fix svg { width: 100%; height: auto; max-width: 640px; }
+
+  /* Quote */
+  .page--quote {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: clamp(64px, 8vh, 120px) clamp(80px, 10vw, 200px);
+    position: relative;
+  }
+  .page--quote blockquote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(32px, 4.2vw, 72px);
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    margin: 0;
+    max-width: 22ch;
+    color: var(--ink);
+  }
+  .page--quote cite {
+    display: block;
+    margin-top: clamp(24px, 4vh, 48px);
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: clamp(11px, 0.9vw, 13px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .page--quote .open-q {
+    position: absolute;
+    font-family: var(--font-display);
+    font-size: clamp(200px, 26vw, 420px);
+    line-height: 0.6;
+    color: var(--ink);
+    opacity: 0.06;
+    top: 8vh;
+    left: 8vw;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ===== Nav dots ===== */
+  .nav-dots {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 999px;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    padding: 0;
+    transition: background 120ms ease, transform 120ms ease;
+  }
+  .nav-dot:hover { background: rgba(255, 255, 255, 0.35); }
+  .nav-dot.active { background: white; transform: scale(1.4); border-color: white; }
+
+  .counter {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(6px);
+    padding: 6px 12px;
+    border-radius: 4px;
+    z-index: 100;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .page--split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .page--quadrant { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+    .q:nth-child(2n) { border-right: 1px solid var(--rule); }
+    .q:nth-child(n+3) { border-bottom: 1px solid var(--rule); }
+    .page--grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .cell:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .cell:nth-child(2n) { border-right: none; }
+    .page--fix { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="counter"><span id="counter-current">01</span> / <span id="counter-total">12</span></div>
+
+<div class="mag" id="mag" aria-label="Magazine">
+
+  <!-- 1. COVER (dark) -->
+  <section class="page page--dark page--cover" aria-label="Cover">
+    <div class="meta-row">
+      <span class="eyebrow">Dispatch No. 01 &middot; 2026</span>
+      <span class="eyebrow">Post-mortem</span>
+    </div>
+    <div class="display-stack" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 28px;">
+      <span class="eyebrow">Feature</span>
+      <h1 class="display" style="font-size: clamp(68px, 8.8vw, 156px);">The queue that outgrew itself.</h1>
+      <p class="body-lg" style="color: rgba(242, 237, 229, 0.75); max-width: 52ch;">How a 500 rps ceiling hid inside a healthy dashboard &mdash; and the partition key that took us to 4,200.</p>
+    </div>
+    <div class="meta-row">
+      <span class="byline" style="color: rgba(242, 237, 229, 0.55);">14 min read &middot; infra desk</span>
+      <span class="byline" style="color: rgba(242, 237, 229, 0.55);">visual-explainer / mono-industrial</span>
+    </div>
+  </section>
+
+  <!-- 2. Opening (t1) -->
+  <section class="page page--t1 page--content" aria-label="Opening">
+    <div class="kicker-row">
+      <span class="eyebrow">01 &middot; Opening</span>
+      <span class="mono-label">p. 02</span>
+    </div>
+    <h2 class="display">What looked like a spike turned out to be a ceiling.</h2>
+    <p class="body-lg">The ingest dashboard said throughput was fine. The queue depth graph said otherwise. Between the two of them, we lost three customers before anyone thought to reconcile the gap.</p>
+    <p class="body-lg">This is the story of what we found when we finally did.</p>
+  </section>
+
+  <!-- 3. Split (dark / warm) -->
+  <section class="page page--split" aria-label="Before and after">
+    <div class="half half--dark">
+      <span class="eyebrow">Before &middot; Jan 14</span>
+      <p class="big-num">500<span class="unit">rps</span></p>
+      <p class="body-lg" style="color: rgba(242, 237, 229, 0.72); max-width: 32ch;">The ceiling, not the average. Past this line the queue depth climbed linearly until workers ran out of memory and restarted.</p>
+    </div>
+    <div class="half half--warm">
+      <span class="eyebrow">After &middot; Jan 29</span>
+      <p class="big-num">4,200<span class="unit">rps</span></p>
+      <p class="body-lg" style="max-width: 32ch;">Same hardware. Same workers. One config change in the topic definition. No incident, no horizontal scale-out, no page.</p>
+    </div>
+  </section>
+
+  <!-- 4. Full-bleed stat (t3) -->
+  <section class="page page--t3 page--stat" aria-label="Key stat">
+    <div class="stat-anchor">
+      <span class="eyebrow" style="margin-bottom: 24px;">Headroom delta</span>
+      <div class="stat-xl" style="color: var(--accent);">8.4<span class="stat-suffix">&times;</span></div>
+      <div class="stat-label">throughput, same hardware</div>
+      <div class="stat-ctx">measured over seven days in production</div>
+    </div>
+  </section>
+
+  <!-- 5. Diagnosis (t2) -->
+  <section class="page page--t2 page--content" aria-label="Diagnosis">
+    <div class="kicker-row">
+      <span class="eyebrow">02 &middot; Diagnosis</span>
+      <span class="mono-label">p. 05</span>
+    </div>
+    <h2 class="display" style="font-size: clamp(48px, 5.8vw, 92px);">The graphs disagreed. Only one of them was lying.</h2>
+    <p class="body-lg">Ingest throughput was averaged across every worker, every tenant, every message type. It looked flat at 480 rps because a single noisy tenant couldn't move the mean.</p>
+    <p class="body-lg">Queue depth was per-partition. It told the real story: two partitions were saturated, thirty-six were idle, and the saturated ones belonged to customers paying us the most money.</p>
+  </section>
+
+  <!-- 6. 2x2 Quadrant -->
+  <section class="page page--quadrant" aria-label="Four trade-offs">
+    <div class="q q-1">
+      <span class="eyebrow">Latency</span>
+      <h3 class="q-head">P99 down 68%.</h3>
+      <p class="q-body">Head-of-line blocking from oversized payloads is gone. Small tenants stopped waiting behind the one large one.</p>
+    </div>
+    <div class="q q-2">
+      <span class="eyebrow">Throughput</span>
+      <h3 class="q-head">8.4&times; ceiling.</h3>
+      <p class="q-body">Same 24 workers, same broker cluster, same hardware budget. No horizontal scaling event. No page.</p>
+    </div>
+    <div class="q q-3">
+      <span class="eyebrow">Cost</span>
+      <h3 class="q-head">No change.</h3>
+      <p class="q-body">The fix was a partition key, not more boxes. Cloud bill for the month was flat within rounding error.</p>
+    </div>
+    <div class="q q-4">
+      <span class="eyebrow">Regressions</span>
+      <h3 class="q-head">Zero so far.</h3>
+      <p class="q-body">Per-tenant ordering was already our contract. Partitioning by tenant_id enforces what we already promised.</p>
+    </div>
+  </section>
+
+  <!-- 7. Dark panel (interior) -->
+  <section class="page page--dark page--content" aria-label="Reframe">
+    <div class="kicker-row">
+      <span class="eyebrow" style="color: rgba(242, 237, 229, 0.55);">03 &middot; Reframe</span>
+      <span class="mono-label" style="color: rgba(242, 237, 229, 0.45);">p. 07</span>
+    </div>
+    <span class="eyebrow">Reframe</span>
+    <h2 class="display">Partition by tenant, not by type.</h2>
+    <p class="body-lg" style="color: rgba(242, 237, 229, 0.72);">We had been partitioning on message type because the topic was called <em>events</em>. The name was lying too. Nothing downstream cared what kind of event it was. Everything downstream cared whose event it was.</p>
+  </section>
+
+  <!-- 8. The fix + inline SVG (t3 alternative - use t4 to avoid repeat with p4 t3) -->
+  <section class="page page--t4 page--fix" aria-label="The fix">
+    <div class="fix-text">
+      <span class="eyebrow">04 &middot; The fix</span>
+      <h2 class="display" style="font-size: clamp(44px, 5.4vw, 88px);">One line in the topic config.</h2>
+      <p class="body-lg">We changed the partition key from <span style="font-family: var(--font-mono); font-size: 0.88em; background: rgba(22,19,15,0.08); padding: 2px 8px; border-radius: 3px;">event.type</span> to <span style="font-family: var(--font-mono); font-size: 0.88em; background: rgba(217,119,6,0.14); padding: 2px 8px; border-radius: 3px; color: var(--accent);">tenant_id</span>. The rest of the architecture stayed untouched. Same producers, same workers, same schema.</p>
+      <p class="body-lg">Messages now fan out across every partition instead of piling up on the two that happened to handle <code>payload.large</code>.</p>
+    </div>
+    <div class="fix-art">
+      <svg viewBox="0 0 640 380" aria-label="Before and after partitioning">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--ink)" opacity="0.6"/>
+          </marker>
+        </defs>
+
+        <!-- BEFORE -->
+        <text x="16" y="28" font-family="Space Mono" font-size="11" letter-spacing="2" fill="var(--muted)">BEFORE &middot; BY TYPE</text>
+        <rect x="16" y="44" width="120" height="48" rx="4" fill="none" stroke="var(--rule-solid)" stroke-width="1.5"/>
+        <text x="76" y="73" text-anchor="middle" font-family="Space Grotesk" font-size="13" fill="var(--ink)">producer</text>
+
+        <!-- 4 tenants feeding 2 hot partitions -->
+        <g stroke="var(--ink)" stroke-opacity="0.35" stroke-width="1.2" fill="none">
+          <path d="M140 68 L232 64" marker-end="url(#arr)"/>
+          <path d="M140 68 L232 64" />
+          <path d="M140 68 L232 102" marker-end="url(#arr)"/>
+          <path d="M140 68 L232 140" marker-end="url(#arr)"/>
+          <path d="M140 68 L232 178" marker-end="url(#arr)"/>
+        </g>
+
+        <!-- partitions before: two saturated (warn), two idle -->
+        <g font-family="Space Mono" font-size="10" letter-spacing="1.5">
+          <rect x="236" y="52" width="150" height="24" fill="var(--accent)" opacity="0.9"/>
+          <rect x="236" y="52" width="150" height="24" fill="none" stroke="var(--ink)" stroke-opacity="0.6"/>
+          <text x="244" y="68" fill="#fff">P0 &middot; payload.large  [SAT]</text>
+
+          <rect x="236" y="90" width="150" height="24" fill="var(--accent)" opacity="0.9"/>
+          <rect x="236" y="90" width="150" height="24" fill="none" stroke="var(--ink)" stroke-opacity="0.6"/>
+          <text x="244" y="106" fill="#fff">P1 &middot; payload.large  [SAT]</text>
+
+          <rect x="236" y="128" width="150" height="24" fill="none" stroke="var(--rule-solid)"/>
+          <text x="244" y="144" fill="var(--muted)">P2 &middot; audit.log</text>
+
+          <rect x="236" y="166" width="150" height="24" fill="none" stroke="var(--rule-solid)"/>
+          <text x="244" y="182" fill="var(--muted)">P3 &middot; heartbeat</text>
+        </g>
+
+        <text x="236" y="210" font-family="Space Mono" font-size="10" letter-spacing="1.5" fill="var(--muted)">2 HOT / 36 IDLE &rarr; 500 RPS CEILING</text>
+
+        <!-- divider -->
+        <line x1="16" y1="240" x2="624" y2="240" stroke="var(--rule-solid)" stroke-dasharray="3 5"/>
+
+        <!-- AFTER -->
+        <text x="16" y="268" font-family="Space Mono" font-size="11" letter-spacing="2" fill="var(--accent)">AFTER &middot; BY TENANT_ID</text>
+        <rect x="16" y="284" width="120" height="48" rx="4" fill="none" stroke="var(--rule-solid)" stroke-width="1.5"/>
+        <text x="76" y="313" text-anchor="middle" font-family="Space Grotesk" font-size="13" fill="var(--ink)">producer</text>
+
+        <!-- fan out -->
+        <g stroke="var(--ink)" stroke-opacity="0.35" stroke-width="1.2" fill="none">
+          <path d="M140 308 L232 292" marker-end="url(#arr)"/>
+          <path d="M140 308 L232 312" marker-end="url(#arr)"/>
+          <path d="M140 308 L232 332" marker-end="url(#arr)"/>
+          <path d="M140 308 L232 352" marker-end="url(#arr)"/>
+          <path d="M140 308 L412 292" marker-end="url(#arr)" stroke-opacity="0.2"/>
+          <path d="M140 308 L412 332" marker-end="url(#arr)" stroke-opacity="0.2"/>
+        </g>
+
+        <!-- partitions after: evenly loaded -->
+        <g font-family="Space Mono" font-size="10" letter-spacing="1.5">
+          <rect x="236" y="280" width="86" height="22" fill="var(--ink)" opacity="0.55"/>
+          <text x="240" y="296" fill="#fff">tenant_a</text>
+          <rect x="326" y="280" width="86" height="22" fill="var(--ink)" opacity="0.5"/>
+          <text x="330" y="296" fill="#fff">tenant_b</text>
+          <rect x="416" y="280" width="86" height="22" fill="var(--ink)" opacity="0.55"/>
+          <text x="420" y="296" fill="#fff">tenant_c</text>
+          <rect x="506" y="280" width="86" height="22" fill="var(--ink)" opacity="0.45"/>
+          <text x="510" y="296" fill="#fff">tenant_d</text>
+
+          <rect x="236" y="306" width="86" height="22" fill="var(--ink)" opacity="0.5"/>
+          <text x="240" y="322" fill="#fff">tenant_e</text>
+          <rect x="326" y="306" width="86" height="22" fill="var(--ink)" opacity="0.55"/>
+          <text x="330" y="322" fill="#fff">tenant_f</text>
+          <rect x="416" y="306" width="86" height="22" fill="var(--ink)" opacity="0.45"/>
+          <text x="420" y="322" fill="#fff">tenant_g</text>
+          <rect x="506" y="306" width="86" height="22" fill="var(--ink)" opacity="0.55"/>
+          <text x="510" y="322" fill="#fff">tenant_h</text>
+
+          <rect x="236" y="332" width="86" height="22" fill="var(--ink)" opacity="0.45"/>
+          <text x="240" y="348" fill="#fff">tenant_i</text>
+          <rect x="326" y="332" width="86" height="22" fill="var(--ink)" opacity="0.5"/>
+          <text x="330" y="348" fill="#fff">tenant_j</text>
+          <rect x="416" y="332" width="86" height="22" fill="var(--ink)" opacity="0.55"/>
+          <text x="420" y="348" fill="#fff">tenant_k</text>
+          <rect x="506" y="332" width="86" height="22" fill="var(--ink)" opacity="0.5"/>
+          <text x="510" y="348" fill="#fff">tenant_l</text>
+        </g>
+
+        <text x="236" y="372" font-family="Space Mono" font-size="10" letter-spacing="1.5" fill="var(--accent)">38 EVEN &rarr; 4,200 RPS CEILING</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 9. 6-cell grid (t5) -->
+  <section class="page page--t5 page--grid" aria-label="At a glance">
+    <div class="cell">
+      <span class="eyebrow">01 &middot; Observability</span>
+      <h4 class="cell-head">Read the two graphs together, or don't read either one.</h4>
+      <span class="mono-label">Throughput / depth</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">02 &middot; Measurement</span>
+      <h4 class="cell-head">Averages hide ceilings. Look at tails first.</h4>
+      <span class="mono-label">P99 &gt; avg</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">03 &middot; Design</span>
+      <h4 class="cell-head">The partition key is a contract. Pick the one you already keep.</h4>
+      <span class="mono-label">tenant_id</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">04 &middot; Operations</span>
+      <h4 class="cell-head">The fix is almost always one line of config.</h4>
+      <span class="mono-label">1 diff</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">05 &middot; Post-mortem</span>
+      <h4 class="cell-head">Write it while the Slack thread is still warm.</h4>
+      <span class="mono-label">&lt; 48 hrs</span>
+    </div>
+    <div class="cell">
+      <span class="eyebrow">06 &middot; Followup</span>
+      <h4 class="cell-head">Ship the fix on Friday. Write the essay on Monday.</h4>
+      <span class="mono-label">Two shipments</span>
+    </div>
+  </section>
+
+  <!-- 10. What we'd do differently (t2) -->
+  <section class="page page--t2 page--content" aria-label="What we'd do differently">
+    <div class="kicker-row">
+      <span class="eyebrow">05 &middot; Revise</span>
+      <span class="mono-label">p. 10</span>
+    </div>
+    <h2 class="display" style="font-size: clamp(44px, 5.2vw, 88px);">What we'd do differently.</h2>
+    <p class="body-lg">Stop naming topics after the message. Start naming them after the routing key. <span style="font-family: var(--font-mono); font-size: 0.86em;">events-by-tenant</span> would have raised the right question in design review six months earlier.</p>
+    <p class="body-lg">Alarm on per-partition saturation, not just aggregate throughput. The dashboard should have been screaming on Jan 9. It wasn't even flashing.</p>
+    <p class="body-lg">And: when two graphs disagree, treat it as a P1 until you know which one is wrong. Don't average.</p>
+  </section>
+
+  <!-- 11. Quote (t1) -->
+  <section class="page page--t1 page--quote" aria-label="Closing quote">
+    <span class="open-q" aria-hidden="true">&ldquo;</span>
+    <blockquote>
+      <em>The dashboard wasn't wrong. It was just answering a question nobody was asking.</em>
+    </blockquote>
+    <cite>&mdash; from the retro, Jan 30</cite>
+  </section>
+
+  <!-- 12. BACK COVER (dark) -->
+  <section class="page page--dark page--cover" aria-label="Back cover">
+    <div class="meta-row">
+      <span class="eyebrow">End of dispatch</span>
+      <span class="eyebrow">No. 01 &middot; 2026</span>
+    </div>
+    <div class="display-stack" style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 28px;">
+      <span class="eyebrow">Next issue</span>
+      <h2 class="display" style="font-size: clamp(56px, 7vw, 128px);">The cache key that outlived the cache.</h2>
+      <p class="body-lg" style="color: rgba(242, 237, 229, 0.68); max-width: 46ch;">Why a three-character TTL typo cost us a week of cold reads &mdash; and the static analysis rule we wrote so it never happens again.</p>
+    </div>
+    <div class="meta-row">
+      <span class="byline" style="color: rgba(242, 237, 229, 0.5);">visual-explainer &middot; mono-industrial</span>
+      <span class="byline" style="color: rgba(242, 237, 229, 0.5);">dispatch / 01 / 2026</span>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav-dots" aria-label="Page navigation"></nav>
+
+<script>
+  (function () {
+    var mag = document.getElementById("mag");
+    var pages = Array.from(mag.querySelectorAll(".page"));
+    var nav = document.querySelector(".nav-dots");
+    var counterCurrent = document.getElementById("counter-current");
+    var counterTotal = document.getElementById("counter-total");
+
+    pages.forEach(function (_, i) {
+      var btn = document.createElement("button");
+      btn.className = "nav-dot" + (i === 0 ? " active" : "");
+      btn.setAttribute("data-page", String(i + 1));
+      btn.setAttribute("aria-label", "Go to page " + (i + 1));
+      btn.addEventListener("click", function () {
+        mag.scrollTo({ left: i * window.innerWidth, behavior: "smooth" });
+      });
+      nav.appendChild(btn);
+    });
+
+    counterTotal.textContent = String(pages.length).padStart(2, "0");
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          var idx = pages.indexOf(entry.target);
+          if (idx >= 0) {
+            document.querySelectorAll(".nav-dot").forEach(function (d, i) {
+              d.classList.toggle("active", i === idx);
+            });
+            counterCurrent.textContent = String(idx + 1).padStart(2, "0");
+          }
+        }
+      });
+    }, { root: mag, threshold: [0.5] });
+
+    pages.forEach(function (p) { io.observe(p); });
+
+    document.addEventListener("keydown", function (e) {
+      var w = window.innerWidth;
+      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+        e.preventDefault();
+        mag.scrollBy({ left: w, behavior: "smooth" });
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        mag.scrollBy({ left: -w, behavior: "smooth" });
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        mag.scrollTo({ left: 0, behavior: "smooth" });
+      } else if (e.key === "End") {
+        e.preventDefault();
+        mag.scrollTo({ left: mag.scrollWidth, behavior: "smooth" });
+      }
+    });
+
+    mag.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        mag.scrollBy({ left: e.deltaY, behavior: "auto" });
+      }
+    }, { passive: false });
+  })();
+</script>
+</body>
+</html>

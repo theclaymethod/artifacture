@@ -1,0 +1,34 @@
+import { Callout, ExplainerShell, FlowDiagram, Section } from '../../visual-explainer-mdx/components';
+
+export default function WebDiagramExample() {
+  return (
+    <ExplainerShell
+      eyebrow="web diagram command"
+      title="Generated Explainer Flow"
+      summary="This example represents the migrated /generate-web-diagram path: MDX source, reusable diagram component, generated standalone HTML."
+    >
+      <Section kicker="diagram" title="Source To Artifact">
+        <FlowDiagram
+          nodes={[
+            { id: 'prompt', label: 'Prompt', detail: 'topic + audience' },
+            { id: 'mdx', label: 'MDX', detail: 'component source' },
+            { id: 'review', label: 'Review', detail: 'point + annotate' },
+            { id: 'html', label: 'HTML', detail: 'generated artifact' },
+          ]}
+          edges={[
+            { from: 'prompt', to: 'mdx', label: 'author' },
+            { from: 'mdx', to: 'review', label: 'preview' },
+            { from: 'review', to: 'html', label: 'export' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="rule" title="Command Contract">
+        <Callout>
+          The command writes MDX/TSX as the editable source. The standalone HTML is produced by
+          <code>npm run ve:export</code>.
+        </Callout>
+      </Section>
+    </ExplainerShell>
+  );
+}

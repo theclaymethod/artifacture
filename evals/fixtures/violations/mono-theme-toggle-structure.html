@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- violates: mono-theme-toggle-structure | seeded violation -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mono Industrial Fixture Base</title>
+<style>
+:root{--bg:#0a0a0a;--fg:#f6f4f0;--text-display:#f6f4f0;--text-primary:#f6f4f0;--text-secondary:#b8b8b2;--text-disabled:#777770;--rule:#464646;--rule-strong:#777777;--ok:#2f6f4e;--warn:#b8871f;--err:#b94b48;--font-body:"Space Grotesk",sans-serif;--font-mono:"Space Mono",monospace}
+:root[data-theme="light"]{--bg:#f6f4f0;--fg:#16130f;--text-display:#16130f;--text-primary:#16130f;--text-secondary:#55524d;--text-disabled:#888888;--rule:#c8c8c8;--rule-strong:#777777}
+:root[data-theme="dark"]{--bg:#0a0a0a;--fg:#f6f4f0;--text-display:#f6f4f0;--text-primary:#f6f4f0;--text-secondary:#b8b8b2;--text-disabled:#777770;--rule:#464646;--rule-strong:#777777}
+@media (prefers-color-scheme:light){:root:not([data-theme="light"]):not([data-theme="dark"]){--bg:#f6f4f0;--fg:#16130f;--text-display:#16130f;--text-primary:#16130f;--text-secondary:#55524d;--text-disabled:#888888;--rule:#c8c8c8;--rule-strong:#777777}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;overflow-x:clip}
+body{overflow-wrap:anywhere;background:var(--bg);color:var(--text-primary);font-family:var(--font-body)}
+main{width:min(100% - 48px,960px);margin:0 auto;padding:64px 0}
+h1{font-size:clamp(2rem,6vw,4rem);line-height:1;font-weight:600}
+a{color:var(--text-primary)}
+.theme-toggle{display:flex;gap:8px}.theme-toggle .active{background:color-mix(in srgb,var(--fg) 10%,transparent)}
+@media (hover:hover){.theme-toggle{opacity:.92}}
+@media (pointer:fine){.theme-toggle button{cursor:pointer}}
+.surprise-pixel{width:24px;height:24px;background:var(--fg)}
+</style>
+<script>const k='mono-industrial-theme';const saved=localStorage.getItem(k);if(saved)document.documentElement.dataset.theme=saved;function setTheme(v){if(v==='auto'){localStorage.removeItem(k);delete document.documentElement.dataset.theme}else{localStorage.setItem(k,v);document.documentElement.dataset.theme=v}}</script>
+</head>
+<body data-ve-preset="mono-industrial">
+<main>
+<div class="theme-toggle" role="radiogroup"><button><svg width="8" height="8"></svg>Light</button><button><svg width="8" height="8"></svg>Dark</button></div>
+<h1>Mono Industrial</h1>
+<section><p class="label">SYSTEM READY</p><div class="surprise-pixel"></div></section>
+</main>
+</body>
+</html>

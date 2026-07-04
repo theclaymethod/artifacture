@@ -1,0 +1,39 @@
+{
+  "name": "visual-explainer-marketplace",
+  "owner": {
+    "name": "Clayton Kim"
+  },
+  "metadata": {
+    "description": "Plugin distribution for visual-explainer",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "visual-explainer",
+      "source": "./plugins/visual-explainer",
+      "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, slides, and data tables",
+      "version": "0.7.0",
+      "author": {
+        "name": "nicobailon"
+      },
+      "repository": "https://github.com/nicobailon/visual-explainer",
+      "license": "MIT",
+      "keywords": [
+        "diagrams",
+        "html",
+        "visualization",
+        "diff-review",
+        "slides"
+      ],
+      "category": "visualization",
+      "tags": [
+        "diagrams",
+        "html-generation",
+        "code-review",
+        "slides",
+        "mermaid"
+      ]
+    }
+  ]
+}

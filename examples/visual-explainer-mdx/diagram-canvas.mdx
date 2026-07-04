@@ -1,0 +1,75 @@
+import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
+
+export default function DiagramCanvasExample() {
+  return (
+    <ExplainerShell
+      eyebrow="component diagram"
+      preset="custom"
+      reviewTools={false}
+      title="DiagramCanvas Acuity Contract"
+      summary="Models supply semantic data; the component supplies lane chrome, focal hierarchy, arrow labels, and canvas atmosphere."
+    >
+      <Section kicker="swimlane" title="Designed Surface From Props">
+        <DiagramCanvas
+          layout="swimlane"
+          lanes={[
+            { id: 'source', label: 'Source' },
+            { id: 'runtime', label: 'Runtime' },
+            { id: 'export', label: 'Export' },
+          ]}
+          nodes={[
+            { id: 'brief', label: 'Brief', detail: 'scope + acceptance', shape: 'oval', lane: 'source' },
+            { id: 'mdx', label: 'MDX props', detail: 'nodes + edges', lane: 'source' },
+            { id: 'canvas', label: 'DiagramCanvas', detail: 'layout + visual system', accent: true, lane: 'runtime' },
+            { id: 'verify', label: 'Verify?', detail: '0 errors / 0 warns', shape: 'diamond', lane: 'runtime' },
+            { id: 'artifact', label: 'HTML artifact', detail: 'single file', shape: 'oval', lane: 'export' },
+            { id: 'report', label: 'Report', detail: 'screens + JSON', shape: 'dot', lane: 'export' },
+          ]}
+          edges={[
+            { from: 'brief', to: 'mdx', label: 'author' },
+            { from: 'mdx', to: 'canvas', label: 'semantic props' },
+            { from: 'canvas', to: 'verify', label: 'export' },
+            { from: 'verify', to: 'artifact', label: 'pass' },
+            { from: 'canvas', to: 'report', label: 'screens', style: 'dashed' },
+          ]}
+          title="DiagramCanvas showcase"
+        />
+      </Section>
+
+      <Section kicker="preset craft" title="Same Semantics, Different Surfaces">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+          <div className="min-w-0" data-ve-preset="blueprint">
+            <DiagramCanvas
+              layout="flow"
+              nodes={[
+                { id: 'brief-bp', label: 'Brief', detail: 'constraint set', shape: 'oval' },
+                { id: 'layout-bp', label: 'Layout solver', detail: 'rank + lane grid', accent: true },
+                { id: 'verify-bp', label: 'Verify', detail: '0 / 0', shape: 'diamond' },
+              ]}
+              edges={[
+                { from: 'brief-bp', to: 'layout-bp', label: 'measure' },
+                { from: 'layout-bp', to: 'verify-bp', label: 'export' },
+              ]}
+              title="Blueprint diagram treatment"
+            />
+          </div>
+          <div className="min-w-0" data-ve-preset="paper-ink">
+            <DiagramCanvas
+              layout="flow"
+              nodes={[
+                { id: 'brief-paper', label: 'Brief', detail: 'margin notes', shape: 'oval' },
+                { id: 'layout-paper', label: 'Layout solver', detail: 'rank + lane grid', accent: true },
+                { id: 'verify-paper', label: 'Verify', detail: 'signed proof', shape: 'diamond' },
+              ]}
+              edges={[
+                { from: 'brief-paper', to: 'layout-paper', label: 'sketch' },
+                { from: 'layout-paper', to: 'verify-paper', label: 'stamp' },
+              ]}
+              title="Paper ink diagram treatment"
+            />
+          </div>
+        </div>
+      </Section>
+    </ExplainerShell>
+  );
+}

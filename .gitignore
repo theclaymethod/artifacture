@@ -1,0 +1,23 @@
+.DS_Store
+node_modules/
+.ve-mdx-tmp/
+dist/
+
+# Local skill-management artifacts (dev-only, not part of the project)
+# Scope to repo root — plugins/*/.claude/ ships agent definitions and must be tracked.
+/.agents/
+/.claude/
+/.pi/
+skills-lock.json
+
+# Browser-verification artifacts (Playwright MCP)
+.playwright-mcp/
+/orchestrated-*.png
+/mono-industrial-*-geist-pixel.png
+/slides-*.png
+
+# Publish hygiene (Artifacture)
+.codex-briefs/
+evals/model-matrix/out/
+docs/goals/
+artifacts/

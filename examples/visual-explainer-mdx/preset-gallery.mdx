@@ -1,0 +1,73 @@
+import { Callout, DecisionMatrix, ExplainerShell, Pipeline, Section } from '../../visual-explainer-mdx/components';
+
+export default function PresetGallery() {
+  const presets = [
+    'mono-industrial',
+    'nothing',
+    'blueprint',
+    'editorial',
+    'paper-ink',
+    'terminal',
+  ];
+
+  return (
+    <ExplainerShell
+      eyebrow="design system"
+      preset="paper-ink"
+      title="Preset Token Gallery"
+      summary="The shared explainer components consume semantic tokens for palette, typography, surfaces, borders, diagrams, slides, review tools, and fixed-canvas posters."
+    >
+      <Section kicker="tokens" title="What Changes">
+        <DecisionMatrix
+          rows={[
+            { Token: 'Typography', Surface: 'Display, body, and mono font stacks plus heading weights.' },
+            { Token: 'Palette', Surface: 'Background, panel, text, muted text, accent, and status roles.' },
+            { Token: 'Layout', Surface: 'Radius, page max width, section rhythm, slide colors, poster grid.' },
+            { Token: 'Review UI', Surface: 'Annotation panel, controls, focus state, and feedback cards.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="presets" title="Available Presets">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {presets.map((preset) => (
+            <article
+              className="min-w-0 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5"
+              key={preset}
+            >
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">
+                {preset}
+              </p>
+              <h3 className="mt-4 text-3xl leading-none text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+                Source to artifact
+              </h3>
+              <p className="mt-4 text-sm leading-6 text-[var(--ve-muted)]">
+                MDX or TSX remains canonical. HTML is generated and reviewed with point-and-click notes.
+              </p>
+              <div className="mt-5 h-2 bg-[var(--ve-accent)]" />
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section kicker="usage" title="Component API">
+        <Callout>
+          Use <code>preset="nothing"</code>, <code>preset="blueprint"</code>, <code>preset="editorial"</code>,{' '}
+          <code>preset="paper-ink"</code>, or <code>preset="terminal"</code> on
+          top-level surfaces like <code>ExplainerShell</code>, <code>SlideDeck</code>, and <code>PosterCanvas</code>.
+        </Callout>
+      </Section>
+
+      <Section kicker="pipeline" title="Export Contract">
+        <Pipeline
+          steps={[
+            { title: 'Pick preset', body: 'Choose a named design system based on the requested aesthetic.' },
+            { title: 'Author source', body: 'Compose with MDX by default or TSX for richer interaction.' },
+            { title: 'Export HTML', body: 'Run ve:export so the final artifact is generated.' },
+            { title: 'Verify output', body: 'Open in browser, check responsive fit, and collect annotations.' },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

@@ -1,0 +1,34 @@
+{
+  "name": "artifacture",
+  "version": "0.6.3",
+  "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources — with a deterministic design-quality verifier and a multi-model eval harness",
+  "keywords": [
+    "claude-code-plugin",
+    "agent-skill"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "ve:export": "node scripts/ve-mdx/export.mjs",
+    "ve:export-static": "node scripts/ve-mdx/export-static.mjs",
+    "ve:check": "node scripts/ve-mdx/check.mjs",
+    "ve:check-integrity": "node scripts/ve-mdx/check-integrity.mjs",
+    "ve:verify": "node plugins/visual-explainer/scripts/verify/ve-verify.mjs",
+    "ve:eval": "node evals/run.mjs"
+  },
+  "dependencies": {
+    "@mdx-js/rollup": "^3.1.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.12"
+  },
+  "devDependencies": {
+    "linkedom": "0.18.12",
+    "playwright": "1.60.0",
+    "playwright-core": "1.60.0",
+    "shiki": "4.3.1"
+  }
+}

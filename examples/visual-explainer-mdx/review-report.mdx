@@ -1,0 +1,76 @@
+import { Callout, DecisionMatrix, ExplainerShell, Pipeline, RiskLedger, Section } from '../../visual-explainer-mdx/components';
+
+export default function ReviewReportExample() {
+  return (
+    <ExplainerShell
+      eyebrow="review command family"
+      title="Verified Review Report"
+      summary="This example represents the migrated diff-review, plan-review, and project-recap pattern: collect evidence, map changes, surface risks, then generate the HTML artifact from MDX."
+    >
+      <Section kicker="summary" title="Executive Read">
+        <Callout>
+          Review pages should separate verified facts from interpretation. Quantities, file names, and behavior claims
+          must trace back to command output or source files before export.
+        </Callout>
+      </Section>
+
+      <Section kicker="scope" title="Impact Dashboard">
+        <DecisionMatrix
+          rows={[
+            { Dimension: 'Files', Evidence: 'Changed-file list or plan references', Treatment: 'Group by subsystem and status.' },
+            { Dimension: 'Tests', Evidence: 'Test files and verification commands', Treatment: 'Show coverage and gaps.' },
+            { Dimension: 'Docs', Evidence: 'README, changelog, ADRs, command docs', Treatment: 'Mark updated, missing, or not applicable.' },
+            { Dimension: 'Rationale', Evidence: 'Plan text, commits, current session notes', Treatment: 'Label sourced vs inferred.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="flow" title="Review Pipeline">
+        <Pipeline
+          steps={[
+            { title: 'Gather', body: 'Read the plan, diff, project history, and referenced files.' },
+            { title: 'Verify', body: 'Build a fact sheet for every claim that will appear in the report.' },
+            { title: 'Compose', body: 'Author the review report as MDX with reusable visual sections.' },
+            { title: 'Export', body: 'Generate standalone HTML and verify it in the browser.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="analysis" title="Good / Bad / Ugly">
+        <DecisionMatrix
+          rows={[
+            { Category: 'Good', Signal: 'Clear invariants, tests, or simpler architecture.', Action: 'Preserve and document.' },
+            { Category: 'Bad', Signal: 'Concrete bug, missing case, or incorrect assumption.', Action: 'Fix or block before merge.' },
+            { Category: 'Ugly', Signal: 'Maintainability risk or hidden coupling.', Action: 'Mitigate with design notes or follow-up tasks.' },
+            { Category: 'Questions', Signal: 'Ambiguity that changes implementation choices.', Action: 'Ask before presenting as fact.' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="risk" title="Cognitive Debt">
+        <RiskLedger
+          risks={[
+            {
+              risk: 'Unsourced rationale',
+              signal: 'The report explains why a decision was made but cites no plan, commit, or conversation source.',
+              mitigation: 'Label as inferred or move it to questions.',
+              level: 'medium',
+            },
+            {
+              risk: 'Fact drift',
+              signal: 'Line counts, file counts, or command outputs are stale after edits.',
+              mitigation: 'Re-run collection commands before the final export.',
+              level: 'high',
+            },
+            {
+              risk: 'Dense tables',
+              signal: 'Mobile viewport overflows or report becomes unreadable.',
+              mitigation: 'Use internal scroll wrappers and compact summary cards.',
+              level: 'medium',
+            },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

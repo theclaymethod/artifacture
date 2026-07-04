@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Figures — Rebuilding our ingest pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --paper:        #faf7f2;
+    --paper-2:      #f2ede4;
+    --ink:          #1c1917;
+    --muted:        #57534e;
+    --soft:         #78716c;
+    --rule:         rgba(28, 25, 23, 0.12);
+    --rule-solid:   rgba(120, 113, 108, 0.25);
+    --accent:       #b5523a;
+    --accent-tint:  rgba(181, 82, 58, 0.08);
+    --link:         #2563eb;
+
+    --font-display: "Instrument Serif", Georgia, serif;
+    --font-body:    "Geist", system-ui, sans-serif;
+    --font-mono:    "Geist Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #1c1917;
+      --paper-2:     #292524;
+      --ink:         #faf7f2;
+      --muted:       #a8a29e;
+      --soft:        #8e8680;
+      --rule:        rgba(250, 247, 242, 0.12);
+      --rule-solid:  rgba(168, 162, 158, 0.25);
+      --accent:      #d6724a;
+      --accent-tint: rgba(214, 114, 74, 0.10);
+      --link:        #60a5fa;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 64px 24px 96px;
+    gap: 80px;
+  }
+
+  .page-header {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .page-intro {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
+    max-width: 64ch;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  figure.fig {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .fig-head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fig-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .fig-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  figcaption {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--muted);
+    max-width: 72ch;
+    line-height: 1.55;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .diagram-frame {
+    width: 100%;
+    display: block;
+    background: var(--paper);
+  }
+  svg.diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+    font-family: var(--font-body);
+    overflow: visible;
+  }
+
+  .t-node-name { font-family: var(--font-body);    font-size: 12px; font-weight: 600; fill: var(--ink); }
+  .t-node-name-lg { font-family: var(--font-body); font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .t-sublabel   { font-family: var(--font-mono);    font-size: 9px;  font-weight: 400; fill: var(--muted); }
+  .t-eyebrow    { font-family: var(--font-mono);    font-size: 8px;  font-weight: 500; fill: var(--muted); letter-spacing: 0.18em; text-transform: uppercase; }
+  .t-arrow-lbl  { font-family: var(--font-mono);    font-size: 9px;  font-weight: 400; fill: var(--ink); letter-spacing: 0.06em; }
+  .t-callout    { font-family: var(--font-display); font-size: 15px; font-style: italic; font-weight: 400; fill: var(--ink); }
+  .t-legend     { font-family: var(--font-mono);    font-size: 9px;  fill: var(--soft); letter-spacing: 0.06em; text-transform: uppercase; }
+  .t-axis       { font-family: var(--font-mono);    font-size: 9px;  fill: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .t-quad-item  { font-family: var(--font-body);    font-size: 11px; font-weight: 500; fill: var(--ink); }
+  .t-pct        { font-family: var(--font-mono);    font-size: 10px; fill: var(--muted); }
+  .t-boundary   { font-family: var(--font-mono);    font-size: 8px;  font-weight: 500; fill: var(--soft); letter-spacing: 0.18em; text-transform: uppercase; }
+
+  footer {
+    max-width: 1000px;
+    width: 100%;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--soft);
+    letter-spacing: 0.06em;
+  }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  footer a:hover { color: var(--ink); border-color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="kicker">Engineering · Field Notes · 2026-Q2</span>
+  <h1 class="page-title">Figures — Rebuilding our ingest pipeline</h1>
+  <p class="page-intro">
+    Five diagrams from a working document on the in-flight ingest rebuild. Each figure
+    is a single inline SVG rendered under the editorial token set: warm stone paper,
+    rust accent, serif display, and a strict 4px coordinate grid. The set is intended
+    to be read top-to-bottom as a short argument: what we are building, how events
+    branch, how the hot path talks, where to invest, and where events drop off.
+  </p>
+</header>
+
+<!-- =================================================================
+     FIG. 01 — ARCHITECTURE
+     ================================================================= -->
+<figure class="fig">
+  <div class="fig-head">
+    <span class="fig-eyebrow">FIG. 01 — ARCHITECTURE</span>
+    <h2 class="fig-title">Three tiers, one trust boundary</h2>
+  </div>
+
+  <div class="diagram-frame">
+    <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="Three-tier architecture for the ingest pipeline">
+      <defs>
+        <pattern id="dots-01" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+        </marker>
+        <marker id="arr-01-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+        </marker>
+      </defs>
+
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots-01)" opacity="0.55" />
+
+      <!--
+        Layout (4px grid):
+          Row top  (tier 1 · edge)      y=140..200  (height 60 area)
+          Row mid  (tier 2 · core)      y=260..320
+          Row bot  (tier 3 · store/DLQ) y=380..440
+          Cols:  producers  60..180
+                 gateway   240..360
+                 queue     420..540
+                 validator 600..720
+                 enricher  600..720  (mid row, focal)
+                 warehouse 780..900  (bot row)
+                 DLQ       420..540  (bot row)
+        Trust boundary wraps producers..validator horizontally and top..mid rows.
+      -->
+
+      <!-- trust boundary (dashed) around edge+core (producers + gateway + queue + validator) -->
+      <rect x="40" y="96" width="700" height="252" rx="8"
+            fill="none" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="5 4" />
+      <rect x="300" y="84" width="180" height="20" fill="var(--paper)" />
+      <text x="390" y="98" class="t-boundary" text-anchor="middle">TRUST BOUNDARY · VPC</text>
+
+      <!-- ====== ARROWS FIRST (z-order) ====== -->
+      <!-- producers -> gateway (three) -->
+      <path d="M 180 172 L 240 200" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+      <path d="M 180 240 L 240 240" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+      <path d="M 180 308 L 240 280" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+
+      <!-- gateway -> queue (horizontal) -->
+      <path d="M 360 240 L 420 240" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+      <!-- queue -> validator (horizontal) -->
+      <path d="M 540 240 L 600 240" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+      <!-- validator -> enricher (accent, vertical down, happy path) -->
+      <path d="M 660 280 L 660 336" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#arr-01-acc)" />
+      <!-- enricher -> warehouse (elbow right/down, crosses trust boundary) -->
+      <path d="M 720 376 L 780 376 L 780 408 L 780 408" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-01)" />
+      <!-- validator -> DLQ (degraded path, elbow down+left, dashed) -->
+      <path d="M 600 280 L 480 280 L 480 404" stroke="var(--muted)" stroke-width="1" fill="none" stroke-dasharray="4 4" marker-end="url(#arr-01)" />
+
+      <!-- ====== ARROW LABELS (masked) ====== -->
+      <g>
+        <rect x="192" y="176" width="36" height="16" fill="var(--paper)" />
+        <text x="210" y="188" class="t-arrow-lbl" text-anchor="middle">tcp</text>
+      </g>
+      <g>
+        <rect x="368" y="232" width="44" height="16" fill="var(--paper)" />
+        <text x="390" y="244" class="t-arrow-lbl" text-anchor="middle">batch</text>
+      </g>
+      <g>
+        <rect x="548" y="232" width="44" height="16" fill="var(--paper)" />
+        <text x="570" y="244" class="t-arrow-lbl" text-anchor="middle">pull</text>
+      </g>
+      <g>
+        <rect x="672" y="300" width="48" height="16" fill="var(--paper)" />
+        <text x="696" y="312" class="t-arrow-lbl" text-anchor="middle" fill="var(--accent)">valid</text>
+      </g>
+      <g>
+        <rect x="460" y="332" width="48" height="16" fill="var(--paper)" />
+        <text x="484" y="344" class="t-arrow-lbl" text-anchor="middle">reject</text>
+      </g>
+      <g>
+        <rect x="728" y="368" width="56" height="16" fill="var(--paper)" />
+        <text x="756" y="380" class="t-arrow-lbl" text-anchor="middle">commit</text>
+      </g>
+
+      <!-- ====== NODES ====== -->
+      <!-- Producers (three stacked sources) -->
+      <g>
+        <rect x="60" y="144" width="120" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="120" y="164" class="t-eyebrow" text-anchor="middle">SOURCE</text>
+        <text x="120" y="182" class="t-node-name" text-anchor="middle">Web clients</text>
+      </g>
+      <g>
+        <rect x="60" y="212" width="120" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="120" y="232" class="t-eyebrow" text-anchor="middle">SOURCE</text>
+        <text x="120" y="250" class="t-node-name" text-anchor="middle">Mobile SDK</text>
+      </g>
+      <g>
+        <rect x="60" y="280" width="120" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="120" y="300" class="t-eyebrow" text-anchor="middle">SOURCE</text>
+        <text x="120" y="318" class="t-node-name" text-anchor="middle">Partner feeds</text>
+      </g>
+
+      <!-- Gateway -->
+      <g>
+        <rect x="240" y="212" width="120" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="300" y="230" class="t-eyebrow" text-anchor="middle">EDGE · 01</text>
+        <text x="300" y="248" class="t-node-name" text-anchor="middle">Ingress gateway</text>
+        <text x="300" y="262" class="t-sublabel" text-anchor="middle">envoy · 4 pods</text>
+      </g>
+
+      <!-- Queue -->
+      <g>
+        <rect x="420" y="212" width="120" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="480" y="230" class="t-eyebrow" text-anchor="middle">CORE · 02</text>
+        <text x="480" y="248" class="t-node-name" text-anchor="middle">Event queue</text>
+        <text x="480" y="262" class="t-sublabel" text-anchor="middle">kafka · 12 prt</text>
+      </g>
+
+      <!-- Validator -->
+      <g>
+        <rect x="600" y="212" width="120" height="68" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="660" y="230" class="t-eyebrow" text-anchor="middle">CORE · 03</text>
+        <text x="660" y="248" class="t-node-name" text-anchor="middle">Validator</text>
+        <text x="660" y="262" class="t-sublabel" text-anchor="middle">schema v4</text>
+        <text x="660" y="274" class="t-sublabel" text-anchor="middle">p99 · 18ms</text>
+      </g>
+
+      <!-- Enricher (focal — accent) -->
+      <g>
+        <rect x="600" y="336" width="120" height="72" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="660" y="354" class="t-eyebrow" text-anchor="middle" fill="var(--accent)">CORE · 04 · HOT</text>
+        <text x="660" y="374" class="t-node-name" text-anchor="middle">Enricher service</text>
+        <text x="660" y="388" class="t-sublabel" text-anchor="middle">geo + segment</text>
+        <text x="660" y="400" class="t-sublabel" text-anchor="middle">rocksdb state</text>
+      </g>
+
+      <!-- Warehouse (store tier, bottom-right) -->
+      <g>
+        <rect x="780" y="380" width="160" height="56" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="860" y="398" class="t-eyebrow" text-anchor="middle">STORE · 05</text>
+        <text x="860" y="416" class="t-node-name" text-anchor="middle">Warehouse</text>
+        <text x="860" y="430" class="t-sublabel" text-anchor="middle">snowflake · prod-01</text>
+      </g>
+
+      <!-- DLQ (degraded, bottom-left of store tier) -->
+      <g>
+        <rect x="420" y="404" width="120" height="48" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 3" />
+        <text x="480" y="422" class="t-eyebrow" text-anchor="middle">DEGRADED</text>
+        <text x="480" y="438" class="t-node-name" text-anchor="middle">Dead letter queue</text>
+      </g>
+
+      <!-- ====== annotation callout (editorial primitive) ======
+           Leader must visibly connect callout text to its target node.
+           Routed below the DLQ node so the dashed line doesn't cross
+           any other node, then approaches the landing dot from above
+           so it terminates cleanly before the italic text begins. -->
+      <g>
+        <path d="M 660 408 C 720 496, 400 512, 56 528"
+              stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+        <circle cx="56" cy="528" r="2.5" fill="var(--accent)" />
+        <text x="64" y="540" class="t-callout">The enricher is the only component that owns state worth protecting. Everything else can be re-derived.</text>
+      </g>
+
+      <!-- ====== legend (horizontal bottom strip) ====== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <g>
+        <line x1="60" y1="634" x2="90" y2="634" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="100" y="638" class="t-legend">Hot path</text>
+      </g>
+      <g>
+        <line x1="220" y1="634" x2="250" y2="634" stroke="var(--muted)" stroke-width="1" />
+        <text x="260" y="638" class="t-legend">Neutral flow</text>
+      </g>
+      <g>
+        <line x1="400" y1="634" x2="430" y2="634" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" />
+        <text x="440" y="638" class="t-legend">Degraded / reject</text>
+      </g>
+      <g>
+        <rect x="600" y="628" width="14" height="12" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1" />
+        <text x="624" y="638" class="t-legend">Focal element</text>
+      </g>
+      <g>
+        <rect x="760" y="626" width="16" height="16" rx="3" fill="none" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="5 4" />
+        <text x="784" y="638" class="t-legend">Trust boundary</text>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption>
+    Ingress, core, and store split across a single VPC trust boundary; the enricher is the
+    one stateful component on the path and carries the accent.
+  </figcaption>
+</figure>
+
+<!-- =================================================================
+     FIG. 02 — FLOWCHART
+     ================================================================= -->
+<figure class="fig">
+  <div class="fig-head">
+    <span class="fig-eyebrow">FIG. 02 — FLOWCHART</span>
+    <h2 class="fig-title">Should this event retry?</h2>
+  </div>
+
+  <div class="diagram-frame">
+    <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="Retry decision flowchart">
+      <defs>
+        <pattern id="dots-02" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+        </marker>
+        <marker id="arr-02-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+        </marker>
+      </defs>
+
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots-02)" opacity="0.55" />
+
+      <!-- ====== ARROWS FIRST ====== -->
+      <!-- start -> isTransient? -->
+      <path d="M 500 92 L 500 140" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+      <!-- isTransient NO -> drop (right) -->
+      <path d="M 580 180 L 820 180 L 820 220" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+      <!-- isTransient YES -> attempts exhausted? (down) -->
+      <path d="M 500 220 L 500 260" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+      <!-- exhausted NO -> backoff (right) -->
+      <path d="M 580 300 L 720 300" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+      <!-- exhausted YES -> DLQ (down) -->
+      <path d="M 500 340 L 500 380" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+      <!-- backoff -> requeue (down) -->
+      <path d="M 780 340 L 780 400" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#arr-02-acc)" />
+      <!-- requeue -> merge dot (down+left) -->
+      <path d="M 780 436 L 780 476 L 504 476" stroke="var(--muted)" stroke-width="1" fill="none" />
+      <!-- DLQ -> merge dot (right) -->
+      <path d="M 500 420 L 500 476" stroke="var(--muted)" stroke-width="1" fill="none" />
+      <!-- merge -> end -->
+      <path d="M 500 480 L 500 520" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-02)" />
+
+      <!-- ====== ARROW LABELS ====== -->
+      <g>
+        <rect x="588" y="172" width="20" height="16" fill="var(--paper)" />
+        <text x="598" y="184" class="t-arrow-lbl" text-anchor="middle">no</text>
+      </g>
+      <g>
+        <rect x="476" y="228" width="28" height="16" fill="var(--paper)" />
+        <text x="490" y="240" class="t-arrow-lbl" text-anchor="middle">yes</text>
+      </g>
+      <g>
+        <rect x="588" y="292" width="20" height="16" fill="var(--paper)" />
+        <text x="598" y="304" class="t-arrow-lbl" text-anchor="middle">no</text>
+      </g>
+      <g>
+        <rect x="476" y="348" width="28" height="16" fill="var(--paper)" />
+        <text x="490" y="360" class="t-arrow-lbl" text-anchor="middle">yes</text>
+      </g>
+      <g>
+        <rect x="756" y="364" width="48" height="16" fill="var(--paper)" />
+        <text x="780" y="376" class="t-arrow-lbl" text-anchor="middle" fill="var(--accent)">retry</text>
+      </g>
+
+      <!-- ====== NODES ====== -->
+      <!-- start oval -->
+      <g>
+        <rect x="440" y="52" width="120" height="40" rx="20" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="76" class="t-node-name" text-anchor="middle">Event failed</text>
+      </g>
+
+      <!-- decision: isTransient? -->
+      <g>
+        <path d="M 500 140 L 580 180 L 500 220 L 420 180 Z"
+              fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="176" class="t-node-name" text-anchor="middle">transient</text>
+        <text x="500" y="192" class="t-node-name" text-anchor="middle">error?</text>
+      </g>
+
+      <!-- decision: attempts exhausted? -->
+      <g>
+        <path d="M 500 260 L 580 300 L 500 340 L 420 300 Z"
+              fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="296" class="t-node-name" text-anchor="middle">attempts</text>
+        <text x="500" y="312" class="t-node-name" text-anchor="middle">exhausted?</text>
+      </g>
+
+      <!-- step: apply backoff (focal — accent) -->
+      <g>
+        <rect x="720" y="280" width="120" height="60" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="780" y="300" class="t-eyebrow" text-anchor="middle" fill="var(--accent)">STEP</text>
+        <text x="780" y="318" class="t-node-name" text-anchor="middle">Apply jittered</text>
+        <text x="780" y="332" class="t-node-name" text-anchor="middle">backoff</text>
+      </g>
+
+      <!-- step: requeue -->
+      <g>
+        <rect x="720" y="400" width="120" height="36" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="780" y="423" class="t-node-name" text-anchor="middle">Requeue</text>
+      </g>
+
+      <!-- step: drop (poison) -->
+      <g>
+        <rect x="760" y="220" width="120" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="820" y="244" class="t-node-name" text-anchor="middle">Drop (poison)</text>
+      </g>
+
+      <!-- step: route to DLQ -->
+      <g>
+        <rect x="440" y="380" width="120" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="404" class="t-node-name" text-anchor="middle">Route to DLQ</text>
+      </g>
+
+      <!-- merge point filled dot r=4 -->
+      <circle cx="500" cy="476" r="4" fill="var(--ink)" />
+
+      <!-- end oval -->
+      <g>
+        <rect x="440" y="520" width="120" height="40" rx="20" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="544" class="t-node-name" text-anchor="middle">Done</text>
+      </g>
+
+      <!-- ====== legend ====== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <g>
+        <rect x="60" y="626" width="28" height="16" rx="8" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="100" y="638" class="t-legend">Start / end</text>
+      </g>
+      <g>
+        <rect x="220" y="626" width="28" height="16" rx="3" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="260" y="638" class="t-legend">Step</text>
+      </g>
+      <g>
+        <path d="M 380 634 L 394 624 L 408 634 L 394 644 Z" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="420" y="638" class="t-legend">Decision</text>
+      </g>
+      <g>
+        <circle cx="556" cy="634" r="4" fill="var(--ink)" />
+        <text x="572" y="638" class="t-legend">Merge</text>
+      </g>
+      <g>
+        <line x1="680" y1="634" x2="710" y2="634" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="720" y="638" class="t-legend">Happy path</text>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption>
+    Vertical flow, shape-carries-meaning, every edge labelled; the accent lands on the
+    single step worth optimising — the backoff — not on every decision.
+  </figcaption>
+</figure>
+
+<!-- =================================================================
+     FIG. 03 — SEQUENCE
+     ================================================================= -->
+<figure class="fig">
+  <div class="fig-head">
+    <span class="fig-eyebrow">FIG. 03 — SEQUENCE</span>
+    <h2 class="fig-title">A single event, four actors</h2>
+  </div>
+
+  <div class="diagram-frame">
+    <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="Sequence diagram between client, gateway, validator, and store">
+      <defs>
+        <pattern id="dots-03" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+        </marker>
+        <marker id="arr-03-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+        </marker>
+      </defs>
+
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots-03)" opacity="0.55" />
+
+      <!-- Lifelines (dashed vertical) behind everything else -->
+      <line x1="160" y1="128" x2="160" y2="540" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
+      <line x1="400" y1="128" x2="400" y2="540" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
+      <line x1="640" y1="128" x2="640" y2="540" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
+      <line x1="880" y1="128" x2="880" y2="540" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
+
+      <!-- Activation bars (8px wide) -->
+      <rect x="156" y="160" width="8" height="336" fill="var(--accent-tint)" stroke="var(--muted)" stroke-width="0.8" />
+      <rect x="396" y="180" width="8" height="300" fill="var(--accent-tint)" stroke="var(--muted)" stroke-width="0.8" />
+      <rect x="636" y="220" width="8" height="180" fill="var(--accent-tint)" stroke="var(--muted)" stroke-width="0.8" />
+      <rect x="876" y="260" width="8" height="100" fill="var(--accent-tint)" stroke="var(--muted)" stroke-width="0.8" />
+
+      <!-- ====== ARROWS FIRST (messages) ====== -->
+      <!-- client -> gateway : POST /events -->
+      <path d="M 164 180 L 396 180" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-03)" />
+      <!-- gateway -> validator : validate() -->
+      <path d="M 404 220 L 636 220" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-03)" />
+      <!-- validator -> store : persist() -->
+      <path d="M 644 260 L 876 260" stroke="var(--muted)" stroke-width="1" fill="none" marker-end="url(#arr-03)" />
+      <!-- store -> validator : ack (dashed return) -->
+      <path d="M 876 360 L 644 360" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" fill="none" marker-end="url(#arr-03)" />
+      <!-- validator -> gateway : ok (dashed return) -->
+      <path d="M 636 400 L 404 400" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" fill="none" marker-end="url(#arr-03)" />
+      <!-- gateway -> client : 202 Accepted (accent, dashed return) -->
+      <path d="M 396 480 L 164 480" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 4" fill="none" marker-end="url(#arr-03-acc)" />
+
+      <!-- ====== ARROW LABELS (masked) ====== -->
+      <g>
+        <rect x="212" y="168" width="112" height="16" fill="var(--paper)" />
+        <text x="268" y="180" class="t-arrow-lbl" text-anchor="middle">POST /events</text>
+      </g>
+      <g>
+        <rect x="456" y="208" width="112" height="16" fill="var(--paper)" />
+        <text x="512" y="220" class="t-arrow-lbl" text-anchor="middle">validate(evt)</text>
+      </g>
+      <g>
+        <rect x="688" y="248" width="112" height="16" fill="var(--paper)" />
+        <text x="744" y="260" class="t-arrow-lbl" text-anchor="middle">persist(evt)</text>
+      </g>
+      <g>
+        <rect x="720" y="348" width="48" height="16" fill="var(--paper)" />
+        <text x="744" y="360" class="t-arrow-lbl" text-anchor="middle">ack</text>
+      </g>
+      <g>
+        <rect x="484" y="388" width="56" height="16" fill="var(--paper)" />
+        <text x="512" y="400" class="t-arrow-lbl" text-anchor="middle">ok</text>
+      </g>
+      <g>
+        <rect x="212" y="468" width="128" height="16" fill="var(--paper)" />
+        <text x="268" y="480" class="t-arrow-lbl" text-anchor="middle" fill="var(--accent)">202 Accepted</text>
+      </g>
+
+      <!-- ====== ACTOR BOXES (top) ====== -->
+      <g>
+        <rect x="100" y="96" width="120" height="32" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="160" y="116" class="t-node-name" text-anchor="middle">Client SDK</text>
+      </g>
+      <g>
+        <rect x="340" y="96" width="120" height="32" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="400" y="116" class="t-node-name" text-anchor="middle">Gateway</text>
+      </g>
+      <g>
+        <rect x="580" y="96" width="120" height="32" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="640" y="116" class="t-node-name" text-anchor="middle">Validator</text>
+      </g>
+      <g>
+        <rect x="820" y="96" width="120" height="32" rx="6" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="880" y="116" class="t-node-name" text-anchor="middle">Store</text>
+      </g>
+
+      <!-- Time axis label -->
+      <text x="48" y="152" class="t-axis" transform="rotate(-90 48 152)" text-anchor="end">TIME</text>
+
+      <!-- ====== legend ====== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <g>
+        <line x1="60" y1="634" x2="90" y2="634" stroke="var(--muted)" stroke-width="1" />
+        <text x="100" y="638" class="t-legend">Call</text>
+      </g>
+      <g>
+        <line x1="200" y1="634" x2="230" y2="634" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" />
+        <text x="240" y="638" class="t-legend">Return</text>
+      </g>
+      <g>
+        <line x1="340" y1="634" x2="370" y2="634" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 4" />
+        <text x="380" y="638" class="t-legend">Primary success</text>
+      </g>
+      <g>
+        <rect x="520" y="628" width="8" height="12" fill="var(--accent-tint)" stroke="var(--muted)" stroke-width="0.8" />
+        <text x="540" y="638" class="t-legend">Activation</text>
+      </g>
+      <g>
+        <line x1="680" y1="634" x2="710" y2="634" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
+        <text x="720" y="638" class="t-legend">Lifeline</text>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption>
+    One request, one primary success response. Lifelines dashed, activation bars 8px,
+    returns dashed, and exactly one arrow in accent — the 202 back to the client.
+  </figcaption>
+</figure>
+
+<!-- =================================================================
+     FIG. 04 — QUADRANT
+     ================================================================= -->
+<figure class="fig">
+  <div class="fig-head">
+    <span class="fig-eyebrow">FIG. 04 — QUADRANT</span>
+    <h2 class="fig-title">Where to spend the next sprint</h2>
+  </div>
+
+  <div class="diagram-frame">
+    <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="Latency vs cost quadrant prioritization">
+      <defs>
+        <pattern id="dots-04" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+      </defs>
+
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots-04)" opacity="0.55" />
+
+      <!-- Top-right (do first) quadrant tint -->
+      <rect x="500" y="100" width="400" height="200" fill="var(--accent-tint)" />
+
+      <!-- Axis cross (centered) -->
+      <line x1="100" y1="300" x2="900" y2="300" stroke="var(--ink)" stroke-width="1" />
+      <line x1="500" y1="100" x2="500" y2="500" stroke="var(--ink)" stroke-width="1" />
+
+      <!-- Axis end labels (at ENDS, not midpoints) -->
+      <!-- X axis: cost -->
+      <g>
+        <rect x="44" y="292" width="52" height="16" fill="var(--paper)" />
+        <text x="96" y="304" class="t-axis" text-anchor="end">LOW COST</text>
+      </g>
+      <g>
+        <rect x="904" y="292" width="60" height="16" fill="var(--paper)" />
+        <text x="908" y="304" class="t-axis" text-anchor="start">HIGH COST</text>
+      </g>
+      <!-- Y axis: latency impact -->
+      <g>
+        <rect x="460" y="76" width="80" height="16" fill="var(--paper)" />
+        <text x="500" y="88" class="t-axis" text-anchor="middle">HIGH IMPACT</text>
+      </g>
+      <g>
+        <rect x="460" y="508" width="80" height="16" fill="var(--paper)" />
+        <text x="500" y="520" class="t-axis" text-anchor="middle">LOW IMPACT</text>
+      </g>
+
+      <!-- Quadrant name labels (subtle, corners) -->
+      <text x="116" y="124" class="t-eyebrow">MAYBE LATER</text>
+      <text x="884" y="124" class="t-eyebrow" text-anchor="end" fill="var(--accent)">DO FIRST</text>
+      <text x="116" y="488" class="t-eyebrow">SKIP</text>
+      <text x="884" y="488" class="t-eyebrow" text-anchor="end">DELEGATE</text>
+
+      <!-- ====== ITEMS (r=4 dots + labels) — 10 items ====== -->
+      <!-- Top-right (DO FIRST) -->
+      <g>
+        <circle cx="640" cy="160" r="4" fill="var(--accent)" />
+        <text x="652" y="164" class="t-quad-item">Enricher autoscaling</text>
+      </g>
+      <g>
+        <circle cx="760" cy="220" r="4" fill="var(--accent)" />
+        <text x="772" y="224" class="t-quad-item">Schema registry v4</text>
+      </g>
+      <g>
+        <circle cx="580" cy="256" r="4" fill="var(--ink)" />
+        <text x="592" y="260" class="t-quad-item">Warehouse reserved slots</text>
+      </g>
+
+      <!-- Top-left (MAYBE LATER) -->
+      <g>
+        <circle cx="240" cy="172" r="4" fill="var(--ink)" />
+        <text x="252" y="176" class="t-quad-item">Edge cache tuning</text>
+      </g>
+      <g>
+        <circle cx="340" cy="240" r="4" fill="var(--ink)" />
+        <text x="352" y="244" class="t-quad-item">Gateway protocol swap</text>
+      </g>
+
+      <!-- Bottom-right (DELEGATE) -->
+      <g>
+        <circle cx="680" cy="368" r="4" fill="var(--ink)" />
+        <text x="692" y="372" class="t-quad-item">Partner SDK rewrite</text>
+      </g>
+      <g>
+        <circle cx="780" cy="436" r="4" fill="var(--ink)" />
+        <text x="792" y="440" class="t-quad-item">Cold-start trimming</text>
+      </g>
+
+      <!-- Bottom-left (SKIP) -->
+      <g>
+        <circle cx="200" cy="384" r="4" fill="var(--ink)" />
+        <text x="212" y="388" class="t-quad-item">Log format renaming</text>
+      </g>
+      <g>
+        <circle cx="320" cy="440" r="4" fill="var(--ink)" />
+        <text x="332" y="444" class="t-quad-item">Dashboard refresh</text>
+      </g>
+      <g>
+        <circle cx="240" cy="464" r="4" fill="var(--ink)" />
+        <text x="252" y="468" class="t-quad-item">Weekly report cron</text>
+      </g>
+
+      <!-- ====== legend ====== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <g>
+        <circle cx="68" cy="634" r="4" fill="var(--accent)" />
+        <text x="84" y="638" class="t-legend">Do first</text>
+      </g>
+      <g>
+        <circle cx="200" cy="634" r="4" fill="var(--ink)" />
+        <text x="216" y="638" class="t-legend">Item</text>
+      </g>
+      <g>
+        <rect x="320" y="626" width="16" height="16" fill="var(--accent-tint)" />
+        <text x="344" y="638" class="t-legend">Focal quadrant</text>
+      </g>
+      <g>
+        <line x1="520" y1="634" x2="550" y2="634" stroke="var(--ink)" stroke-width="1" />
+        <text x="560" y="638" class="t-legend">Axis</text>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption>
+    Ten initiatives on a cost-vs-impact grid. Labels sit at axis ends, not midpoints,
+    and the accent lights only the two candidates in the top-right quadrant.
+  </figcaption>
+</figure>
+
+<!-- =================================================================
+     FIG. 05 — FUNNEL
+     ================================================================= -->
+<figure class="fig">
+  <div class="fig-head">
+    <span class="fig-eyebrow">FIG. 05 — FUNNEL</span>
+    <h2 class="fig-title">From raw event to queryable row</h2>
+  </div>
+
+  <div class="diagram-frame">
+    <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="Event conversion funnel">
+      <defs>
+        <pattern id="dots-05" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
+        </pattern>
+      </defs>
+
+      <rect width="1000" height="660" fill="var(--paper)" />
+      <rect width="1000" height="600" fill="url(#dots-05)" opacity="0.55" />
+
+      <!--
+        Funnel widths proportional to conversion.
+        Layer 1: raw         100%  -> width 800, x=100
+        Layer 2: valid        94%  -> width 752, x=124
+        Layer 3: enriched     88%  -> width 704, x=148
+        Layer 4: indexed      76%  -> width 608, x=196
+        Layer 5: queryable    72%  -> width 576, x=212  (ACCENT — apex of the funnel, the final conversion we care about)
+        Each layer 64px tall, y starts at 96, step 72.
+      -->
+
+      <!-- Layer 1 -->
+      <g>
+        <rect x="100" y="96" width="800" height="64" rx="4" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="124" class="t-node-name-lg" text-anchor="middle">Raw events</text>
+        <text x="500" y="144" class="t-sublabel" text-anchor="middle">ingested at the edge</text>
+        <text x="912" y="132" class="t-pct">100%</text>
+        <text x="88" y="132" class="t-pct" text-anchor="end">4.2M /d</text>
+      </g>
+
+      <!-- Layer 2 -->
+      <g>
+        <rect x="124" y="168" width="752" height="64" rx="4" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="196" class="t-node-name-lg" text-anchor="middle">Valid events</text>
+        <text x="500" y="216" class="t-sublabel" text-anchor="middle">passed schema validation</text>
+        <text x="888" y="204" class="t-pct">94%</text>
+        <text x="112" y="204" class="t-pct" text-anchor="end">3.9M /d</text>
+      </g>
+
+      <!-- Layer 3 -->
+      <g>
+        <rect x="148" y="240" width="704" height="64" rx="4" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="268" class="t-node-name-lg" text-anchor="middle">Enriched events</text>
+        <text x="500" y="288" class="t-sublabel" text-anchor="middle">geo + segment joined</text>
+        <text x="864" y="276" class="t-pct">88%</text>
+        <text x="136" y="276" class="t-pct" text-anchor="end">3.7M /d</text>
+      </g>
+
+      <!-- Layer 4 -->
+      <g>
+        <rect x="196" y="312" width="608" height="64" rx="4" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="500" y="340" class="t-node-name-lg" text-anchor="middle">Indexed events</text>
+        <text x="500" y="360" class="t-sublabel" text-anchor="middle">written to warehouse partitions</text>
+        <text x="816" y="348" class="t-pct">76%</text>
+        <text x="184" y="348" class="t-pct" text-anchor="end">3.2M /d</text>
+      </g>
+
+      <!-- Layer 5 (accent apex) -->
+      <g>
+        <rect x="212" y="384" width="576" height="64" rx="4" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="500" y="408" class="t-eyebrow" text-anchor="middle" fill="var(--accent)">CONVERSION · APEX</text>
+        <text x="500" y="428" class="t-node-name-lg" text-anchor="middle">Queryable rows</text>
+        <text x="500" y="444" class="t-sublabel" text-anchor="middle">materialised views ready</text>
+        <text x="800" y="420" class="t-pct" fill="var(--accent)">72%</text>
+        <text x="200" y="420" class="t-pct" text-anchor="end" fill="var(--accent)">3.0M /d</text>
+      </g>
+
+      <!-- Drop-off annotation (neutral callout).
+           Leader connects the apex (conversion) layer to the italic
+           callout text below the funnel. Routed from the apex's
+           bottom-left corner so it clears the "3.0M /d" rail label. -->
+      <g>
+        <path d="M 212 448 C 160 472, 92 484, 56 488"
+              stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+        <circle cx="56" cy="488" r="2.5" fill="var(--muted)" />
+        <text x="64" y="492" class="t-callout">A 28-point drop from raw to queryable. Most of it is schema; very little is warehouse.</text>
+      </g>
+
+      <!-- ====== legend ====== -->
+      <line x1="40" y1="610" x2="960" y2="610" stroke="var(--rule)" stroke-width="1" />
+
+      <g>
+        <rect x="60" y="626" width="28" height="16" rx="3" fill="var(--paper-2)" stroke="var(--rule-solid)" stroke-width="1" />
+        <text x="100" y="638" class="t-legend">Conversion stage</text>
+      </g>
+      <g>
+        <rect x="260" y="626" width="28" height="16" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4" />
+        <text x="300" y="638" class="t-legend">Apex / focal</text>
+      </g>
+      <g>
+        <text x="460" y="638" class="t-legend">Width ∝ conversion %</text>
+      </g>
+      <g>
+        <text x="680" y="638" class="t-legend">Right rail · % of raw</text>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption>
+    Widths are honest — proportional to real conversion — and the apex layer carries
+    the only accent. A single serif callout marks the drop-off worth arguing about.
+  </figcaption>
+</figure>
+
+<footer>
+  <span>Rules paraphrased from cathrynlavery/diagram-design · MIT · Cocoon AI</span>
+  <a href="../plugins/visual-explainer/SKILL.md">↗ SKILL.md</a>
+</footer>
+
+</body>
+</html>
