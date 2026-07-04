@@ -4,8 +4,9 @@ description: Generate beautiful, self-contained HTML artifacts from MDX/React so
 license: MIT
 compatibility: Requires a browser to view generated HTML files. Optional surf-cli for AI image generation.
 metadata:
-  author: nicobailon
-  version: "0.6.3"
+  author: nicobailon (original visual-explainer)
+  maintainer: Clayton Kim
+  version: "0.7.0"
 ---
 
 # Visual Explainer

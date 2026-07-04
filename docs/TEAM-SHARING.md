@@ -5,7 +5,7 @@ Visual Explainer shares generated HTML artifacts through one command with two ba
 | Need | Use | Access | URL behavior | Setup |
 |---|---|---|---|---|
 | Zero setup, safe to be public | Vercel fallback | Public unless you add Vercel Deployment Protection | New claimable preview URL per share | No local account required |
-| Team-gated review, comments, stable link | sharehtml | Private by default behind Cloudflare Access | Same URL updates in place | Cloudflare + sharehtml CLI |
+| Team-gated review, comments, stable link | [sharehtml](https://github.com/jonesphillip/sharehtml) | Private by default behind Cloudflare Access | Same URL updates in place | Cloudflare + sharehtml CLI |
 
 ## Agent Contract
 

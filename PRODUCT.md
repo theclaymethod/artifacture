@@ -30,6 +30,8 @@ Do not look like generic SaaS cards, raw HTML demos, same-layout theme skins, te
 
 ## Token economics
 
+> Methodology note: the emit-vs-expand measurement approach follows [modem-dev/sideshow](https://github.com/modem-dev/sideshow)'s token-economics framing; we re-measured their published claims and applied the same discipline to this pipeline.
+
 The docs are structured to keep covered-flow reads small. Pre-restructure baselines were 62,078 tokens for web-diagram, 57,829 for code-heavy visual-plan, and 36,750 for data-table. The target is Tier 0 plus one covered-flow card at no more than about 3,000 read tokens.
 
 This works because agents emit small MDX/TSX sources, typically about 300-1,900 tokens, while the deterministic exporter expands them into roughly 237 KB standalone artifacts with about 96.6% deterministic scaffolding. New docs must not re-inflate the Tier 0 read path; put flow-specific detail in cards and bespoke fallback guidance in Tier 2 references.
