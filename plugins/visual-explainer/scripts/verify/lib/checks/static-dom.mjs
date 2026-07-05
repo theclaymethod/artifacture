@@ -147,6 +147,18 @@ export const checks = Object.fromEntries([
     if (redGreen.length >= 2 && !/pass|fail|before|after|old|new|added|removed|error|success|deprecated/i.test(redGreen.map(textOf).join(' '))) return [warn('red/green status pair carries meaning without labels', 'status color')];
     return [];
   })],
+  ['uniform-descriptor-gloss', scoped((ctx) => ctx.dom && /grid|list|catalog|gloss|muted|dim|subtitle|caption|description/i.test(ctx.html), (ctx) => {
+    for (const parent of repeatedItemContainers(ctx)) {
+      const kids = Array.from(parent.children || []).filter((el) => textOf(el) && !descriptorGuardedContext(el));
+      if (kids.length < 5) continue;
+      const hits = kids.map((item) => descriptorGlossPair(ctx, item)).filter(Boolean);
+      if (hits.length >= 5 && hits.length / kids.length >= 0.8) {
+        const examples = hits.slice(0, 3).map((hit) => hit.gloss).join(', ');
+        return [warn(`uniform per-item descriptor gloss across ${hits.length} siblings: ${examples}`, selectorName(parent))];
+      }
+    }
+    return [];
+  })],
   ['hero-metric-template', scoped((ctx) => ctx.dom && /\d(?:[%x/]|[\d,.])/i.test(ctx.html), (ctx) => {
     const repeatedMetrics = (ctx.html.match(/class\s*=\s*["'][^"']*(?:num|metric|stat)[^"']*["'][^>]*>\s*[\d,.]+(?:%|x|\/\d)?/gi) || []).length;
     if (repeatedMetrics >= 3 && /gradient|accent|background|color/i.test(ctx.html)) return [warn(`hero metric template with ${repeatedMetrics} repeated numeric nodes`, 'metric tiles')];
@@ -654,6 +666,66 @@ function markerKind(el) {
   if (/^[▸•→✓✕×+-]/.test(text)) return 'unicode-symbol';
   if (/icon-|fa-|material-icons/i.test(el.innerHTML || '')) return 'icon-font';
   return '';
+}
+
+function repeatedItemContainers(ctx) {
+  const selector = [
+    'ul',
+    'ol',
+    '.grid',
+    '.list',
+    '.catalog',
+    '.cards',
+    '.items',
+    '.features',
+    '.feature-grid',
+    '.rows',
+    '[class*="-grid"]',
+    '[class*="-list"]',
+    '[class*="-catalog"]',
+  ].join(',');
+  return all(ctx.dom, selector).filter((el) => !descriptorGuardedContext(el));
+}
+
+function descriptorGlossPair(ctx, item) {
+  if (descriptorGuardedContext(item) || hasMetricLikeText(item)) return null;
+  const directLabel = ownText(item);
+  const textEls = all(item, 'h1,h2,h3,h4,h5,h6,p,span,small,strong,b,dt,dd,figcaption')
+    .filter((el) => !el.closest('code,pre,table,form') && textOf(el));
+  if (textEls.length < 2 && !directLabel) return null;
+  const glossEl = textEls.find((el) => isDescriptorGloss(ctx, el));
+  if (!glossEl) return null;
+  const labelEl = textEls.find((el) => el !== glossEl && !glossEl.contains(el) && !isDescriptorGloss(ctx, el));
+  if (labelEl) return { label: textOf(labelEl), gloss: textOf(glossEl) };
+  return directLabel && !descriptorGuardedText(directLabel) ? { label: directLabel, gloss: textOf(glossEl) } : null;
+}
+
+function isDescriptorGloss(ctx, el) {
+  const text = textOf(el);
+  if (!text || wordCount(text) < 1 || wordCount(text) > 4) return false;
+  if (/[.!?]$/.test(text) || /[A-Z]/.test(text)) return false;
+  if (!/[a-z]/.test(text) || descriptorGuardedText(text)) return false;
+  return isMutedDescriptorStyle(ctx, el);
+}
+
+function isMutedDescriptorStyle(ctx, el) {
+  const klass = el.getAttribute('class') || '';
+  const style = styleFor(ctx, el);
+  return /(?:muted|dim|subtle|caption|subtitle|description|desc|meta|gloss|sublabel|hint)/i.test(klass) ||
+    /(?:color\s*:\s*(?:var\(--(?:ve-)?(?:muted|text-dim|.*muted|.*dim)\)|rgba?\([^)]*,\s*0\.[1-8]\)|#[789a-f][0-9a-f]{2,5})|opacity\s*:\s*0\.[1-8])/i.test(style);
+}
+
+function descriptorGuardedContext(el) {
+  return Boolean(el.closest?.('table,thead,tbody,tfoot,tr,td,th,form,label,fieldset,.table,.data-table,.stat,.stats,.metric,.metrics,.kpi,.kpis,[class*="stat"],[class*="metric"],[class*="kpi"]'));
+}
+
+function descriptorGuardedText(text) {
+  return /(?:^\$|[$€£¥]|\b\d{1,4}(?:[-/]\d{1,2}){1,2}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\b|\b\d+(?:\.\d+)?\s*(?:px|rem|em|ms|s|sec|min|hr|kb|mb|gb|tb|%|x)\b)/i.test(text);
+}
+
+function hasMetricLikeText(el) {
+  const text = textOf(el);
+  return /\b[$€£¥]?\d[\d,.]*(?:%|x|ms|s|px|rem|em|kb|mb|gb|tb)?\b/.test(text);
 }
 
 function caseKind(value) {

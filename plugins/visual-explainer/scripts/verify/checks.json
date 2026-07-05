@@ -3872,6 +3872,26 @@
     },
     {
       "family": "F8_ai_tells",
+      "id": "uniform-descriptor-gloss",
+      "title": "Uniform lowercase descriptor gloss on every repeated item",
+      "profiles": [
+        "page",
+        "slides",
+        "magazine"
+      ],
+      "stage": "static-dom",
+      "severity": "warn",
+      "applies_when": "Page has a grid/list/catalog of 5+ structurally-similar siblings.",
+      "spec": "Warn when >=5 sibling items each pair a label with a 1-4 word lowercase non-sentence gloss in muted styling, e.g. `collapsible data`, `one canvas`, `titled region`. One deliberate descriptor is voice; a gloss on every item is template grammar.",
+      "fixture_violation": "A five-item feature grid where every item has a title plus a muted lowercase two-word tagline.",
+      "fp_guards": "Exempt tables, units, dates, prices, form hints, and stat/metric labels.",
+      "source_rules": [
+        "ai-uniform-descriptor-gloss"
+      ],
+      "impl_hint": "Scan direct sibling groups; require >=5 label+muted lowercase-gloss pairs and skip table/form/stat/metric contexts plus unit/date/price text."
+    },
+    {
+      "family": "F8_ai_tells",
       "id": "hero-metric-template",
       "title": "Repeated big-number stat tiles as decorative filler",
       "profiles": [

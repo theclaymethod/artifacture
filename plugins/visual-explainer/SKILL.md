@@ -103,6 +103,8 @@ These patterns are explicitly forbidden. They signal "AI-generated template" and
 - Do not box every block by default. Render standalone paragraphs, images, and lone stats as plain flow content.
 - Do not stamp out big-number plus small-label stat tiles unless the numbers are real, sourced data. Use narrative cards, tables, or diagrams when the values are illustrative.
 - Do not dump a wall of eight or more undifferentiated bullets. Group the content into two to four labeled clusters, a table, or a diagram; flat glossaries and changelogs are exceptions.
+- Do not append a tiny lowercase descriptor gloss to every item in a grid/list/catalog (`collapsible data`, `one canvas`, `titled region`).
+- Name things once; add a descriptor only when it disambiguates a specific item.
 - Derive spacing from one small scale such as `4/8/12/16/24/32/48/64`. Avoid scattered one-off values like `13px`, `17px`, and `22px`.
 - Create rhythm: tight spacing within groups, generous spacing between sections.
 - Vary section structure to match content type. Do not force a diff, timeline, and comparison into one grid mold. Break the grid once for a deliberate focal point.

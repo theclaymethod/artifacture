@@ -1194,6 +1194,12 @@
     ],
     "max_other_errors": 0
   },
+  "uniform-descriptor-gloss.html": {
+    "must_fire": [
+      "uniform-descriptor-gloss"
+    ],
+    "max_other_errors": 0
+  },
   "card-as-universal-wrapper.html": {
     "must_fire": [
       "card-as-universal-wrapper"
