@@ -1,0 +1,13 @@
+{
+  "context": "A Mono page where one section's background stays dark in light mode because its fill was hard-coded.",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "preset-both-mode-visual",
+        "evidence": "light screenshot: the 'Status' card panel keeps a #0b0d10 dark background while the rest of the page is on the light token set, reading as a broken invert",
+        "fix": "Replace the hard-coded background with the theme token so it participates in the light/dark swap."
+      }
+    ]
+  }
+}

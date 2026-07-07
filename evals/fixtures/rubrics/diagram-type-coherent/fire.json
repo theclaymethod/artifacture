@@ -1,0 +1,13 @@
+{
+  "context": "Figure screenshot mixes swimlane lanes with a nested-containment metaphor in one canvas.",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "diagram-type-coherent",
+        "evidence": "figure 1 screenshot: left half draws horizontal swimlanes, right half draws nested containment boxes for the same data — reads as two diagram types glued together",
+        "fix": "Pick one diagram type (swimlane or nested-containment) for the whole figure and redraw the other half to match."
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "context": "Source document has 7 decision cards; the deck's extracted text only covers 4 of them.",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "deck-content-completeness",
+        "evidence": "source table rows 'Rollback policy', 'On-call rotation', and 'Data retention window' have no corresponding slide heading, bullet, or card text anywhere in the extracted deck text",
+        "fix": "Add slides (or fold into existing slides with explicit callouts) for the 3 missing decision items, or note the intentional exclusion."
+      }
+    ]
+  }
+}

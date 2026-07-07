@@ -17,6 +17,7 @@
     "ve:check-integrity": "node scripts/ve-mdx/check-integrity.mjs",
     "ve:verify": "node plugins/visual-explainer/scripts/verify/ve-verify.mjs",
     "ve:eval": "node evals/run.mjs",
+    "ve:eval-rubrics": "node evals/run-rubrics.mjs",
     "check:manifests": "node scripts/check-manifests.mjs"
   },
   "dependencies": {
