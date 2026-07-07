@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a problem with Artifacture
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Exact command
+      description: The exact command you ran (e.g. `npm run ve:export -- ...`).
+      placeholder: npm run ve:export -- src/diagram.mdx --out out.html
+    validations:
+      required: true
+  - type: checkboxes
+    id: attachment
+    attributes:
+      label: Attachment
+      options:
+        - label: I attached the generated artifact and/or MDX/TSX source that reproduces this.
+  - type: textarea
+    id: envinfo
+    attributes:
+      label: Environment
+      description: Output of `npx envinfo --system --binaries --npmPackages artifacture`.
+      render: shell
+    validations:
+      required: true
