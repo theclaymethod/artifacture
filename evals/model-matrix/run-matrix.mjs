@@ -638,30 +638,34 @@ async function fetchWithRetry(url, options) {
 
 async function generateCodexCli({ prompt, sourcePath, cellDir }) {
   const tmpDir = await fs.mkdtemp(path.join(cellDir, 'prompt-'));
-  const tmpPrompt = path.join(tmpDir, 'prompt.txt');
-  await fs.writeFile(tmpPrompt, prompt);
-  const instruction = `Read ${tmpPrompt} and follow it. Write the source file to ${sourcePath} and do nothing else.`;
-  const codexArgs = [
-    'exec',
-    '--sandbox',
-    'workspace-write',
-    '-c',
-    'model_reasoning_effort="medium"',
-    instruction,
-  ];
-  let result;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    // stdin must be closed: codex sniffs a piped stdin and blocks on it.
-    result = await runCommand('codex', codexArgs, { timeoutMs: 30 * 60 * 1000, cwd: repoRoot, stdin: 'ignore' });
-    if (result.timedOut) return { status: 'timeout', meta: { command: commandMeta(result) } };
-    if (result.exitCode === 0) return { source: null, usage: null, meta: { command: commandMeta(result) } };
-    const output = `${result.stderr || ''}\n${result.stdout || ''}`;
-    if (/usage limit|purchase more credits/i.test(output)) {
-      return { status: 'quota', error: 'codex-cli usage limit reached', meta: { command: commandMeta(result) } };
+  try {
+    const tmpPrompt = path.join(tmpDir, 'prompt.txt');
+    await fs.writeFile(tmpPrompt, prompt);
+    const instruction = `Read ${tmpPrompt} and follow it. Write the source file to ${sourcePath} and do nothing else.`;
+    const codexArgs = [
+      'exec',
+      '--sandbox',
+      'workspace-write',
+      '-c',
+      'model_reasoning_effort="medium"',
+      instruction,
+    ];
+    let result;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      // stdin must be closed: codex sniffs a piped stdin and blocks on it.
+      result = await runCommand('codex', codexArgs, { timeoutMs: 30 * 60 * 1000, cwd: repoRoot, stdin: 'ignore' });
+      if (result.timedOut) return { status: 'timeout', meta: { command: commandMeta(result) } };
+      if (result.exitCode === 0) return { source: null, usage: null, meta: { command: commandMeta(result) } };
+      const output = `${result.stderr || ''}\n${result.stdout || ''}`;
+      if (/usage limit|purchase more credits/i.test(output)) {
+        return { status: 'quota', error: 'codex-cli usage limit reached', meta: { command: commandMeta(result) } };
+      }
+      if (attempt === 0) await sleep(5000);
     }
-    if (attempt === 0) await sleep(5000);
+    throw new Error(`codex-cli failed: ${result.stderr || result.stdout}`);
+  } finally {
+    await fs.rm(tmpDir, { recursive: true, force: true });
   }
-  throw new Error(`codex-cli failed: ${result.stderr || result.stdout}`);
 }
 
 function stripCodeFences(source) {
