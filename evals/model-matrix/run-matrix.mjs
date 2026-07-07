@@ -681,9 +681,16 @@ function commandMeta(result) {
   };
 }
 
+// Every process this harness spawns (export, verify, codex-cli) is fed
+// model-generated source or invoked against it. None of them need the
+// OpenRouter key — only the in-process fetch calls in generateOpenRouter()
+// and callAcuityJudge() do — so it's stripped from every child env here to
+// keep it from leaking to untrusted model output or third-party CLIs.
 async function runCommand(cmd, args, { timeoutMs, cwd = repoRoot } = {}) {
+  const env = { ...process.env };
+  delete env.OPENROUTER_API_KEY;
   return await new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     let timedOut = false;
