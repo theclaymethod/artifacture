@@ -944,6 +944,11 @@ export function SlideDeck({
       }`}
       data-ve-deck={orientation}
       data-ve-preset={preset}
+      // Autofit safety net: `--min-font-size` is a real floor, not decoration —
+      // Slide's body-text font-size is computed as `clamp(var(--min-font-size), <fluid>, <cap>)`,
+      // so shrinking the fluid term below this floor at narrow viewports still
+      // renders at (at least) --min-font-size instead of continuing to shrink.
+      style={{ '--min-font-size': '16px' } as React.CSSProperties}
     >
       <nav className="fixed left-4 top-4 z-40 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-nav-bg)] px-3 py-2 text-xs uppercase tracking-[0.16em] text-[var(--ve-muted)] [font-family:var(--ve-font-mono)]">
         <span className="text-[var(--ve-accent)]">{eyebrow}</span>
@@ -970,7 +975,7 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
             {title}
           </h1>
         </div>
-        <div className="min-w-0 border-l border-[color:var(--ve-slide-rule)] pl-6 text-lg leading-8 sm:text-xl">{children}</div>
+        <div className="min-w-0 border-l border-[color:var(--ve-slide-rule)] pl-6 text-[clamp(var(--min-font-size),3vw,1.125rem)] leading-8 sm:text-[clamp(var(--min-font-size),2.2vw,1.25rem)]">{children}</div>
       </div>
       <div className="mt-10 border-t border-[color:var(--ve-slide-rule)] pt-4 text-xs uppercase tracking-[0.16em] text-[var(--ve-slide-muted)] [font-family:var(--ve-font-mono)]">
         Generated from MDX/React source
