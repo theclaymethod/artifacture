@@ -1,7 +1,11 @@
 import { codeToHtml } from 'shiki';
 
 const diagramComponents = new Set(['DiagramCanvas', 'FlowDiagram']);
-const sharedComponents = new Set([
+// Exported so scripts/ve-mdx/check.mjs can assert this set stays in sync with
+// components.tsx's actual named exports (roster-sync guard, plan 008 step 5).
+// Contents are unchanged — this only adds visibility, not a refactor of how
+// the set is built.
+export const sharedComponents = new Set([
   'ExplainerShell',
   'Section',
   'Callout',
