@@ -1,6 +1,6 @@
 {
   "name": "artifacture",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources — with a deterministic design-quality verifier and a multi-model eval harness",
   "keywords": [
     "claude-code-plugin",
