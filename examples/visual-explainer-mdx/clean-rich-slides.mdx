@@ -1,0 +1,59 @@
+import { CodeBlock, MermaidBlock, Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
+
+export default function CleanRichSlidesExample() {
+  return (
+    <SlideDeck eyebrow="clean-rich-slides fixture" title="Slides Pipeline, End To End">
+      <Slide kicker="01 / contract" title="One Deck, Five Component Families" tone="dark">
+        <p>
+          This fixture exercises the slides profile end to end: prose, a component pipeline, highlighted
+          code, a runtime Mermaid diagram, and a closing accent slide, all as MDX source exported to a
+          single self-contained HTML artifact.
+        </p>
+      </Slide>
+
+      <Slide kicker="02 / pipeline" title="Author, Review, Export" tone="light">
+        <Pipeline
+          steps={[
+            { title: 'Prompt', body: 'Capture audience, format, and story arc.' },
+            { title: 'MDX', body: 'Compose slides with shared React components.' },
+            { title: 'Annotate', body: 'Use point-and-click feedback in the generated preview.' },
+            { title: 'HTML', body: 'Ship the generated static artifact.' },
+          ]}
+        />
+      </Slide>
+
+      <Slide kicker="03 / code" title="The Export Adds a Content Probe" tone="dark">
+        <CodeBlock
+          filename="export.mjs"
+          language="ts"
+          highlightLines={[3]}
+          annotations={[{ line: 3, note: 'Fails the build if the rendered tree is empty.' }]}
+          code={`export async function exportPage(source) {
+  const html = await renderStatic(source);
+  assertContentPresence(html);
+  return html;
+}`}
+        />
+      </Slide>
+
+      <Slide kicker="04 / diagram" title="Review Stays a Loop, Not a Gate" tone="dark">
+        <MermaidBlock
+          caption="Runtime Mermaid, themed from --ve-* tokens."
+          chart={`stateDiagram-v2
+  [*] --> Draft
+  Draft --> Review: share
+  Review --> Draft: comments
+  Review --> Approved: done
+  Approved --> [*]`}
+        />
+      </Slide>
+
+      <Slide kicker="05 / parity" title="Secondary Exports Stay Optional" tone="accent">
+        <p>
+          PDF and per-slide poster exports remain follow-on artifacts. The interactive HTML deck stays
+          canonical, and every slide profile in this deck verifies clean.
+        </p>
+      </Slide>
+    </SlideDeck>
+  );
+}
