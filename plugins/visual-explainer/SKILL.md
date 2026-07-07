@@ -62,12 +62,12 @@ Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, cu
 
 |Flow|Card|Tier 2|
 |-|-|-|
-|diagram|cards/web-diagram.md|references/diagrams-svg.md; references/legacy-html.md|
-|plan|cards/visual-plan.md|references/legacy-html.md|
-|table|cards/comparison-table.md|references/legacy-html.md|
-|slides|cards/slide-deck.md|references/slide-patterns.md; references/legacy-html.md|
-|code|cards/code-walkthrough.md|references/legacy-html.md|
-|explain-diff|cards/explain-diff.md|references/legacy-html.md|
+|diagram|cards/web-diagram.md|references/diagrams-svg.md|
+|plan|cards/visual-plan.md||
+|table|cards/comparison-table.md||
+|slides|cards/slide-deck.md|references/slide-patterns.md|
+|code|cards/code-walkthrough.md||
+|explain-diff|cards/explain-diff.md||
 
 Clarify: `./references/clarify.md`. Use components/tokens, not hand CSS/coords. Run /unslop (or apply `./scripts/verify/rubrics/pass-copy.md`) on drafted copy; poster/video/brand/bespoke -> `./references/legacy-html.md`.
 
