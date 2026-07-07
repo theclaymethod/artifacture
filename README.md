@@ -61,14 +61,20 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 
 ## Install
 
-**Claude Code (from this fork):**
+Any agent with skills support (Claude Code, Codex, Cursor, and others), via the [skills CLI](https://skills.sh):
+
+```bash
+npx skills add theclaymethod/artifacture
+```
+
+**Claude Code, as a plugin:**
 
 ```bash
 git clone https://github.com/theclaymethod/artifacture.git
 /plugin marketplace add ./artifacture
 ```
 
-**Pi / OpenAI Codex:** same steps as upstream, point at this repo:
+**Manual, for any harness that reads file-based skills:**
 
 ```bash
 git clone --depth 1 https://github.com/theclaymethod/artifacture.git /tmp/artifacture
