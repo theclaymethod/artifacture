@@ -1,0 +1,7 @@
+{
+  "context": "390x844 light/dark screenshots show all headings and body text fully visible with normal line wrapping.",
+  "judge_response": {
+    "pass": true,
+    "findings": []
+  }
+}

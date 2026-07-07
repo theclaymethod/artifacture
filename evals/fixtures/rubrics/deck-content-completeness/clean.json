@@ -1,0 +1,7 @@
+{
+  "context": "Every source section, decision card, and table row has a corresponding slide; two short bullets were legitimately consolidated into one.",
+  "judge_response": {
+    "pass": true,
+    "findings": []
+  }
+}

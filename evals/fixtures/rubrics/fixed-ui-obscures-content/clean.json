@@ -1,0 +1,7 @@
+{
+  "context": "390x844 screenshot shows the fixed theme toggle in a corner with no overlap onto readable or clickable content.",
+  "judge_response": {
+    "pass": true,
+    "findings": []
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "context": "390x844 light/dark screenshots show a mobile heading losing its final word at the right edge with no ellipsis.",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "text-visibly-clipped",
+        "evidence": "390-light screenshot: heading 'Architect...' chopped mid-word by the hero container's overflow:hidden edge, no ellipsis present",
+        "fix": "Add text-overflow: ellipsis or increase container width/line-height so the heading is not chopped mid-character."
+      }
+    ]
+  }
+}
