@@ -3,7 +3,8 @@
 Use `SlideDeck`, `Slide`, plus `DiagramCanvas`, `DecisionMatrix`, or `CodeBlock`. `orientation="horizontal"` is magazine mode.
 
 ```mdx
-import { DiagramCanvas, Slide, SlideDeck } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { DiagramCanvas, Slide, SlideDeck } from 'REPO/visual-explainer-mdx/components';
 
 <SlideDeck title="Release Readiness" eyebrow="Go / No-go" preset="editorial">
   <Slide title="One unresolved blocker">

@@ -13,13 +13,29 @@ metadata:
 
 MDX/TSX -> HTML -> verify. Never ASCII; 4+ row or 3+ column tables become HTML.
 
+## Pipeline location
+
+Rendering requires the Artifacture repo (components + export pipeline).
+Resolve `REPO` first:
+- If `../../visual-explainer-mdx/components.tsx` exists relative to this
+  file, you are inside a full clone: `REPO` = the repo root (two directories
+  up from this file).
+- Otherwise clone or update it once: `git clone --depth 1
+  https://github.com/theclaymethod/artifacture ~/.artifacture` (if
+  `~/.artifacture` exists: `git -C ~/.artifacture pull --ff-only`), then
+  `npm install --prefix ~/.artifacture`. `REPO` = `~/.artifacture`.
+  Requires Node >= 22.
+
+All `npm run ve:*` commands below run from `REPO`; author your `.mdx`/`.tsx`
+source anywhere and pass absolute paths.
+
 ## Tier 0
 
 Workflow, in order:
 
 1. Pick the flow's card from the routing table below and read it (plus this file — nothing else for covered flows).
-2. Author `.mdx` (default; `.tsx` only for state/custom SVG/video). Import shared components from `visual-explainer-mdx/components.tsx` exactly as the card skeleton shows.
-3. Export: `npm run ve:export -- <src> --out ~/.agent/diagrams/<slug>.html` (static video: `npm run ve:export-static -- <tsx> --out ~/.agent/videos/<slug>/index.html`). Fix any strict-export integrity errors at the source.
+2. Author `.mdx` (default; `.tsx` only for state/custom SVG/video). Import shared components from `REPO/visual-explainer-mdx/components.tsx` exactly as the card skeleton shows.
+3. Export: `npm --prefix REPO run ve:export -- <abs-src> --out <abs-out>` (static video: `npm --prefix REPO run ve:export-static -- <abs-tsx> --out <abs-out>`). Fix any strict-export integrity errors at the source.
 4. Verify (§6 below), then open the artifact and tell the user the file path. The MDX/TSX source stays the editable source of truth — apply feedback there and re-export.
 
 ## Components

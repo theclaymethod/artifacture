@@ -24,7 +24,7 @@ Use this source-first path by default:
 
 1. Author the editable explainer as `.mdx`.
 2. Escalate to `.tsx` when the artifact needs local React state, custom interaction, generated SVG logic, or a Hyperframes-compatible video composition.
-3. Import shared primitives from `../../../visual-explainer-mdx/components.tsx`.
+3. Import shared primitives from `REPO/visual-explainer-mdx/components.tsx`. Resolution of `REPO` is defined in SKILL.md "Pipeline location".
 4. Export the generated artifact:
 
 ```bash
@@ -58,7 +58,7 @@ Available presets:
 - `paper-ink` — light paper surface with ink and terracotta accents.
 - `terminal` — dense monospace green-on-black.
 
-Preset tokens live in `../../../visual-explainer-mdx/global.css`; component wiring lives in `../../../visual-explainer-mdx/components.tsx`. Use preset tokens before custom Tailwind overrides so generated artifacts stay consistent across commands.
+Preset tokens live in `REPO/visual-explainer-mdx/global.css`; component wiring lives in `REPO/visual-explainer-mdx/components.tsx`. Use preset tokens before custom Tailwind overrides so generated artifacts stay consistent across commands.
 
 ### Calling From Coding Agents
 

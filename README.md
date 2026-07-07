@@ -67,6 +67,9 @@ Any agent with skills support (Claude Code, Codex, Cursor, and others), via the 
 npx skills add theclaymethod/artifacture
 ```
 
+First generation clones the render pipeline to `~/.artifacture` (one-time,
+Node >= 22); full-clone installs use the repo in place.
+
 **Claude Code, as a plugin:**
 
 ```bash

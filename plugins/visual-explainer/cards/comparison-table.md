@@ -1,7 +1,8 @@
 # Comparison Table Card
 Use `ExplainerShell`, `Section`, `DecisionMatrix`, optional `Callout`. Best for 4+ rows or 3+ columns. Same keys in every row.
 ```mdx
-import { ExplainerShell, Section, DecisionMatrix, Callout } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { ExplainerShell, Section, DecisionMatrix, Callout } from 'REPO/visual-explainer-mdx/components';
 <ExplainerShell title="Search Cache Decision" summary="Pick the smallest store that keeps imports inspectable." preset="blueprint">
   <Section kicker="recommendation" title="SQLite is the default"><Callout>Focal move: one local file, indexed lookups, and a clear migration path if the cache becomes shared.</Callout></Section>
   <Section title="Tradeoff matrix"><DecisionMatrix rows={[
