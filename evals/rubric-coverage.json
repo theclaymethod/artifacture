@@ -1,0 +1,39 @@
+{
+  "note": "Tracks executable-fixture coverage for the 30 llm-pass/transcript catalog checks that evals/run.mjs cannot exercise (see plans/007-DESIGN-NOTE.md). Separate from evals/parity-allowlist.json, which is scoped to deterministic-stage (static-text/static-dom/browser) checks only.",
+  "total_llm_pass_and_transcript_checks": 30,
+  "covered_by_evals_run_rubrics": [
+    "text-visibly-clipped",
+    "fixed-ui-obscures-content",
+    "diagram-type-coherent",
+    "preset-both-mode-visual",
+    "deck-content-completeness",
+    "reel-caption-matches-transcript"
+  ],
+  "remaining_uncovered": [
+    "real-table-for-tabular-data",
+    "hierarchy-squint-test",
+    "unslop-prose-style",
+    "diagram-legend-matches-figure",
+    "diagram-focal-single-dominant",
+    "diagram-proportional-honesty-visual",
+    "diagram-removal-simplicity",
+    "diagram-necessity",
+    "mono-status-value-judgment",
+    "mono-one-surprise",
+    "mono-three-layer-squint",
+    "nothing-accent-red-judgment",
+    "nothing-single-grid-break",
+    "slide-single-focal-point",
+    "composition-variety-visual",
+    "sparse-diagram-slide",
+    "poster-visual-fit-squint",
+    "reel-no-mid-word-cuts",
+    "demo-aesthetic-match",
+    "demo-adds-value",
+    "font-pairing-same-classification",
+    "default-accent-reflex",
+    "copy-redundancy",
+    "jargon-undefined"
+  ],
+  "remaining_count": 24
+}
