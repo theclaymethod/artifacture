@@ -39,11 +39,22 @@ Ask your agent to explain a system architecture, review a diff, or compare requi
 
 ## What's different from upstream visual-explainer
 
-Eight additions on top of the upstream skill. Everything else behaves the same — Mono-Industrial is still the default aesthetic, every existing command still works.
+The major additions, on top of the upstream skill. Mono-Industrial is still the default aesthetic, and every upstream command still works.
+
+Since the fork, the largest changes are structural:
+
+- **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and small blind LLM rubric passes. Exit codes and JSON reports make it usable as a CI gate. Its own eval suite of seeded-violation fixtures proves each check fires.
+- **Tiered agent docs**: SKILL.md is a ~2.5k-token bootstrap plus one ~300-token card per use case (`cards/`). A covered flow reads about 3,100 tokens instead of 62,000. Deep references load only on escalation.
+- **17 shared components** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
+- **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
+- **Model-matrix eval harness** (`evals/model-matrix/`): the same briefs across Kimi, GLM, DeepSeek, Claude, and Codex, scored on deterministic compliance plus a blind screenshot judge. Point it at your own model in about ten minutes.
+- **One-command team sharing**: `share.sh` deploys to Vercel (zero setup, public) or sharehtml on Cloudflare (stable update-in-place URLs, team SSO via Cloudflare Access, comments). See `docs/TEAM-SHARING.md`.
+
+The original eight feature additions, in detail:
 
 ### 0. MDX/React source-first generation
 
-The editable source is now MDX by default, with TSX/React available when an artifact needs local state, custom interaction, generated SVG logic, or Hyperframes-compatible static composition output. HTML is generated, not hand-authored as the canonical file.
+The editable source is now MDX by default, with TSX/React available when an artifact needs local state, custom interaction, generated SVG logic, or Hyperframes-compatible static composition output. HTML is a build output; the canonical, editable file is the MDX or TSX source.
 
 ```bash
 npm run ve:export -- examples/visual-explainer-mdx/pipeline.mdx --out /tmp/pipeline.html
