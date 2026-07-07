@@ -7,6 +7,9 @@
     "agent-skill"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "ve:export": "node scripts/ve-mdx/export.mjs",
     "ve:export-static": "node scripts/ve-mdx/export-static.mjs",
