@@ -40,8 +40,31 @@ async function launchChromium() {
   }
 }
 
+function cacheDirForPlatform() {
+  if (process.env.PLAYWRIGHT_BROWSERS_PATH) return process.env.PLAYWRIGHT_BROWSERS_PATH;
+  const home = homedir();
+  switch (process.platform) {
+    case 'darwin':
+      return path.join(home, 'Library', 'Caches', 'ms-playwright');
+    case 'win32':
+      return path.join(home, 'AppData', 'Local', 'ms-playwright');
+    default:
+      return path.join(home, '.cache', 'ms-playwright');
+  }
+}
+
+function shellFolderForPlatform() {
+  const { platform, arch } = process;
+  if (platform === 'darwin') return arch === 'arm64' ? 'chrome-headless-shell-mac-arm64' : 'chrome-headless-shell-mac';
+  if (platform === 'win32') return 'chrome-headless-shell-win64';
+  // linux and any other POSIX platform
+  return arch === 'arm64' ? 'chrome-headless-shell-linux-arm64' : 'chrome-headless-shell-linux';
+}
+
 async function newestCachedHeadlessShell() {
-  const cacheDir = path.join(homedir(), 'Library', 'Caches', 'ms-playwright');
+  const cacheDir = cacheDirForPlatform();
+  const shellFolder = shellFolderForPlatform();
+  const executableName = process.platform === 'win32' ? 'chrome-headless-shell.exe' : 'chrome-headless-shell';
   let entries = [];
   try {
     entries = await readdir(cacheDir, { withFileTypes: true });
@@ -53,7 +76,7 @@ async function newestCachedHeadlessShell() {
     .map((entry) => ({
       name: entry.name,
       revision: Number(entry.name.match(/(\d+)$/)?.[1] || 0),
-      executablePath: path.join(cacheDir, entry.name, 'chrome-headless-shell-mac-arm64', 'chrome-headless-shell')
+      executablePath: path.join(cacheDir, entry.name, shellFolder, executableName)
     }))
     .sort((a, b) => b.revision - a.revision);
 
