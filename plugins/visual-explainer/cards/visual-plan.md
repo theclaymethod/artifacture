@@ -1,7 +1,8 @@
 # Visual Plan Card
 Use `ExplainerShell`, `Section`, `Pipeline`, `DecisionMatrix`, `RiskLedger`. Real choices, one focal stat.
 ```mdx
-import { ExplainerShell, Section, Pipeline, DecisionMatrix, RiskLedger } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { ExplainerShell, Section, Pipeline, DecisionMatrix, RiskLedger } from 'REPO/visual-explainer-mdx/components';
 <ExplainerShell title="Retry Queue Plan" summary="Bound failed invoice jobs." preset="paper-ink">
   <Section kicker="target" title="48h to visible failure">
     <Pipeline steps={[

@@ -1,7 +1,8 @@
 # Explain-Diff Card
 Use `ExplainerShell`, `Section`, `DiagramCanvas`/`MermaidBlock`, `DiffBlock`, `Quiz`. Arc: context, intuition, code, quiz.
 ```mdx
-import { DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from 'REPO/visual-explainer-mdx/components';
 <ExplainerShell title="Why This Diff Matters" summary="Replay moves from blind retry to idempotent recovery.">
   <Section kicker="before/after" title="Behavior">
     <DiagramCanvas nodes={[{id:'old',label:'Retry loop',detail:'double-charge risk'},{id:'new',label:'Lookup replay',detail:'idempotent',accent:true}]} edges={[{from:'old',to:'new',label:'safer'}]} />

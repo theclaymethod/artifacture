@@ -3,7 +3,8 @@ Use `ExplainerShell`, `Section`, `DiagramCanvas`: lanes, details, one accent.
 In MDX prose, write literal braces as `&#123;` or inside code spans — bare { } in prose breaks the compiler.
 Default Tailwind spacing only; no [Npx].
 ```mdx
-import { ExplainerShell, Section, DiagramCanvas } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { ExplainerShell, Section, DiagramCanvas } from 'REPO/visual-explainer-mdx/components';
 <ExplainerShell title="Checkout" summary="Lanes, sublabels, focal handoff.">
   <Section title="Service path">
     <DiagramCanvas layout="swimlane"

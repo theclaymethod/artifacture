@@ -8,6 +8,11 @@ metadata:
   version: "0.6.3"
 ---
 
+> **Scope**: this path is for poster, video (Hyperframes), brand/bespoke
+> one-offs, and aesthetics without MDX preset support. For diagram / plan /
+> table / slides / code / explain-diff flows, use the MDX pipeline
+> (SKILL.md Tier 0) — do not hand-author HTML for those.
+
 # Legacy HTML Reference
 
 Status: Tier 2 fallback. Use this file only when the MDX/React pipeline is unavailable, a Tier 1 card says none of its component paths fit, or custom work needs the former hand-authored HTML procedures, diagram prose, Mermaid shell details, aesthetics, poster, slide, or video guidance. Tier 0 and cards are the normal path.
@@ -24,7 +29,7 @@ Use this source-first path by default:
 
 1. Author the editable explainer as `.mdx`.
 2. Escalate to `.tsx` when the artifact needs local React state, custom interaction, generated SVG logic, or a Hyperframes-compatible video composition.
-3. Import shared primitives from `../../../visual-explainer-mdx/components.tsx`.
+3. Import shared primitives from `REPO/visual-explainer-mdx/components.tsx`. Resolution of `REPO` is defined in SKILL.md "Pipeline location".
 4. Export the generated artifact:
 
 ```bash
@@ -58,7 +63,7 @@ Available presets:
 - `paper-ink` — light paper surface with ink and terracotta accents.
 - `terminal` — dense monospace green-on-black.
 
-Preset tokens live in `../../../visual-explainer-mdx/global.css`; component wiring lives in `../../../visual-explainer-mdx/components.tsx`. Use preset tokens before custom Tailwind overrides so generated artifacts stay consistent across commands.
+Preset tokens live in `REPO/visual-explainer-mdx/global.css`; component wiring lives in `REPO/visual-explainer-mdx/components.tsx`. Use preset tokens before custom Tailwind overrides so generated artifacts stay consistent across commands.
 
 ### Calling From Coding Agents
 
@@ -122,7 +127,7 @@ For prose accents, see "Prose Page Elements" in `./css-patterns.md`. For everyth
 
 **What aesthetic?** **Default to Mono-Industrial** unless the user names a different one. The other aesthetics listed below remain available, but they are opt-in — they do not rotate in by default.
 
-**Default aesthetic — Mono-Industrial (Swiss, monochrome, typography-first).** Inspired by Nothing, Braun, Teenage Engineering. Hierarchy is built from type scale, weight, and spacing — never from color. Grayscale canvas with status colors only (success / warning / error) on values themselves. Three-layer rule: display, primary, tertiary. Font budget: Space Grotesk + Space Mono + optional Geist Pixel Square for exactly one hero element per page. Zero on-load motion. One "moment of surprise" per page (an oversized number, a vast gap, a pixel-display word, a broken grid). **Before generating, read `./mono-industrial.md`.** For architecture output, base on `../templates/mono-industrial.html`. For slide decks, base on `../templates/mono-industrial-slides.html`.
+**Default aesthetic — Mono-Industrial (Swiss, monochrome, typography-first).** Inspired by Nothing, Braun, Teenage Engineering. `./mono-industrial.md` is the canonical spec (three-layer rule, font budget, color system, motion, moment-of-surprise) — **read it before generating**; its rules are not restated here. For architecture output, base on `../templates/mono-industrial.html`. For slide decks, base on `../templates/mono-industrial-slides.html`.
 
 **Named alternatives (use only when the user explicitly requests one).** The aesthetics below exist for users who ask for Nothing, Blueprint, Editorial, Paper/ink, Monochrome terminal, or an IDE-inspired palette by name. Do not rotate through them on your own initiative, and do not select them as a "change of pace" for variety.
 
