@@ -37,6 +37,19 @@ Ask your agent to explain a system architecture, review a diff, or compare requi
   <em>Same page, dark mode. The aesthetic inverts cleanly through semantic role tokens — hierarchy stays anchored to type scale and spacing, never color.</em>
 </p>
 
+## Examples
+
+Real output, deployed. Every link is an unedited artifact from the pipeline: one self-contained HTML file, view-source friendly. The full set lives at [claytonkim.com/artifacture-examples](https://claytonkim.com/artifacture-examples/index.html).
+
+| | |
+|---|---|
+| [<img src="docs/img/examples/diagram.png" alt="DiagramCanvas page with vertical swimlane architecture diagram" width="400">](https://claytonkim.com/artifacture-examples/architecture-canvas.html) <br> [**Architecture diagram**](https://claytonkim.com/artifacture-examples/architecture-canvas.html) · computed layout, linearizes on mobile | [<img src="docs/img/examples/quiz.png" alt="Literate diff explainer with an interactive quiz" width="400">](https://claytonkim.com/artifacture-examples/literate-diff.html) <br> [**Literate diff + quiz**](https://claytonkim.com/artifacture-examples/literate-diff.html) · background, walkthrough, comprehension check |
+| [<img src="docs/img/examples/blocks.png" alt="Diff, terminal, and JSON blocks on one page" width="400">](https://claytonkim.com/artifacture-examples/code-blocks.html) <br> [**Diff / terminal / JSON blocks**](https://claytonkim.com/artifacture-examples/code-blocks.html) · build-time Shiki, ANSI, collapsible trees | [<img src="docs/img/examples/deck.png" alt="Scroll-snap slide deck title slide" width="400">](https://claytonkim.com/artifacture-examples/slide-deck.html) <br> [**Slide deck**](https://claytonkim.com/artifacture-examples/slide-deck.html) · scroll-snap, keyboard nav, PDF export |
+| [<img src="docs/img/examples/magazine.png" alt="Horizontal magazine deck cover" width="400">](https://claytonkim.com/artifacture-examples/magazine.html) <br> [**Magazine**](https://claytonkim.com/artifacture-examples/magazine.html) · horizontal full-bleed spreads | [<img src="docs/img/examples/poster.png" alt="Fixed-canvas generated poster" width="400">](https://claytonkim.com/artifacture-examples/poster.html) <br> [**Poster**](https://claytonkim.com/artifacture-examples/poster.html) · fixed canvas, PNG export |
+| [<img src="docs/img/examples/presets.png" alt="Preset gallery showing six aesthetics" width="400">](https://claytonkim.com/artifacture-examples/preset-gallery.html) <br> [**Six presets**](https://claytonkim.com/artifacture-examples/preset-gallery.html) · one source, six locked aesthetics | [<img src="docs/img/examples/page.png" alt="Generated explainer page with laned diagram" width="400">](https://claytonkim.com/artifacture-examples/architecture-diagram.html) <br> [**Explainer page**](https://claytonkim.com/artifacture-examples/architecture-diagram.html) · the default scrollable format |
+
+Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sample clips are in [docs/features.md](docs/features.md#4-video-output-via-hyperframes--explainer-mp4s-not-just-html).
+
 ## What it adds to upstream visual-explainer
 
 - **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and small blind LLM rubric passes. Exit codes and JSON reports make it usable as a CI gate. Its own eval suite of seeded-violation fixtures proves each check fires.
