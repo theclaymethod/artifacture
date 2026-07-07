@@ -26,15 +26,15 @@ Ask your agent to explain a system architecture, review a diff, or compare requi
 </p>
 
 <p align="center">
-  <img src="docs/img/mi-readme-light.png" alt="Mono-Industrial aesthetic — light mode" width="820">
+  <img src="docs/img/mono-industrial.png" alt="Mono-Industrial preset — a Swiss monochrome explainer page" width="820">
   <br>
   <em>Mono-Industrial — the default aesthetic. Space Grotesk display, Space Mono labels, optional Geist Pixel Square for one moment of surprise per page. Grayscale canvas, status colors only on values.</em>
 </p>
 
 <p align="center">
-  <img src="docs/img/mi-readme-dark.png" alt="Mono-Industrial aesthetic — dark mode" width="820">
+  <img src="docs/img/terminal.png" alt="Terminal preset — phosphor-green monospace explainer on a dark canvas" width="820">
   <br>
-  <em>Same page, dark mode. The aesthetic inverts cleanly through semantic role tokens — hierarchy stays anchored to type scale and spacing, never color.</em>
+  <em>The same MDX source under the Terminal preset — one of six locked aesthetics. Swap the preset, keep the content: the design system changes, the source never does.</em>
 </p>
 
 ## Examples
