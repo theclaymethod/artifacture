@@ -2,7 +2,7 @@
 
 All implementation runs code against this contract. Do not change exported names/shapes.
 Plain JS (ESM, `.mjs`), Node 22. NO TypeScript syntax. NO npm/npx invocations anywhere
-(broken on this machine) — direct `node` + imports only.
+(by design, so it runs with no package-manager dependency) — direct `node` + imports only.
 
 ## Dependencies
 
