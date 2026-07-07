@@ -2157,7 +2157,7 @@
       ],
       "stage": "static-dom",
       "severity": "error",
-      "applies_when": "A `.slide--split` or `.slide--bleed` element exists.",
+      "applies_when": "profile === 'slides' AND an authoring signal for split/bleed layout is present: a class containing `split` or `bleed` (e.g. `.slide--split`, `.slide--bleed`), or a `data-layout=\"split\"`/`data-layout=\"bleed\"` attribute. (Gated on the markup, not on raw HTML text, so it does not misfire on unrelated `String.prototype.split` calls in a bundled JS runtime.)",
       "spec": "For each `.slide--split` / `.slide--bleed`, assert computed padding-top/right/bottom/left are all `0px`. Inner panels keep their own padding — only the slide element itself must be zero.",
       "fixture_violation": "A `.slide--bleed` with `padding: 60px` so the full-bleed background no longer reaches the viewport edges.",
       "fp_guards": "Check only the outer slide element, never `.slide__panels`/`.slide__panel` children which legitimately pad.",
