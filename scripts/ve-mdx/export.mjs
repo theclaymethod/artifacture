@@ -77,47 +77,51 @@ async function main() {
   const tmpRoot = path.join(repoRoot, '.ve-mdx-tmp');
   await fs.mkdir(tmpRoot, { recursive: true });
   const tmp = await fs.mkdtemp(path.join(tmpRoot, 'export-'));
-  const dist = path.join(tmp, 'dist');
-  await fs.mkdir(path.join(tmp, 'src'), { recursive: true });
+  try {
+    const dist = path.join(tmp, 'dist');
+    await fs.mkdir(path.join(tmp, 'src'), { recursive: true });
 
-  await fs.writeFile(
-    path.join(tmp, 'index.html'),
-    '<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Visual Explainer</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>',
-  );
+    await fs.writeFile(
+      path.join(tmp, 'index.html'),
+      '<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Visual Explainer</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>',
+    );
 
-  await fs.writeFile(
-    path.join(tmp, 'src/main.jsx'),
-    `import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport ${JSON.stringify(viteFsPath(path.join(repoRoot, 'visual-explainer-mdx/global.css')))};\nimport Source from ${JSON.stringify(viteFsPath(source))};\n\ncreateRoot(document.getElementById('root')).render(<Source />);\n`,
-  );
+    await fs.writeFile(
+      path.join(tmp, 'src/main.jsx'),
+      `import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport ${JSON.stringify(viteFsPath(path.join(repoRoot, 'visual-explainer-mdx/global.css')))};\nimport Source from ${JSON.stringify(viteFsPath(source))};\n\ncreateRoot(document.getElementById('root')).render(<Source />);\n`,
+    );
 
-  await build({
-    root: tmp,
-    base: './',
-    logLevel: 'warn',
-    plugins: [veMdxPreflightPlugin(source, draft), mdx(), react(), tailwindcss()],
-    server: {
-      fs: {
-        allow: [repoRoot, tmp],
-      },
-    },
-    build: {
-      outDir: dist,
-      emptyOutDir: true,
-      assetsInlineLimit: Number.MAX_SAFE_INTEGER,
-      cssCodeSplit: false,
-      rollupOptions: {
-        output: {
-          inlineDynamicImports: true,
+    await build({
+      root: tmp,
+      base: './',
+      logLevel: 'warn',
+      plugins: [veMdxPreflightPlugin(source, draft), mdx(), react(), tailwindcss()],
+      server: {
+        fs: {
+          allow: [repoRoot, tmp],
         },
       },
-    },
-  });
+      build: {
+        outDir: dist,
+        emptyOutDir: true,
+        assetsInlineLimit: Number.MAX_SAFE_INTEGER,
+        cssCodeSplit: false,
+        rollupOptions: {
+          output: {
+            inlineDynamicImports: true,
+          },
+        },
+      },
+    });
 
-  const html = await fs.readFile(path.join(dist, 'index.html'), 'utf8');
-  const generated = await inlineAssets(html, dist);
-  await fs.mkdir(path.dirname(out), { recursive: true });
-  await fs.writeFile(out, generated);
-  console.log(`Generated ${out}`);
+    const html = await fs.readFile(path.join(dist, 'index.html'), 'utf8');
+    const generated = await inlineAssets(html, dist);
+    await fs.mkdir(path.dirname(out), { recursive: true });
+    await fs.writeFile(out, generated);
+    console.log(`Generated ${out}`);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
 }
 
 function veMdxPreflightPlugin(source, draft) {

@@ -307,9 +307,21 @@ function findBalanced(input, start, open, close) {
   return -1;
 }
 
+// evaluateLiteral parses a JSX prop expression as a bounded literal — it never
+// executes source. Only object/array literals, strings (single/double/
+// backtick without `${` interpolation), numbers, booleans, and null are
+// accepted; anything else (identifiers, calls, spreads, arrow functions,
+// template interpolation) is rejected with the same diagnostic shape the
+// previous eval-based evaluator produced.
 function evaluateLiteral(expr, file, label, diagnostics) {
   try {
-    return Function(`"use strict"; return (${expr});`)();
+    const state = { input: expr, pos: 0 };
+    const value = parseLiteralValue(state);
+    skipLiteralWhitespace(state);
+    if (state.pos !== state.input.length) {
+      throw new Error(`non-literal expression: unexpected trailing content at position ${state.pos}`);
+    }
+    return value;
   } catch (cause) {
     diagnostics.push(error(file, label, `could not evaluate literal props: ${cause instanceof Error ? cause.message : cause}`));
     return null;
@@ -319,6 +331,194 @@ function evaluateLiteral(expr, file, label, diagnostics) {
 function isLiteralExpression(expr) {
   const trimmed = expr.trim();
   return trimmed.startsWith('[') || trimmed.startsWith('{') || trimmed.startsWith('`') || trimmed.startsWith('"') || trimmed.startsWith("'");
+}
+
+function skipLiteralWhitespace(state) {
+  while (state.pos < state.input.length && /\s/.test(state.input[state.pos])) state.pos += 1;
+}
+
+function literalPeek(state) {
+  return state.input[state.pos];
+}
+
+function literalExpect(state, char) {
+  if (state.input[state.pos] !== char) {
+    throw new Error(`non-literal expression: expected "${char}" at position ${state.pos}, got "${state.input[state.pos] ?? 'EOF'}"`);
+  }
+  state.pos += 1;
+}
+
+function parseLiteralValue(state) {
+  skipLiteralWhitespace(state);
+  const char = literalPeek(state);
+  if (char === '{') return parseLiteralObject(state);
+  if (char === '[') return parseLiteralArray(state);
+  if (char === '"' || char === "'") return parseLiteralString(state, char);
+  if (char === '`') return parseLiteralTemplate(state);
+  if (char === '-' || (char >= '0' && char <= '9')) return parseLiteralNumber(state);
+  if (state.input.startsWith('true', state.pos) && !/[A-Za-z0-9_$]/.test(state.input[state.pos + 4] ?? '')) {
+    state.pos += 4;
+    return true;
+  }
+  if (state.input.startsWith('false', state.pos) && !/[A-Za-z0-9_$]/.test(state.input[state.pos + 5] ?? '')) {
+    state.pos += 5;
+    return false;
+  }
+  if (state.input.startsWith('null', state.pos) && !/[A-Za-z0-9_$]/.test(state.input[state.pos + 4] ?? '')) {
+    state.pos += 4;
+    return null;
+  }
+  if (state.input.startsWith('undefined', state.pos) && !/[A-Za-z0-9_$]/.test(state.input[state.pos + 9] ?? '')) {
+    state.pos += 9;
+    return undefined;
+  }
+  throw new Error(`non-literal expression at position ${state.pos}`);
+}
+
+function parseLiteralObject(state) {
+  literalExpect(state, '{');
+  const obj = {};
+  skipLiteralWhitespace(state);
+  if (literalPeek(state) === '}') {
+    state.pos += 1;
+    return obj;
+  }
+  for (;;) {
+    skipLiteralWhitespace(state);
+    if (state.input.startsWith('...', state.pos)) {
+      throw new Error(`non-literal expression: spread syntax is not allowed at position ${state.pos}`);
+    }
+    const key = parseLiteralObjectKey(state);
+    skipLiteralWhitespace(state);
+    literalExpect(state, ':');
+    obj[key] = parseLiteralValue(state);
+    skipLiteralWhitespace(state);
+    if (literalPeek(state) === ',') {
+      state.pos += 1;
+      skipLiteralWhitespace(state);
+      if (literalPeek(state) === '}') {
+        state.pos += 1;
+        break;
+      }
+      continue;
+    }
+    literalExpect(state, '}');
+    break;
+  }
+  return obj;
+}
+
+function parseLiteralObjectKey(state) {
+  const char = literalPeek(state);
+  if (char === '"' || char === "'") return parseLiteralString(state, char);
+  if (char === '[') {
+    throw new Error(`non-literal expression: computed object keys are not allowed at position ${state.pos}`);
+  }
+  const match = /^[A-Za-z_$][A-Za-z0-9_$]*/.exec(state.input.slice(state.pos));
+  if (!match) throw new Error(`non-literal expression: expected object key at position ${state.pos}`);
+  state.pos += match[0].length;
+  return match[0];
+}
+
+function parseLiteralArray(state) {
+  literalExpect(state, '[');
+  const arr = [];
+  skipLiteralWhitespace(state);
+  if (literalPeek(state) === ']') {
+    state.pos += 1;
+    return arr;
+  }
+  for (;;) {
+    skipLiteralWhitespace(state);
+    if (state.input.startsWith('...', state.pos)) {
+      throw new Error(`non-literal expression: spread syntax is not allowed at position ${state.pos}`);
+    }
+    arr.push(parseLiteralValue(state));
+    skipLiteralWhitespace(state);
+    if (literalPeek(state) === ',') {
+      state.pos += 1;
+      skipLiteralWhitespace(state);
+      if (literalPeek(state) === ']') {
+        state.pos += 1;
+        break;
+      }
+      continue;
+    }
+    literalExpect(state, ']');
+    break;
+  }
+  return arr;
+}
+
+function parseLiteralString(state, quote) {
+  literalExpect(state, quote);
+  let result = '';
+  for (;;) {
+    if (state.pos >= state.input.length) throw new Error('non-literal expression: unterminated string literal');
+    const char = state.input[state.pos];
+    if (char === quote) {
+      state.pos += 1;
+      break;
+    }
+    if (char === '\\') {
+      state.pos += 1;
+      result += unescapeLiteralChar(state);
+      continue;
+    }
+    result += char;
+    state.pos += 1;
+  }
+  return result;
+}
+
+function parseLiteralTemplate(state) {
+  literalExpect(state, '`');
+  let result = '';
+  for (;;) {
+    if (state.pos >= state.input.length) throw new Error('non-literal expression: unterminated template literal');
+    const char = state.input[state.pos];
+    if (char === '`') {
+      state.pos += 1;
+      break;
+    }
+    if (char === '$' && state.input[state.pos + 1] === '{') {
+      throw new Error(`non-literal expression: template literal interpolation is not allowed at position ${state.pos}`);
+    }
+    if (char === '\\') {
+      state.pos += 1;
+      result += unescapeLiteralChar(state);
+      continue;
+    }
+    result += char;
+    state.pos += 1;
+  }
+  return result;
+}
+
+function unescapeLiteralChar(state) {
+  const esc = state.input[state.pos];
+  state.pos += 1;
+  switch (esc) {
+    case 'n': return '\n';
+    case 't': return '\t';
+    case 'r': return '\r';
+    case 'b': return '\b';
+    case 'f': return '\f';
+    case '0': return '\0';
+    case "'": return "'";
+    case '"': return '"';
+    case '`': return '`';
+    case '\\': return '\\';
+    case '\n': return '';
+    default: return esc;
+  }
+}
+
+function parseLiteralNumber(state) {
+  const match = /^-?\d+(\.\d+)?([eE][+-]?\d+)?/.exec(state.input.slice(state.pos));
+  if (!match) throw new Error(`non-literal expression: invalid number at position ${state.pos}`);
+  state.pos += match[0].length;
+  return Number(match[0]);
 }
 
 function checkDiagramClip(nodes, forcedViewBox) {
