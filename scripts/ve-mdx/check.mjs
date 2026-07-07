@@ -3,8 +3,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { spawn } from 'node:child_process';
+import { parseHTML } from 'linkedom';
 
 const repoRoot = process.cwd();
+const MIN_BODY_TEXT_LENGTH = 200;
 const outputs = [
   ['examples/visual-explainer-mdx/pipeline.mdx', 'dist/visual-explainer-mdx/pipeline.html'],
   ['examples/visual-explainer-mdx/interactive.tsx', 'dist/visual-explainer-mdx/interactive.html'],
@@ -35,6 +37,32 @@ function run(args) {
   });
 }
 
+function runStatic(args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, ['scripts/ve-mdx/export-static.mjs', ...args], {
+      cwd: repoRoot,
+      stdio: 'inherit',
+    });
+    child.on('exit', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`static export failed with exit code ${code}`));
+    });
+  });
+}
+
+// Visible document text after scripts/styles are stripped. Catches a React
+// tree that renders empty (or near-empty) without tripping any of the shape
+// checks. Uses documentElement rather than body: linkedom does not
+// foster-parent a fragment root (e.g. a bare <main>...</main>, which is what
+// ExplainerShell/SlideDeck compositions render) into <body> the way a browser
+// parser would, so body.textContent would silently read 0 for those roots.
+function documentTextLength(html) {
+  const { document } = parseHTML(html);
+  for (const el of [...document.querySelectorAll('script, style')]) el.remove();
+  const text = (document.documentElement?.textContent ?? '').replace(/\s+/g, ' ').trim();
+  return text.length;
+}
+
 async function assertGenerated(filePath) {
   const html = await fs.readFile(path.resolve(repoRoot, filePath), 'utf8');
   const shell = html.replace(/<script\b[\s\S]*?<\/script>/g, '<script></script>');
@@ -49,10 +77,64 @@ async function assertGenerated(filePath) {
   if (failures.length) throw new Error(`${filePath}: ${failures.join(', ')}`);
 }
 
+// check.mjs's `outputs` are client-hydrated (CSR): the raw build artifact is
+// always just `<div id="root"></div>` plus a bundled module script — the
+// real page text only exists once that script runs in a browser. Measuring
+// "visible text" on that raw file is a no-op (it reads 0 chars for every
+// source, working or broken), so it cannot catch a component whose React
+// tree renders empty. Instead, render the same SOURCE through
+// export-static.mjs's renderToStaticMarkup path (already wired in below) to
+// an ephemeral temp file and measure THAT — a faithful, deterministic,
+// browser-free reflection of what the component tree actually produces.
+async function assertSourceRendersContent(sourcePath) {
+  const tempOut = path.join(repoRoot, '.ve-mdx-tmp', `content-probe-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.html`);
+  await fs.mkdir(path.dirname(tempOut), { recursive: true });
+  try {
+    await runStatic([sourcePath, '--out', tempOut]);
+    const html = await fs.readFile(tempOut, 'utf8');
+    const textLength = documentTextLength(html);
+    if (textLength <= MIN_BODY_TEXT_LENGTH) {
+      throw new Error(`${sourcePath}: rendered content is only ${textLength} chars (need > ${MIN_BODY_TEXT_LENGTH}) — React tree may be rendering empty`);
+    }
+  } finally {
+    await fs.rm(tempOut, { force: true });
+  }
+}
+
+// export-static.mjs renders the source's own returned tree via
+// renderToStaticMarkup — there is no build shell, no injected generator
+// marker, no id="root", and no bundled <script type="module">. Its documented
+// contract (plugins/visual-explainer/references/hyperframes.md) is a
+// Hyperframes composition root carrying data-composition-id, so that
+// attribute is this leg's equivalent of assertGenerated's id="root" check.
+async function assertStaticGenerated(filePath) {
+  const html = await fs.readFile(path.resolve(repoRoot, filePath), 'utf8');
+  const failures = [];
+  if (!html.includes('<style>')) failures.push('CSS was not inlined');
+  if (!/\sdata-composition-id\s*=/.test(html)) failures.push('missing Hyperframes composition root (data-composition-id)');
+  if (/<script[^>]+src=["']\.?\/assets\//.test(html) || /<link[^>]+href=["']\.?\/assets\//.test(html)) {
+    failures.push('external build asset reference remains');
+  }
+  const textLength = documentTextLength(html);
+  if (textLength <= MIN_BODY_TEXT_LENGTH) {
+    failures.push(`body text content is only ${textLength} chars (need > ${MIN_BODY_TEXT_LENGTH}) — composition may be rendering empty`);
+  }
+  if (failures.length) throw new Error(`${filePath}: ${failures.join(', ')}`);
+}
+
 for (const [source, out] of outputs) {
   await run([source, '--out', out]);
   await assertGenerated(out);
+  await assertSourceRendersContent(source);
 }
+
+const staticExample = [
+  'examples/visual-explainer-mdx/video-longform.tsx',
+  'dist/visual-explainer-mdx/video-longform-static.html',
+];
+await runStatic([staticExample[0], '--out', staticExample[1]]);
+await assertStaticGenerated(staticExample[1]);
+console.log('static export ok');
 
 await new Promise((resolve, reject) => {
   const child = spawn(process.execPath, ['scripts/ve-mdx/check-integrity.mjs'], {
