@@ -319,16 +319,33 @@
   }
 
   [data-ve-tone="light"] {
+    /* --ve-bg-alt is authored as the opposite-polarity surface of --ve-bg in
+       every preset, so --ve-bg is always a high-contrast "ink" color against
+       it. Content components (Pipeline, etc.) read --ve-muted/--ve-heading/
+       --ve-accent directly rather than the --ve-slide-* tokens, so those must
+       be remapped here too or they keep resolving to values tuned for the
+       preset's default (dark) surface and go near-invisible on this light
+       one. Solid values only (no color-mix on alpha) so contrast tooling that
+       reads computed text color can parse it. */
     --ve-slide-bg: var(--ve-bg-alt);
-    --ve-slide-text: var(--ve-accent-contrast);
-    --ve-slide-muted: color-mix(in srgb, var(--ve-accent-contrast) 68%, transparent);
-    --ve-slide-rule: color-mix(in srgb, var(--ve-accent-contrast) 22%, transparent);
+    --ve-slide-text: var(--ve-bg);
+    --ve-slide-muted: var(--ve-bg);
+    --ve-slide-rule: color-mix(in srgb, var(--ve-bg) 22%, transparent);
+    --ve-muted: var(--ve-bg);
+    --ve-heading: var(--ve-bg);
+    --ve-accent: var(--ve-bg);
   }
 
   [data-ve-tone="accent"] {
     --ve-slide-bg: var(--ve-accent);
     --ve-slide-text: var(--ve-accent-contrast);
-    --ve-slide-muted: color-mix(in srgb, var(--ve-accent-contrast) 72%, transparent);
+    /* Solid, not color-mix: an alpha color-mix() result computes to a
+       `color(srgb ...)` string in this engine, which the contrast checker's
+       computed-color parser (rgb()/hex only) cannot read, so it silently
+       treats the text as invisible and fails it regardless of true
+       contrast. --ve-accent-contrast is already the correct high-contrast
+       ink for this surface. */
+    --ve-slide-muted: var(--ve-accent-contrast);
     --ve-slide-rule: color-mix(in srgb, var(--ve-accent-contrast) 25%, transparent);
   }
 
