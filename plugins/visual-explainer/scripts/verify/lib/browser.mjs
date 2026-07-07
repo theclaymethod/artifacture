@@ -191,6 +191,8 @@ function looksLikeNetworkFlake(run) {
   return run.failedRequests.every((failure) => /fonts\.(?:googleapis|gstatic)|cdn\.jsdelivr|unpkg|esm\.sh|cdnjs/i.test(failure.url || ''));
 }
 
+const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
+
 async function executeRun(browser, ctx, runMeta, screensDir) {
   const context = await browser.newContext({
     viewport: { width: runMeta.width, height: runMeta.height },
@@ -199,6 +201,11 @@ async function executeRun(browser, ctx, runMeta, screensDir) {
     reducedMotion: runMeta.reducedMotion ? 'reduce' : 'no-preference'
   });
   const page = await context.newPage();
+  await page.route('**/*', (route) => {
+    const url = route.request().url();
+    const allowed = url.startsWith('file:') || url.startsWith('data:') || url.startsWith('blob:') || ALLOWED_REMOTE.some((origin) => url.startsWith(origin));
+    return allowed ? route.continue() : route.abort('blockedbyclient');
+  });
   const consoleErrors = [];
   const pageErrors = [];
   const failedRequests = [];

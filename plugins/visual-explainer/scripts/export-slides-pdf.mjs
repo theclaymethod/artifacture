@@ -204,12 +204,13 @@ const server = http.createServer((req, res) => {
     return;
   }
   // Serve sibling assets (images, fonts, etc.) from the input's directory.
-  const assetPath = path.join(inputDir, decodeURIComponent(url.split('?')[0]));
-  if (!assetPath.startsWith(inputDir) || !fs.existsSync(assetPath)) {
+  const resolved = path.resolve(inputDir, '.' + path.sep + decodeURIComponent(url.split('?')[0]));
+  if ((!resolved.startsWith(inputDir + path.sep) && resolved !== inputDir) || !fs.existsSync(resolved)) {
     res.writeHead(404);
     res.end('not found');
     return;
   }
+  const assetPath = resolved;
   const ext = path.extname(assetPath).toLowerCase();
   const ct = {
     '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg',
@@ -221,7 +222,7 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': ct });
   fs.createReadStream(assetPath).pipe(res);
 });
-await new Promise(resolve => server.listen(port, resolve));
+await new Promise(resolve => server.listen(port, '127.0.0.1', resolve));
 
 // ---------- 4. Render ----------
 const browser = await chromium.launch();
@@ -230,6 +231,12 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
 });
 const page = await context.newPage();
+const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', `http://127.0.0.1:${port}`];
+await page.route('**/*', (route) => {
+  const url = route.request().url();
+  const allowed = url.startsWith('file:') || url.startsWith('data:') || url.startsWith('blob:') || ALLOWED_REMOTE.some((origin) => url.startsWith(origin));
+  return allowed ? route.continue() : route.abort('blockedbyclient');
+});
 
 try {
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'networkidle', timeout: 20000 });
