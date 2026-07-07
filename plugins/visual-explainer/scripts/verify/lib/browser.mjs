@@ -191,7 +191,7 @@ function looksLikeNetworkFlake(run) {
   return run.failedRequests.every((failure) => /fonts\.(?:googleapis|gstatic)|cdn\.jsdelivr|unpkg|esm\.sh|cdnjs/i.test(failure.url || ''));
 }
 
-const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
+const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net/npm/mermaid@'];
 
 async function executeRun(browser, ctx, runMeta, screensDir) {
   const context = await browser.newContext({

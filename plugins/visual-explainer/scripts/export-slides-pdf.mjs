@@ -231,7 +231,7 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
 });
 const page = await context.newPage();
-const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', `http://127.0.0.1:${port}`];
+const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net/npm/mermaid@', `http://127.0.0.1:${port}`];
 await page.route('**/*', (route) => {
   const url = route.request().url();
   const allowed = url.startsWith('file:') || url.startsWith('data:') || url.startsWith('blob:') || ALLOWED_REMOTE.some((origin) => url.startsWith(origin));
