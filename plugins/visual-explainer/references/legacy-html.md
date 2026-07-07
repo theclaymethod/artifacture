@@ -8,6 +8,11 @@ metadata:
   version: "0.6.3"
 ---
 
+> **Scope**: this path is for poster, video (Hyperframes), brand/bespoke
+> one-offs, and aesthetics without MDX preset support. For diagram / plan /
+> table / slides / code / explain-diff flows, use the MDX pipeline
+> (SKILL.md Tier 0) — do not hand-author HTML for those.
+
 # Legacy HTML Reference
 
 Status: Tier 2 fallback. Use this file only when the MDX/React pipeline is unavailable, a Tier 1 card says none of its component paths fit, or custom work needs the former hand-authored HTML procedures, diagram prose, Mermaid shell details, aesthetics, poster, slide, or video guidance. Tier 0 and cards are the normal path.
