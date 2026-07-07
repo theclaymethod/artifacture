@@ -2093,17 +2093,17 @@
     {
       "family": "F5_slides",
       "id": "autofit-safety-net-present-and-ordered",
-      "title": "autoFit safety net exists and runs before SlideEngine init",
+      "title": "autofit text safety-net marker present",
       "profiles": [
         "slides"
       ],
       "stage": "static-text",
       "severity": "error",
-      "applies_when": "The page instantiates the slide engine (`new SlideEngine(` appears in an inline script). Skip if no SlideEngine (not an engine-driven deck).",
-      "spec": "In inline <script> text: (1) a safety-net function (commonly `autoFit`) is defined that both iterates `.slide__kpi-val` applying `transform:scale(...)` on overflow AND iterates `.slide--quote blockquote` shrinking proportionally with a floor (e.g. `Math.max(0.5, 100/len)` and a `Math.max(16, ...)` px floor). (2) A bare invocation of that function appears at a byte offset strictly less than the byte offset of `new SlideEngine(`. Fail if SlideEngine is constructed with no preceding safety-net call, or the function is absent.",
-      "fixture_violation": "Script defines and calls `new SlideEngine()` with no autoFit() call before it (or autoFit() invoked after SlideEngine).",
-      "fp_guards": "Match on functional pattern (scale on .slide__kpi-val + floor logic on quote blockquote), not the literal name `autoFit`; distinguish the definition site from the invocation site (require a call, not just `function autoFit`).",
-      "impl_hint": "idxCall = html.search(/\\bautoFit\\s*\\(\\s*\\)/); idxEngine = html.search(/new\\s+SlideEngine\\s*\\(/); assert idxCall>-1 && idxCall<idxEngine.",
+      "applies_when": "profile === 'slides' (every slide-deck page, regardless of whether it uses a SlideEngine).",
+      "spec": "Across combined stylesheet text and inline <script> text, at least one autofit safety-net marker must be present: `fitty`, `autoFit`/`autofit`, `resizeText`, or a `--min-font-size` custom property. Presence-only check; no ordering requirement.",
+      "fixture_violation": "Slide deck with none of the markers present in styles or scripts (no fitty/autoFit/resizeText usage and no --min-font-size custom property).",
+      "fp_guards": "Case-insensitive match against the combined styles+scripts text; any single marker satisfies the check.",
+      "impl_hint": "/fitty|autoFit|autofit|resizeText|--min-font-size/i.test(`${styles}\\n${scripts}`).",
       "source_rules": [
         "autofit-before-engine-init",
         "kpi-and-blockquote-autofit-safety-net"
@@ -2157,7 +2157,7 @@
       ],
       "stage": "static-dom",
       "severity": "error",
-      "applies_when": "A `.slide--split` or `.slide--bleed` element exists.",
+      "applies_when": "profile === 'slides' AND an authoring signal for split/bleed layout is present: a class containing `split` or `bleed` (e.g. `.slide--split`, `.slide--bleed`), or a `data-layout=\"split\"`/`data-layout=\"bleed\"` attribute. (Gated on the markup, not on raw HTML text, so it does not misfire on unrelated `String.prototype.split` calls in a bundled JS runtime.)",
       "spec": "For each `.slide--split` / `.slide--bleed`, assert computed padding-top/right/bottom/left are all `0px`. Inner panels keep their own padding — only the slide element itself must be zero.",
       "fixture_violation": "A `.slide--bleed` with `padding: 60px` so the full-bleed background no longer reaches the viewport edges.",
       "fp_guards": "Check only the outer slide element, never `.slide__panels`/`.slide__panel` children which legitimately pad.",

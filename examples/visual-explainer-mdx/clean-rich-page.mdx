@@ -1,0 +1,110 @@
+import {
+  DecisionMatrix,
+  DiagramCanvas,
+  DiffBlock,
+  ExplainerShell,
+  JsonTree,
+  Quiz,
+  Section,
+} from '../../visual-explainer-mdx/components';
+
+export default function CleanRichPage() {
+  return (
+    <ExplainerShell
+      eyebrow="fixture"
+      preset="mono-industrial"
+      reviewTools={false}
+      title="Cache Read Path, End To End"
+      summary="One page walks the same change through five component families: a swimlane diagram of the request path, the patch that changed it, the payload it now returns, a comparison of export targets, and a check on the reader's understanding."
+    >
+      <Section kicker="swimlane" title="Request Path Across Three Systems">
+        <DiagramCanvas
+          layout="swimlane"
+          lanes={[
+            { id: 'source', label: 'Source' },
+            { id: 'runtime', label: 'Runtime' },
+            { id: 'export', label: 'Export' },
+          ]}
+          nodes={[
+            { id: 'brief', label: 'Brief', detail: 'scope + acceptance', shape: 'oval', lane: 'source' },
+            { id: 'mdx', label: 'MDX props', detail: 'nodes + edges', lane: 'source' },
+            { id: 'canvas', label: 'DiagramCanvas', detail: 'layout + visual system', accent: true, lane: 'runtime' },
+            { id: 'verify', label: 'Verify?', detail: '0 errors / 0 warns', shape: 'diamond', lane: 'runtime' },
+            { id: 'artifact', label: 'HTML artifact', detail: 'single file', shape: 'oval', lane: 'export' },
+            { id: 'report', label: 'Report', detail: 'screens + JSON', shape: 'dot', lane: 'export' },
+          ]}
+          edges={[
+            { from: 'brief', to: 'mdx', label: 'author' },
+            { from: 'mdx', to: 'canvas', label: 'semantic props' },
+            { from: 'canvas', to: 'verify', label: 'export' },
+            { from: 'verify', to: 'artifact', label: 'pass' },
+            { from: 'canvas', to: 'report', label: 'screens', style: 'dashed' },
+          ]}
+          title="Six nodes, three lanes"
+        />
+      </Section>
+
+      <Section kicker="diff" title="The Cache Read Adds an Early Return">
+        <DiffBlock
+          filename="src/cache.ts"
+          language="ts"
+          patch={`--- a/src/cache.ts
++++ b/src/cache.ts
+@@ -1,5 +1,7 @@
+ export function readCache(key: string) {
+-  return store.get(key);
++  const hit = store.get(key);
++  metrics.count(hit ? 'hit' : 'miss');
++  return hit;
+ }`}
+        />
+      </Section>
+
+      <Section kicker="json" title="The Export Report Payload">
+        <JsonTree
+          collapsedDepth={2}
+          data={{
+            artifact: 'clean-rich-page.html',
+            checks: { export: true, verify: true, contentPresence: true },
+            profile: 'page',
+            components: ['DiagramCanvas', 'DiffBlock', 'JsonTree', 'DecisionMatrix', 'Quiz'],
+            warnings: [],
+          }}
+        />
+      </Section>
+
+      <Section kicker="targets" title="Export Targets Compared">
+        <DecisionMatrix
+          rows={[
+            { target: 've:export', shape: 'CSR shell + bundled JS', bestFor: 'interactive explainers' },
+            { target: 've:export-static', shape: 'SSR static markup', bestFor: 'Hyperframes video compositions' },
+            { target: 've:eval', shape: 'browser-rendered report', bestFor: 'regression fixtures' },
+          ]}
+        />
+      </Section>
+
+      <Section kicker="quiz" title="Check the Mental Model">
+        <Quiz
+          questions={[
+            {
+              q: 'Which line changes the common path for repeat requests?',
+              options: [
+                { text: 'if (cached) return cached;', correct: true, why: 'That branch returns before the metrics call on a cache hit.' },
+                { text: 'const hit = store.get(key);', why: 'That line runs on every call; it does not change the common path by itself.' },
+                { text: 'return hit;', why: 'That return already existed conceptually after the lookup.' },
+              ],
+            },
+            {
+              q: 'Why does the export report list contentPresence as a check?',
+              options: [
+                { text: 'It confirms the CSS was inlined.', why: 'That is a separate, shape-based check on the built artifact.' },
+                { text: 'It confirms the exported component tree is not empty.', correct: true, why: 'A React tree that renders null passes every shape check but fails this one.' },
+                { text: 'It confirms the JSON payload is valid.', why: 'JsonTree already enforces that at export time via the integrity preflight.' },
+              ],
+            },
+          ]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

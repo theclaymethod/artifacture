@@ -1,5 +1,7 @@
 # Mono-Industrial — Default Aesthetic
 
+Canonical spec for this aesthetic. The MDX preset tokens (`visual-explainer-mdx/global.css`, `data-ve-preset='mono-industrial'`) implement it; `templates/mono-industrial.html` is a frozen legacy rendering.
+
 Swiss typography. Monochrome canvas. Hierarchy through type, weight, and spacing — never through color. This is the default aesthetic for visual-explainer. Produce this unless the user explicitly asks for a named alternative (Blueprint, Editorial, Paper/ink, Monochrome terminal, IDE-inspired).
 
 Inspired by Nothing, Braun, Dieter Rams, Teenage Engineering. The vibe is instrument panel, not dashboard.

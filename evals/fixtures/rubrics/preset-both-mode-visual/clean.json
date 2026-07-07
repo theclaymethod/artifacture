@@ -1,0 +1,7 @@
+{
+  "context": "Paired light and dark full-page screenshots both invert cleanly with no leftover wrong-mode fills.",
+  "judge_response": {
+    "pass": true,
+    "findings": []
+  }
+}

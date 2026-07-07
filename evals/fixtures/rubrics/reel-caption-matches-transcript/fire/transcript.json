@@ -1,0 +1,11 @@
+{
+  "words": [
+    { "text": "Our", "start": 0.0, "end": 0.2 },
+    { "text": "engine", "start": 0.2, "end": 0.6 },
+    { "text": "cuts", "start": 0.6, "end": 0.9 },
+    { "text": "p99", "start": 0.9, "end": 1.2 },
+    { "text": "latency", "start": 1.2, "end": 1.7 },
+    { "text": "in", "start": 1.7, "end": 1.8 },
+    { "text": "half", "start": 1.8, "end": 2.2 }
+  ]
+}

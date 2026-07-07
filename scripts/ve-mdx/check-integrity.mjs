@@ -11,7 +11,14 @@ const fixtures = [
   'scripts/ve-mdx/fixtures/clipped-viewbox.mdx',
   'scripts/ve-mdx/fixtures/bad-diff.mdx',
   'scripts/ve-mdx/fixtures/missing-codeblock.mdx',
+  'scripts/ve-mdx/fixtures/malicious-nodes-exec.mdx',
+  'scripts/ve-mdx/fixtures/malicious-template-interpolation.mdx',
 ];
+
+// malicious-nodes-exec.mdx embeds a payload that, if it were ever executed by
+// the integrity preflight (e.g. a regression back to Function()-eval), would
+// write this canary file. It must never exist after a clean run.
+const canaryPath = '/tmp/p002-canary';
 
 function runExport(args) {
   return new Promise((resolve) => {
@@ -31,6 +38,8 @@ function runExport(args) {
   });
 }
 
+await fs.rm(canaryPath, { force: true });
+
 const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 've-mdx-integrity-'));
 try {
   for (const fixture of fixtures) {
@@ -47,6 +56,11 @@ try {
     if (!draft.stderr.includes('visual-explainer draft warnings')) {
       throw new Error(`${fixture}: draft export did not report warnings\n${draft.stderr}`);
     }
+  }
+
+  const canaryExists = await fs.access(canaryPath).then(() => true, () => false);
+  if (canaryExists) {
+    throw new Error(`${canaryPath} exists — malicious-nodes-exec.mdx's payload executed; the integrity preflight is unsafe`);
   }
 } finally {
   await fs.rm(tmp, { force: true, recursive: true });

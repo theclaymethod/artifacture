@@ -1,0 +1,14 @@
+import { DiffBlock, ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function MaliciousTemplateInterpolationFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Malicious template interpolation fixture">
+      <Section title="Diff">
+        <DiffBlock
+          language="ts"
+          patch={`leaked home: ${process.env.HOME}`}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

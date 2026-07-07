@@ -15,9 +15,9 @@
       "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, slides, and data tables",
       "version": "0.7.0",
       "author": {
-        "name": "nicobailon"
+        "name": "Clayton Kim"
       },
-      "repository": "https://github.com/nicobailon/visual-explainer",
+      "repository": "https://github.com/theclaymethod/artifacture",
       "license": "MIT",
       "keywords": [
         "diagrams",

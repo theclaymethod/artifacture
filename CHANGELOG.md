@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0] - 2026-07-04
+
+### Changed
+- Renamed to Artifacture; published as a standalone repo (github.com/theclaymethod/artifacture).
+- MDX/React source-first pipeline with 17 shared components and build-time Shiki.
+- ve-verify: 207-check deterministic design gate with seeded-violation eval suite.
+- Multi-model eval harness (evals/model-matrix) with blind acuity judging.
+- Tiered agent docs: SKILL.md + per-flow cards.
+
 ## [0.6.3] - 2026-03-09
 
 ### Documentation

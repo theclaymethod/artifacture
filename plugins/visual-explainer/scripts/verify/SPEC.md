@@ -39,7 +39,7 @@ node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> \
 ```
 
 - Exit 0 = no errors (warns allowed). Exit 1 = ≥1 error-severity failure. Exit 2 = engine crash.
-- NEVER use npm/npx (broken on this machine): direct `node` + `import('playwright-core')`.
+- The verifier runs via bare `node` with direct `import('playwright-core')` — no npm/npx at runtime, so it works in minimal agent environments.
 - playwright-core + linkedom added to package.json devDependencies (pin what's in node_modules: playwright-core 1.60.0).
 - Browser stage matrix: {1440×900, 390×844} × {light, dark} → 4 runs; screenshots saved as
   `<screens>/<viewport>-<scheme>.png` + full-page variants. Console messages + failed requests

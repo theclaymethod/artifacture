@@ -127,6 +127,22 @@ if (missingExpectations.length || missingFixtures.length) {
   process.exit(1);
 }
 
+const parityAllowlistPath = join(EVAL_ROOT, 'parity-allowlist.json');
+const parityAllowlist = new Set(JSON.parse(readFileSync(parityAllowlistPath, 'utf8')));
+const violationFileSet = new Set(violationFiles);
+const missingCatalogFixtures = [...stagesByFixture.keys()]
+  .map((fileName) => basename(fileName, '.html'))
+  .filter((id) => !parityAllowlist.has(id))
+  .filter((id) => !violationFileSet.has(`${id}.html`))
+  .sort();
+
+if (missingCatalogFixtures.length) {
+  console.error('Catalog/fixture parity mismatch');
+  console.error(`Deterministic catalog checks missing a violation fixture: ${missingCatalogFixtures.join(', ')}`);
+  console.error('Add a fixture under evals/fixtures/violations/, or list the id in evals/parity-allowlist.json if intentionally deferred.');
+  process.exit(1);
+}
+
 const violationResults = violationFiles.map((file) => checkViolation(file, expectations[file]));
 const cleanResults = readdirSync(cleanRoot)
   .filter((file) => file.endsWith('.html'))

@@ -1,0 +1,13 @@
+{
+  "context": "390x844 screenshot shows a floating theme toggle covering the page title.",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "fixed-ui-obscures-content",
+        "evidence": "390-light screenshot: fixed theme-toggle button overlaps the top third of the h1 title text, making it unreadable",
+        "fix": "Reposition the fixed toggle away from primary content, or add safe-area padding to the title block."
+      }
+    ]
+  }
+}

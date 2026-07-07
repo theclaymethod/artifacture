@@ -1,7 +1,8 @@
 # Code Walkthrough Card
 Use `ExplainerShell`, `Section`, `CodeBlock`, `Pipeline`. Focused snippets, not whole files.
 ```mdx
-import { ExplainerShell, Section, CodeBlock, Pipeline } from '../../../visual-explainer-mdx/components';
+{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+import { ExplainerShell, Section, CodeBlock, Pipeline } from 'REPO/visual-explainer-mdx/components';
 <ExplainerShell title="Webhook Signature Gate" summary="Protect every billing write." preset="terminal">
   <Section kicker="hot path" title="Four checks before handlers">
     <Pipeline steps={['Read raw body','Recompute HMAC','Check timestamp','Attach verified event']} />
