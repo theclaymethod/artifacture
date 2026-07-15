@@ -32,6 +32,22 @@ objects with `id`, `family`, `severity`, `spec`, etc.). To add one:
 3. Add it to the component list in `plugins/visual-explainer/SKILL.md`.
 4. Run `npm run ve:check` to confirm export integrity holds.
 
+## Presentation deck changes
+
+The PresentationDeck engine (`visual-explainer-mdx/presentation.tsx` +
+`presentation-core.ts`) is contract-pinned by two suites; run both after any
+change there:
+
+- `npm test` — unit tests for the pure logic (scale-to-fit math, the
+  click-anywhere-to-close guard, tint helpers).
+- `npm run ve:eval-presentation` — the behavioral eval suite
+  (`evals/run-presentation.mjs`, a documented sibling of `evals/run.mjs`):
+  exports `examples/visual-explainer-mdx/presentation-deck.tsx` through the
+  standard `ve:export` path and replays the interaction, geometry, and
+  token-consumption contracts headlessly with Playwright. New engine behavior
+  should land with a new eval here (and verify it can fail by breaking the
+  behavior locally before trusting it).
+
 ## Adding a preset
 
 Presets are semantic-token layers in `visual-explainer-mdx/global.css`,
