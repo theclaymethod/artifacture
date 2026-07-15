@@ -15,6 +15,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run ve:check-integrity
       # Plan 004 (release hygiene) landed before this workflow was written,
       # so all manifest version sources already agree — this job is

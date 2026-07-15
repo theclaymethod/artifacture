@@ -40,10 +40,29 @@ selected via `data-ve-preset="<name>"` on the root. Add a new
 tokens the existing presets set (mono-industrial, nothing, blueprint,
 editorial, paper-ink, terminal, custom) — don't introduce new token names.
 
+## Adding or changing a design system
+
+Design systems are user-owned — usually private brand material — and live
+OUTSIDE the repo (see `docs/design-systems.md`): `$ARTIFACTURE_DESIGN_DIR` →
+`~/.artifacture/design-systems/` → `<repo>/design-systems/`. The repo ships
+NO systems; the repo-local directory is gitignored (only its README is
+tracked). Never commit a real brand's tokens, and keep eval fixtures
+synthetic.
+
+If you change the `ve:learn` extraction heuristics or the registry loader
+(`scripts/ve-mdx/design-systems.mjs`, `learn-extractors.mjs`,
+`learn-sources.mjs`), the eval suite in `evals/design-systems/` is the spec:
+fixture sources with golden expected tokens plus loader resolution-order
+cases, run as the second leg of `npm run ve:eval`. Update or extend the
+fixtures/goldens under `evals/fixtures/design-systems/` with the change —
+never weaken a golden to make a heuristic pass without hand-verifying the new
+values against the fixture source.
+
 ## Before you open a PR
 
+- `npm test` must pass.
 - `npm run ve:check` must pass.
-- `npm run ve:eval` must pass.
+- `npm run ve:eval` must pass (verifier evals + design-system evals).
 - If you touched or generated an HTML artifact, run the verifier on it
   (`node plugins/visual-explainer/scripts/verify/ve-verify.mjs <artifact.html>`)
   and fix any error-severity failures.

@@ -6,7 +6,7 @@ compatibility: Requires a browser to view generated HTML files. Optional surf-cl
 metadata:
   author: nicobailon (original visual-explainer)
   maintainer: Clayton Kim
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Visual Explainer
@@ -58,7 +58,7 @@ Workflow, in order:
 - Slide(title,kicker?,tone?)
 - PosterCanvas(eyebrow?,title,stat?,footer?,preset?)
 
-Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, custom; use `--ve-*`.
+Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, custom; use `--ve-*`. Any other preset name resolves against the external design-system registry ($ARTIFACTURE_DESIGN_DIR → ~/.artifacture/design-systems → repo design-systems/) and its tokens.css is inlined at export; learn new systems with `npm run ve:learn -- <code|url|image> --name <slug>`. See docs/design-systems.md.
 
 |Flow|Card|Tier 2|
 |-|-|-|

@@ -1,6 +1,6 @@
 {
   "name": "artifacture",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources — with a deterministic design-quality verifier and a multi-model eval harness",
   "keywords": [
     "claude-code-plugin",
@@ -16,9 +16,11 @@
     "ve:check": "node scripts/ve-mdx/check.mjs",
     "ve:check-integrity": "node scripts/ve-mdx/check-integrity.mjs",
     "ve:verify": "node plugins/visual-explainer/scripts/verify/ve-verify.mjs",
-    "ve:eval": "node evals/run.mjs",
+    "ve:eval": "node evals/run.mjs && node evals/design-systems/run.mjs",
     "ve:eval-rubrics": "node evals/run-rubrics.mjs",
-    "check:manifests": "node scripts/check-manifests.mjs"
+    "check:manifests": "node scripts/check-manifests.mjs",
+    "ve:learn": "node scripts/ve-mdx/learn.mjs",
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/learn-extractors.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",
