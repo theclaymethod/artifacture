@@ -7,6 +7,7 @@ import {
   BUILTIN_PRESETS,
   DesignSystemError,
   designSystemSearchPaths,
+  injectDesignSystemCss,
   presetNamesInSource,
   resolveDesignSystem,
   scopeTokensCss,
@@ -88,6 +89,24 @@ test('scopeTokensCss re-scopes :root declarations to the preset attribute', () =
   assert.match(scoped, /--ve-bg: #fff;/);
   assert.match(scoped, /--ve-text: #111;/);
   assert.throws(() => scopeTokensCss('body { color: red; }', 'acme'), /no custom-property declarations/);
+});
+
+test('token values that could escape a <style> element are rejected; $-sequences inject verbatim', () => {
+  // "</style><script>" carries no ";" or "}", so the declaration parser
+  // captures it whole — the "<" rejection is what keeps it out of artifacts.
+  assert.throws(
+    () => scopeTokensCss(':root {\n  --ve-bg: red</style><script>x()</script>;\n}', 'acme'),
+    (error) => error instanceof DesignSystemError && /contains "<" or control characters/.test(error.message),
+  );
+  assert.throws(
+    () => injectDesignSystemCss('<html><head></head></html>', 'x{}</style><script>y()</script>'),
+    DesignSystemError,
+  );
+  // String.replace with a string argument treats "$&" specially; the injector
+  // must use a function replacer so CSS lands verbatim.
+  const html = injectDesignSystemCss('<html><head></head><body></body></html>', '.x { content: "$& $`"; }');
+  assert.match(html, /content: "\$& \$`";/);
+  assert.equal((html.match(/<\/head>/g) ?? []).length, 1);
 });
 
 test('presetNamesInSource finds preset props and data attributes, builtin set intact', () => {

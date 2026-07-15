@@ -13,6 +13,10 @@
 - Drafts land in the registry with a manifest `extraction` report: per-token mapping decisions, size ramp, and required-token coverage. Agent-assisted refinement flow documented in `docs/design-systems.md`.
 - Deterministic heuristics are eval-driven: `evals/design-systems/` (second leg of `npm run ve:eval`) pins fixture sources to golden token sets per modality plus loader resolution-order/fallback/malformed-manifest cases.
 
+### Security
+- Token values and manifest font imports are validated before they can reach a shared artifact: values containing `<` or control characters are rejected loudly (style-element breakout), font imports must be plain http(s) URLs, and the CSS injector uses a function replacer (no `$&` splicing) plus a final `</style>`/`<!--`/`<script` refusal. A hostile-tokens eval pins this behavior.
+- `ve:learn` sanitizes extracted values at ingestion (angle brackets/control characters stripped) and its URL modality refuses private/loopback hosts by default (`--allow-private` to override), caps responses at ~5MB, times out fetches at 15s, and checks content types.
+
 ### Tooling
 - New `npm test` (node:test) covering the loader, extractors, and diagram layout; wired into CI alongside the expanded `ve:eval`.
 

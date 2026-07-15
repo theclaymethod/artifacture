@@ -115,6 +115,18 @@ function looksLikeFontStack(value) {
 }
 
 /**
+ * Sanitize a free-text value extracted from an untrusted source (remote CSS,
+ * arbitrary code files) before it can become a token: strip angle brackets
+ * and control characters so learned systems are clean at ingestion — the
+ * loader independently rejects such characters at inline time (defense in
+ * depth), but a learned tokens.css should never contain them to begin with.
+ */
+export function sanitizeExtractedValue(value) {
+  // eslint-disable-next-line no-control-regex -- stripping raw control bytes is the point
+  return value.replace(/[<>\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/**
  * Extract named hex colors, font stacks, font weights, size ramps, grid
  * geometry, and easing from a TS/JS/CSS token source.
  */
@@ -143,7 +155,7 @@ export function extractFromCode(text) {
     const [, name, , raw] = match;
     if (!looksLikeFontStack(raw)) continue;
     const slot = classifyFontSlot(name, raw);
-    if (slot && !fonts[slot]) fonts[slot] = raw;
+    if (slot && !fonts[slot]) fonts[slot] = sanitizeExtractedValue(raw);
   }
 
   // Font weights (numeric); the mode is used as the display/heading weight.
@@ -226,14 +238,14 @@ export function extractFromHtml({ html, cssTexts = [] }) {
 
   // 3. @font-face families and font-family declarations.
   const fontFaces = [...css.matchAll(/@font-face\s*\{[^}]*font-family:\s*["']?([^;"'}]+)["']?/g)]
-    .map((match) => match[1].trim());
+    .map((match) => sanitizeExtractedValue(match[1]));
   const fonts = {};
   // Strip @font-face blocks so their own font-family declarations (bare
   // family names, not usable stacks) don't claim a slot.
   const cssWithoutFontFace = css.replace(/@font-face\s*\{[^}]*\}/g, '');
   for (const match of cssWithoutFontFace.matchAll(/font-family\s*:\s*([^;}]+)/g)) {
-    const stack = match[1].trim();
-    if (!looksLikeFontStack(stack) && !fontFaces.some((face) => stack.includes(face))) continue;
+    const stack = sanitizeExtractedValue(match[1]);
+    if (!looksLikeFontStack(stack) && !fontFaces.some((face) => face && stack.includes(face))) continue;
     const slot = classifyFontSlot('', stack);
     if (!fonts[slot]) fonts[slot] = stack;
   }
@@ -529,7 +541,11 @@ export function deriveTokens(core) {
 
 /** Render a token map as a tokens.css file body. */
 export function tokensCssText(tokens, { name }) {
-  const lines = Object.entries(tokens).map(([prop, value]) => `  ${prop}: ${value};`);
+  // Belt over the ingestion-time sanitization: no emitted value may carry
+  // characters that could escape a <style> element downstream.
+  const lines = Object.entries(tokens).map(
+    ([prop, value]) => `  ${prop}: ${sanitizeExtractedValue(String(value))};`,
+  );
   return [
     `/* Design tokens for "${name}" — artifacture design-system registry format.`,
     '   Declarations are re-scoped to [data-ve-preset="' + name + '"] at export time. */',

@@ -26,6 +26,10 @@ ignored). At export the loader re-scopes the declarations to
 editor-friendly CSS while guaranteeing the tokens can never leak outside the
 preset scope.
 
+Token values are inlined into shared HTML artifacts, so they may not contain
+`<` or control characters — the loader rejects such values loudly rather than
+inlining them (no legitimate `--ve-*` value needs them).
+
 Cover at least the core roles — bg / surfaces (`panel`, `panel-strong`,
 `row`) / text (`heading`, `text`, `muted`, `faint`) / `accent` (+ `-soft`,
 `-contrast`) / `rule` / status colors / the three font stacks / weights /
@@ -52,9 +56,11 @@ automatically, mirroring the built-in `custom` preset.
 ```
 
 - `source` is provenance: where the tokens came from and how.
-- `fonts.imports` are inlined as `@import` lines ahead of the tokens. Remote
-  fonts are a self-containment trade-off — every stack must end in a system
-  fallback so artifacts degrade gracefully offline.
+- `fonts.imports` are inlined as `@import` lines ahead of the tokens. Each
+  entry must be a plain http(s) URL with no quotes, angle brackets,
+  backslashes, parentheses, or whitespace (anything else is rejected loudly).
+  Remote fonts are a self-containment trade-off — every stack must end in a
+  system fallback so artifacts degrade gracefully offline.
 - `notes` carry the system's hard rules (e.g. "solid fills over grid paper",
   "accent color reserved for CTAs") so an agent styling with the system can
   honor them.
@@ -104,7 +110,7 @@ carry their own styles and does not consult the registry.
 ## Learning a system: `ve:learn`
 
 ```
-npm run ve:learn -- <source> --name <slug> [--out <dir>] [--force]
+npm run ve:learn -- <source> --name <slug> [--out <dir>] [--force] [--allow-private]
 ```
 
 `<source>` decides the modality:
@@ -112,7 +118,7 @@ npm run ve:learn -- <source> --name <slug> [--out <dir>] [--force]
 | Modality | Source | What gets extracted |
 |----------|--------|---------------------|
 | code | `.ts/.tsx/.js/.css/...` file | named hex colors, font stacks, weight/size ramps, grid geometry, easing |
-| url | `http(s)://...` | `:root` custom properties, `@font-face`, font-family stacks, dominant colors from the page's linked CSS |
+| url | `http(s)://...` | `:root` custom properties, `@font-face`, font-family stacks, dominant colors from the page's linked CSS. Guardrails: private/loopback hosts are refused unless `--allow-private` is passed, responses are capped at ~5MB, fetches time out after 15s, and non-text content types are rejected. Extracted values are sanitized (angle brackets and control characters stripped) before they can become tokens. |
 | image | `.png/.jpg/.webp/...` | quantized palette (canvas in Playwright's Chromium), mapped by coverage/contrast/saturation |
 
 Output is a **draft** system in the registry (default:

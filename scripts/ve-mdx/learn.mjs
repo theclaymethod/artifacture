@@ -41,17 +41,19 @@ function parseArgs(argv) {
   let name = null;
   let out = null;
   let force = false;
+  let allowPrivate = false;
   for (let i = 0; i < args.length; i += 1) {
     if (args[i] === '--name') name = args[++i];
     else if (args[i] === '--out') out = args[++i];
     else if (args[i] === '--force') force = true;
+    else if (args[i] === '--allow-private') allowPrivate = true;
     else throw new Error(`Unknown argument: ${args[i]}`);
   }
   if (!source || !name) {
-    throw new Error('Usage: npm run ve:learn -- <source> --name <slug> [--out <dir>] [--force]');
+    throw new Error('Usage: npm run ve:learn -- <source> --name <slug> [--out <dir>] [--force] [--allow-private]');
   }
   assertValidSlug(name);
-  return { source, name, out, force };
+  return { source, name, out, force, allowPrivate };
 }
 
 function defaultRegistryDir(env = process.env) {
@@ -100,12 +102,12 @@ function buildManifest({ name, source, modality, mapped, tokens }) {
 }
 
 async function main() {
-  const { source, name, out, force } = parseArgs(process.argv.slice(2));
+  const { source, name, out, force, allowPrivate } = parseArgs(process.argv.slice(2));
   const modality = detectModality(source);
 
   let extraction;
   if (modality === 'url') {
-    extraction = await extractFromUrlSource(source);
+    extraction = await extractFromUrlSource(source, { allowPrivate });
   } else if (modality === 'image') {
     extraction = await extractFromImageSource(source);
   } else {

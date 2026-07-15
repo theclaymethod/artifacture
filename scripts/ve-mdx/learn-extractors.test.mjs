@@ -9,6 +9,19 @@ import {
   deriveTokens,
 } from './learn-extractors.mjs';
 
+test('extracted values are sanitized at ingestion; private hosts are blocked', async () => {
+  const { sanitizeExtractedValue } = await import('./learn-extractors.mjs');
+  assert.equal(sanitizeExtractedValue('Acme</style><script>, serif'), 'Acme/stylescript, serif');
+  assert.equal(sanitizeExtractedValue('Nice Stack, sans-serif'), 'Nice Stack, sans-serif');
+  const { isPrivateHost } = await import('./learn-sources.mjs');
+  for (const host of ['localhost', '127.0.0.1', '10.0.0.5', '172.16.0.1', '192.168.0.1', '169.254.10.10', '::1', 'fd12::1']) {
+    assert.equal(isPrivateHost(host), true, host);
+  }
+  for (const host of ['example.com', '8.8.8.8', '172.32.0.1', '2606:4700::1111']) {
+    assert.equal(isPrivateHost(host), false, host);
+  }
+});
+
 test('detectModality: url, image extensions, everything else is code', () => {
   assert.equal(detectModality('https://example.com/brand'), 'url');
   assert.equal(detectModality('shot.PNG'), 'image');

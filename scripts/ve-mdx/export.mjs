@@ -8,7 +8,7 @@ import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
 import { preflightSource } from './integrity.mjs';
-import { resolvePresetCssForExport } from './design-systems.mjs';
+import { injectDesignSystemCss, resolvePresetCssForExport } from './design-systems.mjs';
 
 const repoRoot = process.cwd();
 
@@ -129,10 +129,7 @@ async function main() {
     });
     for (const warning of warnings) console.warn(`WARN: ${warning}`);
     if (designSystemCss) {
-      generated = generated.replace(
-        '</head>',
-        `<style data-ve-design-system>\n${designSystemCss}\n</style>\n</head>`,
-      );
+      generated = injectDesignSystemCss(generated, designSystemCss);
     }
 
     await fs.mkdir(path.dirname(out), { recursive: true });

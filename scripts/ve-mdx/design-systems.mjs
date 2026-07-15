@@ -185,6 +185,23 @@ export function listDesignSystems(opts = {}) {
 
 const DECLARATION_PATTERN = /(--[\w-]+)\s*:\s*([^;}]+)/g;
 
+// tokens.css values end up inside a <style> element in the shared standalone
+// HTML. No legitimate --ve-* value needs "<" (or control characters), and a
+// value containing them could break out of the style element ("</style>",
+// "<!--"), so they are rejected outright rather than escaped.
+// eslint-disable-next-line no-control-regex -- rejecting raw control bytes is the point
+const FORBIDDEN_VALUE_CHARS = /[<\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+
+export function assertSafeTokenValue(prop, value, name) {
+  if (FORBIDDEN_VALUE_CHARS.test(value)) {
+    throw new DesignSystemError(
+      `Design system "${name}" token ${prop} contains "<" or control characters — ` +
+        'refusing to inline it into an HTML artifact.',
+      { name },
+    );
+  }
+}
+
 /** Parse every custom-property declaration in a tokens.css text. */
 export function parseTokenDeclarations(css) {
   const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -208,6 +225,7 @@ export function scopeTokensCss(css, name) {
       { name },
     );
   }
+  for (const [prop, value] of declarations) assertSafeTokenValue(prop, value, name);
   const body = declarations.map(([prop, value]) => `  ${prop}: ${value};`).join('\n');
   return `[data-ve-preset="${name}"] {\n${body}\n}`;
 }
@@ -222,22 +240,72 @@ const DERIVED_FALLBACKS = [
   '--ve-diagram-accent-fill: color-mix(in srgb, var(--ve-accent) 14%, transparent)',
 ];
 
+// manifest.fonts.imports are interpolated into @import url('...') inside the
+// artifact's <style> element: they must be plain http(s) URLs with no quote/
+// angle-bracket/backslash/whitespace characters that could escape the url()
+// or the style element. Anything else is rejected loudly.
+const SAFE_IMPORT_URL = /^https?:\/\/[^\s'"<>\\()]+$/;
+
+export function validatedFontImports(system) {
+  const imports = system.manifest?.fonts?.imports ?? [];
+  if (!Array.isArray(imports) || imports.some((entry) => typeof entry !== 'string')) {
+    throw new DesignSystemError(
+      `Design system "${system.name}" manifest.fonts.imports must be an array of URL strings.`,
+      { name: system.name, dir: system.dir },
+    );
+  }
+  for (const url of imports) {
+    let parsed;
+    try {
+      parsed = new URL(url);
+    } catch {
+      throw new DesignSystemError(
+        `Design system "${system.name}" manifest font import is not a valid URL: ${JSON.stringify(url)}`,
+        { name: system.name, dir: system.dir },
+      );
+    }
+    if (!/^https?:$/.test(parsed.protocol) || !SAFE_IMPORT_URL.test(url)) {
+      throw new DesignSystemError(
+        `Design system "${system.name}" manifest font import must be a plain http(s) URL ` +
+          `without quotes, angle brackets, backslashes, parentheses, or whitespace: ${JSON.stringify(url)}`,
+        { name: system.name, dir: system.dir },
+      );
+    }
+  }
+  return imports;
+}
+
 /**
  * Full CSS text to inline for a resolved system: optional font @imports from
  * the manifest, then derived fallbacks + tokens scoped to the preset name.
  */
 export function designSystemStyleCss(system) {
-  const imports = (system.manifest?.fonts?.imports ?? [])
+  const imports = validatedFontImports(system)
     .map((url) => `@import url('${url}');`)
     .join('\n');
   const fallbacks = DERIVED_FALLBACKS.map((line) => `  ${line};`).join('\n');
   const scoped = scopeTokensCss(system.tokensCss, system.name).replace(
     '{\n',
-    `{\n${fallbacks}\n`,
+    () => `{\n${fallbacks}\n`,
   );
   // Name only — no local filesystem paths in a shareable artifact.
   const header = `/* artifacture design system: ${system.name} */`;
   return [header, imports, scoped].filter(Boolean).join('\n');
+}
+
+/**
+ * Inject design-system CSS into an exported HTML document, just before
+ * </head>. Defense in depth on top of per-value validation: refuses CSS that
+ * could close the style element or open an HTML comment, and uses a function
+ * replacer so "$&"-style sequences in the CSS are inserted verbatim rather
+ * than splicing the matched text (String.replace with a string argument
+ * treats "$" specially).
+ */
+export function injectDesignSystemCss(html, css) {
+  if (/<\/style|<!--|<script/i.test(css)) {
+    throw new DesignSystemError('Refusing to inject design-system CSS containing "</style", "<!--", or "<script".');
+  }
+  return html.replace('</head>', () => `<style data-ve-design-system>\n${css}\n</style>\n</head>`);
 }
 
 /** Which REQUIRED_VE_TOKENS a tokens.css leaves unset (derived ones excluded). */
