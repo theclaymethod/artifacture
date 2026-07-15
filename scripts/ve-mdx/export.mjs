@@ -8,6 +8,7 @@ import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
 import { preflightSource } from './integrity.mjs';
+import { injectDesignSystemCss, resolvePresetCssForExport } from './design-systems.mjs';
 
 const repoRoot = process.cwd();
 
@@ -115,7 +116,22 @@ async function main() {
     });
 
     const html = await fs.readFile(path.join(dist, 'index.html'), 'utf8');
-    const generated = await inlineAssets(html, dist);
+    let generated = await inlineAssets(html, dist);
+
+    // Resolve data-ve-preset names against the external design-system
+    // registry ($ARTIFACTURE_DESIGN_DIR → ~/.artifacture/design-systems →
+    // <repo>/design-systems) and inline the matching tokens.css. Unknown
+    // names fall back to built-in tokens with a warning.
+    const sourceCode = await fs.readFile(source, 'utf8');
+    const { css: designSystemCss, warnings } = resolvePresetCssForExport(sourceCode, {
+      repoRoot,
+      globalCssPath: path.join(repoRoot, 'visual-explainer-mdx/global.css'),
+    });
+    for (const warning of warnings) console.warn(`WARN: ${warning}`);
+    if (designSystemCss) {
+      generated = injectDesignSystemCss(generated, designSystemCss);
+    }
+
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, generated);
     console.log(`Generated ${out}`);

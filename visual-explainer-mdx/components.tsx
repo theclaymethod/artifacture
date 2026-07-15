@@ -1,7 +1,18 @@
 import React, { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { edgePath, labelLeaderEndpoint, layoutDiagram, mobileConnectorEdges, splitSvgText, wrapWords, type LaidOutNode } from './diagram-layout';
 
-export type VisualPreset = 'mono-industrial' | 'nothing' | 'blueprint' | 'editorial' | 'paper-ink' | 'terminal' | 'custom';
+// Built-in preset names, plus any slug resolvable from the external
+// design-system registry (see docs/design-systems.md). `(string & {})` keeps
+// literal autocompletion for the built-ins while admitting registry names.
+export type VisualPreset =
+  | 'mono-industrial'
+  | 'nothing'
+  | 'blueprint'
+  | 'editorial'
+  | 'paper-ink'
+  | 'terminal'
+  | 'custom'
+  | (string & {});
 
 type ShellProps = {
   title: string;

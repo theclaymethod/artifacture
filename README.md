@@ -58,6 +58,7 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 - **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
 - **Model-matrix eval harness** (`evals/model-matrix/`): the same briefs across Kimi, GLM, DeepSeek, Claude, and Codex, scored on deterministic compliance plus a blind screenshot judge. Point it at your own model in about ten minutes.
 - **One-command team sharing**: `share.sh` deploys to Vercel (zero setup, public) or sharehtml on Cloudflare (stable update-in-place URLs, team SSO via Cloudflare Access, comments). See `docs/TEAM-SHARING.md`.
+- **External design systems + `ve:learn`**: brand token sets are user-owned artifacts resolved from a registry outside the skill (`$ARTIFACTURE_DESIGN_DIR` → `~/.artifacture/design-systems/` → repo `design-systems/`) and inlined into exports by preset name. `npm run ve:learn -- <code-file|url|image> --name <slug>` drafts a system from a token source, a live page, or an image palette; deterministic heuristics are pinned by their own eval suite (`evals/design-systems/`). The repo ships the mechanism only — systems (typically private brand tokens) live in your own registry. See `docs/design-systems.md`.
 
 ## Install
 
@@ -110,6 +111,7 @@ For private team sharing setup, see [`docs/TEAM-SHARING.md`](docs/TEAM-SHARING.m
 ## Docs
 
 - [Features](docs/features.md): the full capability reference, including all output modes, aesthetics, and how generation works.
+- [Design systems](docs/design-systems.md): the external design-system registry format, resolution order, `ve:learn` token learning, and the agent-assisted refinement flow.
 - [Team sharing](docs/TEAM-SHARING.md): one-command deploys to Vercel or a team-gated Cloudflare space.
 - [Skill docs](plugins/visual-explainer/SKILL.md): what an agent actually reads, plus the per-use-case [cards](plugins/visual-explainer/cards/).
 - [Verifier](plugins/visual-explainer/scripts/verify/): the deterministic design-quality gate and its [eval suite](evals/).

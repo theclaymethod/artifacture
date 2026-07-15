@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0] - 2026-07-15
+
+### External design-system registry
+- Design systems are now user-owned artifacts resolved from a registry OUTSIDE the skill/repo: `$ARTIFACTURE_DESIGN_DIR` → `~/.artifacture/design-systems/` → `<repo>/design-systems/` (first hit wins; deduped when `~/.artifacture` is itself a repo clone).
+- Format: one directory per system with `tokens.css` (`--ve-*` custom properties in a `:root` block, re-scoped to `[data-ve-preset="<slug>"]` at export) and `manifest.json` (description, source provenance, font loads/fallbacks, hard-rule notes).
+- `ve:export` resolves non-built-in `data-ve-preset` names against the registry and inlines the tokens into the standalone HTML; unknown names warn and fall back to built-in `mono-industrial` tokens; malformed systems fail loudly. Built-ins can never be shadowed.
+- Repo-local `design-systems/` is gitignored (only its README is tracked) so learned/private systems can't be committed by accident — the repo ships the mechanism, user registries hold the (typically private) brand tokens.
+
+### ve:learn token learning
+- New `npm run ve:learn -- <source> --name <slug> [--out <dir>]` drafts a design system from a code file (hex tokens, font stacks, size ramps, grid geometry, easing), a URL (`:root` custom props, `@font-face`, dominant colors from linked CSS), or an image (palette quantization via a Playwright canvas).
+- Drafts land in the registry with a manifest `extraction` report: per-token mapping decisions, size ramp, and required-token coverage. Agent-assisted refinement flow documented in `docs/design-systems.md`.
+- Deterministic heuristics are eval-driven: `evals/design-systems/` (second leg of `npm run ve:eval`) pins fixture sources to golden token sets per modality plus loader resolution-order/fallback/malformed-manifest cases.
+
+### Security
+- Token values and manifest font imports are validated before they can reach a shared artifact: values containing `<` or control characters are rejected loudly (style-element breakout), font imports must be plain http(s) URLs, and the CSS injector uses a function replacer (no `$&` splicing) plus a final `</style>`/`<!--`/`<script` refusal. A hostile-tokens eval pins this behavior.
+- `ve:learn` sanitizes extracted values at ingestion (angle brackets/control characters stripped) and its URL modality refuses private/loopback hosts by default (`--allow-private` to override), caps responses at ~5MB, times out fetches at 15s, and checks content types.
+
+### Tooling
+- New `npm test` (node:test) covering the loader, extractors, and diagram layout; wired into CI alongside the expanded `ve:eval`.
+
 ## [0.7.0] - 2026-07-04
 
 ### Changed

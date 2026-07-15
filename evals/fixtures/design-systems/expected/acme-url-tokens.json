@@ -1,0 +1,18 @@
+{
+  "description": "Golden core tokens for the saved Acme brand page fixture (url modality). Hand-verified against the fixture CSS: :root custom props supply bg/text/muted/rule/accent, hue classification supplies warn, @font-face + font-family declarations supply the three stacks.",
+  "tokens": {
+    "--ve-bg": "#0E1116",
+    "--ve-text": "#E6EDF3",
+    "--ve-heading": "#E6EDF3",
+    "--ve-muted": "#9DA7B1",
+    "--ve-faint": "#9DA7B1",
+    "--ve-rule": "#2D333B",
+    "--ve-accent": "#3FB6A8",
+    "--ve-accent-contrast": "#0E1116",
+    "--ve-warn": "#D4A72C",
+    "--ve-font-display": "\"Acme Serif\", Georgia, serif",
+    "--ve-font-body": "\"Acme Grotesk\", ui-sans-serif, system-ui, sans-serif",
+    "--ve-font-mono": "\"Acme Mono\", ui-monospace, SFMono-Regular, Menlo, monospace"
+  },
+  "fontFaces": ["Acme Grotesk", "Acme Mono"]
+}

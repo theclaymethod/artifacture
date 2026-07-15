@@ -1,0 +1,46 @@
+/* Eval fixture stylesheet for the saved Acme brand page. */
+:root {
+  --color-background: #0e1116;
+  --color-text: #e6edf3;
+  --color-muted: #9da7b1;
+  --color-border: #2d333b;
+  --color-accent: #3fb6a8;
+  --color-warning: #d4a72c;
+}
+
+@font-face {
+  font-family: "Acme Grotesk";
+  src: url("/fonts/acme-grotesk.woff2") format("woff2");
+  font-weight: 400 700;
+}
+
+@font-face {
+  font-family: "Acme Mono";
+  src: url("/fonts/acme-mono.woff2") format("woff2");
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: "Acme Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2 {
+  font-family: "Acme Serif", Georgia, serif;
+  color: var(--color-text);
+}
+
+code,
+pre {
+  font-family: "Acme Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.panel {
+  background: #161b22;
+  border: 1px solid var(--color-border);
+}
+
+a {
+  color: var(--color-accent);
+}

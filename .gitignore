@@ -16,6 +16,15 @@ skills-lock.json
 /mono-industrial-*-geist-pixel.png
 /slides-*.png
 
+# Design-system registry (repo-local fallback). Design systems are USER-OWNED,
+# usually PRIVATE artifacts; the loader also resolves
+# ~/.artifacture/design-systems, and ~/.artifacture may itself BE a clone of
+# this repo — in that case this repo-local directory IS the user's global
+# registry, so learned/private systems landing here must never be committed by
+# accident. Only the README ships.
+/design-systems/*
+!/design-systems/README.md
+
 # Publish hygiene (Artifacture)
 .codex-briefs/
 evals/model-matrix/out/

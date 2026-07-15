@@ -1,0 +1,14 @@
+{
+  "description": "Expected quantized palette + core mapping for brand-palette.png (image modality). The fixture is three solid blocks of the synthetic acme-terracotta palette: paper #F7F3EA (~52%), ink #26282D (~29%), terracotta #C05F33 (~17%). Tolerance-based: quantization averages within-bucket antialiasing, so channels may drift a little.",
+  "channelTolerance": 12,
+  "palette": [
+    { "hex": "#F7F3EA", "minShare": 0.4 },
+    { "hex": "#26282D", "minShare": 0.2 },
+    { "hex": "#C05F33", "minShare": 0.1 }
+  ],
+  "core": {
+    "bg": "#F7F3EA",
+    "text": "#26282D",
+    "accent": "#C05F33"
+  }
+}
