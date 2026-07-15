@@ -22,6 +22,7 @@ jobs:
       # blocking rather than continue-on-error, per that plan's guidance to
       # flip it once versions are consistent. See plan 003 NOTES.
       - run: npm run check:manifests
+      - run: npm test
       - run: npm run ve:check
 
   evals:
@@ -35,3 +36,4 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run ve:eval
+      - run: npm run ve:eval-presentation
