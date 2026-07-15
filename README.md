@@ -55,6 +55,7 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 - **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and small blind LLM rubric passes. Exit codes and JSON reports make it usable as a CI gate. Its own eval suite of seeded-violation fixtures proves each check fires.
 - **Tiered agent docs**: SKILL.md is a ~2.5k-token bootstrap plus one ~300-token card per use case (`cards/`). A covered flow reads about 3,100 tokens instead of 62,000. Deep references load only on escalation.
 - **17 shared components** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
+- **PresentationDeck** (`visual-explainer-mdx/presentation.tsx`): a second deck engine for presented (not scrolled) decks — a fixed 1920×1080 stage scaled to fit any screen, collapsible slide rail, keyboard nav, and drill-down primitives (click-to-expand cards/sheets with a click-anywhere-to-close guard, ladder/fanout diagrams, metrics, steppers). Fully `--ve-*` token-driven so every preset skins it; its behavioral contract is pinned by a headless eval suite (`npm run ve:eval-presentation`). See [docs/presentation-deck.md](docs/presentation-deck.md) for when to use it vs `SlideDeck`.
 - **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
 - **Model-matrix eval harness** (`evals/model-matrix/`): the same briefs across Kimi, GLM, DeepSeek, Claude, and Codex, scored on deterministic compliance plus a blind screenshot judge. Point it at your own model in about ten minutes.
 - **One-command team sharing**: `share.sh` deploys to Vercel (zero setup, public) or sharehtml on Cloudflare (stable update-in-place URLs, team SSO via Cloudflare Access, comments). See `docs/TEAM-SHARING.md`.
@@ -112,6 +113,7 @@ For private team sharing setup, see [`docs/TEAM-SHARING.md`](docs/TEAM-SHARING.m
 
 - [Features](docs/features.md): the full capability reference, including all output modes, aesthetics, and how generation works.
 - [Design systems](docs/design-systems.md): the external design-system registry format, resolution order, `ve:learn` token learning, and the agent-assisted refinement flow.
+- [PresentationDeck vs SlideDeck](docs/presentation-deck.md): which deck engine to reach for, the drill-down primitives, and the eval-pinned behavioral contract.
 - [Team sharing](docs/TEAM-SHARING.md): one-command deploys to Vercel or a team-gated Cloudflare space.
 - [Skill docs](plugins/visual-explainer/SKILL.md): what an agent actually reads, plus the per-use-case [cards](plugins/visual-explainer/cards/).
 - [Verifier](plugins/visual-explainer/scripts/verify/): the deterministic design-quality gate and its [eval suite](evals/).

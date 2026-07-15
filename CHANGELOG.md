@@ -20,6 +20,19 @@
 ### Tooling
 - New `npm test` (node:test) covering the loader, extractors, and diagram layout; wired into CI alongside the expanded `ve:eval`.
 
+### PresentationDeck engine + deck primitives
+- **PresentationDeck engine + deck primitives** (`visual-explainer-mdx/presentation.tsx`, re-exported through `components.tsx`): an alternative to `SlideDeck` for presented, interactive decks. Fixed 1920×1080 stage scaled to fit (ResizeObserver + letterbox), collapsible slide rail (auto-collapse, hover expand, dot column), keyboard nav (arrows/Space/PageUp/PageDown/Home/End), 80px edge click zones, and a mono slide counter. Primitives: `PresentationSlide` (tone chrome via the existing `data-ve-tone` → `--ve-slide-*` mapping), `DrillCard`/`DrillChip`/`DrillSheet` (click-to-expand with corner-anchored expansion, Escape/X close, and a click-anywhere-to-close guard that ignores `button, a, input, select, textarea, [data-interactive]`), `LayerExplorer`, `LadderDiagram`/`FanoutDiagram` (grid-paper backdrops with opaque solid-over-grid fills), `PullQuote`, `Metric`/`StatRow`, `HairlineList`, `Stepper`, `CodePanel`, `MonoLabel`/`DisplayText`, `IconChip` + geometric icons, `ShineOverlay`/`trackShine`, and pure helpers `fitStage`/`shouldDismissDrillSheet`/`tint`/`solidTint`. Everything consumes `--ve-*` tokens (new root token: `--ve-deck-letterbox`); prefers-reduced-motion collapses all deck motion.
+- **Presentation eval suite** (`evals/run-presentation.mjs`, `npm run ve:eval-presentation`, wired into CI): the engine's behavioral contract — click-anywhere-to-close guard matrix, keyboard-nav matrix, drill CTA contract (click/Enter/Space; primary solid vs secondary outline computed styles), LayerExplorer selection, reduced-motion, scale-to-fit geometry across viewports, letterboxing, rail collapse/expand widths, preset re-skin assertions, and an allowlist-based scan asserting the shipped module contains no color or font literals at all. Runs against the demo (`examples/visual-explainer-mdx/presentation-deck.tsx`) exported through the standard `ve:export` path.
+- Unit tests for the pure deck logic (`visual-explainer-mdx/presentation-core.test.mjs`) and an `npm test` script (also runs the existing diagram-layout tests) now executed in CI.
+- Docs: `docs/presentation-deck.md` (when to use PresentationDeck vs SlideDeck).
+
+### Changed (presentation)
+- Keyboard guard hardened: modifier chords (meta/ctrl/alt) are never intercepted, and focus inside `input`/`textarea`/`select`/`[contenteditable]` now owns every key (arrows, Space, Home/End) instead of only Space/Enter.
+- Navigation (edge click zones + nav keys) is gated while a drill sheet is open — an edge click can no longer blow past an open sheet; Escape closes first.
+- Light-tone slides flip the CTA ink like accent-tone slides do, fixing primary chips rendering ink-on-ink where `--ve-accent` remaps to the ink color. All three pinned by new falsifiable evals.
+- `ve-verify` profile detection: artifacts carrying `data-ve-presentation` (fixed-stage decks that never scroll) classify as `page` instead of tripping the scroll-snap `slides` heuristics via bundled Tailwind utilities.
+- Roster-sync guard (`scripts/ve-mdx/check.mjs`) now also collects PascalCase named re-exports from `components.tsx`.
+
 ## [0.7.0] - 2026-07-04
 
 ### Changed

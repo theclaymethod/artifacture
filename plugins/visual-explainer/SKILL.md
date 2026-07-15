@@ -58,6 +58,40 @@ Workflow, in order:
 - Slide(title,kicker?,tone?)
 - PosterCanvas(eyebrow?,title,stat?,footer?,preset?)
 
+Presentation deck (presented/interactive decks — fixed 1920×1080 stage scaled to fit, slide rail, keyboard nav, drill-downs; when in doubt see `REPO/docs/presentation-deck.md` for PresentationDeck vs SlideDeck):
+
+- PresentationDeck(title,eyebrow?,preset?,stageWidth?,stageHeight?,railAutoCollapseMs?)
+- PresentationSlide(kicker,title?,shortTitle?,tone?,rightLabel?,footer?,sub?)
+- DrillCard(drillId,title,eyebrow?,body?,hint?,accent?,origin?,minHeight?)
+- DrillChip(label,onClick,drillId,variant?,hint?)
+- DrillSheet(eyebrow,onClose,origin?)
+- CloseX(onClose)
+- LayerExplorer(layers,initialIndex?,drillIdPrefix?,listWidth?)
+- LadderDiagram(stages,stepOffset?,gridBackdrop?,renderStage?,framed?)
+- FanoutDiagram(source,outputs,sourceWidth?,connectorWidth?)
+- PullQuote(quote,attribution,size?,panel?)
+- Metric(value,label,size?)
+- StatRow(stats)
+- HairlineList(items,accent?,gap?,columns?)
+- Stepper(steps,accentIndex?)
+- CodePanel(rows? OR lines?,fontSize?)
+- MonoLabel(children,size?,color?,ls?,caps?,block?)
+- DisplayText(children,size?,lh?,color?,italic?,maxW?)
+- IconChip(icon,accent?,size?)
+- ShineOverlay(color?,radius?)
+- IconBase(children,size?,color?)
+- IconFile(color?,size?)
+- IconTool(color?,size?)
+- IconAction(color?,size?)
+- IconLoop(color?,size?)
+- IconGauge(color?,size?)
+- IconTag(color?,size?)
+- IconFit(color?,size?)
+- IconFilter(color?,size?)
+- IconCorpus(color?,size?)
+- IconArrowDown(color?,size?)
+- IconArrowRight(color?,size?)
+
 Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, custom; use `--ve-*`. Any other preset name resolves against the external design-system registry ($ARTIFACTURE_DESIGN_DIR → ~/.artifacture/design-systems → repo design-systems/) and its tokens.css is inlined at export; learn new systems with `npm run ve:learn -- <code|url|image> --name <slug>`. See docs/design-systems.md.
 
 |Flow|Card|Tier 2|

@@ -23,6 +23,7 @@ const outputs = [
   ['examples/visual-explainer-mdx/mermaid-block.mdx', 'dist/visual-explainer-mdx/mermaid-block.html'],
   ['examples/visual-explainer-mdx/diff-terminal-json.mdx', 'dist/visual-explainer-mdx/diff-terminal-json.html'],
   ['examples/visual-explainer-mdx/explain-diff-demo.mdx', 'dist/visual-explainer-mdx/explain-diff-demo.html'],
+  ['examples/visual-explainer-mdx/presentation-deck.tsx', 'dist/visual-explainer-mdx/presentation-deck.html'],
 ];
 
 function run(args) {
@@ -135,6 +136,19 @@ async function assertStaticGenerated(filePath) {
 async function assertRosterInSync() {
   const componentsSource = await fs.readFile(path.resolve(repoRoot, 'visual-explainer-mdx/components.tsx'), 'utf8');
   const exported = new Set([...componentsSource.matchAll(/^export function (\w+)/gm)].map((match) => match[1]));
+  // Components can also ship through components.tsx as named re-exports
+  // (e.g. the presentation module: `export { PresentationDeck, ... } from
+  // './presentation';`). Collect those names too, keeping only PascalCase
+  // identifiers — lowercase and ALL_CAPS re-exports are helpers/constants
+  // (fitStage, tint, presentationEase), not JSX components, and stay out of
+  // the roster.
+  for (const block of componentsSource.matchAll(/^export\s*\{([\s\S]*?)\}\s*from\s*['"][^'"]+['"]/gm)) {
+    if (/^export\s+type\b/.test(block[0])) continue;
+    for (const specifier of block[1].split(',')) {
+      const name = specifier.trim().split(/\s+as\s+/).pop().trim();
+      if (/^[A-Z][a-z]/.test(name)) exported.add(name);
+    }
+  }
 
   const missingFromShared = [...exported].filter((name) => !sharedComponents.has(name));
   const missingFromExports = [...sharedComponents].filter((name) => !exported.has(name));
