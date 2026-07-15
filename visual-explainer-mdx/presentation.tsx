@@ -64,8 +64,13 @@ const PRESENTATION_CSS = `
   --ve-pres-cta-ink: var(--ve-accent-contrast);
 }
 /* On accent-tone slides the accent color IS the surface, so CTAs flip to the
-   tone's ink color (accent-on-accent would vanish). */
-.ve-pres-slide[data-ve-tone="accent"] { --ve-pres-cta: var(--ve-slide-text); --ve-pres-cta-ink: var(--ve-slide-bg); }
+   tone's ink color (accent-on-accent would vanish). Light-tone slides need
+   the same flip: global.css remaps --ve-accent to the ink color there, so a
+   primary CTA filled with it must take the slide surface as its text color —
+   without this, --ve-accent-contrast (tuned for the preset's real accent)
+   renders ink-on-ink. */
+.ve-pres-slide[data-ve-tone="accent"],
+.ve-pres-slide[data-ve-tone="light"] { --ve-pres-cta: var(--ve-slide-text); --ve-pres-cta-ink: var(--ve-slide-bg); }
 .ve-pres-card, .ve-pres-chip { transition: border-color .25s ${EASE}, background-color .25s ${EASE}, transform .25s ${EASE}; }
 .ve-pres-card { position: relative; }
 .ve-pres-card:hover { transform: translateY(-2px); border-color: var(--ve-pres-cta) !important; }
@@ -1623,15 +1628,24 @@ export function PresentationDeck({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Never intercept browser/OS shortcuts (Cmd+Arrow history nav,
+      // Ctrl+Space, Alt+Arrow word-jump, …).
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
-      if (
-        t &&
-        typeof t.closest === 'function' &&
-        t.closest("button, input, textarea, select, [role='dialog']") &&
-        (e.key === ' ' || e.key === 'Enter')
-      ) {
-        return; // let focused drill-down triggers handle Enter/Space
+      const closest = t && typeof t.closest === 'function' ? (sel: string) => t.closest(sel) : () => null;
+      // Typing context: text fields own EVERY key (arrows move the caret,
+      // Space types a space, Home/End jump within the value). Never hijack.
+      if (closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) {
+        return;
       }
+      // Let focused controls activate with Enter/Space (drill triggers, rail
+      // items, links, anything inside an open dialog).
+      if (closest("button, a, [role='dialog']") && (e.key === ' ' || e.key === 'Enter')) {
+        return;
+      }
+      // While a drill sheet is open the deck is in inspect mode: navigation
+      // pauses (Escape closes the sheet first). Mirrors the edge-zone gate.
+      if (document.querySelector('[data-drill-open]')) return;
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
         go(index + 1);
@@ -1756,16 +1770,25 @@ export function PresentationDeck({
             </button>
           </div>
         </div>
+        {/* Edge click zones sit above the stage (and therefore above an open
+            drill sheet, z-40), so they are gated while a sheet is open: an
+            edge click must never blow past the sheet and change slides. */}
         <div
           aria-hidden="true"
           data-edge-prev="true"
-          onClick={() => go(index - 1)}
+          onClick={() => {
+            if (document.querySelector('[data-drill-open]')) return;
+            go(index - 1);
+          }}
           style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, zIndex: 50, cursor: index === 0 ? 'default' : 'w-resize' }}
         />
         <div
           aria-hidden="true"
           data-edge-next="true"
-          onClick={() => go(index + 1)}
+          onClick={() => {
+            if (document.querySelector('[data-drill-open]')) return;
+            go(index + 1);
+          }}
           style={{
             position: 'absolute',
             right: 0,

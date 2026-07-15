@@ -27,6 +27,9 @@
 - Docs: `docs/presentation-deck.md` (when to use PresentationDeck vs SlideDeck).
 
 ### Changed (presentation)
+- Keyboard guard hardened: modifier chords (meta/ctrl/alt) are never intercepted, and focus inside `input`/`textarea`/`select`/`[contenteditable]` now owns every key (arrows, Space, Home/End) instead of only Space/Enter.
+- Navigation (edge click zones + nav keys) is gated while a drill sheet is open — an edge click can no longer blow past an open sheet; Escape closes first.
+- Light-tone slides flip the CTA ink like accent-tone slides do, fixing primary chips rendering ink-on-ink where `--ve-accent` remaps to the ink color. All three pinned by new falsifiable evals.
 - `ve-verify` profile detection: artifacts carrying `data-ve-presentation` (fixed-stage decks that never scroll) classify as `page` instead of tripping the scroll-snap `slides` heuristics via bundled Tailwind utilities.
 - Roster-sync guard (`scripts/ve-mdx/check.mjs`) now also collects PascalCase named re-exports from `components.tsx`.
 

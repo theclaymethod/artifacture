@@ -217,6 +217,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
 }
 
 function LayersSlide({ shortTitle, tone }: SlideMeta) {
+  const [open, setOpen] = React.useState(false);
   return (
     <PresentationSlide
       kicker="03 · The layers"
@@ -226,6 +227,8 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
       rightLabel="Presentation Deck"
       footer="Opposite-polarity surface via tone=light"
     >
+      <div style={{ display: 'grid', gridTemplateRows: '1fr auto', gap: 30, height: '100%' }}>
+        <div style={{ minHeight: 0 }}>
       <LayerExplorer
         drillIdPrefix="deck-layer"
         layers={[
@@ -273,6 +276,27 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
           },
         ]}
       />
+        </div>
+        <div>
+          {/* Light-tone primary CTA: --ve-accent remaps to the ink color on
+              this surface, so the chip must flip its text to the slide
+              background — pinned by the light-tone-primary-cta eval. */}
+          <DrillChip drillId="layers-tones" label="How tones remap" variant="primary" onClick={() => setOpen(true)} />
+        </div>
+      </div>
+      {open ? (
+        <DrillSheet eyebrow="The layers · Tone remapping" onClose={() => setOpen(false)} origin="left bottom">
+          <div style={{ maxWidth: 1100 }}>
+            <HairlineList
+              items={[
+                { head: 'dark', body: 'The preset base surface: --ve-slide-bg is --ve-bg, CTAs use the real accent.' },
+                { head: 'light', body: 'Opposite polarity: the accent token remaps to ink, so primary CTAs flip their text to the surface color.' },
+                { head: 'accent', body: 'The accent IS the surface: CTAs render in the tone ink with surface-colored text.' },
+              ]}
+            />
+          </div>
+        </DrillSheet>
+      ) : null}
     </PresentationSlide>
   );
 }

@@ -56,6 +56,21 @@ function approx(actual, expected, tolerance, label) {
   );
 }
 
+/** WCAG contrast ratio between two computed `rgb(...)`/`rgba(...)` colors. */
+function contrastRatio(a, b) {
+  const luminance = (css) => {
+    const match = css.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+    if (!match) throw new Error(`contrastRatio: cannot parse computed color "${css}"`);
+    const [r, g, bl] = match.slice(1, 4).map((v) => {
+      const channel = Number(v) / 255;
+      return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
 function exportDemo(sourcePath, outPath) {
   const run = spawnSync(process.execPath, ['scripts/ve-mdx/export.mjs', sourcePath, '--out', outPath], {
     cwd: REPO_ROOT,
@@ -211,6 +226,7 @@ async function main() {
           [1, 'sys-guard'],
           [1, 'sys-scale'],
           [1, 'sys-tokens'],
+          [2, 'layers-tones'],
           [3, 'ask-fanout'],
         ];
         for (const [slide, drillId] of triggers) {
@@ -260,6 +276,78 @@ async function main() {
         assert(pressed === 'true', 'selected layer card must be aria-pressed');
         await page.keyboard.press('Escape');
         await expectSheetClosed(page, 'layer selection reset');
+      }),
+    );
+
+    await record('interaction', 'keyboard-guard-typing-and-modifiers', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        // Modifier chords are browser/OS shortcuts — the deck must not steal
+        // them. (Playwright still delivers the keydown, so a missing guard
+        // would navigate.)
+        for (const chord of ['Meta+ArrowRight', 'Control+ArrowRight', 'Alt+ArrowRight', 'Meta+End']) {
+          await page.keyboard.press(chord);
+          assert((await slideIndex(page)) === 0, `deck must ignore ${chord}`);
+        }
+        await page.keyboard.press('ArrowRight');
+        assert((await slideIndex(page)) === 1, 'plain ArrowRight must still navigate');
+        // Typing context: with focus in a text field, EVERY key belongs to
+        // the field. Space must produce a space character (a missing guard
+        // preventDefault()s it away) and arrows must not navigate.
+        await page.locator('[data-drill-target="sys-guard"]').click();
+        await expectSheetOpen(page, 'typing-guard fixture');
+        const textarea = page.locator('[data-drill-open] [data-fixture="textarea"]');
+        await textarea.click();
+        await textarea.pressSequentially(' typed x y');
+        const value = await textarea.inputValue();
+        assert(value.includes(' typed x y'), `Space/keys must type into the field, got "${value}"`);
+        await textarea.press('ArrowLeft');
+        await textarea.press('Home');
+        await textarea.press('End');
+        assert((await slideIndex(page)) === 1, 'arrow/Home/End inside a field must not navigate');
+        assert((await sheetOpen(page).count()) === 1, 'typing must not dismiss the sheet');
+      }),
+    );
+
+    await record('interaction', 'nav-gated-while-sheet-open', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        await goToSlide(page, 1);
+        await page.locator('[data-drill-target="sys-guard"]').click();
+        await expectSheetOpen(page, 'nav-gate fixture');
+        // Edge zones sit above the sheet (z-50 vs z-40): clicks there must
+        // neither navigate nor blow past the open sheet.
+        await page.locator('[data-edge-next]').click({ position: { x: 40, y: 450 }, force: true });
+        assert((await slideIndex(page)) === 1, 'edge zone must not navigate while a sheet is open');
+        assert((await sheetOpen(page).count()) === 1, 'edge-zone click must not dismiss the sheet');
+        for (const key of ['ArrowRight', 'ArrowLeft', 'End', 'Home', 'PageDown']) {
+          await page.keyboard.press(key);
+          assert((await slideIndex(page)) === 1, `${key} must not navigate while a sheet is open`);
+        }
+        assert((await sheetOpen(page).count()) === 1, 'sheet must survive gated nav keys');
+        await page.keyboard.press('Escape');
+        await expectSheetClosed(page, 'nav-gate Escape');
+        await page.keyboard.press('ArrowRight');
+        assert((await slideIndex(page)) === 2, 'nav must resume once the sheet closes');
+      }),
+    );
+
+    await record('interaction', 'light-tone-primary-cta-contrast', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        // On light-tone slides --ve-accent remaps to the ink color, so a
+        // primary CTA filled with it must flip its text to the slide surface
+        // — otherwise it renders ink-on-ink (invisible label).
+        await goToSlide(page, 2);
+        const chip = await page
+          .locator('[data-drill-target="layers-tones"][data-drill-variant="primary"]')
+          .evaluate((el) => {
+            const s = getComputedStyle(el);
+            return { bg: s.backgroundColor, border: s.borderTopColor, color: s.color };
+          });
+        assert(chip.bg === chip.border, `light-tone primary CTA must stay a solid fill, got bg=${chip.bg} border=${chip.border}`);
+        const ratio = contrastRatio(chip.color, chip.bg);
+        assert(
+          ratio >= 3,
+          `light-tone primary CTA text must contrast its fill (got ${ratio.toFixed(2)}:1 for ${chip.color} on ${chip.bg})`,
+        );
       }),
     );
 
