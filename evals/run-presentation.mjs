@@ -351,6 +351,37 @@ async function main() {
       }),
     );
 
+    await record('geometry', 'metric-value-no-wrap', async () => {
+      // Regression: Metric values must render on a single line and inside
+      // their cell under EVERY preset, including mono-display presets whose
+      // glyphs are much wider than the default. The second-preset export
+      // (terminal: fully monospace display font) is the worst case.
+      for (const url of [primaryUrl, secondUrl]) {
+        await withPage(browser, { url }, async (page) => {
+          const metrics = await page.locator('[data-ve-metric-value]').evaluateAll((els) =>
+            els.map((el) => ({
+              text: el.textContent,
+              clientHeight: el.clientHeight,
+              scrollWidth: el.scrollWidth,
+              fontSize: parseFloat(getComputedStyle(el).fontSize),
+              cellWidth: el.parentElement.clientWidth,
+            })),
+          );
+          assert(metrics.length > 0, 'demo must render at least one Metric');
+          for (const m of metrics) {
+            assert(
+              m.clientHeight <= m.fontSize * 1.4,
+              `Metric "${m.text}" wrapped onto multiple lines (height ${m.clientHeight} vs font ${m.fontSize})`,
+            );
+            assert(
+              m.scrollWidth <= m.cellWidth + 1,
+              `Metric "${m.text}" overflows its cell (scrollWidth ${m.scrollWidth} vs cell ${m.cellWidth})`,
+            );
+          }
+        });
+      }
+    });
+
     /* ------------------------------------------------------------ */
     /* tokens                                                        */
     /* ------------------------------------------------------------ */

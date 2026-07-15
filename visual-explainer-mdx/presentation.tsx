@@ -708,15 +708,24 @@ export function PullQuote({
 
 /** Single large metric (display-font number + mono label). */
 export function Metric({ value, label, size = 54 }: { value: string; label: string; size?: number }) {
+  /* Wide display fonts (e.g. mono-display presets) can push long values past
+     their cell: the value must never wrap ("1920×1080" breaking into two
+     lines reads as a different number). nowrap keeps it on one line, and the
+     character-count clamp shrinks values longer than 8 chars proportionally
+     so they still fit at any preset's glyph width. Pinned by the
+     metric-value-no-wrap eval against the widest built-in display font. */
+  const fitSize = value.length > 8 ? Math.round((size * 8) / value.length) : size;
   return (
     <div>
       <p
+        data-ve-metric-value="true"
         style={{
           margin: 0,
           fontFamily: 'var(--ve-font-display)',
           fontWeight: 'var(--ve-display-weight)' as CSSProperties['fontWeight'],
-          fontSize: size,
+          fontSize: fitSize,
           lineHeight: 1,
+          whiteSpace: 'nowrap',
           fontVariantNumeric: 'tabular-nums',
         }}
       >
