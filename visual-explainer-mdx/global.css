@@ -28,6 +28,9 @@
     --ve-row: rgb(24 24 27 / 0.08);
     --ve-nav-bg: rgb(9 9 11 / 0.92);
     --ve-review-bg: rgb(9 9 11 / 0.96);
+    /* Backdrop behind PresentationDeck's letterboxed stage. Declared on :root
+       so every preset inherits it; presets may override. */
+    --ve-deck-letterbox: #161616;
     --ve-rule: rgb(255 255 255 / 0.15);
     --ve-heading: #fafafa;
     --ve-text: #f4f4f5;

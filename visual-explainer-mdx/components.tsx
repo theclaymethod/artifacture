@@ -14,6 +14,55 @@ export type VisualPreset =
   | 'custom'
   | (string & {});
 
+/* Presentation deck engine + primitives (fixed-stage interactive decks).
+   Re-exported here so users keep a single import entry; implementation lives
+   in ./presentation. The roster-sync guard in scripts/ve-mdx/check.mjs parses
+   this re-export block alongside the `export function` declarations below. */
+export {
+  PresentationDeck,
+  PresentationSlide,
+  DrillCard,
+  DrillChip,
+  DrillSheet,
+  CloseX,
+  LadderDiagram,
+  FanoutDiagram,
+  LayerExplorer,
+  PullQuote,
+  Metric,
+  StatRow,
+  HairlineList,
+  Stepper,
+  CodePanel,
+  MonoLabel,
+  DisplayText,
+  IconChip,
+  ShineOverlay,
+  IconBase,
+  IconFile,
+  IconTool,
+  IconAction,
+  IconLoop,
+  IconGauge,
+  IconTag,
+  IconFit,
+  IconFilter,
+  IconCorpus,
+  IconArrowDown,
+  IconArrowRight,
+  trackShine,
+  useEscape,
+} from './presentation';
+export type { PresentationTone, PresentationSlideProps, PresentationDeckProps, LadderStage, FanoutOutput, ExplorerLayer, HairlineItem } from './presentation';
+export {
+  fitStage,
+  clampSlideIndex,
+  shouldDismissDrillSheet,
+  tint,
+  solidTint,
+  presentationEase,
+} from './presentation-core';
+
 type ShellProps = {
   title: string;
   eyebrow?: string;
