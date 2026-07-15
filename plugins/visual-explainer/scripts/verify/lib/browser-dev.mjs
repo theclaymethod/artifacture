@@ -77,6 +77,7 @@ function detectProfile(html, filePath) {
   if (/poster/i.test(base)) return 'poster';
   if (/video-comp|hyperframes|data-hf|__timelines|9\s*:\s*16|1080\s*x\s*1920/i.test(html)) return 'video-comp';
   if (/--poster|data-poster|w-\[\d+px\][\s\S]*h-\[\d+px\]|poster/i.test(html) && /poster/i.test(path.basename(filePath))) return 'poster';
+  if (/data-ve-presentation/i.test(html)) return 'page'; // fixed-stage decks never scroll-snap
   if (/class=["'][^"']*\bmag\b[^"']*["']|scroll-snap-type\s*:\s*x\s+mandatory|--magazine/i.test(html)) return 'magazine';
   if (/section[^>]+class=["'][^"']*\bslide\b|scroll-snap-type\s*:\s*y\s+mandatory|\bdeck-hints\b/i.test(html)) return 'slides';
   return 'page';

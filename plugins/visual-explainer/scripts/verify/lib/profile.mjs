@@ -28,6 +28,16 @@ export function detectProfile(filePath, html) {
     return 'poster';
   }
 
+  // Fixed-stage presentation decks (PresentationDeck) render one scaled
+  // 1920×1080 stage with no scrolling at all, so the slides/magazine
+  // scroll-snap heuristics below do not apply to them — and the bundled
+  // Tailwind CSS always carries SlideDeck's snap utilities, which would
+  // otherwise misclassify every presentation artifact as `slides`. They
+  // verify as pages.
+  if (/data-ve-presentation/.test(authored)) {
+    return 'page';
+  }
+
   if (
     /data-layout=["']magazine/.test(authored) ||
     /orientation\s*:\s*`horizontal`/.test(authored) && /data-ve-deck/.test(authored) ||
