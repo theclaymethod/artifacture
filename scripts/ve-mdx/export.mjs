@@ -12,6 +12,30 @@ import { injectDesignSystemCss, resolvePresetCssForExport } from './design-syste
 
 const repoRoot = process.cwd();
 
+function isSourceOutsideRepo(sourcePath) {
+  const relative = path.relative(repoRoot, path.resolve(sourcePath));
+  return relative.startsWith('..') || path.isAbsolute(relative);
+}
+
+/** Force a single React instance when /@fs/ sources carry their own node_modules. */
+export function resolveReactForExport(sourcePath, exportRepoRoot = repoRoot) {
+  const resolve = {
+    dedupe: ['react', 'react-dom'],
+  };
+  if (!isSourceOutsideRepo(sourcePath)) return resolve;
+
+  const reactDir = path.join(exportRepoRoot, 'node_modules/react');
+  const reactDomDir = path.join(exportRepoRoot, 'node_modules/react-dom');
+  resolve.alias = {
+    react: reactDir,
+    'react/jsx-runtime': path.join(reactDir, 'jsx-runtime.js'),
+    'react/jsx-dev-runtime': path.join(reactDir, 'jsx-dev-runtime.js'),
+    'react-dom': reactDomDir,
+    'react-dom/client': path.join(reactDomDir, 'client.js'),
+  };
+  return resolve;
+}
+
 function parseArgs(argv) {
   const args = [...argv];
   const source = args.shift();
@@ -96,6 +120,7 @@ async function main() {
       root: tmp,
       base: './',
       logLevel: 'warn',
+      resolve: resolveReactForExport(source),
       plugins: [veMdxPreflightPlugin(source, draft), mdx(), react(), tailwindcss()],
       server: {
         fs: {
@@ -153,7 +178,9 @@ function veMdxPreflightPlugin(source, draft) {
   };
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+if (import.meta.url === pathToFileURL(path.resolve(process.argv[1] ?? '')).href) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });
+}

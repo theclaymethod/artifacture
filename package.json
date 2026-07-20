@@ -21,7 +21,7 @@
     "ve:eval-rubrics": "node evals/run-rubrics.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/learn-extractors.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export.test.mjs scripts/ve-mdx/learn-extractors.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",
