@@ -56,6 +56,7 @@ const SLICE = [
   { id: 'diagram-type-coherent', mode: 'stub' },
   { id: 'preset-both-mode-visual', mode: 'stub' },
   { id: 'deck-content-completeness', mode: 'stub' },
+  { id: 'title-claim-function', mode: 'stub' },
   { id: 'operating-model-fit', mode: 'stub' },
   { id: 'reel-caption-matches-transcript', mode: 'algorithm' },
 ];

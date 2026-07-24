@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generated": "2026-07-04",
-  "note": "v2: +37 AI-tell/copy checks from impeccable+unslop distillation. Stage counts: {\"static-text\":70,\"static-dom\":69,\"llm-pass\":29,\"browser\":37,\"transcript\":2}",
+  "note": "v2: AI-tell/copy checks from impeccable+unslop distillation. Stage counts: {\"static-text\":70,\"static-dom\":69,\"llm-pass\":30,\"browser\":37,\"transcript\":2}",
   "checks": [
     {
       "family": "F1_slop_global",
@@ -4056,6 +4056,27 @@
     },
     {
       "family": "F9_copy",
+      "id": "title-claim-function",
+      "title": "Slide and section titles state a test, mechanism, result, or decision",
+      "profiles": [
+        "page",
+        "slides",
+        "magazine"
+      ],
+      "stage": "llm-pass",
+      "severity": "warn",
+      "applies_when": "The artifact has slide titles or section headings that do narrative work. Covers, literal dividers, agendas, quotes, and reference labels are reviewed under the exception rules.",
+      "spec": "pass: pass-copy. For each narrative title, ask whether it names the concrete test, mechanism, result, decision, action, or completion criterion the unit earns. Warn on calendar/program containers made to deliver outcomes ('Week 1 ends with a calibrated eval'), tool/data/score/package personification ('the judge lies', 'the score hides', 'the package outlives'), abstract uplift transformations ('taste becomes infrastructure'), journey/paradigm/pillars framing, generic topic handles when a stronger claim is present, or counting titles that describe deck structure instead of the point.",
+      "fixture_violation": "A slide titled 'Week 1 ends with a calibrated eval' when the body actually defines the completion evidence: a clean package run with judge agreement recorded.",
+      "fp_guards": "Do not ban inanimate subjects categorically. Accurate causal mechanisms ('Examples calibrate the judge', 'The gate fails the build'), literal temporal facts ('Week 1 ends on Friday'), exact technical noun phrases, short questions that state the decision, and cover/divider/agenda labels may pass. Judge title function against the unit's narrative job, not a fixed grammar template.",
+      "source_rules": [
+        "title-states-test-mechanism-result-decision",
+        "no-category-error-title-agency",
+        "no-generic-title-handles"
+      ]
+    },
+    {
+      "family": "F9_copy",
       "id": "copy-redundancy",
       "title": "Heading restates its own body, or a point repeats across sections",
       "profiles": [
@@ -4068,7 +4089,7 @@
       "applies_when": "Page has section headings each followed by prose.",
       "spec": "pass: pass-copy. Rubric question: 'Does any section heading merely rephrase its own first sentence with no added fact/number/mechanism, or is the same explanatory point repeated across two or more sections?' YES = warn. A heading that just names its topic ('Architecture' over an architecture diagram) is fine — flag same information content restated, not a shared topic word.",
       "fixture_violation": "Heading 'Faster deploys' followed by 'Deploys are now faster.' with no new specifics.",
-      "fp_guards": "A topic sentence that states the claim AND immediately substantiates it with a number/mechanism passes. Only zero-added-specificity restatement or cross-section duplication fires.",
+      "fp_guards": "A topic sentence that states the claim AND immediately substantiates it with a number/mechanism passes. Only zero-added-specificity restatement or cross-section duplication fires here; a generic topic handle may still be flagged separately by title-claim-function.",
       "source_rules": [
         "ai-redundant-heading-body-echo",
         "ai-redundant-restated-copy"
