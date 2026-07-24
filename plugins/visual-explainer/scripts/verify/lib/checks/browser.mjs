@@ -107,10 +107,11 @@ export const checks = {
 
   'diagram-arrow-endpoint-air-gap': metricCheck('diagram-arrow-endpoint-air-gap', {
     profiles: ALL_RENDERED,
-    appliesWhen: (ctx) => /data-diagram-role=["'][^"']*(?:arrow|connector)[^"']*["']/i.test(ctx.html || ''),
+    runFilter: desktopRun,
+    appliesWhen: (ctx) => /data-diagram-role.{0,160}(?:arrow|connector)/i.test(ctx.html || ''),
     failWhen: (metric) => metric?.offenders?.length,
     evidence: (failures) => `Arrow endpoints outside 6-10px air-gap: ${summarizeOffenders(failures, 'offenders')}`,
-    fix_hint: 'Tagged arrow endpoints must stop 6-10px from node borders and never land inside a node bounding box.'
+    fix_hint: 'Tagged arrow endpoints must stop 6-10px from node borders; declared side-center anchors must hit that side and its midpoint within 3px.'
   }),
 
   'diagram-text-clipping-overlap': metricCheck('diagram-text-clipping-overlap', {

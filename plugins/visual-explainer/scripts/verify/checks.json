@@ -1226,7 +1226,7 @@
     {
       "family": "F3_diagrams",
       "id": "diagram-arrow-endpoint-air-gap",
-      "title": "Arrow tips stop 6-10px from node borders, never inside",
+      "title": "Arrow tips align to declared node anchors with a 6-10px air gap",
       "profiles": [
         "page",
         "slides",
@@ -1237,9 +1237,9 @@
       "stage": "browser",
       "severity": "error",
       "applies_when": "Arrows are tagged/detectable and connect to nodes with resolvable bounding boxes.",
-      "spec": "Render at 1440x900 (both schemes). For each arrow terminal point and its connected node getBBox(), compute perpendicular distance from the endpoint to the nearest node edge and assert 6-10px; assert the endpoint fails a point-in-rect test against its own node bbox and every neighboring node bbox.",
-      "fp_guards": "Requires role tagging to pair arrows with nodes.",
-      "fixture_violation": "An arrow whose arrowhead point lands 0px inside (piercing) the target node's border.",
+      "spec": "Render at 1440x900 (both schemes). Resolve terminal points for line, path, polyline, and polygon connectors into viewport coordinates with getScreenCTM(). Pair data-diagram-target with the node's data-diagram-id when supplied; otherwise use the nearest tagged node. Assert a 6-10px endpoint air gap and no point-in-rect intersection. When data-diagram-target-anchor is left-center, right-center, top-center, or bottom-center, also assert the endpoint lands on that side and aligns to the edge midpoint within 3px.",
+      "fp_guards": "Requires role tagging to pair arrows with nodes. Center-anchor alignment runs only when the connector declares data-diagram-target-anchor.",
+      "fixture_violation": "A polyline tagged for left-center whose arrowhead is 18px below the target node's midpoint, even though it happens to sit near another edge.",
       "source_rules": [
         "arrow-endpoint-air-gap"
       ]

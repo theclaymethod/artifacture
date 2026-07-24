@@ -247,6 +247,23 @@ Compute endpoints from the node's own geometry, not by eyeballing coordinates:
 - **Diamond node centered at `(cx, cy)` with half-width `hw`, half-height `hh`** → right tip is `(cx + hw + gap, cy)`; bottom tip is `(cx, cy + hh + gap)`.
 - **Ellipse/pill** → project from center along the connector angle to the ellipse boundary, then add `gap`.
 
+Tag the relationship so browser verification checks the rendered geometry, including
+CSS/SVG coordinate transforms:
+
+```html
+<polyline
+  data-diagram-role="arrow"
+  data-diagram-target="review-queue"
+  data-diagram-target-anchor="left-center"
+  points="..."
+/>
+<g data-diagram-role="node" data-diagram-id="review-queue">...</g>
+```
+
+Use `left-center`, `right-center`, `top-center`, or `bottom-center` only when the
+connector is meant to hit the midpoint of that edge. Omit the anchor attribute for
+intentional off-center entry points; the air-gap and inside-node checks still run.
+
 If the arrow must route around a sibling node, add an orthogonal elbow (one or two right-angle segments) rather than letting a diagonal segment graze other nodes. An arrow that originates or terminates **visually inside** any node — its own or a neighbor — is a routing bug, not a styling choice.
 
 ### Arrow label masking

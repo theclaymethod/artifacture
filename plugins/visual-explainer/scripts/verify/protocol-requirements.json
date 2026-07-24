@@ -53,7 +53,7 @@
   },
   {
     "family": "F3_diagrams",
-    "req": "Diagram element tagging: generation templates must emit data-diagram-role on SVG elements (node/arrow/arrow-label/legend/lifeline/step/decision/merge/entity/lane/layer/ring/item) so downstream counting and classification checks can run deterministically; use the attribute, never a class named 'node' (Mermaid .node collision)."
+    "req": "Diagram element tagging: generation templates must emit data-diagram-role on SVG elements (node/arrow/arrow-label/legend/lifeline/step/decision/merge/entity/lane/layer/ring/item) so downstream counting and classification checks can run deterministically; use the attribute, never a class named 'node' (Mermaid .node collision). Connectors with a known target must also emit data-diagram-target matching the target node's data-diagram-id; side-center endpoints declare data-diagram-target-anchor as left-center, right-center, top-center, or bottom-center so browser verification can detect drift."
   },
   {
     "family": "F3_diagrams",

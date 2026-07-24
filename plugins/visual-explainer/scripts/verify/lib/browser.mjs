@@ -830,29 +830,80 @@ function diagramArrowMetrics(doc, compact) {
   const nodes = [...doc.querySelectorAll('[data-diagram-role~="node"], [data-diagram-role~="step"], [data-diagram-role~="decision"]')];
   if (!arrows.length || !nodes.length) return { skipped: true, reason: 'No tagged arrows/nodes' };
   const offenders = [];
-  const nodeBoxes = nodes.map((node) => ({ node, box: node.getBBox ? node.getBBox() : node.getBoundingClientRect() }));
+  const nodeBoxes = nodes.map((node) => ({ node, box: node.getBoundingClientRect() }));
+  const nodesById = new Map(
+    nodeBoxes
+      .map((item) => [item.node.getAttribute('data-diagram-id'), item])
+      .filter(([id]) => id)
+  );
   for (const arrow of arrows) {
-    let point = null;
-    if (arrow.tagName.toLowerCase() === 'line') {
-      point = { x: Number(arrow.getAttribute('x2')), y: Number(arrow.getAttribute('y2')) };
-    } else if (arrow.tagName.toLowerCase() === 'path') {
-      const len = arrow.getTotalLength?.() || 0;
-      point = len ? arrow.getPointAtLength(len) : null;
-    }
+    const point = arrowTerminalPoint(arrow);
     if (!point) continue;
-    const nearest = nodeBoxes.map(({ node, box }) => ({ node, box, d: distanceToRectEdge(point, box), inside: point.x > box.x && point.x < box.x + box.width && point.y > box.y && point.y < box.y + box.height })).sort((a, b) => a.d - b.d)[0];
-    if (nearest && (nearest.inside || nearest.d < 6 || nearest.d > 10)) {
-      offenders.push({ arrow: compact(arrow), node: compact(nearest.node), distance: Math.round(nearest.d * 10) / 10, inside: nearest.inside });
+    const targetId = arrow.getAttribute('data-diagram-target');
+    const target = targetId
+      ? nodesById.get(targetId)
+      : nodeBoxes
+        .map((item) => ({ ...item, d: distanceToRectEdge(point, item.box) }))
+        .sort((a, b) => a.d - b.d)[0];
+    if (!target) {
+      offenders.push({ arrow: compact(arrow), targetId, reason: 'Target node not found' });
+      continue;
+    }
+    const d = distanceToRectEdge(point, target.box);
+    const inside = point.x > target.box.left && point.x < target.box.right && point.y > target.box.top && point.y < target.box.bottom;
+    const anchor = arrow.getAttribute('data-diagram-target-anchor');
+    const anchorResult = anchor ? diagramAnchorAlignment(point, target.box, anchor) : { alignment: 0, wrongSide: false };
+    if (inside || d < 6 || d > 10 || anchorResult.alignment > 3 || anchorResult.wrongSide) {
+      offenders.push({
+        arrow: compact(arrow),
+        node: compact(target.node),
+        targetId,
+        anchor,
+        distance: Math.round(d * 10) / 10,
+        alignment: Math.round(anchorResult.alignment * 10) / 10,
+        wrongSide: anchorResult.wrongSide,
+        inside,
+      });
     }
   }
   return { offenders: offenders.slice(0, 10) };
 }
 
+function arrowTerminalPoint(arrow) {
+  let point = null;
+  const tag = arrow.tagName.toLowerCase();
+  if (tag === 'line') {
+    point = { x: Number(arrow.getAttribute('x2')), y: Number(arrow.getAttribute('y2')) };
+  } else if (typeof arrow.getTotalLength === 'function' && typeof arrow.getPointAtLength === 'function') {
+    const len = arrow.getTotalLength();
+    point = Number.isFinite(len) && len >= 0 ? arrow.getPointAtLength(len) : null;
+  } else if ((tag === 'polyline' || tag === 'polygon') && arrow.points?.numberOfItems) {
+    point = arrow.points.getItem(arrow.points.numberOfItems - 1);
+  }
+  if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+  const matrix = arrow.getScreenCTM?.();
+  if (!matrix) return point;
+  return {
+    x: point.x * matrix.a + point.y * matrix.c + matrix.e,
+    y: point.x * matrix.b + point.y * matrix.d + matrix.f,
+  };
+}
+
+function diagramAnchorAlignment(point, box, anchor) {
+  const centerX = (box.left + box.right) / 2;
+  const centerY = (box.top + box.bottom) / 2;
+  if (anchor === 'left-center') return { alignment: Math.abs(point.y - centerY), wrongSide: point.x >= box.left };
+  if (anchor === 'right-center') return { alignment: Math.abs(point.y - centerY), wrongSide: point.x <= box.right };
+  if (anchor === 'top-center') return { alignment: Math.abs(point.x - centerX), wrongSide: point.y >= box.top };
+  if (anchor === 'bottom-center') return { alignment: Math.abs(point.x - centerX), wrongSide: point.y <= box.bottom };
+  return { alignment: 0, wrongSide: false };
+}
+
 function distanceToRectEdge(point, box) {
-  const left = Math.abs(point.x - box.x);
-  const right = Math.abs(point.x - (box.x + box.width));
-  const top = Math.abs(point.y - box.y);
-  const bottom = Math.abs(point.y - (box.y + box.height));
+  const left = Math.abs(point.x - box.left);
+  const right = Math.abs(point.x - box.right);
+  const top = Math.abs(point.y - box.top);
+  const bottom = Math.abs(point.y - box.bottom);
   return Math.min(left, right, top, bottom);
 }
 
@@ -1294,6 +1345,8 @@ const BROWSER_METRIC_SOURCE = [
   proseMetrics,
   fixedOverlapMetrics,
   diagramArrowMetrics,
+  arrowTerminalPoint,
+  diagramAnchorAlignment,
   distanceToRectEdge,
   diagramTextMetrics,
   rectsIntersect,
