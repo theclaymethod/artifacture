@@ -1,0 +1,36 @@
+{
+  "judge_response": {
+    "pass": true,
+    "routing": [
+      {
+        "unit_id": "cover",
+        "unit_type": "slide",
+        "treatment": "none",
+        "confidence": "high",
+        "reason": "The slide introduces the deck with one title."
+      },
+      {
+        "unit_id": "review-economics",
+        "unit_type": "slide",
+        "treatment": "relational",
+        "confidence": "high",
+        "reason": "The claim is a repeated-cost versus one-time-cost comparison."
+      },
+      {
+        "unit_id": "review-routing",
+        "unit_type": "slide",
+        "treatment": "operating-model",
+        "confidence": "high",
+        "reason": "The claim depends on policy-based routing."
+      },
+      {
+        "unit_id": "clinical-ide",
+        "unit_type": "slide",
+        "treatment": "simulated-surface",
+        "confidence": "high",
+        "reason": "The physician's interaction with evidence and hypotheses is the claim."
+      }
+    ],
+    "findings": []
+  }
+}

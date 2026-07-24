@@ -58,7 +58,8 @@ In single-agent mode, YOU produce the declared inputs before running each rubric
 
 2. Build the P-completeness source-vs-render inventory from the source material and the rendered artifact: headings, bullets, table rows, cards, collapsible details, footnotes, and demo-frame summaries. Do not use screenshots for this pass.
 3. Capture P-diagram inputs one figure at a time. Scroll to each element carrying `data-diagram-role` or `.mermaid`; screenshot that element's bounding region; extract its visible labels; write a one-line content brief for the figure.
-4. Use candidate element lists from each deterministic check's `evidence` and `where` fields when a pass asks for candidate extracts.
+4. For P-operating-model, build a review map with one row per slide or coherent long-form section: stable unit id, unit type (`slide` or `section`), visible title, one-sentence narrative job, and screenshot path. If the source has no narrative job, use the visible claim and mark the route low-confidence. Do not use implementation source to infer intent.
+5. Use candidate element lists from each deterministic check's `evidence` and `where` fields when a pass asks for candidate extracts.
 
 ## 2. Run LLM Passes
 
@@ -86,6 +87,7 @@ Use these passes:
 | P-layout | `llm_passes_required` includes `hierarchy`, or any layout candidate exists | `report.json`; the 4 standard screenshots; candidate lists for clipping, fixed chrome, div-grid tables, slide screenshots, demo frames when referenced | `{{skill_dir}}/scripts/verify/rubrics/pass-layout.md` |
 | P-aesthetic | `llm_passes_required` includes any `aesthetic-*` token, a preset is detected or declared, or any preset candidate exists | `report.json`; active preset name; light/dark screenshots; candidate extracts named in the report | `{{skill_dir}}/scripts/verify/rubrics/pass-aesthetic.md` |
 | P-diagram | diagrams are present | `report.json`; one screenshot per figure; extracted diagram labels; one-line content brief for each figure | `{{skill_dir}}/scripts/verify/rubrics/pass-diagram.md` |
+| P-operating-model | `llm_passes_required` includes `operating-model` | one screenshot per review unit; review map with unit id, unit type, visible title, and one-sentence narrative job; only the brief excerpts needed to resolve intent | `{{skill_dir}}/scripts/verify/rubrics/pass-operating-model.md` |
 | P-completeness | source material or demo evidence exists | source inventory; extracted rendered headings, bullets, table rows, cards, and demo-frame summary; no page screenshots | `{{skill_dir}}/scripts/verify/rubrics/pass-completeness.md` |
 | P-copy | extracted prose exists | excluded-filtered prose text only | `{{skill_dir}}/scripts/verify/rubrics/pass-copy.md` |
 | P-visual-tells | `llm_passes_required` includes `visual-tells` (page/slides/magazine) | `report.json`; light/dark screenshots; candidate extracts | `{{skill_dir}}/scripts/verify/rubrics/pass-visual-tells.md` |
@@ -102,6 +104,20 @@ Load only the active preset section in `pass-aesthetic.md`. Do not judge Nothing
 ### P-diagram Questions
 
 Run only for rendered figures. Use per-figure screenshots, not one full-page screenshot. Apply the diagram Removal Test before emit; after emit, inspect screenshots. If a hand-authored SVG still fails after 2 repair attempts, replace the figure with Mermaid instead of continuing manual repair.
+
+### P-operating-model Questions
+
+Route every slide or coherent page section before judging it:
+
+- `none`: cover, divider, quote, image, agenda, simple CTA, single statistic, or one claim with one supporting fact;
+- `relational`: comparison, before/after, formula, aligned evidence, or exact mappings;
+- `operating-model`: sequence, routing, state, causality, provenance, uncertainty, dependencies, feedback, or resource flow; and
+- `simulated-surface`: the workflow or interface itself is the claim.
+
+Apply model-fidelity questions only to the final three routes. Do not require a
+diagram when a table, formula, paired contrast, or aligned rows tell the truth.
+Return a finding only when the chosen or missing structure materially weakens
+or misstates the unit's narrative job.
 
 ### P-completeness Questions
 
