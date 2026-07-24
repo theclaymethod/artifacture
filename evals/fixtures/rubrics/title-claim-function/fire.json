@@ -1,0 +1,12 @@
+{
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "title-claim-function",
+        "evidence": "Slide s3-12 is titled “Week 1 ends with a calibrated eval,” assigning outcome-producing agency to a calendar container instead of naming the completion evidence.",
+        "fix": "Name the criterion directly: “The Week 1 capstone is a clean run with recorded agreement.”"
+      }
+    ]
+  }
+}

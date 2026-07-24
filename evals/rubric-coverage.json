@@ -1,15 +1,16 @@
 {
-  "note": "Tracks executable-fixture coverage for the 31 llm-pass/transcript catalog checks that evals/run.mjs cannot exercise (see plans/007-DESIGN-NOTE.md). Separate from evals/parity-allowlist.json, which is scoped to deterministic-stage (static-text/static-dom/browser) checks only. operating-model-fit also has a JSONL routing set covering slide and long-form section decisions.",
+  "note": "Tracks executable-fixture coverage for the 32 llm-pass/transcript catalog checks that evals/run.mjs cannot exercise (see plans/007-DESIGN-NOTE.md). Separate from evals/parity-allowlist.json, which is scoped to deterministic-stage (static-text/static-dom/browser) checks only. operating-model-fit also has a JSONL routing set covering slide and long-form section decisions.",
   "behavioral_fixture_sets": {
     "operating-model-fit": "evals/fixtures/rubrics/operating-model-fit/routing-cases.jsonl"
   },
-  "total_llm_pass_and_transcript_checks": 31,
+  "total_llm_pass_and_transcript_checks": 32,
   "covered_by_evals_run_rubrics": [
     "text-visibly-clipped",
     "fixed-ui-obscures-content",
     "diagram-type-coherent",
     "preset-both-mode-visual",
     "deck-content-completeness",
+    "title-claim-function",
     "operating-model-fit",
     "reel-caption-matches-transcript"
   ],
