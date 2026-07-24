@@ -1226,7 +1226,7 @@
     {
       "family": "F3_diagrams",
       "id": "diagram-arrow-endpoint-air-gap",
-      "title": "Arrow tips align to declared node anchors with a 6-10px air gap",
+      "title": "Arrow sources and tips align to declared node anchors with a 6-10px air gap",
       "profiles": [
         "page",
         "slides",
@@ -1237,9 +1237,9 @@
       "stage": "browser",
       "severity": "error",
       "applies_when": "Arrows are tagged/detectable and connect to nodes with resolvable bounding boxes.",
-      "spec": "Render at 1440x900 (both schemes). Resolve terminal points for line, path, polyline, and polygon connectors into viewport coordinates with getScreenCTM(). Pair data-diagram-target with the node's data-diagram-id when supplied; otherwise use the nearest tagged node. Assert a 6-10px endpoint air gap and no point-in-rect intersection. When data-diagram-target-anchor is left-center, right-center, top-center, or bottom-center, also assert the endpoint lands on that side and aligns to the edge midpoint within 3px.",
-      "fp_guards": "Requires role tagging to pair arrows with nodes. Center-anchor alignment runs only when the connector declares data-diagram-target-anchor.",
-      "fixture_violation": "A polyline tagged for left-center whose arrowhead is 18px below the target node's midpoint, even though it happens to sit near another edge.",
+      "spec": "Render at 1440x900 (both schemes). Resolve the start and terminal points for line, path, polyline, and polygon connectors into viewport coordinates with getScreenCTM(). Pair data-diagram-source and data-diagram-target with nodes by data-diagram-id; when no target is declared, use the nearest tagged node. Assert a 6-10px air gap and no point-in-rect intersection at every declared endpoint. When data-diagram-source-anchor or data-diagram-target-anchor is left-center, right-center, top-center, or bottom-center, also assert that endpoint lands on the named side and aligns to its midpoint within 3px.",
+      "fp_guards": "Requires role tagging to pair arrows with nodes. Source checks run only when data-diagram-source is declared; target checks may infer the nearest tagged node for backward compatibility. Center-anchor alignment runs only when the corresponding source or target anchor is declared.",
+      "fixture_violation": "One fixture pierces a target node; a second starts on the source border instead of preserving the declared 6-10px source air gap.",
       "source_rules": [
         "arrow-endpoint-air-gap"
       ]
@@ -2089,6 +2089,48 @@
       "source_rules": [
         "nav-chrome-fixed-and-layered"
       ]
+    },
+    {
+      "family": "F5_slides",
+      "id": "deck-rail-first-frame-collapsed",
+      "title": "Deck rail never obscures the opening slide before user intent",
+      "profiles": [
+        "slides",
+        "magazine"
+      ],
+      "stage": "browser",
+      "severity": "error",
+      "applies_when": "A deck renders a collapsible side rail identifiable by `[data-rail]`, `[data-rail-expanded]`, `nav[aria-label='Slides']`, or a role-equivalent chapter spine.",
+      "spec": "At 1920x1080, load the first slide in a fresh document before any pointer, focus, or keyboard input. The rail's exposed width must be <=46px and `data-rail-expanded` must not resolve to true. Fail any timer-driven peek or automatic expansion. The slide stage must begin at or to the right of the exposed spine, or otherwise prove a non-overlapping safe area.",
+      "fixture_violation": "A 288px directory automatically opens on a wide viewport and collapses after 900ms, covering the opening title and making screenshots timing-dependent.",
+      "fp_guards": "A deliberately persistent, non-collapsible application sidebar is not a deck rail and does not trigger. A user preference restored from storage may reopen the rail only when the implementation records and exposes that persisted choice; a fresh context remains collapsed.",
+      "source_rules": [
+        "deck-shell-first-frame-collapsed",
+        "deck-shell-no-timed-peek"
+      ],
+      "impl_hint": "Intersect the rail getBoundingClientRect() with the viewport before interactions; transform-based rails pass when only their 44px spine is exposed."
+    },
+    {
+      "family": "F5_slides",
+      "id": "deck-navigation-shell-safe-controls",
+      "title": "Deck shell uses safe hit targets and preserves interactive click ownership",
+      "profiles": [
+        "slides",
+        "magazine"
+      ],
+      "stage": "browser",
+      "severity": "error",
+      "applies_when": "A deck has a side rail, chapter controls, previous/next controls, or full-slide/edge click navigation.",
+      "spec": "At the delivery viewport: (a) the rail brand/open control, every chapter target, and previous/next buttons each measure at least 44x44px; (b) the first chapter target begins within 24px below the brand cell rather than being vertically centered; (c) clicking a visible non-navigation button, link, input, dialog control, `[data-interactive]`, or `[data-drill-target]` does not change the slide hash; and (d) while `[data-drill-open]` or a role=dialog surface is active, the rail is hidden, behind the modal, or has pointer-events:none.",
+      "fixture_violation": "Chapter dots have 16px click boxes, or clicking a drill trigger also advances the deck because the full-slide handler claims the event.",
+      "fp_guards": "The visible marker glyph may be smaller than 44px when its interactive parent supplies the hit area. Skip modal-yield behavior when the artifact has no modal, drill sheet, or dialog.",
+      "source_rules": [
+        "deck-shell-44px-targets",
+        "deck-shell-top-anchored-chapters",
+        "deck-shell-interactive-click-ownership",
+        "deck-shell-yields-to-modal"
+      ],
+      "impl_hint": "Measure target rectangles and chapter offset. For interaction tests, snapshot location.hash around representative non-navigation clicks and compare rail z-index/visibility/pointer-events while a dialog is open."
     },
     {
       "family": "F5_slides",

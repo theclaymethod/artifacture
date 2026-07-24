@@ -2,7 +2,6 @@
 name: visual-explainer
 description: Generate beautiful, self-contained HTML artifacts from MDX/React sources that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, code walkthrough, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled generated HTML page instead.
 license: MIT
-compatibility: Requires a browser to view generated HTML files. Optional surf-cli for AI image generation.
 metadata:
   author: nicobailon (original visual-explainer)
   maintainer: Clayton Kim
@@ -59,6 +58,10 @@ Workflow, in order:
 - PosterCanvas(eyebrow?,title,stat?,footer?,preset?)
 
 Presentation deck (presented/interactive decks — fixed 1920×1080 stage scaled to fit, slide rail, keyboard nav, drill-downs; when in doubt see `REPO/docs/presentation-deck.md` for PresentationDeck vs SlideDeck):
+
+Before creating or editing presentation chrome, read
+`./references/deck-navigation-shell.md`. Reuse the workspace's canonical shell
+and shader when present; do not copy either implementation into a new deck.
 
 - PresentationDeck(title,eyebrow?,preset?,stageWidth?,stageHeight?,railAutoCollapseMs?)
 - PresentationSlide(kicker,title?,shortTitle?,tone?,rightLabel?,footer?,sub?)

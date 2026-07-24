@@ -491,6 +491,8 @@ async function collectBrowserMetrics(runMeta) {
   metrics['gray-text-on-colored-surface'] = grayOnColorMetrics(leafTextEls, compact, bgFor, color);
   metrics['body-text-contrast-aa'] = contrastMetrics(leafTextEls, compact, bgFor, color, px);
   metrics['undersized-touch-targets'] = touchTargetMetrics(doc, compact);
+  metrics['deck-rail-first-frame-collapsed'] = deckRailFirstFrameMetrics(doc, win, compact);
+  metrics['deck-navigation-shell-safe-controls'] = deckNavigationShellMetrics(doc, compact);
   metrics['font-family-sprawl'] = fontFamilySprawlMetrics(leafTextEls);
   metrics['nothing-accent-red-single-use'] = nothingAccentRedMetrics(doc, all, color);
   metrics['nothing-labels-allcaps-mono'] = nothingLabelsMetrics(doc, compact);
@@ -747,6 +749,71 @@ function touchTargetMetrics(doc, compact) {
   return { offenders };
 }
 
+function deckRailFirstFrameMetrics(doc, win, compact) {
+  const rail = doc.querySelector('[data-rail], nav[aria-label="Slides"], .case-rail, .rail');
+  if (!rail) return { skipped: true, reason: 'No collapsible deck rail' };
+  const rect = rail.getBoundingClientRect();
+  const exposedWidth = Math.max(0, Math.min(win.innerWidth, rect.right) - Math.max(0, rect.left));
+  const expanded = rail.getAttribute('data-rail-expanded') === 'true'
+    || rail.getAttribute('aria-expanded') === 'true'
+    || rail.querySelector('[aria-expanded="true"]') !== null;
+  return {
+    rail: compact(rail),
+    exposedWidth: Math.round(exposedWidth * 100) / 100,
+    expanded,
+    obscuresFirstFrame: exposedWidth > 46 || expanded
+  };
+}
+
+function deckNavigationShellMetrics(doc, compact) {
+  const rail = doc.querySelector('[data-rail], nav[aria-label="Slides"], .case-rail, .rail');
+  const pager = [...doc.querySelectorAll('button[aria-label="Previous slide"], button[aria-label="Next slide"]')];
+  if (!rail && pager.length === 0) return { skipped: true, reason: 'No deck navigation shell' };
+
+  const visible = (el) => {
+    if (!el || el.closest('[aria-hidden="true"]')) return false;
+    const cs = getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return cs.display !== 'none' && cs.visibility !== 'hidden' && Number.parseFloat(cs.opacity || '1') > 0.01 && rect.width > 0 && rect.height > 0;
+  };
+  const controls = [
+    ...(rail ? [...rail.querySelectorAll('[aria-label*="slide navigation"], [aria-label^="Go to chapter"], .rail-dot, .case-rail-dot')] : []),
+    ...pager
+  ].filter(visible);
+  const undersized = controls
+    .map((el) => ({ el, rect: el.getBoundingClientRect() }))
+    .filter(({ rect }) => rect.width < 43.5 || rect.height < 43.5)
+    .slice(0, 10)
+    .map(({ el, rect }) => ({ ...compact(el), width: Math.round(rect.width * 100) / 100, height: Math.round(rect.height * 100) / 100 }));
+
+  const brand = rail?.querySelector('[aria-label*="slide navigation"], [data-rail-brand], .rail-collapsed-brand, .case-rail-brand');
+  const chapterTargets = rail ? [...rail.querySelectorAll('[aria-label^="Go to chapter"], .rail-dot, .case-rail-dot')].filter(visible) : [];
+  const brandRect = brand?.getBoundingClientRect();
+  const firstChapterRect = chapterTargets[0]?.getBoundingClientRect();
+  const chapterGap = brandRect && firstChapterRect ? Math.round((firstChapterRect.top - brandRect.bottom) * 100) / 100 : null;
+
+  const openModal = doc.querySelector('[data-drill-open], [role="dialog"][open], [role="dialog"][aria-modal="true"]');
+  let modalYield = null;
+  if (rail && openModal) {
+    const railStyle = getComputedStyle(rail);
+    const modalStyle = getComputedStyle(openModal);
+    const railZ = Number.parseInt(railStyle.zIndex, 10) || 0;
+    const modalZ = Number.parseInt(modalStyle.zIndex, 10) || 0;
+    modalYield = railStyle.display === 'none'
+      || railStyle.visibility === 'hidden'
+      || Number.parseFloat(railStyle.opacity || '1') < 0.05
+      || railStyle.pointerEvents === 'none'
+      || railZ < modalZ;
+  }
+
+  return {
+    undersized,
+    chapterGap,
+    chapterTooLow: chapterGap !== null && chapterGap > 24,
+    modalYield
+  };
+}
+
 function fontFamilySprawlMetrics(leafTextEls) {
   const generic = /^(?:system-ui|sans-serif|serif|monospace|ui-sans-serif|ui-serif|ui-monospace|inherit|initial)$/i;
   const fonts = new Set();
@@ -837,48 +904,82 @@ function diagramArrowMetrics(doc, compact) {
       .filter(([id]) => id)
   );
   for (const arrow of arrows) {
-    const point = arrowTerminalPoint(arrow);
-    if (!point) continue;
     const targetId = arrow.getAttribute('data-diagram-target');
-    const target = targetId
-      ? nodesById.get(targetId)
-      : nodeBoxes
-        .map((item) => ({ ...item, d: distanceToRectEdge(point, item.box) }))
-        .sort((a, b) => a.d - b.d)[0];
-    if (!target) {
-      offenders.push({ arrow: compact(arrow), targetId, reason: 'Target node not found' });
-      continue;
-    }
-    const d = distanceToRectEdge(point, target.box);
-    const inside = point.x > target.box.left && point.x < target.box.right && point.y > target.box.top && point.y < target.box.bottom;
-    const anchor = arrow.getAttribute('data-diagram-target-anchor');
-    const anchorResult = anchor ? diagramAnchorAlignment(point, target.box, anchor) : { alignment: 0, wrongSide: false };
-    if (inside || d < 6 || d > 10 || anchorResult.alignment > 3 || anchorResult.wrongSide) {
-      offenders.push({
-        arrow: compact(arrow),
-        node: compact(target.node),
-        targetId,
-        anchor,
-        distance: Math.round(d * 10) / 10,
-        alignment: Math.round(anchorResult.alignment * 10) / 10,
-        wrongSide: anchorResult.wrongSide,
-        inside,
-      });
+    const sourceId = arrow.getAttribute('data-diagram-source');
+    const endpoints = [
+      {
+        kind: 'target',
+        point: arrowEndpointPoint(arrow, 'end'),
+        nodeId: targetId,
+        anchor: arrow.getAttribute('data-diagram-target-anchor'),
+        /* The shared DiagramCanvas renderer owns untagged internal paths whose
+           visual endpoint may intentionally terminate inside a grouped node.
+           Inference is useful for legacy hand-authored SVG, but is ambiguous
+           inside that generated renderer; require explicit semantics there. */
+        infer: !arrow.closest('.ve-diagram-variant'),
+      },
+      {
+        kind: 'source',
+        point: arrowEndpointPoint(arrow, 'start'),
+        nodeId: sourceId,
+        anchor: arrow.getAttribute('data-diagram-source-anchor'),
+        infer: false,
+      },
+    ];
+
+    for (const endpoint of endpoints) {
+      if (!endpoint.point || (!endpoint.nodeId && !endpoint.infer)) continue;
+      const node = endpoint.nodeId
+        ? nodesById.get(endpoint.nodeId)
+        : nodeBoxes
+          .map((item) => ({ ...item, d: distanceToRectEdge(endpoint.point, item.box) }))
+          .sort((a, b) => a.d - b.d)[0];
+      if (!node) {
+        offenders.push({
+          arrow: compact(arrow),
+          endpoint: endpoint.kind,
+          nodeId: endpoint.nodeId,
+          reason: `${endpoint.kind === 'source' ? 'Source' : 'Target'} node not found`,
+        });
+        continue;
+      }
+      const d = distanceToRectEdge(endpoint.point, node.box);
+      const inside = endpoint.point.x > node.box.left
+        && endpoint.point.x < node.box.right
+        && endpoint.point.y > node.box.top
+        && endpoint.point.y < node.box.bottom;
+      const anchorResult = endpoint.anchor
+        ? diagramAnchorAlignment(endpoint.point, node.box, endpoint.anchor)
+        : { alignment: 0, wrongSide: false };
+      if (inside || d < 6 || d > 10 || anchorResult.alignment > 3 || anchorResult.wrongSide) {
+        offenders.push({
+          arrow: compact(arrow),
+          node: compact(node.node),
+          endpoint: endpoint.kind,
+          nodeId: endpoint.nodeId,
+          anchor: endpoint.anchor,
+          distance: Math.round(d * 10) / 10,
+          alignment: Math.round(anchorResult.alignment * 10) / 10,
+          wrongSide: anchorResult.wrongSide,
+          inside,
+        });
+      }
     }
   }
   return { offenders: offenders.slice(0, 10) };
 }
 
-function arrowTerminalPoint(arrow) {
+function arrowEndpointPoint(arrow, endpoint = 'end') {
   let point = null;
   const tag = arrow.tagName.toLowerCase();
   if (tag === 'line') {
-    point = { x: Number(arrow.getAttribute('x2')), y: Number(arrow.getAttribute('y2')) };
+    const suffix = endpoint === 'start' ? '1' : '2';
+    point = { x: Number(arrow.getAttribute(`x${suffix}`)), y: Number(arrow.getAttribute(`y${suffix}`)) };
   } else if (typeof arrow.getTotalLength === 'function' && typeof arrow.getPointAtLength === 'function') {
     const len = arrow.getTotalLength();
-    point = Number.isFinite(len) && len >= 0 ? arrow.getPointAtLength(len) : null;
+    point = Number.isFinite(len) && len >= 0 ? arrow.getPointAtLength(endpoint === 'start' ? 0 : len) : null;
   } else if ((tag === 'polyline' || tag === 'polygon') && arrow.points?.numberOfItems) {
-    point = arrow.points.getItem(arrow.points.numberOfItems - 1);
+    point = arrow.points.getItem(endpoint === 'start' ? 0 : arrow.points.numberOfItems - 1);
   }
   if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
   const matrix = arrow.getScreenCTM?.();
@@ -896,6 +997,10 @@ function diagramAnchorAlignment(point, box, anchor) {
   if (anchor === 'right-center') return { alignment: Math.abs(point.y - centerY), wrongSide: point.x <= box.right };
   if (anchor === 'top-center') return { alignment: Math.abs(point.x - centerX), wrongSide: point.y >= box.top };
   if (anchor === 'bottom-center') return { alignment: Math.abs(point.x - centerX), wrongSide: point.y <= box.bottom };
+  if (anchor === 'left-edge') return { alignment: 0, wrongSide: point.x >= box.left };
+  if (anchor === 'right-edge') return { alignment: 0, wrongSide: point.x <= box.right };
+  if (anchor === 'top-edge') return { alignment: 0, wrongSide: point.y >= box.top };
+  if (anchor === 'bottom-edge') return { alignment: 0, wrongSide: point.y <= box.bottom };
   return { alignment: 0, wrongSide: false };
 }
 
@@ -1005,6 +1110,7 @@ function deckSnapMetrics(doc) {
   const deck = doc.querySelector('.deck') || [...doc.querySelectorAll('*')].find((el) => getComputedStyle(el).scrollSnapType.includes('mandatory'));
   const ySnap = [...doc.querySelectorAll('*')].filter((el) => /y\s+mandatory/.test(getComputedStyle(el).scrollSnapType || '')).map(selectorFor);
   return {
+    stateDriven: doc.querySelector('[data-deck-shell]') !== null,
     mag: mag ? getComputedStyle(mag).scrollSnapType : '',
     deck: deck ? getComputedStyle(deck).scrollSnapType : '',
     ySnap
@@ -1345,7 +1451,7 @@ const BROWSER_METRIC_SOURCE = [
   proseMetrics,
   fixedOverlapMetrics,
   diagramArrowMetrics,
-  arrowTerminalPoint,
+  arrowEndpointPoint,
   diagramAnchorAlignment,
   distanceToRectEdge,
   diagramTextMetrics,
@@ -1362,6 +1468,8 @@ const BROWSER_METRIC_SOURCE = [
   classNameForMetric,
   matchedCssText,
   touchTargetMetrics,
+  deckRailFirstFrameMetrics,
+  deckNavigationShellMetrics,
   fontFamilySprawlMetrics,
   nothingAccentRedMetrics,
   nothingLabelsMetrics,

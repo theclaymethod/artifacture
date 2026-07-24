@@ -110,8 +110,8 @@ export const checks = {
     runFilter: desktopRun,
     appliesWhen: (ctx) => /data-diagram-role.{0,160}(?:arrow|connector)/i.test(ctx.html || ''),
     failWhen: (metric) => metric?.offenders?.length,
-    evidence: (failures) => `Arrow endpoints outside 6-10px air-gap: ${summarizeOffenders(failures, 'offenders')}`,
-    fix_hint: 'Tagged arrow endpoints must stop 6-10px from node borders; declared side-center anchors must hit that side and its midpoint within 3px.'
+    evidence: (failures) => `Arrow source/target endpoints outside 6-10px air-gap: ${summarizeOffenders(failures, 'offenders')}`,
+    fix_hint: 'Tag both source and target when known. Each endpoint must stop 6-10px from its node border; declared side-center anchors must hit that side and its midpoint within 3px.'
   }),
 
   'diagram-text-clipping-overlap': metricCheck('diagram-text-clipping-overlap', {
@@ -184,6 +184,24 @@ export const checks = {
     fix_hint: 'Provide at least a 44x44px clickable parent for nav dots, tabs, controls, links, and buttons.'
   }),
 
+  'deck-rail-first-frame-collapsed': metricCheck('deck-rail-first-frame-collapsed', {
+    profiles: DECK,
+    runFilter: desktopRun,
+    appliesWhen: (ctx) => /data-rail|aria-label\s*=\s*["']Slides|case-rail|class\s*=\s*["'][^"']*\brail\b/i.test(ctx.html || ''),
+    failWhen: (metric) => metric?.obscuresFirstFrame,
+    evidence: (failures) => `Deck rail exposed before user intent: ${json(failures.map(({ run, metric }) => ({ run, exposedWidth: metric.exposedWidth, expanded: metric.expanded, rail: metric.rail })).slice(0, 10))}`,
+    fix_hint: 'Start collapsible deck rails as a <=44px spine. Remove timer-driven peek/auto-expansion behavior that obscures the opening slide.'
+  }),
+
+  'deck-navigation-shell-safe-controls': metricCheck('deck-navigation-shell-safe-controls', {
+    profiles: DECK,
+    runFilter: desktopRun,
+    appliesWhen: (ctx) => /data-rail|aria-label\s*=\s*["'](?:Slides|Previous slide|Next slide)|case-rail|class\s*=\s*["'][^"']*\brail\b/i.test(ctx.html || ''),
+    failWhen: (metric) => metric?.undersized?.length || metric?.chapterTooLow || metric?.modalYield === false,
+    evidence: (failures) => `Unsafe deck shell controls: ${json(failures.map(({ run, metric }) => ({ run, undersized: metric.undersized, chapterGap: metric.chapterGap, modalYield: metric.modalYield })).slice(0, 10))}`,
+    fix_hint: 'Use >=44px brand/chapter/pager targets, anchor chapters directly below the brand cell, and make the rail yield while a dialog or drill sheet is open.'
+  }),
+
   'font-family-sprawl': metricCheck('font-family-sprawl', {
     profiles: ALL_RENDERED,
     appliesWhen: (ctx) => /font-family|--font-|fonts\.googleapis\.com/i.test(ctx.html || ''),
@@ -250,6 +268,7 @@ export const checks = {
     appliesWhen: deckPresent,
     failWhen(metric, run, ctx) {
       if (!metric) return false;
+      if (metric.stateDriven) return false;
       if (ctx.profile === 'magazine') return !/x\b/.test(metric.mag || '') || !/mandatory/.test(metric.mag || '') || metric.ySnap?.length;
       return !/y\b/.test(metric.deck || '') || !/mandatory/.test(metric.deck || '');
     },

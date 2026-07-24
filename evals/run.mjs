@@ -67,7 +67,8 @@ function severityFor(report, id) {
 
 function checkViolation(fileName, expected) {
   const filePath = join(violationsRoot, fileName);
-  const stage = stagesByFixture.get(fileName);
+  const stage = stagesByFixture.get(fileName)
+    ?? checksCatalog.find((check) => expected.must_fire.includes(check.id))?.stage;
   const html = readFileSync(filePath, 'utf8');
   const { result, report, args } = runVerifier(filePath, stage);
   const fired = failedChecks(report);

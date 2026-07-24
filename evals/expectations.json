@@ -393,6 +393,16 @@
       "diagram-z-order-arrows-before-nodes"
     ]
   },
+  "diagram-arrow-source-endpoint-air-gap.html": {
+    "must_fire": [
+      "diagram-arrow-endpoint-air-gap"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "diagram-4px-grid",
+      "diagram-z-order-arrows-before-nodes"
+    ]
+  },
   "diagram-text-clipping-overlap.html": {
     "must_fire": [
       "diagram-text-clipping-overlap"
@@ -625,6 +635,21 @@
     "max_other_errors": 0,
     "allowed_co_fires": [
       "autofit-safety-net-present-and-ordered"
+    ]
+  },
+  "deck-rail-first-frame-collapsed.html": {
+    "must_fire": [
+      "deck-rail-first-frame-collapsed"
+    ],
+    "max_other_errors": 0
+  },
+  "deck-navigation-shell-safe-controls.html": {
+    "must_fire": [
+      "deck-navigation-shell-safe-controls"
+    ],
+    "max_other_errors": 0,
+    "allowed_co_fires": [
+      "undersized-touch-targets"
     ]
   },
   "autofit-safety-net-present-and-ordered.html": {
