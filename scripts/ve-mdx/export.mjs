@@ -97,6 +97,13 @@ async function main() {
       base: './',
       logLevel: 'warn',
       plugins: [veMdxPreflightPlugin(source, draft), mdx(), react(), tailwindcss()],
+      // A source outside the Artifacture package can have its own physical
+      // React install. Without dedupe, the generated bundle renders with
+      // Artifacture's ReactDOM while hooks import the source package's React,
+      // leaving that second copy's dispatcher null at runtime.
+      resolve: {
+        dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+      },
       server: {
         fs: {
           allow: [repoRoot, tmp],
