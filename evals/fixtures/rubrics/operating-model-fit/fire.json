@@ -1,0 +1,23 @@
+{
+  "judge_response": {
+    "pass": false,
+    "routing": [
+      {
+        "unit_id": "review-routing",
+        "unit_type": "slide",
+        "treatment": "operating-model",
+        "confidence": "high",
+        "reason": "The claim depends on policy-based routing into distinct clinician queues."
+      }
+    ],
+    "findings": [
+      {
+        "check_id": "operating-model-fit",
+        "unit_id": "review-routing",
+        "unit_type": "slide",
+        "evidence": "Four equal cards name review jobs but show no selection rule, mandatory path, protected probability sample, or deduplication.",
+        "fix": "Render the universal checks and policy router, then separate mandatory, representative, calibration, and frontier lanes."
+      }
+    ]
+  }
+}

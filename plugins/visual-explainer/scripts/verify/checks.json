@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generated": "2026-07-04",
-  "note": "v2: +37 AI-tell/copy checks from impeccable+unslop distillation. Stage counts: {\"static-text\":70,\"static-dom\":69,\"llm-pass\":28,\"browser\":37,\"transcript\":2}",
+  "note": "v2: +37 AI-tell/copy checks from impeccable+unslop distillation. Stage counts: {\"static-text\":70,\"static-dom\":69,\"llm-pass\":29,\"browser\":37,\"transcript\":2}",
   "checks": [
     {
       "family": "F1_slop_global",
@@ -2448,6 +2448,27 @@
       "fp_guards": "Restrict to documented single-focus slide types; do not run on grid/dashboard/quadrant layouts.",
       "source_rules": [
         "presentation-focal-point-and-contrast"
+      ]
+    },
+    {
+      "family": "F5_slides",
+      "id": "operating-model-fit",
+      "title": "Review units use the minimum faithful explanatory treatment",
+      "profiles": [
+        "page",
+        "slides",
+        "magazine"
+      ],
+      "stage": "llm-pass",
+      "severity": "warn",
+      "applies_when": "The artifact is a vertical deck, magazine deck, fixed-stage PresentationDeck, or long-form page with coherent sections. The pass routes every slide or section before judging model fidelity.",
+      "spec": "pass: pass-operating-model. First route each review unit to none, relational, operating-model, or simulated-surface from its narrative job. Judge only relational, operating-model, and simulated-surface units. Warn when the composition materially hides or misstates a required comparison, sequence, routing policy, state transition, causal/evidence relationship, uncertainty, dependency, feedback loop, or resource flow; also warn when an elaborate diagram is imposed on a unit that needs only a table, sentence, quote, image, or single number.",
+      "fixture_violation": "A clinician-routing policy rendered as four equal cards with no visible selection rule or separation between mandatory review, representative measurement, calibration, and frontier discovery.",
+      "fp_guards": "Do not require this treatment on covers, heroes, dividers, quotes, full-bleed images, agendas, FAQs, simple CTAs, single statistics, or one-claim/one-fact units. Lists and genuine peer sets may remain cards. A table, formula, or paired contrast may satisfy a relational unit. Route vague or underspecified units downward rather than inventing an operating model.",
+      "source_rules": [
+        "operating-model-first",
+        "layout-is-a-domain-claim",
+        "minimum-faithful-treatment"
       ]
     },
     {

@@ -49,5 +49,19 @@ function llmPassesFor(ctx, checks) {
     required.add('copy');
     if (['page', 'slides', 'magazine'].includes(ctx.profile)) required.add('visual-tells');
   }
+  const hasReviewUnits =
+    ['slides', 'magazine'].includes(ctx.profile) ||
+    /data-ve-presentation/i.test(ctx.html) ||
+    /<section(?:\s|>)/i.test(ctx.html);
+  if (
+    hasReviewUnits &&
+    checks.some(
+      (check) =>
+        check.id === 'operating-model-fit' &&
+        check.status === 'llm-required',
+    )
+  ) {
+    required.add('operating-model');
+  }
   return Array.from(required);
 }

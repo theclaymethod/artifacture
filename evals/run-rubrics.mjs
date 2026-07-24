@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Regression suite for the 30 llm-pass/transcript catalog checks that
+// Regression suite for the 31 llm-pass/transcript catalog checks that
 // evals/run.mjs cannot exercise (it filters to static-text/static-dom/browser
 // stages by design — see plans/007-DESIGN-NOTE.md for why).
 //
@@ -28,10 +28,16 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildReport } from '../plugins/visual-explainer/scripts/verify/lib/report.mjs';
 
 const EVAL_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(EVAL_ROOT, '..');
 const RUBRICS_FIXTURES_ROOT = join(EVAL_ROOT, 'fixtures', 'rubrics');
+const OPERATING_MODEL_ROUTING_CASES = join(
+  RUBRICS_FIXTURES_ROOT,
+  'operating-model-fit',
+  'routing-cases.jsonl',
+);
 
 const checksCatalog = JSON.parse(
   readFileSync(resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/checks.json'), 'utf8'),
@@ -39,7 +45,8 @@ const checksCatalog = JSON.parse(
 
 const severityById = new Map(checksCatalog.map((check) => [check.id, check.severity]));
 
-// The first implementation slice from plan 007 step 3: 6 checks, the
+// The first implementation slice from plan 007 step 3, extended with the
+// operating-model routing contract: 7 checks. The
 // 13 error-severity uncovered checks are the priority pool this was drawn
 // from. `mode: 'stub'` checks are asserted via deriveStatus() against a
 // canned judge_response fixture; `mode: 'algorithm'` runs the real scorer.
@@ -49,6 +56,7 @@ const SLICE = [
   { id: 'diagram-type-coherent', mode: 'stub' },
   { id: 'preset-both-mode-visual', mode: 'stub' },
   { id: 'deck-content-completeness', mode: 'stub' },
+  { id: 'operating-model-fit', mode: 'stub' },
   { id: 'reel-caption-matches-transcript', mode: 'algorithm' },
 ];
 
@@ -154,6 +162,118 @@ function runTranscriptCheck(id) {
   return rows;
 }
 
+// --- Operating-model contract: routing set + section pass selection --------
+
+function readJsonl(path) {
+  return readFileSync(path, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => {
+      try {
+        return JSON.parse(line);
+      } catch (error) {
+        throw new Error(`${path}:${index + 1}: ${error.message}`);
+      }
+    });
+}
+
+function runOperatingModelRoutingCases() {
+  const allowedTreatments = new Set([
+    'none',
+    'relational',
+    'operating-model',
+    'simulated-surface',
+  ]);
+  const allowedUnitTypes = new Set(['slide', 'section']);
+  const cases = readJsonl(OPERATING_MODEL_ROUTING_CASES);
+  const seenIds = new Set();
+  const rows = [];
+
+  for (const fixture of cases) {
+    const errors = [];
+    if (!fixture.id || seenIds.has(fixture.id)) errors.push('id must be present and unique');
+    if (!allowedUnitTypes.has(fixture.unit_type)) errors.push('unit_type must be slide or section');
+    if (!allowedTreatments.has(fixture.expected_treatment)) errors.push('invalid expected_treatment');
+    if (typeof fixture.expected_applicable !== 'boolean') errors.push('expected_applicable must be boolean');
+    if (fixture.expected_applicable !== (fixture.expected_treatment !== 'none')) {
+      errors.push('expected_applicable must be false only for treatment=none');
+    }
+    if (!fixture.narrative_job || !fixture.visible_claim || !fixture.rationale) {
+      errors.push('narrative_job, visible_claim, and rationale are required');
+    }
+    seenIds.add(fixture.id);
+    rows.push({
+      id: 'operating-model-routing-case',
+      caseName: fixture.id || 'missing-id',
+      status: errors.length ? 'FAIL' : 'pass',
+      message: errors.length
+        ? errors.join('; ')
+        : `${fixture.unit_type} -> ${fixture.expected_treatment}`,
+    });
+  }
+
+  const coverageAssertions = [
+    ['covers-slide-units', cases.some((fixture) => fixture.unit_type === 'slide')],
+    ['covers-section-units', cases.some((fixture) => fixture.unit_type === 'section')],
+    ...Array.from(allowedTreatments, (treatment) => [
+      `covers-${treatment}`,
+      cases.some((fixture) => fixture.expected_treatment === treatment),
+    ]),
+  ];
+  for (const [caseName, pass] of coverageAssertions) {
+    rows.push({
+      id: 'operating-model-routing-coverage',
+      caseName,
+      status: pass ? 'pass' : 'FAIL',
+      message: pass ? 'covered' : 'missing',
+    });
+  }
+  return rows;
+}
+
+function runOperatingModelPassSelectionCases() {
+  const operatingModelCheck = {
+    id: 'operating-model-fit',
+    stage: 'llm-pass',
+    status: 'llm-required',
+    severity: 'warn',
+  };
+  const cases = [
+    {
+      name: 'sectioned-page',
+      ctx: { profile: 'page', preset: 'custom', presetHint: '', html: '<main><section>Case review</section></main>', filePath: 'sectioned.html' },
+      expected: true,
+    },
+    {
+      name: 'simple-page',
+      ctx: { profile: 'page', preset: 'custom', presetHint: '', html: '<main><div>One statement</div></main>', filePath: 'simple.html' },
+      expected: false,
+    },
+    {
+      name: 'vertical-deck',
+      ctx: { profile: 'slides', preset: 'custom', presetHint: '', html: '<main></main>', filePath: 'slides.html' },
+      expected: true,
+    },
+    {
+      name: 'presentation-stage',
+      ctx: { profile: 'page', preset: 'custom', presetHint: '', html: '<main data-ve-presentation></main>', filePath: 'stage.html' },
+      expected: true,
+    },
+  ];
+
+  return cases.map(({ name, ctx, expected }) => {
+    const report = buildReport(ctx, [operatingModelCheck]);
+    const actual = report.llm_passes_required.includes('operating-model');
+    return {
+      id: 'operating-model-pass-selection',
+      caseName: name,
+      status: actual === expected ? 'pass' : 'FAIL',
+      message: `expected=${expected} actual=${actual}`,
+    };
+  });
+}
+
 // --- Driver ------------------------------------------------------------
 
 const catalogIds = new Set(checksCatalog.map((check) => check.id));
@@ -168,6 +288,8 @@ for (const entry of SLICE) {
   const rows = entry.mode === 'algorithm' ? runTranscriptCheck(entry.id) : runStubCheck(entry.id);
   allRows.push(...rows);
 }
+allRows.push(...runOperatingModelRoutingCases());
+allRows.push(...runOperatingModelPassSelectionCases());
 
 console.log('check_id,case,status,detail');
 for (const row of allRows) {
@@ -184,4 +306,4 @@ if (failures.length) {
 }
 
 const checksCovered = new Set(allRows.map((row) => row.id)).size;
-console.log(`\nAll ${allRows.length} assertions passed across ${checksCovered} checks (fire + no-fire each).`);
+console.log(`\nAll ${allRows.length} assertions passed across ${checksCovered} check families.`);
