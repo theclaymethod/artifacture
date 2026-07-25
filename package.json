@@ -19,9 +19,11 @@
     "ve:eval": "node evals/run.mjs && node evals/design-systems/run.mjs",
     "ve:eval-presentation": "node evals/run-presentation.mjs",
     "ve:eval-rubrics": "node evals/run-rubrics.mjs",
+    "ve:eval-visual-model-policy": "node --test evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs",
+    "ve:select-visual-model-policy": "node evals/visual-model-policy/select.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",

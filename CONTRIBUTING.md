@@ -23,6 +23,13 @@ objects with `id`, `family`, `severity`, `spec`, etc.). To add one:
 4. Add the fixture's expected result to `evals/expectations.json`.
 5. Run `npm run ve:eval` and confirm the new fixture is caught.
 
+Focused visual rubrics may also return criterion IDs that are narrower than a
+top-level catalog check. Register those in
+`plugins/visual-explainer/scripts/verify/rubric-criteria.json`, keep them scoped
+to one routed pass, add fire/clean human-reviewed eval cases, and run
+`npm run check:manifests`. Do not present an unregistered rubric label as a
+verdict `check_id`.
+
 ## Adding a shared component
 
 1. Export the component from `visual-explainer-mdx/components.tsx`.

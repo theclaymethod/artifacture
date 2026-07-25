@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildContext } from './context.mjs';
-import { buildReport } from './report.mjs';
+import { buildReport, delegatedOwnerForCheck } from './report.mjs';
 import { checks as staticTextChecks } from './checks/static-text.mjs';
 import { checks as staticDomChecks } from './checks/static-dom.mjs';
 
@@ -65,10 +65,14 @@ async function runOne(definition, ctx, registries, options) {
     const actionable = results.filter(Boolean).filter((result) => result.status !== 'pass');
     if (actionable.length === 0) return { ...base, status: 'pass', evidence: 'ok' };
     const first = actionable[0];
-    const status = first.status === 'warn' || definition.severity === 'warn' ? 'warn' : 'fail';
+    const delegatedOwner = delegatedOwnerForCheck(definition.id);
+    const status = delegatedOwner
+      ? 'delegated-candidate'
+      : first.status === 'warn' || definition.severity === 'warn' ? 'warn' : 'fail';
     return {
       ...base,
       status,
+      delegated_owner: delegatedOwner || undefined,
       evidence: first.evidence || definition.title || 'violation',
       where: first.where || '',
       fix_hint: first.fix_hint || definition.spec || definition.title || '',

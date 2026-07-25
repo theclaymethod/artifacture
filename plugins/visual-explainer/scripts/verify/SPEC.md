@@ -21,7 +21,7 @@ plugins/visual-explainer/scripts/verify/
     pass-hierarchy.md
     pass-aesthetic-<preset>.md   # one per preset; verifier loads ONLY the active preset's file
     pass-completeness.md
-    pass-copy.md
+    pass-artifact-slop-gap.md   # explicit semantic gap only; Impeccable/Unslop stay external
 evals/
   fixtures/violations/<check-id>.html   # exactly one seeded violation each
   fixtures/clean/<profile>.html         # must pass everything (false-positive guard)
@@ -54,9 +54,20 @@ node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> \
                 "status": "pass|fail|warn|skip", "evidence": "...",
                 "where": "selector/line/screenshot ref", "fix_hint": "..." } ],
   "screenshots": ["..."],
-  "llm_passes_required": ["hierarchy", "aesthetic-mono-industrial", "completeness", "copy"]
+  "llm_passes_required": ["hierarchy", "aesthetic-mono-industrial", "completeness", "impeccable:critique", "unslop:cleanup-report", "artifacture:slop-gap"],
+  "llm_dispatch_plan": [
+    {"pass":"hierarchy","owner":"artifacture","status":"ready","model":"provider-small-vision","batch_size":2},
+    {"pass":"impeccable:critique","owner":"impeccable","status":"delegate-to-installed-skill"}
+  ]
 }
 ```
+
+`llm_dispatch_plan` is the executable routing boundary. Artifacture-owned
+passes are `ready` only when the resolved eval policy contains a qualified
+route; otherwise they are explicitly `skipped` with
+`reason: "no-eval-qualified-model"`. A host must not replace a skipped route
+with its current/main-thread model. Companion-skill entries retain their own
+skill and model policies.
 
 - Human output: compact table, failures first, each with fix_hint quoting the doc rule.
 
@@ -87,15 +98,18 @@ Sequenced so a weak model cannot skip or blend steps:
 
 1. Run ve-verify. If exit 1 → fix root cause → re-run. Max 3 cycles, then deliver with explicit
    failure disclosure. (Deterministic gate FIRST; no LLM review of pages that fail mechanics.)
-2. LLM passes, each a separate small context consuming ONLY its named inputs:
+2. LLM passes and delegated skills, each a separate small context consuming ONLY its named inputs:
    - P1 hierarchy/layout: 4 screenshots + pass-hierarchy.md (squint, weight, moment-of-surprise)
    - P2 aesthetic fidelity: 4 screenshots + the ACTIVE preset rubric only (swap test, motif rules)
    - P3 completeness: source material inventory + extracted section list/headings (NO screenshots)
-   - P4 copy: extracted prose text only (slop patterns; unslop escalation)
-   Claude Code: 4 parallel Task subagents (`.claude/agents/ve-verifier-*.md`, JSON verdict contract
-   like section-contract.md). Codex/single-agent: same rubric files run as 4 sequential
-   fresh-context passes. Rubric files are the single source of truth for both paths.
-3. Verdict merge: any P1–P4 fail → fix → re-run affected pass only. Max 2 cycles.
+   - D1 visual craft: candidate screenshots routed to installed Impeccable critique/audit
+   - D2 prose: excluded-filtered prose routed to Unslop `cleanup --report`
+   - P4 artifact slop gap: an explicitly nominated crop plus truth excerpt, limited to false
+     sequence, state/confidence, or provenance
+   Claude Code: parallelize compatible Artifacture `ve-verifier-*` agents. Invoke Impeccable and
+   Unslop through their installed skills. Codex/single-agent: keep every pass/skill in a fresh
+   context. Artifacture rubric files are authoritative only for Artifacture-owned paths.
+3. Verdict merge: any local or delegated check fails → fix → re-run only that path. Max 2 cycles.
 4. Delivery message MUST include: report path, pass/fail per LLM pass, and either "verified" or
    the explicit could-not-verify disclosure. (Protocol requirement, reviewable from transcript.)
 
@@ -104,7 +118,7 @@ Sequenced so a weak model cannot skip or blend steps:
 - SKILL.md §6 rewritten (shorter than today: point at ve-verify + verification.md).
 - references/verification.md: full protocol incl. rubrics index + report schema.
 - references/*.md: add rule-ID anchors where checks cite docs (only where curation demands).
-- .claude/agents/ve-verifier-{hierarchy,aesthetic,completeness,copy}.md
+- .claude/agents/ve-verifier-{layout,aesthetic,completeness,artifact-slop-gap}.md
 - check.mjs: keep as build smoke test; add `ve:verify` + `ve:eval` npm scripts (documented as
   direct-node invocations too, given broken npm shim).
 

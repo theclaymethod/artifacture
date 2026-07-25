@@ -26,6 +26,7 @@ function readSkillFrontmatterVersion(relPath) {
 const pkg = readJson('package.json');
 const pluginManifest = readJson('plugins/visual-explainer/.claude-plugin/plugin.json');
 const marketplace = readJson('.claude-plugin/marketplace.json');
+const rubricCriteria = readJson('plugins/visual-explainer/scripts/verify/rubric-criteria.json');
 const marketplaceEntry = marketplace.plugins.find((plugin) => plugin.name === 'visual-explainer');
 
 const sources = [
@@ -43,6 +44,20 @@ const repository = marketplaceEntry?.repository;
 const uniqueVersions = new Set(sources.map((source) => source.value));
 const versionsOk = uniqueVersions.size === 1;
 const repositoryOk = repository === EXPECTED_REPOSITORY;
+const criterionIds = rubricCriteria.criteria.map((criterion) => criterion.id);
+const criteriaOk =
+  rubricCriteria.version === 1 &&
+  criterionIds.length === new Set(criterionIds).size &&
+  rubricCriteria.criteria.every(
+    (criterion) =>
+      criterion.id &&
+      criterion.pass &&
+      criterion.rubric &&
+      readFileSync(
+        path.join(REPO_ROOT, 'plugins/visual-explainer/scripts/verify', criterion.rubric),
+        'utf8',
+      ).includes(criterion.id),
+  );
 
 function printTable() {
   const rows = [
@@ -55,12 +70,13 @@ function printTable() {
   }
 }
 
-if (!versionsOk || !repositoryOk) {
+if (!versionsOk || !repositoryOk || !criteriaOk) {
   console.error('Manifest consistency check FAILED\n');
   printTable();
   console.error('');
   if (!versionsOk) console.error(`Version mismatch across sources: ${[...uniqueVersions].join(', ')}`);
   if (!repositoryOk) console.error(`Repository mismatch: expected "${EXPECTED_REPOSITORY}", got "${repository}"`);
+  if (!criteriaOk) console.error('Rubric criterion registry is malformed or out of sync with its rubric files');
   process.exit(1);
 }
 

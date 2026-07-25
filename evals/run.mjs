@@ -58,7 +58,12 @@ function runVerifier(filePath, stage) {
 
 function failedChecks(report) {
   if (!report || !Array.isArray(report.checks)) return [];
-  return report.checks.filter((check) => check.status === 'fail' || check.status === 'warn');
+  return report.checks.filter(
+    (check) =>
+      check.status === 'fail' ||
+      check.status === 'warn' ||
+      check.status === 'delegated-candidate',
+  );
 }
 
 function severityFor(report, id) {
@@ -76,7 +81,11 @@ function checkViolation(fileName, expected) {
   const allowedCoFires = new Set(expected.allowed_co_fires || []);
   const missing = expected.must_fire.filter((id) => !firedIds.has(id));
   const otherErrors = fired.filter(
-    (check) => !expected.must_fire.includes(check.id) && !allowedCoFires.has(check.id) && check.severity === 'error',
+    (check) =>
+      !expected.must_fire.includes(check.id) &&
+      !allowedCoFires.has(check.id) &&
+      check.severity === 'error' &&
+      check.status !== 'delegated-candidate',
   );
 
   return {
@@ -98,7 +107,7 @@ function checkClean(fileName) {
   const filePath = join(cleanRoot, fileName);
   const stage = 'browser';
   const { result, report, args } = runVerifier(filePath, stage);
-  const fired = failedChecks(report);
+  const fired = failedChecks(report).filter((check) => check.status !== 'delegated-candidate');
   return {
     fileName,
     status: result.status === 0 && fired.length === 0 ? 'pass' : 'fail',

@@ -1,0 +1,8 @@
+{
+  "case": "The footnote marker resolves to a supplied source with title and URL.",
+  "human_label": "clean",
+  "judge_response": {
+    "pass": true,
+    "findings": []
+  }
+}

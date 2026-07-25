@@ -28,5 +28,7 @@ skills-lock.json
 # Publish hygiene (Artifacture)
 .codex-briefs/
 evals/model-matrix/out/
+evals/visual-model-policy/runs/
+evals/visual-model-policy/policy.generated.json
 docs/goals/
 artifacts/

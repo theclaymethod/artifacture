@@ -4,7 +4,7 @@
 
 # Artifacture
 
-**Verified visual explainers for coding agents.** Artifacture turns MDX/React sources into self-contained HTML artifacts: architecture diagrams, code walkthroughs, literate diff explainers, comparison tables, and slide decks. It then proves they hold up, with a deterministic 200+ check design-quality verifier (layout, contrast, responsiveness, AI-slop tells), small blind LLM rubric passes, and a multi-model eval harness. Kimi, GLM, DeepSeek, Claude, and Codex all produce passing output from the same ~3k-token authoring contract.
+**Verified visual explainers for coding agents.** Artifacture turns MDX/React sources into self-contained HTML artifacts: architecture diagrams, code walkthroughs, literate diff explainers, comparison tables, and slide decks. Verification is a routed family of skills: Artifacture runs deterministic mechanics and artifact-specific checks, Impeccable owns general visual craft, and Unslop owns prose. Visual judgment is dispatched to the smallest model and batch size that clears the relevant eval suite; the main agent orchestrates and summarizes instead of spending a frontier-model turn inspecting every screenshot.
 
 Artifacture began as a fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer) and preserves its spirit; see Credits below.
 
@@ -52,14 +52,35 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 
 ## What it adds to upstream visual-explainer
 
-- **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and small blind LLM rubric passes. Exit codes and JSON reports make it usable as a CI gate. Its own eval suite of seeded-violation fixtures proves each check fires.
+- **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and routed specialist judgment. Exit codes and JSON reports make it usable as a CI gate. Seeded-violation fixtures prove deterministic checks fire; the visual-model policy separately selects the smallest model and screenshot batch size that clear precision, recall, silence, grounding, schema, latency, and cost gates.
 - **Tiered agent docs**: SKILL.md is a ~2.5k-token bootstrap plus one ~300-token card per use case (`cards/`). A covered flow reads about 3,100 tokens instead of 62,000. Deep references load only on escalation.
 - **17 shared components** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
 - **PresentationDeck** (`visual-explainer-mdx/presentation.tsx`): a second deck engine for presented (not scrolled) decks — a fixed 1920×1080 stage scaled to fit any screen, collapsible slide rail, keyboard nav, and drill-down primitives (click-to-expand cards/sheets with a click-anywhere-to-close guard, ladder/fanout diagrams, metrics, steppers). Fully `--ve-*` token-driven so every preset skins it; its behavioral contract is pinned by a headless eval suite (`npm run ve:eval-presentation`). See [docs/presentation-deck.md](docs/presentation-deck.md) for when to use it vs `SlideDeck`.
 - **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
-- **Model-matrix eval harness** (`evals/model-matrix/`): the same briefs across Kimi, GLM, DeepSeek, Claude, and Codex, scored on deterministic compliance plus a blind screenshot judge. Point it at your own model in about ten minutes.
+- **Two model eval harnesses**: `evals/model-matrix/` compares artifact generation, while `evals/visual-model-policy/` qualifies visual-verification models and screenshot batch sizes. Generation quality and review quality are deliberately not treated as the same benchmark.
 - **One-command team sharing**: `share.sh` deploys to Vercel (zero setup, public) or sharehtml on Cloudflare (stable update-in-place URLs, team SSO via Cloudflare Access, comments). See `docs/TEAM-SHARING.md`.
 - **External design systems + `ve:learn`**: brand token sets are user-owned artifacts resolved from a registry outside the skill (`$ARTIFACTURE_DESIGN_DIR` → `~/.artifacture/design-systems/` → repo `design-systems/`) and inlined into exports by preset name. `npm run ve:learn -- <code-file|url|image> --name <slug>` drafts a system from a token source, a live page, or an image palette; deterministic heuristics are pinned by their own eval suite (`evals/design-systems/`). The repo ships the mechanism only — systems (typically private brand tokens) live in your own registry. See `docs/design-systems.md`.
+
+## Skill family
+
+Artifacture is the artifact-mechanics and evidence-routing member of a skill
+family:
+
+| Skill | Owns |
+|---|---|
+| **Artifacture** | export, browser/state coverage, clipping, containment, layout candidates, diagrams, operating-model fidelity, and evidence routing |
+| **Impeccable** | general visual craft, design specificity, typography, color, generic decoration, and visual AI tells |
+| **Unslop** | prose cadence, voice, and AI-writing patterns |
+
+Artifacture does not copy the other skills' judgment prompts. Legacy
+high-precision craft/prose detectors remain temporarily as candidate extractors:
+they can route evidence, but they cannot fail Artifacture. If a companion skill
+is missing, its pass is reported as skipped. Artifacture-owned visual judgment
+uses the smallest eval-qualified model and screenshot batch size; a
+frontier/main agent is not the automatic fallback.
+
+See [installation and family setup](docs/installation.md) and the
+[visual-model policy harness](evals/visual-model-policy/README.md).
 
 ## Install
 
@@ -69,8 +90,16 @@ Any agent with skills support (Claude Code, Codex, Cursor, and others), via the 
 npx skills add theclaymethod/artifacture
 ```
 
+Install the recommended companion skills:
+
+```bash
+npx impeccable skills install
+npx skills add theclaymethod/unslop
+```
+
 First generation clones the render pipeline to `~/.artifacture` (one-time,
-Node >= 22); full-clone installs use the repo in place.
+Node >= 22); full-clone installs use the repo in place. The companion skills
+remain independently versioned and keep ownership of their prompts.
 
 **Claude Code, as a plugin:**
 
@@ -86,6 +115,12 @@ git clone --depth 1 https://github.com/theclaymethod/artifacture.git /tmp/artifa
 cp -r /tmp/artifacture/plugins/visual-explainer ~/.agents/skills/visual-explainer
 rm -rf /tmp/artifacture
 ```
+
+After installation, follow [docs/installation.md](docs/installation.md) to
+verify the render pipeline, detect missing companion skills, and install or
+generate a visual-model policy. Until a pass has an eval-qualified route,
+Artifacture reports `no-eval-qualified-model` rather than consuming the current
+large agent by default.
 
 For the upstream project, see [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer).
 
@@ -112,12 +147,14 @@ For private team sharing setup, see [`docs/TEAM-SHARING.md`](docs/TEAM-SHARING.m
 ## Docs
 
 - [Features](docs/features.md): the full capability reference, including all output modes, aesthetics, and how generation works.
+- [Installation and skill family](docs/installation.md): core setup, companion skills, failure behavior, and visual-model policy.
 - [Design systems](docs/design-systems.md): the external design-system registry format, resolution order, `ve:learn` token learning, and the agent-assisted refinement flow.
 - [PresentationDeck vs SlideDeck](docs/presentation-deck.md): which deck engine to reach for, the drill-down primitives, and the eval-pinned behavioral contract.
 - [Team sharing](docs/TEAM-SHARING.md): one-command deploys to Vercel or a team-gated Cloudflare space.
 - [Skill docs](plugins/visual-explainer/SKILL.md): what an agent actually reads, plus the per-use-case [cards](plugins/visual-explainer/cards/).
 - [Verifier](plugins/visual-explainer/scripts/verify/): the deterministic design-quality gate and its [eval suite](evals/).
 - [Model-matrix harness](evals/model-matrix/): benchmark your own model or agent on the same briefs.
+- [Visual-model policy harness](evals/visual-model-policy/): select the smallest qualified model and safe screenshot batch size per routed pass.
 
 ## Limitations
 

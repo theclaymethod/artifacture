@@ -1,0 +1,14 @@
+{
+  "case": "Three independent options are numbered 1–3 and connected by arrows even though no order exists.",
+  "human_label": "fire",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "artifact-slop-false-sequence",
+        "evidence": "Numbers and arrows falsely imply an ordered workflow.",
+        "fix": "Remove sequential cues or document the actual dependency."
+      }
+    ]
+  }
+}

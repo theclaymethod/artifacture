@@ -1,0 +1,14 @@
+{
+  "case": "A claim carries a citation-style [4] marker but the artifact contains no source list or target.",
+  "human_label": "fire",
+  "judge_response": {
+    "pass": false,
+    "findings": [
+      {
+        "check_id": "artifact-slop-false-provenance",
+        "evidence": "The reference marker implies traceable evidence that the artifact cannot supply.",
+        "fix": "Link a real source or remove the citation treatment."
+      }
+    ]
+  }
+}

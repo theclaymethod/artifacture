@@ -1,16 +1,17 @@
 #!/bin/bash
-# install-pi.sh - Install visual-explainer for Pi
+# install-pi.sh - Install Artifacture's visual-explainer skill for Pi
 
 set -e
 
 SKILL_DIR="$HOME/.pi/agent/skills/visual-explainer"
+PI_SKILLS_DIR="$HOME/.pi/agent/skills"
 PROMPTS_DIR="$HOME/.pi/agent/prompts"
 
 # Check if we're in the repo or need to clone
 if [ ! -f "plugins/visual-explainer/SKILL.md" ]; then
-    echo "Cloning visual-explainer..."
+    echo "Cloning Artifacture..."
     TEMP_DIR=$(mktemp -d)
-    git clone --depth 1 https://github.com/nicobailon/visual-explainer.git "$TEMP_DIR"
+    git clone --depth 1 https://github.com/theclaymethod/artifacture.git "$TEMP_DIR"
     cd "$TEMP_DIR"
     CLEANUP=true
 else
@@ -41,7 +42,22 @@ if [ "$CLEANUP" = true ]; then
 fi
 
 echo ""
-echo "Done! Restart pi to use visual-explainer."
+echo "Artifacture core installed. Restart Pi to use visual-explainer."
+echo ""
+echo "Companion skill family:"
+if [ -d "$PI_SKILLS_DIR/impeccable" ]; then
+    echo "  [found] Impeccable — general visual craft"
+else
+    echo "  [missing] Impeccable — install separately for general visual craft"
+fi
+if [ -d "$PI_SKILLS_DIR/unslop" ]; then
+    echo "  [found] Unslop — prose review"
+else
+    echo "  [missing] Unslop — install separately for prose review"
+fi
+echo "  Missing companions are reported as skipped; Artifacture does not copy their rubrics."
+echo "  Visual screenshot passes also require an eval-qualified model policy."
+echo "  See: https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md"
 echo ""
 echo "Commands available:"
 echo "  /diff-review, /plan-review, /project-recap, /fact-check"

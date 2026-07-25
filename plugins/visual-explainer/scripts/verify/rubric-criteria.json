@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "criteria": [
+    {
+      "id": "layout-repeated-track-symmetry",
+      "pass": "layout",
+      "rubric": "rubrics/pass-layout.md"
+    },
+    {
+      "id": "artifact-slop-false-sequence",
+      "pass": "artifacture:slop-gap",
+      "rubric": "rubrics/pass-artifact-slop-gap.md"
+    },
+    {
+      "id": "artifact-slop-false-state",
+      "pass": "artifacture:slop-gap",
+      "rubric": "rubrics/pass-artifact-slop-gap.md"
+    },
+    {
+      "id": "artifact-slop-false-provenance",
+      "pass": "artifacture:slop-gap",
+      "rubric": "rubrics/pass-artifact-slop-gap.md"
+    }
+  ]
+}

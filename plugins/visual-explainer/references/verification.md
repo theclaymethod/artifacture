@@ -40,7 +40,21 @@ The report JSON contains:
     }
   ],
   "screenshots": ["..."],
-  "llm_passes_required": ["hierarchy", "aesthetic-mono-industrial", "completeness", "copy", "visual-tells"]
+  "llm_passes_required": ["hierarchy", "impeccable:critique"],
+  "llm_dispatch_plan": [
+    {
+      "pass": "hierarchy",
+      "owner": "artifacture",
+      "status": "ready",
+      "model": "provider-small-vision",
+      "batch_size": 2
+    },
+    {
+      "pass": "impeccable:critique",
+      "owner": "impeccable",
+      "status": "delegate-to-installed-skill"
+    }
+  ]
 }
 ```
 
@@ -48,9 +62,11 @@ The browser stage renders the required matrix for the detected profile. Page, sl
 
 ### Producing pass inputs
 
-In single-agent mode, YOU produce the declared inputs before running each rubric.
+The orchestrator produces the declared inputs before dispatching each rubric.
+Input extraction and screenshot capture may run in the main thread; visual
+judgment may not.
 
-1. Extract prose text for P-copy with the exclusion filter in that rubric: remove code, identifiers, filenames, table headers, labels, counters, timestamps, status strings, Mermaid labels, and square-bracket system messages. A documented Node one-liner is acceptable, for example:
+1. Extract prose text for delegated Unslop review: remove code, identifiers, filenames, table headers, labels, counters, timestamps, status strings, Mermaid labels, and square-bracket system messages. A documented Node one-liner is acceptable, for example:
 
    ```bash
    node -e "let s=require('fs').readFileSync(process.argv[1],'utf8'); s=s.replace(/<(script|style|pre|code|svg)\b[\s\S]*?<\/\1>/gi,' '); s=s.replace(/\[[^\]]*\]/g,' ').replace(/<[^>]+>/g,' '); console.log(s.replace(/\s+/g,' ').trim())" <artifact.html>
@@ -60,23 +76,71 @@ In single-agent mode, YOU produce the declared inputs before running each rubric
 3. Capture P-diagram inputs one figure at a time. Scroll to each element carrying `data-diagram-role` or `.mermaid`; screenshot that element's bounding region; extract its visible labels; write a one-line content brief for the figure.
 4. For P-operating-model, build a review map with one row per slide or coherent long-form section: stable unit id, unit type (`slide` or `section`), visible title, one-sentence narrative job, and screenshot path. If the source has no narrative job, use the visible claim and mark the route low-confidence. Do not use implementation source to infer intent.
 5. Use candidate element lists from each deterministic check's `evidence` and `where` fields when a pass asks for candidate extracts.
+6. For `impeccable:critique`, capture only the candidate screenshots and locations named by the report. For `unslop:cleanup-report`, supply only the excluded-filtered prose extract.
+7. For `artifacture:slop-gap`, capture only the explicitly nominated region, its visible text, and the smallest source/truth excerpt needed to judge sequence, state/confidence, or provenance.
 
 ## 2. Run LLM Passes
 
 Run each required pass as a separate context. Use only the inputs named by the pass. Do not let screenshots, source text, or rubric sections leak across passes.
 
-Claude Code: spawn the matching `ve-verifier-*` agents in one parallel Task batch. Each agent reads one rubric and returns only verdict JSON.
+Before dispatch, read `./model-routing.md` and consume the report's
+`llm_dispatch_plan`. Use the exact model and batch size recorded for every
+`ready` Artifacture pass. The current/main agent must not inspect the
+screenshots itself merely because a subagent or direct model route is
+inconvenient.
 
-Single-agent environments such as Codex CLI: run the same rubric files sequentially. Run rubrics in order; for each, load only that rubric file and its declared inputs; do not carry prior rubrics' questions, screenshots, or findings forward; emit the verdict JSON, then proceed. The files in `{{skill_dir}}/scripts/verify/rubrics/` are the single source of truth for both execution modes.
+Prefer direct model API calls when controlled model selection, cost telemetry,
+or cache measurement matters. Coding-agent subagents are an orchestration
+fallback only when they can actually target the selected model. If the host
+cannot run the policy's model, mark the pass skipped with
+`no-eval-qualified-model`; do not silently substitute the host/frontier model.
+
+Invoke Impeccable and Unslop through their installed skills, not copied
+Artifacture agents. Load only the selected rubric/skill and declared inputs; do
+not carry prior questions, screenshots, or findings forward. Artifacture rubric
+files are authoritative only for Artifacture-owned passes.
+
+### Cache-friendly visual dispatch
+
+When multiple selected criteria consume the exact same image set, build one
+immutable evidence prefix: fixed tools and verdict contract, shared evidence
+instructions, optional design-system exception excerpt, then exact image blocks
+in stable state-id order. Append selected check ids and rubric questions only
+after that prefix.
+
+Do not claim prefix-cache savings from coding-agent subagents without provider
+usage telemetry. Claude Code named subagents use separate caches; forks share
+the parent cache but inherit its model. Codex can reuse exact prefixes, but
+model, tools, sandbox, approval, or working-directory changes can invalidate
+them and its subagent protocol does not expose cache token counts. Use the
+direct-API experiment in `docs/plans/visual-eval-prefix-caching.md` when measured
+cache reads and controlled small-model selection are required.
 
 Every pass returns:
 
 ```json
 {
   "pass": true,
+  "execution": {
+    "model": "provider/model",
+    "batch_size": 2,
+    "policy_source": "~/.artifacture/visual-model-policy.json",
+    "escalated_from": null
+  },
   "findings": [
-    { "check_id": "text-visibly-clipped", "evidence": "390-dark screenshot: heading is cut at right edge", "fix": "Allow wrapping or widen the container, then rerun verification." }
+    { "check_id": "text-visibly-clipped", "state_id": "390-dark", "region": "hero heading", "evidence": "Heading is cut at right edge", "fix": "Allow wrapping or widen the container, then rerun verification." }
   ]
+}
+```
+
+When no eval-qualified route can run:
+
+```json
+{
+  "pass": null,
+  "status": "skipped",
+  "reason": "no-eval-qualified-model",
+  "findings": []
 }
 ```
 
@@ -84,22 +148,23 @@ Use these passes:
 
 | Pass | Run When | Inputs | Rubric |
 |---|---|---|---|
-| P-layout | `llm_passes_required` includes `hierarchy`, or any layout candidate exists | `report.json`; the 4 standard screenshots; candidate lists for clipping, fixed chrome, div-grid tables, slide screenshots, demo frames when referenced | `{{skill_dir}}/scripts/verify/rubrics/pass-layout.md` |
+| P-layout | `llm_passes_required` includes `hierarchy`, or any layout candidate exists | `report.json`; the 4 standard screenshots; candidate lists for clipping, fixed chrome, div-grid tables, repeated-track layouts, slide screenshots, demo frames when referenced | `{{skill_dir}}/scripts/verify/rubrics/pass-layout.md` |
 | P-aesthetic | `llm_passes_required` includes any `aesthetic-*` token, a preset is detected or declared, or any preset candidate exists | `report.json`; active preset name; light/dark screenshots; candidate extracts named in the report | `{{skill_dir}}/scripts/verify/rubrics/pass-aesthetic.md` |
 | P-diagram | diagrams are present | `report.json`; one screenshot per figure; extracted diagram labels; one-line content brief for each figure | `{{skill_dir}}/scripts/verify/rubrics/pass-diagram.md` |
 | P-operating-model | `llm_passes_required` includes `operating-model` | one screenshot per review unit; review map with unit id, unit type, visible title, and one-sentence narrative job; only the brief excerpts needed to resolve intent | `{{skill_dir}}/scripts/verify/rubrics/pass-operating-model.md` |
 | P-completeness | source material or demo evidence exists | source inventory; extracted rendered headings, bullets, table rows, cards, and demo-frame summary; no page screenshots | `{{skill_dir}}/scripts/verify/rubrics/pass-completeness.md` |
-| P-copy | extracted prose exists | excluded-filtered prose text only | `{{skill_dir}}/scripts/verify/rubrics/pass-copy.md` |
-| P-visual-tells | `llm_passes_required` includes `visual-tells` (page/slides/magazine) | `report.json`; light/dark screenshots; candidate extracts | `{{skill_dir}}/scripts/verify/rubrics/pass-visual-tells.md` |
+| D-Impeccable | `llm_passes_required` includes `impeccable:critique` | candidate screenshots and locations from `report.json`; relevant design-system excerpt only | installed Impeccable skill; read-only critique/audit |
+| D-Unslop | `llm_passes_required` includes `unslop:cleanup-report` | excluded-filtered prose text only | installed Unslop skill; `cleanup --report` |
+| P-artifact-slop-gap | `llm_passes_required` includes `artifacture:slop-gap` | one nominated screenshot/crop; visible text; smallest source/truth excerpt needed to judge the claim | `{{skill_dir}}/scripts/verify/rubrics/pass-artifact-slop-gap.md` |
 | P-poster | profile is `poster` | exported PNG only | `{{skill_dir}}/scripts/verify/rubrics/pass-poster.md` |
 
 ### P-layout Questions
 
-Ask the questions tagged in `pass-layout.md`: semantic table need, global hierarchy, visible text clipping, mobile fixed-chrome obstruction, slide focal clarity, repeated slide composition, sparse diagram slide.
+Ask only the applicable questions tagged in `pass-layout.md`: semantic table need, global hierarchy, visible text clipping, mobile fixed-chrome obstruction, slide focal clarity, repeated-track symmetry, repeated slide composition, and sparse diagram slide. Repeated-track symmetry is conditional: run it only when the artifact visibly establishes equivalent columns or rows.
 
 ### P-aesthetic Questions
 
-Load only the active preset section in `pass-aesthetic.md`. Do not judge Nothing rules on a Mono-Industrial page or generic custom pages against a named preset. Ask the generic both-mode question for any named preset.
+Load only the active named-preset section in `pass-aesthetic.md`. Do not judge generic custom pages against a named preset; general visual craft and visual AI tells route to Impeccable.
 
 ### P-diagram Questions
 
@@ -123,9 +188,23 @@ or misstates the unit's narrative job.
 
 Compare source inventory to extracted rendered content. Do not use screenshots. Missing source sections, decision cards, table rows, collapsible details, footnotes, or demonstrably low-value demo embeds fail this pass.
 
-### P-copy Questions
+### Delegated Impeccable Questions
 
-Judge only extracted prose. Do not penalize code, identifiers, filenames, table headers, labels, counters, timestamps, status strings, Mermaid labels, or square-bracket system messages.
+Invoke the installed Impeccable skill in read-only critique/audit mode with only
+the routed screenshot evidence. Do not paste or paraphrase Impeccable's rubric
+into Artifacture.
+
+### Delegated Unslop Questions
+
+Invoke Unslop as `cleanup --report` on excluded-filtered prose only. Do not
+penalize identifiers, labels, counters, timestamps, status strings, Mermaid
+labels, or system messages. Do not rewrite prose during verification.
+
+### P-artifact-slop-gap Questions
+
+Run only for explicit `data-ve-checks="artifacture:slop-gap"` regions. Ask
+whether decoration falsely implies sequence, measured state/confidence, or
+provenance/verification. Stay silent on every generic aesthetic or prose issue.
 
 ### P-poster Questions
 
@@ -133,7 +212,7 @@ Inspect the exact exported PNG after every `poster export`. Check edge clipping,
 
 ## 3. Merge Verdicts And Re-Fix
 
-1. Merge all pass verdicts into one table: pass name, `pass` boolean, finding count, check IDs.
+1. Merge Artifacture and delegated verdicts into one table: pass/skill name, `pass` boolean, finding count, check IDs.
 2. If every pass returns `"pass": true`, continue to Step 4.
 3. If any pass returns `"pass": false`, fix only the defects named in `findings`.
 4. Re-export from source. Never hand-edit generated HTML when an MDX/TSX source exists.
@@ -147,7 +226,7 @@ The delivery message must include:
 
 1. The artifact path.
 2. The `ve-verify` report path.
-3. A pass/fail line for each LLM pass that ran.
+3. A pass/fail line for every Artifacture pass and delegated skill that ran.
 4. One of these exact disclosure shapes:
    - `Verified: ve-verify passed and required LLM verification passes passed.`
    - `Could not fully verify: <specific verifier, browser, or LLM pass limitation>.`
@@ -157,7 +236,7 @@ Never imply browser or visual verification happened when it did not.
 
 ## Process Boundaries
 
-- Clarify-tier gates are defined in `{{skill_dir}}/references/clarify.md`; apply them before generation and do not duplicate them here.
+- Delegated ownership is defined in `{{skill_dir}}/references/delegated-skills.md`; apply it without copying Impeccable or Unslop rubrics. Clarify-tier gates are defined in `{{skill_dir}}/references/clarify.md`.
 - Slide, magazine, poster, and video formats are opt-in only. Do not choose them without an explicit user request or flag.
 - For pages with 3 or more sections, use the fan-out policy and section retry limit in `{{skill_dir}}/references/section-contract.md`.
 - For video, run the Hyperframes workflow in order: doctor, build, lint, validate, draft render, extract 3 meaningful keyframes, show the user, wait for explicit approval, then final render. Reject invalid `--fps`, `--quality`, and `--aspect` flags before rendering.

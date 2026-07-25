@@ -42,6 +42,9 @@ const OPERATING_MODEL_ROUTING_CASES = join(
 const checksCatalog = JSON.parse(
   readFileSync(resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/checks.json'), 'utf8'),
 ).checks;
+const rubricCriteria = JSON.parse(
+  readFileSync(resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/rubric-criteria.json'), 'utf8'),
+).criteria;
 
 const severityById = new Map(checksCatalog.map((check) => [check.id, check.severity]));
 
@@ -98,6 +101,27 @@ function runStubCheck(id) {
     });
   }
   return rows;
+}
+
+function runCriterionCheck(id) {
+  const registered = rubricCriteria.find((criterion) => criterion.id === id);
+  if (!registered) throw new Error(`rubric-criteria.json has no entry for ${id}`);
+  const dir = join(RUBRICS_FIXTURES_ROOT, id);
+  return ['fire', 'clean'].map((caseName) => {
+    const fixturePath = join(dir, `${caseName}.json`);
+    if (!existsSync(fixturePath)) {
+      return { id, caseName, status: 'error', message: `missing fixture ${fixturePath}` };
+    }
+    const fixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
+    const result = deriveStatus(id, fixture.judge_response, 'warn');
+    const expected = caseName === 'fire' ? 'warn' : 'pass';
+    return {
+      id,
+      caseName,
+      status: result.status === expected ? 'pass' : 'FAIL',
+      message: `human-reviewed expected=${expected} derived=${result.status}`,
+    };
+  });
 }
 
 // --- Real algorithm: word-overlap scorer for caption vs. transcript --------
@@ -275,6 +299,173 @@ function runOperatingModelPassSelectionCases() {
   });
 }
 
+function runVisualFamilyPassSelectionCases() {
+  const baseCtx = {
+    profile: 'page',
+    preset: 'custom',
+    presetHint: '',
+    html: '<main></main>',
+    filePath: 'artifact.html',
+  };
+  const cases = [
+    {
+      name: 'diagram-check-emits-diagram-family',
+      ctx: baseCtx,
+      check: { id: 'diagram-type-coherent', stage: 'llm-pass', status: 'llm-required', severity: 'error' },
+      expected: 'diagram',
+    },
+    {
+      name: 'poster-check-emits-poster-family',
+      ctx: { ...baseCtx, profile: 'poster' },
+      check: { id: 'poster-visual-fit-squint', stage: 'llm-pass', status: 'llm-required', severity: 'error' },
+      expected: 'poster',
+    },
+  ];
+  return cases.map(({ name, ctx, check, expected }) => {
+    const report = buildReport(ctx, [check]);
+    const actual = report.llm_passes_required.includes(expected);
+    return {
+      id: 'visual-family-pass-selection',
+      caseName: name,
+      status: actual ? 'pass' : 'FAIL',
+      message: `expected=${expected} actual=${report.llm_passes_required.join('|')}`,
+    };
+  });
+}
+
+function runDelegatedSkillSelectionCases() {
+  const visualCandidate = {
+    id: 'nested-cards',
+    stage: 'static-dom',
+    status: 'warn',
+    severity: 'warn',
+  };
+  const proseCandidate = {
+    id: 'copy-slop-phrases',
+    stage: 'static-text',
+    status: 'warn',
+    severity: 'warn',
+  };
+  const unrelatedFinding = {
+    id: 'body-text-contrast-aa',
+    stage: 'browser',
+    status: 'fail',
+    severity: 'error',
+  };
+  const baseCtx = {
+    profile: 'slides',
+    preset: 'custom',
+    presetHint: '',
+    html: '<main></main>',
+    filePath: 'slides.html',
+  };
+  const cases = [
+    {
+      name: 'visual-candidate-routes-only-impeccable',
+      ctx: baseCtx,
+      checks: [visualCandidate],
+      expected: ['impeccable:critique'],
+    },
+    {
+      name: 'prose-candidate-routes-only-unslop',
+      ctx: baseCtx,
+      checks: [proseCandidate],
+      expected: ['unslop:cleanup-report'],
+    },
+    {
+      name: 'mixed-candidates-route-each-owner-once',
+      ctx: baseCtx,
+      checks: [visualCandidate, proseCandidate],
+      expected: ['impeccable:critique', 'unslop:cleanup-report'],
+    },
+    {
+      name: 'clean-candidates-route-neither-owner',
+      ctx: baseCtx,
+      checks: [
+        { ...visualCandidate, status: 'pass' },
+        { ...proseCandidate, status: 'pass' },
+      ],
+      expected: [],
+    },
+    {
+      name: 'unrelated-failure',
+      ctx: baseCtx,
+      checks: [unrelatedFinding],
+      expected: [],
+    },
+    {
+      name: 'impeccable-owned-llm-candidate-routes-to-impeccable',
+      ctx: baseCtx,
+      checks: [{
+        id: 'font-pairing-same-classification',
+        stage: 'llm-pass',
+        status: 'llm-required',
+        severity: 'warn',
+      }],
+      expected: ['impeccable:critique'],
+    },
+    {
+      name: 'unslop-owned-llm-candidate-routes-to-unslop',
+      ctx: baseCtx,
+      checks: [{
+        id: 'unslop-prose-style',
+        stage: 'llm-pass',
+        status: 'llm-required',
+        severity: 'warn',
+      }],
+      expected: ['unslop:cleanup-report'],
+    },
+    {
+      name: 'explicit-impeccable-marker',
+      ctx: { ...baseCtx, html: '<main data-ve-checks="layout, impeccable:critique"></main>' },
+      checks: [],
+      expected: ['impeccable:critique'],
+    },
+    {
+      name: 'explicit-unslop-marker',
+      ctx: { ...baseCtx, html: "<main data-ve-checks='unslop:cleanup-report'></main>" },
+      checks: [],
+      expected: ['unslop:cleanup-report'],
+    },
+    {
+      name: 'explicit-artifacture-slop-gap-marker',
+      ctx: { ...baseCtx, html: '<main data-ve-checks="artifacture:slop-gap"></main>' },
+      checks: [],
+      expected: ['artifacture:slop-gap'],
+    },
+    {
+      name: 'ambiguous-slop-marker-routes-nothing',
+      ctx: { ...baseCtx, html: '<main data-ve-checks="slop"></main>' },
+      checks: [],
+      expected: [],
+    },
+    {
+      name: 'video-visual-candidate-does-not-route-ui-critique',
+      ctx: { ...baseCtx, profile: 'video-comp' },
+      checks: [visualCandidate],
+      expected: [],
+    },
+    {
+      name: 'video-prose-candidate-can-route-unslop',
+      ctx: { ...baseCtx, profile: 'video-comp' },
+      checks: [proseCandidate],
+      expected: ['unslop:cleanup-report'],
+    },
+  ];
+
+  return cases.map(({ name, ctx, checks, expected }) => {
+    const report = buildReport(ctx, checks);
+    const actual = [...report.llm_passes_required].sort();
+    const wanted = [...expected].sort();
+    return {
+      id: 'delegated-skill-selection',
+      caseName: name,
+      status: JSON.stringify(actual) === JSON.stringify(wanted) ? 'pass' : 'FAIL',
+      message: `expected=${wanted.join('|') || 'none'} actual=${actual.join('|') || 'none'}`,
+    };
+  });
+}
+
 // --- Driver ------------------------------------------------------------
 
 const catalogIds = new Set(checksCatalog.map((check) => check.id));
@@ -289,8 +480,11 @@ for (const entry of SLICE) {
   const rows = entry.mode === 'algorithm' ? runTranscriptCheck(entry.id) : runStubCheck(entry.id);
   allRows.push(...rows);
 }
+for (const criterion of rubricCriteria) allRows.push(...runCriterionCheck(criterion.id));
 allRows.push(...runOperatingModelRoutingCases());
 allRows.push(...runOperatingModelPassSelectionCases());
+allRows.push(...runVisualFamilyPassSelectionCases());
+allRows.push(...runDelegatedSkillSelectionCases());
 
 console.log('check_id,case,status,detail');
 for (const row of allRows) {

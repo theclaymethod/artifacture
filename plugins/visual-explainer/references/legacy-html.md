@@ -377,7 +377,7 @@ Before you render any prose into the page, **run the copy through the `/unslop` 
 
 1. Draft the full set of prose copy for the page as a plain-text block before writing HTML.
 2. Invoke `/unslop` on that block. The skill runs its two-pass diagnosis-then-reconstruction and returns revised copy.
-3. If `/unslop` is unavailable in the current surface (for example, Codex CLI), apply the embedded de-slop rubric in `../scripts/verify/rubrics/pass-copy.md` yourself, using the same instruction hierarchy as the verification protocol: deterministic checks first, then fresh-context copy judgment.
+3. If Unslop is unavailable, disclose that the prose check was skipped. Do not emulate it with an Artifacture fallback rubric.
 4. Paste the unslopped copy into the HTML template. Do not paraphrase it again or "polish" it further — `/unslop` already did that work, and re-editing reintroduces the patterns it removed.
 
 If you skip this step and your prose still reads as AI-generated (telltale phrases like "it's important to note", "let that sink in", "in today's fast-paced landscape", predictable three-item lists, transitional "however"s and "moreover"s), the output has failed the craft bar regardless of how good the visual design is.
@@ -404,7 +404,7 @@ Exit `0` means no error-severity failures; warnings still require judgment. Exit
 
 Do not run LLM visual passes until `ve-verify` exits `0`. Use at most 3 deterministic repair cycles. If failures remain, deliver only with explicit unresolved check IDs and evidence.
 
-After `ve-verify` passes, run the LLM passes in `./verification.md`: hierarchy, aesthetic, visual-tells, diagram, completeness, copy, and poster as required by the report/profile. Claude Code should dispatch the `ve-verifier-*` agents in parallel. Single-agent environments should run the same files in `../scripts/verify/rubrics/` sequentially.
+After `ve-verify` passes, run only the Artifacture passes and delegated skills named by `./verification.md`. General visual craft routes to Impeccable, prose routes to Unslop report-only, and Artifacture's explicit slop-gap pass covers only false sequence, state/confidence, or provenance. Claude Code should dispatch compatible selected `ve-verifier-*` agents in parallel. Single-agent environments should run the same selected Artifacture rubric files sequentially.
 
 Each LLM pass returns only:
 
@@ -689,101 +689,26 @@ The full protocol lives in `./verification.md`; the executable rubric questions 
 The irreducible judgment checks are:
 - **Layout judgment:** hierarchy, visible clipping, fixed chrome obstruction, semantic table need, slide focal clarity, composition repetition, and sparse slide diagnosis.
 - **Aesthetic judgment:** active-preset fidelity, both-mode visual inversion, status-color meaning, moment-of-surprise, grid-break intent, red-accent intent, and demo embed fit.
-- **Visual-tells judgment:** whether the visual choices communicate the source material through specific hierarchy, motifs, data emphasis, and format-appropriate tells.
+- **Delegated Impeccable judgment:** general visual craft, design specificity, hierarchy, typography, color, and generic visual AI tells.
 - **Diagram judgment:** legend fidelity, focal dominance, proportional honesty, type coherence, removal simplicity, and whether a diagram is necessary.
 - **Completeness judgment:** source inventory mapped to rendered content, plus whether a demo adds motion/interaction value.
-- **Copy judgment:** extracted prose passes `/unslop` standards.
+- **Delegated Unslop judgment:** excluded-filtered prose passes `cleanup --report`.
 - **Poster judgment:** exported PNG preserves canvas fit, hierarchy, and the intended hero/moment-of-surprise.
 
 Deterministic checks cover file structure, console/runtime errors, placeholder leaks, body overflow, link/style contracts, Mermaid container mechanics, preset tokens, slide sizing, poster bounds, video/transcript rules, and other machine-checkable constraints.
 
-## Anti-Patterns (AI Slop)
+## Design-craft delegation
 
-These patterns are explicitly forbidden. They signal "AI-generated template" and undermine the skill's purpose of producing distinctive, high-quality diagrams. Review every generated page against this list. Each ban includes the positive alternative to use instead.
+Artifacture does not maintain a general AI-slop checklist. Use the ownership
+contract in `./delegated-skills.md`:
 
-### Typography
+- Impeccable owns general visual craft, design specificity, typography, color,
+  generic decoration, and visual AI tells.
+- Unslop owns prose patterns, cadence, voice, and AI-writing tells.
+- Artifacture owns mechanical artifact checks and the explicit
+  `artifacture:slop-gap` pass.
 
-- Do not use Inter, Roboto, Arial, Helvetica, or `system-ui, sans-serif` alone as the primary `--font-body`; pick from the font pairings in `./libraries.md` or preserve a real project font stack.
-- Cap each page at four named font families. Prefer one family in three or four weights over fake variety.
-- Do not pair two fonts from the same class, such as two geometric sans or two humanist sans faces. Contrast on a real axis, such as serif plus sans or mono plus sans, or stay within one family.
-- Do not reach for reflex webfonts such as Fraunces, Playfair Display, Cormorant, Lora, Syne, Space Grotesk, DM Sans/Serif, Outfit, Plus Jakarta Sans, or Instrument Sans/Serif as the voice face on a custom page. Pick against three brand-voice words from a real catalog; mono variants inside code are fine.
-- Keep a committed type scale. Adjacent levels need at least a 1.25x difference carried by size plus weight or color; avoid 14/15/16px muddle and lone 500-vs-400 weight bumps.
-- Set body and running prose at 16px or larger in `rem`. Never ship `user-scalable=no` or `maximum-scale=1`.
-- Bound `clamp()` type: max/min should stay at or below about 2.5, and hero/display max should stay at or below about `6rem`.
-- Add `0.05em` to `0.12em` tracking to all-caps labels unless a house aesthetic sets its own value.
-- Load webfonts with `font-display: swap`; Google Fonts links must include `&display=swap`.
-
-### Color
-
-- Do not use indigo/violet defaults (`#8b5cf6`, `#7c3aed`, `#a78bfa`) or the cyan + magenta + pink neon set (`#06b6d4` -> `#d946ef` -> `#f472b6`). Build palettes from reference templates or from a real named theme.
-- Do not default body or surface neutrals to warm cream/sand (`OKLCH` L `.84-.99`, C `<.06`, hue `40-100`, or tokens such as `--paper`, `--cream`, `--sand`, `--linen`) unless the aesthetic explicitly owns paper. Tint neutrals toward the real brand hue or stay chroma-0; carry warmth through accent, type, or imagery.
-- Do not use indigo/blue around hue 250 or warm orange around hue 60 as the only accent without a brand reason. Choose accents that match the subject, theme, or data semantics.
-- Cap decorative chrome at about four hue families. Chart series, syntax highlighting, and semantic status colors are exempt.
-- Never put mid-gray text on a saturated background. Use the ink color at reduced alpha or a shade of the background hue.
-- Verify body-text contrast at 4.5:1 or better, and large/bold text at 3:1 or better, against the real rendered background in both themes.
-- Never encode meaning by color alone. Add a label, icon, shape, or texture; avoid legends made only of bare swatches.
-
-### Backgrounds & Effects
-
-- Do not use full-bleed violet-to-blue/cyan or purple-to-pink gradient washes as backgrounds. Use a solid brand color, a real image/chart, or an intentional non-default multi-stop gradient.
-- Do not add ambient decorative layers such as blurred gradient orbs, particle canvases, floating dot grids, or multiple radial glows. Tie atmosphere to real content, once and restrained.
-- Do not use gradient text on headings. Use actual type scale, weight, layout, and color contrast.
-- Do not use glassmorphism (`backdrop-blur` plus translucent surface) as the default card/nav/modal treatment. Reserve one frosted moment over real imagery; otherwise use opaque surfaces with a hairline or shadow.
-- Do not use animated glowing box-shadows or pulsing/breathing effects on static content. Use entrance reveals, hover feedback, or user-initiated transitions only.
-- Do not use a colored one-sided `border-left` or `border-right` stripe as a card accent. Use a full hairline border, a background tint, or a leading glyph.
-- Do not copy-paste one box-shadow onto every raised element. Use two or three elevation levels tied to importance, or rely on spacing and borders.
-
-### Layout & Structure
-
-- Do not center everything with uniform padding. Build hierarchy with visible differences in scale, alignment, density, and section rhythm.
-- Do not style every card identically. Hero, primary, secondary, and reference material need different weight.
-- Do not nest a card directly inside another card. Use spacing, a divider, or a subheading for subgrouping.
-- Do not box every block by default. Render standalone paragraphs, images, and lone stats as plain flow content.
-- Do not stamp out big-number plus small-label stat tiles unless the numbers are real, sourced data. Use narrative cards, tables, or diagrams when the values are illustrative.
-- Do not dump a wall of eight or more undifferentiated bullets. Group the content into two to four labeled clusters, a table, or a diagram; flat glossaries and changelogs are exceptions.
-- Derive spacing from one small scale such as `4/8/12/16/24/32/48/64`. Avoid scattered one-off values like `13px`, `17px`, and `22px`.
-- Create rhythm: tight spacing within groups, generous spacing between sections.
-- Vary section structure to match content type. Do not force a diff, timeline, and comparison into one grid mold. Break the grid once for a deliberate focal point.
-- Avoid symmetric layouts where both halves mirror each other without a reason.
-
-### Motion
-
-- Reveal animations must enhance already-visible content. Never default content to `opacity: 0` gated on a JavaScript class; headless, PDF, and PNG exports can ship blank.
-- Gate reveals behind CSS scroll timelines or provide reduced-motion and `noscript` fallbacks.
-- Do not loop the same fade-and-rise on every section or choreograph header, sections, and footer on load. Pick one hero moment; stagger only siblings within a list.
-- Use ease-out quart/quint/expo curves. Do not use bounce or elastic curves, including `cubic-bezier()` control points outside `[0,1]`.
-- Animate `transform` and `opacity`, not `width`, `height`, `top`, `left`, or `margin`.
-- Keep hover and press feedback at or below 300ms.
-- Never write `outline: none` on a focusable element without a `:focus-visible` replacement. Give interactive controls at least a `44px` by `44px` hit area.
-- Do not stage a spinner or skeleton in a static artifact that fetches nothing.
-
-### Iconography
-
-- Do not use emoji icons in section headers or inline body bullets. Use styled monospace labels, numbered badges, asymmetric section dividers, or inline SVG that matches the palette.
-- Pick one icon system per role and use it uniformly. Do not mix emoji, inline SVG, and unicode glyphs for equivalent items.
-- Do not repeat the same icon-in-rounded-box pattern for every section header.
-
-### Copy
-
-- Open with the claim. Cut throat-clearing such as "Here's the thing:", chatbot artifacts such as "Great question!" and "I hope this helps", and significance inflation such as "stands as a testament to".
-- Do not let a heading restate its own next sentence. The first sentence after a heading must add a fact, number, or mechanism.
-- Do not repeat a point across sections. Say it once in the strongest place.
-- Define load-bearing jargon on first use.
-- Keep one capitalization convention per heading level.
-- Use zero or one em dash per section. Avoid colon-before-dramatic-reveal and manufactured "not just X, it's Y" parallelism.
-- Run `/unslop` on drafted copy when available. If it is unavailable, apply the rubric in `../scripts/verify/rubrics/pass-copy.md` before writing prose into HTML.
-- Code blocks should use a simple header with filename or language label, never three-dot window chrome.
-
-### The Slop Test
-
-Before delivering, apply this test: **Would a developer looking at this page immediately think "AI generated this"?** The telltale signs:
-
-1. Inter or Roboto font with purple/violet gradient accents
-2. Every heading has `background-clip: text` gradient
-3. Emoji icons leading every section
-4. Glowing cards with animated shadows
-5. Cyan-magenta-pink color scheme on dark background
-6. Perfectly uniform card grid with no visual hierarchy
-7. Three-dot code block chrome
-
-If two or more of these are present, the page is slop. Regenerate with a different aesthetic direction — Editorial, Blueprint, Paper/ink, or a specific IDE theme. These constrained aesthetics are harder to mess up because they have specific visual requirements that prevent defaulting to generic patterns.
+The Artifacture gap is limited to decoration that falsely implies sequence,
+measured state/confidence, or provenance/verification. Do not expand that list
+with generic taste rules. If Impeccable or Unslop is unavailable, disclose the
+skipped delegated check instead of recreating its rubric here.

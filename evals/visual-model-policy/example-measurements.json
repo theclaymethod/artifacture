@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "thresholds": {
+    "min_runs": 3,
+    "min_positives": 10,
+    "min_negatives": 10,
+    "precision": 0.9,
+    "recall": 0.9,
+    "silence_accuracy": 0.95,
+    "grounding_accuracy": 0.95,
+    "json_validity": 0.99,
+    "max_abstention_rate": 0.05,
+    "max_p95_latency_ms": 30000,
+    "max_cost_per_case_usd": 0.01
+  },
+  "candidates": [
+    {
+      "id": "provider-small-vision",
+      "rank": 1,
+      "class": "small",
+      "provider": "replace-me"
+    },
+    {
+      "id": "provider-medium-vision",
+      "rank": 2,
+      "class": "medium",
+      "provider": "replace-me"
+    }
+  ],
+  "results": [
+    {
+      "pass": "layout",
+      "model": "provider-small-vision",
+      "batch_size": 2,
+      "runs": 3,
+      "cases": 100,
+      "positives": 40,
+      "negatives": 60,
+      "tp": 38,
+      "fp": 2,
+      "tn": 58,
+      "fn": 2,
+      "grounded": 39,
+      "grounding_total": 40,
+      "json_valid": 100,
+      "responses": 100,
+      "abstentions": 1,
+      "total_cost_usd": 0.1,
+      "p95_latency_ms": 5000
+    },
+    {
+      "pass": "layout",
+      "model": "provider-small-vision",
+      "batch_size": 4,
+      "runs": 3,
+      "cases": 100,
+      "positives": 40,
+      "negatives": 60,
+      "tp": 31,
+      "fp": 2,
+      "tn": 58,
+      "fn": 9,
+      "grounded": 35,
+      "grounding_total": 40,
+      "json_valid": 100,
+      "responses": 100,
+      "abstentions": 2,
+      "total_cost_usd": 0.06,
+      "p95_latency_ms": 6500
+    },
+    {
+      "pass": "layout",
+      "model": "provider-medium-vision",
+      "batch_size": 4,
+      "runs": 3,
+      "cases": 100,
+      "positives": 40,
+      "negatives": 60,
+      "tp": 40,
+      "fp": 1,
+      "tn": 59,
+      "fn": 0,
+      "grounded": 40,
+      "grounding_total": 40,
+      "json_valid": 100,
+      "responses": 100,
+      "abstentions": 0,
+      "total_cost_usd": 0.4,
+      "p95_latency_ms": 9000
+    }
+  ]
+}
