@@ -33,6 +33,13 @@ function result(overrides = {}) {
     abstentions: 1,
     total_cost_usd: 0.1,
     p95_latency_ms: 5000,
+    unique_cases: 20,
+    unique_positives: 10,
+    unique_negatives: 10,
+    adjudication_complete: true,
+    synthetic: false,
+    telemetry_complete: true,
+    experiment_complete: true,
     ...overrides,
   };
 }
@@ -167,4 +174,52 @@ test('requires grounding observations', () => {
     }),
     /grounding_total must be a positive integer/,
   );
+});
+
+test('repeated observations cannot substitute for independent labeled cases', () => {
+  const policy = selectVisualModelPolicy({
+    candidates,
+    results: [result({
+      unique_cases: 8,
+      unique_positives: 4,
+      unique_negatives: 4,
+    })],
+  });
+  assert.equal(policy.routes.layout, undefined);
+  assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /unique_positives/);
+});
+
+test('blocks measurements with pending human adjudication', () => {
+  const policy = selectVisualModelPolicy({
+    candidates,
+    results: [result({ adjudication_complete: false })],
+  });
+  assert.equal(policy.routes.layout, undefined);
+  assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /adjudication_complete/);
+});
+
+test('blocks synthetic dry-run evidence', () => {
+  const policy = selectVisualModelPolicy({
+    candidates,
+    results: [result({ synthetic: true })],
+  });
+  assert.equal(policy.routes.layout, undefined);
+  assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /synthetic/);
+});
+
+test('blocks incomplete provider telemetry', () => {
+  const policy = selectVisualModelPolicy({
+    candidates,
+    results: [result({ telemetry_complete: false })],
+  });
+  assert.equal(policy.routes.layout, undefined);
+  assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /telemetry_complete/);
+});
+
+test('blocks an incomplete experiment request matrix', () => {
+  const policy = selectVisualModelPolicy({
+    candidates,
+    results: [result({ experiment_complete: false })],
+  });
+  assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /experiment_complete/);
 });

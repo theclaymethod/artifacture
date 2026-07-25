@@ -10,6 +10,8 @@ export const DEFAULT_THRESHOLDS = Object.freeze({
   min_runs: 3,
   min_positives: 10,
   min_negatives: 10,
+  min_criterion_positives: 1,
+  min_criterion_negatives: 1,
   precision: 0.9,
   recall: 0.9,
   silence_accuracy: 0.95,
@@ -38,8 +40,12 @@ export function metricsFor(result) {
     grounding_accuracy: ratio(result.grounded, result.grounding_total, 0),
     json_validity: ratio(result.json_valid, responses, 0),
     abstention_rate: ratio(result.abstentions, responses, 0),
-    cost_per_case_usd: Number(result.total_cost_usd || 0) / cases,
-    p95_latency_ms: Number(result.p95_latency_ms),
+    cost_per_case_usd: result.total_cost_usd === null
+      ? null
+      : Number(result.total_cost_usd) / cases,
+    p95_latency_ms: result.p95_latency_ms === null
+      ? null
+      : Number(result.p95_latency_ms),
   };
 }
 
@@ -50,7 +56,7 @@ export function qualificationFor(result, thresholds = DEFAULT_THRESHOLDS) {
     if (Number(actual) < Number(minimum)) reasons.push(`${field} ${actual} < ${minimum}`);
   };
   const requireAtMost = (field, actual, maximum) => {
-    if (!Number.isFinite(Number(actual)) || Number(actual) > Number(maximum)) {
+    if (actual === null || !Number.isFinite(Number(actual)) || Number(actual) > Number(maximum)) {
       reasons.push(`${field} ${actual} > ${maximum}`);
     }
   };
@@ -58,6 +64,36 @@ export function qualificationFor(result, thresholds = DEFAULT_THRESHOLDS) {
   requireAtLeast('runs', result.runs, thresholds.min_runs);
   requireAtLeast('positives', result.positives, thresholds.min_positives);
   requireAtLeast('negatives', result.negatives, thresholds.min_negatives);
+  if (result.unique_positives !== undefined || result.unique_negatives !== undefined) {
+    requireAtLeast('unique_positives', result.unique_positives, thresholds.min_positives);
+    requireAtLeast('unique_negatives', result.unique_negatives, thresholds.min_negatives);
+  }
+  if (result.adjudication_complete !== true) {
+    reasons.push('adjudication_complete must be true');
+  }
+  if (result.synthetic !== false) {
+    reasons.push('synthetic measurements are not policy evidence');
+  }
+  if (result.telemetry_complete !== true) {
+    reasons.push('telemetry_complete must be true');
+  }
+  if (result.experiment_complete !== true) {
+    reasons.push('experiment_complete must be true');
+  }
+  if (Array.isArray(result.criteria)) {
+    for (const criterion of result.criteria) {
+      requireAtLeast(
+        `criterion ${criterion.id} unique_positives`,
+        criterion.unique_positives,
+        thresholds.min_criterion_positives,
+      );
+      requireAtLeast(
+        `criterion ${criterion.id} unique_negatives`,
+        criterion.unique_negatives,
+        thresholds.min_criterion_negatives,
+      );
+    }
+  }
   requireAtLeast('precision', metrics.precision, thresholds.precision);
   requireAtLeast('recall', metrics.recall, thresholds.recall);
   requireAtLeast('silence_accuracy', metrics.silence_accuracy, thresholds.silence_accuracy);
@@ -120,6 +156,11 @@ export function selectVisualModelPolicy(input) {
         cases: selected.cases,
         positives: selected.positives,
         negatives: selected.negatives,
+        ...(selected.unique_cases === undefined ? {} : {
+          unique_cases: selected.unique_cases,
+          unique_positives: selected.unique_positives,
+          unique_negatives: selected.unique_negatives,
+        }),
       },
       escalation_chain: ladder.slice(1).map((row) => ({
         model: row.model,
@@ -147,6 +188,9 @@ function validateInput(input) {
   if (!input || !Array.isArray(input.candidates) || !Array.isArray(input.results)) {
     throw new Error('input requires candidates[] and results[]');
   }
+  if (input.candidates.length === 0 || input.results.length === 0) {
+    throw new Error('input requires non-empty candidates[] and results[]');
+  }
   const ids = new Set();
   const ranks = new Set();
   for (const candidate of input.candidates) {
@@ -163,8 +207,19 @@ function validateInput(input) {
       'pass', 'model', 'batch_size', 'runs', 'cases', 'positives', 'negatives',
       'tp', 'fp', 'tn', 'fn', 'grounded', 'grounding_total', 'json_valid',
       'responses', 'abstentions', 'total_cost_usd', 'p95_latency_ms',
+      'unique_cases', 'unique_positives', 'unique_negatives',
+      'adjudication_complete', 'synthetic', 'telemetry_complete',
+      'experiment_complete',
     ]) {
-      if (result[field] === undefined || result[field] === null || result[field] === '') {
+      const nullableIncompleteTelemetry = (
+        ['total_cost_usd', 'p95_latency_ms'].includes(field)
+        && result.telemetry_complete === false
+      );
+      if (
+        result[field] === undefined
+        || result[field] === ''
+        || (result[field] === null && !nullableIncompleteTelemetry)
+      ) {
         throw new Error(`result requires ${field}`);
       }
     }
@@ -176,9 +231,24 @@ function validateInput(input) {
       'positives', 'negatives', 'tp', 'fp', 'tn', 'fn', 'grounded',
       'json_valid', 'abstentions',
     ]) nonNegativeInt(result[field], field);
+    for (const field of ['unique_cases', 'unique_positives', 'unique_negatives']) {
+      nonNegativeInt(result[field], field);
+    }
+    for (const field of [
+      'adjudication_complete',
+      'synthetic',
+      'telemetry_complete',
+      'experiment_complete',
+    ]) {
+      if (typeof result[field] !== 'boolean') throw new Error(`${field} must be a boolean`);
+    }
     positiveInt(result.grounding_total, 'grounding_total');
-    nonNegativeFinite(result.total_cost_usd, 'total_cost_usd');
-    nonNegativeFinite(result.p95_latency_ms, 'p95_latency_ms');
+    if (result.total_cost_usd !== null) {
+      nonNegativeFinite(result.total_cost_usd, 'total_cost_usd');
+    }
+    if (result.p95_latency_ms !== null) {
+      nonNegativeFinite(result.p95_latency_ms, 'p95_latency_ms');
+    }
     if (Number(result.positives) + Number(result.negatives) !== Number(result.cases)) {
       throw new Error('positives + negatives must equal cases');
     }
@@ -196,6 +266,12 @@ function validateInput(input) {
     }
     if (Number(result.grounded) > Number(result.grounding_total)) {
       throw new Error('grounded cannot exceed grounding_total');
+    }
+    if (
+      result.unique_cases !== undefined
+      && Number(result.unique_positives) + Number(result.unique_negatives) !== Number(result.unique_cases)
+    ) {
+      throw new Error('unique_positives + unique_negatives must equal unique_cases');
     }
   }
 }
@@ -232,7 +308,9 @@ function roundMetrics(metrics) {
   return Object.fromEntries(
     Object.entries(metrics).map(([key, value]) => [
       key,
-      Number.isFinite(value) ? Number(value.toFixed(key === 'cost_per_case_usd' ? 8 : 4)) : value,
+      Number.isFinite(value)
+        ? Number(value.toFixed(key === 'cost_per_case_usd' ? 8 : 4))
+        : value,
     ]),
   );
 }

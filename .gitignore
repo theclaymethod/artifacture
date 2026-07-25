@@ -29,6 +29,8 @@ skills-lock.json
 .codex-briefs/
 evals/model-matrix/out/
 evals/visual-model-policy/runs/
+evals/visual-model-policy/corpus/rendered/
 evals/visual-model-policy/policy.generated.json
+evals/visual-model-policy/experiment.local.json
 docs/goals/
 artifacts/

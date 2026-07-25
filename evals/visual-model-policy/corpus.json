@@ -1,0 +1,1112 @@
+{
+  "schema_version": 1,
+  "corpus_id": "artifacture-owned-visual-v1",
+  "rendered_root": "corpus/rendered",
+  "label_review": {
+    "status": "pending-human-review",
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "Proposed labels follow the authored pair intent. A human reviewer must inspect every rendered pair and sign off before live measurements."
+  },
+  "families": [
+    {
+      "id": "layout",
+      "route_key": "layout",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-layout.md",
+      "pairs": [
+        {
+          "id": "mobile-heading-edge",
+          "criterion_id": "text-visibly-clipped",
+          "region": { "id": "hero-heading", "label": "Mobile hero heading" },
+          "fire": {
+            "title": "Heading clipped at the viewport edge",
+            "visible_text": "Operational evidence architecture",
+            "truth_excerpt": "The full heading is authored as “Operational evidence architecture.”",
+            "adjudication_notes": "The final word is cut mid-character at the right edge; no ellipsis or disclosure control is present.",
+            "render": { "template": "text", "variant": "clipped-right" }
+          },
+          "clean": {
+            "title": "Long heading wraps intentionally",
+            "visible_text": "Operational evidence architecture",
+            "truth_excerpt": "The heading may wrap to preserve every authored word.",
+            "adjudication_notes": "The two-line wrap is intentional and every character remains visible; line wrapping is not clipping.",
+            "render": { "template": "text", "variant": "wrapped" }
+          }
+        },
+        {
+          "id": "dense-table-label",
+          "criterion_id": "text-visibly-clipped",
+          "region": { "id": "audit-table", "label": "Dense audit table" },
+          "fire": {
+            "title": "Audit label chopped inside a fixed cell",
+            "visible_text": "Representative calibration queue",
+            "truth_excerpt": "The complete queue name is required to distinguish it from the frontier queue.",
+            "adjudication_notes": "The label is visibly chopped inside an overflow-hidden cell and cannot be recovered from adjacent content.",
+            "render": { "template": "table", "variant": "clipped-label" }
+          },
+          "clean": {
+            "title": "Dense expert table scrolls without truncating labels",
+            "visible_text": "Representative calibration queue",
+            "truth_excerpt": "Dense expert surfaces are allowed when their labels remain available.",
+            "adjudication_notes": "The table is intentionally dense, but the label is complete and the horizontal overflow affordance is visible.",
+            "render": { "template": "table", "variant": "dense-scroll" }
+          }
+        },
+        {
+          "id": "title-diagram-kpis",
+          "criterion_id": "slide-single-focal-point",
+          "region": { "id": "slide-canvas", "label": "Presentation slide canvas" },
+          "fire": {
+            "title": "Three primary treatments compete",
+            "visible_text": "Policy router · 93% coverage · Review topology",
+            "truth_excerpt": "The slide’s narrative job is to explain the routing topology.",
+            "adjudication_notes": "A huge title, saturated diagram, and equally large KPI row all demand first attention, leaving no single focal point.",
+            "render": { "template": "slide", "variant": "competing-foci" }
+          },
+          "clean": {
+            "title": "Dense evidence supports one dominant diagram",
+            "visible_text": "Policy router · 93% coverage · Review topology",
+            "truth_excerpt": "The router is the claim; supporting metrics may remain subordinate.",
+            "adjudication_notes": "The surface contains many expert details, but scale and contrast clearly make the router diagram the single focal element.",
+            "render": { "template": "slide", "variant": "dense-one-focus" }
+          }
+        },
+        {
+          "id": "comparison-dashboard",
+          "criterion_id": "slide-single-focal-point",
+          "region": { "id": "dashboard-main", "label": "Comparison dashboard" },
+          "fire": {
+            "title": "Every dashboard tile is visually primary",
+            "visible_text": "Latency · Cost · Recall · Coverage",
+            "truth_excerpt": "The decision is whether recall remains above the graduation gate.",
+            "adjudication_notes": "Four equally loud metric tiles and two charts compete despite one decision-driving measure.",
+            "render": { "template": "dashboard", "variant": "uniform-loud" }
+          },
+          "clean": {
+            "title": "Expert dashboard emphasizes the decision metric",
+            "visible_text": "Latency · Cost · Recall · Coverage",
+            "truth_excerpt": "Recall is the decision-driving measure; other metrics are supporting context.",
+            "adjudication_notes": "The dashboard remains information-dense but recall is clearly dominant through placement and type scale.",
+            "render": { "template": "dashboard", "variant": "hierarchical-dense" }
+          }
+        },
+        {
+          "id": "tiny-diagram-ocean",
+          "criterion_id": "sparse-diagram-slide",
+          "region": { "id": "diagram-frame", "label": "Diagram and surrounding canvas" },
+          "fire": {
+            "title": "Tiny diagram floats in unexplained space",
+            "visible_text": "Input → Review → Output",
+            "truth_excerpt": "The three-stage route is the full content of the slide.",
+            "adjudication_notes": "The diagram occupies a small corner while most of the canvas is unexplained blank space, making the content feel missing.",
+            "render": { "template": "diagram-space", "variant": "tiny-unbalanced" }
+          },
+          "clean": {
+            "title": "Authored breathing room frames a short claim",
+            "visible_text": "Input → Review → Output",
+            "truth_excerpt": "The brief calls for a quiet transition slide with one compact route.",
+            "adjudication_notes": "The blank area is deliberately balanced around a centered claim and does not resemble a collapsed or missing region.",
+            "render": { "template": "diagram-space", "variant": "intentional-breathing" }
+          }
+        },
+        {
+          "id": "collapsed-peer-column",
+          "criterion_id": "sparse-diagram-slide",
+          "region": { "id": "peer-map", "label": "Three-column peer map" },
+          "fire": {
+            "title": "Collapsed third column leaves accidental dead space",
+            "visible_text": "Signals · Policy · Actions",
+            "truth_excerpt": "All three peer stages have content in the source brief.",
+            "adjudication_notes": "The third stage collapses to a tiny block and leaves a large blank region that reads as missing content.",
+            "render": { "template": "diagram-space", "variant": "collapsed-column" }
+          },
+          "clean": {
+            "title": "Evidence rail intentionally leaves reading space",
+            "visible_text": "Narrative · Evidence",
+            "truth_excerpt": "The composition is an editorial 70/30 narrative and evidence split.",
+            "adjudication_notes": "The narrow evidence rail and open lower area are authored hierarchy, not a missing peer column.",
+            "render": { "template": "diagram-space", "variant": "editorial-space" }
+          }
+        },
+        {
+          "id": "three-peer-widths",
+          "criterion_id": "layout-repeated-track-symmetry",
+          "region": { "id": "peer-tracks", "label": "Input, router, and output tracks" },
+          "fire": {
+            "title": "Equivalent peer tracks drift in width",
+            "visible_text": "Input · Router · Output",
+            "truth_excerpt": "The three stages are declared as equivalent review tracks.",
+            "adjudication_notes": "The middle track is inexplicably narrower and divider positions do not align across otherwise equivalent regions.",
+            "render": { "template": "tracks", "variant": "unequal-peers" }
+          },
+          "clean": {
+            "title": "Intentional 60/40 editorial split",
+            "visible_text": "Narrative · Evidence",
+            "truth_excerpt": "The narrative is primary and the evidence rail is explicitly supporting.",
+            "adjudication_notes": "The unequal widths express different content roles and therefore should not be treated as failed peer symmetry.",
+            "render": { "template": "tracks", "variant": "editorial-60-40" }
+          }
+        },
+        {
+          "id": "row-baseline-drift",
+          "criterion_id": "layout-repeated-track-symmetry",
+          "region": { "id": "comparison-rows", "label": "Before and after comparison rows" },
+          "fire": {
+            "title": "Peer row baselines do not align",
+            "visible_text": "Before · After",
+            "truth_excerpt": "Rows represent direct before/after counterparts.",
+            "adjudication_notes": "Corresponding row dividers drift vertically, undermining the declared one-to-one comparison.",
+            "render": { "template": "tracks", "variant": "baseline-drift" }
+          },
+          "clean": {
+            "title": "Content-driven masonry is not a peer table",
+            "visible_text": "Field notes · Evidence fragments",
+            "truth_excerpt": "Items are independent editorial fragments with deliberately varied lengths.",
+            "adjudication_notes": "The staggered baselines belong to an editorial masonry composition, not equivalent repeated rows.",
+            "render": { "template": "tracks", "variant": "masonry" }
+          }
+        },
+        {
+          "id": "missing-track-weight",
+          "criterion_id": "layout-repeated-track-symmetry",
+          "region": { "id": "quadrant-grid", "label": "Four peer quadrants" },
+          "fire": {
+            "title": "One peer quadrant appears absent",
+            "visible_text": "Detect · Route · Review · Learn",
+            "truth_excerpt": "The operating loop defines four peer responsibilities.",
+            "adjudication_notes": "One quadrant receives a fraction of the area and large accidental whitespace makes it appear unimplemented.",
+            "render": { "template": "tracks", "variant": "missing-weight" }
+          },
+          "clean": {
+            "title": "One dominant result spans two grid columns",
+            "visible_text": "Inputs · Method · Result",
+            "truth_excerpt": "The result is explicitly the conclusion and should dominate supporting inputs.",
+            "adjudication_notes": "The spanning result is intentional hierarchy rather than an equivalent peer rendered at the wrong size.",
+            "render": { "template": "tracks", "variant": "hero-span" }
+          }
+        },
+        {
+          "id": "mobile-control-crowding",
+          "criterion_id": "slide-single-focal-point",
+          "region": { "id": "mobile-header", "label": "Mobile header and primary content" },
+          "fire": {
+            "title": "Controls crowd the primary claim",
+            "visible_text": "Model policy · Theme · Filter · Export",
+            "truth_excerpt": "The page title and selected policy are the primary content.",
+            "adjudication_notes": "Large controls surround and visually overpower the title, producing several competing focal targets.",
+            "render": { "template": "mobile", "variant": "crowded-controls" }
+          },
+          "clean": {
+            "title": "Compact expert controls remain subordinate",
+            "visible_text": "Model policy · Theme · Filter · Export",
+            "truth_excerpt": "Frequent operators need all controls available without losing the page claim.",
+            "adjudication_notes": "The surface is dense by design, but compact chrome remains subordinate to one clear title and active policy.",
+            "render": { "template": "mobile", "variant": "compact-controls" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "diagram",
+      "route_key": "diagram",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-diagram.md",
+      "pairs": [
+        {
+          "id": "mixed-grammar",
+          "criterion_id": "diagram-type-coherent",
+          "region": { "id": "figure", "label": "Architecture figure" },
+          "fire": {
+            "title": "Swimlanes and containment conflict",
+            "visible_text": "Client · Router · Cache · Store",
+            "truth_excerpt": "The content describes one request flow.",
+            "adjudication_notes": "Half the figure uses lanes while the other half uses nested containment for the same relation.",
+            "render": { "template": "diagram", "variant": "mixed-grammar" }
+          },
+          "clean": {
+            "title": "One flow grammar with a highlighted boundary",
+            "visible_text": "Client · Router · Cache · Store",
+            "truth_excerpt": "The boundary denotes deployment ownership inside one request flow.",
+            "adjudication_notes": "A boundary annotation does not create a second diagram type; connectors and nodes retain one stable grammar.",
+            "render": { "template": "diagram", "variant": "coherent-flow" }
+          }
+        },
+        {
+          "id": "timeline-scale",
+          "criterion_id": "diagram-proportional-honesty-visual",
+          "region": { "id": "timeline", "label": "Delivery timeline" },
+          "fire": {
+            "title": "One-day and six-month gaps look equal",
+            "visible_text": "Day 1 · Day 2 · Month 6",
+            "truth_excerpt": "The milestones occur after one day and then roughly six months.",
+            "adjudication_notes": "Equal visual spacing materially misrepresents the stated time intervals.",
+            "render": { "template": "diagram", "variant": "dishonest-timeline" }
+          },
+          "clean": {
+            "title": "Compressed timeline explicitly marks a break",
+            "visible_text": "Day 1 · Day 2 · // · Month 6",
+            "truth_excerpt": "The timeline is compressed and must disclose the discontinuity.",
+            "adjudication_notes": "A visible axis break and label make the non-linear spacing explicit rather than deceptively proportional.",
+            "render": { "template": "diagram", "variant": "timeline-break" }
+          }
+        },
+        {
+          "id": "quantity-bars",
+          "criterion_id": "diagram-proportional-honesty-visual",
+          "region": { "id": "bar-figure", "label": "Cost comparison bars" },
+          "fire": {
+            "title": "Near-equal bars represent a fourfold difference",
+            "visible_text": "$10 · $40",
+            "truth_excerpt": "The second value is four times the first.",
+            "adjudication_notes": "The bars differ only slightly in length, visually erasing a load-bearing fourfold ratio.",
+            "render": { "template": "diagram", "variant": "dishonest-bars" }
+          },
+          "clean": {
+            "title": "Symbolic comparison avoids a false quantitative scale",
+            "visible_text": "$10 baseline · $40 candidate",
+            "truth_excerpt": "The composition is a labeled comparison and does not claim scaled bar length.",
+            "adjudication_notes": "Equal containers are acceptable because explicit values carry the comparison and no quantitative axis is implied.",
+            "render": { "template": "diagram", "variant": "labeled-comparison" }
+          }
+        },
+        {
+          "id": "legend-orphan",
+          "criterion_id": "diagram-legend-matches-figure",
+          "region": { "id": "legend-and-plot", "label": "Legend and plotted categories" },
+          "fire": {
+            "title": "Legend names an absent cache category",
+            "visible_text": "API · Cache · Store",
+            "truth_excerpt": "Only API and Store categories are drawn.",
+            "adjudication_notes": "The legend includes Cache even though no corresponding mark exists in the figure.",
+            "render": { "template": "diagram", "variant": "orphan-legend" }
+          },
+          "clean": {
+            "title": "Muted category still appears in the figure",
+            "visible_text": "API · Cache · Store",
+            "truth_excerpt": "Cache is present but intentionally de-emphasized because it is inactive.",
+            "adjudication_notes": "Every legend category has a plotted counterpart; low emphasis is not absence.",
+            "render": { "template": "diagram", "variant": "complete-legend" }
+          }
+        },
+        {
+          "id": "missing-legend-category",
+          "criterion_id": "diagram-legend-matches-figure",
+          "region": { "id": "legend-and-nodes", "label": "Node categories and legend" },
+          "fire": {
+            "title": "Decision nodes lack a legend entry",
+            "visible_text": "Service · Data",
+            "truth_excerpt": "Diamonds encode decisions and rectangles encode services.",
+            "adjudication_notes": "A distinct load-bearing diamond category is used repeatedly but the legend never defines it.",
+            "render": { "template": "diagram", "variant": "missing-legend-entry" }
+          },
+          "clean": {
+            "title": "Annotation callout does not need a legend category",
+            "visible_text": "Service · Data",
+            "truth_excerpt": "The lone dashed note is explanatory annotation, not a data category.",
+            "adjudication_notes": "A conventional one-off annotation is self-labelled and does not create an unexplained visual category.",
+            "render": { "template": "diagram", "variant": "annotation-no-legend" }
+          }
+        },
+        {
+          "id": "three-box-list",
+          "criterion_id": "diagram-necessity",
+          "region": { "id": "figure", "label": "Three-item figure" },
+          "fire": {
+            "title": "Three independent bullets are boxed and arrowed",
+            "visible_text": "Reliable · Fast · Affordable",
+            "truth_excerpt": "The brief lists three independent qualities with no sequence or relationship.",
+            "adjudication_notes": "Boxes and arrows add a false flow while conveying no information beyond a short list.",
+            "render": { "template": "diagram", "variant": "decorated-list" }
+          },
+          "clean": {
+            "title": "Three nodes expose a real dependency",
+            "visible_text": "Capture → Adjudicate → Graduate",
+            "truth_excerpt": "Graduation requires adjudication, which requires captured observations.",
+            "adjudication_notes": "The connectors encode necessary dependency and therefore add information beyond the labels.",
+            "render": { "template": "diagram", "variant": "necessary-sequence" }
+          }
+        },
+        {
+          "id": "peer-table-as-graph",
+          "criterion_id": "diagram-necessity",
+          "region": { "id": "comparison-figure", "label": "Model comparison figure" },
+          "fire": {
+            "title": "Model comparison is an arbitrary node graph",
+            "visible_text": "Nano · Mini · Frontier",
+            "truth_excerpt": "The source contains aligned latency, accuracy, and cost values.",
+            "adjudication_notes": "A graph obscures exact aligned comparisons that a compact table would communicate more faithfully.",
+            "render": { "template": "diagram", "variant": "table-as-graph" }
+          },
+          "clean": {
+            "title": "Network topology needs relational placement",
+            "visible_text": "Gateway · Workers · Stores",
+            "truth_excerpt": "The claim depends on fan-out, shared stores, and retry paths.",
+            "adjudication_notes": "Topology and connector direction are load-bearing; a flat table would discard the relevant relationships.",
+            "render": { "template": "diagram", "variant": "necessary-topology" }
+          }
+        },
+        {
+          "id": "dual-focal",
+          "criterion_id": "diagram-focal-single-dominant",
+          "region": { "id": "system-map", "label": "System map" },
+          "fire": {
+            "title": "Two unrelated nodes claim equal dominance",
+            "visible_text": "Policy Router · Analytics Hub",
+            "truth_excerpt": "The narrative job is to explain policy routing.",
+            "adjudication_notes": "Two saturated oversized nodes compete even though only the router is load-bearing to the claim.",
+            "render": { "template": "diagram", "variant": "dual-focal" }
+          },
+          "clean": {
+            "title": "Two endpoints frame one dominant transformation",
+            "visible_text": "Evidence · Policy Router · Decision",
+            "truth_excerpt": "The policy router is the transformation under explanation.",
+            "adjudication_notes": "Endpoints remain visible but the central router is unmistakably dominant.",
+            "render": { "template": "diagram", "variant": "single-focal" }
+          }
+        },
+        {
+          "id": "uniform-box-forest",
+          "criterion_id": "diagram-type-coherent",
+          "region": { "id": "org-map", "label": "Organization map" },
+          "fire": {
+            "title": "Hierarchy and sequence use identical connectors",
+            "visible_text": "Team · Stage · Owner",
+            "truth_excerpt": "The source distinguishes reporting hierarchy from workflow sequence.",
+            "adjudication_notes": "Identical lines and boxes collapse two different relation types into an incoherent grammar.",
+            "render": { "template": "diagram", "variant": "ambiguous-relations" }
+          },
+          "clean": {
+            "title": "Uniform node forest is the requested inventory",
+            "visible_text": "Service A · Service B · Service C",
+            "truth_excerpt": "The figure is an inventory grouped only by deployment zone.",
+            "adjudication_notes": "Uniform boxes are truthful because the nodes are genuine peers and containment is the sole relation.",
+            "render": { "template": "diagram", "variant": "peer-inventory" }
+          }
+        },
+        {
+          "id": "residual-probability",
+          "criterion_id": "diagram-proportional-honesty-visual",
+          "region": { "id": "probability-map", "label": "Probability distribution" },
+          "fire": {
+            "title": "Named outcomes consume more than the whole",
+            "visible_text": "A 55% · B 35% · Other 20%",
+            "truth_excerpt": "Displayed probabilities must sum to the complete distribution.",
+            "adjudication_notes": "The visual encodes 110 percent while presenting a complete distribution, a material proportional contradiction.",
+            "render": { "template": "diagram", "variant": "invalid-probability" }
+          },
+          "clean": {
+            "title": "Residual probability remains visible",
+            "visible_text": "A 55% · B 25% · Other 20%",
+            "truth_excerpt": "Residual probability is material and must remain represented.",
+            "adjudication_notes": "All proportions sum to one hundred percent and the residual category is explicitly preserved.",
+            "render": { "template": "diagram", "variant": "valid-probability" }
+          }
+        },
+        {
+          "id": "competing-control-planes",
+          "criterion_id": "diagram-focal-single-dominant",
+          "region": { "id": "control-plane-map", "label": "Control-plane architecture map" },
+          "fire": {
+            "title": "Two control planes receive equal visual dominance",
+            "visible_text": "Admission Gate · Policy Engine · Audit Store",
+            "truth_excerpt": "The policy engine is the decision-making center; admission and audit are supporting boundaries.",
+            "adjudication_notes": "The admission gate and policy engine are both oversized and saturated, so the diagram gives two competing answers to what controls the system.",
+            "render": { "template": "diagram", "variant": "dual-focal" }
+          },
+          "clean": {
+            "title": "One policy engine dominates supporting boundaries",
+            "visible_text": "Admission Gate · Policy Engine · Audit Store",
+            "truth_excerpt": "The policy engine is the decision-making center; admission and audit are supporting boundaries.",
+            "adjudication_notes": "The central policy engine receives the sole dominant treatment while the admission gate and audit store remain legible supporting endpoints.",
+            "render": { "template": "diagram", "variant": "single-focal" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "aesthetic",
+      "route_key": "aesthetic",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-aesthetic.md",
+      "pairs": [
+        {
+          "id": "light-mode-panel",
+          "criterion_id": "preset-both-mode-visual",
+          "region": { "id": "mode-pair", "label": "Light and dark mode pair" },
+          "fire": {
+            "title": "Hard-coded dark panel leaks into light mode",
+            "visible_text": "Status overview",
+            "truth_excerpt": "Both screenshots should express the same preset in their respective mode.",
+            "adjudication_notes": "One panel remains dark only in the light screenshot and its text fails to invert with the rest of the preset.",
+            "render": { "template": "preset", "variant": "wrong-mode-panel" }
+          },
+          "clean": {
+            "title": "Dark data surface is intentional in both modes",
+            "visible_text": "Terminal trace",
+            "truth_excerpt": "The embedded terminal is explicitly a dark simulated surface in either page mode.",
+            "adjudication_notes": "The stable dark terminal is content semantics, not a failed page-mode inversion, and its own text remains readable.",
+            "render": { "template": "preset", "variant": "intentional-terminal" }
+          }
+        },
+        {
+          "id": "mode-icon-fill",
+          "criterion_id": "preset-both-mode-visual",
+          "region": { "id": "mode-pair", "label": "Mode comparison with icons" },
+          "fire": {
+            "title": "Icons disappear against the dark surface",
+            "visible_text": "Inputs · Results",
+            "truth_excerpt": "Icon and label meaning must remain visible in both modes.",
+            "adjudication_notes": "The dark screenshot retains a dark icon fill, making load-bearing symbols effectively invisible.",
+            "render": { "template": "preset", "variant": "invisible-dark-icons" }
+          },
+          "clean": {
+            "title": "Decorative watermark fades in dark mode",
+            "visible_text": "Inputs · Results",
+            "truth_excerpt": "The watermark is non-semantic decoration and may be quiet.",
+            "adjudication_notes": "All load-bearing icons and text remain visible; only a deliberately non-semantic watermark loses prominence.",
+            "render": { "template": "preset", "variant": "quiet-watermark" }
+          }
+        },
+        {
+          "id": "mono-status-container",
+          "criterion_id": "mono-status-value-judgment",
+          "region": { "id": "status-board", "label": "Mono-Industrial status board" },
+          "fire": {
+            "title": "Orange tints an entire status section",
+            "visible_text": "Review queue",
+            "truth_excerpt": "Mono-Industrial reserves color for specific values with status meaning.",
+            "adjudication_notes": "Orange colors a container and heading without representing an actual warning value.",
+            "render": { "template": "preset", "variant": "decorative-status-color" }
+          },
+          "clean": {
+            "title": "One warning value carries orange",
+            "visible_text": "Review queue · 3 delayed",
+            "truth_excerpt": "Three delayed items are a measured warning state.",
+            "adjudication_notes": "Color is scoped to the precise delayed count and therefore conveys genuine value semantics.",
+            "render": { "template": "preset", "variant": "semantic-status-color" }
+          }
+        },
+        {
+          "id": "mono-surprise",
+          "criterion_id": "mono-one-surprise",
+          "region": { "id": "mono-page", "label": "Mono-Industrial composition" },
+          "fire": {
+            "title": "Several unrelated elements break the grid",
+            "visible_text": "Policy · Evidence · Result",
+            "truth_excerpt": "The preset permits one deliberate compositional or typographic surprise.",
+            "adjudication_notes": "Three rotated and oversized elements break the system, so no single authored surprise remains.",
+            "render": { "template": "preset", "variant": "many-surprises" }
+          },
+          "clean": {
+            "title": "One oversized decision breaks the pattern",
+            "visible_text": "Policy · DECISION · Result",
+            "truth_excerpt": "The decision is the one intended moment of surprise.",
+            "adjudication_notes": "Exactly one typographic element breaks the otherwise consistent system and the break supports hierarchy.",
+            "render": { "template": "preset", "variant": "one-surprise" }
+          }
+        },
+        {
+          "id": "mono-three-layers",
+          "criterion_id": "mono-three-layer-squint",
+          "region": { "id": "mono-page", "label": "Mono-Industrial hierarchy" },
+          "fire": {
+            "title": "Five equally loud emphasis layers",
+            "visible_text": "Title · KPI · Section · Label · Note",
+            "truth_excerpt": "The active preset calls for three legible emphasis layers.",
+            "adjudication_notes": "Multiple near-equal weights and sizes create at least five competing emphasis levels with no stable hierarchy.",
+            "render": { "template": "preset", "variant": "too-many-layers" }
+          },
+          "clean": {
+            "title": "Dense page resolves into three emphasis layers",
+            "visible_text": "Title · KPI · Section · Label · Note",
+            "truth_excerpt": "Dense content is compatible with three clearly grouped emphasis levels.",
+            "adjudication_notes": "Many elements are present, but they resolve into a dominant hero, section level, and quiet instrument text.",
+            "render": { "template": "preset", "variant": "three-layers" }
+          }
+        },
+        {
+          "id": "nothing-red-underline",
+          "criterion_id": "nothing-accent-red-judgment",
+          "region": { "id": "nothing-page", "label": "Nothing preset page" },
+          "fire": {
+            "title": "Red accent is a decorative underline",
+            "visible_text": "Signal architecture",
+            "truth_excerpt": "Nothing red is reserved for urgent, destructive, or error meaning.",
+            "adjudication_notes": "The single red use merely decorates a neutral heading and communicates no status.",
+            "render": { "template": "preset", "variant": "decorative-red" }
+          },
+          "clean": {
+            "title": "Red marks a destructive reset action",
+            "visible_text": "Reset policy",
+            "truth_excerpt": "Resetting the policy is destructive and requires explicit warning.",
+            "adjudication_notes": "The red accent is scoped to a genuine destructive action rather than used as ornament.",
+            "render": { "template": "preset", "variant": "destructive-red" }
+          }
+        },
+        {
+          "id": "nothing-grid-break",
+          "criterion_id": "nothing-single-grid-break",
+          "region": { "id": "nothing-grid", "label": "Nothing preset grid" },
+          "fire": {
+            "title": "Three cards independently escape the grid",
+            "visible_text": "Capture · Route · Learn",
+            "truth_excerpt": "The preset allows one meaningful grid break.",
+            "adjudication_notes": "Several arbitrary offsets break the composition without establishing one deliberate exception.",
+            "render": { "template": "preset", "variant": "many-grid-breaks" }
+          },
+          "clean": {
+            "title": "Full-width navigation is ordinary chrome",
+            "visible_text": "Capture · Route · Learn",
+            "truth_excerpt": "Full-width navigation is excluded from the single content-grid-break count.",
+            "adjudication_notes": "One content element breaks the grid; the full-width navigation is legitimate chrome and not a second break.",
+            "render": { "template": "preset", "variant": "one-grid-break" }
+          }
+        },
+        {
+          "id": "demo-frame",
+          "criterion_id": "demo-aesthetic-match",
+          "region": { "id": "demo-embed", "label": "Embedded demo and host page" },
+          "fire": {
+            "title": "Glossy rounded demo conflicts with flat host",
+            "visible_text": "Live policy inspector",
+            "truth_excerpt": "The host preset uses flat square surfaces and restrained borders.",
+            "adjudication_notes": "Large radius, glow, and heavy shadow make the demo feel pasted onto a visibly different design system.",
+            "render": { "template": "preset", "variant": "mismatched-demo" }
+          },
+          "clean": {
+            "title": "Functional browser chrome remains distinct",
+            "visible_text": "Live policy inspector",
+            "truth_excerpt": "The demo needs a minimal frame to communicate that it is interactive.",
+            "adjudication_notes": "The frame is functionally necessary and still matches the host’s radius, border, color, and caption treatment.",
+            "render": { "template": "preset", "variant": "matched-demo" }
+          }
+        },
+        {
+          "id": "mono-mobile-hero",
+          "criterion_id": "mono-three-layer-squint",
+          "region": { "id": "mobile-hero", "label": "Mono-Industrial mobile hero" },
+          "fire": {
+            "title": "Hero collapses into a tiny card on mobile",
+            "visible_text": "Route with evidence",
+            "truth_excerpt": "The hero should remain intact and full-width on mobile.",
+            "adjudication_notes": "The primary claim is shrunk into one small bordered card among peers, destroying the intended hierarchy.",
+            "render": { "template": "preset", "variant": "mobile-hero-card" }
+          },
+          "clean": {
+            "title": "Full-width mobile hero with compact supporting cards",
+            "visible_text": "Route with evidence",
+            "truth_excerpt": "Supporting items may compact as long as the hero stays intact.",
+            "adjudication_notes": "The hero remains full-width and dominant while subordinate evidence becomes a denser mobile row.",
+            "render": { "template": "preset", "variant": "mobile-hero-full" }
+          }
+        },
+        {
+          "id": "mode-background",
+          "criterion_id": "preset-both-mode-visual",
+          "region": { "id": "mode-pair", "label": "Full-page light and dark screenshots" },
+          "fire": {
+            "title": "Dark mode keeps a light page background",
+            "visible_text": "Evidence map",
+            "truth_excerpt": "The named preset supports both light and dark surfaces.",
+            "adjudication_notes": "The dark-mode screenshot preserves the light canvas while inverting text, causing broken contrast and wrong-mode bleed.",
+            "render": { "template": "preset", "variant": "wrong-mode-background" }
+          },
+          "clean": {
+            "title": "Paper inset remains light in both modes",
+            "visible_text": "Export preview",
+            "truth_excerpt": "A print-preview inset intentionally represents white paper in either application mode.",
+            "adjudication_notes": "The light inset is an explicitly labelled paper preview with readable local colors, not a failed global inversion.",
+            "render": { "template": "preset", "variant": "paper-preview" }
+          }
+        },
+        {
+          "id": "mono-neutral-count",
+          "criterion_id": "mono-status-value-judgment",
+          "region": { "id": "queue-summary", "label": "Mono-Industrial queue summary" },
+          "fire": {
+            "title": "Neutral queue total receives warning color",
+            "visible_text": "Calibration total · 12 cases",
+            "truth_excerpt": "A total case count is neutral unless a measured threshold has been exceeded.",
+            "adjudication_notes": "The colored status treatment decorates a neutral inventory count and implies a warning that the underlying value does not support.",
+            "render": { "template": "preset", "variant": "decorative-status-color" }
+          },
+          "clean": {
+            "title": "Threshold breach receives scoped warning color",
+            "visible_text": "Calibration total · 12 overdue",
+            "truth_excerpt": "Twelve overdue cases exceed the documented queue threshold.",
+            "adjudication_notes": "The warning color is scoped to a measured threshold breach and therefore carries explicit status meaning rather than decoration.",
+            "render": { "template": "preset", "variant": "semantic-status-color" }
+          }
+        },
+        {
+          "id": "mono-offset-summary",
+          "criterion_id": "mono-one-surprise",
+          "region": { "id": "summary-grid", "label": "Mono-Industrial summary grid" },
+          "fire": {
+            "title": "Multiple summary metrics independently break the grid",
+            "visible_text": "Escalation summary · Cost · Recall",
+            "truth_excerpt": "Only the escalation decision is intended to break the otherwise regular summary grid.",
+            "adjudication_notes": "Several rotated and enlarged metrics compete as independent exceptions, leaving no single meaningful compositional surprise.",
+            "render": { "template": "preset", "variant": "many-surprises" }
+          },
+          "clean": {
+            "title": "One escalation decision breaks the summary grid",
+            "visible_text": "Escalation summary · Cost · Recall",
+            "truth_excerpt": "Only the escalation decision is intended to break the otherwise regular summary grid.",
+            "adjudication_notes": "A single decision treatment departs from the regular grid while the supporting cost and recall measures retain the base system.",
+            "render": { "template": "preset", "variant": "one-surprise" }
+          }
+        },
+        {
+          "id": "nothing-red-badge",
+          "criterion_id": "nothing-accent-red-judgment",
+          "region": { "id": "policy-action", "label": "Nothing preset policy action" },
+          "fire": {
+            "title": "Red badge decorates a neutral policy version",
+            "visible_text": "Policy version 24",
+            "truth_excerpt": "The policy version is informational and has no urgent, destructive, or error state.",
+            "adjudication_notes": "Red is applied to a neutral version badge only for visual interest, creating false urgency without corresponding semantics.",
+            "render": { "template": "preset", "variant": "decorative-red" }
+          },
+          "clean": {
+            "title": "Red identifies irreversible policy deletion",
+            "visible_text": "Delete policy version",
+            "truth_excerpt": "Deleting the policy version is irreversible and requires destructive emphasis.",
+            "adjudication_notes": "Red is limited to an irreversible deletion action, so the accent communicates the precise destructive meaning reserved by the preset.",
+            "render": { "template": "preset", "variant": "destructive-red" }
+          }
+        },
+        {
+          "id": "nothing-evidence-offsets",
+          "criterion_id": "nothing-single-grid-break",
+          "region": { "id": "evidence-grid", "label": "Nothing preset evidence grid" },
+          "fire": {
+            "title": "Several evidence cards use unrelated offsets",
+            "visible_text": "Evidence ledger · Sources · Decisions",
+            "truth_excerpt": "The decision ledger is the sole content element intended to cross the grid.",
+            "adjudication_notes": "Multiple cards rotate and offset independently, turning the permitted single grid break into a collection of arbitrary exceptions.",
+            "render": { "template": "preset", "variant": "many-grid-breaks" }
+          },
+          "clean": {
+            "title": "One decision ledger crosses the evidence grid",
+            "visible_text": "Evidence ledger · Sources · Decisions",
+            "truth_excerpt": "The decision ledger is the sole content element intended to cross the grid.",
+            "adjudication_notes": "Only the decision ledger departs from the content grid; the surrounding source cards and ordinary chrome remain aligned.",
+            "render": { "template": "preset", "variant": "one-grid-break" }
+          }
+        },
+        {
+          "id": "demo-inspector-theme",
+          "criterion_id": "demo-aesthetic-match",
+          "region": { "id": "inspector-embed", "label": "Embedded inspector and host preset" },
+          "fire": {
+            "title": "Soft gradient inspector conflicts with industrial host",
+            "visible_text": "Evidence inspector",
+            "truth_excerpt": "The host uses square panels, flat fills, and instrument-like typography.",
+            "adjudication_notes": "The embedded inspector introduces pill controls, gradients, glow, and soft shadows that visibly belong to a different design language.",
+            "render": { "template": "preset", "variant": "mismatched-demo" }
+          },
+          "clean": {
+            "title": "Inspector inherits the host surface language",
+            "visible_text": "Evidence inspector",
+            "truth_excerpt": "The inspector may retain functional controls while matching the host surface language.",
+            "adjudication_notes": "The embedded inspector retains necessary controls but matches the host’s square geometry, flat color, border weight, and typography.",
+            "render": { "template": "preset", "variant": "matched-demo" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "operating-model",
+      "route_key": "operating-model",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-operating-model.md",
+      "pairs": [
+        {
+          "id": "review-routing",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "review-routing", "label": "Review routing unit" },
+          "fire": {
+            "title": "Four cards hide the selection policy",
+            "visible_text": "Mandatory · Representative · Calibration · Frontier",
+            "truth_excerpt": "A policy router assigns cases to distinct review queues with different entry rules.",
+            "adjudication_notes": "Equal cards name destinations but omit the router, mandatory path, sampling rule, and deduplication.",
+            "render": { "template": "operating", "variant": "routing-cards" }
+          },
+          "clean": {
+            "title": "Router exposes queue selection and overlap handling",
+            "visible_text": "Mandatory · Representative · Calibration · Frontier",
+            "truth_excerpt": "A policy router assigns cases to distinct review queues with different entry rules.",
+            "adjudication_notes": "The composition shows the universal gate, routing rules, separate queues, and deduplication path.",
+            "render": { "template": "operating", "variant": "routing-model" }
+          }
+        },
+        {
+          "id": "causal-loop",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "causal-loop", "label": "Calibration feedback loop" },
+          "fire": {
+            "title": "Feedback loop is drawn as a one-way pipeline",
+            "visible_text": "Observe → Adjudicate → Calibrate → Deploy",
+            "truth_excerpt": "Deployment outcomes feed the next calibration cycle.",
+            "adjudication_notes": "The one-way pipeline omits the load-bearing return path and misstates the process as terminal.",
+            "render": { "template": "operating", "variant": "one-way-loop" }
+          },
+          "clean": {
+            "title": "Feedback path returns outcomes to calibration",
+            "visible_text": "Observe → Adjudicate → Calibrate → Deploy ↩",
+            "truth_excerpt": "Deployment outcomes feed the next calibration cycle.",
+            "adjudication_notes": "The return connector and its label make the iterative causal structure reconstructable.",
+            "render": { "template": "operating", "variant": "closed-loop" }
+          }
+        },
+        {
+          "id": "probability-residual",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "diagnostic-state", "label": "Probability-bearing diagnostic state" },
+          "fire": {
+            "title": "Named diagnoses omit residual uncertainty",
+            "visible_text": "A 60% · B 25%",
+            "truth_excerpt": "Fifteen percent residual probability remains material to the decision.",
+            "adjudication_notes": "The state looks complete while hiding residual uncertainty that changes downstream review behavior.",
+            "render": { "template": "operating", "variant": "missing-residual" }
+          },
+          "clean": {
+            "title": "Residual uncertainty remains an explicit branch",
+            "visible_text": "A 60% · B 25% · Other 15%",
+            "truth_excerpt": "Fifteen percent residual probability remains material to the decision.",
+            "adjudication_notes": "The full distribution and uncertain branch remain visible and connected to escalation.",
+            "render": { "template": "operating", "variant": "visible-residual" }
+          }
+        },
+        {
+          "id": "provenance-trace",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "evidence-trace", "label": "Evidence provenance trace" },
+          "fire": {
+            "title": "Evidence cards omit source-to-decision paths",
+            "visible_text": "Study · Finding · Decision",
+            "truth_excerpt": "The viewer must reconstruct which source supports each decision claim.",
+            "adjudication_notes": "Grouped cards contain the right nouns but no connectors or identifiers preserve provenance.",
+            "render": { "template": "operating", "variant": "provenance-cards" }
+          },
+          "clean": {
+            "title": "Trace IDs connect sources through findings to decisions",
+            "visible_text": "S1 → F1 → D1",
+            "truth_excerpt": "The viewer must reconstruct which source supports each decision claim.",
+            "adjudication_notes": "Stable identifiers and connectors preserve the evidence path without requiring presenter narration.",
+            "render": { "template": "operating", "variant": "provenance-trace" }
+          }
+        },
+        {
+          "id": "resource-flow",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "resource-flow", "label": "Resource-to-output flow" },
+          "fire": {
+            "title": "Resource allocation is shown as independent metrics",
+            "visible_text": "Reviewers 8 · Queue 120 · SLA 2h",
+            "truth_excerpt": "Reviewer capacity governs queue throughput and the resulting SLA.",
+            "adjudication_notes": "Independent metrics conceal the load-bearing resource-to-throughput relationship.",
+            "render": { "template": "operating", "variant": "resource-metrics" }
+          },
+          "clean": {
+            "title": "Capacity and queue connect to throughput and SLA",
+            "visible_text": "8 reviewers → 40/hr → 2h SLA",
+            "truth_excerpt": "Reviewer capacity governs queue throughput and the resulting SLA.",
+            "adjudication_notes": "The visual grammar exposes the governing flow and labels each transformation.",
+            "render": { "template": "operating", "variant": "resource-flow" }
+          }
+        },
+        {
+          "id": "state-transition",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "state-machine", "label": "Review state transitions" },
+          "fire": {
+            "title": "Statuses appear without allowed transitions",
+            "visible_text": "Pending · Reviewed · Escalated",
+            "truth_excerpt": "Cases can escalate from pending or reviewed, but only reviewed cases can close.",
+            "adjudication_notes": "Status badges expose no transition rules and cannot communicate the allowed state changes.",
+            "render": { "template": "operating", "variant": "state-badges" }
+          },
+          "clean": {
+            "title": "State machine exposes guarded transitions",
+            "visible_text": "Pending → Reviewed → Closed · Escalated",
+            "truth_excerpt": "Cases can escalate from pending or reviewed, but only reviewed cases can close.",
+            "adjudication_notes": "Directed and labelled transitions make the guarded state changes reconstructable.",
+            "render": { "template": "operating", "variant": "state-machine" }
+          }
+        },
+        {
+          "id": "comparison-treatment",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "cost-comparison", "label": "Review cost comparison" },
+          "fire": {
+            "title": "Simple cost comparison becomes an elaborate system map",
+            "visible_text": "Repeated review · One-time verification",
+            "truth_excerpt": "The claim is a two-term break-even comparison.",
+            "adjudication_notes": "A complex network invents dependencies and obscures a claim that only needs aligned arithmetic.",
+            "render": { "template": "operating", "variant": "overbuilt-comparison" }
+          },
+          "clean": {
+            "title": "Aligned equation is proportionate to the claim",
+            "visible_text": "n × review cost > verification cost",
+            "truth_excerpt": "The claim is a two-term break-even comparison.",
+            "adjudication_notes": "The relational treatment exposes the exact comparison without forcing an operating-model diagram.",
+            "render": { "template": "operating", "variant": "relational-equation" }
+          }
+        },
+        {
+          "id": "simple-cover",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "cover-unit", "label": "Cover slide" },
+          "fire": {
+            "title": "Cover claim is forced into a node graph",
+            "visible_text": "Evidence you can operate",
+            "truth_excerpt": "The unit is a cover with one claim and no relational narrative job.",
+            "adjudication_notes": "A decorative graph implies a system the cover does not claim and is disproportionate to the unit.",
+            "render": { "template": "operating", "variant": "cover-graph" }
+          },
+          "clean": {
+            "title": "Cover remains a single dominant claim",
+            "visible_text": "Evidence you can operate",
+            "truth_excerpt": "The unit is a cover with one claim and no relational narrative job.",
+            "adjudication_notes": "Routing to none is correct; no diagram is required for a single introductory claim.",
+            "render": { "template": "operating", "variant": "cover-none" }
+          }
+        },
+        {
+          "id": "simulated-surface",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "clinical-ide", "label": "Clinical decision workspace" },
+          "fire": {
+            "title": "Interactive workflow is flattened into generic cards",
+            "visible_text": "Evidence · Hypotheses · Next actions",
+            "truth_excerpt": "The clinician’s interaction among evidence, hypotheses, and actions is the claim.",
+            "adjudication_notes": "Three generic cards omit selection, comparison, and action state that define the workflow.",
+            "render": { "template": "operating", "variant": "workspace-cards" }
+          },
+          "clean": {
+            "title": "Simulated workspace exposes the interaction",
+            "visible_text": "Evidence · Hypotheses · Next actions",
+            "truth_excerpt": "The clinician’s interaction among evidence, hypotheses, and actions is the claim.",
+            "adjudication_notes": "The simulated surface faithfully exposes selection state, linked evidence, and available next actions.",
+            "render": { "template": "operating", "variant": "workspace-surface" }
+          }
+        },
+        {
+          "id": "dependency-map",
+          "criterion_id": "operating-model-fit",
+          "region": { "id": "dependency-map", "label": "Deployment dependency map" },
+          "fire": {
+            "title": "Dependency order is presented as unordered bullets",
+            "visible_text": "Schema · Migration · Service · Client",
+            "truth_excerpt": "Deployment requires schema before migration, then service, then client.",
+            "adjudication_notes": "An unordered list hides the load-bearing prerequisites and deploy order.",
+            "render": { "template": "operating", "variant": "dependency-list" }
+          },
+          "clean": {
+            "title": "Dependency map preserves prerequisites",
+            "visible_text": "Schema → Migration → Service → Client",
+            "truth_excerpt": "Deployment requires schema before migration, then service, then client.",
+            "adjudication_notes": "The ordered connectors expose every prerequisite and the final client dependency.",
+            "render": { "template": "operating", "variant": "dependency-map" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "artifact-slop-gap",
+      "route_key": "artifact-slop-gap",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-artifact-slop-gap.md",
+      "pairs": [
+        {
+          "id": "independent-options",
+          "criterion_id": "artifact-slop-false-sequence",
+          "region": { "id": "option-row", "label": "Three independent options" },
+          "fire": {
+            "title": "Independent options are numbered and arrowed",
+            "visible_text": "01 Explore → 02 Compare → 03 Export",
+            "truth_excerpt": "Users may choose Explore, Compare, or Export in any order.",
+            "adjudication_notes": "Numbers and arrows imply a required progression that the source explicitly does not establish.",
+            "render": { "template": "slop", "variant": "false-sequence" }
+          },
+          "clean": {
+            "title": "Numbered workflow follows real dependencies",
+            "visible_text": "01 Capture → 02 Adjudicate → 03 Graduate",
+            "truth_excerpt": "Adjudication requires captured observations; graduation requires adjudication.",
+            "adjudication_notes": "Every number and connector corresponds to a documented dependency and real order.",
+            "render": { "template": "slop", "variant": "true-sequence" }
+          }
+        },
+        {
+          "id": "section-number",
+          "criterion_id": "artifact-slop-false-sequence",
+          "region": { "id": "section-heading", "label": "Numbered section heading" },
+          "fire": {
+            "title": "Random section number implies missing chapters",
+            "visible_text": "04 · Architecture",
+            "truth_excerpt": "The artifact has one standalone page and no ordered sections.",
+            "adjudication_notes": "The isolated 04 marker implies a larger ordered document that does not exist.",
+            "render": { "template": "slop", "variant": "orphan-section-number" }
+          },
+          "clean": {
+            "title": "Section number resolves through the document agenda",
+            "visible_text": "04 · Architecture",
+            "truth_excerpt": "The agenda links Architecture as section four of six.",
+            "adjudication_notes": "The section marker corresponds to real navigation and a genuine reading order.",
+            "render": { "template": "slop", "variant": "real-section-number" }
+          }
+        },
+        {
+          "id": "confidence-meter",
+          "criterion_id": "artifact-slop-false-state",
+          "region": { "id": "confidence-meter", "label": "Confidence meter" },
+          "fire": {
+            "title": "Static mockup claims 87 percent confidence",
+            "visible_text": "Confidence 87%",
+            "truth_excerpt": "No calculation, measurement, or source supplies a confidence value.",
+            "adjudication_notes": "The meter looks measured and live even though the artifact has no supporting state.",
+            "render": { "template": "slop", "variant": "false-confidence" }
+          },
+          "clean": {
+            "title": "Confidence derives from displayed test results",
+            "visible_text": "Confidence 87% · 87/100 checks",
+            "truth_excerpt": "The value is calculated from 87 passing checks out of 100 and links to the method.",
+            "adjudication_notes": "The measured value and its derivation are both visible, so the state implication is supported.",
+            "render": { "template": "slop", "variant": "measured-confidence" }
+          }
+        },
+        {
+          "id": "live-status-dot",
+          "criterion_id": "artifact-slop-false-state",
+          "region": { "id": "status-line", "label": "System status line" },
+          "fire": {
+            "title": "Green dot claims a live connection",
+            "visible_text": "● System live",
+            "truth_excerpt": "The artifact is a static exported explainer with no connection telemetry.",
+            "adjudication_notes": "The conventional green status dot and “live” label imply a measured connection that cannot exist.",
+            "render": { "template": "slop", "variant": "false-live-status" }
+          },
+          "clean": {
+            "title": "Decorative dot is visibly non-status",
+            "visible_text": "• System architecture",
+            "truth_excerpt": "The dot is a typographic bullet before a neutral heading.",
+            "adjudication_notes": "No status word, color semantics, or monitoring treatment suggests live state.",
+            "render": { "template": "slop", "variant": "decorative-dot" }
+          }
+        },
+        {
+          "id": "progress-bar",
+          "criterion_id": "artifact-slop-false-state",
+          "region": { "id": "progress", "label": "Progress indicator" },
+          "fire": {
+            "title": "Decorative progress bar implies task completion",
+            "visible_text": "Analysis 72%",
+            "truth_excerpt": "The page performs no analysis and tracks no progress.",
+            "adjudication_notes": "A filled meter and percentage imply active measured completion without any underlying task.",
+            "render": { "template": "slop", "variant": "false-progress" }
+          },
+          "clean": {
+            "title": "Deck progress reflects actual navigation",
+            "visible_text": "Slide 7 of 10 · 70%",
+            "truth_excerpt": "The viewer is currently on slide seven of ten.",
+            "adjudication_notes": "The progress treatment is directly bound to real navigation state and accurately calculated.",
+            "render": { "template": "slop", "variant": "real-progress" }
+          }
+        },
+        {
+          "id": "citation-marker",
+          "criterion_id": "artifact-slop-false-provenance",
+          "region": { "id": "claim", "label": "Claim with citation marker" },
+          "fire": {
+            "title": "Citation marker has no source target",
+            "visible_text": "Review cost falls 40% [4]",
+            "truth_excerpt": "The artifact supplies no source list, footnote, or link target.",
+            "adjudication_notes": "The bracketed marker conventionally implies traceable evidence that the artifact cannot provide.",
+            "render": { "template": "slop", "variant": "false-citation" }
+          },
+          "clean": {
+            "title": "Footnote marker resolves to a supplied source",
+            "visible_text": "Review cost falls 40% [4]",
+            "truth_excerpt": "Footnote four names the study, publication date, and resolvable URL.",
+            "adjudication_notes": "The provenance cue is backed by a concrete source target in the artifact.",
+            "render": { "template": "slop", "variant": "real-citation" }
+          }
+        },
+        {
+          "id": "evidence-badge",
+          "criterion_id": "artifact-slop-false-provenance",
+          "region": { "id": "evidence-badge", "label": "Evidence validation badge" },
+          "fire": {
+            "title": "Validated badge has no validation process",
+            "visible_text": "✓ Evidence validated",
+            "truth_excerpt": "No validator, review event, or source record exists.",
+            "adjudication_notes": "The checkmark and validation label assert provenance and verification unsupported by the artifact.",
+            "render": { "template": "slop", "variant": "false-validation" }
+          },
+          "clean": {
+            "title": "Validation badge links to a signed review event",
+            "visible_text": "✓ Evidence validated · R-184",
+            "truth_excerpt": "Review event R-184 names the reviewer, timestamp, and checked sources.",
+            "adjudication_notes": "The validation claim resolves to a real review record with traceable provenance.",
+            "render": { "template": "slop", "variant": "real-validation" }
+          }
+        },
+        {
+          "id": "source-timestamp",
+          "criterion_id": "artifact-slop-false-provenance",
+          "region": { "id": "source-strip", "label": "Source and timestamp strip" },
+          "fire": {
+            "title": "Decorative source strip invents freshness",
+            "visible_text": "SOURCE · LIVE · 12:42 UTC",
+            "truth_excerpt": "The content is static prose with no source feed or retrieval time.",
+            "adjudication_notes": "Source and timestamp chrome imply a live traceable feed that the artifact does not possess.",
+            "render": { "template": "slop", "variant": "false-source-strip" }
+          },
+          "clean": {
+            "title": "Snapshot timestamp identifies a real retrieval",
+            "visible_text": "Snapshot · 12:42 UTC · dataset v18",
+            "truth_excerpt": "Dataset version 18 was retrieved at 12:42 UTC and is bundled with the report.",
+            "adjudication_notes": "The timestamp and version accurately identify a supplied snapshot rather than manufacturing freshness.",
+            "render": { "template": "slop", "variant": "real-source-strip" }
+          }
+        },
+        {
+          "id": "terminal-label",
+          "criterion_id": "artifact-slop-false-state",
+          "region": { "id": "terminal", "label": "Terminal-style panel" },
+          "fire": {
+            "title": "Fake terminal reports successful deployment",
+            "visible_text": "$ deploy --prod · SUCCESS",
+            "truth_excerpt": "The artifact never ran a deployment command and has no execution result.",
+            "adjudication_notes": "Terminal chrome and SUCCESS output imply an executed command and measured state that never occurred.",
+            "render": { "template": "slop", "variant": "false-terminal" }
+          },
+          "clean": {
+            "title": "Terminal is explicitly labelled as an example",
+            "visible_text": "Example command · $ deploy --dry-run",
+            "truth_excerpt": "The panel documents a command example and makes no claim that it ran.",
+            "adjudication_notes": "The example label and dry-run wording prevent a reasonable viewer from inferring live execution state.",
+            "render": { "template": "slop", "variant": "example-terminal" }
+          }
+        },
+        {
+          "id": "choice-arrows",
+          "criterion_id": "artifact-slop-false-sequence",
+          "region": { "id": "choice-map", "label": "Choice map" },
+          "fire": {
+            "title": "Parallel choices are connected as a pipeline",
+            "visible_text": "PDF → Slides → Web",
+            "truth_excerpt": "PDF, Slides, and Web are independent export formats selected one at a time.",
+            "adjudication_notes": "Directional arrows falsely imply transformation from one export format into the next.",
+            "render": { "template": "slop", "variant": "false-choice-flow" }
+          },
+          "clean": {
+            "title": "Branching connector shows mutually exclusive choices",
+            "visible_text": "Export → PDF | Slides | Web",
+            "truth_excerpt": "One export action branches to three mutually exclusive formats.",
+            "adjudication_notes": "The branch grammar faithfully represents choice and does not imply sequential transformation.",
+            "render": { "template": "slop", "variant": "real-choice-branch" }
+          }
+        }
+      ]
+    }
+  ]
+}

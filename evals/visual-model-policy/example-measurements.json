@@ -4,6 +4,8 @@
     "min_runs": 3,
     "min_positives": 10,
     "min_negatives": 10,
+    "min_criterion_positives": 1,
+    "min_criterion_negatives": 1,
     "precision": 0.9,
     "recall": 0.9,
     "silence_accuracy": 0.95,
@@ -46,7 +48,14 @@
       "responses": 100,
       "abstentions": 1,
       "total_cost_usd": 0.1,
-      "p95_latency_ms": 5000
+      "p95_latency_ms": 5000,
+      "unique_cases": 20,
+      "unique_positives": 10,
+      "unique_negatives": 10,
+      "adjudication_complete": true,
+      "synthetic": true,
+      "telemetry_complete": false,
+      "experiment_complete": false
     },
     {
       "pass": "layout",
@@ -66,7 +75,14 @@
       "responses": 100,
       "abstentions": 2,
       "total_cost_usd": 0.06,
-      "p95_latency_ms": 6500
+      "p95_latency_ms": 6500,
+      "unique_cases": 20,
+      "unique_positives": 10,
+      "unique_negatives": 10,
+      "adjudication_complete": true,
+      "synthetic": true,
+      "telemetry_complete": false,
+      "experiment_complete": false
     },
     {
       "pass": "layout",
@@ -86,7 +102,14 @@
       "responses": 100,
       "abstentions": 0,
       "total_cost_usd": 0.4,
-      "p95_latency_ms": 9000
+      "p95_latency_ms": 9000,
+      "unique_cases": 20,
+      "unique_positives": 10,
+      "unique_negatives": 10,
+      "adjudication_complete": true,
+      "synthetic": true,
+      "telemetry_complete": false,
+      "experiment_complete": false
     }
   ]
 }

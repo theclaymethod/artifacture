@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "replace-with-dated-experiment-id",
+  "corpus_path": "corpus.json",
+  "image_detail": "high",
+  "replicates": 3,
+  "batch_sizes": [1, 2, 4],
+  "passes": [
+    "layout",
+    "diagram",
+    "aesthetic",
+    "operating-model",
+    "artifact-slop-gap"
+  ],
+  "thresholds": {
+    "min_runs": 3,
+    "min_positives": 10,
+    "min_negatives": 10,
+    "min_criterion_positives": 1,
+    "min_criterion_negatives": 1,
+    "precision": 0.9,
+    "recall": 0.9,
+    "silence_accuracy": 0.95,
+    "grounding_accuracy": 0.95,
+    "json_validity": 0.99,
+    "max_abstention_rate": 0.05,
+    "max_p95_latency_ms": 30000,
+    "max_cost_per_case_usd": 0.01
+  },
+  "run_candidate": "REPLACE_WITH_SMALLEST_PROVIDER_MODEL_ID",
+  "ladder_state": {
+    "completed_candidates": []
+  },
+  "candidates": [
+    {
+      "id": "REPLACE_WITH_SMALLEST_PROVIDER_MODEL_ID",
+      "rank": 1,
+      "class": "small",
+      "provider": "REPLACE_WITH_PROVIDER"
+    }
+  ],
+  "adapter_options": {}
+}
