@@ -11,6 +11,8 @@ import {
   criterionPromptFor,
   evaluateProviderResponse,
   runExperiment,
+  SHARED_INSTRUCTIONS,
+  VERDICT_SYSTEM_TEXT,
 } from './run.mjs';
 
 test('live graduation requires distinct rendered images and source artifacts per label', () => {
@@ -182,6 +184,14 @@ Verdict JSON schema: {...}`;
   const prompt = criterionPromptFor(rubric, 'text-visibly-clipped');
   assert.match(prompt, /Is text cut off/);
   assert.doesNotMatch(prompt, /peer tracks drift/);
+});
+
+test('verdict prompt defines pass semantics and conservative evidence grounding', () => {
+  assert.match(VERDICT_SYSTEM_TEXT, /pass=true means the selected criterion does not fire/);
+  assert.match(VERDICT_SYSTEM_TEXT, /Do not invent a finding/);
+  assert.match(SHARED_INSTRUCTIONS, /truth excerpt to decide whether a visible claim is supported/);
+  assert.match(SHARED_INSTRUCTIONS, /supplied evidence supports the composition as acceptable/);
+  assert.doesNotMatch(SHARED_INSTRUCTIONS, /asymmetry is intentional/);
 });
 
 test('the staged ladder runs one candidate and wraps randomized tails into full batches', () => {

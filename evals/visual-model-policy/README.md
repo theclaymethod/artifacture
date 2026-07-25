@@ -56,6 +56,29 @@ and truth excerpt, not merely the case ID or screenshot bytes. These
 source-conditioned controls test whether a verifier actually uses supplied
 evidence when identical pixels can be either valid or invalid.
 
+### Prompt hill-climb smoke (non-policy evidence)
+
+On 2026-07-25, the shared verdict contract and family rubrics were tuned
+against one label-blind smoke of all 72 seed states using three parallel
+delegated `gpt-5.6-terra` agents (24 disjoint states per agent). This is a
+prompt-development check, not a provider measurement: it has no provider
+latency, token-cache, cost, or independent replicate telemetry, and it does
+not qualify a route. It reuses the seed corpus rather than a held-out split,
+so the improvement is not a generalization estimate.
+
+| Prompt | Correct | TP | TN | FP | FN | Precision | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 67/72 | 36 | 31 | 5 | 0 | 87.8% | 100% |
+| Hill-climbed | 72/72 | 36 | 36 | 0 | 0 | 100% | 100% |
+
+The hill-climbed output was emitted as label-free JSON with grounded regions;
+the manifests and raw outputs were retained externally at
+`/tmp/artifacture-luna-blind-{0,1,2}.json` and
+`/tmp/artifacture-smoke-results-v2.json`. Because those files are delegated
+agent artifacts rather than adapter records, they are intentionally excluded
+from policy aggregation. Re-run the smoke only as a development signal, and
+use the provider-independent runner below for any qualification claim.
+
 This is a seed corpus, not a graduation corpus. Its checked-in labels are
 proposed from fixture intent, not represented as human review, and each family
 currently has fewer than the default 10 positive and 10 negative unique-

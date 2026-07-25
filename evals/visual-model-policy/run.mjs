@@ -17,9 +17,9 @@ import {
 } from './corpus.mjs';
 import { normalizeTelemetry } from './telemetry.mjs';
 
-export const VERDICT_SYSTEM_TEXT = `Return JSON only. The top-level object must be {"verdicts":[...]}. Each supplied state_id must have exactly one verdict. A verdict is either {"state_id":"...","abstain":true,"reason":"..."} or {"state_id":"...","pass":true|false,"findings":[...]}. Every finding requires check_id, image_id, region_id, evidence, and fix.`;
+export const VERDICT_SYSTEM_TEXT = `Return JSON only. The top-level object must be {"verdicts":[...]}. Each supplied state_id must have exactly one verdict. A verdict is either {"state_id":"...","abstain":true,"reason":"..."} or {"state_id":"...","pass":true|false,"findings":[...]}. pass=true means the selected criterion does not fire; use pass=false only when the supplied image and evidence visibly support a violation. Do not invent a finding from a title, truth excerpt, or unusual-but-intentional design alone. Every finding requires check_id, image_id, region_id, evidence, and fix.`;
 
-export const SHARED_INSTRUCTIONS = `Inspect only the supplied evidence. Judge only the selected criterion. Never infer a finding from another image or another criterion. Use the exact state_id, image_id, and region_id supplied for grounding. Stay silent when the criterion does not fire.`;
+export const SHARED_INSTRUCTIONS = `Inspect only the supplied evidence. Judge only the selected criterion. Never infer a finding from another image or another criterion. Use the exact state_id, image_id, and region_id supplied for grounding. Use the truth excerpt to decide whether a visible claim is supported; do not use it alone to invent a violation when the image does not show one. If the selected criterion is not visibly demonstrated, or the supplied evidence supports the composition as acceptable for that criterion, return pass=true with no findings. Stay silent when the criterion does not fire.`;
 
 export function corpusContractId(corpus) {
   return crypto.createHash('sha256').update(canonicalJson(corpus)).digest('hex');

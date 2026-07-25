@@ -23,6 +23,7 @@ Routing rules:
 Questions for units routed `relational`, `operating-model`, or `simulated-surface`:
 
 - [operating-model-fit] Does the composition faithfully expose the relationships the viewer needs for the unit's narrative job?
+- For source-conditioned claims such as equations, comparisons, or provenance, the supplied source brief is decisive context: if it explicitly defines the visible relationship, pass it; if it says the relationship is unsupported, flag the visible claim even when the pixels are identical.
 - Does the visual grammar make a truthful claim? Cards imply independent peers; a pipeline implies ordered transformation; a funnel implies attrition; a tree implies hierarchy or prerequisites; a graph implies meaningful relationships; a control plane implies policy routing; a trace implies sequence and provenance.
 - Can the viewer reconstruct the relevant comparison, sequence, routing rule, state change, evidence path, or dependency without presenter narration?
 - Does each load-bearing position, connector, line style, size, color, or animation have one stable meaning?

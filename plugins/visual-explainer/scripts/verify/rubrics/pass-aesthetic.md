@@ -5,10 +5,10 @@ Inputs:
 - Load only the section for the active preset plus `Any named preset`.
 
 Questions:
-- Any named preset: [preset-both-mode-visual] Do both modes render correctly with no invisible text, no wrong-mode background or fill bleeding through, and no element that clearly failed to invert?
-- Mono-Industrial: [mono-status-value-judgment] Does every colored element mark a specific value or datum with genuine ok/warn/error meaning, rather than tinting a container, row, label, or decoration?
+- Any named preset: [preset-both-mode-visual] Do both modes render correctly with no invisible text, no wrong-mode background or fill bleeding through, and no element that clearly failed to invert? A load-bearing icon disappearing into a dark surface is a violation even when its adjacent label remains readable; a non-semantic watermark may fade.
+- Mono-Industrial: [mono-status-value-judgment] Does every colored element mark a specific value or datum with genuine ok/warn/error meaning, rather than tinting a container, row, label, or decoration? A single colored warning/error value with a neutral surrounding container is a pass.
 - Mono-Industrial: [mono-one-surprise] Does exactly one element deliberately break the pattern, and is that break typographic or compositional rather than color, icon, or gradient?
-- Mono-Industrial: [mono-three-layer-squint] When squinted at, do exactly three legible levels of emphasis exist, and does the hero stay intact and full-width on mobile rather than shrinking into a card?
+- Mono-Industrial: [mono-three-layer-squint] When squinted at, do exactly three legible levels of emphasis exist, and does the hero stay intact and full-width on mobile rather than shrinking into a card? Count major hierarchy levels, not every ordinary card, label, or supporting sentence; five equally loud hero/emphasis layers is a violation, while three clearly resolved levels is a pass.
 - Nothing: [nothing-accent-red-judgment] Is the single red-accent use an urgent, destructive, or error signal rather than decorative?
 - Nothing: [nothing-single-grid-break] Does exactly one element deliberately break the grid, excluding legitimate full-width chrome such as nav, footer, or section dividers?
 - Demo embed: [demo-aesthetic-match] Does the embedded demo frame match the page preset in corner radius, border, shadow, and caption chrome, and feel embedded rather than glued on?

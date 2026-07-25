@@ -5,9 +5,9 @@ Inputs:
 - One-line content brief per figure.
 
 Questions:
-- [diagram-legend-matches-figure] Does every legend entry correspond to something drawn in the figure, and does every distinct visual category in the figure appear in the legend?
+- [diagram-legend-matches-figure] Does every legend entry correspond to something drawn in the figure, and does every distinct visual category in the figure appear in the legend? Compare category identity by the visible labels and symbols; do not require equal styling, equal emphasis, or a special muted treatment when every category is present in both the figure and legend.
 - [diagram-focal-single-dominant] Is there exactly one clearly dominant focal element, with no missing focal point and no two-or-more elements competing equally for primary attention?
-- [diagram-proportional-honesty-visual] Do relative sizes and spacings visually match stated quantities, percentages, counts, or dates?
+- [diagram-proportional-honesty-visual] Do relative sizes and spacings visually match stated quantities, percentages, counts, or dates? For an explicitly scaled comparison, verify the visible geometry against the stated ratio. Correctly proportional bars are a pass even without a drawn axis; do not flag them merely because the containers are unequal or because the chart is sparse.
 - [diagram-type-coherent] Does the figure read as one coherent diagram type matching its content, and if Mermaid was used, was it warranted by 15+ nodes, a uniform-shape forest, or an explicit request?
 - [diagram-removal-simplicity] Does every node, label, and line carry information, with no removable padding, generic equal cards, or all-identical boxes that erase hierarchy?
 - [diagram-necessity] Could the content be conveyed just as well by a short 3-column table, bulleted list, or single sentence?
