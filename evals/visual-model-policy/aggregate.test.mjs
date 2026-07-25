@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { aggregateRecords } from './aggregate.mjs';
-import { expandCorpus, loadCorpus } from './corpus.mjs';
+import { evidenceSha256, expandCorpus, loadCorpus } from './corpus.mjs';
 import {
   buildExperimentPlan,
   experimentContractId,
@@ -20,7 +20,16 @@ function record({
   grounded = true,
   latencyMs = 100,
   cost = 0.001,
+  imageSha256 = null,
+  visibleText = caseId,
+  truthExcerpt = caseId,
 }) {
+  const renderedSha256 = imageSha256
+    || crypto.createHash('sha256').update(caseId).digest('hex');
+  const evidenceIdentity = evidenceSha256(renderedSha256, {
+    visible_text: visibleText,
+    truth_excerpt: truthExcerpt,
+  });
   return {
     schema_version: 1,
     record_type: 'visual-eval-request',
@@ -57,7 +66,8 @@ function record({
       observation_id: `${requestId}:${caseId}`,
       case_id: caseId,
       image_id: `image:${caseId}`,
-      image_sha256: crypto.createHash('sha256').update(caseId).digest('hex'),
+      image_sha256: renderedSha256,
+      evidence_sha256: evidenceIdentity,
       criterion_id: 'text-visibly-clipped',
       human_label: humanLabel,
       predicted_label: predictedLabel,
@@ -88,6 +98,9 @@ test('aggregation emits selector counts, unique evidence, telemetry, and p95', (
   assert.equal(result.unique_cases, 2);
   assert.equal(result.unique_positives, 1);
   assert.equal(result.unique_negatives, 1);
+  assert.equal(result.unique_images, 2);
+  assert.equal(result.unique_image_positives, 1);
+  assert.equal(result.unique_image_negatives, 1);
   assert.equal(result.tp, 2);
   assert.equal(result.tn, 2);
   assert.equal(result.grounded, 2);
@@ -100,13 +113,17 @@ test('aggregation emits selector counts, unique evidence, telemetry, and p95', (
   assert.equal(result.experiment_complete, false);
 });
 
-test('unique evidence is keyed by rendered pixels rather than case id', () => {
+test('unique evidence is keyed by the image-and-source evidence bundle', () => {
+  const sharedImageSha256 = crypto.createHash('sha256').update('shared-pixels').digest('hex');
   const first = record({
     requestId: 'pixel-copy-a',
     replicate: 1,
     caseId: 'case-a',
     humanLabel: 'fire',
     predictedLabel: 'fire',
+    imageSha256: sharedImageSha256,
+    visibleText: 'Same visible evidence',
+    truthExcerpt: 'Same source evidence',
   });
   const second = record({
     requestId: 'pixel-copy-b',
@@ -114,14 +131,59 @@ test('unique evidence is keyed by rendered pixels rather than case id', () => {
     caseId: 'case-b',
     humanLabel: 'fire',
     predictedLabel: 'fire',
+    imageSha256: sharedImageSha256,
+    visibleText: 'Same visible evidence',
+    truthExcerpt: 'Same source evidence',
   });
-  second.observations[0].image_sha256 = first.observations[0].image_sha256;
   const measurements = aggregateRecords([first, second], {
     candidates: [{ id: 'tiny', rank: 1, class: 'small', provider: 'fixture' }],
   });
   assert.equal(measurements.results[0].cases, 2);
   assert.equal(measurements.results[0].unique_cases, 1);
   assert.equal(measurements.results[0].unique_positives, 1);
+  assert.equal(measurements.results[0].unique_images, 1);
+});
+
+test('source-conditioned labels remain independent when rendered pixels match', () => {
+  const sharedImageSha256 = crypto.createHash('sha256').update('confidence-meter').digest('hex');
+  const fire = record({
+    requestId: 'source-conditioned-fire',
+    replicate: 1,
+    caseId: 'unsupported-confidence',
+    humanLabel: 'fire',
+    predictedLabel: 'fire',
+    imageSha256: sharedImageSha256,
+    visibleText: 'Confidence 87%',
+    truthExcerpt: 'No measurement supports the displayed confidence.',
+  });
+  const clean = record({
+    requestId: 'source-conditioned-clean',
+    replicate: 1,
+    caseId: 'measured-confidence',
+    humanLabel: 'clean',
+    predictedLabel: 'clean',
+    imageSha256: sharedImageSha256,
+    visibleText: 'Confidence 87%',
+    truthExcerpt: '87 of 100 checks passed in the attached run.',
+  });
+  assert.equal(
+    clean.observations[0].image_sha256,
+    fire.observations[0].image_sha256,
+  );
+  assert.notEqual(
+    clean.observations[0].evidence_sha256,
+    fire.observations[0].evidence_sha256,
+  );
+
+  const measurements = aggregateRecords([fire, clean], {
+    candidates: [{ id: 'tiny', rank: 1, class: 'small', provider: 'fixture' }],
+  });
+  assert.equal(measurements.results[0].unique_cases, 2);
+  assert.equal(measurements.results[0].unique_positives, 1);
+  assert.equal(measurements.results[0].unique_negatives, 1);
+  assert.equal(measurements.results[0].unique_images, 1);
+  assert.equal(measurements.results[0].unique_image_positives, 1);
+  assert.equal(measurements.results[0].unique_image_negatives, 1);
 });
 
 test('unadjudicated disagreements remain visible and cannot become policy evidence', () => {
@@ -367,18 +429,22 @@ test('aggregation binds qualification to the complete expected request matrix', 
         output_tokens: 20,
         actual_cost_usd: 0.001,
       },
-      observations: cell.cases.map((entry) => ({
-        observation_id: `${requestId}:${entry.case_id}`,
-        case_id: entry.case_id,
-        image_id: entry.image.id,
-        image_sha256: crypto.createHash('sha256').update(entry.case_id).digest('hex'),
-        criterion_id: entry.criterion_id,
-        human_label: entry.human_label,
-        predicted_label: entry.human_label,
-        grounded: entry.human_label === 'fire',
-        json_valid: true,
-        abstained: false,
-      })),
+      observations: cell.cases.map((entry) => {
+        const imageSha256 = crypto.createHash('sha256').update(entry.case_id).digest('hex');
+        return {
+          observation_id: `${requestId}:${entry.case_id}`,
+          case_id: entry.case_id,
+          image_id: entry.image.id,
+          image_sha256: imageSha256,
+          evidence_sha256: evidenceSha256(imageSha256, entry),
+          criterion_id: entry.criterion_id,
+          human_label: entry.human_label,
+          predicted_label: entry.human_label,
+          grounded: entry.human_label === 'fire',
+          json_valid: true,
+          abstained: false,
+        };
+      }),
       synthetic: false,
     };
   });

@@ -36,6 +36,9 @@ function result(overrides = {}) {
     unique_cases: 20,
     unique_positives: 10,
     unique_negatives: 10,
+    unique_images: 20,
+    unique_image_positives: 10,
+    unique_image_negatives: 10,
     adjudication_complete: true,
     synthetic: false,
     telemetry_complete: true,
@@ -110,6 +113,21 @@ test('blocks a pass when no model has enough positive and negative evidence', ()
   assert.equal(policy.routes.layout, undefined);
   assert.equal(policy.blocked.layout.reason, 'no-eval-qualified-model');
   assert.match(policy.blocked.layout.evaluated[0].reasons.join('\n'), /positives/);
+});
+
+test('source-conditioned evidence cannot replace distinct rendered-image coverage', () => {
+  const outcome = qualificationFor(result({
+    unique_cases: 20,
+    unique_positives: 10,
+    unique_negatives: 10,
+    unique_images: 2,
+    unique_image_positives: 1,
+    unique_image_negatives: 1,
+  }));
+
+  assert.equal(outcome.qualified, false);
+  assert.match(outcome.reasons.join('\n'), /unique_image_positives/);
+  assert.match(outcome.reasons.join('\n'), /unique_image_negatives/);
 });
 
 test('allows stricter per-run thresholds without changing the selector', () => {

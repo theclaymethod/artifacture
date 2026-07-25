@@ -6,12 +6,11 @@ import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import {
+  DEFAULT_VIEWPORT,
   expandCorpus,
   loadCorpus,
   validateCorpus,
 } from './corpus.mjs';
-
-const VIEWPORT = Object.freeze({ width: 960, height: 600 });
 
 export function renderCaseHtml(evalCase) {
   const { template, variant } = evalCase.render;
@@ -26,21 +25,25 @@ export function renderCaseHtml(evalCase) {
   html, body { width: 100%; height: 100%; margin: 0; }
   body {
     overflow: hidden;
-    background: #e9e6df;
+    background: #d9dde2;
     color: #171714;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
   .frame {
-    width: 960px;
-    height: 600px;
-    padding: 44px 48px;
+    width: 100vw;
+    height: 100vh;
+    padding: clamp(24px, 4vw, 48px);
     background:
       linear-gradient(90deg, rgba(23,23,20,.035) 1px, transparent 1px) 0 0 / 32px 32px,
       #f7f5ef;
     position: relative;
   }
+  .family-diagram { background-color:#edf2f4; background-image:linear-gradient(rgba(41,72,84,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(41,72,84,.055) 1px,transparent 1px); background-size:24px 24px; }
+  .family-aesthetic { background:#f3f0e9; }
+  .family-operating-model { background:#f0f3ee; }
+  .family-artifact-slop-gap { background:#fbf7ed; }
   .eyebrow { font: 700 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: #626159; }
-  h1 { margin: 12px 0 28px; font-size: 38px; line-height: 1.04; letter-spacing: -.04em; max-width: 720px; }
+  h1 { margin: 0 0 28px; font-size: clamp(30px, 4vw, 42px); line-height: 1.04; letter-spacing: -.04em; max-width: 720px; }
   h2, h3, p { margin: 0; }
   .muted { color: #6c6a61; }
   .panel { border: 1px solid #aaa79e; background: rgba(255,255,255,.62); }
@@ -49,6 +52,7 @@ export function renderCaseHtml(evalCase) {
   .grid { display: grid; gap: 14px; }
   .row { display: flex; align-items: center; gap: 14px; }
   .node { min-width: 132px; padding: 18px; border: 1px solid #7e7b73; background: #fffdf8; }
+  .node.ink { background: #22231f; color: #f6f3eb; }
   .node strong { display: block; margin-bottom: 6px; }
   .arrow { font: 700 22px/1 ui-monospace, monospace; color: #69675f; }
   .chip { border: 1px solid #8f8c82; padding: 7px 10px; font: 700 11px/1 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; }
@@ -59,8 +63,7 @@ export function renderCaseHtml(evalCase) {
 </style>
 </head>
 <body>
-<main class="frame" data-state-id="${escapeHtml(evalCase.state_id)}">
-  <div class="eyebrow">${escapeHtml(evalCase.family)} / ${escapeHtml(evalCase.criterion_id)}</div>
+<main class="frame family-${escapeHtml(evalCase.family)}" data-state-id="${escapeHtml(evalCase.state_id)}">
   ${scene}
 </main>
 </body>
@@ -92,17 +95,18 @@ export async function renderCorpus({
   const renderedImages = [];
   try {
     const page = await browser.newPage({
-      viewport: VIEWPORT,
+      viewport: DEFAULT_VIEWPORT,
       deviceScaleFactor: 1,
       colorScheme: 'light',
     });
     for (const evalCase of cases) {
+      await page.setViewportSize(evalCase.viewport || DEFAULT_VIEWPORT);
       await page.setContent(renderCaseHtml(evalCase), { waitUntil: 'load' });
       const file = path.join(root, `${evalCase.image.id}.png`);
       const bytes = await page.screenshot({ path: file, type: 'png' });
       const hash = crypto.createHash('sha256').update(bytes).digest('hex');
       const duplicate = caseByHash.get(hash);
-      if (duplicate) {
+      if (duplicate && !(duplicate.source_conditioned && evalCase.source_conditioned)) {
         throw new Error(
           `duplicate rendered pixels for ${duplicate.case_id} and ${evalCase.case_id}`,
         );
@@ -110,17 +114,26 @@ export async function renderCorpus({
       caseByHash.set(hash, evalCase);
       const pairKey = `${evalCase.family}\u0000${evalCase.pair_id}`;
       const prior = renderHashes.get(pairKey);
-      if (prior?.hash === hash && prior.human_label !== evalCase.human_label) {
+      if (
+        prior?.hash === hash
+        && prior.human_label !== evalCase.human_label
+        && !(prior.source_conditioned && evalCase.source_conditioned)
+      ) {
         throw new Error(
           `opposite labels rendered identical pixels for ${evalCase.family}:${evalCase.pair_id}`,
         );
       }
-      renderHashes.set(pairKey, { hash, human_label: evalCase.human_label });
+      renderHashes.set(pairKey, {
+        hash,
+        human_label: evalCase.human_label,
+        source_conditioned: evalCase.source_conditioned,
+      });
       renderedImages.push({
         case_id: evalCase.case_id,
         image_id: evalCase.image.id,
         path: file,
         sha256: hash,
+        viewport: evalCase.viewport,
       });
     }
   } finally {
@@ -130,7 +143,7 @@ export async function renderCorpus({
     schema_version: 1,
     corpus_id: corpus.corpus_id,
     rendered_at: new Date().toISOString(),
-    viewport: VIEWPORT,
+    default_viewport: DEFAULT_VIEWPORT,
     images: renderedImages,
   };
   await fs.writeFile(
@@ -145,11 +158,10 @@ function renderTemplate(template, variant, evalCase) {
   const text = escapeHtml(evalCase.visible_text);
   if (template === 'text') {
     const clipped = variant === 'clipped-right';
-    const width = clipped ? 410 : 640;
     const wrap = clipped ? 'white-space:nowrap; overflow:hidden;' : 'white-space:normal;';
     return `<h1>${sceneHeading(template)}</h1>
-      <section class="panel" data-region="${regionId}" style="width:${width}px; padding:26px; ${wrap}">
-        <div style="font-size:48px; line-height:1.02; font-weight:800; letter-spacing:-.055em; width:${clipped ? 640 : 560}px">${text}</div>
+      <section class="panel" data-region="${regionId}" style="width:100%; max-width:640px; padding:clamp(18px,4vw,26px); ${wrap}">
+        <div style="font-size:clamp(38px,9vw,48px); line-height:1.02; font-weight:800; letter-spacing:-.055em; width:${clipped ? '640px' : '100%'}">${text}</div>
       </section>`;
   }
   if (template === 'table') {
@@ -186,14 +198,15 @@ function renderTemplate(template, variant, evalCase) {
       </section>`;
   }
   if (template === 'tracks') {
-    const uneven = ['unequal-peers', 'baseline-drift', 'missing-weight'].includes(variant);
+    const uneven = ['unequal-peers', 'missing-weight'].includes(variant);
+    const baselineDrift = variant === 'baseline-drift';
     const editorial = variant === 'editorial-60-40';
     const columns = uneven ? '1.2fr .55fr 1.35fr' : (editorial ? '1.5fr 1fr' : '1fr 1fr 1fr');
     const labels = editorial ? ['Narrative', 'Evidence'] : ['Input', 'Router', 'Output'];
     return `<h1>${sceneHeading(template)}</h1>
       <section class="grid" data-region="${regionId}" style="grid-template-columns:${columns}">
-        ${labels.map((label, index) => `<div class="panel" style="padding:22px; min-height:${uneven && index === 1 ? 170 : 250}px; margin-top:${uneven && index === 2 ? 24 : 0}px">
-          <h2>${label}</h2><div class="rule" style="margin:18px 0 ${uneven && index === 1 ? 36 : 18}px"></div><p class="muted">${text}</p>
+        ${labels.map((label, index) => `<div class="panel" style="padding:22px; min-height:${uneven && index === 1 ? 170 : 250}px; margin-top:${baselineDrift ? index * 22 : uneven && index === 2 ? 24 : 0}px">
+          <h2>${label}</h2><div class="rule" style="margin:${baselineDrift ? 14 + index * 12 : 18}px 0 ${uneven && index === 1 ? 36 : 18}px"></div><p class="muted">${text}</p>
         </div>`).join('')}
       </section>`;
   }
@@ -218,7 +231,7 @@ function renderTemplate(template, variant, evalCase) {
 function renderDiagram(variant, evalCase) {
   const regionId = evalCase.regions[0].id;
   const timeline = ['dishonest-timeline', 'timeline-break'].includes(variant);
-  const bars = ['dishonest-bars', 'labeled-comparison', 'invalid-probability', 'valid-probability'].includes(variant);
+  const bars = ['dishonest-bars', 'labeled-comparison', 'proportional-bars', 'invalid-probability', 'valid-probability'].includes(variant);
   if (timeline) {
     return `<h1>${sceneHeading('diagram')}</h1><section data-region="${regionId}" class="panel" style="padding:44px;height:320px">
       <div class="rule" style="margin-top:80px"></div>
@@ -229,12 +242,32 @@ function renderDiagram(variant, evalCase) {
   }
   if (bars) {
     const dishonestScale = variant === 'dishonest-bars' || variant === 'invalid-probability';
-    const widths = dishonestScale ? [48, 58, 70] : [30, 62, 86];
+    const widths = variant.includes('probability')
+      ? (dishonestScale ? [48, 58, 70] : [72, 33, 26])
+      : (dishonestScale ? [62, 69, 66] : [24, 82, 43]);
     const labels = variant.includes('probability')
       ? ['A 55%', variant === 'invalid-probability' ? 'B 35%' : 'B 25%', 'Other 20%']
       : ['A $10', 'B $40', 'Other $20'];
     return `<h1>${sceneHeading('diagram')}</h1><section data-region="${regionId}" class="panel" style="padding:30px;height:340px">
       ${widths.map((width, index) => `<div class="row" style="margin:22px 0"><span class="caption" style="width:90px">${labels[index]}</span><div class="ink" style="height:42px;width:${width}%"></div></div>`).join('')}
+    </section>`;
+  }
+  if (['orphan-legend', 'complete-legend', 'missing-legend-entry', 'annotation-no-legend'].includes(variant)) {
+    const orphan = variant === 'orphan-legend';
+    const missing = variant === 'missing-legend-entry';
+    const annotation = variant === 'annotation-no-legend';
+    const figureKinds = missing ? ['SERVICE', 'DECISION', 'DATA'] : ['SERVICE', 'DATA'];
+    if (variant === 'complete-legend') figureKinds.push('CACHE');
+    const legendKinds = orphan || variant === 'complete-legend'
+      ? ['SERVICE', 'DATA', 'CACHE']
+      : ['SERVICE', 'DATA'];
+    return `<h1>${sceneHeading('diagram')}</h1><section data-region="${regionId}" class="panel" style="padding:34px;height:420px">
+      <div class="row" style="justify-content:center;min-height:190px">
+        ${figureKinds.map((kind, index) => `${index ? '<span class="arrow">→</span>' : ''}<div class="node"><strong>${kind}</strong><span class="muted">${index + 1}</span></div>`).join('')}
+        ${annotation ? '<aside style="border:1px dashed #7e7b73;padding:16px;align-self:flex-start">Annotation: retry boundary</aside>' : ''}
+      </div>
+      <div class="rule" style="margin:18px 0"></div>
+      <div class="row" style="justify-content:center">${legendKinds.map((kind) => `<span class="chip"><i style="display:inline-block;width:10px;height:10px;background:#22231f;margin-right:7px"></i>${kind}</span>`).join('')}</div>
     </section>`;
   }
   const nodes = ['Capture', 'Policy', 'Decision'];
@@ -268,7 +301,41 @@ function renderDiagram(variant, evalCase) {
 
 function renderPreset(variant, evalCase) {
   const regionId = evalCase.regions[0].id;
-  const wrongMode = ['wrong-mode-panel', 'wrong-mode-background', 'invisible-dark-icons'].includes(variant);
+  if (variant === 'invisible-dark-icons' || variant === 'quiet-watermark') {
+    const broken = variant === 'invisible-dark-icons';
+    return `<h1>${sceneHeading('preset')}</h1><section data-region="${regionId}" class="grid" style="grid-template-columns:1fr 1fr">
+      ${['LIGHT', 'DARK'].map((mode, index) => {
+        const dark = index === 1;
+        const foreground = dark ? '#f6f3eb' : '#22231f';
+        const iconColor = broken && dark ? '#22231f' : foreground;
+        return `<div class="panel" style="height:330px;padding:24px;background:${dark ? '#22231f' : '#fffdf8'};color:${foreground}">
+          <div class="caption" style="color:inherit">${mode}</div>
+          <div class="row" style="margin-top:54px;justify-content:center">
+            <span aria-label="load-bearing input icon" style="font-size:54px;line-height:1;color:${iconColor}">◆</span>
+            <div><strong style="font-size:24px">Inputs</strong><p style="margin-top:6px;color:inherit">Route evidence</p></div>
+          </div>
+          <div class="row" style="margin-top:34px;justify-content:center">
+            <span aria-hidden="true" style="font-size:42px;line-height:1;opacity:${broken ? 0.55 : 0.12}">◎</span>
+            <div><strong style="font-size:24px">Results</strong><p style="margin-top:6px;color:inherit">Grounded finding</p></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </section>`;
+  }
+  if (['many-surprises', 'one-surprise', 'many-grid-breaks', 'one-grid-break'].includes(variant)) {
+    const many = variant.startsWith('many-');
+    const gridBreak = variant.endsWith('grid-breaks') || variant === 'one-grid-break';
+    return `<h1>${sceneHeading('preset')}</h1><section data-region="${regionId}" class="panel" style="height:470px;padding:30px;overflow:hidden">
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);align-items:start">
+        ${['Capture', 'Review', 'Decision'].map((label, index) => `<article class="node" style="
+          ${many ? `transform:translate(${index === 0 ? '-18' : index === 1 ? '14' : '28'}px,${index * 18}px) rotate(${index - 1}deg);` : index === 1 ? 'grid-column:span 2;transform:translateY(18px);' : ''}
+          ${gridBreak ? 'border-width:2px;' : ''}
+        "><strong>${label}</strong><span class="muted">${escapeHtml(evalCase.visible_text)}</span></article>`).join('')}
+      </div>
+      <div class="caption" style="margin-top:70px">${many ? 'Three unrelated elements leave the established grid.' : 'One decision deliberately breaks the established pattern.'}</div>
+    </section>`;
+  }
+  const wrongMode = ['wrong-mode-panel', 'wrong-mode-background'].includes(variant);
   const mismatchedDemo = variant === 'mismatched-demo';
   const mobileHeroCard = variant === 'mobile-hero-card';
   const multipleSurprises = variant === 'many-surprises' || variant === 'many-grid-breaks';
@@ -294,24 +361,63 @@ function renderPreset(variant, evalCase) {
 function renderOperating(variant, evalCase) {
   const regionId = evalCase.regions[0].id;
   const labels = evalCase.visible_text.split(' · ').slice(0, 4);
-  const independentCards = [
-    'routing-cards',
-    'one-way-loop',
-    'missing-residual',
-    'provenance-cards',
-    'resource-metrics',
-    'state-badges',
-    'overbuilt-comparison',
-    'cover-graph',
-    'workspace-cards',
-    'dependency-list',
-  ].includes(variant);
-  const cards = independentCards || variant === 'relational-equation' || variant === 'cover-none';
-  return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:350px;padding:28px">
-    <div class="${cards ? 'grid' : 'row'}" style="${cards ? `grid-template-columns:repeat(${Math.min(labels.length, 4)},1fr)` : 'justify-content:center'}">
-      ${labels.map((label, index) => `${!cards && index ? `<span class="arrow">${variant === 'closed-loop' && index === labels.length - 1 ? '↩' : '→'}</span>` : ''}<div class="node" style="${!cards && index === 1 ? 'background:#22231f;color:#fff' : ''}"><strong>${escapeHtml(label)}</strong><span class="muted">${independentCards ? 'Independent item' : `Rule ${index + 1}`}</span></div>`).join('')}
-    </div>
-    ${!cards ? `<div class="caption" style="margin:46px auto 0;text-align:center">guards, dependencies, and provenance remain explicit</div>` : ''}
+  if (variant === 'relational-equation') {
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:42px;display:grid;place-items:center">
+      <div class="ink" style="padding:34px 46px;font:800 clamp(24px,3vw,42px)/1.1 ui-monospace,monospace">${escapeHtml(evalCase.visible_text)}</div>
+    </section>`;
+  }
+  if (variant === 'routing-model') {
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:34px">
+      <div class="row" style="justify-content:center"><div class="node"><strong>Incoming review</strong><span class="muted">all eligible items</span></div><span class="arrow">→</span><div class="node ink"><strong>Policy router</strong><span>priority + deduplication</span></div></div>
+      <div class="grid" style="grid-template-columns:repeat(4,1fr);margin:46px auto 0;max-width:1040px">${['Mandatory', 'Representative', 'Calibration', 'Frontier'].map((label) => `<div class="node"><strong>${label}</strong><span class="muted">explicit entry rule</span></div>`).join('')}</div>
+    </section>`;
+  }
+  if (variant === 'closed-loop' || variant === 'one-way-loop') {
+    const closed = variant === 'closed-loop';
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:40px">
+      <div class="row" style="justify-content:center">${labels.map((label, index) => `${index ? '<span class="arrow">→</span>' : ''}<div class="node"><strong>${escapeHtml(label)}</strong><span class="muted">stage ${index + 1}</span></div>`).join('')}</div>
+      ${closed ? '<div style="margin:70px auto 0;max-width:700px;border:2px solid #22231f;border-top:0;height:70px;text-align:center;padding-top:42px" class="caption">outcomes ↩ calibration</div>' : '<div class="caption" style="margin-top:86px;text-align:center">No outcome path returns to calibration.</div>'}
+    </section>`;
+  }
+  if (variant === 'provenance-trace' || variant === 'provenance-cards') {
+    const trace = variant === 'provenance-trace';
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:42px">
+      <div class="${trace ? 'row' : 'grid'}" style="${trace ? 'justify-content:center' : 'grid-template-columns:repeat(3,1fr)'}">${['Source', 'Finding', 'Decision'].map((label, index) => `${trace && index ? '<span class="arrow">→</span>' : ''}<div class="node"><strong>${label}</strong><span class="muted">${trace ? 'trace R-184' : 'unlinked evidence'}</span></div>`).join('')}</div>
+      <div class="caption" style="margin-top:72px;text-align:center">${trace ? 'R-184 binds every transformation.' : 'No identifier connects the cards.'}</div>
+    </section>`;
+  }
+  if (variant === 'state-machine' || variant === 'state-badges') {
+    const machine = variant === 'state-machine';
+    if (machine) {
+      return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:42px">
+        <div class="row" style="justify-content:center">
+          <div class="node"><strong>Pending</strong><span class="muted">state 1</span></div>
+          <span><span class="arrow">→</span><small class="caption">review complete</small></span>
+          <div class="node"><strong>Reviewed</strong><span class="muted">state 2</span></div>
+          <span><span class="arrow">→</span><small class="caption">reviewed only</small></span>
+          <div class="node"><strong>Closed</strong><span class="muted">terminal</span></div>
+        </div>
+        <div class="row" style="justify-content:center;margin-top:70px">
+          <span class="caption">Pending ↘</span>
+          <div class="node ink"><strong>Escalated</strong><span>from pending or reviewed</span></div>
+          <span class="caption">↙ Reviewed</span>
+        </div>
+      </section>`;
+    }
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:42px">
+      <div class="grid" style="grid-template-columns:repeat(3,1fr)">${['Pending', 'Reviewed', 'Escalated'].map((label) => `<div class="node"><strong>${label}</strong><span class="muted">status only</span></div>`).join('')}</div>
+    </section>`;
+  }
+  if (variant === 'workspace-surface' || variant === 'workspace-cards') {
+    const surface = variant === 'workspace-surface';
+    return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:24px">
+      <div class="grid" style="grid-template-columns:${surface ? '180px 1fr 220px' : 'repeat(3,1fr)'};height:100%">
+        ${['Evidence', 'Hypotheses', 'Next actions'].map((label, index) => `<div class="${surface && index === 1 ? 'ink' : 'node'}" style="${surface ? 'padding:24px' : ''}"><strong>${label}</strong><p class="muted" style="margin-top:12px">${surface ? ['filterable queue', 'active investigation canvas', 'decision inspector'][index] : 'independent summary card'}</p></div>`).join('')}
+      </div>
+    </section>`;
+  }
+  return `<h1>${sceneHeading('operating')}</h1><section data-region="${regionId}" class="panel" style="height:430px;padding:36px">
+    <div class="grid" style="grid-template-columns:repeat(${Math.min(labels.length, 4)},1fr)">${labels.map((label) => `<div class="node"><strong>${escapeHtml(label)}</strong><span class="muted">Independent item</span></div>`).join('')}</div>
   </section>`;
 }
 

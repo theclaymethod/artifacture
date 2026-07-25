@@ -10,6 +10,7 @@ import {
   buildPrefixManifest,
 } from '../visual-cache/prefix.mjs';
 import {
+  evidenceSha256,
   expandCorpus,
   loadCorpus,
   validateCorpus,
@@ -277,6 +278,14 @@ export async function runExperiment({
     throw new Error('replace all placeholder candidate and provider values before a live run');
   }
   validateCorpus(corpus);
+  const unsupportedBatchSizes = experiment.batch_sizes.filter(
+    (batchSize) => !corpus.target_batch_sizes.includes(batchSize),
+  );
+  if (unsupportedBatchSizes.length > 0) {
+    throw new Error(
+      `experiment requests unsupported corpus batch size(s): ${unsupportedBatchSizes.join(', ')}`,
+    );
+  }
   const allCases = expandCorpus(corpus, { corpusPath: experiment.corpus_path });
   const selectedPasses = new Set(experiment.passes || allCases.map((entry) => entry.family));
   const cases = allCases.filter((entry) => selectedPasses.has(entry.family));
@@ -289,7 +298,7 @@ export async function runExperiment({
   if (unknownPasses.length > 0) {
     throw new Error(`experiment references unknown pass(es): ${unknownPasses.join(', ')}`);
   }
-  await assertImagesExist(cases);
+  const imageHashesByCase = await readCorpusImageHashes(cases);
   const plan = buildExperimentPlan(experiment, cases);
   if (plan.length === 0) throw new Error('experiment produced an empty request plan');
   const preparedPlan = await prepareExperimentPlan(experiment, plan);
@@ -312,6 +321,12 @@ export async function runExperiment({
     throw new Error(
       'live measurements require corpus.label_review.status=human-reviewed with reviewer and reviewed_at',
     );
+  }
+  if (adapter.synthetic !== true && corpus.graduation_status !== 'ready') {
+    throw new Error('live measurements require corpus.graduation_status=ready');
+  }
+  if (adapter.synthetic !== true) {
+    assertGraduationImageDiversity(cases, imageHashesByCase);
   }
 
   let written = 0;
@@ -386,6 +401,10 @@ export async function runExperiment({
       observations: evaluated.observations.map((observation) => ({
         ...observation,
         image_sha256: imageHashById.get(observation.image_id),
+        evidence_sha256: evidenceSha256(
+          imageHashById.get(observation.image_id),
+          cell.cases.find((entry) => entry.case_id === observation.case_id),
+        ),
         observation_id: `${requestId}:${observation.case_id}`,
       })),
       synthetic: adapter.synthetic === true,
@@ -676,11 +695,16 @@ function validateLadderProgress(experiment, selectedPasses) {
   }
 }
 
-async function assertImagesExist(cases) {
+async function readCorpusImageHashes(cases) {
   const missing = [];
+  const hashes = new Map();
   for (const entry of cases) {
     try {
-      await fs.access(entry.image.path);
+      const bytes = await fs.readFile(entry.image.path);
+      hashes.set(
+        entry.case_id,
+        crypto.createHash('sha256').update(bytes).digest('hex'),
+      );
     } catch {
       missing.push(entry.image.path);
     }
@@ -689,6 +713,31 @@ async function assertImagesExist(cases) {
     throw new Error(
       `corpus images are missing (${missing.length}); run npm run ve:render-visual-model-corpus`,
     );
+  }
+  return hashes;
+}
+
+export function assertGraduationImageDiversity(cases, imageHashesByCase) {
+  const groups = new Map();
+  for (const entry of cases) {
+    const key = `${entry.family}\u0000${entry.human_label}`;
+    const group = groups.get(key) || { images: new Set(), sources: new Set() };
+    group.images.add(imageHashesByCase.get(entry.case_id));
+    group.sources.add(entry.source_artifact_sha256);
+    groups.set(key, group);
+  }
+  for (const [key, group] of groups) {
+    const [family, label] = key.split('\u0000');
+    if (group.images.has(undefined) || group.images.size < 10) {
+      throw new Error(
+        `${family}:${label} requires at least ten distinct rendered images for live graduation`,
+      );
+    }
+    if (group.sources.has(null) || group.sources.has(undefined) || group.sources.size < 10) {
+      throw new Error(
+        `${family}:${label} requires at least ten distinct source artifacts for live graduation`,
+      );
+    }
   }
 }
 

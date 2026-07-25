@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import {
+  evidenceSha256,
   expandCorpus,
   loadCorpus,
   validateCorpus,
@@ -125,6 +126,10 @@ export function aggregateRecords(records, {
             || observation.criterion_id !== evalCase.criterion_id
             || observation.human_label !== evalCase.human_label
             || observation.image_sha256 !== expectedHashByImage.get(evalCase.image.id)
+            || observation.evidence_sha256 !== evidenceSha256(
+              expectedHashByImage.get(evalCase.image.id),
+              evalCase,
+            )
           ) {
             throw new Error(
               `observation ${observation.observation_id} does not match expected corpus evidence`,
@@ -218,7 +223,10 @@ export function aggregateRecords(records, {
     );
     const positives = classified.filter((entry) => entry.human_label === 'fire');
     const negatives = classified.filter((entry) => entry.human_label === 'clean');
-    const uniqueImages = new Map();
+    const uniqueEvidence = new Map();
+    const uniqueImages = new Set();
+    const uniquePositiveImages = new Set();
+    const uniqueNegativeImages = new Set();
     const evidenceByCase = new Map();
     for (const observation of classified) {
       const priorEvidence = evidenceByCase.get(observation.case_id);
@@ -226,6 +234,7 @@ export function aggregateRecords(records, {
         priorEvidence
         && (
           priorEvidence.image_sha256 !== observation.image_sha256
+          || priorEvidence.evidence_sha256 !== observation.evidence_sha256
           || priorEvidence.human_label !== observation.human_label
         )
       ) {
@@ -233,15 +242,21 @@ export function aggregateRecords(records, {
       }
       evidenceByCase.set(observation.case_id, {
         image_sha256: observation.image_sha256,
+        evidence_sha256: observation.evidence_sha256,
         human_label: observation.human_label,
       });
-      if (!uniqueImages.has(observation.image_sha256)) {
-        uniqueImages.set(observation.image_sha256, observation.human_label);
-      } else if (uniqueImages.get(observation.image_sha256) !== observation.human_label) {
+      if (!uniqueEvidence.has(observation.evidence_sha256)) {
+        uniqueEvidence.set(observation.evidence_sha256, observation.human_label);
+      } else if (uniqueEvidence.get(observation.evidence_sha256) !== observation.human_label) {
         throw new Error(
-          `rendered image ${observation.image_sha256} has inconsistent human labels`,
+          `evidence bundle ${observation.evidence_sha256} has inconsistent human labels`,
         );
       }
+      uniqueImages.add(observation.image_sha256);
+      (observation.human_label === 'fire'
+        ? uniquePositiveImages
+        : uniqueNegativeImages
+      ).add(observation.image_sha256);
     }
     const first = cellRecords[0];
     const criterionMetrics = aggregateCriteria(
@@ -279,9 +294,12 @@ export function aggregateRecords(records, {
       cases: classified.length,
       positives: positives.length,
       negatives: negatives.length,
-      unique_cases: uniqueImages.size,
-      unique_positives: [...uniqueImages.values()].filter((label) => label === 'fire').length,
-      unique_negatives: [...uniqueImages.values()].filter((label) => label === 'clean').length,
+      unique_cases: uniqueEvidence.size,
+      unique_positives: [...uniqueEvidence.values()].filter((label) => label === 'fire').length,
+      unique_negatives: [...uniqueEvidence.values()].filter((label) => label === 'clean').length,
+      unique_images: uniqueImages.size,
+      unique_image_positives: uniquePositiveImages.size,
+      unique_image_negatives: uniqueNegativeImages.size,
       tp: positives.filter((entry) => entry.predicted_label === 'fire').length,
       fp: negatives.filter((entry) => entry.predicted_label === 'fire').length,
       tn: negatives.filter((entry) => entry.predicted_label === 'clean').length,
@@ -349,8 +367,10 @@ function aggregateCriteria(observations, requiredCriteria) {
     return {
       id: criterionId,
       cases: rows.length,
-      unique_positives: new Set(positives.map((entry) => entry.image_sha256)).size,
-      unique_negatives: new Set(negatives.map((entry) => entry.image_sha256)).size,
+      unique_positives: new Set(positives.map((entry) => entry.evidence_sha256)).size,
+      unique_negatives: new Set(negatives.map((entry) => entry.evidence_sha256)).size,
+      unique_image_positives: new Set(positives.map((entry) => entry.image_sha256)).size,
+      unique_image_negatives: new Set(negatives.map((entry) => entry.image_sha256)).size,
       tp: positives.filter((entry) => entry.predicted_label === 'fire').length,
       fp: negatives.filter((entry) => entry.predicted_label === 'fire').length,
       tn: negatives.filter((entry) => entry.predicted_label === 'clean').length,
@@ -453,6 +473,7 @@ function validateRequestRecord(record) {
       'case_id',
       'image_id',
       'image_sha256',
+      'evidence_sha256',
       'human_label',
       'criterion_id',
       'json_valid',
@@ -465,6 +486,9 @@ function validateRequestRecord(record) {
     }
     if (!/^[a-f0-9]{64}$/.test(observation.image_sha256)) {
       throw new Error(`observation ${observation.observation_id} has invalid image_sha256`);
+    }
+    if (!/^[a-f0-9]{64}$/.test(observation.evidence_sha256)) {
+      throw new Error(`observation ${observation.observation_id} has invalid evidence_sha256`);
     }
     const caseIndex = record.case_ids.indexOf(observation.case_id);
     if (

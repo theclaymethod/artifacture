@@ -68,6 +68,16 @@ export function qualificationFor(result, thresholds = DEFAULT_THRESHOLDS) {
     requireAtLeast('unique_positives', result.unique_positives, thresholds.min_positives);
     requireAtLeast('unique_negatives', result.unique_negatives, thresholds.min_negatives);
   }
+  requireAtLeast(
+    'unique_image_positives',
+    result.unique_image_positives,
+    thresholds.min_positives,
+  );
+  requireAtLeast(
+    'unique_image_negatives',
+    result.unique_image_negatives,
+    thresholds.min_negatives,
+  );
   if (result.adjudication_complete !== true) {
     reasons.push('adjudication_complete must be true');
   }
@@ -90,6 +100,16 @@ export function qualificationFor(result, thresholds = DEFAULT_THRESHOLDS) {
       requireAtLeast(
         `criterion ${criterion.id} unique_negatives`,
         criterion.unique_negatives,
+        thresholds.min_criterion_negatives,
+      );
+      requireAtLeast(
+        `criterion ${criterion.id} unique_image_positives`,
+        criterion.unique_image_positives,
+        thresholds.min_criterion_positives,
+      );
+      requireAtLeast(
+        `criterion ${criterion.id} unique_image_negatives`,
+        criterion.unique_image_negatives,
         thresholds.min_criterion_negatives,
       );
     }
@@ -160,6 +180,9 @@ export function selectVisualModelPolicy(input) {
           unique_cases: selected.unique_cases,
           unique_positives: selected.unique_positives,
           unique_negatives: selected.unique_negatives,
+          unique_images: selected.unique_images,
+          unique_image_positives: selected.unique_image_positives,
+          unique_image_negatives: selected.unique_image_negatives,
         }),
       },
       escalation_chain: ladder.slice(1).map((row) => ({
@@ -208,6 +231,7 @@ function validateInput(input) {
       'tp', 'fp', 'tn', 'fn', 'grounded', 'grounding_total', 'json_valid',
       'responses', 'abstentions', 'total_cost_usd', 'p95_latency_ms',
       'unique_cases', 'unique_positives', 'unique_negatives',
+      'unique_images', 'unique_image_positives', 'unique_image_negatives',
       'adjudication_complete', 'synthetic', 'telemetry_complete',
       'experiment_complete',
     ]) {
@@ -231,7 +255,10 @@ function validateInput(input) {
       'positives', 'negatives', 'tp', 'fp', 'tn', 'fn', 'grounded',
       'json_valid', 'abstentions',
     ]) nonNegativeInt(result[field], field);
-    for (const field of ['unique_cases', 'unique_positives', 'unique_negatives']) {
+    for (const field of [
+      'unique_cases', 'unique_positives', 'unique_negatives',
+      'unique_images', 'unique_image_positives', 'unique_image_negatives',
+    ]) {
       nonNegativeInt(result[field], field);
     }
     for (const field of [
@@ -272,6 +299,16 @@ function validateInput(input) {
       && Number(result.unique_positives) + Number(result.unique_negatives) !== Number(result.unique_cases)
     ) {
       throw new Error('unique_positives + unique_negatives must equal unique_cases');
+    }
+    if (
+      Number(result.unique_images) > Number(result.unique_image_positives)
+        + Number(result.unique_image_negatives)
+      || Number(result.unique_images) < Math.max(
+        Number(result.unique_image_positives),
+        Number(result.unique_image_negatives),
+      )
+    ) {
+      throw new Error('unique image totals are internally inconsistent');
     }
   }
 }

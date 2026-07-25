@@ -4,7 +4,7 @@
   "corpus_path": "corpus.json",
   "image_detail": "high",
   "replicates": 3,
-  "batch_sizes": [1, 2, 4],
+  "batch_sizes": [1, 2],
   "passes": [
     "layout",
     "diagram",

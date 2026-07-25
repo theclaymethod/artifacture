@@ -5,12 +5,40 @@ import path from 'node:path';
 import test from 'node:test';
 import {
   appendRawRecord,
+  assertGraduationImageDiversity,
   buildBatchRequest,
   buildExperimentPlan,
   criterionPromptFor,
   evaluateProviderResponse,
   runExperiment,
 } from './run.mjs';
+
+test('live graduation requires distinct rendered images and source artifacts per label', () => {
+  const cases = ['fire', 'clean'].flatMap((humanLabel) => (
+    Array.from({ length: 10 }, (_, index) => ({
+      case_id: `${humanLabel}-${index}`,
+      family: 'layout',
+      human_label: humanLabel,
+      source_artifact_sha256: `${humanLabel === 'fire' ? 'a' : 'b'}${String(index).padStart(63, '0')}`,
+    }))
+  ));
+  const repeatedPixels = new Map(cases.map((entry) => [
+    entry.case_id,
+    entry.human_label === 'fire' ? 'c'.repeat(64) : 'd'.repeat(64),
+  ]));
+  assert.throws(
+    () => assertGraduationImageDiversity(cases, repeatedPixels),
+    /ten distinct rendered images/,
+  );
+
+  const distinctPixels = new Map(cases.map((entry, index) => [
+    entry.case_id,
+    String(index).padStart(64, '0'),
+  ]));
+  assert.doesNotThrow(
+    () => assertGraduationImageDiversity(cases, distinctPixels),
+  );
+});
 
 async function fixture(t) {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'artifacture-visual-run-'));

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_CORPUS_PATH = path.join(ROOT, 'corpus.json');
+export const DEFAULT_VIEWPORT = Object.freeze({ width: 960, height: 600 });
 const DELEGATED_CRITERIA = new Set([
   'impeccable:critique',
   'unslop:cleanup-report',
@@ -17,12 +18,12 @@ export const RENDER_VARIANTS = Object.freeze(Object.fromEntries(
     slide: ['competing-foci', 'dense-one-focus'],
     dashboard: ['hierarchical-dense', 'uniform-loud'],
     'diagram-space': ['collapsed-column', 'editorial-space', 'intentional-breathing', 'tiny-unbalanced'],
-    tracks: ['baseline-drift', 'editorial-60-40', 'hero-span', 'masonry', 'missing-weight', 'unequal-peers'],
+    tracks: ['baseline-drift', 'editorial-60-40', 'equal-peers', 'hero-span', 'masonry', 'missing-weight', 'unequal-peers'],
     mobile: ['compact-controls', 'crowded-controls'],
     diagram: [
       'ambiguous-relations', 'annotation-no-legend', 'coherent-flow', 'complete-legend',
       'decorated-list', 'dishonest-bars', 'dishonest-timeline', 'dual-focal',
-      'invalid-probability', 'labeled-comparison', 'missing-legend-entry',
+      'invalid-probability', 'labeled-comparison', 'missing-legend-entry', 'proportional-bars',
       'mixed-grammar', 'necessary-sequence', 'necessary-topology', 'orphan-legend',
       'peer-inventory', 'single-focal', 'table-as-graph', 'timeline-break',
       'valid-probability',
@@ -57,6 +58,18 @@ export async function loadCorpus(corpusPath = DEFAULT_CORPUS_PATH) {
   return JSON.parse(await fs.readFile(corpusPath, 'utf8'));
 }
 
+export function evidenceSha256(imageSha256, evalCase) {
+  if (!/^[a-f0-9]{64}$/.test(imageSha256 || '')) {
+    throw new Error('evidence identity requires an image SHA-256');
+  }
+  return crypto.createHash('sha256').update([
+    imageSha256,
+    evalCase.visible_text || '',
+    evalCase.truth_excerpt || '',
+    evalCase.source_artifact_sha256 || '',
+  ].join('\u0000')).digest('hex');
+}
+
 export function expandCorpus(corpus, { corpusPath = DEFAULT_CORPUS_PATH } = {}) {
   const renderedRoot = path.resolve(path.dirname(corpusPath), corpus.rendered_root || 'corpus/rendered');
   const cases = [];
@@ -81,7 +94,15 @@ export function expandCorpus(corpus, { corpusPath = DEFAULT_CORPUS_PATH } = {}) 
           visible_text: state.visible_text,
           truth_excerpt: state.truth_excerpt,
           adjudication_notes: state.adjudication_notes,
+          source_conditioned: state.source_conditioned === true,
+          source_artifact_sha256: state.source_artifact_sha256 || null,
           render: state.render,
+          viewport: {
+            ...DEFAULT_VIEWPORT,
+            ...(family.viewport || {}),
+            ...(pair.viewport || {}),
+            ...(state.viewport || {}),
+          },
           image: {
             id: imageId,
             path: path.join(renderedRoot, `${imageId}.png`),
@@ -102,6 +123,25 @@ export function validateCorpus(corpus, options = {}) {
   if (!['pending-human-review', 'human-reviewed'].includes(corpus.label_review?.status)) {
     throw new Error('corpus requires label_review.status pending-human-review or human-reviewed');
   }
+  if (!['seed', 'ready'].includes(corpus.graduation_status)) {
+    throw new Error('corpus requires graduation_status seed or ready');
+  }
+  if (
+    !['synthetic-fixtures', 'representative-artifacture-captures']
+      .includes(corpus.capture_provenance?.status)
+  ) {
+    throw new Error(
+      'corpus requires capture_provenance.status synthetic-fixtures or representative-artifacture-captures',
+    );
+  }
+  if (
+    !Array.isArray(corpus.target_batch_sizes)
+    || corpus.target_batch_sizes.length === 0
+    || corpus.target_batch_sizes.some((value) => !Number.isInteger(value) || value < 1)
+    || new Set(corpus.target_batch_sizes).size !== corpus.target_batch_sizes.length
+  ) {
+    throw new Error('corpus requires unique positive target_batch_sizes');
+  }
   if (
     corpus.label_review.status === 'human-reviewed'
     && (!corpus.label_review.reviewer || !corpus.label_review.reviewed_at)
@@ -114,6 +154,9 @@ export function validateCorpus(corpus, options = {}) {
   const summary = {
     corpus_id: corpus.corpus_id,
     label_review: corpus.label_review,
+    graduation_status: corpus.graduation_status,
+    capture_provenance: corpus.capture_provenance,
+    target_batch_sizes: [...corpus.target_batch_sizes],
     cases: 0,
     families: {},
   };
@@ -140,6 +183,21 @@ export function validateCorpus(corpus, options = {}) {
       ) {
         throw new Error(`${family.id}:${pair.id} requires named regions`);
       }
+      const sourceConditioned = pair.fire?.source_conditioned || pair.clean?.source_conditioned;
+      if (
+        sourceConditioned
+        && (
+          pair.fire?.source_conditioned !== true
+          || pair.clean?.source_conditioned !== true
+          || pair.fire.visible_text !== pair.clean.visible_text
+          || JSON.stringify(pair.fire.render) !== JSON.stringify(pair.clean.render)
+          || pair.fire.truth_excerpt === pair.clean.truth_excerpt
+        )
+      ) {
+        throw new Error(
+          `${family.id}:${pair.id} source-conditioned states require identical visible evidence and distinct truth excerpts`,
+        );
+      }
       for (const label of ALLOWED_LABELS) {
         const state = pair[label];
         if (!state) throw new Error(`${family.id}:${pair.id} requires ${label} state`);
@@ -154,6 +212,34 @@ export function validateCorpus(corpus, options = {}) {
         }
         if (state.adjudication_notes.length < 20) {
           throw new Error(`${family.id}:${pair.id}:${label} adjudication_notes are too short`);
+        }
+        if (
+          state.source_artifact_sha256 !== undefined
+          && !/^[a-f0-9]{64}$/.test(state.source_artifact_sha256)
+        ) {
+          throw new Error(`${family.id}:${pair.id}:${label} has invalid source_artifact_sha256`);
+        }
+        if (
+          corpus.graduation_status === 'ready'
+          && !/^[a-f0-9]{64}$/.test(state.source_artifact_sha256 || '')
+        ) {
+          throw new Error(
+            `${family.id}:${pair.id}:${label} graduation evidence requires source_artifact_sha256`,
+          );
+        }
+        const viewport = {
+          ...DEFAULT_VIEWPORT,
+          ...(family.viewport || {}),
+          ...(pair.viewport || {}),
+          ...(state.viewport || {}),
+        };
+        if (
+          !Number.isInteger(viewport.width)
+          || viewport.width < 320
+          || !Number.isInteger(viewport.height)
+          || viewport.height < 320
+        ) {
+          throw new Error(`${family.id}:${pair.id}:${label} has invalid viewport`);
         }
         const allowedVariants = RENDER_VARIANTS[state.render.template];
         if (!allowedVariants?.has(state.render.variant)) {
@@ -175,6 +261,38 @@ export function validateCorpus(corpus, options = {}) {
         summary.families[family.id].criteria[pair.criterion_id] = criterion;
       }
     }
+  }
+  const maxTargetBatchSize = Math.max(...corpus.target_batch_sizes);
+  for (const [familyId, family] of Object.entries(summary.families)) {
+    for (const [criterionId, counts] of Object.entries(family.criteria)) {
+      if (counts.fire + counts.clean < maxTargetBatchSize) {
+        throw new Error(
+          `${familyId}:${criterionId} does not support target batch ${maxTargetBatchSize}`,
+        );
+      }
+    }
+    if (
+      corpus.graduation_status === 'ready'
+      && (family.fire < 10 || family.clean < 10)
+    ) {
+      throw new Error(
+        `${familyId} requires at least ten fire and ten clean cases for graduation`,
+      );
+    }
+  }
+  if (
+    corpus.graduation_status === 'ready'
+    && corpus.label_review.status !== 'human-reviewed'
+  ) {
+    throw new Error('graduation-ready corpus requires human-reviewed labels');
+  }
+  if (
+    corpus.graduation_status === 'ready'
+    && corpus.capture_provenance.status !== 'representative-artifacture-captures'
+  ) {
+    throw new Error(
+      'graduation-ready corpus requires representative Artifacture capture provenance',
+    );
   }
   expandCorpus(corpus, options);
   return summary;

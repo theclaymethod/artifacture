@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  evidenceSha256,
   expandCorpus,
   loadCorpus,
   validateCorpus,
@@ -14,23 +15,30 @@ const REQUIRED_FAMILIES = [
   'artifact-slop-gap',
 ];
 
-test('the visual corpus has independent graduation evidence for every owned family', async () => {
+test('the visual seed corpus covers every owned family without claiming graduation readiness', async () => {
   const corpus = await loadCorpus();
   const summary = validateCorpus(corpus);
 
   assert.deepEqual(Object.keys(summary.families).sort(), [...REQUIRED_FAMILIES].sort());
   assert.equal(summary.label_review.status, 'pending-human-review');
+  assert.equal(summary.graduation_status, 'seed');
+  assert.equal(summary.capture_provenance.status, 'synthetic-fixtures');
+  assert.deepEqual(summary.target_batch_sizes, [1, 2]);
   for (const family of REQUIRED_FAMILIES) {
-    assert.ok(summary.families[family].fire >= 10, `${family} fire cases`);
-    assert.ok(summary.families[family].clean >= 10, `${family} clean cases`);
+    assert.ok(summary.families[family].fire >= 6, `${family} fire cases`);
+    assert.ok(summary.families[family].clean >= 6, `${family} clean cases`);
     assert.equal(
       summary.families[family].hard_negatives,
       summary.families[family].clean,
       `${family} hard negatives`,
     );
     for (const [criterionId, counts] of Object.entries(summary.families[family].criteria)) {
-      assert.ok(counts.fire >= 2, `${family}:${criterionId} fire cases support batch 4`);
-      assert.ok(counts.clean >= 2, `${family}:${criterionId} clean cases support batch 4`);
+      assert.ok(counts.fire >= 1, `${family}:${criterionId} fire evidence`);
+      assert.ok(counts.clean >= 1, `${family}:${criterionId} clean evidence`);
+      assert.ok(
+        counts.fire + counts.clean >= 2,
+        `${family}:${criterionId} supports the target batch size`,
+      );
     }
   }
 });
@@ -50,7 +58,7 @@ test('layout corpus covers clipping, crowding, dead space, and symmetry', async 
 
 test('every case exposes stable evidence identity, a named region, and adjudication notes', async () => {
   const cases = expandCorpus(await loadCorpus());
-  assert.equal(cases.length, 112);
+  assert.equal(cases.length, 72);
   for (const entry of cases) {
     assert.match(entry.case_id, /^[a-z0-9][a-z0-9:-]+$/);
     assert.match(entry.state_id, /^[a-z0-9][a-z0-9:-]+$/);
@@ -60,7 +68,29 @@ test('every case exposes stable evidence identity, a named region, and adjudicat
     assert.ok(entry.regions.every((region) => region.id && region.label));
     assert.ok(['fire', 'clean'].includes(entry.human_label));
     assert.ok(entry.adjudication_notes.length >= 20);
+    assert.ok(entry.viewport.width > 0 && entry.viewport.height > 0);
   }
+});
+
+test('source-conditioned cases distinguish evidence context even when pixels match', () => {
+  const imageSha256 = 'a'.repeat(64);
+  const unsupported = evidenceSha256(imageSha256, {
+    visible_text: 'Confidence 87%',
+    truth_excerpt: 'No measurement exists for the displayed confidence.',
+  });
+  const supported = evidenceSha256(imageSha256, {
+    visible_text: 'Confidence 87%',
+    truth_excerpt: '87 of 100 checks passed in the attached evaluation run.',
+  });
+
+  assert.notEqual(unsupported, supported);
+  assert.equal(
+    unsupported,
+    evidenceSha256(imageSha256, {
+      visible_text: 'Confidence 87%',
+      truth_excerpt: 'No measurement exists for the displayed confidence.',
+    }),
+  );
 });
 
 test('the owned corpus cannot absorb delegated skill criteria', async () => {
