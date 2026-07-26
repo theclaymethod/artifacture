@@ -15,6 +15,8 @@
  *     equivalent of presentation-core's solidTint()).
  *   - CTA variant discipline: primary = solid accent fill, secondary =
  *     accent outline. Drill triggers never look like passive content.
+ *   - two-axis navigation: Left/Right changes slides; Up/Down changes the
+ *     active slide's ordered internal state or drill-down.
  *   - click-anywhere-to-close on sheets, guarded by
  *     closest('button, a, input, select, textarea, [data-interactive], …').
  *   - corner-anchored expansion (transform-origin per card position).
@@ -390,6 +392,79 @@ export function useEscape(active: boolean, onClose: () => void) {
     window.addEventListener('keydown', handler, true);
     return () => window.removeEventListener('keydown', handler, true);
   }, [active, onClose]);
+}
+
+type PresentationStateDirection = 'previous' | 'next';
+
+export interface PresentationStateNavigationOptions {
+  index: number;
+  count: number;
+  onChange: (index: number) => void;
+}
+
+const PRESENTATION_STATE_NAV_EVENT = 'presentation-state-navigate';
+
+function getPresentationStateDirection(event: Event): PresentationStateDirection | null {
+  if (!('detail' in event)) return null;
+  const detail = event.detail;
+  if (!detail || typeof detail !== 'object' || !('direction' in detail)) return null;
+  return detail.direction === 'previous' || detail.direction === 'next'
+    ? detail.direction
+    : null;
+}
+
+/**
+ * Register one ordered custom state navigator for the active slide.
+ *
+ * Spread the returned props onto a stable wrapper inside PresentationSlide.
+ * ArrowUp/ArrowDown then move within this state sequence while
+ * ArrowLeft/ArrowRight continue to change slides. A registered navigator
+ * takes precedence over the deck's automatic data-drill-target traversal
+ * until its boundary; ArrowDown can then continue to the next slide.
+ */
+export function usePresentationStateNavigation({
+  index,
+  count,
+  onChange,
+}: PresentationStateNavigationOptions) {
+  if (!Number.isInteger(count) || count < 1) {
+    throw new Error('usePresentationStateNavigation: count must be a positive integer');
+  }
+  if (!Number.isInteger(index) || index < 0 || index >= count) {
+    throw new Error(`usePresentationStateNavigation: index ${index} must be within 0..${count - 1}`);
+  }
+  const ref = useRef<HTMLDivElement>(null);
+  const stateRef = useRef({ index, count, onChange });
+  stateRef.current = { index, count, onChange };
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const handleStateNavigation = (rawEvent: Event) => {
+      const direction = getPresentationStateDirection(rawEvent);
+      if (!direction) return;
+      const current = stateRef.current;
+      const nextIndex = clampSlideIndex(
+        current.index + (direction === 'next' ? 1 : -1),
+        current.count,
+      );
+      if (nextIndex === current.index) return;
+      rawEvent.preventDefault();
+      // Advance the live ref before React commits so rapid key repeats cannot
+      // collapse into repeated updates from the same stale index.
+      current.index = nextIndex;
+      current.onChange(nextIndex);
+    };
+    node.addEventListener(PRESENTATION_STATE_NAV_EVENT, handleStateNavigation);
+    return () => node.removeEventListener(PRESENTATION_STATE_NAV_EVENT, handleStateNavigation);
+  }, []);
+
+  return {
+    ref,
+    'data-presentation-state-nav': 'true',
+    'data-presentation-state-index': index,
+    'data-presentation-state-count': count,
+  } as const;
 }
 
 export function CloseX({ onClose }: { onClose: () => void }) {
@@ -1578,13 +1653,93 @@ export interface PresentationDeckProps {
   children: ReactNode;
 }
 
+function isRenderedDrillTrigger(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  if (element.hasAttribute('disabled') || rect.width <= 0 || rect.height <= 0) return false;
+  for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+    const style = window.getComputedStyle(current);
+    if (
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      style.pointerEvents === 'none' ||
+      (current === element && Number(style.opacity) === 0)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getPresentationCustomStateNavigator(stage: HTMLElement): HTMLElement | null {
+  const customNavigators = stage.querySelectorAll<HTMLElement>('[data-presentation-state-nav="true"]');
+  if (customNavigators.length > 1) {
+    throw new Error('PresentationDeck: an active slide may register only one custom state navigator');
+  }
+  return customNavigators[0] ?? null;
+}
+
+function requestPresentationVerticalNavigation(
+  stage: HTMLElement,
+  direction: PresentationStateDirection,
+  openDrillId: React.MutableRefObject<string | null>,
+): boolean {
+  const customNavigator = getPresentationCustomStateNavigator(stage);
+  if (customNavigator) {
+    const EventConstructor = customNavigator.ownerDocument.defaultView?.CustomEvent;
+    if (EventConstructor) {
+      const event = new EventConstructor(PRESENTATION_STATE_NAV_EVENT, {
+        cancelable: true,
+        detail: { direction },
+      });
+      customNavigator.dispatchEvent(event);
+      if (event.defaultPrevented) return true;
+      return false;
+    }
+  }
+
+  const triggers = Array.from(stage.querySelectorAll<HTMLElement>('[data-drill-target]')).filter(isRenderedDrillTrigger);
+  if (triggers.length === 0) return false;
+
+  const openSurface = stage.querySelector<HTMLElement>('[data-drill-open]');
+  const activePressedIndex = triggers.findIndex((trigger) => trigger.getAttribute('aria-pressed') === 'true');
+  const rememberedIndex = openSurface
+    ? triggers.findIndex((trigger) => trigger.dataset.drillTarget === openDrillId.current)
+    : -1;
+  const currentIndex = rememberedIndex >= 0 ? rememberedIndex : activePressedIndex;
+  const delta = direction === 'next' ? 1 : -1;
+  const nextIndex = currentIndex + delta;
+
+  if (nextIndex < 0) {
+    const close = openSurface?.querySelector<HTMLElement>('[data-drill-close]');
+    if (close) close.click();
+    openDrillId.current = null;
+    return true;
+  }
+  if (nextIndex >= triggers.length) {
+    openSurface?.querySelector<HTMLElement>('[data-drill-close]')?.click();
+    openDrillId.current = null;
+    return false;
+  }
+
+  const openNext = () => triggers[nextIndex]?.click();
+  const close = openSurface?.querySelector<HTMLElement>('[data-drill-close]');
+  if (openSurface && close) {
+    close.click();
+    window.setTimeout(openNext, 0);
+  } else {
+    openNext();
+  }
+  return true;
+}
+
 /**
  * Deck root: fixed stageWidth×stageHeight stage scaled to fit the area right
  * of the collapsible rail (ResizeObserver keeps it fitted while the rail
- * animates), letterboxed on --ve-deck-letterbox, keyboard nav
- * (arrows/Space/PageUp/PageDown/Home/End), 80px edge click zones, and a
- * bottom-right mono slide counter. Children are PresentationSlide elements;
- * only the active slide is mounted.
+ * animates), letterboxed on --ve-deck-letterbox, two-axis keyboard nav
+ * (Left/Right = slides, Up/Down = internal states; Space/PageUp/PageDown and
+ * Home/End retain slide navigation), 80px edge click zones, and a bottom-right
+ * mono slide counter. Children are PresentationSlide elements; only the active
+ * slide is mounted.
  */
 export function PresentationDeck({
   title,
@@ -1601,6 +1756,7 @@ export function PresentationDeck({
   const count = slides.length;
   const [index, setIndex] = useState(0);
   const mainRef = useRef<HTMLDivElement>(null);
+  const openDrillIdRef = useRef<string | null>(null);
   const [avail, setAvail] = useState<{ w: number; h: number }>({ w: stageWidth, h: stageHeight });
 
   /* Measure the area right of the rail; ResizeObserver keeps the stage
@@ -1627,6 +1783,12 @@ export function PresentationDeck({
   );
 
   useEffect(() => {
+    openDrillIdRef.current = null;
+    const stage = mainRef.current?.querySelector<HTMLElement>('[data-stage]');
+    if (stage) getPresentationCustomStateNavigator(stage);
+  }, [index]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Never intercept browser/OS shortcuts (Cmd+Arrow history nav,
       // Ctrl+Space, Alt+Arrow word-jump, …).
@@ -1643,8 +1805,22 @@ export function PresentationDeck({
       if (closest("button, a, [role='dialog']") && (e.key === ' ' || e.key === 'Enter')) {
         return;
       }
-      // While a drill sheet is open the deck is in inspect mode: navigation
-      // pauses (Escape closes the sheet first). Mirrors the edge-zone gate.
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const stage = mainRef.current?.querySelector<HTMLElement>('[data-stage]');
+        const handled = stage
+          ? requestPresentationVerticalNavigation(
+            stage,
+            e.key === 'ArrowDown' ? 'next' : 'previous',
+            openDrillIdRef,
+          )
+          : false;
+        if (!handled && e.key === 'ArrowDown') go(index + 1);
+        return;
+      }
+      // While a drill sheet is open horizontal navigation pauses. Vertical
+      // navigation remains available so the presenter can move among the
+      // slide's click-ins or return to its base state.
       if (document.querySelector('[data-drill-open]')) return;
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
@@ -1694,6 +1870,12 @@ export function PresentationDeck({
         <div
           data-slide-index={index}
           data-stage="true"
+          onClickCapture={(event) => {
+            const target = event.target instanceof Element
+              ? event.target.closest<HTMLElement>('[data-drill-target]')
+              : null;
+            if (target) openDrillIdRef.current = target.dataset.drillTarget ?? null;
+          }}
           style={{
             position: 'absolute',
             width: stageWidth,

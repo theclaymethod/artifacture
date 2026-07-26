@@ -19,6 +19,7 @@ import {
   PullQuote,
   StatRow,
   Stepper,
+  usePresentationStateNavigation,
 } from '../../visual-explainer-mdx/components';
 import type { PresentationTone } from '../../visual-explainer-mdx/components';
 
@@ -303,6 +304,12 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
 
 function AskSlide({ shortTitle, tone }: SlideMeta) {
   const [open, setOpen] = React.useState(false);
+  const [step, setStep] = React.useState(0);
+  const stateNavigation = usePresentationStateNavigation({
+    index: step,
+    count: 3,
+    onChange: setStep,
+  });
   return (
     <PresentationSlide
       kicker="04 · Adoption"
@@ -312,10 +319,13 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
       rightLabel="Presentation Deck"
       footer="PresentationDeck vs SlideDeck: docs/presentation-deck.md"
     >
-      <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr', gap: 44, height: '100%' }}>
+      <div
+        {...stateNavigation}
+        style={{ display: 'grid', gridTemplateRows: 'auto 1fr', gap: 44, height: '100%' }}
+      >
         <div style={{ height: 240 }}>
           <Stepper
-            accentIndex={2}
+            accentIndex={step}
             steps={[
               { num: '1', name: 'Scrolling handout', body: 'Use SlideDeck: scroll-snap sections that read top to bottom and print well.' },
               { num: '2', name: 'Editorial spread', body: 'Use SlideDeck with orientation=horizontal for magazine-style pagination.' },

@@ -52,8 +52,18 @@ export {
   IconArrowRight,
   trackShine,
   useEscape,
+  usePresentationStateNavigation,
 } from './presentation';
-export type { PresentationTone, PresentationSlideProps, PresentationDeckProps, LadderStage, FanoutOutput, ExplorerLayer, HairlineItem } from './presentation';
+export type {
+  PresentationTone,
+  PresentationSlideProps,
+  PresentationDeckProps,
+  PresentationStateNavigationOptions,
+  LadderStage,
+  FanoutOutput,
+  ExplorerLayer,
+  HairlineItem,
+} from './presentation';
 export {
   fitStage,
   clampSlideIndex,

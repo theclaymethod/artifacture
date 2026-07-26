@@ -27,6 +27,7 @@
 - Docs: `docs/presentation-deck.md` (when to use PresentationDeck vs SlideDeck).
 
 ### Changed (presentation)
+- Presentation navigation now has two axes: Left/Right always changes slides, while Up/Down traverses the active slide's ordered click-ins. Down falls through to the next slide when the sequence is exhausted. Ordinary drill triggers are discovered automatically in DOM order; custom progressive slides can register one navigator with `usePresentationStateNavigation`.
 - Keyboard guard hardened: modifier chords (meta/ctrl/alt) are never intercepted, and focus inside `input`/`textarea`/`select`/`[contenteditable]` now owns every key (arrows, Space, Home/End) instead of only Space/Enter.
 - Navigation (edge click zones + nav keys) is gated while a drill sheet is open — an edge click can no longer blow past an open sheet; Escape closes first.
 - Light-tone slides flip the CTA ink like accent-tone slides do, fixing primary chips rendering ink-on-ink where `--ve-accent` remaps to the ink color. All three pinned by new falsifiable evals.
