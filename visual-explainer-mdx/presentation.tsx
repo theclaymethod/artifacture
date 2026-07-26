@@ -394,7 +394,7 @@ export function useEscape(active: boolean, onClose: () => void) {
   }, [active, onClose]);
 }
 
-export type PresentationStateDirection = 'previous' | 'next';
+type PresentationStateDirection = 'previous' | 'next';
 
 export interface PresentationStateNavigationOptions {
   index: number;
@@ -402,7 +402,16 @@ export interface PresentationStateNavigationOptions {
   onChange: (index: number) => void;
 }
 
-export const PRESENTATION_STATE_NAV_EVENT = 'presentation-state-navigate';
+const PRESENTATION_STATE_NAV_EVENT = 'presentation-state-navigate';
+
+function getPresentationStateDirection(event: Event): PresentationStateDirection | null {
+  if (!('detail' in event)) return null;
+  const detail = event.detail;
+  if (!detail || typeof detail !== 'object' || !('direction' in detail)) return null;
+  return detail.direction === 'previous' || detail.direction === 'next'
+    ? detail.direction
+    : null;
+}
 
 /**
  * Register one ordered custom state navigator for the active slide.
@@ -432,16 +441,15 @@ export function usePresentationStateNavigation({
     const node = ref.current;
     if (!node) return;
     const handleStateNavigation = (rawEvent: Event) => {
-      const event = rawEvent as CustomEvent<{ direction?: PresentationStateDirection }>;
-      const direction = event.detail?.direction;
-      if (direction !== 'previous' && direction !== 'next') return;
+      const direction = getPresentationStateDirection(rawEvent);
+      if (!direction) return;
       const current = stateRef.current;
       const nextIndex = clampSlideIndex(
         current.index + (direction === 'next' ? 1 : -1),
         current.count,
       );
       if (nextIndex === current.index) return;
-      event.preventDefault();
+      rawEvent.preventDefault();
       // Advance the live ref before React commits so rapid key repeats cannot
       // collapse into repeated updates from the same stale index.
       current.index = nextIndex;

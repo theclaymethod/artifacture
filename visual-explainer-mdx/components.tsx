@@ -53,13 +53,11 @@ export {
   trackShine,
   useEscape,
   usePresentationStateNavigation,
-  PRESENTATION_STATE_NAV_EVENT,
 } from './presentation';
 export type {
   PresentationTone,
   PresentationSlideProps,
   PresentationDeckProps,
-  PresentationStateDirection,
   PresentationStateNavigationOptions,
   LadderStage,
   FanoutOutput,
