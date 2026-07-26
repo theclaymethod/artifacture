@@ -185,6 +185,135 @@ async function main() {
       }),
     );
 
+    await record('interaction', 'vertical-fallthrough-without-click-ins', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        assert((await slideIndex(page)) === 0, 'fallthrough fixture must start on slide 0');
+        await page.locator('[data-stage] [data-drill-target]').evaluateAll((triggers) => {
+          for (const trigger of triggers) {
+            const wrapper = trigger.parentElement;
+            if (wrapper) wrapper.style.pointerEvents = 'none';
+          }
+        });
+        assert(
+          (await page.locator('[data-stage] [data-presentation-state-nav]').count()) === 0,
+          'fallthrough fixture slide must have no custom state navigator',
+        );
+        await page.keyboard.press('ArrowDown');
+        await page.waitForFunction(() => document.querySelector('[data-slide-index]')?.getAttribute('data-slide-index') === '1');
+        assert((await slideIndex(page)) === 1, 'ArrowDown without an effectively rendered internal state must advance to the next slide');
+      }),
+    );
+
+    await record('interaction', 'vertical-drill-navigation', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        await goToSlide(page, 1);
+        const label = () => sheetOpen(page).getAttribute('aria-label');
+
+        await page.keyboard.press('ArrowDown');
+        await expectSheetOpen(page, 'first vertical drill');
+        assert((await label()) === 'Behavior · Click-anywhere-to-close', 'ArrowDown must open the first drill');
+        assert((await slideIndex(page)) === 1, 'vertical navigation must not change slides');
+
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        await expectSheetOpen(page, 'second vertical drill');
+        assert((await label()) === 'Engine · Scale-to-fit stage', 'second ArrowDown must advance to the next drill');
+
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        assert((await label()) === 'Theming · Preset-driven', 'third ArrowDown must advance to the last drill');
+
+        await page.keyboard.press('ArrowUp');
+        await page.waitForTimeout(50);
+        assert((await label()) === 'Engine · Scale-to-fit stage', 'ArrowUp must reverse through drills');
+        await page.keyboard.press('ArrowUp');
+        await page.waitForTimeout(50);
+        assert((await label()) === 'Behavior · Click-anywhere-to-close', 'ArrowUp must reach the first drill');
+        await page.keyboard.press('ArrowUp');
+        await expectSheetClosed(page, 'vertical return to base state');
+        assert((await slideIndex(page)) === 1, 'returning to the base state must stay on the slide');
+
+        await page.keyboard.press('ArrowDown');
+        await expectSheetOpen(page, 'first drill before fallthrough');
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        assert((await slideIndex(page)) === 2, 'ArrowDown after the final drill must advance to the next slide');
+        await expectSheetClosed(page, 'final drill fallthrough');
+      }),
+    );
+
+    await record('interaction', 'vertical-custom-state-navigation', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        await goToSlide(page, 3);
+        const stateIndex = () =>
+          page.locator('[data-presentation-state-nav]').getAttribute('data-presentation-state-index').then(Number);
+        const expectStateIndex = async (expected, label) => {
+          await page.waitForFunction(
+            (value) =>
+              document.querySelector('[data-presentation-state-nav]')
+                ?.getAttribute('data-presentation-state-index') === String(value),
+            expected,
+          );
+          assert((await stateIndex()) === expected, label);
+        };
+
+        assert((await stateIndex()) === 0, 'custom state navigator must start at state 0');
+        await page.evaluate(() => {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        });
+        await expectStateIndex(2, 'two synchronous ArrowDown events must reach the final custom state');
+        await page.keyboard.press('ArrowUp');
+        await expectStateIndex(1, 'ArrowUp must reverse custom state');
+        await page.keyboard.press('ArrowDown');
+        await expectStateIndex(2, 'ArrowDown must return to the final custom state');
+        await page.keyboard.press('ArrowDown');
+        await expectStateIndex(2, 'the final custom state must remain rendered when the deck itself is at its end');
+        await page.keyboard.press('ArrowUp');
+        await expectStateIndex(1, 'ArrowUp must reverse custom state');
+        assert((await slideIndex(page)) === 3, 'custom state navigation must not change slides');
+        await page.keyboard.press('ArrowLeft');
+        assert((await slideIndex(page)) === 2, 'ArrowLeft must still change slides');
+      }),
+    );
+
+    await record('interaction', 'vertical-layer-explorer-navigation', () =>
+      withPage(browser, { url: primaryUrl }, async (page) => {
+        await goToSlide(page, 2);
+        const pressedId = () =>
+          page.locator('[data-drill-target][aria-pressed="true"]').getAttribute('data-drill-target');
+
+        assert((await pressedId()) === 'deck-layer-engine', 'layer explorer must start on its initial state');
+        await page.keyboard.press('ArrowDown');
+        assert((await pressedId()) === 'deck-layer-primitives', 'ArrowDown must advance the layer explorer');
+        await page.keyboard.press('ArrowDown');
+        assert((await pressedId()) === 'deck-layer-tokens', 'ArrowDown must reach the final layer');
+        await page.keyboard.press('ArrowUp');
+        assert((await pressedId()) === 'deck-layer-primitives', 'ArrowUp must reverse the layer explorer');
+        await page.keyboard.press('ArrowUp');
+        assert((await pressedId()) === 'deck-layer-engine', 'ArrowUp must return to the initial layer');
+        assert((await sheetOpen(page).count()) === 0, 'initial layer is the explorer base state');
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        assert((await pressedId()) === 'deck-layer-primitives', 'fallthrough setup must reach the middle layer');
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        assert((await pressedId()) === 'deck-layer-tokens', 'fallthrough setup must reach the final layer');
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        await expectSheetOpen(page, 'tone-remapping click-in after the final layer');
+        assert((await slideIndex(page)) === 2, 'a remaining click-in must be consumed before slide fallthrough');
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(50);
+        assert((await slideIndex(page)) === 3, 'ArrowDown after the final layer must advance to the next slide');
+        await expectSheetClosed(page, 'final layer fallthrough');
+      }),
+    );
+
     await record('interaction', 'drill-dismiss-guard-matrix', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
