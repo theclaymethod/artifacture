@@ -131,6 +131,10 @@ function llmPassesFor(ctx, checks) {
   if (declaresCheck(ctx.html || '', ['artifacture:slop-gap'])) {
     required.add('artifacture:slop-gap');
   }
+  const hasDeckReviewUnits =
+    ctx.profile === 'slides' ||
+    /data-ve-presentation/i.test(ctx.html || '');
+  if (hasDeckReviewUnits) required.add('deck-review');
   const hasReviewUnits =
     ['slides', 'magazine'].includes(ctx.profile) ||
     /data-ve-presentation/i.test(ctx.html) ||

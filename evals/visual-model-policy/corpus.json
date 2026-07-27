@@ -253,6 +253,191 @@
       }
     },
     {
+      "id": "deck-review",
+      "route_key": "deck-review",
+      "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-deck-review.md",
+      "label_review": {
+        "status": "pending-human-review",
+        "reviewer": null,
+        "reviewed_at": null,
+        "notes": "Synthetic seed evidence only. A named human must inspect every rendered fire/clean pair before this family can contribute to qualification; production-shaped state groups are also required before graduation."
+      },
+      "pairs": [
+        {
+          "id": "rendered-example-truth",
+          "criterion_id": "deck-example-rendered-truth",
+          "region": {
+            "id": "example-pair",
+            "label": "Positive and negative example pair"
+          },
+          "fire": {
+            "title": "Warning decoration is the only visible failure",
+            "visible_text": "Good and bad examples must earn their labels",
+            "truth_excerpt": "The negative example is supposed to demonstrate broken symmetry.",
+            "adjudication_notes": "Both examples have equal tracks and baselines; only the warning rule and caption claim the right example is bad.",
+            "render": {
+              "template": "deck",
+              "variant": "warning-only-example"
+            }
+          },
+          "clean": {
+            "title": "Negative example visibly breaks symmetry",
+            "visible_text": "Good and bad examples must earn their labels",
+            "truth_excerpt": "The negative example is supposed to demonstrate broken symmetry.",
+            "adjudication_notes": "The negative example has unequal tracks and a displaced baseline before its caption is read.",
+            "render": {
+              "template": "deck",
+              "variant": "honest-example"
+            }
+          }
+        },
+        {
+          "id": "annotation-mapping",
+          "criterion_id": "deck-annotation-evidence-mapping",
+          "region": {
+            "id": "annotated-examples",
+            "label": "Examples and explanatory annotation"
+          },
+          "fire": {
+            "title": "Annotation for B sits beneath A",
+            "visible_text": "Annotations should map directly to evidence",
+            "truth_excerpt": "The annotation describes Example B.",
+            "adjudication_notes": "The annotation is aligned under Example A without a connector, so proximity assigns it to the wrong evidence.",
+            "render": {
+              "template": "deck",
+              "variant": "detached-annotation"
+            }
+          },
+          "clean": {
+            "title": "Annotation shares Example B's column",
+            "visible_text": "Annotations should map directly to evidence",
+            "truth_excerpt": "The annotation describes Example B.",
+            "adjudication_notes": "The annotation is directly aligned with the evidence it names.",
+            "render": {
+              "template": "deck",
+              "variant": "aligned-annotation"
+            }
+          }
+        },
+        {
+          "id": "reading-path-density",
+          "criterion_id": "deck-reading-path-density",
+          "region": {
+            "id": "slide-body",
+            "label": "Slide body and explanatory regions"
+          },
+          "fire": {
+            "title": "Three regions repeat one conclusion",
+            "visible_text": "One claim should have one clear reading path",
+            "truth_excerpt": "The slide only needs to explain one bounded decision.",
+            "adjudication_notes": "Explanation, checklist, and return contract repeat the same conclusion with equal visual weight.",
+            "render": {
+              "template": "deck",
+              "variant": "overexplained-reading-path"
+            }
+          },
+          "clean": {
+            "title": "One decision leads and evidence supports it",
+            "visible_text": "One claim should have one clear reading path",
+            "truth_excerpt": "The slide only needs to explain one bounded decision.",
+            "adjudication_notes": "The decision is dominant and the smaller evidence region advances rather than repeats it.",
+            "render": {
+              "template": "deck",
+              "variant": "distilled-reading-path"
+            }
+          }
+        },
+        {
+          "id": "adjacent-slide-variety",
+          "criterion_id": "deck-structural-variety",
+          "region": {
+            "id": "slide-strip",
+            "label": "Three adjacent slide frames"
+          },
+          "fire": {
+            "title": "Three lessons reuse the same card pair",
+            "visible_text": "Transfer should survive different structures",
+            "truth_excerpt": "The adjacent slides teach three different review relationships.",
+            "adjudication_notes": "All three frames use the same equal good/bad card pair, making distinct relationships look mechanically identical.",
+            "render": {
+              "template": "deck",
+              "variant": "repeated-layouts"
+            }
+          },
+          "clean": {
+            "title": "Adjacent lessons use fitting structures",
+            "visible_text": "Transfer should survive different structures",
+            "truth_excerpt": "The adjacent slides teach comparison, sequence, and primary-versus-supporting hierarchy.",
+            "adjudication_notes": "The frames vary their structure because their relationships differ while retaining one visual system.",
+            "render": {
+              "template": "deck",
+              "variant": "varied-layouts"
+            }
+          }
+        },
+        {
+          "id": "click-in-continuity",
+          "criterion_id": "deck-click-in-continuity",
+          "region": {
+            "id": "click-in-frame",
+            "label": "Base evidence and open click-in"
+          },
+          "fire": {
+            "title": "Click-in obscures context and clips its last line",
+            "visible_text": "Click-ins need their own full-frame review",
+            "truth_excerpt": "The click-in should add evidence while preserving context and dismissal controls.",
+            "adjudication_notes": "The oversized overlay covers the base evidence and trigger while its final line escapes the visible frame.",
+            "render": {
+              "template": "deck",
+              "variant": "overlay-collision"
+            }
+          },
+          "clean": {
+            "title": "Click-in uses reserved space and stays dismissible",
+            "visible_text": "Click-ins need their own full-frame review",
+            "truth_excerpt": "The click-in should add evidence while preserving context and dismissal controls.",
+            "adjudication_notes": "The overlay occupies a separate lane, keeps the base anchor visible, and contains its close control and copy.",
+            "render": {
+              "template": "deck",
+              "variant": "clear-click-in"
+            }
+          }
+        },
+        {
+          "id": "positive-example-integrity",
+          "criterion_id": "deck-example-rendered-truth",
+          "region": {
+            "id": "positive-example",
+            "label": "Example labelled as a passing repeated-track layout"
+          },
+          "fire": {
+            "title": "Pass example has an underweighted middle track",
+            "visible_text": "Input · Router · Output should read as equal peers",
+            "truth_excerpt": "The example is labelled positive because all three regions are direct peers.",
+            "adjudication_notes": "The narrow middle track visibly contradicts the example's positive label and peer relationship.",
+            "render": {
+              "template": "tracks",
+              "variant": "missing-weight"
+            }
+          },
+          "clean": {
+            "title": "Pass example gives direct peers equal tracks",
+            "visible_text": "Input · Router · Output should read as equal peers",
+            "truth_excerpt": "The example is labelled positive because all three regions are direct peers.",
+            "adjudication_notes": "The three direct peers have equal widths and aligned baselines, so the positive label is visually supported.",
+            "render": {
+              "template": "tracks",
+              "variant": "equal-peers"
+            }
+          }
+        }
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
       "id": "diagram",
       "route_key": "diagram",
       "rubric": "../../plugins/visual-explainer/scripts/verify/rubrics/pass-diagram.md",

@@ -20,6 +20,12 @@ export const RENDER_VARIANTS = Object.freeze(Object.fromEntries(
     'diagram-space': ['collapsed-column', 'editorial-space', 'intentional-breathing', 'tiny-unbalanced'],
     tracks: ['baseline-drift', 'editorial-60-40', 'equal-peers', 'hero-span', 'masonry', 'missing-weight', 'unequal-peers'],
     mobile: ['compact-controls', 'crowded-controls'],
+    deck: [
+      'aligned-annotation', 'clear-click-in', 'detached-annotation',
+      'distilled-reading-path', 'honest-example', 'overlay-collision',
+      'overexplained-reading-path', 'repeated-layouts', 'varied-layouts',
+      'warning-only-example',
+    ],
     diagram: [
       'ambiguous-relations', 'annotation-no-legend', 'coherent-flow', 'complete-legend',
       'decorated-list', 'dishonest-bars', 'dishonest-timeline', 'dual-focal',

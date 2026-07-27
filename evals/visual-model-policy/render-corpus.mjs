@@ -221,11 +221,64 @@ function renderTemplate(template, variant, evalCase) {
         <div class="panel ink" style="margin-top:26px;padding:24px;height:190px"><div class="metric">Policy 02</div></div>
       </section>`;
   }
+  if (template === 'deck') return renderDeck(variant, evalCase);
   if (template === 'diagram') return renderDiagram(variant, evalCase);
   if (template === 'preset') return renderPreset(variant, evalCase);
   if (template === 'operating') return renderOperating(variant, evalCase);
   if (template === 'slop') return renderSlop(variant, evalCase);
   throw new Error(`unsupported render template ${template}`);
+}
+
+function renderDeck(variant, evalCase) {
+  const regionId = evalCase.regions[0].id;
+  const title = `<div class="eyebrow">Deck review · rendered truth</div><h1 style="margin-top:12px">${escapeHtml(evalCase.visible_text)}</h1>`;
+  if (['warning-only-example', 'honest-example'].includes(variant)) {
+    const honest = variant === 'honest-example';
+    return `${title}<section data-region="${regionId}" class="grid" style="grid-template-columns:1fr 1fr">
+      <div><div class="panel" style="padding:24px;height:250px"><div class="eyebrow">GOOD</div><div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:28px">${['Plan','Visits','Goals'].map((label) => `<div class="node" style="min-width:0">${label}</div>`).join('')}</div></div><div class="caption" style="margin-top:10px;color:#356846">PASS · equal tracks</div></div>
+      <div><div class="panel" style="padding:24px;height:250px;border-color:#9f3a27"><div class="eyebrow accent">BAD</div><div class="grid" style="grid-template-columns:${honest ? '.55fr 1.35fr .8fr' : 'repeat(3,1fr)'};margin-top:28px">${['Plan','Visits','Goals'].map((label, index) => `<div class="node" style="min-width:0;${honest && index === 1 ? 'transform:translateY(24px)' : ''}">${label}</div>`).join('')}</div>${honest ? '' : '<div style="height:3px;background:#9f3a27;margin-top:18px"></div>'}</div><div class="caption accent" style="margin-top:10px">FAIL · broken symmetry</div></div>
+    </section>`;
+  }
+  if (['detached-annotation', 'aligned-annotation'].includes(variant)) {
+    const aligned = variant === 'aligned-annotation';
+    return `${title}<section data-region="${regionId}" class="panel" style="height:390px;padding:30px;position:relative">
+      <div class="node" style="position:absolute;left:70px;top:120px;width:260px">Example A<br><span class="muted">Evidence region</span></div>
+      <div class="node" style="position:absolute;right:70px;top:120px;width:260px">Example B<br><span class="muted">Evidence region</span></div>
+      <aside style="position:absolute;${aligned ? 'right:70px;top:245px;width:260px' : 'left:70px;bottom:26px;width:260px'};padding:14px;border-top:3px solid #9f3a27" class="caption">Annotation for Example B</aside>
+    </section>`;
+  }
+  if (['overexplained-reading-path', 'distilled-reading-path'].includes(variant)) {
+    const distilled = variant === 'distilled-reading-path';
+    return `${title}<section data-region="${regionId}" class="grid" style="grid-template-columns:${distilled ? '1.35fr .65fr' : 'repeat(3,1fr)'}">
+      <div class="panel" style="padding:28px;min-height:300px"><h2>${distilled ? 'One visible decision' : 'Explanation'}</h2><p class="muted" style="margin-top:20px">${distilled ? 'The examples and one bounded check carry the claim.' : 'The same conclusion is repeated here in full.'}</p></div>
+      <div class="panel" style="padding:28px;min-height:300px"><h2>${distilled ? 'Evidence' : 'Checklist'}</h2><p class="muted" style="margin-top:20px">${distilled ? 'Two aligned examples.' : 'The same conclusion is repeated here again.'}</p></div>
+      ${distilled ? '' : '<div class="panel" style="padding:28px;min-height:300px"><h2>Return contract</h2><p class="muted" style="margin-top:20px">The same conclusion is repeated a third time.</p></div>'}
+    </section>`;
+  }
+  if (['repeated-layouts', 'varied-layouts'].includes(variant)) {
+    const varied = variant === 'varied-layouts';
+    const frames = varied
+      ? [
+        '<div style="height:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px"><b class="node">Before</b><b class="node">After</b></div>',
+        '<div style="height:100%;display:grid;grid-template-rows:1fr 1fr 1fr;gap:8px"><b class="node">01</b><b class="node">02</b><b class="node">03</b></div>',
+        '<div style="height:100%;display:grid;grid-template-columns:1.5fr .5fr;gap:8px"><b class="node">Primary</b><b class="node">Rail</b></div>',
+      ]
+      : Array.from({ length: 3 }, () => '<div style="height:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px"><b class="node">Good</b><b class="node">Bad</b></div>');
+    return `${title}<section data-region="${regionId}" class="grid" style="grid-template-columns:repeat(3,1fr)">${frames.map((frame, index) => `<div class="panel" style="padding:18px;height:300px"><div class="caption">SLIDE ${index + 1}</div><div style="height:230px;margin-top:16px">${frame}</div></div>`).join('')}</section>`;
+  }
+  if (['overlay-collision', 'clear-click-in'].includes(variant)) {
+    const clear = variant === 'clear-click-in';
+    return `${title}<section data-region="${regionId}" class="panel" style="height:400px;padding:30px;position:relative;overflow:hidden">
+      <div class="node" style="position:absolute;left:36px;top:90px;width:360px;height:220px"><strong>Base evidence</strong><p class="muted">The visual anchor remains available.</p></div>
+      <button class="chip" style="position:absolute;right:30px;bottom:24px">Open evidence</button>
+      <aside class="ink" style="position:absolute;${clear ? 'right:36px;top:76px;width:420px;height:250px' : 'left:180px;top:58px;width:700px;height:370px'};padding:30px;box-shadow:0 18px 50px rgba(0,0,0,.3)">
+        <div class="row" style="justify-content:space-between"><strong>Click-in evidence</strong><span class="chip">Close</span></div>
+        <p style="margin-top:28px">Additional detail should not erase its context or controls.</p>
+        ${clear ? '' : '<p style="position:absolute;bottom:-12px">This final line is clipped.</p>'}
+      </aside>
+    </section>`;
+  }
+  throw new Error(`unsupported deck render variant ${variant}`);
 }
 
 function renderDiagram(variant, evalCase) {

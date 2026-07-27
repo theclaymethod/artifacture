@@ -74,10 +74,11 @@ judgment may not.
 
 2. Build the P-completeness source-vs-render inventory from the source material and the rendered artifact: headings, bullets, table rows, cards, collapsible details, footnotes, and demo-frame summaries. Do not use screenshots for this pass.
 3. Capture P-diagram inputs one figure at a time. Scroll to each element carrying `data-diagram-role` or `.mermaid`; screenshot that element's bounding region; extract its visible labels; write a one-line content brief for the figure.
-4. For P-operating-model, build a review map with one row per slide or coherent long-form section: stable unit id, unit type (`slide` or `section`), visible title, one-sentence narrative job, and screenshot path. If the source has no narrative job, use the visible claim and mark the route low-confidence. Do not use implementation source to infer intent.
-5. Use candidate element lists from each deterministic check's `evidence` and `where` fields when a pass asks for candidate extracts.
-6. For `impeccable:critique`, capture only the candidate screenshots and locations named by the report. For `unslop:cleanup-report`, supply only the excluded-filtered prose extract.
-7. For `artifacture:slop-gap`, capture only the explicitly nominated region, its visible text, and the smallest source/truth excerpt needed to judge sequence, state/confidence, or provenance.
+4. For P-deck-review, use the generated `deck-review-*.json` sidecar manifest in the screens directory. Each base slide, visible drill target, and custom progressive state receives a stable state id at the verifier's contracted desktop viewport. Run the ordered `review_groups`: state-continuity groups pair a base with each drill or progressive state, while adjacent-slide-variety groups pair neighboring base slides. Every group contains exactly two production frames. P-deck-review requires an independently qualified batch size of 2; a batch-1 route is unavailable, and capture fails closed when a lone state has no valid partner. Do not substitute the opening frame for the complete state set.
+5. For P-operating-model, build a review map with one row per slide or coherent long-form section: stable unit id, unit type (`slide` or `section`), visible title, one-sentence narrative job, and screenshot path. If the source has no narrative job, use the visible claim and mark the route low-confidence. Do not use implementation source to infer intent.
+6. Use candidate element lists from each deterministic check's `evidence` and `where` fields when a pass asks for candidate extracts.
+7. For `impeccable:critique`, capture only the candidate screenshots and locations named by the report. For `unslop:cleanup-report`, supply only the excluded-filtered prose extract.
+8. For `artifacture:slop-gap`, capture only the explicitly nominated region, its visible text, and the smallest source/truth excerpt needed to judge sequence, state/confidence, or provenance.
 
 ## 2. Run LLM Passes
 
@@ -149,6 +150,7 @@ Use these passes:
 | Pass | Run When | Inputs | Rubric |
 |---|---|---|---|
 | P-layout | `llm_passes_required` includes `hierarchy`, or any layout candidate exists | `report.json`; the 4 standard screenshots; candidate lists for clipping, fixed chrome, div-grid tables, repeated-track layouts, slide screenshots, demo frames when referenced | `{{skill_dir}}/scripts/verify/rubrics/pass-layout.md` |
+| P-deck-review | `llm_passes_required` includes `deck-review` | one generated deck-review manifest; every ordered state-continuity and adjacent-slide-variety group named by it; visible title or narrative job only when absent from the frame | `{{skill_dir}}/scripts/verify/rubrics/pass-deck-review.md` |
 | P-aesthetic | `llm_passes_required` includes any `aesthetic-*` token, a preset is detected or declared, or any preset candidate exists | `report.json`; active preset name; light/dark screenshots; candidate extracts named in the report | `{{skill_dir}}/scripts/verify/rubrics/pass-aesthetic.md` |
 | P-diagram | diagrams are present | `report.json`; one screenshot per figure; extracted diagram labels; one-line content brief for each figure | `{{skill_dir}}/scripts/verify/rubrics/pass-diagram.md` |
 | P-operating-model | `llm_passes_required` includes `operating-model` | one screenshot per review unit; review map with unit id, unit type, visible title, and one-sentence narrative job; only the brief excerpts needed to resolve intent | `{{skill_dir}}/scripts/verify/rubrics/pass-operating-model.md` |
@@ -161,6 +163,15 @@ Use these passes:
 ### P-layout Questions
 
 Ask only the applicable questions tagged in `pass-layout.md`: semantic table need, global hierarchy, visible text clipping, mobile fixed-chrome obstruction, slide focal clarity, repeated-track symmetry, repeated slide composition, and sparse diagram slide. Repeated-track symmetry is conditional: run it only when the artifact visibly establishes equivalent columns or rows.
+
+### P-deck-review Questions
+
+Treat rendered frames as truth. Check whether labeled examples visibly earn
+their labels, annotations map to their evidence, the reading path survives the
+slide's density, adjacent slides demonstrate meaningful structural variety, and
+every drill or progressive state remains clear and collision-free. Attribute
+findings to exact state ids. Generic visual craft remains delegated to
+Impeccable; prose remains delegated to Unslop.
 
 ### P-aesthetic Questions
 
@@ -216,7 +227,13 @@ Inspect the exact exported PNG after every `poster export`. Check edge clipping,
 2. If every pass returns `"pass": true`, continue to Step 4.
 3. If any pass returns `"pass": false`, fix only the defects named in `findings`.
 4. Re-export from source. Never hand-edit generated HTML when an MDX/TSX source exists.
-5. Rerun `ve-verify`.
+5. Rerun `ve-verify`. For deck-review findings, first read
+   `./deck-visual-review-repair.md`, then set
+   `ARTIFACTURE_DECK_REVIEW_STATES` to the comma-separated affected state ids
+   and related base/progression states. This recaptures only the repair set and
+   fails if any requested state id is stale or missing; a repaired base frame
+   does not prove its related states are repaired. Clear the
+   variable and run a complete deck capture before delivery.
 6. Rerun only the affected LLM passes.
 7. Repeat this LLM fix loop at most 2 times. If any pass still fails, stop and disclose the unresolved findings.
 
