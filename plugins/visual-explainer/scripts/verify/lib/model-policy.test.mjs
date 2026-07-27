@@ -7,6 +7,8 @@ import {
   buildLlmDispatchPlan,
   resolveVisualModelPolicy,
 } from './model-policy.mjs';
+import '../../../../../evals/deck-review-set.browser.test.mjs';
+import '../../../../../evals/deck-review-report.test.mjs';
 
 function generatedPolicy(routes) {
   return {
@@ -92,6 +94,33 @@ test('does not borrow layout qualification for an aesthetic pass', () => {
   );
   assert.equal(entry.status, 'skipped');
   assert.equal(entry.reason, 'no-eval-qualified-model');
+});
+
+test('does not borrow layout qualification for deck review', () => {
+  const [entry] = buildLlmDispatchPlan(
+    ['deck-review'],
+    { source: '/policy.json', policy: generatedPolicy({ layout: measuredRoute() }) },
+  );
+  assert.equal(entry.status, 'skipped');
+  assert.equal(entry.reason, 'no-eval-qualified-model');
+});
+
+test('deck review refuses a route that was not qualified on paired evidence', () => {
+  const [entry] = buildLlmDispatchPlan(
+    ['deck-review'],
+    { source: '/policy.json', policy: generatedPolicy({ 'deck-review': measuredRoute({ batch_size: 1 }) }) },
+  );
+  assert.equal(entry.status, 'skipped');
+  assert.equal(entry.reason, 'deck-review-requires-paired-evidence');
+});
+
+test('deck review accepts an independently qualified paired-evidence route', () => {
+  const [entry] = buildLlmDispatchPlan(
+    ['deck-review'],
+    { source: '/policy.json', policy: generatedPolicy({ 'deck-review': measuredRoute({ batch_size: 2 }) }) },
+  );
+  assert.equal(entry.status, 'ready');
+  assert.equal(entry.batch_size, 2);
 });
 
 test('rejects a hand-written route without selector provenance and measurements', () => {

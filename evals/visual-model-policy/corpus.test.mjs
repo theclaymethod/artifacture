@@ -9,6 +9,7 @@ import {
 
 const REQUIRED_FAMILIES = [
   'layout',
+  'deck-review',
   'diagram',
   'aesthetic',
   'operating-model',
@@ -58,7 +59,7 @@ test('layout corpus covers clipping, crowding, dead space, and symmetry', async 
 
 test('every case exposes stable evidence identity, a named region, and adjudication notes', async () => {
   const cases = expandCorpus(await loadCorpus());
-  assert.equal(cases.length, 72);
+  assert.equal(cases.length, 84);
   for (const entry of cases) {
     assert.match(entry.case_id, /^[a-z0-9][a-z0-9:-]+$/);
     assert.match(entry.state_id, /^[a-z0-9][a-z0-9:-]+$/);

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body, #deck { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #171714; color: #f8f4ea; font: 22px/1.4 system-ui, sans-serif; }
+    main { position: absolute; inset: 0; padding: 90px; background: #25251f; }
+    section { width: 100%; height: 100%; }
+    h1 { font-size: 64px; }
+    button { min-width: 160px; min-height: 56px; }
+    [data-drill-open] { position: absolute; inset: 120px; padding: 60px; background: #f8f4ea; color: #171714; }
+  </style>
+</head>
+<body>
+  <div id="deck" data-ve-presentation="true">
+    <main data-slide-index="0" data-slide-id="slide-one">
+      <section>
+        <h1>One base and one drill</h1>
+        <button data-drill-target="evidence">Open evidence</button>
+      </section>
+    </main>
+  </div>
+  <script>
+    const deck = document.querySelector('#deck');
+    let index = 0;
+    let state = 0;
+
+    function render() {
+      if (index === 0) {
+        deck.innerHTML = '<main data-slide-index="0" data-slide-id="slide-one"><section><h1>One base and one drill</h1><button data-drill-target="evidence">Open evidence</button></section></main>';
+        deck.querySelector('[data-drill-target]').addEventListener('click', () => {
+          const dialog = document.createElement('aside');
+          dialog.setAttribute('data-drill-open', 'true');
+          dialog.innerHTML = '<h2>Evidence click-in</h2><button data-drill-close>Close</button>';
+          dialog.querySelector('[data-drill-close]').addEventListener('click', () => dialog.remove());
+          deck.querySelector('main').append(dialog);
+        });
+      } else {
+        deck.innerHTML = '<main data-slide-index="1" data-slide-id="slide-two"><section><h1>One progressive state</h1><div data-presentation-state-nav="true" data-presentation-state-index="' + state + '" data-presentation-state-count="2">State ' + state + '</div>' + (state === 1 ? '<button data-drill-target="progressive-evidence">Open progressive evidence</button>' : '') + '</section></main>';
+        const trigger = deck.querySelector('[data-drill-target]');
+        if (trigger) trigger.addEventListener('click', () => {
+          const dialog = document.createElement('aside');
+          dialog.setAttribute('data-drill-open', 'true');
+          dialog.innerHTML = '<h2>Progressive evidence click-in</h2><button data-drill-close>Close</button>';
+          dialog.querySelector('[data-drill-close]').addEventListener('click', () => dialog.remove());
+          deck.querySelector('main').append(dialog);
+        });
+      }
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Home') { index = 0; state = 0; render(); }
+      if (event.key === 'ArrowRight' && index === 0) { index = 1; state = 0; render(); }
+      if (event.key === 'ArrowDown' && index === 1 && state === 0) { state = 1; render(); }
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -7,6 +7,31 @@
       "rubric": "rubrics/pass-layout.md"
     },
     {
+      "id": "deck-example-rendered-truth",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
+      "id": "deck-annotation-evidence-mapping",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
+      "id": "deck-reading-path-density",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
+      "id": "deck-structural-variety",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
+      "id": "deck-click-in-continuity",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
       "id": "artifact-slop-false-sequence",
       "pass": "artifacture:slop-gap",
       "rubric": "rubrics/pass-artifact-slop-gap.md"

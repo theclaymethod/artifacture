@@ -33,11 +33,13 @@ A cheaper larger model does not displace a qualified smaller model. Candidate
 
 ## Corpus
 
-`corpus.json` defines a deliberately compact seed corpus: 36 paired scenarios
-and 72 label-blind states across the owned families:
+`corpus.json` defines a deliberately compact seed corpus: 42 paired scenarios
+and 84 label-blind states across the owned families:
 
 - layout, including clipping, focal crowding, authored versus accidental dead
   space, and repeated-track symmetry;
+- deck review, including rendered example truth, annotation mapping, reading
+  path density, adjacent-slide variety, and click-in continuity;
 - diagram fidelity;
 - aesthetic and preset fidelity;
 - operating-model fidelity; and

@@ -58,6 +58,15 @@ export function buildLlmDispatchPlan(passes, resolved = resolveVisualModelPolicy
         policy_source: resolved.source,
       };
     }
+    if (routeKey === 'deck-review' && Number(route.batch_size) !== 2) {
+      return {
+        pass,
+        owner: 'artifacture',
+        status: 'skipped',
+        reason: 'deck-review-requires-paired-evidence',
+        policy_source: resolved.source,
+      };
+    }
     return {
       pass,
       owner: 'artifacture',
