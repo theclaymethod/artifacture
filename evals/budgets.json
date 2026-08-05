@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "canonical_max_seconds": 120,
+  "mechanics_catalog_max_checks": 160,
+  "seeded_fixture_max_cases": 170,
+  "product_benchmark_max_cases": 6,
+  "product_generation_prompt_max_tokens": 17000,
+  "paid_eval_max_requests": 45,
+  "paid_eval_max_observations": 90,
+  "paid_eval_max_cost_usd": 0.9
+}

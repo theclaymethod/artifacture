@@ -4,13 +4,10 @@
   "corpus_path": "corpus.json",
   "image_detail": "high",
   "replicates": 3,
-  "batch_sizes": [1, 2],
+  "batch_sizes": [2],
   "passes": [
     "layout",
-    "diagram",
-    "aesthetic",
-    "operating-model",
-    "artifact-slop-gap"
+    "deck-review"
   ],
   "thresholds": {
     "min_runs": 3,

@@ -8,6 +8,8 @@ const TASK_CARD = {
   'code-walkthrough': 'code-walkthrough.md',
   'comparison-table': 'comparison-table.md',
   'explain-diff': 'explain-diff.md',
+  'slide-deck': 'slide-deck.md',
+  'project-recap': 'project-recap.md',
 };
 
 const encoder = new TextEncoder();

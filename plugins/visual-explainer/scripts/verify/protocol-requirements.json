@@ -1,7 +1,11 @@
 [
   {
     "family": "F1_slop_global",
-    "req": "Before reporting any artifact as done, render it in a browser and inspect it at 1440x900 and 390x844, in both prefers-color-scheme light and dark; a clean file write is not a green signal. Capture screenshots for the LLM verification passes."
+    "req": "For artifacts generated from React/TSX source, run the source project's declared static-lint and React Doctor checks before export, after each substantive implementation batch, and once before final ve-verify. React Doctor errors block delivery; warnings remain explicit review inputs. Artifacture's generated-HTML checks do not substitute for source diagnostics."
+  },
+  {
+    "family": "F1_slop_global",
+    "req": "Before reporting any artifact as done, render it in a browser and inspect it at 1440x900 and 390x844, in both prefers-color-scheme light and dark; a clean file write is not a green signal. Capture screenshots for the profile-aware artifact review."
   },
   {
     "family": "F1_slop_global",
@@ -29,7 +33,7 @@
   },
   {
     "family": "F2_responsive",
-    "req": "Before reporting any page-profile artifact as done, render it in a headless browser at 390x844 AND 1440x900, each in both prefers-color-scheme light and dark, and confirm the horizontal-overflow gate (documentElement.scrollWidth - innerWidth <= 1) passes at every viewport/scheme; capture the 390x844 light+dark screenshots for the text-clip and fixed-UI llm-pass reviews."
+    "req": "Before reporting any page-profile artifact as done, render it in a headless browser at 390x844 AND 1440x900, each in both prefers-color-scheme light and dark, and confirm the horizontal-overflow gate (documentElement.scrollWidth - innerWidth <= 1) passes at every viewport/scheme; capture the 390x844 light+dark screenshots for the mobile-usability dimension of the artifact review."
   },
   {
     "family": "F2_responsive",
@@ -82,10 +86,6 @@
   {
     "family": "F4_presets",
     "req": "Fan-out policy: 1–2 sections build sequentially with no sub-agents; 3+ sections dispatch one sub-agent per section in a single parallel Task batch, unless --no-parallel is explicitly requested."
-  },
-  {
-    "family": "F4_presets",
-    "req": "All prose (headlines, leads, body, card descriptions, callouts, pull quotes, slide body copy) must be run through /unslop before it is emitted into HTML."
   },
   {
     "family": "F4_presets",

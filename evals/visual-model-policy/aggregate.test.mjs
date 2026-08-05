@@ -113,6 +113,29 @@ test('aggregation emits selector counts, unique evidence, telemetry, and p95', (
   assert.equal(result.experiment_complete, false);
 });
 
+test('aggregation collapses a failed paid attempt into its successful retry', () => {
+  const success = record({
+    requestId: 'retry-me',
+    replicate: 1,
+    caseId: 'clean-a',
+    humanLabel: 'clean',
+    predictedLabel: 'clean',
+  });
+  success.telemetry.complete = true;
+  const failure = {
+    ...success,
+    response: { json_valid: false, error: 'provider timeout' },
+    telemetry: { ...success.telemetry, complete: false },
+    observations: [],
+  };
+  const measurements = aggregateRecords([failure, success], {
+    candidates: [{ id: 'tiny', rank: 1, class: 'small', provider: 'fixture' }],
+  });
+  assert.equal(measurements.source.request_records, 1);
+  assert.equal(measurements.results[0].cases, 1);
+  assert.equal(measurements.results[0].tn, 1);
+});
+
 test('unique evidence is keyed by the image-and-source evidence bundle', () => {
   const sharedImageSha256 = crypto.createHash('sha256').update('shared-pixels').digest('hex');
   const first = record({

@@ -13,24 +13,25 @@ function context(overrides = {}) {
   };
 }
 
-test('routes fixed-stage presentations through the dedicated deck review pass', () => {
+test('routes fixed-stage presentations through the profile-aware artifact review', () => {
   const report = buildReport(context({
     html: '<div data-ve-presentation="true"></div>',
   }), []);
-  assert.ok(report.llm_passes_required.includes('deck-review'));
-  assert.equal(
-    report.llm_dispatch_plan.find((entry) => entry.pass === 'deck-review')?.reason,
-    'no-eval-qualified-model',
-  );
+  assert.deepEqual(report.llm_passes_required, ['artifact-review:slides']);
+  const route = report.llm_dispatch_plan[0];
+  assert.equal(route?.status, 'fallback-required');
+  assert.equal(route?.reason, 'no-eval-qualified-model');
+  assert.equal(route?.selection, 'best-available-model');
+  assert.equal(route?.batch_size, 2);
 });
 
-test('routes slide decks but leaves magazines and ordinary pages alone', () => {
+test('routes every visual profile through exactly one matching artifact review', () => {
   const slides = buildReport(context({ profile: 'slides' }), []);
-  assert.ok(slides.llm_passes_required.includes('deck-review'));
+  assert.deepEqual(slides.llm_passes_required, ['artifact-review:slides']);
 
   const magazine = buildReport(context({ profile: 'magazine' }), []);
-  assert.equal(magazine.llm_passes_required.includes('deck-review'), false);
+  assert.deepEqual(magazine.llm_passes_required, ['artifact-review:magazine']);
 
   const page = buildReport(context(), []);
-  assert.equal(page.llm_passes_required.includes('deck-review'), false);
+  assert.deepEqual(page.llm_passes_required, ['artifact-review:page']);
 });

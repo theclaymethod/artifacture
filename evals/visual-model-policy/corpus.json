@@ -348,6 +348,34 @@
           }
         },
         {
+          "id": "functional-metadata",
+          "criterion_id": "deck-functional-metadata",
+          "region": {
+            "id": "slide-footer",
+            "label": "Visible lower-corner metadata"
+          },
+          "fire": {
+            "title": "Ornamental metadata repeats the deck context",
+            "visible_text": "Visible metadata must help the audience understand or act",
+            "truth_excerpt": "The slide already shows the patient case and probabilistic relationship.",
+            "adjudication_notes": "The lower-corner strip repeats the case name and generic descriptors without adding navigation, provenance, a required notice, state, or comparison data.",
+            "render": {
+              "template": "deck",
+              "variant": "ornamental-metadata-strip"
+            }
+          },
+          "clean": {
+            "title": "A source footer supports evaluation of the claim",
+            "visible_text": "Visible metadata must help the audience understand or act",
+            "truth_excerpt": "The audience needs the pathway citation to evaluate the clinical claim.",
+            "adjudication_notes": "The footer gives a specific source and section that the audience can use.",
+            "render": {
+              "template": "deck",
+              "variant": "functional-source-footer"
+            }
+          }
+        },
+        {
           "id": "adjacent-slide-variety",
           "criterion_id": "deck-structural-variety",
           "region": {

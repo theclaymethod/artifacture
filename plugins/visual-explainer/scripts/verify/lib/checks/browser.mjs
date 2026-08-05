@@ -131,16 +131,6 @@ export const checks = {
     fix_hint: 'Named aesthetics must preserve >=4.5:1 body contrast in light and dark and must not resolve text to the same color as its background.'
   }),
 
-  'cream-sand-background': metricCheck('cream-sand-background', {
-    profiles: ALL_RENDERED,
-    runFilter: desktopRun,
-    appliesWhen: (ctx) => ctx.preset !== 'paper-ink' && !/\b(?:paper|parchment|receipt|linen)\b/i.test(ctx.html || ''),
-    status: 'warn',
-    failWhen: (metric) => metric && (metric.isCreamSand || metric.reflexToken),
-    evidence: (failures) => `Cream/sand body background candidates: ${json(failures.map(({ run, metric }) => ({ run, bg: metric.bg, hsl: metric.hsl, reflexToken: metric.reflexToken })).slice(0, 10))}`,
-    fix_hint: 'Avoid reflex warm cream/sand page backgrounds unless paper-ink or the subject explicitly calls for paper/parchment.'
-  }),
-
   'flat-type-scale-weak-hierarchy': metricCheck('flat-type-scale-weak-hierarchy', {
     profiles: ALL_RENDERED,
     runFilter: desktopRun,
@@ -149,15 +139,6 @@ export const checks = {
     failWhen: (metric) => metric?.pairs?.some((pair) => pair.flat),
     evidence: (failures) => `Weak type hierarchy pairs: ${json(flattenMetric(failures, 'pairs', 10).filter((pair) => pair.flat))}`,
     fix_hint: 'Separate adjacent type roles by at least size, weight, or color; size-only adjacent ratios below 1.25 need another contrast axis.'
-  }),
-
-  'rainbow-accent-palette': metricCheck('rainbow-accent-palette', {
-    profiles: ALL_RENDERED,
-    runFilter: desktopRun,
-    status: 'warn',
-    failWhen: (metric) => metric && metric.bucketCount > 4,
-    evidence: (failures) => `Decorative saturated hue buckets: ${json(failures.map(({ run, metric }) => ({ run, buckets: metric.buckets, samples: metric.samples })).slice(0, 10))}`,
-    fix_hint: 'Limit non-data UI chrome to a tighter accent palette; charts and syntax highlighting are excluded.'
   }),
 
   'gray-text-on-colored-surface': metricCheck('gray-text-on-colored-surface', {

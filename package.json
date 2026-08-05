@@ -16,9 +16,13 @@
     "ve:check": "node scripts/ve-mdx/check.mjs",
     "ve:check-integrity": "node scripts/ve-mdx/check-integrity.mjs",
     "ve:verify": "node plugins/visual-explainer/scripts/verify/ve-verify.mjs",
+    "ve:finalize": "node plugins/visual-explainer/scripts/verify/ve-finalize.mjs",
     "ve:eval": "node evals/run.mjs && node evals/design-systems/run.mjs",
+    "ve:eval-product": "node evals/product-benchmark/check.mjs --json",
+    "ve:manifest-product-run": "node evals/product-benchmark/run-manifest.mjs",
+    "ve:prepare-product-review": "node evals/product-benchmark/prepare-review.mjs",
+    "ve:generate-product-benchmark": "node evals/model-matrix/run-matrix.mjs --models codex --tasks arch-diagram,code-walkthrough,comparison-table,explain-diff,slide-deck,project-recap",
     "ve:eval-presentation": "node evals/run-presentation.mjs",
-    "ve:eval-rubrics": "node evals/run-rubrics.mjs",
     "ve:eval-visual-model-policy": "node --test evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs",
     "ve:render-visual-model-corpus": "node evals/visual-model-policy/render-corpus.mjs",
     "ve:run-visual-model-eval": "node evals/visual-model-policy/run.mjs",
@@ -26,8 +30,11 @@
     "ve:merge-visual-model-measurements": "node evals/visual-model-policy/merge.mjs",
     "ve:select-visual-model-policy": "node evals/visual-model-policy/select.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
+    "check:fast": "npm test && npm run check:manifests && npm run ve:check",
+    "check": "node evals/check-with-budget.mjs",
+    "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "artifacture-product-v1",
+  "baseline_run": null,
+  "candidate_run": null,
+  "runs": {
+    "baseline": null,
+    "candidate": null
+  },
+  "review": {
+    "status": "pending-human-review",
+    "acceptance": "improvement",
+    "reviewer": null,
+    "reviewed_at": null
+  },
+  "comparisons": []
+}

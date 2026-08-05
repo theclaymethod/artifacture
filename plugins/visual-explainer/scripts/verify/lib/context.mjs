@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import { detectPreset, detectPresetHint, detectProfile } from './profile.mjs';
@@ -21,6 +22,9 @@ export async function buildContext(filePath, options = {}) {
   const presetHint = preset === 'custom' ? detectPresetHint(absolute, html) : preset;
 
   const text = dom?.body?.textContent || stripTags(stripCodeLike(html));
+  const truthPath = options.truth ? path.resolve(options.truth) : null;
+  const truthText = truthPath ? await fs.readFile(truthPath, 'utf8') : null;
+  const renderedInventory = buildRenderedInventory(dom);
   const lowered = html.toLowerCase();
   const flags = {
     hasMermaid: /class\s*=\s*["'][^"']*\bmermaid\b|mermaid\.initialize|\.mermaid\b/i.test(html),
@@ -44,7 +48,37 @@ export async function buildContext(filePath, options = {}) {
     presetHint,
     flags,
     browser: null,
+    truth: truthText == null ? null : buildTruthRecord(truthPath, truthText),
+    renderedInventory,
   };
+}
+
+export function buildRenderedInventory(dom) {
+  if (!dom) return { sha256: sha256('[]'), items: [], provenance: 'static' };
+  const selectors = 'h1,h2,h3,h4,h5,h6,p,li,th,td,figcaption,blockquote,summary';
+  const items = Array.from(dom.querySelectorAll(selectors))
+    .map((element) => ({
+      role: element.tagName.toLowerCase(),
+      text: (element.textContent || '').replace(/\s+/g, ' ').trim(),
+    }))
+    .filter((item) => item.text);
+  return { sha256: sha256(JSON.stringify(items)), items, provenance: 'static' };
+}
+
+export function buildTruthRecord(truthPath, truthText) {
+  const claims = truthText.split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^#{1,6}\s/.test(line));
+  return {
+    path: truthPath,
+    sha256: sha256(truthText),
+    bytes: Buffer.byteLength(truthText),
+    claims,
+  };
+}
+
+function sha256(value) {
+  return crypto.createHash('sha256').update(value).digest('hex');
 }
 
 export function extractTagBodies(html, tag) {

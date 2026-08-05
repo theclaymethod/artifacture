@@ -12,6 +12,7 @@ import {
   evaluateProviderResponse,
   runExperiment,
   SHARED_INSTRUCTIONS,
+  summarizeExperimentPlan,
   VERDICT_SYSTEM_TEXT,
 } from './run.mjs';
 
@@ -221,6 +222,43 @@ test('the staged ladder runs one candidate and wraps randomized tails into full 
   );
 });
 
+test('plan summary exposes the maximum paid-call and observation budget', () => {
+  const cases = ['a', 'b', 'c', 'd', 'e'].map((id) => ({
+    case_id: id,
+    family: 'layout',
+    criterion_id: 'text-visibly-clipped',
+    rubric: '/rubric.md',
+  }));
+  const plan = buildExperimentPlan({
+    run_candidate: 'nano',
+    candidates: [{ id: 'nano', provider: 'test', rank: 1, class: 'small' }],
+    batch_sizes: [4],
+    replicates: 1,
+    image_detail: 'high',
+  }, cases);
+
+  assert.deepEqual(summarizeExperimentPlan(plan, { max_cost_per_case_usd: 0.01 }), {
+    requests: 2,
+    observations: 8,
+    max_cost_usd: 0.08,
+  });
+});
+
+test('the default paid experiment evaluates only the two production review routes', async () => {
+  const template = JSON.parse(await fs.readFile(
+    new URL('./experiment.template.json', import.meta.url),
+    'utf8',
+  ));
+  assert.deepEqual(template.passes, ['layout', 'deck-review']);
+  assert.deepEqual(template.batch_sizes, [2]);
+
+  const { expandCorpus, loadCorpus } = await import('./corpus.mjs');
+  const cases = expandCorpus(await loadCorpus());
+  const selected = cases.filter((entry) => template.passes.includes(entry.family));
+  const budget = summarizeExperimentPlan(buildExperimentPlan(template, selected), template.thresholds);
+  assert.deepEqual(budget, { requests: 45, observations: 90, max_cost_usd: 0.9 });
+});
+
 test('the candidate ladder enforces smallest-first progress and stops after escalation', () => {
   const cases = ['fire-a', 'clean-a'].map((id) => ({
     case_id: id,
@@ -310,4 +348,102 @@ test('an unknown pass cannot become an empty successful experiment', async () =>
     }),
     /known corpus family|unknown pass/,
   );
+});
+
+test('a repeated experiment resumes without paying for completed request ids', async (t) => {
+  const { loadCorpus } = await import('./corpus.mjs');
+  const corpus = await loadCorpus();
+  const { dir } = await fixture(t);
+  const recordsPath = path.join(dir, 'records.jsonl');
+  const experiment = {
+    id: 'resume-paid-work',
+    corpus_path: new URL('./corpus.json', import.meta.url).pathname,
+    run_candidate: 'nano',
+    candidates: [{ id: 'nano', provider: 'fixture', rank: 1 }],
+    batch_sizes: [2],
+    replicates: 1,
+    image_detail: 'high',
+    passes: ['layout'],
+  };
+  let invokes = 0;
+  const adapter = {
+    synthetic: true,
+    async invoke(request) {
+      invokes += 1;
+      return {
+        raw_text: JSON.stringify({
+          verdicts: request.suffix.cases.map(({ state_id }) => ({
+            state_id,
+            pass: true,
+            findings: [],
+          })),
+        }),
+        telemetry: {
+          latency_ms: 1,
+          time_to_first_token_ms: 1,
+          input_tokens: 1,
+          cache_read_tokens: 0,
+          cache_write_tokens: 0,
+          output_tokens: 1,
+          actual_cost_usd: 0,
+        },
+      };
+    },
+  };
+
+  const first = await runExperiment({ experiment, corpus, adapter, recordsPath });
+  assert.ok(first.requests_written > 0);
+  const paidInvokes = invokes;
+  const resumed = await runExperiment({ experiment, corpus, adapter, recordsPath });
+
+  assert.equal(invokes, paidInvokes);
+  assert.equal(resumed.requests_written, 0);
+  assert.equal(resumed.requests_skipped, first.requests_written);
+});
+
+test('resume retries a provider error instead of poisoning the request matrix', async (t) => {
+  const { loadCorpus } = await import('./corpus.mjs');
+  const corpus = await loadCorpus();
+  const { dir } = await fixture(t);
+  const recordsPath = path.join(dir, 'records.jsonl');
+  const experiment = {
+    id: 'resume-provider-error',
+    corpus_path: new URL('./corpus.json', import.meta.url).pathname,
+    run_candidate: 'nano',
+    candidates: [{ id: 'nano', provider: 'fixture', rank: 1 }],
+    batch_sizes: [2],
+    replicates: 1,
+    image_detail: 'high',
+    passes: ['layout'],
+  };
+  let invokes = 0;
+  const adapter = {
+    synthetic: true,
+    async invoke(request) {
+      invokes += 1;
+      if (invokes === 1) throw new Error('transient provider failure');
+      return {
+        raw_text: JSON.stringify({
+          verdicts: request.suffix.cases.map(({ state_id }) => ({ state_id, pass: true, findings: [] })),
+        }),
+        telemetry: {
+          latency_ms: 1,
+          time_to_first_token_ms: 1,
+          input_tokens: 1,
+          cache_read_tokens: 0,
+          cache_write_tokens: 0,
+          output_tokens: 1,
+          actual_cost_usd: 0,
+        },
+      };
+    },
+  };
+
+  const first = await runExperiment({ experiment, corpus, adapter, recordsPath });
+  const firstInvokes = invokes;
+  const resumed = await runExperiment({ experiment, corpus, adapter, recordsPath });
+
+  assert.equal(invokes, firstInvokes + 1);
+  assert.equal(resumed.requests_written, 1);
+  assert.equal(resumed.requests_skipped, first.requests_written - 1);
 });

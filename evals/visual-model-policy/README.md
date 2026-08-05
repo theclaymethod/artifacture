@@ -188,6 +188,13 @@ npm run ve:run-visual-model-eval -- \
   --dry-run
 ```
 
+The checked-in template measures two narrow prerequisite research routes
+(`layout` and paired `deck-review`). It does not qualify the broader
+`artifact-review:*` composite passes. Its current dry-run budget is 45 requests, 90
+observations, and at most $0.90 at the configured per-case ceiling. Broader
+criterion families remain research inputs; they are not part of the default
+qualification run.
+
 A provider adapter must implement the contract in `adapters/README.md`. Run the
 measured ladder:
 
@@ -198,7 +205,12 @@ npm run ve:run-visual-model-eval -- \
 ```
 
 The runner writes one append-only JSONL record per request under
-`runs/<experiment-id>/records.jsonl`. It never truncates prior records. Each
+`runs/<experiment-id>/records.jsonl`. It never truncates prior records. On an
+interrupted rerun it skips request IDs already completed under the same
+experiment contract and request-matrix hash; changed inputs cannot reuse stale
+records. Provider errors and malformed or incomplete responses remain
+retryable; aggregation collapses append-only attempts to the latest successful
+terminal attempt. Each
 request has an immutable image prefix followed by exactly one criterion suffix.
 Human labels and adjudication notes are never sent to the adapter. Every record
 also captures the deterministic randomization key and exact image SHA-256 used
@@ -254,8 +266,10 @@ npm run ve:select-visual-model-policy -- \
 ```
 
 The selector exits `1` if any measured family has no qualified route. Do not
-turn that into an implicit frontier fallback. Add evidence, test the next model
-rank, or disclose `no-eval-qualified-model`.
+promote an unmeasured frontier model into the qualified policy. Add evidence
+and test the next model rank. When no route qualifies, runtime must disclose
+`no-eval-qualified-model`, use the best available visual-capable model, and
+label the result `unqualified-fallback`.
 
 ## Ladder discipline
 
