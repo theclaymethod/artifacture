@@ -1,8 +1,0 @@
-{
-  "case": "A dominant narrative column is intentionally wider than a narrow evidence rail and the hierarchy is clear.",
-  "human_label": "clean",
-  "judge_response": {
-    "pass": true,
-    "findings": []
-  }
-}

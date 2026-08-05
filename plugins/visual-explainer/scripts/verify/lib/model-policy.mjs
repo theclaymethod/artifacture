@@ -48,22 +48,30 @@ export function buildLlmDispatchPlan(passes, resolved = resolveVisualModelPolicy
     }
 
     const routeKey = routeKeyFor(pass);
+    const pairedEvidence = routeKey === 'deck-review' || pass === 'artifact-review:slides';
     const route = resolved.policy?.routes?.[routeKey];
     if (!route) {
       return {
         pass,
         owner: 'artifacture',
-        status: 'skipped',
+        status: 'fallback-required',
         reason: 'no-eval-qualified-model',
+        qualification: 'unqualified-fallback',
+        selection: 'best-available-model',
+        batch_size: pairedEvidence ? 2 : null,
         policy_source: resolved.source,
       };
     }
-    if (routeKey === 'deck-review' && Number(route.batch_size) !== 2) {
+    if (pairedEvidence && Number(route.batch_size) !== 2) {
       return {
         pass,
         owner: 'artifacture',
-        status: 'skipped',
-        reason: 'deck-review-requires-paired-evidence',
+        status: 'fallback-required',
+        reason: 'no-eval-qualified-model',
+        qualification: 'unqualified-fallback',
+        qualification_gap: 'deck-review-requires-paired-evidence',
+        selection: 'best-available-model',
+        batch_size: 2,
         policy_source: resolved.source,
       };
     }

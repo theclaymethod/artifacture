@@ -1,132 +1,113 @@
-# ve-verify — Implementation Spec (v1)
+# Artifacture verifier contract
 
-Deterministic verifier + focused LLM verification protocol for the visual-explainer skill.
-Target executors: Codex, Opus, Sonnet-tier — the checker must be runnable with ONE command and
-produce machine-readable results a weak model can act on without judgment.
+The verifier is a mechanics gate plus a review dispatcher. It does not claim
+visual quality from deterministic proxy rules.
 
-## Repo layout (new)
+## Public commands
 
-```
-plugins/visual-explainer/scripts/verify/
-  ve-verify.mjs          # CLI entry
-  lib/engine.mjs         # runs checks, assembles report
-  lib/profile.mjs        # profile auto-detection (page|slides|magazine|poster|video-comp)
-  lib/static-text.mjs    # regex-stage runner
-  lib/static-dom.mjs     # linkedom-stage runner
-  lib/browser.mjs        # playwright-core stage: viewports × schemes, screenshots, probes
-  checks.json            # THE CATALOG — data-driven check definitions (id, stage, profiles,
-                         # applies_when, severity, params). Complex checks reference a named
-                         # impl in lib/checks/<stage>.mjs by id.
-  rubrics/               # LLM-pass rubric files (one per pass, markdown, ≤ 1 screen each)
-    pass-hierarchy.md
-    pass-aesthetic-<preset>.md   # one per preset; verifier loads ONLY the active preset's file
-    pass-completeness.md
-    pass-artifact-slop-gap.md   # explicit semantic gap only; Impeccable/Unslop stay external
-evals/
-  fixtures/violations/<check-id>.html   # exactly one seeded violation each
-  fixtures/clean/<profile>.html         # must pass everything (false-positive guard)
-  run.mjs                               # runs ve-verify over all fixtures, asserts expectations
-  expectations.json                     # fixture -> {must_fire: [ids], must_not_fire: "*"}
+```bash
+node ve-verify.mjs <artifact.html> --truth <brief.md> --json <mechanics-report.json> --screens <dir>
+node ve-finalize.mjs --report <mechanics-report.json> --verdicts <verdicts.json> --out <final-report.json>
 ```
 
-## CLI contract
+`ve-verify` exits `0` when deterministic mechanics has no error and `1` when it
+does. Its success is not the final artifact verdict. `ve-finalize` exits `0`
+only for `status: verified`, `1` for `failed` or `incomplete`, and `2` for bad
+input.
 
-```
-node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> \
-  [--profile page|slides|magazine|poster|video-comp]   # default: auto-detect
-  [--preset mono-industrial|nothing|...]               # default: auto-detect
-  [--json <out.json>] [--screens <dir>] [--static-only] [--quiet]
-```
+## Mechanics catalog
 
-- Exit 0 = no errors (warns allowed). Exit 1 = ≥1 error-severity failure. Exit 2 = engine crash.
-- The verifier runs via bare `node` with direct `import('playwright-core')` — no npm/npx at runtime, so it works in minimal agent environments.
-- playwright-core + linkedom added to package.json devDependencies (pin what's in node_modules: playwright-core 1.60.0).
-- Browser stage matrix: {1440×900, 390×844} × {light, dark} → 4 runs; screenshots saved as
-  `<screens>/<viewport>-<scheme>.png` + full-page variants. Console messages + failed requests
-  collected per run. Skip matrix rows per profile (poster: native canvas only; video-comp: 1920×1080 or 1080×1920).
-- Report JSON:
+`checks.json` contains executable `static-text`, `static-dom`, and `browser`
+checks only. A catalog check must be grounded in observable
+mechanics or artifact semantics and have a seeded violation fixture. General
+taste, prose style, and model-judged criteria do not belong in this catalog.
+
+`--mechanics-only` runs the same applicable mechanics checks but skips expensive
+deck-state evidence capture. `--static-only` is diagnostic and skips browser
+checks.
+
+## Review dispatch
+
+Every rendered profile produces exactly one Artifacture-owned review pass:
+
+- `artifact-review:page`
+- `artifact-review:slides`
+- `artifact-review:magazine`
+- `artifact-review:poster`
+- `artifact-review:video-comp`
+
+Each composite pass requires qualification on its own profile corpus. Narrower
+legacy `layout` and `deck-review` measurements cannot be borrowed as composite
+qualification. Slides require batch size 2 because every state is reviewed
+with paired context. Until a dedicated route qualifies, dispatch fails closed
+as `fallback-required` and discloses `unqualified-fallback`.
+
+The single rubric is `rubrics/pass-artifact-review.md`. It covers correctness,
+completeness, visual hierarchy, mobile usability, and shipping quality. Do not
+fan these dimensions out into separate model calls.
+
+`impeccable:critique`, `unslop:cleanup-report`, and
+`artifacture:slop-gap` appear only when explicitly declared in
+`data-ve-checks`. Artifacture owns no local Impeccable or Unslop detectors.
+
+## Mechanics report
 
 ```json
 {
-  "file": "...", "profile": "page", "preset": "mono-industrial",
-  "summary": { "errors": 2, "warns": 1, "skipped": 14, "passed": 61 },
-  "checks": [ { "id": "...", "stage": "...", "severity": "error",
-                "status": "pass|fail|warn|skip", "evidence": "...",
-                "where": "selector/line/screenshot ref", "fix_hint": "..." } ],
-  "screenshots": ["..."],
-  "llm_passes_required": ["hierarchy", "aesthetic-mono-industrial", "completeness", "impeccable:critique", "unslop:cleanup-report", "artifacture:slop-gap"],
+  "file": "/absolute/path/artifact.html",
+  "profile": "slides",
+  "preset": "nothing",
+  "summary": {"errors": 0, "warns": 1, "skipped": 125, "passed": 28},
+  "checks": [],
+  "screenshots": [],
+  "llm_passes_required": ["artifact-review:slides"],
   "llm_dispatch_plan": [
-    {"pass":"hierarchy","owner":"artifacture","status":"ready","model":"provider-small-vision","batch_size":2},
-    {"pass":"impeccable:critique","owner":"impeccable","status":"delegate-to-installed-skill"}
+    {
+      "pass": "artifact-review:slides",
+      "owner": "artifacture",
+      "status": "fallback-required",
+      "route_key": "artifact-review:slides",
+      "qualification": "unqualified-fallback",
+      "batch_size": 2
+    }
   ]
 }
 ```
 
-`llm_dispatch_plan` is the executable routing boundary. Artifacture-owned
-passes are `ready` only when the resolved eval policy contains a qualified
-route; otherwise they are explicitly `skipped` with
-`reason: "no-eval-qualified-model"`. A host must not replace a skipped route
-with its current/main-thread model. Companion-skill entries retain their own
-skill and model policies.
+When no evaluated route exists, dispatch status is `fallback-required` with
+`qualification: unqualified-fallback`. This must be disclosed.
 
-- Human output: compact table, failures first, each with fix_hint quoting the doc rule.
+## Verdict ingestion
 
-## Profile & preset auto-detection (lib/profile.mjs)
+The finalizer accepts a normalized verdict bundle:
 
-- slides: `scroll-snap-type: y mandatory` on a track + slides ≥ 100dvh
-- magazine: `scroll-snap-type: x mandatory`
-- poster: single fixed `w-[Npx] h-[Npx]` root or `--poster` marker / TSX source
-- video-comp: hyperframes markers (gsap timeline, data-hf attrs, scene structure)
-- page: fallback
-- preset: explicit `data-ve-preset` attribute first (or `--preset` flag), else STRONG token signatures only (Doto in a font-family declaration = nothing; >=2 core mono token names = mono-industrial); generic font pairings and filenames must never gate preset conformance — "custom" otherwise; loose heuristics may only route LLM passes
-- `applies_when` guards: each check declares a detection predicate (regex/selector) evaluated
-  before running; non-applicable → status "skip" with reason. THIS IS THE FALSE-POSITIVE FIREWALL.
+```json
+{
+  "schema_version": 1,
+  "review_contract_sha256": "<mechanics-report review_contract.sha256>",
+  "passes": [
+    {"pass": "artifact-review:slides", "status": "pass", "findings": []}
+  ]
+}
+```
 
-## Eval suite (`node evals/run.mjs`)
+`review_contract` binds the artifact bytes, truth brief, rendered inventory,
+profile, and screenshot/deck evidence. The finalizer rejects stale or foreign
+verdict bundles. Missing contract evidence produces `status: incomplete`.
 
-- For every `fixtures/violations/<id>.html`: run ve-verify (static stages always; browser stage
-  only for browser-stage fixtures), assert `<id>` fires with expected severity AND no other
-  error-severity check fires (warns from unrelated checks tolerated but reported).
-- For every `fixtures/clean/<profile>.html`: assert zero fires (errors AND warns).
-- Summary: per-check catch-rate table; exit non-zero if any expectation unmet.
-- Runtime budget: static fixtures < 5s total; browser fixtures batched in one chromium instance,
-  < 90s total. This is the regression suite for the checker itself.
+Only `pass` and `fail` complete a required review. Missing or `skipped` passes
+produce `status: incomplete`. Any mechanics error, failed pass, or finding
+produces `status: failed`. Only a clean mechanics report with all required
+passes successful produces `status: verified`.
 
-## LLM verification protocol (rewrite of SKILL.md §6 + new references/verification.md)
+## Evaluation layers
 
-Sequenced so a weak model cannot skip or blend steps:
+- `npm test`: public CLI and orchestration contracts.
+- `npm run ve:eval`: deterministic mechanics fixtures.
+- `npm run ve:eval-product`: six representative artifact pairs with blind,
+  human-reviewed judgments; any per-case regression fails closed.
+- visual-model-policy: optional resumable qualification research for the two
+  production review routes. Dry-run exposes the exact call and cost ceiling.
 
-1. Run ve-verify. If exit 1 → fix root cause → re-run. Max 3 cycles, then deliver with explicit
-   failure disclosure. (Deterministic gate FIRST; no LLM review of pages that fail mechanics.)
-2. LLM passes and delegated skills, each a separate small context consuming ONLY its named inputs:
-   - P1 hierarchy/layout: 4 screenshots + pass-hierarchy.md (squint, weight, moment-of-surprise)
-   - P2 aesthetic fidelity: 4 screenshots + the ACTIVE preset rubric only (swap test, motif rules)
-   - P3 completeness: source material inventory + extracted section list/headings (NO screenshots)
-   - D1 visual craft: candidate screenshots routed to installed Impeccable critique/audit
-   - D2 prose: excluded-filtered prose routed to Unslop `cleanup --report`
-   - P4 artifact slop gap: an explicitly nominated crop plus truth excerpt, limited to false
-     sequence, state/confidence, or provenance
-   Claude Code: parallelize compatible Artifacture `ve-verifier-*` agents. Invoke Impeccable and
-   Unslop through their installed skills. Codex/single-agent: keep every pass/skill in a fresh
-   context. Artifacture rubric files are authoritative only for Artifacture-owned paths.
-3. Verdict merge: any local or delegated check fails → fix → re-run only that path. Max 2 cycles.
-4. Delivery message MUST include: report path, pass/fail per LLM pass, and either "verified" or
-   the explicit could-not-verify disclosure. (Protocol requirement, reviewable from transcript.)
-
-## Doc updates in scope
-
-- SKILL.md §6 rewritten (shorter than today: point at ve-verify + verification.md).
-- references/verification.md: full protocol incl. rubrics index + report schema.
-- references/*.md: add rule-ID anchors where checks cite docs (only where curation demands).
-- .claude/agents/ve-verifier-{layout,aesthetic,completeness,artifact-slop-gap}.md
-- check.mjs: keep as build smoke test; add `ve:verify` + `ve:eval` npm scripts (documented as
-  direct-node invocations too, given broken npm shim).
-
-## Build loop
-
-1. Fable: freeze checks.json catalog + this SPEC (after curation merge).
-2. Codex run A: engine + CLI + browser stage. Codex run B (parallel, disjoint files): fixtures + evals/run.mjs.
-   Codex run C (after A/B interfaces exist): docs + rubrics + verifier agents.
-3. Opus adversarial verify: break the checker (seed tricky false-pos/false-neg pages), audit
-   spec fidelity against docs, review rubric quality for weak-model followability.
-4. Fable: run evals, final fidelity check, iterate 2–4 until green + no confirmed findings.
+The product benchmark governs product direction. Mechanics fixtures protect
+shipping invariants; they are not evidence that artifacts became better.

@@ -56,7 +56,7 @@ else
     echo "  [missing] Unslop — install separately for prose review"
 fi
 echo "  Missing companions are reported as skipped; Artifacture does not copy their rubrics."
-echo "  Visual screenshot passes also require an eval-qualified model policy."
+echo "  Visual screenshot passes prefer an eval-qualified policy and fall back to the best available visual model."
 echo "  See: https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md"
 echo ""
 echo "Commands available:"

@@ -1,138 +1,8 @@
 {
   "version": 2,
   "generated": "2026-07-04",
-  "note": "Legacy deterministic craft/prose detectors are candidate extractors only: matches route to Impeccable or Unslop and do not fail Artifacture. Artifacture owns mechanics, evidence, and artifact semantics. Stage counts: {\"static-text\":70,\"static-dom\":69,\"llm-pass\":30,\"browser\":37,\"transcript\":2}",
+  "note": "Deterministic mechanics catalog. Subjective artifact quality is handled by one profile-aware artifact review; companion skills are explicit opt-ins. Stage counts: {\"browser\":40,\"static-dom\":55,\"static-text\":57}",
   "checks": [
-    {
-      "family": "F1_slop_global",
-      "id": "forbidden-body-font",
-      "title": "Forbidden AI-slop font as primary --font-body",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "CSS declares a `--font-body` custom property or a `body`/`html { font-family }` rule.",
-      "spec": "Parse `--font-body: <stack>;` and any `body`/`html { font-family: <stack> }`. Extract the FIRST (primary) family in the stack, strip quotes. Fail if it case-insensitively equals Inter, Roboto, Arial, or Helvetica, OR if the whole stack is only generic keywords (system-ui / sans-serif / serif) with no named webfont preceding them. Only the primary entry counts — these names as trailing fallbacks pass. Named aesthetics (Mono-Industrial/Nothing) already use their own allowed primaries, so this fires only when a banned family sits in the primary slot.",
-      "fixture_violation": "Page whose `--font-body: 'Inter', sans-serif;` puts Inter in the primary slot.",
-      "fp_guards": "Ignore Inter/Roboto/Arial/Helvetica when they appear only as later fallbacks in the stack, in a non-body role (--font-mono, headings), or inside <code>/prose discussing fonts.",
-      "impl_hint": "/--font-body\\s*:\\s*([^;]+)/i then split(',')[0].replace(/['\"]/g,'').trim()",
-      "source_rules": [
-        "forbidden-primary-body-fonts",
-        "font-forbidden-body-fonts"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "forbidden-accent-colors",
-      "title": "Forbidden Tailwind-default violet/neon accent hexes",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "Any <style> block or inline style= attribute present.",
-      "spec": "Case-insensitively scan <style> blocks and inline `style=\"\"` attributes (NOT text nodes/code) for hex 8b5cf6, 7c3aed, a78bfa (indigo/violet), d946ef (fuchsia), 06b6d4, f472b6 (cyan/pink neon) — with or without leading #, plus their rgb()/rgba() equivalents. Any match = fail.",
-      "fixture_violation": "Page CSS with `--accent: #8b5cf6;`.",
-      "fp_guards": "Scope strictly to style contexts, not prose/code that documents the hex; Mermaid themeVariables colours are covered separately by the mermaid family.",
-      "impl_hint": "/#?(8b5cf6|7c3aed|a78bfa|d946ef|06b6d4|f472b6)\\b/i restricted to <style>…</style> and style=\"…\" spans",
-      "source_rules": [
-        "forbidden-accent-colors"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "forbidden-gradient-text-headings",
-      "title": "Gradient-clipped text on headings",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "CSS contains `background-clip: text` or `-webkit-background-clip: text`.",
-      "spec": "Find CSS rules that combine a `linear-gradient(`/`-webkit-linear-gradient(` background with `background-clip: text` (or `-webkit-background-clip: text`) and transparent/clipped text fill, on a heading-ish selector (h1–h4, .title, .headline, .hero-title, .display, .kicker). Any such rule = fail.",
-      "fixture_violation": "`h1{background:linear-gradient(...);-webkit-background-clip:text;color:transparent}`.",
-      "fp_guards": "Very specific combo; low FP. SVG/diagram title gradients are owned by the diagrams family (no-gradient-text-titles).",
-      "impl_hint": "Match rule blocks containing both /background(-image)?\\s*:\\s*[^;]*gradient/ and /-?(webkit-)?background-clip\\s*:\\s*text/",
-      "source_rules": [
-        "forbidden-gradient-text-headings",
-        "no-gradient-text-titles"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "forbidden-glow-pulse-animations",
-      "title": "Glow/pulse keyframes and infinite motion on static content",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "CSS contains `@keyframes` or an `animation`/`animation-iteration-count` declaration.",
-      "spec": "Fail if either: (a) a `@keyframes NAME{}` whose NAME matches /glow|pulse|breathe|shimmer/i AND whose body animates `box-shadow` or oscillates `opacity`/`filter`; or (b) any `animation:` shorthand / `animation-iteration-count: infinite` applied to a selector that is NOT a progress/loading/spinner element.",
-      "fixture_violation": "`@keyframes glow{0%{box-shadow:0 0 4px}50%{box-shadow:0 0 24px}}` applied via `animation:glow 2s infinite` to a `.card`.",
-      "fp_guards": "Exempt `.progress`/`.loading`/`.spinner`/[role=progressbar]; require infinite iteration or a glow/pulse-named box-shadow/opacity keyframe — do not flag one-shot user-triggered transitions. Mono-Industrial zero-onload-motion is owned by the mono family.",
-      "impl_hint": "Regex @keyframes bodies for box-shadow/opacity; regex /animation[^;]*infinite/ and check selector against progress allowlist.",
-      "source_rules": [
-        "forbidden-glow-pulse-animations"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "no-emoji-in-ui-chrome",
-      "title": "Emoji in section headers, status indicators, or table cells",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-dom",
-      "severity": "error",
-      "applies_when": "Document has any heading, `.status*` indicator, or `<td>`.",
-      "spec": "Query own text content of section headings (h1–h6, .section-label, .section-header, .kicker), status indicators (.status, .status--*, .status-dot*), and table cells (`td`). Fail if any contains an emoji codepoint (U+1F300–1FAFF, U+2600–27BF, U+2B00–2BFF, U+1F000–1F0FF, U+FE0F, and ✅❌⚠️). Icons must be inline SVG or CSS shapes, not emoji glyphs.",
-      "fixture_violation": "`<h2>🚀 Architecture</h2>` (or a `<td>✅</td>` status cell).",
-      "fp_guards": "Inspect each element's own text nodes only; styled <span>/inline-SVG status dots with no glyph pass; emoji inside <code>/<pre> shown as literal content is exempt.",
-      "impl_hint": "Emoji Unicode-range regex over el.textContent for the three selector groups.",
-      "source_rules": [
-        "no-emoji-section-headers",
-        "table-status-no-emoji",
-        "no-emoji-in-status-indicators"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "no-three-dot-window-chrome",
-      "title": "macOS traffic-light dots on code blocks",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "error",
-      "applies_when": "Page has a code-block header (`.code-block` header / `.code-file__head` / header preceding a `<pre>`) containing >=3 round sibling elements.",
-      "spec": "In a code-block header, detect exactly 3 small circular sibling elements (border-radius:50% or ~equal width/height <=16px) whose declared background-colours approximate the traffic-light triple (red ~#ff5f56, yellow ~#ffbd2e, green ~#27c93f, within tolerance). A red/yellow/green triple atop a code block = fail; use a filename/language label header instead.",
-      "fixture_violation": "Code-block header with three 12px spans coloured #ff5f56 / #ffbd2e / #27c93f.",
-      "fp_guards": "Must sit specifically on a code-block header, not a status legend; require the red/yellow/green colour signature, not any three dots.",
-      "source_rules": [
-        "no-three-dot-window-chrome"
-      ]
-    },
     {
       "family": "F1_slop_global",
       "id": "no-placeholder-leak",
@@ -295,26 +165,6 @@
     },
     {
       "family": "F1_slop_global",
-      "id": "real-table-for-tabular-data",
-      "title": "Tabular data must use a real <table>",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Mechanical prefilter matches: a div-based structure with >=3 sibling row-like divs each holding >=3 cell-like children with consistent per-column classes (>=4 rows or >=3 cols).",
-      "spec": "For each prefiltered div-grid region, feed the LLM that region's HTML plus a screenshot crop. Rubric question: 'Does this div-grid present row/column tabular data (comparison / audit / status matrix) that should be a semantic <table>, rather than a card grid / KPI row / feature grid?' A YES = warn (rebuild as <table>/<thead>/<tbody>).",
-      "fixture_violation": "A 4-row x 3-col comparison built from `<div class=row><div class=cell>` instead of a `<table>`.",
-      "fp_guards": "Card grids, KPI rows, and feature grids with varying per-card content are legitimately not tables and must pass — the LLM makes this call, not the prefilter.",
-      "source_rules": [
-        "real-table-element-required",
-        "use-real-table-for-tabular-data"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
       "id": "prose-readability-minimums",
       "title": "Prose font-size / line-height / measure floors",
       "profiles": [
@@ -335,25 +185,6 @@
     },
     {
       "family": "F1_slop_global",
-      "id": "prose-accent-overuse",
-      "title": "Pull-quote / drop-cap restraint",
-      "profiles": [
-        "page"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Page uses a pull-quote (`.pullquote`/`.pull-quote`/`blockquote.pull`) or drop-cap (`.lead--dropcap`/`::first-letter`) pattern.",
-      "spec": "Count pull-quote elements per rendered page — warn if > 2. Count drop-cap usages — warn if applied to more than the single lead paragraph (> 1 section). Either exceeded = warn.",
-      "fixture_violation": "A page with 3 `.pullquote` elements.",
-      "fp_guards": "One drop cap on the article lead is correct; <=2 pull quotes is fine; scope the pull-quote count per rendered page/slide, not across a whole multi-slide deck.",
-      "source_rules": [
-        "pull-quote-one-per-page",
-        "pullquote-max-two-per-article",
-        "prose-dropcap-not-every-section"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
       "id": "no-console-errors",
       "title": "No console errors or failed asset loads on load",
       "profiles": [
@@ -371,65 +202,6 @@
       "source_rules": [
         "no-console-errors",
         "console-clean-on-load"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "hierarchy-squint-test",
-      "title": "Visual hierarchy survives the squint test",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Always (page/slides/magazine renders).",
-      "spec": "Capture a full-page screenshot at 1440x900 (light), programmatically blur/downscale it. Rubric question (fed only the blurred image plus the page's declared content type): 'In this blurred view, is there a clear dominant focal region with quieter subordinate regions, or does the page read as uniformly flat with no visual hierarchy?' FLAT = warn.",
-      "fixture_violation": "A page where every section uses identical type size, weight, and spacing (deliberately flat).",
-      "fp_guards": "Dense reference / audit / data-table pages may legitimately be flatter — judge against the page's own stated content type, not a hero bar. Mono-specific three-layer rules are owned by the mono family.",
-      "source_rules": [
-        "hierarchy-visible-squint-test"
-      ]
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "unslop-prose-phrases",
-      "title": "AI-slop telltale phrases in prose",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "Page has prose text nodes (paragraphs / leads / callouts / card descriptions / slide body copy).",
-      "spec": "Replace the small inline literal list with the curated high-precision phrase set now owned by the new F9 check `copy-slop-phrases` (see phrase_check). Keep unslop-prose-phrases responsible ONLY for the frequency heuristic it uniquely does — flag high-frequency 'however'/'moreover' (>1 per 300 words) — and delegate all fixed-phrase literals to copy-slop-phrases so the two checks do not double-fire on the same text. Same excluded-prose filter (no code/labels/table-headers/Mermaid/[BRACKET]).",
-      "fixture_violation": "A body paragraph containing 'It's important to note that...'.",
-      "fp_guards": "Exclude Space Mono ALL-CAPS labels, table headers, code, Mermaid node labels, and bracketed system messages so terse technical labels don't trigger.",
-      "source_rules": [
-        "unslop-copy-before-html"
-      ],
-      "spec_modification_note": "The tell corpus expands the phrase list far beyond v1's six literals. Rather than grow two overlapping literal lists, consolidate all fixed phrases in copy-slop-phrases and let unslop-prose-phrases retain only its distinct frequency check, preventing duplicate warns on one paragraph."
-    },
-    {
-      "family": "F1_slop_global",
-      "id": "unslop-prose-style",
-      "title": "AI-slop stylistic rhythm beyond fixed phrases",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Page has prose (same excluded-filter set as unslop-prose-phrases).",
-      "spec": "delegate: unslop:cleanup-report. Supply excluded-filtered prose only and use Unslop's installed report-only audit; Artifacture does not reproduce the prose rubric.",
-      "fixture_violation": "Prose with a forced three-item list plus hollow transition rhythm that no fixed phrase catches.",
-      "fp_guards": "Terse technical labels/captions excluded; judge only sustained prose, not one-line UI copy.",
-      "source_rules": [
-        "unslop-copy-before-html",
-        "prose-role-unslop-required"
       ]
     },
     {
@@ -700,30 +472,13 @@
       "stage": "browser",
       "severity": "warn",
       "applies_when": "Page profile, non-fixed-canvas.",
-      "spec": "At 390x844 (both schemes) collect elements where getComputedStyle overflowX or overflowY is 'clip'/'hidden' AND (scrollWidth>clientWidth+1 OR scrollHeight>clientHeight+1) AND the element has non-empty direct text content, EXCLUDING elements whose computed `-webkit-line-clamp` is not 'none' or `text-overflow` is 'ellipsis'. Emit the candidate list for the paired llm-pass. Non-empty ⇒ warn (visual confirmation decides the ship-blocker).",
+      "spec": "At 390x844 (both schemes) collect elements where getComputedStyle overflowX or overflowY is 'clip'/'hidden' AND (scrollWidth>clientWidth+1 OR scrollHeight>clientHeight+1) AND the element has non-empty direct text content, EXCLUDING elements whose computed `-webkit-line-clamp` is not 'none' or `text-overflow` is 'ellipsis'. Emit the candidate list for the single profile-aware artifact review. Non-empty ⇒ warn (visual confirmation decides the ship-blocker).",
       "fixture_violation": "A heading inside a fixed-width box with overflow:hidden that chops characters, with no ellipsis/line-clamp.",
       "source_rules": [
         "no-text-clipped-by-overflow-clip",
         "text-not-clipped-or-truncated"
       ],
       "fp_guards": "Exclude intentional -webkit-line-clamp and text-overflow:ellipsis truncation from candidates."
-    },
-    {
-      "family": "F2_responsive",
-      "id": "text-visibly-clipped",
-      "title": "LLM: real text is visibly cut off by a container",
-      "profiles": [
-        "page"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Runs when text-clip-candidates produced a non-empty list (consumes that list + 390px screenshots).",
-      "spec": "Rubric question, answerable from the 390x844 light+dark screenshots plus the text-clip candidate element list: 'Is any real content text visibly cut off by a container edge — characters chopped or a sentence truncated WITHOUT an intentional ellipsis?' Yes ⇒ fail. No page-wide context needed.",
-      "fixture_violation": "N/A (LLM pass) — exercised by feeding a screenshot where a heading is chopped mid-word by an overflow:hidden box.",
-      "source_rules": [
-        "no-text-clipped-by-overflow-clip",
-        "text-not-clipped-or-truncated"
-      ]
     },
     {
       "family": "F2_responsive",
@@ -735,28 +490,12 @@
       "stage": "browser",
       "severity": "warn",
       "applies_when": "Page contains at least one position:fixed element (e.g. the theme toggle).",
-      "spec": "At 390x844 (both schemes), for each position:fixed element with a non-transparent computed background, compute its bounding rect and find interactive/text elements (a, button, h1-h4, p, td, .sec-head) whose rects geometrically intersect it and paint beneath it. Emit overlap candidates for the paired llm-pass. Non-empty ⇒ warn.",
+      "spec": "At 390x844 (both schemes), for each position:fixed element with a non-transparent computed background, compute its bounding rect and find interactive/text elements (a, button, h1-h4, p, td, .sec-head) whose rects geometrically intersect it and paint beneath it. Emit overlap candidates for the single profile-aware artifact review. Non-empty ⇒ warn.",
       "fixture_violation": "A fixed theme toggle docked top-right whose rect overlaps an <h1> at 390 width.",
       "source_rules": [
         "no-content-behind-fixed-ui"
       ],
       "fp_guards": "Require non-transparent background on the fixed element; overlap with pure padding/empty area is not a candidate."
-    },
-    {
-      "family": "F2_responsive",
-      "id": "fixed-ui-obscures-content",
-      "title": "LLM: fixed chrome actually obscures readable/clickable content",
-      "profiles": [
-        "page"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Runs when content-behind-fixed-ui-candidates is non-empty (consumes overlaps + 390px screenshots).",
-      "spec": "Rubric question from the 390x844 screenshots + overlap candidate list: 'Does fixed-position chrome (theme toggle, nav, counter) actually hide readable text or block a clickable target at mobile width?' Yes ⇒ fail.",
-      "fixture_violation": "N/A (LLM pass) — exercised by a screenshot where the theme toggle sits on top of the page title.",
-      "source_rules": [
-        "no-content-behind-fixed-ui"
-      ]
     },
     {
       "family": "F2_responsive",
@@ -1267,131 +1006,6 @@
       ]
     },
     {
-      "family": "F3_diagrams",
-      "id": "diagram-legend-matches-figure",
-      "title": "Legend entries match what the figure actually draws",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "A legend is present in the diagram.",
-      "spec": "Rubric question over the per-figure screenshot: 'Does every legend entry (swatch + label) correspond to something actually drawn in the figure, and does every distinct visual category in the figure appear in the legend? Flag any ghost legend item (in legend, not in figure) or missing item (in figure, not in legend).' Evidence: the per-figure screenshot only.",
-      "fixture_violation": "A legend lists a 'Cache' swatch color that appears nowhere in the drawn figure.",
-      "source_rules": [
-        "legend-matches-diagram"
-      ]
-    },
-    {
-      "family": "F3_diagrams",
-      "id": "diagram-focal-single-dominant",
-      "title": "Exactly one clearly dominant focal element",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Inline skill-authored <svg> diagram present.",
-      "spec": "Rubric question over the per-figure screenshot: 'Is there exactly ONE clearly dominant focal element (the look-here-first point)? Flag if there is no clear focal point, or if two-or-more elements compete equally for primary attention.' Pairs with the deterministic diagram-focal-accent-count. Evidence: the per-figure screenshot only.",
-      "fixture_violation": "A diagram where two equally-weighted accent nodes compete with no single dominant focal.",
-      "source_rules": [
-        "accent-count-max-2"
-      ]
-    },
-    {
-      "family": "F3_diagrams",
-      "id": "diagram-proportional-honesty-visual",
-      "title": "Visual proportions match stated quantities (no fabricated sizes)",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "A ranked/proportional diagram (pyramid, funnel, venn, timeline, bar) that lacks machine-readable data-* attributes.",
-      "spec": "Rubric question over the per-figure screenshot plus extracted label text: 'Do the relative sizes and spacings visually match the quantities stated in the labels (percentages, counts, dates)? Flag fabricated-equal layers, mis-scaled circles, or a timeline implying uniform pacing when the labels are not evenly spaced.' Evidence: per-figure screenshot + extracted label text.",
-      "fixture_violation": "A funnel whose three layers are drawn equal width but labeled 80% / 45% / 12%.",
-      "source_rules": [
-        "pyramid-funnel-conventions",
-        "timeline-honest-scale",
-        "venn-diagram-conventions"
-      ]
-    },
-    {
-      "family": "F3_diagrams",
-      "id": "diagram-type-coherent",
-      "title": "Figure reads as a single coherent diagram type",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Inline skill-authored <svg> or Mermaid diagram present.",
-      "spec": "Rubric question over the per-figure screenshot + brief: 'Does this figure read as a single coherent diagram type matching its content shape, rather than a muddle of two types? And if Mermaid was used instead of hand-authored SVG, was it warranted (15+ node graph, uniform-shape forest, or explicit user request)?' Evidence: per-figure screenshot + one-line content brief.",
-      "fixture_violation": "A figure that mixes swimlane lanes with a nested-containment metaphor in one canvas.",
-      "source_rules": [
-        "type-selection-gate-single-type",
-        "mermaid-fallback-threshold"
-      ]
-    },
-    {
-      "family": "F3_diagrams",
-      "id": "diagram-removal-simplicity",
-      "title": "Every element carries information; no padded or all-identical boxes",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Inline skill-authored <svg> diagram present.",
-      "spec": "Rubric question over the per-figure screenshot: 'Is every element carrying information — could any node, label, or line be removed with no loss of meaning? Flag over-complex or padded diagrams, three equal-width summary cards, and all-identical boxes that erase visual hierarchy.' Evidence: the per-figure screenshot only.",
-      "fixture_violation": "A diagram of five identically-sized, identically-styled boxes with no hierarchy and a redundant third summary card.",
-      "source_rules": [
-        "removal-test-mandatory",
-        "identical-boxes-erase-hierarchy",
-        "no-three-equal-width-summary-cards"
-      ]
-    },
-    {
-      "family": "F3_diagrams",
-      "id": "diagram-necessity",
-      "title": "Content warrants a diagram over a table/list/sentence",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Inline skill-authored <svg> diagram present.",
-      "spec": "Rubric question over the per-figure screenshot + brief: 'Could this diagram's content be conveyed just as well by a short 3-column table, a bulleted list, or a single sentence? Flag diagram-for-diagram's-sake.' Evidence: per-figure screenshot + one-line content brief.",
-      "fixture_violation": "A three-node A->B->C flow that restates a single sentence with no added structure.",
-      "source_rules": [
-        "anti-selection-dont-draw-a-diagram"
-      ]
-    },
-    {
       "family": "F4_presets",
       "id": "mono-type-budget",
       "title": "Mono-Industrial type budget: ≤3 families, ≤4 sizes, ≤2 weights, no bold sans",
@@ -1433,25 +1047,6 @@
       "source_rules": [
         "grayscale-only-status-color-exception",
         "status-color-value-only"
-      ]
-    },
-    {
-      "family": "F4_presets",
-      "id": "mono-status-value-judgment",
-      "title": "Mono-Industrial: status color reads as a data event, not decoration",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Mono-Industrial detected AND mono-grayscale-status-color flagged an ambiguous status-color use.",
-      "spec": "Rubric (answer from the desktop light+dark screenshots + the flagged elements' text): 'Does every colored element mark a specific value/datum with a genuine ok/warn/err meaning (a value or a small adjacent dot), rather than tinting a container, row, label, or being decorative?' Fail if color reads as decoration or container fill.",
-      "fixture_violation": "A status color applied as an accent wash behind a section that has no ok/warn/err semantics.",
-      "source_rules": [
-        "status-color-value-only",
-        "grayscale-only-status-color-exception"
       ]
     },
     {
@@ -1689,44 +1284,6 @@
     },
     {
       "family": "F4_presets",
-      "id": "mono-one-surprise",
-      "title": "Mono-Industrial: exactly one deliberate pattern-break, never via color/icon/gradient",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Mono-Industrial detected AND mono-hero-and-surprise-count reported 0 or >1 candidates.",
-      "spec": "Rubric (from the full-page desktop screenshot): 'Does exactly ONE element deliberately break the pattern (an oversized/pixel number, a vast gap, an oversized word, a circle among rectangles, an off-grid slide), and is that break typographic/compositional rather than a color, icon, or gradient?' Fail if zero genuine breaks, more than one, or the break is realized via color/icon/gradient.",
-      "fixture_violation": "Mono page whose only 'surprise' is a bright accent color swatch, or a page with three competing oversized display elements.",
-      "source_rules": [
-        "one-moment-of-surprise"
-      ]
-    },
-    {
-      "family": "F4_presets",
-      "id": "mono-three-layer-squint",
-      "title": "Mono-Industrial three-layer hierarchy survives the squint test on desktop and mobile",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Mono-Industrial detected.",
-      "spec": "Rubric (from the desktop AND 390px-mobile screenshots): 'When squinted at, do exactly three legible levels of emphasis exist (display dominates, primary reads, tertiary metadata stays quiet), and does the hero stay intact and full-width on mobile rather than shrinking into a card?' Fail if hierarchy reads as flat (1–2 levels), busy (>4), or the hero collapses into a boxed/shrunk element on mobile.",
-      "fixture_violation": "Mono page where every text block is the same weight/size so nothing dominates, or where the hero number shrinks into a small bordered card at 390px.",
-      "source_rules": [
-        "exactly-three-layers",
-        "responsive-below-768-hierarchy-survives",
-        "hierarchy-visible-squint-test"
-      ]
-    },
-    {
-      "family": "F4_presets",
       "id": "preset-both-mode-inversion",
       "title": "Named-aesthetic page inverts correctly in both light and dark (contrast + no invisible text)",
       "profiles": [
@@ -1740,25 +1297,6 @@
       "spec": "Render at 1440×900 in prefers-color-scheme light AND dark (and each data-theme override). In each mode: compute contrast ratio of --text-primary against --bg and assert ≥4.5:1; assert no text-bearing element resolves to a color within ~ΔE small of its own background (invisible-text guard); assert elements spec'd to stay fixed across modes (dark terminal code blocks, CTA-on-blue) do not flip. Fail if any mode has failing contrast or invisible text.",
       "fixture_violation": "A Nothing-preset page whose body text is hard-coded #fff so it becomes invisible against the light-mode #F5F5F5 background.",
       "fp_guards": "Whitelist elements explicitly spec'd unchanged between modes (CTA text, dark code block) from the invisible-text guard.",
-      "source_rules": [
-        "verify-both-theme-modes",
-        "named-aesthetics-both-themes-verified"
-      ]
-    },
-    {
-      "family": "F4_presets",
-      "id": "preset-both-mode-visual",
-      "title": "Both light and dark renders look correct (no leftover wrong-mode colors)",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "A named aesthetic is detected.",
-      "spec": "Rubric (from the paired light + dark full-page screenshots): 'Do both modes render correctly with no invisible text, no leftover wrong-mode background/fill bleeding through, and no element that clearly failed to invert?' Fail if either mode shows a mode-mismatch artifact the contrast check cannot catch (e.g. a panel stuck in dark colors on a light page).",
-      "fixture_violation": "A Mono page where one section's background stays dark in light mode because its fill was hard-coded.",
       "source_rules": [
         "verify-both-theme-modes",
         "named-aesthetics-both-themes-verified"
@@ -1877,24 +1415,6 @@
     },
     {
       "family": "F4_presets",
-      "id": "nothing-accent-red-judgment",
-      "title": "Nothing: the single red use is genuinely urgent/destructive/error",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Nothing detected AND exactly one red use was found.",
-      "spec": "Rubric (from the screenshot + the red element's text/context): 'Is the single red-accent use an urgent/destructive/error signal, rather than decorative?' Fail if the red is decorative.",
-      "fixture_violation": "Nothing page using red once, but purely as a decorative underline on a heading.",
-      "source_rules": [
-        "nothing-accent-red-single-use"
-      ]
-    },
-    {
-      "family": "F4_presets",
       "id": "nothing-status-color-scope",
       "title": "Nothing status colors apply to values only, never labels or row backgrounds",
       "profiles": [
@@ -1969,25 +1489,6 @@
       "fp_guards": "Scope the full spec to primary/secondary variants only — ghost variants intentionally omit background/border.",
       "source_rules": [
         "nothing-button-shape"
-      ]
-    },
-    {
-      "family": "F4_presets",
-      "id": "nothing-single-grid-break",
-      "title": "Nothing: exactly one deliberate grid break (excluding structural chrome)",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "Nothing detected. (Static pre-filter detects candidates: full-bleed negative-margin elements, grid-column:1/-1 overrides, oversized Doto blocks exceeding column width.)",
-      "spec": "Rubric (from the full-page screenshot + the candidate list): 'Does exactly ONE element deliberately break the grid (the single break IS the design), excluding legitimate full-width chrome like nav/footer/section dividers?' Fail if zero breaks (spreadsheet-flat) or more than one (chaotic).",
-      "fixture_violation": "Nothing page where three different elements each break the grid, or a perfectly uniform grid with no break at all.",
-      "fp_guards": "The static pre-filter over-triggers on nav/footer/full-width dividers — the LLM must exclude structural chrome.",
-      "source_rules": [
-        "nothing-grid-break-count"
       ]
     },
     {
@@ -2402,24 +1903,6 @@
     },
     {
       "family": "F5_slides",
-      "id": "decorative-svg-sparing-use",
-      "title": "Decorative SVG accents are used sparingly, not on every slide",
-      "profiles": [
-        "slides"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "At least one `.slide__decor` (discrete decorative SVG accent) is present in the deck.",
-      "spec": "Flag any single slide with > 2 `.slide__decor` accents. Separately, if 100% of slides contain at least one `.slide__decor`, flag (violates 'never on every slide'). Background grid patterns (`.slide--with-grid::before`) are NOT counted as discrete accents.",
-      "fixture_violation": "Every slide in the deck carries a `.slide__decor` accent (100% coverage).",
-      "fp_guards": "Count only discrete `.slide__decor` SVG accents, not preset background grid/dot patterns; a per-slide count of 1-2 is fine.",
-      "impl_hint": "perSlide=slide.querySelectorAll('.slide__decor').length; fraction = slidesWithDecor/totalSlides.",
-      "source_rules": [
-        "decorative-svg-sparing-use"
-      ]
-    },
-    {
-      "family": "F5_slides",
       "id": "vertical-consecutive-composition-run",
       "title": "No run of 3+ consecutive vertical slides with identical composition type",
       "profiles": [
@@ -2472,100 +1955,6 @@
       "impl_hint": "contrast(resolve('--text-dim'), bg); wcag ratio helper.",
       "source_rules": [
         "presentation-focal-point-and-contrast"
-      ]
-    },
-    {
-      "family": "F5_slides",
-      "id": "slide-single-focal-point",
-      "title": "Single-focus slide types read as one clear focal point",
-      "profiles": [
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Screenshots exist for single-focus slide types (title, quote, stat, divider, dark cover/back cover).",
-      "spec": "Rubric (one question per screenshot): 'Does this slide present one clear focal element, or do three or more elements compete for attention?' Consumes only the per-slide screenshot for title/quote/stat/divider/cover pages. Grid/dashboard/quadrant layouts are excluded (intentionally multi-item).",
-      "fixture_violation": "N/A (llm pass) — a title slide crowded with a heading, a large diagram, and a KPI row all competing.",
-      "fp_guards": "Restrict to documented single-focus slide types; do not run on grid/dashboard/quadrant layouts.",
-      "source_rules": [
-        "presentation-focal-point-and-contrast"
-      ]
-    },
-    {
-      "family": "F5_slides",
-      "id": "operating-model-fit",
-      "title": "Review units use the minimum faithful explanatory treatment",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "The artifact is a vertical deck, magazine deck, fixed-stage PresentationDeck, or long-form page with coherent sections. The pass routes every slide or section before judging model fidelity.",
-      "spec": "pass: pass-operating-model. First route each review unit to none, relational, operating-model, or simulated-surface from its narrative job. Judge only relational, operating-model, and simulated-surface units. Warn when the composition materially hides or misstates a required comparison, sequence, routing policy, state transition, causal/evidence relationship, uncertainty, dependency, feedback loop, or resource flow; also warn when an elaborate diagram is imposed on a unit that needs only a table, sentence, quote, image, or single number.",
-      "fixture_violation": "A clinician-routing policy rendered as four equal cards with no visible selection rule or separation between mandatory review, representative measurement, calibration, and frontier discovery.",
-      "fp_guards": "Do not require this treatment on covers, heroes, dividers, quotes, full-bleed images, agendas, FAQs, simple CTAs, single statistics, or one-claim/one-fact units. Lists and genuine peer sets may remain cards. A table, formula, or paired contrast may satisfy a relational unit. Route vague or underspecified units downward rather than inventing an operating model.",
-      "source_rules": [
-        "operating-model-first",
-        "layout-is-a-domain-claim",
-        "minimum-faithful-treatment"
-      ]
-    },
-    {
-      "family": "F5_slides",
-      "id": "composition-variety-visual",
-      "title": "Consecutive slides/pages genuinely vary their spatial composition",
-      "profiles": [
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "The vertical-consecutive-composition-run static check flagged a run of 3+ same-type slides (or magazine consecutive-centered candidates).",
-      "spec": "Rubric: 'Do these N consecutive slides look spatially repetitive — same alignment and whitespace balance — rather than genuinely varied?' Consumes the screenshot strip of only the flagged run. Confirms or dismisses the static run flag.",
-      "fixture_violation": "N/A (llm pass) — three consecutive centered slides with identical whitespace balance.",
-      "fp_guards": "Same type class can still vary layout; only confirm when the screenshots are visibly repetitive.",
-      "source_rules": [
-        "compositional-variety-vertical-deck",
-        "magazine-no-3-consecutive-centered"
-      ]
-    },
-    {
-      "family": "F5_slides",
-      "id": "sparse-diagram-slide",
-      "title": "Small lone Mermaid diagram does not float in an empty slide",
-      "profiles": [
-        "slides"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "A slide contains exactly one `.mermaid` diagram rendering fewer than ~7 nodes with no branching and no additional sibling content blocks.",
-      "spec": "Rubric: 'Does this slide read as sparse/empty — a tiny diagram floating in a large viewport with no supporting content?' Consumes the single flagged slide screenshot. If yes, the fix is to pair supporting content or switch to a CSS pipeline.",
-      "fixture_violation": "N/A (llm pass) — a 4-node linear Mermaid graph alone on an otherwise blank slide.",
-      "fp_guards": "A deliberately minimalist diagram slide may be intentional; this is warn-level and requires the visual confirmation, never an automatic fail.",
-      "source_rules": [
-        "no-small-mermaid-alone"
-      ]
-    },
-    {
-      "family": "F5_slides",
-      "id": "deck-content-completeness",
-      "title": "Deck reconstructs every major point of its source document",
-      "profiles": [
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "A source document was supplied for the deck generation (a named source artifact exists alongside the deck).",
-      "spec": "Rubric: 'Reading the source document and the extracted deck text side by side, list any source item (section, decision card, table row, collapsible detail, footnote) that has NO corresponding slide.' Consumes the source doc text + the extracted deck text (headings/bullets/table rows/cards). Any unmapped major item is a missing-content finding. The naive static item-count proxy is intentionally not used (see dropped).",
-      "fixture_violation": "N/A (llm pass) — a source with 7 decision cards where the deck only covers 4.",
-      "fp_guards": "Legitimate consolidation (merging short bullets) is not a drop; only flag substantive content with no representation anywhere in the deck.",
-      "source_rules": [
-        "content-inventory-completeness",
-        "deck-content-completeness"
       ]
     },
     {
@@ -2657,25 +2046,6 @@
       "fp_guards": "Allow explicit full-bleed background elements marked with a documented `data-bleed` attribute to extend past bounds. Scope to content elements, not the root/background rect itself.",
       "impl_hint": "page.evaluate over root.querySelectorAll('*'); compare rects to {w,h} from the declared classes.",
       "source_rules": [
-        "poster-canvas-overflow-clipping"
-      ]
-    },
-    {
-      "family": "F6_poster_video",
-      "id": "poster-visual-fit-squint",
-      "title": "Poster PNG passes the fit/hierarchy squint test",
-      "profiles": [
-        "poster"
-      ],
-      "stage": "llm-pass",
-      "severity": "error",
-      "applies_when": "An exported poster PNG artifact exists.",
-      "spec": "Consume ONLY the exported poster PNG. Single rubric: 'Does the poster read its intended visual hierarchy (one element clearly dominates and the moment-of-surprise / hero number still reads as intentional emphasis), with NO text visibly clipped at any edge and NO large unexplained blank region (e.g. from a grid column that collapsed)?' Answer yes/no with the offending region if no. Catches rasterization-only clipping and fit-rework degradation the DOM measurement misses.",
-      "fixture_violation": "An exported PNG where the hero number was shrunk to blend in and the right third is empty from a collapsed grid column.",
-      "fp_guards": "Deliberate generous whitespace in a minimalist design is not a failure — only flag blank regions that correlate with a collapsed layout. Judge from the image alone; do not read the source.",
-      "impl_hint": "Feed PNG to the vision pass with the one rubric question; no page context.",
-      "source_rules": [
-        "poster-empty-space-and-hierarchy",
         "poster-canvas-overflow-clipping"
       ]
     },
@@ -2926,24 +2296,6 @@
     },
     {
       "family": "F6_poster_video",
-      "id": "reel-no-mid-word-cuts",
-      "title": "No reel cut lands mid-word of the narration",
-      "profiles": [
-        "video-comp"
-      ],
-      "stage": "transcript",
-      "severity": "error",
-      "applies_when": "Reel composition with a time-aligned transcript.json (word-level {text,start,end}) present.",
-      "spec": "Cross-reference each clip's cut data-start timestamp against the word-level transcript. FAIL if any cut falls strictly inside a word's [start,end] interval (±50ms tolerance). Cuts landing in inter-word silence pass.",
-      "fixture_violation": "A cut at 4.40s while the transcript has the word 'architecture' spanning 4.20–4.75s.",
-      "fp_guards": "Requires transcript.json aligned to the FINAL cut list; if narration was edited after transcription the check misfires — regenerate transcript after any narration edit. Skip if no transcript present.",
-      "impl_hint": "For each cut ts, find covering word; flag if start+eps < ts < end-eps.",
-      "source_rules": [
-        "reel-no-mid-word-cuts"
-      ]
-    },
-    {
-      "family": "F6_poster_video",
       "id": "reel-transitions-at-boundaries",
       "title": "Dissolves/transitions only at beat boundaries, one per boundary",
       "profiles": [
@@ -2959,24 +2311,6 @@
       "source_rules": [
         "reel-no-dissolve-within-beat",
         "reel-one-transition-per-boundary"
-      ]
-    },
-    {
-      "family": "F6_poster_video",
-      "id": "reel-caption-matches-transcript",
-      "title": "Reel captions are a verbatim transcript of narration",
-      "profiles": [
-        "video-comp"
-      ],
-      "stage": "transcript",
-      "severity": "error",
-      "applies_when": "Reel composition has burned-in captions (.cap elements) and a transcript.json.",
-      "spec": "Concatenate .cap text in DOM order and diff (word-overlap / edit-distance ratio, ignoring case and punctuation) against the transcript word sequence for the same time range. FAIL any caption segment whose normalized word-overlap with its transcript segment falls below ~90% — captions must be verbatim, never a paraphrase of the visuals. An LLM tie-break may confirm genuine paraphrase vs. acceptable normalization on borderline (85–90%) segments.",
-      "fixture_violation": "A caption reading 'We speed up queries' while the narration/transcript says 'Our engine cuts p99 latency in half.'",
-      "fp_guards": "Exclude case/punctuation-only diffs before scoring; minor readability punctuation is fine. Skip if no transcript.",
-      "impl_hint": "Normalize both streams; sliding-window overlap ratio per caption.",
-      "source_rules": [
-        "reel-caption-verbatim-transcript"
       ]
     },
     {
@@ -3233,42 +2567,6 @@
       ]
     },
     {
-      "family": "F6_poster_video",
-      "id": "demo-aesthetic-match",
-      "title": "Demo video frame matches the page aesthetic",
-      "profiles": [
-        "page"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "The page embeds a demo video and declares/uses a recognizable aesthetic preset.",
-      "spec": "Consume a screenshot of the page region containing the demo. Single rubric: 'Does the embedded demo video frame (corner radius, border, shadow, caption chrome) match the page's aesthetic preset and feel embedded rather than glued on?' e.g. Mono-Industrial 8px corners no border/shadow; Blueprint sharp corners 1px slate border; Editorial 12–16px corners subtle border.",
-      "fixture_violation": "A Mono-Industrial page whose demo video sits in a 24px-rounded drop-shadowed card.",
-      "fp_guards": "Needs the page's aesthetic as input; judge integration from the screenshot, not the source.",
-      "impl_hint": "Vision pass on the demo-region screenshot with the one rubric.",
-      "source_rules": [
-        "demo-aesthetic-match"
-      ]
-    },
-    {
-      "family": "F6_poster_video",
-      "id": "demo-adds-value",
-      "title": "Demo video conveys motion a static screenshot could not",
-      "profiles": [
-        "page"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "The page embeds a demo video.",
-      "spec": "Consume the demo frames/video and the feature it illustrates. Single rubric: 'Does this demo convey interaction/motion information that a single annotated screenshot could not?' If not (e.g. only a cursor-move-and-click), recommend dropping it in favor of a labeled still — a low-value embed bloats the page.",
-      "fixture_violation": "An embedded demo showing only a mouse moving to a button and clicking, with no state change worth motion.",
-      "fp_guards": "Purely editorial judgment — never auto-enforce as hard-fail.",
-      "impl_hint": "Vision pass on demo frames with the one rubric.",
-      "source_rules": [
-        "demo-drop-if-no-added-value"
-      ]
-    },
-    {
       "family": "F7_process",
       "id": "review-quadrant-completeness",
       "title": "Good/Bad/Ugly/Questions review shows all four categories",
@@ -3343,146 +2641,6 @@
     },
     {
       "family": "F8_ai_tells",
-      "id": "gradient-hero-background",
-      "title": "Purple/violet→blue-cyan gradient as a full-bleed background",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "A `<style>`/inline background or background-image uses linear-gradient()/radial-gradient() on a large layout container (body, .hero, section, [class*=hero], or any element sized ≥~40% of the canvas).",
-      "spec": "Parse gradient background declarations on large layout containers. Convert stops to hue (HSL/OKLCH). FAIL when a 2+ stop gradient sweeps from a violet/indigo band (hue ~255–300) into a blue/cyan band (hue ~195–250) — the canonical purple→blue(→pink) AI-hero wash — OR a straight 2-stop indigo(#6366f1/#7c3aed/#8b5cf6 range)→blue(#3b82f6/#2563eb range) diagonal. Only large background containers count; complements forbidden-accent-colors (literal hexes) and is distinct from forbidden-gradient-text-headings (clipped TEXT).",
-      "fixture_violation": "`.hero{background:linear-gradient(135deg,#7c3aed,#3b82f6)}` on a full-bleed hero div with no image/data behind it.",
-      "fp_guards": "Single-hue gradients (two shades of one violet), gradients built only from the page's own documented brand hues, and small chips/buttons are exempt — only the violet→blue/cyan sweep on a large background container fires. 3+ stop intentional brand gradients with non-default hues pass.",
-      "source_rules": [
-        "ai-gradient-mesh-background",
-        "ai-purple-blue-gradient-bg",
-        "ai-gradient-hero-panel"
-      ],
-      "impl_hint": "Regex gradient() values; convert each stop hex/rgb to hue; test span across the violet→blue bands; gate on container size / hero-ish selector."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "decorative-blur-orbs",
-      "title": "Ambient blurred gradient orbs / particle backdrop with no content role",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Document has absolutely/fixed-positioned decorative elements, ::before/::after layers, a particle library (particles.js/tsparticles), or a full-bleed background <canvas>.",
-      "spec": "FAIL when ≥2 empty (no text/data) absolutely/fixed-positioned shapes combine `border-radius:50%`/large radius with `filter:blur(N)` where N≥20px (or a radial/conic gradient fill), sitting below content in z-order as pure ambient glow; OR a particles.js/tsparticles include or a decorative rAF <canvas> drawing many dots exists solely as backdrop. One restrained on-brand wash is fine; the tell is the repeated copy-pasted glow/particle layer.",
-      "fixture_violation": "Two `<div>`s: `position:absolute;width:400px;height:400px;border-radius:50%;filter:blur(60px)` in opposite corners behind the hero.",
-      "fp_guards": "A blurred highlight ring directly behind a real labelled diagram element (selection state) is exempt. A single small palette-matched wash tied to the topic passes — require ≥2 near-identical empty shapes, or a particle/canvas layer disconnected from the subject. Particle motion that IS the content (packets on a network path) never fires.",
-      "source_rules": [
-        "ai-decorative-blob-background",
-        "ai-decorative-blur-orbs",
-        "ai-gradient-blob-background",
-        "ai-particle-background"
-      ],
-      "impl_hint": "querySelectorAll for absolutely-positioned empty nodes; test computed border-radius+blur; grep for particles.js/tsparticles and canvas rAF-dot loops."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "glassmorphism-default-surface",
-      "title": "Frosted-glass (backdrop-blur + translucent) as the default surface",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "CSS contains `backdrop-filter`/`-webkit-backdrop-filter: blur(`.",
-      "spec": "FAIL when `backdrop-filter: blur()` paired with a translucent background (rgba/hsla/hex8/color-mix alpha<1) appears on ≥3 distinct selectors/components — frosted glass used as the repeated default card/nav surface. One deliberate frosted moment (a single sticky nav, or a card genuinely floating over imagery) is a real choice, not slop.",
-      "fixture_violation": "`.card{backdrop-filter:blur(12px);background:rgba(255,255,255,.5)}` reused on cards, nav, and modal (3 components).",
-      "fp_guards": "A single purposeful frosted element passes (require ≥3 selectors). Glass floating over real photographic/busy content where the blur meaningfully separates layers is legitimate; the tell is decorative glass over a flat solid color with nothing to blur.",
-      "source_rules": [
-        "ai-glassmorphism",
-        "ai-glassmorphism-cards"
-      ],
-      "impl_hint": "Regex CSS rules combining backdrop-filter:blur( with an alpha<1 background; count distinct selectors."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "nested-cards",
-      "title": "A card nested directly inside another card (double-boxing)",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-dom",
-      "severity": "error",
-      "applies_when": "Document has ≥2 elements matching a card heuristic.",
-      "spec": "Card heuristic: border-radius>0 AND (box-shadow≠none OR border-width>0 OR background visibly distinct from parent) AND min bounding dimension >~120px. FAIL when a card element has a strict ancestor that also matches the heuristic and shares near-identical treatment (same class or similar background hue/lightness + radius), i.e. redundant containment rather than two purposefully different components.",
-      "fixture_violation": "`<div class=card><div class=card>…</div></div>` where both carry the same background+border+radius+shadow.",
-      "fp_guards": "Require the >120px size threshold on BOTH nodes so a rounded chip/badge/avatar inside a real card does not fire. A genuinely distinct inner component (a code block or image with its own subtle corners inside a text card) passes — only same-treatment double-boxing fires.",
-      "source_rules": [
-        "ai-nested-cards"
-      ],
-      "impl_hint": "querySelectorAll('*'), compute the card set via getComputedStyle, then walk parentElement chains for same-set membership + treatment similarity."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "side-stripe-border",
-      "title": "One-sided thick colored accent stripe (border-left/right)",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-dom",
-      "severity": "error",
-      "applies_when": "Document has ≥1 card/callout/list-item/alert element with a border or box-shadow.",
-      "spec": "FAIL when an element has computed border-left-width>1px OR border-right-width>1px in a non-neutral (saturated) color while its top/bottom (and opposite side) borders are 0 or ≤1px — the reflexive asymmetric colored accent stripe on an otherwise plain card. A uniform hairline on all four sides is a different, legitimate pattern.",
-      "fixture_violation": "`.callout{border-left:4px solid #e11d48}` with no other borders.",
-      "fp_guards": "Uniform 4-side borders never fire. A traditional typographic blockquote left rule (no card background/shadow accompanying it) is a defensible edge case — still surfaced but only when it carries card chrome; a bare blockquote rule may be downgraded by the reviewer.",
-      "source_rules": [
-        "ai-color-stripe-border",
-        "ai-side-stripe-border"
-      ],
-      "impl_hint": "Computed-style diff across the four border sides; check saturation of the thick side's color."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "cream-sand-background",
-      "title": "Reflexive warm cream/sand body background",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "browser",
-      "severity": "warn",
-      "applies_when": "Profile has a measurable dominant body/root background AND preset is not `paper-ink` (paper-ink legitimately owns warm paper).",
-      "spec": "Convert the computed background-color of <body> (and any full-bleed root wrapper) to OKLCH. FLAG when 0.84≤L≤0.99 AND C≤0.06 AND 40≤hue≤100 — the named AI cream/sand default — UNLESS that hue is within ~20° of the page's own saturated accent hue (cohesive tint, not a reflex). Also surface CSS custom properties named --paper/--cream/--sand/--bone/--linen/--parchment/--ivory as a corroborating signal.",
-      "fixture_violation": "`body{background:#f5efe3}` (≈oklch(95% 0.02 75)) with a blue accent elsewhere.",
-      "fp_guards": "Exempt preset paper-ink and any page whose subject is literally paper/parchment/receipts (needs an explicit content cue). Only evaluate the dominant body-level surface, never a small card/badge. If the warm hue matches the page's own brand accent, it is cohesive — pass.",
-      "source_rules": [
-        "ai-cream-sand-neutral-wash",
-        "ai-cream-sand-background"
-      ],
-      "impl_hint": "culori (or equivalent) OKLCH conversion on the resolved computed body background; plus regex for the reflex token names."
-    },
-    {
-      "family": "F8_ai_tells",
       "id": "font-family-sprawl",
       "title": "More than four distinct named font families on one page",
       "profiles": [
@@ -3506,28 +2664,6 @@
     },
     {
       "family": "F8_ai_tells",
-      "id": "reflex-reject-fonts",
-      "title": "Training-data reflex webfont as a primary voice face",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "Preset is `custom` (named house aesthetics declare their own type systems) AND CSS declares a --font-body/--font-display or a heading/body font-family.",
-      "spec": "FAIL when the PRIMARY heading or body family (not fallback, not code mono) case-insensitively matches a reflex-catalog name: Fraunces, Newsreader, Lora, Crimson (Pro/Text), Playfair Display, Cormorant (Garamond), Syne, Space Grotesk, DM Sans, DM Serif, Outfit, Plus Jakarta Sans, Instrument Sans, Instrument Serif. These dominate AI training data for ‘distinctive’ type and signal reflex selection. Warn-only: many are otherwise fine faces; the tell is reflexive default use on a greenfield custom page.",
-      "fixture_violation": "`--font-display: 'Playfair Display', serif; --font-body: 'Plus Jakarta Sans', sans-serif;` on a custom page.",
-      "fp_guards": "Only fires when preset==custom — exempts Nothing (Space Grotesk/Space Mono), Mono-Industrial and any preset that mandates its own type. Monospace members used only inside <code>/<pre> are exempt (mono-for-code is legitimate). Any family already present in an existing project tokens file passes (identity preservation). IBM Plex / Space Mono deliberately excluded from the name list to avoid fighting code stacks and the Nothing preset.",
-      "source_rules": [
-        "ai-reflex-reject-fonts"
-      ],
-      "impl_hint": "CSS parse (not naive search) of font-family/--font-* with var() resolution; word-boundary case-insensitive match against the reflex list; scope to preset==custom."
-    },
-    {
-      "family": "F8_ai_tells",
       "id": "flat-type-scale-weak-hierarchy",
       "title": "Adjacent type roles differ too little to establish hierarchy",
       "profiles": [
@@ -3540,7 +2676,7 @@
       "stage": "browser",
       "severity": "warn",
       "applies_when": "Page exposes at least two distinct type roles (a largest heading and body copy) that are not part of a dense data table.",
-      "spec": "Read computed font-size for the largest heading and for body copy (and, where present, adjacent heading levels h1/h2/h3). Compute adjacent ratios. FLAG when an adjacent pair's size ratio is <1.25 AND font-weight is equal AND color is near-identical — i.e. no dimension of hierarchy (size, weight, or color) meaningfully separates the roles. This is the mechanical complement to the llm-pass hierarchy-squint-test.",
+      "spec": "Read computed font-size for the largest heading and for body copy (and, where present, adjacent heading levels h1/h2/h3). Compute adjacent ratios. FLAG when an adjacent pair's size ratio is <1.25 AND font-weight is equal AND color is near-identical — i.e. no dimension of hierarchy (size, weight, or color) meaningfully separates the roles. This is the mechanical complement to the visual-hierarchy dimension of the artifact review.",
       "fixture_violation": "h1 18px/600 #111, body 16px/600 #111 — ratio 1.13, same weight, same color.",
       "fp_guards": "Pages that carry hierarchy deliberately via weight or color (not size) pass — only flag when size AND weight AND color all fail to differ. Skip dense data tables / compact dashboards where close ratios are intentional density. Measure clamp() at one reference viewport, not per breakpoint.",
       "source_rules": [
@@ -3637,29 +2773,6 @@
     },
     {
       "family": "F8_ai_tells",
-      "id": "rainbow-accent-palette",
-      "title": "Too many saturated hues in decorative chrome",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "browser",
-      "severity": "warn",
-      "applies_when": "Page uses ≥5 elements with saturated (non-neutral) fills/backgrounds/borders outside charts and code.",
-      "spec": "Collect rendered colors with OKLCH chroma>0.08 (drop near-neutrals) used in decorative/UI chrome — badges, icons, section accents, headings, card borders, buttons. Bin hues into 30° buckets. FLAG when >4 distinct buckets appear. Distinct from forbidden-accent-colors (specific hexes); this caps overall hue variety.",
-      "fixture_violation": "Badges/section accents in red, orange, green, blue, and purple with no data-encoding rationale.",
-      "fp_guards": "Exempt data-visualization categorical scales (chart series/legends), syntax highlighting, and semantic status colors — those legitimately need many distinguishable hues. Only chrome-level decorative color counts.",
-      "source_rules": [
-        "ai-rainbow-palette",
-        "ai-excessive-accent-palette"
-      ],
-      "impl_hint": "Collect computed colors from chrome elements; OKLCH chroma filter; 30° hue-bucket count; exclude chart/legend/code containers."
-    },
-    {
-      "family": "F8_ai_tells",
       "id": "gray-text-on-colored-surface",
       "title": "Neutral gray text on a saturated background",
       "profiles": [
@@ -3728,28 +2841,6 @@
     },
     {
       "family": "F8_ai_tells",
-      "id": "scroll-reveal-spam",
-      "title": "One identical fade-and-rise reveal on most/every section",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "Page uses scroll/load-triggered entrance animation (a reveal class toggled by IntersectionObserver, `animation-timeline: view()`, or per-region load @keyframes).",
-      "spec": "FLAG when one shared entrance rule of the form `opacity:0; transform:translateY(N)` → `opacity:1; transform:none` (or a single .reveal/.fade-in-up class) is applied to ≥60% of top-level sections/body children, OR when >3 unrelated structural regions (header, several sections, footer) each carry their own load-triggered staggered entrance. The saturated AI motion default is the same reveal looped down the page.",
-      "fixture_violation": "Every `<section>` carries `class=\"reveal\"` with one shared translateY fade toggled on scroll.",
-      "fp_guards": "One deliberate hero-only reveal, or 2–3 sections each animated differently (varied direction/timing/property), is legitimate pacing and passes. Staggering siblings WITHIN one list/grid is fine — only cross-section uniformity fires. Pages with ≤2 sections never trigger.",
-      "source_rules": [
-        "ai-scroll-fade-reveal-spam",
-        "ai-uniform-scroll-reveal",
-        "ai-page-load-choreography"
-      ],
-      "impl_hint": "Identify the reveal rule/class; count carrying sections vs total top-level sections; ratio≥0.6 or >3 unrelated regions."
-    },
-    {
-      "family": "F8_ai_tells",
       "id": "hidden-until-js-reveal",
       "title": "Content hidden by default, revealed only via JS, no fallback",
       "profiles": [
@@ -3791,26 +2882,6 @@
     },
     {
       "family": "F8_ai_tells",
-      "id": "bounce-elastic-easing",
-      "title": "Bounce/elastic overshoot easing on standard motion",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-text",
-      "severity": "error",
-      "applies_when": "CSS/JS declares a cubic-bezier() timing function or a named easing.",
-      "spec": "FAIL when any cubic-bezier(x1,y1,x2,y2) has y1<0/y1>1 or y2<0/y2>1 (mathematical overshoot signature), or an animation-name/timing-function/JS ease identifier matches /bounce|elastic|spring/i, applied to standard reveal/hover/tooltip/entrance motion.",
-      "fixture_violation": "`transition-timing-function: cubic-bezier(0.34,1.56,0.64,1)` on a card hover.",
-      "fp_guards": "The skill's prescribed curves — cubic-bezier(0.25,1,0.5,1), (0.22,1,0.36,1), (0.16,1,0.3,1) — keep all control points in [0,1] and pass. Named aesthetics with zero motion (Mono-Industrial) never trigger. A deliberate physical-toy bounce would be a rare, explicitly-commented exception, not the default.",
-      "source_rules": [
-        "ai-bounce-elastic-easing"
-      ],
-      "impl_hint": "Parse cubic-bezier args and range-check y values; regex bounce/elastic/spring identifiers."
-    },
-    {
-      "family": "F8_ai_tells",
       "id": "undersized-touch-targets",
       "title": "Interactive control smaller than 44x44px",
       "profiles": [
@@ -3828,67 +2899,6 @@
         "ai-undersized-touch-targets"
       ],
       "impl_hint": "Per interactive element getBoundingClientRect; compare against 44px."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "fake-loading-theater",
-      "title": "Spinner/skeleton/progress in a static artifact that fetches nothing",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Document contains a loading affordance (class/id ~ skeleton|spinner|loading|progress-bar, or a [role=progressbar]).",
-      "spec": "FLAG when a skeleton/spinner/progress element plays once via setTimeout or CSS animation-delay on load in a file that contains no `fetch(`, `XMLHttpRequest`, or dynamic `import(` — i.e. there is no real async work to wait for, so the loading sequence is pure theater.",
-      "fixture_violation": "A `.skeleton` shimmer that fades to real content after a 1200ms setTimeout, in a file with no fetch.",
-      "fp_guards": "If the artifact genuinely streams/lazy-loads (fetch, XHR, dynamic import, lazy images) the loading UI is functional — do not flag. Only timer-driven theater with no matching async operation fires.",
-      "source_rules": [
-        "ai-decorative-fake-loading"
-      ],
-      "impl_hint": "Detect skeleton/spinner/progress element + timed reveal; assert no fetch/XHR/dynamic-import in the file."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "mixed-icon-systems",
-      "title": "Inconsistent icon systems for the same repeated role",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Page has a repeated list/row/section pattern with leading markers or icons on ≥3 same-level items.",
-      "spec": "For same-level, same-role sibling markers (leading glyphs before list items or section labels), classify each as {emoji, unicode-symbol, inline-svg, icon-font, none}. FLAG when siblings serving the identical role mix ≥2 categories with no rule for which is used where.",
-      "fixture_violation": "A stat list where row 1 uses an emoji, row 2 an inline <svg>, row 3 a `▸` unicode arrow.",
-      "fp_guards": "Different marker kinds for genuinely different semantic categories (a green check vs a red X) are not inconsistency. Only flag mixed systems among same-level equivalent items.",
-      "source_rules": [
-        "ai-mixed-icon-systems",
-        "ai-mixed-icon-styles"
-      ],
-      "impl_hint": "Collect leading markers per sibling group; classify token kind; flag >1 kind within a role group."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "inline-emoji-bullets",
-      "title": "Emoji used as inline list/paragraph bullets",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Page has ≥3 <li>/<p> items.",
-      "spec": "FLAG a leading emoji codepoint (U+1F300–U+1FAFF, U+2600–U+27BF, U+2B00–U+2BFF, U+FE0F) followed by ASCII text recurring across ≥3 list items or paragraphs (the '✅ Fast / 🚀 Scalable / 💡 Note' pattern). Distinct from no-emoji-in-ui-chrome, which covers headers/status/table cells, not body bullets.",
-      "fixture_violation": "A `<ul>` whose items read `✅ Fast`, `🚀 Scalable`, `🔒 Secure`.",
-      "fp_guards": "A one-off meaningful emoji (a flag glyph naming a country in real data, a status glyph inside an actual UI mock) is exempt — require the decorative pattern to recur across ≥3 items. Emoji inside <code>/<pre> as literal content is exempt.",
-      "source_rules": [
-        "ai-inline-emoji-bullets"
-      ],
-      "impl_hint": "Walk <li>/<p> text nodes; test leading-emoji-then-text regex; tally per document."
     },
     {
       "family": "F8_ai_tells",
@@ -3910,89 +2920,6 @@
         "ai-icon-only-legend-key"
       ],
       "impl_hint": "Hue-band DOM scan for contrastive red/green without status text; legend-container scan for swatch labels/title/aria."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "copy-paste-drop-shadow",
-      "title": "One generic box-shadow copy-pasted onto every raised element",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine",
-        "poster",
-        "video-comp"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "CSS declares ≥5 box-shadow rules across different selectors.",
-      "spec": "FLAG when a single box-shadow value (or a family within ~10% blur/spread/alpha tolerance) is reused verbatim across ≥5 structurally different element types (e.g. card AND button AND image AND code block AND nav) — generic 'depth' with no elevation logic.",
-      "fixture_violation": "`0 4px 6px rgba(0,0,0,.1)` applied identically to cards, buttons, images, code blocks, and nav.",
-      "fp_guards": "A deliberate one-token elevation applied consistently to ONE role (only clickable cards) is legitimate system reuse. Only flag when the same shadow spans unrelated element types.",
-      "source_rules": [
-        "ai-copy-paste-drop-shadow"
-      ],
-      "impl_hint": "Extract box-shadow declarations; cluster near-identical values; count distinct selector element-types sharing one value."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "uniform-descriptor-gloss",
-      "title": "Uniform lowercase descriptor gloss on every repeated item",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Page has a grid/list/catalog of 5+ structurally-similar siblings.",
-      "spec": "Warn when >=5 sibling items each pair a label with a 1-4 word lowercase non-sentence gloss in muted styling, e.g. `collapsible data`, `one canvas`, `titled region`. One deliberate descriptor is voice; a gloss on every item is template grammar.",
-      "fixture_violation": "A five-item feature grid where every item has a title plus a muted lowercase two-word tagline.",
-      "fp_guards": "Exempt tables, units, dates, prices, form hints, and stat/metric labels.",
-      "source_rules": [
-        "ai-uniform-descriptor-gloss"
-      ],
-      "impl_hint": "Scan direct sibling groups; require >=5 label+muted lowercase-gloss pairs and skip table/form/stat/metric contexts plus unit/date/price text."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "hero-metric-template",
-      "title": "Repeated big-number stat tiles as decorative filler",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Page has ≥3 sibling tiles each pairing a large numeric node with a short label.",
-      "spec": "Structurally find a repeated sibling group (≥3) where each item contains a >70%-digit/percent/currency node at computed font-size ≥~2.5x body size plus a much smaller ≤~4-word label, with identical structure/classing and a decorative gradient/colored accent repeated across all tiles.",
-      "fixture_violation": "Three identical tiles: `99.9%` / `10x` / `24/7` big numbers over small labels on a gradient bar, unsourced.",
-      "fp_guards": "Exempt tiles whose numbers are traceable to the artifact's real source (an actual diff line count, a genuine dataviz KPI) and stat grids where each tile's accent is meaningfully data-driven rather than one repeated decorative gradient. The data-traceability judgment is deferred to the copy/completeness reviewer; the structural signature is the mechanical prefilter.",
-      "source_rules": [
-        "ai-fake-hero-metrics",
-        "ai-hero-metric-template"
-      ],
-      "impl_hint": "Structural-similarity scan across sibling subtrees; digit-ratio + font-size test on the numeral node; sameness test on the accent."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "card-as-universal-wrapper",
-      "title": "Every content block boxed in card chrome by default",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-dom",
-      "severity": "warn",
-      "applies_when": "Main content flow has ≥4 top-level content blocks.",
-      "spec": "FLAG when ≥90% of top-level content blocks are wrapped in card chrome (border-radius>0 + border/shadow/distinct background) AND at least one such card wraps a single unstructured item (one paragraph/image/stat) with no structurally-similar repeated siblings — boxing arbitrary singular content out of habit rather than reserving cards for distinct repeated units.",
-      "fixture_violation": "A lone intro paragraph, a single image, and a lone stat each wrapped in its own bordered/shadowed card.",
-      "fp_guards": "A genuine grid of distinct actionable items (pricing tiers, module links) legitimately cards every item — that is the separate uniform-card-grid pattern, not this. Only habitual boxing of singular non-repeating content fires.",
-      "source_rules": [
-        "ai-card-as-universal-wrapper"
-      ],
-      "impl_hint": "Count top-level blocks vs card-wrapped fraction; check for a card wrapping a single item with no sibling twins."
     },
     {
       "family": "F8_ai_tells",
@@ -4056,126 +2983,6 @@
         "ai-inconsistent-heading-case"
       ],
       "impl_hint": "Group headings by level/component; classify casing; flag ≥2 styles within a level."
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "font-pairing-same-classification",
-      "title": "Two fonts paired within the same typographic classification",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Page uses two different (non-code) font families for heading vs body.",
-      "spec": "delegate: impeccable:critique. Supply the relevant screenshot and font-family evidence; Impeccable owns the visual-craft judgment.",
-      "fixture_violation": "Heading in Poppins, body in Montserrat — two near-identical geometric sans presented as a 'pairing'.",
-      "fp_guards": "A single family across weights is fine. Only flag two DIFFERENT families in the same bucket with no discernible contrast; genuine cross-axis pairings pass.",
-      "source_rules": [
-        "ai-near-duplicate-font-pairing",
-        "ai-mismatched-font-pairing"
-      ]
-    },
-    {
-      "family": "F8_ai_tells",
-      "id": "default-accent-reflex",
-      "title": "Sole accent is a reflexive blue/orange default",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Page has a single dominant saturated accent color and no documented brand palette in source.",
-      "spec": "delegate: impeccable:critique. Supply the relevant screenshot, palette evidence, and brand exception excerpt; Impeccable owns the visual-craft judgment.",
-      "fixture_violation": "A page whose sole accent is #6366f1 indigo with no brand rationale.",
-      "fp_guards": "If source material establishes blue/orange as a real brand identity (existing logo/brand assets), it is not a reflex — pass. Judgment call, warn only.",
-      "source_rules": [
-        "ai-default-accent-hue"
-      ]
-    },
-    {
-      "family": "F9_copy",
-      "id": "title-claim-function",
-      "title": "Slide and section titles state a test, mechanism, result, or decision",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "The artifact has slide titles or section headings that do narrative work. Covers, literal dividers, agendas, quotes, and reference labels are reviewed under the exception rules.",
-      "spec": "delegate: unslop:cleanup-report. Supply excluded-filtered narrative titles with their adjacent prose; Artifacture records the applicability signal but does not reproduce the prose rubric.",
-      "fixture_violation": "A slide titled 'Week 1 ends with a calibrated eval' when the body actually defines the completion evidence: a clean package run with judge agreement recorded.",
-      "fp_guards": "Do not ban inanimate subjects categorically. Accurate causal mechanisms ('Examples calibrate the judge', 'The gate fails the build'), literal temporal facts ('Week 1 ends on Friday'), exact technical noun phrases, short questions that state the decision, and cover/divider/agenda labels may pass. Judge title function against the unit's narrative job, not a fixed grammar template.",
-      "source_rules": [
-        "title-states-test-mechanism-result-decision",
-        "no-category-error-title-agency",
-        "no-generic-title-handles"
-      ]
-    },
-    {
-      "family": "F9_copy",
-      "id": "copy-redundancy",
-      "title": "Heading restates its own body, or a point repeats across sections",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Page has section headings each followed by prose.",
-      "spec": "delegate: unslop:cleanup-report. Supply excluded-filtered headings with adjacent prose; Artifacture records the applicability signal but does not reproduce the prose rubric.",
-      "fixture_violation": "Heading 'Faster deploys' followed by 'Deploys are now faster.' with no new specifics.",
-      "fp_guards": "A topic sentence that states the claim AND immediately substantiates it with a number/mechanism passes. Only zero-added-specificity restatement or cross-section duplication fires here; a generic topic handle may still be flagged separately by title-claim-function.",
-      "source_rules": [
-        "ai-redundant-heading-body-echo",
-        "ai-redundant-restated-copy"
-      ]
-    },
-    {
-      "family": "F9_copy",
-      "id": "jargon-undefined",
-      "title": "Load-bearing jargon never defined for the intended audience",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "llm-pass",
-      "severity": "warn",
-      "applies_when": "Page is an explainer aimed at a broader/onboarding audience (not an internal team-only reference).",
-      "spec": "delegate: unslop:cleanup-report. Supply excluded-filtered prose plus the intended-audience note; Artifacture records the applicability signal but does not reproduce the prose rubric.",
-      "fixture_violation": "An explainer using 'the CRDT merges via the WAL' with neither term ever expanded.",
-      "fp_guards": "Terms the explicit target audience already knows (an internal architecture doc for the team that coined them) are exempt — only flag when the artifact reads as onboarding/broad audience or the term is never defined anywhere.",
-      "source_rules": [
-        "ai-unexplained-jargon"
-      ]
-    },
-    {
-      "family": "F9_copy",
-      "id": "copy-slop-phrases",
-      "title": "High-precision AI-slop phrases in rendered prose",
-      "profiles": [
-        "page",
-        "slides",
-        "magazine"
-      ],
-      "stage": "static-text",
-      "severity": "warn",
-      "applies_when": "Page has prose text nodes (headlines, leads, callouts, card descriptions, captions, slide body copy).",
-      "spec": "Extract rendered prose text nodes using the same exclusion filter as unslop-prose-phrases (exclude code/pre, identifiers, filenames, table headers, ALL-CAPS mono labels/kickers, counters, timestamps, status strings, Mermaid labels, and [BRACKET] system messages). Case-insensitively grep for any curated literal phrase or structural regex below — each is essentially impossible in legitimate technical-explainer prose. Any hit = warn. LITERALS: here's the thing:; let that sink in; make no mistake; read that again; this cannot be overstated; in today's fast-paced; in today's rapidly evolving; needless to say; it goes without saying; it is important to note that; it's important to note; pro tip:; hot take:; unpopular opinion:; plot twist:; spoiler:; stands as a testament; a testament to; pivotal moment; indelible mark; rich tapestry; cornerstone of; sends a clear message; nestled in the heart of; boasts a world-class; a hidden gem; a beacon of; at the forefront of; i hope this helps; certainly!; great question; happy to help; let me know if you need anything else; i'd be happy to; as an ai language model; i assure you; here's what's interesting; here's what caught my eye; here's what stood out; let me think step by step; here's my thought process; to answer your question; as of my knowledge cutoff; as of my last update; based on my training data; the future looks bright; exciting times lie ahead; only time will tell; one thing is certain; poised for growth; warrants further investigation; holds great promise; spanning everything from; double-edged sword; at the intersection of; the elephant in the room; it begs the question; buckle up; food for thought; let's dive in; let's unpack. REGEXES (case-insensitive): not only .{0,80}but also | it'?s not just about .+?,\\s*it'?s about | \\bit'?s not just .+?,?\\s*it'?s\\s | \\bthe (answer|secret|key|trick|truth|reality|problem|solution|takeaway|lesson|difference|reason) (is|was|isn'?t|remains)\\s*:. Deliberately EXCLUDED as too plausible in real explainer prose: bare 'robust'/'seamless'/'powerful'/'comprehensive'/'leverage'/'delve'/'in other words'/'at its core'/'when it comes to'/'the key takeaway:'/'it's worth noting'/'at the end of the day', and the bare nested-em-dash regex (too FP-prone for a static grep — left to the unslop-prose-style llm pass).",
-      "fixture_violation": "A lead paragraph reading 'In today's fast-paced landscape, this architecture stands as a testament to scalability.'",
-      "fp_guards": "Never scan code, labels, table headers, Mermaid labels, or [BRACKET] messages. Literal quotes/illustrative bad examples inside <blockquote>/<code> are exempt. Load-bearing technical words (leverage/navigate/harness in their literal sense) are absent from the list by design; single weak words are excluded so this stays high-precision. Overlaps with unslop-prose-phrases are resolved by the modified_checks entry (that check keeps only the however/moreover frequency heuristic).",
-      "source_rules": [
-        "unslop-prose-phrases (expanded)",
-        "deterministic_phrase_list"
-      ],
-      "impl_hint": "Case-insensitive substring/regex scan over the excluded-filtered prose text; report the matched phrase + surrounding sentence."
     }
   ]
 }

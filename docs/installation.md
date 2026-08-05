@@ -109,17 +109,19 @@ only for the pass/model combination that was tested.
 
 ## Missing capability behavior
 
-Artifacture never hides missing verification by substituting the current agent:
+Artifacture records missing capabilities and uses an explicit fallback only for
+its own visual passes:
 
 | Missing capability | Result |
 |---|---|
 | Browser automation | browser checks skipped with explicit disclosure |
 | Impeccable | `impeccable:critique` skipped |
 | Unslop | `unslop:cleanup-report` skipped |
-| Eval-qualified visual model | pass skipped as `no-eval-qualified-model` |
+| Eval-qualified visual model | best available visual-capable model runs as `unqualified-fallback` |
 
-The artifact may still be delivered with a clear incomplete-verification
-receipt. It must not be called fully verified.
+If no visual-capable model can run, the pass is skipped as
+`no-visual-model-available`. An unqualified fallback is a completed visual
+review, but it must not be described as eval-qualified.
 
 ## Updating
 

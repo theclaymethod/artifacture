@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { availableParallelism, tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -11,6 +11,8 @@ const CLI = {
   node: process.execPath,
   script: resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/ve-verify.mjs'),
 };
+const JOBS = Math.max(1, Number.parseInt(process.env.VE_EVAL_JOBS || '', 10)
+  || Math.min(4, availableParallelism()));
 
 const expectationsPath = join(EVAL_ROOT, 'expectations.json');
 const fixturesRoot = join(EVAL_ROOT, 'fixtures');
@@ -28,7 +30,7 @@ const stagesByFixture = new Map(
 function buildArgs(filePath, jsonPath, screensDir, stage) {
   const args = [CLI.script, filePath, '--json', jsonPath, '--quiet'];
   if (stage !== 'browser') args.push('--static-only');
-  if (stage === 'browser') args.push('--screens', screensDir);
+  if (stage === 'browser') args.push('--screens', screensDir, '--mechanics-only');
   return args;
 }
 
@@ -37,23 +39,28 @@ function runVerifier(filePath, stage) {
   const jsonPath = join(tempDir, 'report.json');
   const screensDir = join(tempDir, 'screens');
   const args = buildArgs(filePath, jsonPath, screensDir, stage);
-  const result = spawnSync(CLI.node, args, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 1024 * 1024 * 20,
+  return new Promise((resolveRun) => {
+    const child = spawn(CLI.node, args, { cwd: REPO_ROOT });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => { stdout += chunk; });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+    child.on('error', (error) => { stderr += `${error.stack || error.message}\n`; });
+    child.on('close', (status) => {
+      let report = null;
+      if (existsSync(jsonPath)) {
+        try {
+          report = JSON.parse(readFileSync(jsonPath, 'utf8'));
+        } catch (error) {
+          report = { parse_error: error.message };
+        }
+      }
+      rmSync(tempDir, { recursive: true, force: true });
+      resolveRun({ result: { status, stdout, stderr }, report, args });
+    });
   });
-
-  let report = null;
-  if (existsSync(jsonPath)) {
-    try {
-      report = JSON.parse(readFileSync(jsonPath, 'utf8'));
-    } catch (error) {
-      report = { parse_error: error.message };
-    }
-  }
-
-  rmSync(tempDir, { recursive: true, force: true });
-  return { result, report, args };
 }
 
 function failedChecks(report) {
@@ -61,8 +68,7 @@ function failedChecks(report) {
   return report.checks.filter(
     (check) =>
       check.status === 'fail' ||
-      check.status === 'warn' ||
-      check.status === 'delegated-candidate',
+      check.status === 'warn',
   );
 }
 
@@ -70,12 +76,12 @@ function severityFor(report, id) {
   return report?.checks?.find((check) => check.id === id)?.severity ?? 'error';
 }
 
-function checkViolation(fileName, expected) {
+async function checkViolation(fileName, expected) {
   const filePath = join(violationsRoot, fileName);
   const stage = stagesByFixture.get(fileName)
     ?? checksCatalog.find((check) => expected.must_fire.includes(check.id))?.stage;
   const html = readFileSync(filePath, 'utf8');
-  const { result, report, args } = runVerifier(filePath, stage);
+  const { result, report, args } = await runVerifier(filePath, stage);
   const fired = failedChecks(report);
   const firedIds = new Set(fired.map((check) => check.id));
   const allowedCoFires = new Set(expected.allowed_co_fires || []);
@@ -84,8 +90,7 @@ function checkViolation(fileName, expected) {
     (check) =>
       !expected.must_fire.includes(check.id) &&
       !allowedCoFires.has(check.id) &&
-      check.severity === 'error' &&
-      check.status !== 'delegated-candidate',
+      check.severity === 'error',
   );
 
   return {
@@ -103,11 +108,11 @@ function checkViolation(fileName, expected) {
   };
 }
 
-function checkClean(fileName) {
+async function checkClean(fileName) {
   const filePath = join(cleanRoot, fileName);
   const stage = 'browser';
-  const { result, report, args } = runVerifier(filePath, stage);
-  const fired = failedChecks(report).filter((check) => check.status !== 'delegated-candidate');
+  const { result, report, args } = await runVerifier(filePath, stage);
+  const fired = failedChecks(report);
   return {
     fileName,
     status: result.status === 0 && fired.length === 0 ? 'pass' : 'fail',
@@ -153,11 +158,29 @@ if (missingCatalogFixtures.length) {
   process.exit(1);
 }
 
-const violationResults = violationFiles.map((file) => checkViolation(file, expectations[file]));
-const cleanResults = readdirSync(cleanRoot)
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  return results;
+}
+
+const violationResults = await mapWithConcurrency(
+  violationFiles,
+  JOBS,
+  (file) => checkViolation(file, expectations[file]),
+);
+const cleanFiles = readdirSync(cleanRoot)
   .filter((file) => file.endsWith('.html'))
-  .sort()
-  .map(checkClean);
+  .sort();
+const cleanResults = await mapWithConcurrency(cleanFiles, JOBS, checkClean);
 
 console.log('check_id,stage,status,expected_severity');
 for (const row of violationResults) {

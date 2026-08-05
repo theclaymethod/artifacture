@@ -1,6 +1,10 @@
 # Slide Deck Card
 
-Use `SlideDeck`, `Slide`, plus `DiagramCanvas`, `DecisionMatrix`, or `CodeBlock`. `orientation="horizontal"` is magazine mode.
+Use `SlideDeck`, `Slide`, plus `DiagramCanvas`, `DecisionMatrix`, or `CodeBlock`.
+For a generic request for slides, a slide deck, or a presentation, use the
+default vertical deck and omit `orientation`. Set `orientation="horizontal"`
+only when the user explicitly asks for magazine mode, a horizontal zine, or
+editorial pages; that prop changes the artifact contract to magazine mode.
 
 ```mdx
 {/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}

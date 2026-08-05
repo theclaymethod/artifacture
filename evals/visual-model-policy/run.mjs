@@ -243,6 +243,39 @@ export async function appendRawRecord(recordsPath, record) {
   return output;
 }
 
+async function completedRequestIds(recordsPath, { contractId, matrixId }) {
+  let text;
+  try {
+    text = await fs.readFile(recordsPath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return new Set();
+    throw error;
+  }
+  const ids = new Set();
+  for (const line of text.split('\n').map((entry) => entry.trim()).filter(Boolean)) {
+    const record = JSON.parse(line);
+    if (
+      record.experiment_contract_id === contractId
+      && record.request_matrix_sha256 === matrixId
+      && record.request_id
+      && isTerminalRequestRecord(record)
+    ) ids.add(record.request_id);
+  }
+  return ids;
+}
+
+export function isTerminalRequestRecord(record) {
+  return (
+    record?.record_type === 'visual-eval-request'
+    && !record.response?.error
+    && record.response?.json_valid === true
+    && record.telemetry?.complete === true
+    && Number(record.actual_batch_size) > 0
+    && record.observations?.length === Number(record.actual_batch_size)
+    && record.observations.every((observation) => observation.json_valid === true)
+  );
+}
+
 export function criterionPromptFor(rubricText, criterionId) {
   const marker = `[${criterionId}]`;
   const markerCount = [...rubricText.matchAll(/\[[a-z0-9:-]+\]/g)].length;
@@ -309,6 +342,7 @@ export async function runExperiment({
       experiment_id: experiment.id,
       dry_run: true,
       requests: preparedPlan.map(({ request, ...cell }) => cell),
+      budget: summarizeExperimentPlan(preparedPlan, experiment.thresholds),
     };
   }
   if (!adapter || typeof adapter.invoke !== 'function') {
@@ -329,9 +363,15 @@ export async function runExperiment({
     assertGraduationImageDiversity(cases, imageHashesByCase);
   }
 
+  const completed = await completedRequestIds(recordsPath, { contractId, matrixId });
   let written = 0;
+  let skipped = 0;
   for (const { request, ...cell } of preparedPlan) {
     const requestId = requestIdFor(experiment.id, cell);
+    if (completed.has(requestId)) {
+      skipped += 1;
+      continue;
+    }
     const startedAt = now();
     let adapterResponse;
     try {
@@ -412,7 +452,13 @@ export async function runExperiment({
     await appendRawRecord(recordsPath, record);
     written += 1;
   }
-  return { experiment_id: experiment.id, dry_run: false, requests_written: written, records_path: recordsPath };
+  return {
+    experiment_id: experiment.id,
+    dry_run: false,
+    requests_written: written,
+    requests_skipped: skipped,
+    records_path: recordsPath,
+  };
 }
 
 export async function prepareExperimentPlan(experiment, plan) {
@@ -501,6 +547,21 @@ export function buildExperimentPlan(experiment, cases) {
     }
   }
   return plan;
+}
+
+export function summarizeExperimentPlan(plan, thresholds = {}) {
+  const observations = plan.reduce(
+    (total, entry) => total + Number(entry.actual_batch_size || entry.cases?.length || 0),
+    0,
+  );
+  const maxCostPerCase = Number(thresholds.max_cost_per_case_usd);
+  return {
+    requests: plan.length,
+    observations,
+    max_cost_usd: Number.isFinite(maxCostPerCase)
+      ? Number((observations * maxCostPerCase).toFixed(6))
+      : null,
+  };
 }
 
 function deterministicOrder(cases, key) {
@@ -797,6 +858,8 @@ async function main() {
       experiment_id: outcome.experiment_id,
       dry_run: true,
       requests: outcome.requests.length,
+      observations: outcome.budget.observations,
+      max_cost_usd: outcome.budget.max_cost_usd,
       cells: [...new Set(outcome.requests.map((entry) => (
         `${entry.model}/${entry.pass}/b${entry.configured_batch_size}`
       )))],

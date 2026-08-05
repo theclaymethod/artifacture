@@ -1,4 +1,5 @@
 import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -11,6 +12,7 @@ const DECK_REVIEW_SETTLE_MS = 240;
 export async function runBrowserStage(ctx, options = {}) {
   const profile = options.profile || ctx.profile || 'page';
   const screensDir = options.screensDir || DEFAULT_SCREENS_DIR;
+  const captureDeckReview = options.captureDeckReview !== false;
   await mkdir(screensDir, { recursive: true });
 
   const html = ctx.html ?? await readFile(ctx.filePath, 'utf8');
@@ -20,7 +22,7 @@ export async function runBrowserStage(ctx, options = {}) {
 
   try {
     for (const runMeta of matrix) {
-      const result = await executeWithRetry(browser, ctx, runMeta, screensDir);
+      const result = await executeWithRetry(browser, ctx, runMeta, screensDir, { captureDeckReview });
       runs.push(result);
     }
   } finally {
@@ -28,6 +30,14 @@ export async function runBrowserStage(ctx, options = {}) {
   }
 
   ctx.browser = { runs };
+  const renderedItems = runs.find((run) => run.renderedInventory?.length)?.renderedInventory;
+  if (renderedItems?.length) {
+    ctx.renderedInventory = {
+      items: renderedItems,
+      sha256: createHash('sha256').update(JSON.stringify(renderedItems)).digest('hex'),
+      provenance: 'browser-rendered',
+    };
+  }
   return ctx.browser;
 }
 
@@ -178,11 +188,11 @@ function videoCanvas(html = '') {
   return [{ width: 1920, height: 1080 }];
 }
 
-async function executeWithRetry(browser, ctx, runMeta, screensDir) {
-  let first = await executeRun(browser, ctx, runMeta, screensDir);
+async function executeWithRetry(browser, ctx, runMeta, screensDir, options) {
+  let first = await executeRun(browser, ctx, runMeta, screensDir, options);
   if (looksLikeNetworkFlake(first)) {
     const retryMeta = { ...runMeta, retry: true };
-    first = await executeRun(browser, ctx, retryMeta, screensDir);
+    first = await executeRun(browser, ctx, retryMeta, screensDir, options);
   }
   return first;
 }
@@ -195,7 +205,7 @@ function looksLikeNetworkFlake(run) {
 
 const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net/npm/mermaid@'];
 
-async function executeRun(browser, ctx, runMeta, screensDir) {
+async function executeRun(browser, ctx, runMeta, screensDir, options) {
   const context = await browser.newContext({
     viewport: { width: runMeta.width, height: runMeta.height },
     deviceScaleFactor: 1,
@@ -251,6 +261,12 @@ async function executeRun(browser, ctx, runMeta, screensDir) {
       metrics[id] = metrics[id] ?? null;
     }
     await page.evaluate((collected) => { window.__veLastMetrics = collected; }, metrics);
+    const renderedInventory = await page.evaluate(() => Array.from(
+      document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,th,td,figcaption,blockquote,summary'),
+    ).map((element) => ({
+      role: element.tagName.toLowerCase(),
+      text: (element.textContent || '').replace(/\s+/g, ' ').trim(),
+    })).filter((item) => item.text));
 
     const suffix = `${runMeta.viewport}-${runMeta.scheme}${runMeta.reducedMotion ? '-reduced-motion' : ''}${runMeta.retry ? '-retry' : ''}`;
     const screenshotPath = path.join(screensDir, `${suffix}.png`);
@@ -266,13 +282,15 @@ async function executeRun(browser, ctx, runMeta, screensDir) {
       const last = tags[tags.length - 1];
       if (last && last.textContent && last.textContent.includes('.ve-review-panel { visibility: hidden')) last.remove();
     });
-    await captureDeckReviewSet({
-      page,
-      ctx,
-      runMeta,
-      screensDir,
-      suffix,
-    });
+    const deckReview = options.captureDeckReview
+      ? await captureDeckReviewSet({
+        page,
+        ctx,
+        runMeta,
+        screensDir,
+        suffix,
+      })
+      : null;
 
     return {
       viewport: runMeta.viewport,
@@ -285,8 +303,10 @@ async function executeRun(browser, ctx, runMeta, screensDir) {
       pageErrors,
       failedRequests,
       metrics,
+      renderedInventory,
       screenshotPath,
-      fullScreenshotPath
+      fullScreenshotPath,
+      deckReview,
     };
   } finally {
     await context.close();
@@ -494,9 +514,7 @@ async function collectBrowserMetrics(runMeta) {
   metrics['diagram-arrow-endpoint-air-gap'] = diagramArrowMetrics(doc, compact);
   metrics['diagram-text-clipping-overlap'] = diagramTextMetrics(doc, compact, viewBoxRect);
   metrics['preset-both-mode-inversion'] = presetInversionMetrics(doc, docEl, textEls, cssVarColor, bgFor, color);
-  metrics['cream-sand-background'] = creamSandMetrics(doc, docEl, color);
   metrics['flat-type-scale-weak-hierarchy'] = flatTypeMetrics(doc, color);
-  metrics['rainbow-accent-palette'] = rainbowAccentMetrics(all, compact, color);
   metrics['gray-text-on-colored-surface'] = grayOnColorMetrics(leafTextEls, compact, bgFor, color);
   metrics['body-text-contrast-aa'] = contrastMetrics(leafTextEls, compact, bgFor, color, px);
   metrics['undersized-touch-targets'] = touchTargetMetrics(doc, compact);
@@ -619,18 +637,6 @@ function colorDistance(a, b) {
   return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2);
 }
 
-function creamSandMetrics(doc, docEl, color) {
-  const target = doc.body || docEl;
-  const bg = color(getComputedStyle(target).backgroundColor) || color(getComputedStyle(docEl).backgroundColor);
-  const tone = hsl(bg);
-  const text = (doc.body?.textContent || '').toLowerCase();
-  const styleText = [...doc.querySelectorAll('style')].map((style) => style.textContent || '').join('\n');
-  const reflexToken = /--(?:paper|cream|sand|bone|linen|parchment|ivory)\s*:/i.test(styleText);
-  const warmSpread = bg ? Math.max(bg.r, bg.g, bg.b) - Math.min(bg.r, bg.g, bg.b) : 0;
-  const isCreamSand = warmSpread >= 12 && tone.l >= 0.84 && tone.l <= 0.99 && tone.s <= 0.6 && tone.h >= 40 && tone.h <= 100 && !/\b(?:paper|parchment|receipt|linen)\b/.test(text);
-  return { bg, hsl: { h: Math.round(tone.h), s: Math.round(tone.s * 100) / 100, l: Math.round(tone.l * 100) / 100 }, isCreamSand, reflexToken };
-}
-
 function flatTypeMetrics(doc, color) {
   const roles = [...doc.querySelectorAll('h1,h2,h3,p')].filter((el) => (el.textContent || '').trim() && !el.closest('table,.data-table'));
   const samples = roles.map((el) => {
@@ -650,25 +656,6 @@ function typePair(a, b) {
   const weightSame = Math.abs(a.weight - b.weight) < 100;
   const colorSame = colorDistance(a.color, b.color) < 24;
   return { a: a.selector, b: b.selector, ratio: Math.round(ratio * 100) / 100, weightSame, colorSame, flat: ratio < 1.25 && weightSame && colorSame };
-}
-
-function rainbowAccentMetrics(all, compact, color) {
-  const samples = [];
-  const buckets = new Set();
-  for (const el of all) {
-    if (el.closest('svg,canvas,pre,code,.chart,[data-chart]')) continue;
-    const cs = getComputedStyle(el);
-    for (const value of [cs.backgroundColor, cs.borderTopColor, cs.color]) {
-      const c = color(value);
-      if (!c || c.a < 0.2) continue;
-      const tone = hsl(c);
-      if (tone.s <= 0.35 || tone.l <= 0.15 || tone.l >= 0.92) continue;
-      const bucket = Math.floor(tone.h / 30) * 30;
-      buckets.add(bucket);
-      if (samples.length < 12) samples.push({ ...compact(el), hue: Math.round(tone.h), bucket });
-    }
-  }
-  return { bucketCount: buckets.size, buckets: Array.from(buckets).sort((a, b) => a - b), samples };
 }
 
 function grayOnColorMetrics(leafTextEls, compact, bgFor, color) {
@@ -1466,10 +1453,8 @@ const BROWSER_METRIC_SOURCE = [
   diagramTextMetrics,
   rectsIntersect,
   presetInversionMetrics,
-  creamSandMetrics,
   flatTypeMetrics,
   typePair,
-  rainbowAccentMetrics,
   grayOnColorMetrics,
   contrastMetrics,
   deEmphasisContrastFloor,

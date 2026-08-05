@@ -1,7 +1,0 @@
-{
-  "context": "Figure screenshot is a single hand-authored flow diagram, one shape vocabulary throughout.",
-  "judge_response": {
-    "pass": true,
-    "findings": []
-  }
-}
