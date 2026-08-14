@@ -62,7 +62,7 @@
 
     /* Status — the ONLY color on the page */
     --ok: #2f7a3e;
-    --warn: #8f5600;
+    --warn: #b36b00;
     --err:  #a51818;
 
     /* Type scale — 3 sizes total */
@@ -147,9 +147,9 @@
     border-radius: 999px;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    transition: background 120ms ease-out, border-color 120ms ease-out,
-                padding 120ms ease-out, gap 120ms ease-out,
-                backdrop-filter 120ms ease-out;
+    transition: background 240ms ease-out, border-color 240ms ease-out,
+                padding 260ms ease-out, gap 260ms ease-out,
+                backdrop-filter 240ms ease-out;
   }
   .theme-toggle button {
     appearance: none;
@@ -171,9 +171,9 @@
     border-radius: 999px;
     overflow: hidden;
     white-space: nowrap;
-    transition: color 120ms ease-out, background 120ms ease-out,
-                padding 120ms ease-out, gap 120ms ease-out,
-                max-width 120ms ease-out, opacity 120ms ease-out;
+    transition: color 180ms ease-out, background 180ms ease-out,
+                padding 260ms ease-out, gap 240ms ease-out,
+                max-width 320ms ease-out, opacity 220ms ease-out;
   }
   .theme-toggle__glyph {
     display: block;
@@ -187,7 +187,7 @@
     opacity: 0;
     overflow: hidden;
     white-space: nowrap;
-    transition: max-width 120ms ease-out, opacity 120ms ease-out 40ms;
+    transition: max-width 300ms ease-out, opacity 220ms ease-out 40ms;
   }
   .theme-toggle button:hover { color: var(--text-display); }
   .theme-toggle button:focus-visible {
@@ -239,12 +239,6 @@
   /* ============ RESET ============ */
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body {
-    max-width: 100%;
-    overflow-x: hidden;
-    overflow-x: clip;
-  }
-
   body {
     background: var(--bg);
     color: var(--text-primary);
@@ -255,11 +249,6 @@
     padding: var(--space-5) var(--space-4);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    overflow-wrap: anywhere;
-  }
-
-  body :where(.grid, .flex, [class*="-grid"], [class*="-row"]) > * {
-    min-width: 0;
   }
 
   @media (max-width: 768px) {
@@ -705,7 +694,7 @@
           <div class="mermaid mermaid-canvas"></div>
         </div>
       </div>
-      <script type="text/plain" class="diagram-source">
+      <pre hidden class="diagram-source">
         graph TD
           CLIENT[Client] --> GW[Gateway]
           GW --> LEDGER[(Append-only Ledger)]
@@ -716,7 +705,7 @@
           API --> UI[Admin UI]
           BILL --> WAREHOUSE[(Warehouse)]
           AUDIT --> WAREHOUSE
-      </script>
+      </pre>
     </div>
   </section>
 
@@ -1212,12 +1201,6 @@
 
   async function reRenderAllMermaid() {
     initMermaid();
-    const standardBlocks = [...document.querySelectorAll('pre.mermaid, div.mermaid:not(.mermaid-canvas)')];
-    standardBlocks.forEach(el => {
-      el.removeAttribute('data-processed');
-      if (el.dataset.source) el.textContent = el.dataset.source;
-    });
-    if (standardBlocks.length) await mermaid.run({ nodes: standardBlocks });
     for (const r of shellRenderers) await r();
   }
 

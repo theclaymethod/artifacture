@@ -99,14 +99,15 @@ Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, cu
 
 |Flow|Card|Tier 2|
 |-|-|-|
-|diagram|cards/web-diagram.md|references/diagrams-svg.md|
+|diagram|cards/web-diagram.md|references/diagram-design.md, then references/diagrams-svg.md|
 |plan|cards/visual-plan.md||
 |table|cards/comparison-table.md||
 |slides|cards/slide-deck.md|references/slide-patterns.md|
 |code|cards/code-walkthrough.md||
 |explain-diff|cards/explain-diff.md||
+|annotate|commands/annotate.md|references/developer-preview.md|
 
-Clarify: `./references/clarify.md`. Use components/tokens, not hand CSS/coords. Run Unslop on drafted copy; do not emulate it with an embedded fallback. Delegated verification ownership: `./references/delegated-skills.md`. Visual judgment model policy: `./references/model-routing.md`. Poster/video/brand/bespoke -> `./references/legacy-html.md`.
+Clarify: `./references/clarify.md`. Use components/tokens, not hand CSS/coords. Run Unslop on drafted copy. Delegated checks: `./references/delegated-skills.md`; model policy: `./references/model-routing.md`. Optional media: `./references/media.md`. Diagram mechanics: `./references/quality.md`. Poster/video/brand/bespoke -> `./references/legacy-html.md`.
 
 ## 6. Verify
 

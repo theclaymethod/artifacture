@@ -151,7 +151,7 @@ Wraps a single Mermaid diagram with full zoom/pan/expand chrome. Copy the `diagr
 
 **Constraint:** Never use bare `<pre class="mermaid">`. Always include the zoom/pan controls and the click-to-expand handler. See SKILL.md "Mermaid containers" for the full requirement.
 
-The diagram source goes in a `<script type="text/plain" class="ve-diagram__source">` block. The orchestrator's bottom-of-page `<script type="module">` reads all `.ve-diagram__source` elements and renders each into its sibling `.ve-diagram__canvas`.
+The diagram source goes in a hidden inert `<pre class="ve-diagram__source">` element as escaped text. The orchestrator's bottom-of-page module reads each source element with `textContent` and renders it into its sibling `.ve-diagram__canvas`.
 
 ---
 

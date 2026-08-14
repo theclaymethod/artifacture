@@ -138,9 +138,20 @@ For the upstream project, see [nicobailon/visual-explainer](https://github.com/n
 | `/plan-review` | Compare a plan against the codebase with risk assessment |
 | `/project-recap` | Mental model snapshot for context-switching back to a project |
 | `/fact-check` | Verify accuracy of a document against actual code |
+| `/annotate` | Open an artifact in the click-to-comment and direct-text-edit developer preview |
 | `/share` | Share an HTML page via sharehtml team access or Vercel fallback |
 
 The agent also kicks in automatically when it's about to dump a complex table in the terminal (4+ rows or 3+ columns) — it renders HTML instead.
+
+## Developer preview
+
+Run `node plugins/visual-explainer/scripts/preview.mjs <artifact.html>` or use
+`/annotate`. The agent starts the server and opens the served URL directly. The
+preview supports exact-element comments, compact source-aware notes for coding
+agents, and guarded direct text edits that write the owning MDX/TSX source,
+rebuild, and preserve the current slide. npm, pnpm, and Bun are all supported;
+Bun is optional. Preview chrome, pins, and review state never enter the
+published HTML.
 
 For private team sharing setup, see [`docs/TEAM-SHARING.md`](docs/TEAM-SHARING.md).
 
@@ -170,7 +181,7 @@ Artifacture is derived from [nicobailon/visual-explainer](https://github.com/nic
 
 The `/explain-diff` literate diff mode adapts [Geoffrey Litt's explain-diff prompt](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524). The Nothing aesthetic adapts [dominikmartn/nothing-design-skill](https://github.com/dominikmartn/nothing-design-skill). Team sharing integrates [jonesphillip/sharehtml](https://github.com/jonesphillip/sharehtml) as an optional backend. The component-contract and token-economics approach was informed by measuring [modem-dev/sideshow](https://github.com/modem-dev/sideshow)'s surface model. SVG text measurement guidance references [chenglou/pretext](https://github.com/chenglou/pretext).
 
-Diagram rules and philosophy paraphrased (with attribution) from [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) (MIT, Cocoon AI).
+Diagram routing and SVG guidance adapt [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de) (MIT; copyright 2025 Cathryn Lavery).
 
 Video output wraps [HeyGen's Hyperframes](https://github.com/heygen-com/hyperframes) (Apache 2.0) — local HTML → MP4 rendering via headless Chrome + GSAP + FFmpeg.
 

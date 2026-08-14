@@ -1,4 +1,6 @@
 # Web Diagram Card
+Read `../references/diagram-design.md` to select the routed diagram type and
+semantic pattern, then `../references/diagrams-svg.md` for shared SVG geometry.
 Use `ExplainerShell`, `Section`, `DiagramCanvas`: lanes, details, one accent.
 In MDX prose, write literal braces as `&#123;` or inside code spans — bare { } in prose breaks the compiler.
 Default Tailwind spacing only; no [Npx].
@@ -20,4 +22,6 @@ import { ExplainerShell, Section, DiagramCanvas } from 'REPO/visual-explainer-md
   </Section>
 </ExplainerShell>
 ```
-None fit -> read diagrams reference.
+None fit -> use an accessible inline SVG inside the component shell. Mermaid is
+the fallback only when its layout is a better fit and it retains the complete
+zoom, pan, reset, and expand controls.

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Developer preview
+- Added `/annotate` and `artifacture-preview` for agent-owned local review sessions with exact-element comments, compact source-aware copy for coding agents, and guarded direct text edits that rebuild the owning MDX/TSX project while preserving the active slide.
+- Added Preview, Comment, and Edit text modes; a collapsible review queue; edit undo; publish output paths; optional Bun support alongside npm and pnpm; and an injected bridge that never modifies the deliverable HTML.
+
+### Diagram contracts
+- Added a pinned 27-type and seven-pattern diagram router, accessible inline-SVG defaults, explicit Mermaid fallback rules, import-fidelity requirements, and regression tests that keep executable source containers and stale type counts out of active guidance.
+
 ## [0.8.0] - 2026-07-15
 
 ### External design-system registry

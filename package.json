@@ -7,6 +7,9 @@
     "agent-skill"
   ],
   "license": "MIT",
+  "bin": {
+    "artifacture-preview": "plugins/visual-explainer/scripts/preview.mjs"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -34,7 +37,7 @@
     "check": "node evals/check-with-budget.mjs",
     "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",

@@ -4,6 +4,16 @@ Raw design values. Every sub-agent reads this to build its CSS scoped to a secti
 
 For the principles behind these values, see `./mono-industrial.md`. For named patterns that use them, see `./components.md`.
 
+## Contents
+
+- [Fonts](#fonts)
+- [Color (Light, default)](#color-light-default)
+- [Color (Dark, via prefers-color-scheme)](#color-dark-via-prefers-color-scheme)
+- [Spacing scale](#spacing-scale)
+- [Type scale](#type-scale-3-sizes-max-per-page)
+- [Mermaid palette tokens](#mermaid-palette-tokens)
+- [Motion](#motion)
+
 ---
 
 ## Fonts
@@ -176,3 +186,5 @@ a, button, .linkish {
 ```
 
 Sub-agents must not introduce `@keyframes`, `animation:` properties, or `transition:` durations beyond the above. Spring/bounce easings are forbidden.
+
+An explicit diagram-motion request may use the narrowly scoped modes and limits in [`diagram-design.md`](./diagram-design.md). That exception is owned once by the orchestrator: section fragments remain complete, static, and script-free, and the page-wide 120 ms rule otherwise remains unchanged.

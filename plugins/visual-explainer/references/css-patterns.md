@@ -2,6 +2,12 @@
 
 Reusable patterns for layout, connectors, theming, and visual effects in self-contained HTML diagrams.
 
+## Contents
+
+- [Theme](#theme-setup) · [Backgrounds](#background-atmosphere) · [Links](#link-styling) · [Sections and cards](#section--card-components) · [Code](#code-blocks) · [Directory trees](#directory-tree) · [Overflow](#overflow-protection) · [Mermaid](#mermaid-containers)
+- [Grids](#grid-layouts) · [Connectors](#connectors) · [Animations](#animations) · [Sparklines](#sparklines-and-simple-charts-pure-svg) · [Responsive](#responsive-breakpoint) · [Badges](#badges-and-tags) · [Lists](#lists-inside-nodes)
+- [KPI cards](#kpi--metric-cards) · [Before/after](#before--after-panels) · [Collapsibles](#collapsible-sections) · [Prose](#prose-page-elements) · [Generated images](#generated-images)
+
 ## Theme Setup
 
 Always define both light and dark palettes via custom properties. Start with whichever fits the chosen aesthetic, ensure both work.
@@ -633,14 +639,14 @@ The SVG is rendered into `.mermaid-canvas` which is absolutely positioned inside
       <div class="mermaid mermaid-canvas"></div>
     </div>
   </div>
-  <script type="text/plain" class="diagram-source">
+  <pre hidden class="diagram-source">
     graph TD
       A --> B
-  </script>
+  </pre>
 </section>
 ```
 
-Use one `.diagram-shell` per diagram. The source Mermaid text lives in `<script type="text/plain" class="diagram-source">`, so multiple diagrams can coexist on a page without ID collisions.
+Use one `.diagram-shell` per diagram. The source Mermaid text lives in an inert `<pre hidden class="diagram-source">` container and is read through `textContent`, so multiple diagrams can coexist on a page without ID collisions.
 
 ### JavaScript
 
@@ -1748,7 +1754,7 @@ Avoid these in reading-first content:
 
 ## Generated Images
 
-For AI-generated illustrations embedded as base64 data URIs via `surf gemini --generate-image`. Use sparingly — hero banners, conceptual illustrations, educational diagrams, decorative accents.
+Follow `references/media.md` for image selection, acquisition, rights-sensitive sourcing, self-contained embedding, and fallbacks. Use generated illustrations sparingly — hero banners, conceptual illustrations, educational diagrams, and decorative accents. The patterns below define presentation containers, not acquisition policy.
 
 ### Hero Banner
 

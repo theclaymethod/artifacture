@@ -2,6 +2,15 @@
 
 Every SVG diagram uses the same semantic token names regardless of which aesthetic is active. Only the values change. This lets the rules in `diagrams-svg.md` (shape semantics, arrow-label masking, 4px grid, focal-accent rule) stay aesthetic-independent while the visual identity adapts to whichever page the diagram lives in.
 
+## Contents
+
+- [The ten tokens](#the-ten-tokens)
+- [Per-aesthetic mappings](#per-aesthetic-mappings)
+- [Light / dark inversion](#light--dark-inversion)
+- [Host-page detection](#host-page-detection)
+- [Integration with the skill workflow](#integration-with-skillmd-workflow)
+- [Aesthetic-independent rules](#whats-aesthetic-independent)
+
 ---
 
 ## The Ten Tokens
@@ -57,6 +66,31 @@ Notes:
 - Status colors replace the coral accent — follow the MI rule that color only ever lands on values that actually have status.
 - No emoji, no gradient text, no animated shadows.
 
+### SubQ / Subquadratic
+
+Diagrams inside a SubQ page inherit SubQ's pixel-block accent system. The accent rotates through SubQ's four fixed colors based on content semantics; the focal rule still caps accent use at 2 elements per diagram.
+
+```css
+--paper:       #000000;   /* dark-first; light mode flips to #f7f0e4 */
+--paper-2:     #111111;
+--ink:         #f5ead6;
+--muted:       rgba(245, 234, 214, 0.65);
+--soft:        rgba(245, 234, 214, 0.40);
+--rule:        rgba(245, 234, 214, 0.12);
+--rule-solid:  rgba(245, 234, 214, 0.25);
+--accent:      #f6d242;   /* yellow; or subq-blue #3a66ff, subq-orange #ff7a2a, subq-green #7ee787 */
+--accent-tint: rgba(246, 210, 66, 0.10);
+--link:        #60a5fa;
+
+--font-display: "Roboto Serif", serif;
+--font-body:    "Manrope", system-ui, sans-serif;
+--font-mono:    "Roboto Mono", ui-monospace, monospace;
+```
+
+Notes:
+- SubQ's "accent" lands on the focal node AND optionally its matching legend cell — pixel blocks in the legend share the accent color. Still ≤ 2 focal elements in the diagram body.
+- Cross-mark corner anchors (SubQ motif) can optionally appear at SVG corners at 8px from each edge.
+
 ### Nothing
 
 Diagrams inside a Nothing page carry the instrument-panel look: OLED-black canvas, status-color accents, and the segmented progress bar as the dominant data-viz motif. Doto is available for exactly one hero glyph per diagram (a focal number on a dashboard/layer stack). The accent (`#D71921` Nothing red) is reserved for a single critical node — otherwise default to `--warning` / `--success` drawn from content.
@@ -88,19 +122,25 @@ Notes:
 
 ### Editorial-Diagram (diagram-design native)
 
-When the user explicitly asks for "editorial diagram" or "diagram-design" style, use the native palette and font stack from the upstream project.
+When the user explicitly asks for "editorial diagram" or "diagram-design" style, use the palette pinned from upstream revision `a5e3978`. Use the host page's deliberate font stack unless the user also requests the upstream typography.
 
 ```css
---paper:       #faf7f2;   /* warm stone; dark mode flips to #1c1917 */
---paper-2:     #f2ede4;
---ink:         #1c1917;
---muted:       #57534e;
---soft:        #78716c;
---rule:        rgba(28, 25, 23, 0.12);
---rule-solid:  rgba(120, 113, 108, 0.25);
---accent:      #b5523a;   /* rust / coral; dark mode flips to #d6724a */
---accent-tint: rgba(181, 82, 58, 0.08);
---link:        #2563eb;
+--paper:       #f5f5f5;   /* dark mode: #2d3142 */
+--paper-2:     #ececec;   /* dark mode: #393e53 */
+--ink:         #2d3142;   /* dark mode: #f5f5f5 */
+--muted:       #4f5d75;   /* dark mode: #bfc0c0 */
+--soft:        #7a8399;   /* dark mode: #8e98ac */
+--rule:        rgba(45, 49, 66, 0.12);   /* dark: rgba(245, 245, 245, 0.12) */
+--rule-solid:  #bfc0c0;   /* dark: rgba(191, 192, 192, 0.25) */
+--accent:      #eb6c36;   /* dark mode: #f08a59 */
+--accent-tint: rgba(235, 108, 54, 0.08); /* dark: rgba(240, 138, 89, 0.10) */
+--link:        #2e5aa8;   /* dark mode: #6a95d8 */
+
+--series-1:    #7c8f6f;   /* dark: #9caf8f */
+--series-2:    #5e7a9b;   /* dark: #82a0c0 */
+--series-3:    #b8915a;   /* dark: #d3ad7a */
+--series-4:    #9c6b50;   /* dark: #b88670 */
+--series-5:    #6e6479;   /* dark: #8d8298 */
 
 --font-display: "Instrument Serif", serif;
 --font-body:    "Geist", system-ui, sans-serif;
@@ -108,8 +148,9 @@ When the user explicitly asks for "editorial diagram" or "diagram-design" style,
 ```
 
 Notes:
-- This is the only aesthetic where italic Instrument Serif callouts are appropriate.
-- JetBrains Mono is explicitly forbidden here.
+- Series colors are data encodings, not decorative accents; use direct labels and non-color distinctions.
+- Instrument Serif callouts are appropriate only when the user requests the full upstream editorial treatment.
+- JetBrains Mono is not part of the pinned upstream stack.
 
 ### Blueprint
 
@@ -213,10 +254,12 @@ Every aesthetic defines both modes. Inversions use the standard `prefers-color-s
 :root { /* light-first: MI, paper/ink, Editorial-Diagram */ }
 @media (prefers-color-scheme: dark) { :root { /* dark values */ } }
 
-/* OR dark-first: Blueprint, Terminal, Dracula */
+/* OR dark-first: SubQ, Blueprint, Terminal, Dracula */
 :root { /* dark-first values */ }
 @media (prefers-color-scheme: light) { :root { /* light values */ } }
 ```
+
+For SubQ specifically, the pixel-block accents (`#f6d242`, `#3a66ff`, `#ff7a2a`, `#7ee787`) do **not** invert. They stay constant across modes. Everything else inverts.
 
 ---
 
@@ -249,8 +292,8 @@ When the diagram is a standalone page, it defines its own `:root` tokens based o
 
 ## Integration With SKILL.md Workflow
 
-1. **Pick the diagram type** using the Type Selection Gate in `diagrams-svg.md`.
-2. **Determine the host aesthetic.** If standalone: follow the aesthetic workflow in SKILL.md §1 Think. If embedded: inherit tokens from the host.
+1. **Pick the semantic pattern and visual type** using `diagram-design.md`.
+2. **Determine the host aesthetic.** If standalone, follow the aesthetic route in `SKILL.md`. If embedded, inherit tokens from the host.
 3. **Apply the per-aesthetic mapping from this file.**
 4. **Author SVG with semantic token names** (`var(--ink)`, `var(--accent)`, etc.) — never hard-coded hex.
 5. **Run the Removal Test** from `diagrams-svg.md`.
@@ -267,7 +310,7 @@ These rules apply to every aesthetic and cannot be overridden:
 - Arrow labels on paper-colored masking rects
 - Legend as horizontal strip at bottom
 - ≤ 2 focal uses of the accent color per diagram
-- Complexity budgets from `diagrams-svg.md`
+- Complexity budgets from `diagram-design.md`
 - Shape semantics for flowcharts (oval/rect/diamond/dot)
 - No emoji, no gradient text on titles, no animated shadows
 - `box-shadow` forbidden; use 1px hairlines

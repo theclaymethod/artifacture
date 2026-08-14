@@ -2,6 +2,14 @@
 
 Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include what the diagram actually needs — most diagrams need zero external JS.
 
+## Contents
+
+- [Mermaid.js](#mermaidjs--diagramming-engine)
+- [Chart.js](#chartjs--data-visualizations)
+- [anime.js](#animejs--non-diagram-animation)
+- [Prism.js](#prismjs--syntax-highlighting)
+- [Google Fonts](#google-fonts--typography)
+
 ## Mermaid.js — Diagramming Engine
 
 Use for flowcharts, sequence diagrams, ER diagrams, state machines, mind maps, class diagrams, and any diagram where automatic node positioning and edge routing saves effort. Mermaid handles layout — you handle theming.
@@ -291,7 +299,7 @@ A[handleRequest] --> B[query users]
 userSvc["User Service"] --> authSvc["Auth Service"]
 ```
 
-**Max 10-12 nodes per Mermaid diagram.** Beyond that, readability collapses even with zoom controls and increased fontSize. For complex architectures (15+ elements), use the **hybrid pattern**: a simple 5-8 node Mermaid overview showing module relationships, followed by CSS Grid cards with detailed function lists. Never cram everything into one diagram. Use `subgraph` blocks to group related nodes when under the limit:
+**Resolve complexity before choosing Mermaid.** Follow [`diagram-design.md`](./diagram-design.md): semantic-pattern cap → selected-type cap → explicit import-detail override. Split an over-budget diagram into overview and detail; switching renderers does not waive the resolved budget. Use `subgraph` blocks only for real boundaries:
 
 ```
 subgraph Auth
@@ -567,9 +575,9 @@ Wrap the canvas in a styled container:
 }
 ```
 
-## anime.js — Orchestrated Animations
+## anime.js — Non-diagram animation
 
-Use when a diagram has 10+ elements and you want a choreographed entrance sequence (staggered reveals, path drawing, count-up numbers). For simpler diagrams, CSS `animation-delay` staggering is sufficient.
+Do not use anime.js for diagram motion. Diagram animation is static-first and may use only the reviewed, shell-owned controller described in [`diagram-design.md`](./diagram-design.md). For an explicit non-diagram animation request, anime.js remains optional when the page route approves the dependency and provides a complete reduced-motion state.
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
