@@ -15,6 +15,7 @@ const RESPONSE_CHAR_LIMIT = 60000;
 const ACUITY_MODEL = 'anthropic/claude-opus-4.8';
 const ACUITY_CALL_LIMIT = 20;
 const OPENROUTER_TIMEOUT_MS = 5 * 60 * 1000;
+const DEFAULT_TASKS = ['arch-diagram', 'code-walkthrough', 'comparison-table', 'explain-diff'];
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -114,7 +115,7 @@ async function loadTasks(taskSlugs) {
     .filter((entry) => entry.endsWith('.md'))
     .map((entry) => path.basename(entry, '.md'))
     .sort();
-  if (!taskSlugs) return all;
+  if (!taskSlugs) return DEFAULT_TASKS;
   const known = new Set(all);
   const missing = taskSlugs.filter((task) => !known.has(task));
   if (missing.length > 0) throw new Error(`Unknown task slug(s): ${missing.join(', ')}`);
@@ -154,6 +155,7 @@ async function runCell({ model, task, runDir }) {
 
   const startedAt = new Date().toISOString();
   const promptInfo = await buildPrompt({ task, repoRoot });
+  const truthPath = path.join(repoRoot, promptInfo.paths.task);
   const meta = {
     run_id: path.basename(runDir),
     model_slug: model.slug,
@@ -223,7 +225,7 @@ async function runCell({ model, task, runDir }) {
     }
 
     await prepareComponentResolution({ cellDir, runDir });
-    const first = await evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir });
+    const first = await evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir, truthPath });
     meta.commands.export = first.commands.export;
     if (first.commands.verify) meta.commands.verify = first.commands.verify;
     meta.export_ok = first.exportOk;
@@ -266,7 +268,7 @@ async function runCell({ model, task, runDir }) {
       if (repairGeneration.source != null) {
         await fs.writeFile(sourcePath, stripCodeFences(repairGeneration.source).trimStart());
       }
-      const repaired = await evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir });
+      const repaired = await evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir, truthPath });
       meta.commands.export_after_repair = repaired.commands.export;
       if (repaired.commands.verify) meta.commands.verify_after_repair = repaired.commands.verify;
       meta.export_ok = repaired.exportOk;
@@ -294,7 +296,7 @@ async function runCell({ model, task, runDir }) {
   }
 }
 
-async function evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir }) {
+async function evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, screensDir, truthPath }) {
   const exportResult = await runCommand('node', [
     'scripts/ve-mdx/export.mjs',
     sourcePath,
@@ -328,6 +330,8 @@ async function evaluateSourceAttempt({ sourcePath, artifactPath, reportPath, scr
     reportPath,
     '--screens',
     screensDir,
+    '--truth',
+    truthPath,
   ], { timeoutMs: 10 * 60 * 1000 });
   const report = await readJson(reportPath) || syntheticReport({
     id: 'verify.report-missing',

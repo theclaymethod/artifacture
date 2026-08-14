@@ -1,13 +1,15 @@
 # Delegated verification skills
 
-Artifacture is one layer in a verification system. It owns artifact mechanics,
-evidence extraction, state coverage, and artifact-specific semantics. It routes
-general visual craft to Impeccable and prose-pattern judgment to Unslop.
+Artifacture owns artifact mechanics, evidence extraction, state coverage, and
+one profile-aware product review. Impeccable and Unslop are optional explicit
+companion passes; Artifacture does not predict when their taxonomies apply.
 
 The main thread is an orchestrator, not the default visual judge. Artifacture-
 owned visual passes use the smallest eval-qualified model and batch size from
-`./model-routing.md`. Impeccable and Unslop retain their own skill context and
-model policy.
+`./model-routing.md`. When none can run, use the best available visual-capable
+model in a separate judge context when possible and disclose
+`unqualified-fallback`. Impeccable and Unslop retain their own skill context
+and model policy.
 
 ## Ownership
 
@@ -31,18 +33,18 @@ typography, color, gradients, glow, glass, nested cards, fake chrome,
 decorative text, template scaffolding, aesthetic costume, ornament without
 information, and manufactured hierarchy.
 
-Artifacture emits `impeccable:critique` with the relevant screenshot evidence
-and candidate locations. Invoke the installed Impeccable skill in read-only
-critique/audit mode. Do not copy its detector taxonomy or taste rules into
-Artifacture.
+When the artifact explicitly declares `impeccable:critique`, invoke the
+installed Impeccable skill in read-only critique/audit mode with the relevant
+screenshots. Do not copy its detector taxonomy or taste rules into Artifacture.
 
 ### Unslop
 
 Unslop owns prose patterns, cadence, voice, and AI-writing tells.
 
-Artifacture emits `unslop:cleanup-report` and supplies excluded-filtered prose
-only. Invoke Unslop as `cleanup --report`. Verification is report-only: do not
-rewrite text while determining whether the artifact passes.
+When the artifact explicitly declares `unslop:cleanup-report`, supply
+excluded-filtered prose only and invoke Unslop as `cleanup --report`.
+Verification is report-only: do not rewrite text while determining whether the
+artifact passes.
 
 ## Curated Artifacture gap
 
@@ -71,7 +73,8 @@ space.
 ## Failure and cache behavior
 
 If a delegated skill is unavailable, disclose that its check was skipped.
-Never emulate it with a local fallback rubric.
+Do not emulate a companion skill with Artifacture's rubric. The best-available
+fallback rule applies only to Artifacture-owned visual passes.
 
 Treat the three routes as separate request families:
 
@@ -83,8 +86,5 @@ Treat the three routes as separate request families:
 - Unslop receives excluded-filtered prose in report-only mode without
   screenshots or visual-rubric text.
 
-Legacy deterministic craft/prose detectors in `checks.json` are candidate
-extractors, not Artifacture verdicts. A match has status
-`delegated-candidate`, does not increment Artifacture errors or warnings, and
-only causes the owning skill route to appear. The owning skill decides whether
-the candidate is a real issue.
+There are no Impeccable or Unslop candidate detectors in `checks.json`.
+Companion routes appear only when explicitly declared in `data-ve-checks`.

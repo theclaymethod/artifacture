@@ -1,8 +1,0 @@
-{
-  "case": "Numbered steps correspond to the documented workflow and each arrow represents a real dependency.",
-  "human_label": "clean",
-  "judge_response": {
-    "pass": true,
-    "findings": []
-  }
-}

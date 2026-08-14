@@ -16,6 +16,7 @@ import {
   prepareExperimentPlan,
   requestMatrixId,
   requestIdFor,
+  isTerminalRequestRecord,
 } from './run.mjs';
 import { normalizeTelemetry } from './telemetry.mjs';
 
@@ -29,6 +30,7 @@ export function aggregateRecords(records, {
   preparedPlan = null,
 } = {}) {
   if (!Array.isArray(records)) throw new Error('records[] is required');
+  records = collapseRequestAttempts(records);
   if (!Array.isArray(candidates) || candidates.length === 0) {
     throw new Error('candidates[] is required');
   }
@@ -353,6 +355,27 @@ export function aggregateRecords(records, {
     results,
     pending_adjudication: [...pendingAdjudication].sort(),
   };
+}
+
+function collapseRequestAttempts(records) {
+  const adjudications = [];
+  const attemptsByRequest = new Map();
+  for (const record of records) {
+    if (record?.record_type === 'visual-eval-adjudication') {
+      adjudications.push(record);
+      continue;
+    }
+    if (!record?.request_id) {
+      adjudications.push(record);
+      continue;
+    }
+    const attempts = attemptsByRequest.get(record.request_id) || [];
+    attempts.push(record);
+    attemptsByRequest.set(record.request_id, attempts);
+  }
+  const requests = [...attemptsByRequest.values()].map((attempts) =>
+    [...attempts].reverse().find(isTerminalRequestRecord) || attempts.at(-1));
+  return [...requests, ...adjudications];
 }
 
 function aggregateCriteria(observations, requiredCriteria) {

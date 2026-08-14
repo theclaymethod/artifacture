@@ -23,12 +23,12 @@ objects with `id`, `family`, `severity`, `spec`, etc.). To add one:
 4. Add the fixture's expected result to `evals/expectations.json`.
 5. Run `npm run ve:eval` and confirm the new fixture is caught.
 
-Focused visual rubrics may also return criterion IDs that are narrower than a
-top-level catalog check. Register those in
-`plugins/visual-explainer/scripts/verify/rubric-criteria.json`, keep them scoped
-to one routed pass, add fire/clean human-reviewed eval cases, and run
-`npm run check:manifests`. Do not present an unregistered rubric label as a
-verdict `check_id`.
+Do not add subjective taste or prose rules to the mechanics catalog. Extend the
+single profile-aware artifact-review rubric only when the product benchmark
+proves a missing quality dimension. The explicit Artifacture semantic-gap
+criteria remain registered in
+`plugins/visual-explainer/scripts/verify/rubric-criteria.json`; run
+`npm run check:manifests` after changing that registry.
 
 ## Adding a shared component
 
@@ -83,9 +83,17 @@ values against the fixture source.
 
 ## Before you open a PR
 
-- `npm test` must pass.
-- `npm run ve:check` must pass.
-- `npm run ve:eval` must pass (verifier evals + design-system evals).
+- Run `npm run check`. It is the one local equivalent of CI: unit and browser
+  behavior, manifests, export integrity, deterministic mechanics, design-system
+  cases, and PresentationDeck behavior. The checked-in runtime budget is 120
+  seconds; diagnose a regression before raising it.
+- During iteration, use `npm run check:fast`; it omits the seeded mechanics and
+  PresentationDeck browser suites.
+- For changes intended to improve artifact quality, generate baseline and
+  candidate runs and complete `npm run check:release -- --judgments
+  <reviewed-judgments.json>`. The reviewed manifests cryptographically bind the
+  artifact, truth brief, verifier report, and exact screenshot evidence.
+  Aggregate gains cannot hide a per-case regression or an all-ties no-op.
 - If you touched or generated an HTML artifact, run the verifier on it
   (`node plugins/visual-explainer/scripts/verify/ve-verify.mjs <artifact.html>`)
   and fix any error-severity failures.

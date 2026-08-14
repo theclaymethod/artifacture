@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "id": "artifacture-product-v1",
+  "purpose": "Does a change make representative Artifacture outputs more correct, complete, clear, usable on mobile, and shippable?",
+  "viewports": [
+    { "id": "desktop", "width": 1440, "height": 900 },
+    { "id": "mobile", "width": 390, "height": 844 }
+  ],
+  "cases": [
+    {
+      "id": "architecture-diagram",
+      "task": "../model-matrix/tasks/arch-diagram.md",
+      "profile": "page",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "mobile-usability", "shipping-quality"]
+    },
+    {
+      "id": "code-walkthrough",
+      "task": "../model-matrix/tasks/code-walkthrough.md",
+      "profile": "page",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "mobile-usability", "shipping-quality"]
+    },
+    {
+      "id": "comparison",
+      "task": "../model-matrix/tasks/comparison-table.md",
+      "profile": "page",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "mobile-usability", "shipping-quality"]
+    },
+    {
+      "id": "diff-explainer",
+      "task": "../model-matrix/tasks/explain-diff.md",
+      "profile": "page",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "mobile-usability", "shipping-quality"]
+    },
+    {
+      "id": "slide-deck",
+      "task": "../model-matrix/tasks/slide-deck.md",
+      "profile": "slides",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "shipping-quality"]
+    },
+    {
+      "id": "project-recap",
+      "task": "../model-matrix/tasks/project-recap.md",
+      "profile": "page",
+      "dimensions": ["correctness", "completeness", "visual-hierarchy", "mobile-usability", "shipping-quality"]
+    }
+  ]
+}

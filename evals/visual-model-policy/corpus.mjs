@@ -22,7 +22,8 @@ export const RENDER_VARIANTS = Object.freeze(Object.fromEntries(
     mobile: ['compact-controls', 'crowded-controls'],
     deck: [
       'aligned-annotation', 'clear-click-in', 'detached-annotation',
-      'distilled-reading-path', 'honest-example', 'overlay-collision',
+      'distilled-reading-path', 'functional-source-footer', 'honest-example',
+      'ornamental-metadata-strip', 'overlay-collision',
       'overexplained-reading-path', 'repeated-layouts', 'varied-layouts',
       'warning-only-example',
     ],

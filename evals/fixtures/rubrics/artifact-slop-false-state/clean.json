@@ -1,8 +1,0 @@
-{
-  "case": "The confidence value is calculated from the displayed test results and has an accessible explanation.",
-  "human_label": "clean",
-  "judge_response": {
-    "pass": true,
-    "findings": []
-  }
-}

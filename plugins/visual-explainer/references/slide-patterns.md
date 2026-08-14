@@ -6,6 +6,23 @@ CSS patterns, JS engine, slide type layouts, transitions, navigation chrome, and
 
 **Before generating**, also read `./css-patterns.md` for shared patterns (Mermaid zoom controls, overflow protection, depth tiers, status badges) and `./libraries.md` for Mermaid theming, Chart.js, and font pairings. Those patterns apply to slides too — this file adds slide-specific patterns on top.
 
+## Functional metadata only
+
+Every visible footer, corner label, eyebrow, badge, and kicker must provide one
+of these functions:
+
+- navigation or position in the deck;
+- a source, citation, or provenance link;
+- a required legal, confidentiality, or accessibility notice;
+- current interactive state or a control label; or
+- a datum that changes across slides and helps the audience compare them.
+
+Remove case names, deck taxonomies, repeated topic labels, and adjective strings
+such as "synthetic", "illustrative", "probabilistic", or "attributable" when
+the slide content already shows that meaning. Do not add a metadata strip to
+make a slide feel designed. Use the removal test: if deleting the text changes
+neither comprehension nor action, delete it.
+
 ## Planning a Deck from a Source Document
 
 When converting a plan, spec, review, or any structured document into slides, follow this process before writing any HTML. Skipping it leads to polished-looking decks that silently drop 30–40% of the source material.

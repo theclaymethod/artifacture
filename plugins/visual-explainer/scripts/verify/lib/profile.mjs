@@ -38,17 +38,26 @@ export function detectProfile(filePath, html) {
     return 'page';
   }
 
+  if (/data-ve-deck\s*=\s*["']horizontal["']/.test(authored)) return 'magazine';
+  if (/data-ve-deck\s*=\s*["']vertical["']/.test(authored)) return 'slides';
+
   if (
     /data-layout=["']magazine/.test(authored) ||
-    /orientation\s*:\s*`horizontal`/.test(authored) && /data-ve-deck/.test(authored) ||
-    /scroll-snap-type\s*:\s*x\s+mandatory/.test(styles)
+    /\.(?:mdx?|tsx?|jsx?)$/i.test(filePath)
+      && /<slidedeck\b[^>]*\borientation\s*=\s*["']horizontal["']/s.test(authored)
   ) {
     return 'magazine';
   }
 
+  // SlideDeck bundles CSS and helper code for both orientations. An emitted
+  // deck marker therefore outranks the unused x-axis CSS fallback unless the
+  // emitted root marker above explicitly selects horizontal magazine mode.
+  if (/data-ve-deck/.test(authored)) return 'slides';
+
+  if (/scroll-snap-type\s*:\s*x\s+mandatory/.test(styles)) return 'magazine';
+
   if (
-    /data-ve-deck/.test(authored) ||
-    (/scroll-snap-type\s*:\s*y\s+mandatory/.test(styles) && /100(?:dvh|vh)/.test(styles))
+    /scroll-snap-type\s*:\s*y\s+mandatory/.test(styles) && /100(?:dvh|vh)/.test(styles)
   ) {
     return 'slides';
   }

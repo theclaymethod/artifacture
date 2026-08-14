@@ -20,6 +20,11 @@ Questions:
 - [deck-reading-path-density] Is the intended first read obvious, with repeated
   explanation and redundant interface anatomy removed? Do not flag expert
   density when hierarchy remains clear and every region advances the claim.
+- [deck-functional-metadata] Does every visible footer, corner label, eyebrow,
+  badge, and kicker provide navigation, a source or citation, a required
+  notice, current interactive state, or a changing comparison datum? Flag
+  ornamental metadata that only repeats the case, deck taxonomy, topic, or
+  generic adjectives.
 - [deck-structural-variety] Across adjacent slides, do examples vary in domain,
   layout, or symmetry when the lesson claims to transfer? Flag a sequence that
   repeatedly uses the same fixture or silhouette when that repetition makes the
@@ -47,6 +52,8 @@ Pass examples:
 - A pass example has equal tracks and baselines; its paired fail example visibly
   breaks those tracks before the viewer reads the caption.
 - Annotation, example, and binary check form one aligned horizontal lane.
+- A footer contains a source citation that the audience needs to evaluate the
+  claim.
 - Three adjacent slides teach containment, symmetry, and action priority with
   materially different compositions.
 - A click-in expands into reserved space, keeps its dismissal affordance clear,
@@ -56,6 +63,9 @@ Fail examples:
 - “Bad” differs from “good” only through a rust underline and label.
 - A note describing the right-hand example sits under the left-hand example.
 - The slide repeats the same explanation in a caption, checklist, and footer.
+- A lower-corner strip repeats the case name and strings together labels such
+  as "synthetic · illustrative · probabilistic" without adding navigation,
+  provenance, required notice, state, or comparison data.
 - Four adjacent slides reuse the same centered card pair despite claiming a
   general review method.
 - A drill sheet clips its last row or covers the trigger and close control.

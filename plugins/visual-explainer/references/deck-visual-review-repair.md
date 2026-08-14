@@ -27,6 +27,8 @@ Treat pixels as truth:
 - Put each annotation in the same row, column, or connected region as its
   evidence.
 - Remove repeated explanation before adding more structure.
+- Remove footer and corner metadata that does not provide navigation,
+  provenance, a required notice, current state, or comparison data.
 - Vary the domain or composition when adjacent examples claim a transferable
   lesson but reuse one tired fixture.
 - Give click-ins reserved space, a clear dismissal path, and a dedicated

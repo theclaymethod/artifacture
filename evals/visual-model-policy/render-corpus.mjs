@@ -255,6 +255,14 @@ function renderDeck(variant, evalCase) {
       ${distilled ? '' : '<div class="panel" style="padding:28px;min-height:300px"><h2>Return contract</h2><p class="muted" style="margin-top:20px">The same conclusion is repeated a third time.</p></div>'}
     </section>`;
   }
+  if (['ornamental-metadata-strip', 'functional-source-footer'].includes(variant)) {
+    const functional = variant === 'functional-source-footer';
+    return `${title}<section data-region="${regionId}" class="panel" style="height:390px;padding:30px;position:relative">
+      <div class="node" style="position:absolute;left:90px;top:120px;width:320px"><strong>Patient evidence</strong><p class="muted">A visible finding supports the slide claim.</p></div>
+      <div class="node" style="position:absolute;right:90px;top:120px;width:320px"><strong>Clinical output</strong><p class="muted">The output follows from that evidence.</p></div>
+      <div class="caption" style="position:absolute;left:30px;bottom:24px">${functional ? 'Source: clinical pathway, section 4.2' : 'CRP · MAYA · SYNTHETIC CASE &nbsp;&nbsp; illustrative · probabilistic · attributable'}</div>
+    </section>`;
+  }
   if (['repeated-layouts', 'varied-layouts'].includes(variant)) {
     const varied = variant === 'varied-layouts';
     const frames = varied

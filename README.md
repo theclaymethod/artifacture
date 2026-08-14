@@ -52,12 +52,12 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 
 ## What it adds to upstream visual-explainer
 
-- **ve-verify** (`scripts/verify/`): a 200+ check deterministic design-quality gate — static scans, real-browser measurement (390px overflow, WCAG contrast in both themes, Mermaid render), and routed specialist judgment. Exit codes and JSON reports make it usable as a CI gate. Seeded-violation fixtures prove deterministic checks fire; the visual-model policy separately selects the smallest model and screenshot batch size that clear precision, recall, silence, grounding, schema, latency, and cost gates.
+- **ve-verify** (`scripts/verify/`): 152 executable mechanics checks plus one grounded, profile-aware artifact review. Static scans and real-browser measurements catch shipping failures; the finalizer binds review verdicts to the artifact, truth brief, rendered inventory, and screenshot evidence.
 - **Tiered agent docs**: SKILL.md is a ~2.5k-token bootstrap plus one ~300-token card per use case (`cards/`). A covered flow reads about 3,100 tokens instead of 62,000. Deep references load only on escalation.
 - **17 shared components** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
 - **PresentationDeck** (`visual-explainer-mdx/presentation.tsx`): a second deck engine for presented (not scrolled) decks — a fixed 1920×1080 stage scaled to fit any screen, collapsible slide rail, two-axis keyboard navigation (Left/Right for slides; Up/Down for ordered click-ins or custom states, falling through to the next slide when exhausted), and drill-down primitives (click-to-expand cards/sheets with a click-anywhere-to-close guard, ladder/fanout diagrams, metrics, steppers). Fully `--ve-*` token-driven so every preset skins it; its behavioral contract is pinned by a headless eval suite (`npm run ve:eval-presentation`). See [docs/presentation-deck.md](docs/presentation-deck.md) for when to use it vs `SlideDeck`.
 - **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
-- **Two model eval harnesses**: `evals/model-matrix/` compares artifact generation, while `evals/visual-model-policy/` qualifies visual-verification models and screenshot batch sizes. Generation quality and review quality are deliberately not treated as the same benchmark.
+- **Product and model evals with separate jobs**: a six-case, human-reviewed product benchmark governs artifact quality. `evals/model-matrix/` generates evidence; `evals/visual-model-policy/` is resumable, budgeted model-routing research. Detector consistency is not treated as product improvement.
 - **One-command team sharing**: `share.sh` deploys to Vercel (zero setup, public) or sharehtml on Cloudflare (stable update-in-place URLs, team SSO via Cloudflare Access, comments). See `docs/TEAM-SHARING.md`.
 - **External design systems + `ve:learn`**: brand token sets are user-owned artifacts resolved from a registry outside the skill (`$ARTIFACTURE_DESIGN_DIR` → `~/.artifacture/design-systems/` → repo `design-systems/`) and inlined into exports by preset name. `npm run ve:learn -- <code-file|url|image> --name <slug>` drafts a system from a token source, a live page, or an image palette; deterministic heuristics are pinned by their own eval suite (`evals/design-systems/`). The repo ships the mechanism only — systems (typically private brand tokens) live in your own registry. See `docs/design-systems.md`.
 
@@ -68,16 +68,16 @@ family:
 
 | Skill | Owns |
 |---|---|
-| **Artifacture** | export, browser/state coverage, clipping, containment, layout candidates, diagrams, operating-model fidelity, and evidence routing |
+| **Artifacture** | export mechanics, browser/state evidence, and one profile-aware artifact review |
 | **Impeccable** | general visual craft, design specificity, typography, color, generic decoration, and visual AI tells |
 | **Unslop** | prose cadence, voice, and AI-writing patterns |
 
-Artifacture does not copy the other skills' judgment prompts. Legacy
-high-precision craft/prose detectors remain temporarily as candidate extractors:
-they can route evidence, but they cannot fail Artifacture. If a companion skill
-is missing, its pass is reported as skipped. Artifacture-owned visual judgment
-uses the smallest eval-qualified model and screenshot batch size; a
-frontier/main agent is not the automatic fallback.
+Artifacture does not copy the other skills' judgment prompts or detector
+taxonomies. Impeccable and Unslop are explicit opt-ins. Artifacture-owned visual
+judgment uses an exact profile-qualified route when one exists. The current
+small paid template measures narrower prerequisite routes and does not qualify
+the composite review. Until dedicated evidence exists, Artifacture uses the
+best available visual-capable model and labels it an unqualified fallback.
 
 See [installation and family setup](docs/installation.md) and the
 [visual-model policy harness](evals/visual-model-policy/README.md).
@@ -119,8 +119,8 @@ rm -rf /tmp/artifacture
 After installation, follow [docs/installation.md](docs/installation.md) to
 verify the render pipeline, detect missing companion skills, and install or
 generate a visual-model policy. Until a pass has an eval-qualified route,
-Artifacture reports `no-eval-qualified-model` rather than consuming the current
-large agent by default.
+Artifacture records `no-eval-qualified-model`, runs the best available
+visual-capable model, and marks the execution `unqualified-fallback`.
 
 For the upstream project, see [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer).
 
@@ -154,7 +154,8 @@ For private team sharing setup, see [`docs/TEAM-SHARING.md`](docs/TEAM-SHARING.m
 - [Skill docs](plugins/visual-explainer/SKILL.md): what an agent actually reads, plus the per-use-case [cards](plugins/visual-explainer/cards/).
 - [Verifier](plugins/visual-explainer/scripts/verify/): the deterministic design-quality gate and its [eval suite](evals/).
 - [Model-matrix harness](evals/model-matrix/): benchmark your own model or agent on the same briefs.
-- [Visual-model policy harness](evals/visual-model-policy/): select the smallest qualified model and safe screenshot batch size per routed pass.
+- [Product benchmark](evals/product-benchmark/): blind human pairwise review of six representative artifacts.
+- [Visual-model policy harness](evals/visual-model-policy/): resumable, budgeted qualification research; narrow routes do not qualify composite reviews.
 
 ## Limitations
 

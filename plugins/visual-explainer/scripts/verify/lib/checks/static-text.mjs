@@ -4,7 +4,6 @@ import {
   dataUriDecodedBytes,
   fail,
   firstNamedFont,
-  hasAny,
   regexForbid,
   stripCssComments,
   stripJsComments,
@@ -13,53 +12,10 @@ import {
 } from '../generic.mjs';
 import { stripCodeLike } from '../context.mjs';
 
-const BANNED_ACCENT_HEXES = new Set(['8b5cf6', '7c3aed', 'a78bfa', 'd946ef', '06b6d4', 'f472b6']);
-const BANNED_ACCENT_RGB = new Set(['139,92,246', '124,58,237', '167,139,250', '217,70,239', '6,182,212', '244,114,182']);
 const REAL_LINK_RE = /<a\b[^>]*href\s*=\s*["'](?!#|mailto:|tel:)[^"']+["']/i;
 const MOBILE_MEDIA_RE = /@media\s*\([^)]*max-width\s*:\s*(\d+)px[^)]*\)/gi;
-const SLOP_PHRASE_RE = /\b(?:it'?s important to note|let that sink in|in today'?s fast-paced|here'?s the thing|needless to say)\b/i;
-const COPY_SLOP_RE = /\b(?:here'?s the thing:?|let that sink in|make no mistake|read that again|this cannot be overstated|in today'?s fast-paced|in today'?s rapidly evolving|needless to say|it goes without saying|it is important to note that|it'?s important to note|pro tip:|hot take:|unpopular opinion:|plot twist:|spoiler:|stands as a testament|a testament to|pivotal moment|indelible mark|rich tapestry|cornerstone of|sends a clear message|nestled in the heart of|boasts a world-class|a hidden gem|a beacon of|at the forefront of|i hope this helps|certainly!|great question|happy to help|let me know if you need anything else|i'?d be happy to|as an ai language model|i assure you|here'?s what'?s interesting|here'?s what caught my eye|here'?s what stood out|let me think step by step|here'?s my thought process|to answer your question|as of my knowledge cutoff|as of my last update|based on my training data|the future looks bright|exciting times lie ahead|only time will tell|one thing is certain|poised for growth|warrants further investigation|holds great promise|spanning everything from|double-edged sword|at the intersection of|the elephant in the room|it begs the question|buckle up|food for thought|let'?s dive in|let'?s unpack)\b|not only .{0,80}but also|it'?s not just about .+?,\s*it'?s about|\bit'?s not just .+?,?\s*it'?s\s|\bthe (?:answer|secret|key|trick|truth|reality|problem|solution|takeaway|lesson|difference|reason) (?:is|was|isn'?t|remains)\s*:/i;
 const GENERIC_PLACEHOLDER_RE = /{{\s*(?:[A-Za-z0-9_]+|NN)\s*}}|\b(?:TODO|FIXME|Lorem ipsum)\b|\b(?:Module|Component) [A-Z]\b/i;
-const REFLEX_FONT_RE = /^(?:fraunces|newsreader|lora|crimson(?: pro| text)?|playfair display|cormorant(?: garamond)?|syne|space grotesk|dm sans|dm serif|outfit|plus jakarta sans|instrument sans|instrument serif)$/i;
-
 export const checks = Object.fromEntries([
-  ['forbidden-body-font', scoped(hasBodyFont, (ctx) => {
-    const props = customProps(ctx.styles);
-    const stacks = [
-      ...Array.from(ctx.styles.matchAll(/--font-body\s*:\s*([^;{}]+)/gi), (m) => m[1]),
-      ...cssRules(ctx.styles).filter((r) => /(^|,)\s*(?:body|html)\b/i.test(r.selector)).flatMap((r) => Array.from(r.body.matchAll(/font-family\s*:\s*([^;{}]+)/gi), (m) => m[1])),
-    ];
-    for (const stack of stacks) {
-      const resolved = derefFontVars(stack, props);
-      const primary = firstFontSlot(resolved);
-      if (/^(inter|roboto|arial|helvetica)$/i.test(primary)) return [fail(`primary body font is ${primary}`, '--font-body/body font-family')];
-      if (/^(?:system-ui|sans-serif|serif|ui-sans-serif)$/i.test(primary) && !firstNamedFont(resolved)) return [fail('body font stack has only generic families', '--font-body/body font-family')];
-    }
-    return [];
-  })],
-  ['forbidden-accent-colors', scoped((ctx) => hasStyleContext(ctx), (ctx) => forbiddenAccentFindings(`${ctx.styles}\n${ctx.inlineStyles.join('\n')}`))],
-  ['forbidden-gradient-text-headings', scoped((ctx) => /background-clip\s*:\s*text/i.test(`${ctx.styles}\n${ctx.inlineStyles.join('\n')}`), (ctx) => {
-    for (const rule of cssRules(ctx.styles)) {
-      if (!/(^|[,.#\s])(?:h[1-4]|title|headline|hero-title|display|kicker)\b/i.test(rule.selector)) continue;
-      if (/gradient\s*\(/i.test(rule.body) && /background-clip\s*:\s*text/i.test(rule.body) && /(?:color\s*:\s*transparent|-webkit-text-fill-color\s*:\s*transparent)/i.test(rule.body)) {
-        return [fail('gradient-clipped heading text', rule.selector)];
-      }
-    }
-    for (const style of ctx.inlineStyles) {
-      if (/gradient\s*\(/i.test(style) && /background-clip\s*:\s*text/i.test(style) && /(?:color\s*:\s*transparent|-webkit-text-fill-color\s*:\s*transparent)/i.test(style)) {
-        return [fail('gradient-clipped inline text', 'style=""')];
-      }
-    }
-    return [];
-  })],
-  ['forbidden-glow-pulse-animations', scoped((ctx) => /@keyframes|\banimation(?:-[a-z-]+)?\s*:/i.test(ctx.styles), (ctx) => {
-    if (/@keyframes\s+(?:glow|pulse|breathe|shimmer)[\w-]*\s*\{[\s\S]*?(?:box-shadow|opacity|filter)/i.test(ctx.styles)) return [fail('glow/pulse keyframes animate shadow, opacity, or filter', '@keyframes')];
-    for (const rule of cssRules(ctx.styles)) {
-      if (/(?:progress|loading|spinner|\[role=['"]?progressbar)/i.test(rule.selector)) continue;
-      if (/animation(?:-iteration-count)?\s*:[^;{}]*infinite/i.test(rule.body)) return [fail('infinite animation on static content', rule.selector)];
-    }
-    return [];
-  })],
   ['no-placeholder-leak', scoped(always, (ctx) => regexForbid(stripCodeLike(ctx.html), GENERIC_PLACEHOLDER_RE, 'unresolved placeholder/TODO text leaked', 'html text'))],
   ['self-contained-html-file', scoped((ctx) => /\s(?:src|href)\s*=/.test(ctx.html), (ctx) => {
     for (const match of ctx.html.matchAll(/\s(?:src|href)\s*=\s*(["'])([^"']+)\1/gi)) {
@@ -91,47 +47,7 @@ export const checks = Object.fromEntries([
     if (/class\s*=\s*["'][^"']*dir-tree|[├└│─]/.test(ctx.html) && !rules.some((r) => /dir-tree/i.test(r.selector) && /white-space\s*:\s*pre\b/i.test(r.body))) return [fail('directory tree requires white-space: pre', '.dir-tree')];
     return rules.some((r) => /white-space\s*:\s*(?:pre|pre-wrap|pre-line)\b/i.test(r.body)) ? [] : [fail('block code containers do not declare white-space: pre/pre-wrap/pre-line', 'white-space')];
   })],
-  ['unslop-prose-phrases', scoped((ctx) => /<p\b|class\s*=\s*["'][^"']*(?:lead|callout|description|body)/i.test(ctx.html), (ctx) => {
-    const text = proseText(ctx);
-    if (SLOP_PHRASE_RE.test(text)) return [warn(`slop phrase: ${text.match(SLOP_PHRASE_RE)[0]}`, 'prose')];
-    const words = Math.max(1, wordCount(text));
-    for (const word of ['however', 'moreover']) {
-      const count = (text.match(new RegExp(`\\b${word}\\b`, 'gi')) || []).length;
-      if (count > Math.ceil(words / 300)) return [warn(`high-frequency "${word}" in prose`, 'prose')];
-    }
-    return [];
-  })],
-  ['copy-slop-phrases', scoped((ctx) => /<p\b|<h[1-6]\b|class\s*=\s*["'][^"']*(?:lead|callout|description|caption|slide|card)/i.test(ctx.html), (ctx) => {
-    const text = proseText(ctx);
-    const match = text.match(COPY_SLOP_RE);
-    return match ? [warn(`AI-slop copy phrase: ${match[0]}`, 'prose text')] : [];
-  })],
   ['reduced-motion-media-query', scoped((ctx) => hasMotion(ctx.styles), (ctx) => /prefers-reduced-motion\s*:\s*reduce/i.test(ctx.styles) ? [] : [warn('animated CSS lacks prefers-reduced-motion reduce guard', '@media')])],
-  ['gradient-hero-background', scoped((ctx) => /gradient\s*\(/i.test(`${ctx.styles}\n${ctx.inlineStyles.join('\n')}`), (ctx) => {
-    for (const rule of cssRules(ctx.styles)) {
-      if (!isLargeBackgroundSelector(rule.selector)) continue;
-      const value = propertyValue(rule.body, /background(?:-image)?/i);
-      if (gradientHasAiSweep(value)) return [fail('large hero/layout background uses violet-to-blue gradient wash', rule.selector)];
-    }
-    for (const style of ctx.inlineStyles) {
-      if (/gradient\s*\(/i.test(style) && /(?:min-)?height\s*:\s*(?:[4-9]\dvh|100vh)|width\s*:\s*100(?:vw|%)/i.test(style) && gradientHasAiSweep(style)) {
-        return [fail('large inline background uses violet-to-blue gradient wash', 'style=""')];
-      }
-    }
-    return [];
-  })],
-  ['glassmorphism-default-surface', scoped((ctx) => /backdrop-filter\s*:\s*blur|-webkit-backdrop-filter\s*:\s*blur/i.test(ctx.styles), (ctx) => {
-    const selectors = cssRules(ctx.styles).filter((rule) => /backdrop-filter\s*:\s*blur|-webkit-backdrop-filter\s*:\s*blur/i.test(rule.body) && /background(?:-color)?\s*:\s*(?:rgba\([^)]*,\s*(?:0?\.\d+|[01]\s*\))|hsla\([^)]*,\s*(?:0?\.\d+|[01]\s*\))|#[0-9a-f]{8}\b|color-mix\()/i.test(rule.body)).map((rule) => rule.selector);
-    return selectors.length >= 3 ? [warn(`frosted glass repeated on ${selectors.length} selectors`, selectors.slice(0, 3).join(', '))] : [];
-  })],
-  ['reflex-reject-fonts', scoped((ctx) => ctx.preset === 'custom' && /--font-(?:body|display)\s*:|font-family\s*:/i.test(ctx.styles), (ctx) => {
-    const stacks = [
-      ...Array.from(ctx.styles.matchAll(/--font-(?:body|display)\s*:\s*([^;{}]+)/gi), (m) => m[1]),
-      ...cssRules(ctx.styles).filter((r) => /(^|,)\s*(?:body|html|h[1-6]|\.[\w-]*(?:title|heading|headline|display))/i.test(r.selector)).flatMap((r) => Array.from(r.body.matchAll(/font-family\s*:\s*([^;{}]+)/gi), (m) => m[1])),
-    ];
-    const bad = stacks.map(firstFontSlot).find((font) => REFLEX_FONT_RE.test(font));
-    return bad ? [warn(`reflex catalog font used as primary voice: ${bad}`, 'font-family')] : [];
-  })],
   ['unbounded-fluid-type-clamp', scoped((ctx) => ctx.preset === 'custom' && /font-size\s*:\s*clamp\s*\(/i.test(ctx.styles) && ctx.profile !== 'poster' && ctx.profile !== 'video-comp', (ctx) => {
     for (const rule of cssRules(ctx.styles)) {
       if (!/font-size\s*:\s*clamp\s*\(/i.test(rule.body)) continue;
@@ -160,42 +76,10 @@ export const checks = Object.fromEntries([
     const replacement = strips.every((strip) => cssRules(ctx.styles).some((rule) => focusReplacementCovers(strip.selector, rule)));
     return replacement ? [] : [fail('focus outline stripped without visible :focus-visible replacement', strips[0].selector)];
   })],
-  ['scroll-reveal-spam', scoped((ctx) => /IntersectionObserver|animation-timeline\s*:\s*view|reveal|fade-in-up|in-view/i.test(ctx.html), (ctx) => {
-    const sections = (ctx.html.match(/<(?:section|header|footer|main)\b/gi) || []).length;
-    const reveal = (ctx.html.match(/class\s*=\s*["'][^"']*(?:reveal|fade-in-up|in-view)[^"']*["']/gi) || []).length;
-    if (sections >= 3 && reveal / sections >= 0.6 && /opacity\s*:\s*0[\s\S]{0,120}transform\s*:\s*translateY/i.test(ctx.styles)) return [warn('uniform scroll reveal applied to most top-level sections', 'reveal classes')];
-    return [];
-  })],
   ['layout-property-animation', scoped((ctx) => /@keyframes|transition/i.test(ctx.styles), (ctx) => {
     if (/@keyframes[\s\S]*?(?:\b(?:width|height|left|right|top|bottom|margin|padding)\s*:)/i.test(ctx.styles)) return [warn('keyframes animate layout geometry instead of transform/opacity', '@keyframes')];
     for (const rule of cssRules(ctx.styles)) {
       if (/transition(?:-property)?\s*:[^;{}]*(?:\bwidth\b|\bheight\b|\bleft\b|\bright\b|\btop\b|\bbottom\b|\bmargin\b|\bpadding\b)/i.test(rule.body) && !/max-height/i.test(rule.body)) return [warn('transition animates layout geometry', rule.selector)];
-    }
-    return [];
-  })],
-  ['bounce-elastic-easing', scoped((ctx) => /cubic-bezier|bounce|elastic|spring/i.test(ctx.html), (ctx) => {
-    const motionContext = [
-      ...Array.from(ctx.styles.matchAll(/(?:animation(?:-timing-function)?|transition(?:-timing-function)?)\s*:\s*([^;{}]+)/gi), (m) => m[1]),
-      ...Array.from(ctx.scripts.matchAll(/\b(?:ease|easing)\s*[:=]\s*["']?([A-Za-z0-9_.-]+)/gi), (m) => m[1]),
-      ...Array.from(ctx.scripts.matchAll(/\.(?:to|from|fromTo)\s*\([^)]*\{[\s\S]*?\bease\s*:\s*["']([^"']+)/gi), (m) => m[1]),
-    ].join('\n');
-    for (const match of `${ctx.styles}\n${ctx.scripts}`.matchAll(/cubic-bezier\s*\(([^)]+)\)/gi)) {
-      const nums = match[1].split(',').map((part) => Number(part.trim()));
-      if (nums.length === 4 && nums.some((n) => n < 0 || n > 1)) return [fail(`overshooting cubic-bezier(${match[1]})`, 'easing')];
-    }
-    return /\b(?:bounce|elastic|spring)\b/i.test(motionContext) ? [fail('bounce/elastic/spring easing used for standard motion', 'easing')] : [];
-  })],
-  ['copy-paste-drop-shadow', scoped((ctx) => (ctx.styles.match(/box-shadow\s*:/gi) || []).length >= 5, (ctx) => {
-    const byShadow = new Map();
-    for (const rule of cssRules(ctx.styles)) {
-      const shadow = propertyValue(rule.body, /box-shadow/i).toLowerCase().replace(/\s+/g, ' ').trim();
-      if (!shadow || shadow === 'none') continue;
-      const selectors = byShadow.get(shadow) || [];
-      selectors.push(rule.selector);
-      byShadow.set(shadow, selectors);
-    }
-    for (const [shadow, selectors] of byShadow) {
-      if (selectors.length >= 5 && selectorRoleCount(selectors) >= 4) return [warn(`same box-shadow reused across ${selectors.length} unrelated selectors: ${shadow}`, selectors.slice(0, 5).join(', '))];
     }
     return [];
   })],
@@ -461,47 +345,6 @@ function always() {
   return true;
 }
 
-function hasStyleContext(ctx) {
-  return Boolean(ctx.styles || ctx.inlineStyles.length);
-}
-
-function hasBodyFont(ctx) {
-  return /--font-body\s*:|(?:^|[{}])\s*(?:body|html)[^{]*\{[^}]*font-family\s*:/i.test(ctx.styles);
-}
-
-function firstFontSlot(stack) {
-  return (stack.split(',')[0] || '').trim().replace(/^['"]|['"]$/g, '').replace(/\s*!important$/, '').trim();
-}
-
-function derefFontVars(stack, props) {
-  return stack.replace(/var\(\s*(--[\w-]+)\s*(?:,[^)]+)?\)/gi, (match, name) => props.get(name.toLowerCase()) || match);
-}
-
-function forbiddenAccentFindings(cssText) {
-  for (const match of cssText.matchAll(/#?([0-9a-f]{6})\b/gi)) {
-    if (BANNED_ACCENT_HEXES.has(match[1].toLowerCase())) return [fail('forbidden violet/neon accent color used', 'style context')];
-  }
-  for (const match of cssText.matchAll(/rgba?\s*\(([^)]+)\)/gi)) {
-    const nums = match[1].split(',').slice(0, 3).map((part) => Number.parseFloat(part.trim()));
-    if (nums.length === 3 && nums.every(Number.isFinite) && BANNED_ACCENT_RGB.has(nums.map((n) => Math.round(n)).join(','))) {
-      return [fail('forbidden violet/neon accent color used', 'style context')];
-    }
-  }
-  for (const match of cssText.matchAll(/hsla?\s*\(([^)]+)\)/gi)) {
-    const parts = match[1].split(/[,\s/]+/).filter(Boolean);
-    const hue = Number.parseFloat(parts[0]);
-    const sat = Number.parseFloat(parts.find((part, index) => index > 0 && /%$/.test(part)) || '0');
-    if (Number.isFinite(hue) && sat >= 45 && bannedHue(((hue % 360) + 360) % 360)) {
-      return [fail('forbidden violet/neon accent color used', 'style context')];
-    }
-  }
-  return [];
-}
-
-function bannedHue(hue) {
-  return (hue >= 185 && hue <= 200) || (hue >= 255 && hue <= 300) || (hue >= 310 && hue <= 335);
-}
-
 function focusReplacementCovers(strippedSelector, replacementRule) {
   if (!/:focus(?:-visible)?/i.test(replacementRule.selector)) return false;
   if (/outline\s*:\s*(?:none|0)\b/i.test(replacementRule.body)) return false;
@@ -540,13 +383,6 @@ function escapeForRe(value) {
 
 function combinedHtmlBodyRules(styles) {
   return cssRules(styles).filter((rule) => /(^|,)\s*(?:html|body)\b/i.test(rule.selector)).map((rule) => rule.body).join(';');
-}
-
-function proseText(ctx) {
-  return stripCodeLike(ctx.html)
-    .replace(/<blockquote\b[\s\S]*?<\/blockquote>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\[[A-Z0-9 .:-]+\]/g, ' ');
 }
 
 function stripHtmlComments(value) {
@@ -671,38 +507,6 @@ function numberAfter(text, prefixRe) {
   return rest ? Number(rest[0]) : null;
 }
 
-function isLargeBackgroundSelector(selector) {
-  return /(^|,)\s*(?:body|html|main|section|\.[\w-]*(?:hero|masthead|cover|stage|page|slide)|\[class[*^$|~]?=["'][^"']*hero)/i.test(selector);
-}
-
-function propertyValue(body, propRe) {
-  const re = new RegExp(`(?:${propRe.source})\\s*:\\s*([^;{}]+)`, propRe.flags.replace('g', ''));
-  return body.match(re)?.[1] || '';
-}
-
-function gradientHasAiSweep(value = '') {
-  if (!/gradient\s*\(/i.test(value)) return false;
-  const hues = Array.from(value.matchAll(/#([0-9a-f]{3}|[0-9a-f]{6})\b/gi), (m) => hexHue(m[0])).filter((h) => h != null);
-  return hues.some((h) => h >= 255 && h <= 300) && hues.some((h) => h >= 195 && h <= 250);
-}
-
-function hexHue(hex) {
-  let raw = hex.replace('#', '');
-  if (raw.length === 3) raw = raw.split('').map((ch) => ch + ch).join('');
-  const r = Number.parseInt(raw.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(raw.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(raw.slice(4, 6), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  if (d === 0) return 0;
-  let h = 0;
-  if (max === r) h = ((g - b) / d) % 6;
-  else if (max === g) h = (b - r) / d + 2;
-  else h = (r - g) / d + 4;
-  return (h * 60 + 360) % 360;
-}
-
 function parseClampFont(body) {
   const match = body.match(/font-size\s*:\s*clamp\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/i);
   if (!match) return null;
@@ -717,17 +521,4 @@ function lengthToPx(value) {
   if (!match) return 0;
   const n = Number(match[1]);
   return match[2].toLowerCase() === 'px' ? n : n * 16;
-}
-
-function selectorRoleCount(selectors) {
-  const roles = new Set();
-  for (const selector of selectors) {
-    if (/button|btn/.test(selector)) roles.add('button');
-    else if (/nav/.test(selector)) roles.add('nav');
-    else if (/img|image|figure/.test(selector)) roles.add('media');
-    else if (/code|pre/.test(selector)) roles.add('code');
-    else if (/card/.test(selector)) roles.add('card');
-    else roles.add(selector.replace(/[.#][\w-]+/g, '').trim() || selector);
-  }
-  return roles.size;
 }

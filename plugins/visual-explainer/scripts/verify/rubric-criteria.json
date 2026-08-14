@@ -22,6 +22,11 @@
       "rubric": "rubrics/pass-deck-review.md"
     },
     {
+      "id": "deck-functional-metadata",
+      "pass": "deck-review",
+      "rubric": "rubrics/pass-deck-review.md"
+    },
+    {
       "id": "deck-structural-variety",
       "pass": "deck-review",
       "rubric": "rubrics/pass-deck-review.md"

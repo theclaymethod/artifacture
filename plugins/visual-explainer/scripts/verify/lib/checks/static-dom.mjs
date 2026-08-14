@@ -1,24 +1,6 @@
-import { all, classMatches, cssRules, fail, isAllCapsLabel, ownText, textOf, warn, wordCount } from '../generic.mjs';
-
-const EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]|✅|❌|⚠️/u;
+import { all, classMatches, cssRules, fail, isAllCapsLabel, textOf, warn, wordCount } from '../generic.mjs';
 
 export const checks = Object.fromEntries([
-  ['no-emoji-in-ui-chrome', scoped((ctx) => ctx.dom && all(ctx.dom, 'h1,h2,h3,h4,h5,h6,.section-label,.section-header,.kicker,.status,td').length > 0, (ctx) => {
-    for (const el of all(ctx.dom, 'h1,h2,h3,h4,h5,h6,.section-label,.section-header,.kicker,.status,[class*="status"],td')) {
-      if (el.closest('code,pre')) continue;
-      const text = ownText(el) || textOf(el);
-      if (EMOJI_RE.test(text)) return [fail(`emoji glyph in UI chrome: ${text}`, selectorName(el))];
-    }
-    return [];
-  })],
-  ['no-three-dot-window-chrome', scoped((ctx) => ctx.dom && /code-block|code-file|<pre\b/i.test(ctx.html), (ctx) => {
-    for (const head of all(ctx.dom, '.code-block header,.code-file__head,.code-header,.window-chrome')) {
-      const children = Array.from(head.children || []);
-      const circles = children.filter((el) => isSmallCircle(styleFor(ctx, el), el));
-      if (circles.length >= 3 && hasTrafficLightTriple(circles.map((el) => styleFor(ctx, el)))) return [fail('macOS traffic-light dot chrome on code block', selectorName(head))];
-    }
-    return [];
-  })],
   ['file-structure-head-contract', scoped((ctx) => ctx.dom, (ctx) => {
     if (!/^\s*<!doctype html>/i.test(ctx.html)) return [fail('file does not start with <!DOCTYPE html>', 'doctype')];
     if (!ctx.dom.querySelector('meta[charset]')) return [fail('missing <meta charset>', 'head')];
@@ -36,13 +18,6 @@ export const checks = Object.fromEntries([
       if (lines > 100) return [warn(`code block has ${lines} lines outside <details>`, 'pre code')];
       if (lines > 32 && !/max-height\s*:[^;]+;\s*overflow-y\s*:\s*(?:auto|scroll)|overflow-y\s*:\s*(?:auto|scroll)[^}]+max-height\s*:/i.test(style)) return [warn('tall code block lacks max-height plus overflow-y auto/scroll', 'pre code')];
     }
-    return [];
-  })],
-  ['prose-accent-overuse', scoped((ctx) => ctx.profile === 'page' && ctx.dom && /pullquote|pull-quote|dropcap|first-letter/i.test(ctx.html), (ctx) => {
-    const pulls = all(ctx.dom, '.pullquote,.pull-quote,blockquote.pull');
-    if (pulls.length > 2) return [warn(`too many pull quotes (${pulls.length})`, 'pull quote')];
-    const drops = all(ctx.dom, '.lead--dropcap,.dropcap');
-    if (drops.length > 1 || ((ctx.styles.match(/::first-letter/g) || []).length > 1)) return [warn('drop cap used more than once', 'drop cap')];
     return [];
   })],
   ['no-scroll-x-on-prose', scoped((ctx) => ctx.profile === 'page' && ctx.dom && all(ctx.dom, '.scroll-x').length > 0, (ctx) => {
@@ -72,32 +47,6 @@ export const checks = Object.fromEntries([
     return links.length === heads.length ? [] : [fail(`TOC link count ${links.length} does not match section count ${heads.length}`, 'nav.toc')];
   })],
   ['skip-toc-under-four-sections', scoped((ctx) => ctx.dom && ctx.dom.querySelector('nav.toc'), (ctx) => all(ctx.dom, '.sec-head').length < 4 ? [warn('TOC present with fewer than four sections', 'nav.toc')] : [])],
-  ['decorative-blur-orbs', scoped((ctx) => ctx.dom && /blur\s*\(|particles\.js|tsparticles|requestAnimationFrame|<canvas\b/i.test(ctx.html), (ctx) => {
-    if (/(?:particles\.js|tsparticles)/i.test(ctx.html)) return [warn('decorative particle backdrop library detected', 'particle backdrop')];
-    const candidates = all(ctx.dom, 'div,span,i,canvas').filter((el) => !textOf(el) && decorativeOrbStyle(styleFor(ctx, el)));
-    if (candidates.length >= 2) return [warn(`ambient blur orb backdrop has ${candidates.length} empty blurred shapes`, candidates.slice(0, 2).map(selectorName).join(', '))];
-    const pseudoOrbs = cssRules(ctx.styles).filter((rule) => /::(?:before|after)\b/i.test(rule.selector) && decorativeOrbStyle(rule.body));
-    if (pseudoOrbs.length >= 2) return [warn(`ambient blur orb backdrop has ${pseudoOrbs.length} pseudo-element shapes`, pseudoOrbs.slice(0, 2).map((rule) => rule.selector).join(', '))];
-    if (/<canvas\b/i.test(ctx.html) && /requestAnimationFrame[\s\S]{0,240}(?:arc|fillRect|particles?|dots?)/i.test(ctx.scripts || '')) return [warn('decorative animated canvas particle layer', 'canvas')];
-    return [];
-  })],
-  ['nested-cards', scoped((ctx) => ctx.dom && /card|box-shadow|border-radius|border\s*:/i.test(ctx.html), (ctx) => {
-    const cards = new Set(all(ctx.dom, 'div,section,article,li').filter((el) => isCardLike(ctx, el)));
-    for (const card of cards) {
-      for (let parent = card.parentElement; parent; parent = parent.parentElement) {
-        if (cards.has(parent) && sameTreatment(styleFor(ctx, card), styleFor(ctx, parent))) return [fail('card nested inside same-treatment card', `${selectorName(parent)} > ${selectorName(card)}`)];
-      }
-    }
-    return [];
-  })],
-  ['side-stripe-border', scoped((ctx) => ctx.dom && /border-(?:left|right)\s*:/i.test(ctx.html), (ctx) => {
-    for (const el of all(ctx.dom, 'blockquote,div,section,article,li,aside')) {
-      const style = styleFor(ctx, el);
-      const side = thickSideBorder(style);
-      if (side && /(?:card|callout|alert|item|box-shadow|background|border-radius)/i.test(`${el.getAttribute('class') || ''} ${style}`)) return [fail(`one-sided saturated ${side} accent stripe`, selectorName(el))];
-    }
-    return [];
-  })],
   ['font-family-sprawl', scoped((ctx) => ctx.dom && /font-family|--font-/i.test(ctx.html), (ctx) => {
     const fonts = authoredFontFamilies(ctx).filter((font) => !/^(?:system-ui|sans-serif|serif|monospace|ui-sans-serif|ui-serif|ui-monospace)$/i.test(font));
     return fonts.length > 4 ? [fail(`more than four named font families: ${fonts.join(', ')}`, 'font-family')] : [];
@@ -122,23 +71,6 @@ export const checks = Object.fromEntries([
     }
     return [];
   })],
-  ['fake-loading-theater', scoped((ctx) => ctx.dom && /skeleton|spinner|loading|progress-bar|role\s*=\s*["']progressbar/i.test(ctx.html), (ctx) => {
-    if (/\b(?:fetch|XMLHttpRequest|import\s*\()\b/i.test(ctx.scripts || ctx.html)) return [];
-    return /setTimeout|animation-delay|setInterval/i.test(ctx.html) ? [warn('timer-driven loading UI with no real async work', 'loading affordance')] : [];
-  })],
-  ['mixed-icon-systems', scoped((ctx) => ctx.dom && /<li\b|class\s*=\s*["'][^"']*(?:row|item|feature)/i.test(ctx.html), (ctx) => {
-    for (const parent of all(ctx.dom, 'ul,ol,.list,.features,.rows')) {
-      const kids = Array.from(parent.children || []).filter((el) => textOf(el));
-      if (kids.length < 3) continue;
-      const kinds = new Set(kids.map(markerKind).filter(Boolean));
-      if (kinds.size >= 2) return [warn(`mixed icon systems in same sibling pattern: ${Array.from(kinds).join(', ')}`, selectorName(parent))];
-    }
-    return [];
-  })],
-  ['inline-emoji-bullets', scoped((ctx) => ctx.dom && all(ctx.dom, 'li,p').length >= 3, (ctx) => {
-    const hits = all(ctx.dom, 'li,p').filter((el) => EMOJI_RE.test((textOf(el).match(/^\S+/) || [''])[0]) && !el.closest('code,pre'));
-    return hits.length >= 3 ? [warn(`leading emoji bullet pattern across ${hits.length} items`, selectorName(hits[0].parentElement))] : [];
-  })],
   ['meaning-without-labels', scoped((ctx) => ctx.dom && /legend|key|swatch|status|#(?:dc2626|16a34a|ef4444|22c55e)|red|green/i.test(ctx.html), (ctx) => {
     for (const el of all(ctx.dom, '.legend,.key,[class*="legend"],[class*="swatch"],[class*="status"]')) {
       if (/background|border-radius|width\s*:\s*(?:\d|1\d|2\d)px/i.test(styleFor(ctx, el)) && !textOf(el) && !el.getAttribute('aria-label') && !el.getAttribute('title')) return [warn('bare color/icon swatch lacks adjacent label', selectorName(el))];
@@ -146,34 +78,6 @@ export const checks = Object.fromEntries([
     const redGreen = all(ctx.dom, '[class*="red"],[class*="green"],[style*="red"],[style*="green"],[style*="#dc2626"],[style*="#16a34a"],[style*="#ef4444"],[style*="#22c55e"]');
     if (redGreen.length >= 2 && !/pass|fail|before|after|old|new|added|removed|error|success|deprecated/i.test(redGreen.map(textOf).join(' '))) return [warn('red/green status pair carries meaning without labels', 'status color')];
     return [];
-  })],
-  ['uniform-descriptor-gloss', scoped((ctx) => ctx.dom && /grid|list|catalog|gloss|muted|dim|subtitle|caption|description/i.test(ctx.html), (ctx) => {
-    for (const parent of repeatedItemContainers(ctx)) {
-      const kids = Array.from(parent.children || []).filter((el) => textOf(el) && !descriptorGuardedContext(el));
-      if (kids.length < 5) continue;
-      const hits = kids.map((item) => descriptorGlossPair(ctx, item)).filter(Boolean);
-      if (hits.length >= 5 && hits.length / kids.length >= 0.8) {
-        const examples = hits.slice(0, 3).map((hit) => hit.gloss).join(', ');
-        return [warn(`uniform per-item descriptor gloss across ${hits.length} siblings: ${examples}`, selectorName(parent))];
-      }
-    }
-    return [];
-  })],
-  ['hero-metric-template', scoped((ctx) => ctx.dom && /\d(?:[%x/]|[\d,.])/i.test(ctx.html), (ctx) => {
-    const repeatedMetrics = (ctx.html.match(/class\s*=\s*["'][^"']*(?:num|metric|stat)[^"']*["'][^>]*>\s*[\d,.]+(?:%|x|\/\d)?/gi) || []).length;
-    if (repeatedMetrics >= 3 && /gradient|accent|background|color/i.test(ctx.html)) return [warn(`hero metric template with ${repeatedMetrics} repeated numeric nodes`, 'metric tiles')];
-    for (const parent of all(ctx.dom, '.metrics,.stats,.kpis,.hero,section')) {
-      const tiles = Array.from(parent.children || []).filter((el) => /\b[\d,.]+(?:%|x|\/\d)?\b/.test(textOf(el)) && wordCount(textOf(el)) <= 8);
-      if (tiles.length >= 3 && /gradient|accent|color|background/i.test(tiles.map((el) => styleFor(ctx, el)).join(' '))) return [warn(`hero metric template with ${tiles.length} repeated tiles`, selectorName(parent))];
-    }
-    return [];
-  })],
-  ['card-as-universal-wrapper', scoped((ctx) => ctx.dom && /card|box-shadow|border-radius/i.test(ctx.html), (ctx) => {
-    const blocks = Array.from((ctx.dom.querySelector('main') || ctx.dom.body)?.children || []).filter((el) => textOf(el));
-    if (blocks.length < 4) return [];
-    const cardBlocks = blocks.filter((el) => isCardLike(ctx, el));
-    const singletons = cardBlocks.filter((el) => Array.from(el.children || []).filter((child) => textOf(child)).length <= 1);
-    return cardBlocks.length / blocks.length >= 0.9 && singletons.length ? [warn('nearly every top-level content block is boxed as a card', 'main flow')] : [];
   })],
   ['flat-wall-of-bullets', scoped((ctx) => ctx.dom && /<[uo]l\b/i.test(ctx.html), (ctx) => {
     for (const list of all(ctx.dom, 'main > ul,main > ol,section > ul,section > ol')) {
@@ -345,7 +249,6 @@ export const checks = Object.fromEntries([
     }
     return [];
   })],
-  ['decorative-svg-sparing-use', scoped((ctx) => ctx.profile === 'slides' && ctx.dom && all(ctx.dom, 'svg').length > 0, (ctx) => all(ctx.dom, 'svg').filter((svg) => !svg.getAttribute('data-diagram-role') && !/diagram|chart/i.test(svg.getAttribute('class') || '')).length > 2 ? [warn('too many decorative SVGs in slide deck', 'svg')] : [])],
   ['vertical-consecutive-composition-run', scoped((ctx) => ctx.profile === 'slides' && ctx.dom, (ctx) => consecutiveRun(all(ctx.dom, '.slide,section,[data-slide]'), (el) => /vertical|stack|content/i.test(el.getAttribute('class') || el.getAttribute('data-layout') || ''), 3) ? [warn('three or more consecutive vertical/stack compositions', 'slides')] : [])],
   ['poster-fonts-loaded-in-root', scoped((ctx) => ctx.profile === 'poster' && /font-family|fontFamily|Doto|Geist|Space Grotesk/i.test(ctx.html), (ctx) => {
     if (/Geist Pixel/i.test(ctx.html) && !/@font-face[\s\S]*Geist Pixel[\s\S]*cdn\.jsdelivr\.net\/npm\/geist/i.test(ctx.html)) return [fail('poster references Geist Pixel without in-root @font-face jsDelivr source', 'font')];
@@ -537,39 +440,6 @@ function styleFor(ctx, el) {
   return `${matched};${inline}`;
 }
 
-function isSmallCircle(style, el) {
-  const klass = el.getAttribute?.('class') || '';
-  const width = Number(style.match(/\bwidth\s*:\s*(\d+(?:\.\d+)?)px/i)?.[1] || 0);
-  const height = Number(style.match(/\bheight\s*:\s*(\d+(?:\.\d+)?)px/i)?.[1] || 0);
-  const round = /border-radius\s*:\s*(?:50%|999px)/i.test(style) || /\b(?:dot|circle)\b/i.test(klass);
-  const small = (!width && !height) || (width <= 16 && height <= 16 && Math.abs(width - height) <= 3);
-  return round && small;
-}
-
-function hasTrafficLightTriple(styles) {
-  const hues = styles.map((style) => colorHue(propertyValue(style, /background(?:-color)?/i) || style)).filter((hue) => hue != null);
-  return hues.some((h) => h <= 12 || h >= 348) && hues.some((h) => h >= 34 && h <= 52) && hues.some((h) => h >= 105 && h <= 150);
-}
-
-function propertyValue(body, propRe) {
-  const match = body.match(new RegExp(`(?:${propRe.source})\\s*:\\s*([^;{}]+)`, propRe.flags.replace('g', '')));
-  return match?.[1] || '';
-}
-
-function colorHue(value = '') {
-  if (/red/i.test(value)) return 0;
-  if (/yellow/i.test(value)) return 45;
-  if (/green/i.test(value)) return 130;
-  const hsl = value.match(/hsla?\s*\(\s*([0-9.]+)/i);
-  if (hsl) return Number(hsl[1]) % 360;
-  const rgb = value.match(/rgba?\s*\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)/i);
-  if (rgb) return rgbHue(Number(rgb[1]), Number(rgb[2]), Number(rgb[3]));
-  const hex = value.match(/#([0-9a-f]{3}|[0-9a-f]{6})\b/i)?.[1];
-  if (!hex) return null;
-  const raw = hex.length === 3 ? hex.split('').map((ch) => ch + ch).join('') : hex;
-  return rgbHue(Number.parseInt(raw.slice(0, 2), 16), Number.parseInt(raw.slice(2, 4), 16), Number.parseInt(raw.slice(4, 6), 16));
-}
-
 function rgbHue(r, g, b) {
   r /= 255;
   g /= 255;
@@ -595,54 +465,6 @@ function selectorMatchesSimple(selector, tag, classes, id) {
   return false;
 }
 
-function decorativeOrbStyle(style) {
-  return /position\s*:\s*(?:absolute|fixed)/i.test(style) &&
-    /border-radius\s*:\s*(?:50%|999px|[3-9]\dpx)/i.test(style) &&
-    (/(?:filter|backdrop-filter)\s*:\s*blur\(\s*(?:[2-9]\d|[1-9]\d{2,})px/i.test(style) || /(?:radial|conic)-gradient\s*\(/i.test(style));
-}
-
-function isCardLike(ctx, el) {
-  const style = styleFor(ctx, el);
-  const klass = el.getAttribute('class') || '';
-  const sized = /(?:width|min-width)\s*:\s*(?:1[2-9]\d|[2-9]\d{2,})px|(?:height|min-height)\s*:\s*(?:1[2-9]\d|[2-9]\d{2,})px/i.test(style) || /card|panel|tile|surface/i.test(klass);
-  return sized && /border-radius\s*:\s*(?!0)\S+/i.test(style) && (/(?:box-shadow)\s*:\s*(?!none)/i.test(style) || /border\s*:\s*(?!0|none)/i.test(style) || /background(?:-color)?\s*:/i.test(style));
-}
-
-function sameTreatment(a, b) {
-  const radiusA = (a.match(/border-radius\s*:\s*([^;]+)/i)?.[1] || '').trim();
-  const radiusB = (b.match(/border-radius\s*:\s*([^;]+)/i)?.[1] || '').trim();
-  const bgA = (a.match(/background(?:-color)?\s*:\s*([^;]+)/i)?.[1] || '').trim();
-  const bgB = (b.match(/background(?:-color)?\s*:\s*([^;]+)/i)?.[1] || '').trim();
-  return (radiusA && radiusA === radiusB) || (bgA && bgA === bgB);
-}
-
-function thickSideBorder(style) {
-  const left = borderSide(style, 'left');
-  const right = borderSide(style, 'right');
-  const other = ['top', 'bottom'].some((side) => borderSide(style, side).width > 1);
-  if (!other && left.width > 1 && right.width <= 1 && saturatedColor(left.color)) return 'left';
-  if (!other && right.width > 1 && left.width <= 1 && saturatedColor(right.color)) return 'right';
-  return '';
-}
-
-function borderSide(style, side) {
-  const match = style.match(new RegExp(`border-${side}\\s*:\\s*(\\d+)px\\s+[^;#]*(#[0-9a-f]{3,6}|[a-z]+)?`, 'i'));
-  if (match) return { width: Number(match[1]), color: match[2] || '' };
-  const width = Number(style.match(new RegExp(`border-${side}-width\\s*:\\s*(\\d+)px`, 'i'))?.[1] || 0);
-  const color = style.match(new RegExp(`border-${side}-color\\s*:\\s*([^;]+)`, 'i'))?.[1] || '';
-  return { width, color };
-}
-
-function saturatedColor(value = '') {
-  if (/red|green|blue|orange|purple|pink|cyan|rose|lime/i.test(value)) return true;
-  const hex = value.match(/#([0-9a-f]{3}|[0-9a-f]{6})\b/i)?.[0];
-  if (!hex) return false;
-  let raw = hex.slice(1);
-  if (raw.length === 3) raw = raw.split('').map((ch) => ch + ch).join('');
-  const rgb = [0, 2, 4].map((i) => Number.parseInt(raw.slice(i, i + 2), 16));
-  return Math.max(...rgb) - Math.min(...rgb) > 40;
-}
-
 function authoredFontFamilies(ctx) {
   const fonts = [];
   for (const value of ctx.html.matchAll(/(?:font-family\s*:\s*|--font-[\w-]+\s*:\s*)([^;{}<]+)/gi)) {
@@ -659,55 +481,6 @@ function firstFamily(stack) {
   return (stack.split(',')[0] || '').trim().replace(/^['"]|['"]$/g, '').replace(/\s*!important$/, '');
 }
 
-function markerKind(el) {
-  const text = textOf(el);
-  if (EMOJI_RE.test((text.match(/^\S+/) || [''])[0])) return 'emoji';
-  if (el.querySelector('svg')) return 'inline-svg';
-  if (/^[▸•→✓✕×+-]/.test(text)) return 'unicode-symbol';
-  if (/icon-|fa-|material-icons/i.test(el.innerHTML || '')) return 'icon-font';
-  return '';
-}
-
-function repeatedItemContainers(ctx) {
-  const selector = [
-    'ul',
-    'ol',
-    '.grid',
-    '.list',
-    '.catalog',
-    '.cards',
-    '.items',
-    '.features',
-    '.feature-grid',
-    '.rows',
-    '[class*="-grid"]',
-    '[class*="-list"]',
-    '[class*="-catalog"]',
-  ].join(',');
-  return all(ctx.dom, selector).filter((el) => !descriptorGuardedContext(el));
-}
-
-function descriptorGlossPair(ctx, item) {
-  if (descriptorGuardedContext(item) || hasMetricLikeText(item)) return null;
-  const directLabel = ownText(item);
-  const textEls = all(item, 'h1,h2,h3,h4,h5,h6,p,span,small,strong,b,dt,dd,figcaption')
-    .filter((el) => !el.closest('code,pre,table,form') && textOf(el));
-  if (textEls.length < 2 && !directLabel) return null;
-  const glossEl = textEls.find((el) => isDescriptorGloss(ctx, el));
-  if (!glossEl) return null;
-  const labelEl = textEls.find((el) => el !== glossEl && !glossEl.contains(el) && !isDescriptorGloss(ctx, el));
-  if (labelEl) return { label: textOf(labelEl), gloss: textOf(glossEl) };
-  return directLabel && !descriptorGuardedText(directLabel) ? { label: directLabel, gloss: textOf(glossEl) } : null;
-}
-
-function isDescriptorGloss(ctx, el) {
-  const text = textOf(el);
-  if (!text || wordCount(text) < 1 || wordCount(text) > 4) return false;
-  if (/[.!?]$/.test(text) || /[A-Z]/.test(text)) return false;
-  if (!/[a-z]/.test(text) || descriptorGuardedText(text)) return false;
-  return isMutedDescriptorStyle(ctx, el);
-}
-
 function isMutedDescriptorStyle(ctx, el) {
   const klass = el.getAttribute('class') || '';
   const style = styleFor(ctx, el);
@@ -715,17 +488,8 @@ function isMutedDescriptorStyle(ctx, el) {
     /(?:color\s*:\s*(?:var\(--(?:ve-)?(?:muted|text-dim|.*muted|.*dim)\)|rgba?\([^)]*,\s*0\.[1-8]\)|#[789a-f][0-9a-f]{2,5})|opacity\s*:\s*0\.[1-8])/i.test(style);
 }
 
-function descriptorGuardedContext(el) {
-  return Boolean(el.closest?.('table,thead,tbody,tfoot,tr,td,th,form,label,fieldset,.table,.data-table,.stat,.stats,.metric,.metrics,.kpi,.kpis,[class*="stat"],[class*="metric"],[class*="kpi"]'));
-}
-
 function descriptorGuardedText(text) {
   return /(?:^\$|[$€£¥]|\b\d{1,4}(?:[-/]\d{1,2}){1,2}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\b|\b\d+(?:\.\d+)?\s*(?:px|rem|em|ms|s|sec|min|hr|kb|mb|gb|tb|%|x)\b)/i.test(text);
-}
-
-function hasMetricLikeText(el) {
-  const text = textOf(el);
-  return /\b[$€£¥]?\d[\d,.]*(?:%|x|ms|s|px|rem|em|kb|mb|gb|tb)?\b/.test(text);
 }
 
 function caseKind(value) {

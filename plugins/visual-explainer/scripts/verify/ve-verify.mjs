@@ -6,7 +6,7 @@ async function main() {
   const args = process.argv.slice(2);
   const options = parseArgs(args);
   if (!options.file) {
-    console.error('Usage: node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> [--profile page|slides|magazine|poster|video-comp] [--preset mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide|custom] [--json out.json] [--screens dir] [--static-only] [--quiet]');
+    console.error('Usage: node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> [--truth brief.md] [--profile page|slides|magazine|poster|video-comp] [--preset mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide|custom] [--json out.json] [--screens dir] [--static-only] [--mechanics-only] [--quiet]');
     process.exit(2);
   }
 
@@ -22,14 +22,16 @@ async function main() {
 }
 
 function parseArgs(args) {
-  const options = { staticOnly: false, quiet: false };
+  const options = { staticOnly: false, mechanicsOnly: false, quiet: false };
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === '--profile') options.profile = args[++i];
+    else if (arg === '--truth') options.truth = args[++i];
     else if (arg === '--preset') options.preset = args[++i];
     else if (arg === '--json') options.json = args[++i];
     else if (arg === '--screens') options.screens = args[++i];
     else if (arg === '--static-only') options.staticOnly = true;
+    else if (arg === '--mechanics-only') options.mechanicsOnly = true;
     else if (arg === '--quiet') options.quiet = true;
     else if (!options.file) options.file = arg;
     else throw new Error(`Unexpected argument: ${arg}`);

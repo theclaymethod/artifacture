@@ -1,40 +1,4 @@
 {
-  "forbidden-body-font.html": {
-    "must_fire": [
-      "forbidden-body-font"
-    ],
-    "max_other_errors": 0
-  },
-  "forbidden-accent-colors.html": {
-    "must_fire": [
-      "forbidden-accent-colors"
-    ],
-    "max_other_errors": 0
-  },
-  "forbidden-gradient-text-headings.html": {
-    "must_fire": [
-      "forbidden-gradient-text-headings"
-    ],
-    "max_other_errors": 0
-  },
-  "forbidden-glow-pulse-animations.html": {
-    "must_fire": [
-      "forbidden-glow-pulse-animations"
-    ],
-    "max_other_errors": 0
-  },
-  "no-emoji-in-ui-chrome.html": {
-    "must_fire": [
-      "no-emoji-in-ui-chrome"
-    ],
-    "max_other_errors": 0
-  },
-  "no-three-dot-window-chrome.html": {
-    "must_fire": [
-      "no-three-dot-window-chrome"
-    ],
-    "max_other_errors": 0
-  },
   "no-placeholder-leak.html": {
     "must_fire": [
       "no-placeholder-leak"
@@ -89,21 +53,9 @@
     ],
     "max_other_errors": 0
   },
-  "prose-accent-overuse.html": {
-    "must_fire": [
-      "prose-accent-overuse"
-    ],
-    "max_other_errors": 0
-  },
   "no-console-errors.html": {
     "must_fire": [
       "no-console-errors"
-    ],
-    "max_other_errors": 0
-  },
-  "unslop-prose-phrases.html": {
-    "must_fire": [
-      "unslop-prose-phrases"
     ],
     "max_other_errors": 0
   },
@@ -768,16 +720,6 @@
       "autofit-safety-net-present-and-ordered"
     ]
   },
-  "decorative-svg-sparing-use.html": {
-    "must_fire": [
-      "decorative-svg-sparing-use"
-    ],
-    "max_other_errors": 0,
-    "allowed_co_fires": [
-      "autofit-safety-net-present-and-ordered",
-      "diagram-4px-grid"
-    ]
-  },
   "vertical-consecutive-composition-run.html": {
     "must_fire": [
       "vertical-consecutive-composition-run"
@@ -1051,51 +993,9 @@
     ],
     "max_other_errors": 0
   },
-  "gradient-hero-background.html": {
-    "must_fire": [
-      "gradient-hero-background"
-    ],
-    "max_other_errors": 0
-  },
-  "decorative-blur-orbs.html": {
-    "must_fire": [
-      "decorative-blur-orbs"
-    ],
-    "max_other_errors": 0
-  },
-  "glassmorphism-default-surface.html": {
-    "must_fire": [
-      "glassmorphism-default-surface"
-    ],
-    "max_other_errors": 0
-  },
-  "nested-cards.html": {
-    "must_fire": [
-      "nested-cards"
-    ],
-    "max_other_errors": 0
-  },
-  "side-stripe-border.html": {
-    "must_fire": [
-      "side-stripe-border"
-    ],
-    "max_other_errors": 0
-  },
-  "cream-sand-background.html": {
-    "must_fire": [
-      "cream-sand-background"
-    ],
-    "max_other_errors": 0
-  },
   "font-family-sprawl.html": {
     "must_fire": [
       "font-family-sprawl"
-    ],
-    "max_other_errors": 0
-  },
-  "reflex-reject-fonts.html": {
-    "must_fire": [
-      "reflex-reject-fonts"
     ],
     "max_other_errors": 0
   },
@@ -1129,12 +1029,6 @@
     ],
     "max_other_errors": 0
   },
-  "rainbow-accent-palette.html": {
-    "must_fire": [
-      "rainbow-accent-palette"
-    ],
-    "max_other_errors": 0
-  },
   "gray-text-on-colored-surface.html": {
     "must_fire": [
       "gray-text-on-colored-surface"
@@ -1153,12 +1047,6 @@
     ],
     "max_other_errors": 0
   },
-  "scroll-reveal-spam.html": {
-    "must_fire": [
-      "scroll-reveal-spam"
-    ],
-    "max_other_errors": 0
-  },
   "hidden-until-js-reveal.html": {
     "must_fire": [
       "hidden-until-js-reveal"
@@ -1171,63 +1059,15 @@
     ],
     "max_other_errors": 0
   },
-  "bounce-elastic-easing.html": {
-    "must_fire": [
-      "bounce-elastic-easing"
-    ],
-    "max_other_errors": 0
-  },
   "undersized-touch-targets.html": {
     "must_fire": [
       "undersized-touch-targets"
     ],
     "max_other_errors": 0
   },
-  "fake-loading-theater.html": {
-    "must_fire": [
-      "fake-loading-theater"
-    ],
-    "max_other_errors": 0
-  },
-  "mixed-icon-systems.html": {
-    "must_fire": [
-      "mixed-icon-systems"
-    ],
-    "max_other_errors": 0
-  },
-  "inline-emoji-bullets.html": {
-    "must_fire": [
-      "inline-emoji-bullets"
-    ],
-    "max_other_errors": 0
-  },
   "meaning-without-labels.html": {
     "must_fire": [
       "meaning-without-labels"
-    ],
-    "max_other_errors": 0
-  },
-  "copy-paste-drop-shadow.html": {
-    "must_fire": [
-      "copy-paste-drop-shadow"
-    ],
-    "max_other_errors": 0
-  },
-  "hero-metric-template.html": {
-    "must_fire": [
-      "hero-metric-template"
-    ],
-    "max_other_errors": 0
-  },
-  "uniform-descriptor-gloss.html": {
-    "must_fire": [
-      "uniform-descriptor-gloss"
-    ],
-    "max_other_errors": 0
-  },
-  "card-as-universal-wrapper.html": {
-    "must_fire": [
-      "card-as-universal-wrapper"
     ],
     "max_other_errors": 0
   },
@@ -1246,12 +1086,6 @@
   "inconsistent-heading-case.html": {
     "must_fire": [
       "inconsistent-heading-case"
-    ],
-    "max_other_errors": 0
-  },
-  "copy-slop-phrases.html": {
-    "must_fire": [
-      "copy-slop-phrases"
     ],
     "max_other_errors": 0
   }

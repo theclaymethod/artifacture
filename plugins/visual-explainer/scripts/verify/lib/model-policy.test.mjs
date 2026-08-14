@@ -73,7 +73,7 @@ test('builds ready Artifacture routes and independent companion routes', () => {
   assert.equal(plan[2].owner, 'unslop');
 });
 
-test('skips an Artifacture pass instead of falling back to the host model', () => {
+test('requires a disclosed best-available fallback when no qualified route exists', () => {
   const [entry] = buildLlmDispatchPlan(
     ['operating-model'],
     { source: null, policy: null },
@@ -81,8 +81,11 @@ test('skips an Artifacture pass instead of falling back to the host model', () =
   assert.deepEqual(entry, {
     pass: 'operating-model',
     owner: 'artifacture',
-    status: 'skipped',
+    status: 'fallback-required',
     reason: 'no-eval-qualified-model',
+    qualification: 'unqualified-fallback',
+    selection: 'best-available-model',
+    batch_size: null,
     policy_source: null,
   });
 });
@@ -92,8 +95,9 @@ test('does not borrow layout qualification for an aesthetic pass', () => {
     ['aesthetic-nothing'],
     { source: '/policy.json', policy: generatedPolicy({ layout: measuredRoute() }) },
   );
-  assert.equal(entry.status, 'skipped');
+  assert.equal(entry.status, 'fallback-required');
   assert.equal(entry.reason, 'no-eval-qualified-model');
+  assert.equal(entry.selection, 'best-available-model');
 });
 
 test('does not borrow layout qualification for deck review', () => {
@@ -101,8 +105,9 @@ test('does not borrow layout qualification for deck review', () => {
     ['deck-review'],
     { source: '/policy.json', policy: generatedPolicy({ layout: measuredRoute() }) },
   );
-  assert.equal(entry.status, 'skipped');
+  assert.equal(entry.status, 'fallback-required');
   assert.equal(entry.reason, 'no-eval-qualified-model');
+  assert.equal(entry.batch_size, 2);
 });
 
 test('deck review refuses a route that was not qualified on paired evidence', () => {
@@ -110,8 +115,10 @@ test('deck review refuses a route that was not qualified on paired evidence', ()
     ['deck-review'],
     { source: '/policy.json', policy: generatedPolicy({ 'deck-review': measuredRoute({ batch_size: 1 }) }) },
   );
-  assert.equal(entry.status, 'skipped');
-  assert.equal(entry.reason, 'deck-review-requires-paired-evidence');
+  assert.equal(entry.status, 'fallback-required');
+  assert.equal(entry.reason, 'no-eval-qualified-model');
+  assert.equal(entry.qualification_gap, 'deck-review-requires-paired-evidence');
+  assert.equal(entry.batch_size, 2);
 });
 
 test('deck review accepts an independently qualified paired-evidence route', () => {
@@ -121,6 +128,22 @@ test('deck review accepts an independently qualified paired-evidence route', () 
   );
   assert.equal(entry.status, 'ready');
   assert.equal(entry.batch_size, 2);
+});
+
+test('profile-aware artifact review cannot borrow narrower legacy qualification', () => {
+  const plan = buildLlmDispatchPlan(
+    ['artifact-review:page', 'artifact-review:slides'],
+    {
+      source: '/policy.json',
+      policy: generatedPolicy({
+        layout: measuredRoute({ batch_size: 1 }),
+        'deck-review': measuredRoute({ batch_size: 2 }),
+      }),
+    },
+  );
+  assert.equal(plan[0].status, 'fallback-required');
+  assert.equal(plan[1].status, 'fallback-required');
+  assert.equal(plan[1].batch_size, 2);
 });
 
 test('rejects a hand-written route without selector provenance and measurements', () => {
