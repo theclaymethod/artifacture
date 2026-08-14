@@ -1,6 +1,7 @@
 {
   "name": "artifacture",
   "version": "0.8.0",
+  "type": "module",
   "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources — with a deterministic design-quality verifier and a multi-model eval harness",
   "keywords": [
     "claude-code-plugin",
@@ -33,11 +34,12 @@
     "ve:merge-visual-model-measurements": "node evals/visual-model-policy/merge.mjs",
     "ve:select-visual-model-policy": "node evals/visual-model-policy/select.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
-    "check:fast": "npm test && npm run check:manifests && npm run ve:check",
+    "typecheck": "tsc --noEmit",
+    "check:fast": "npm test && npm run typecheck && npm run check:manifests && npm run ve:check",
     "check": "node evals/check-with-budget.mjs",
     "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/network-policy.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",
@@ -46,13 +48,15 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3",
     "vite": "^8.0.12"
   },
   "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "linkedom": "0.18.12",
     "playwright": "1.60.0",
     "playwright-core": "1.60.0",
-    "shiki": "4.3.1"
+    "shiki": "4.3.1",
+    "typescript": "^6.0.3"
   }
 }

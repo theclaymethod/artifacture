@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generated": "2026-07-04",
-  "note": "Deterministic mechanics catalog. Subjective artifact quality is handled by one profile-aware artifact review; companion skills are explicit opt-ins. Stage counts: {\"browser\":40,\"static-dom\":55,\"static-text\":57}",
+  "note": "Deterministic mechanics catalog. Subjective artifact quality is handled by one profile-aware artifact review; companion skills are explicit opt-ins. Stage counts: {\"browser\":41,\"static-dom\":55,\"static-text\":57}",
   "checks": [
     {
       "family": "F1_slop_global",
@@ -182,6 +182,26 @@
         "prose-max-measure-75ch"
       ],
       "spec_modification_note": "The typeset tells (ai-sub-16px-body-text, ai-unbounded-line-length, ai-default-tight-line-height) are ~80% covered by prose-readability-minimums but only inside a .prose container. Widening the selector to all running prose (still excluding secondary roles) folds those three tells in without a new check, and the profile guard keeps fixed-canvas posters/videos out."
+    },
+    {
+      "family": "F1_slop_global",
+      "id": "mermaid-rendered",
+      "title": "Declared Mermaid content renders to SVG",
+      "profiles": [
+        "page",
+        "slides",
+        "magazine",
+        "video-comp"
+      ],
+      "stage": "browser",
+      "severity": "error",
+      "applies_when": "Renderable page, slides, magazine, or video-composition profiles. The check is a no-op when the live DOM contains no `.mermaid` or `data-ve-mermaid-shell` container.",
+      "spec": "Wait up to the configured Mermaid readiness timeout, then require every declared Mermaid container to contain an SVG and no Mermaid parse-error marker. A timeout is recorded as browser evidence and fails this check instead of aborting the verifier before findings are produced.",
+      "fixture_violation": "A `.mermaid` block remains as source text because the renderer never ran or failed to parse it.",
+      "fp_guards": "Do not infer Mermaid from unrelated source imports or prose. Poster artifacts are covered by the stricter no-live-Mermaid source rule.",
+      "source_rules": [
+        "mermaid-rendered-before-verification"
+      ]
     },
     {
       "family": "F1_slop_global",

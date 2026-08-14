@@ -9,6 +9,7 @@ import { buildReport } from '../plugins/visual-explainer/scripts/verify/lib/repo
 
 const REPO_ROOT = resolve(import.meta.dirname, '..');
 const CLI = resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/ve-finalize.mjs');
+const VERIFY_CLI = resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/ve-verify.mjs');
 
 async function fixture(t) {
   const workDir = mkdtempSync(join(tmpdir(), 'artifacture-finalize-'));
@@ -114,4 +115,55 @@ test('an empty heading-only truth file cannot complete a review contract', async
   const report = buildReport(await buildContext(artifact, { truth }), [], [screenshot]);
   assert.equal(report.review_contract.complete, false);
   assert.deepEqual(report.review_contract.missing, ['truth-brief']);
+});
+
+test('a fixed-stage deck finalizes with page mechanics and slides review semantics', async (t) => {
+  const workDir = mkdtempSync(join(tmpdir(), 'artifacture-fixed-stage-'));
+  t.after(() => rmSync(workDir, { recursive: true, force: true }));
+  const artifact = join(workDir, 'deck.html');
+  const truth = join(workDir, 'brief.md');
+  const screenshot = join(workDir, 'deck.png');
+  const manifest = join(workDir, 'deck-review.json');
+  const reportPath = join(workDir, 'report.json');
+  const verifierReportPath = join(workDir, 'verifier-report.json');
+  const verdictsPath = join(workDir, 'verdicts.json');
+  const outPath = join(workDir, 'final.json');
+  writeFileSync(artifact, '<!doctype html><html><body><main data-ve-presentation="true"><h1>Deck</h1><p>Grounded fact.</p></main></body></html>');
+  writeFileSync(truth, '# Brief\nGrounded fact.\n');
+  writeFileSync(screenshot, 'pixels');
+  writeFileSync(manifest, '{}');
+
+  const verifyResult = spawnSync(process.execPath, [
+    VERIFY_CLI, artifact, '--truth', truth, '--json', verifierReportPath, '--static-only', '--quiet',
+  ], { cwd: REPO_ROOT, encoding: 'utf8' });
+  assert.notEqual(verifyResult.status, 2, verifyResult.stderr);
+  const verifierReport = JSON.parse(readFileSync(verifierReportPath, 'utf8'));
+  assert.equal(verifierReport.profile, 'page');
+  assert.equal(verifierReport.mechanics_profile, 'page');
+  assert.equal(verifierReport.review_profile, 'slides');
+  assert.deepEqual(verifierReport.llm_passes_required, ['artifact-review:slides']);
+
+  const ctx = await buildContext(artifact, { truth });
+  ctx.browser = { runs: [{ deckReview: { manifestPath: manifest } }] };
+  const report = buildReport(ctx, [], [screenshot]);
+  assert.equal(report.profile, 'page');
+  assert.equal(report.mechanics_profile, 'page');
+  assert.equal(report.review_profile, 'slides');
+  assert.equal(report.review_contract.profile, 'slides');
+  assert.equal(report.review_contract.mechanics_profile, 'page');
+  assert.equal(report.review_contract.review_profile, 'slides');
+  assert.deepEqual(report.llm_passes_required, ['artifact-review:slides']);
+  assert.equal(report.review_contract.complete, true);
+
+  writeFileSync(reportPath, JSON.stringify(report));
+  writeFileSync(verdictsPath, JSON.stringify({
+    schema_version: 1,
+    review_contract_sha256: report.review_contract.sha256,
+    passes: [{ pass: 'artifact-review:slides', status: 'pass', findings: [] }],
+  }));
+  const result = spawnSync(process.execPath, [
+    CLI, '--report', reportPath, '--verdicts', verdictsPath, '--out', outPath,
+  ], { cwd: REPO_ROOT, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(readFileSync(outPath, 'utf8')).verification.status, 'verified');
 });

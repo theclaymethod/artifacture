@@ -1,17 +1,18 @@
-import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
+import { isAllowedBrowserRequest } from '../../network-policy.mjs';
 
-const DEFAULT_SCREENS_DIR = path.join(tmpdir(), 've-verify-screens');
+const DEFAULT_SCREENS_PREFIX = path.join(tmpdir(), 've-verify-screens-');
 const MAX_DECK_REVIEW_SLIDES = 200;
 const DECK_REVIEW_SETTLE_MS = 240;
 
 export async function runBrowserStage(ctx, options = {}) {
   const profile = options.profile || ctx.profile || 'page';
-  const screensDir = options.screensDir || DEFAULT_SCREENS_DIR;
+  const screensDir = options.screensDir || await mkdtemp(DEFAULT_SCREENS_PREFIX);
   const captureDeckReview = options.captureDeckReview !== false;
   await mkdir(screensDir, { recursive: true });
 
@@ -22,7 +23,10 @@ export async function runBrowserStage(ctx, options = {}) {
 
   try {
     for (const runMeta of matrix) {
-      const result = await executeWithRetry(browser, ctx, runMeta, screensDir, { captureDeckReview });
+      const result = await executeWithRetry(browser, ctx, runMeta, screensDir, {
+        captureDeckReview,
+        mermaidTimeoutMs: options.mermaidTimeoutMs,
+      });
       runs.push(result);
     }
   } finally {
@@ -197,13 +201,12 @@ async function executeWithRetry(browser, ctx, runMeta, screensDir, options) {
   return first;
 }
 
-function looksLikeNetworkFlake(run) {
-  if (run.consoleErrors.length || run.pageErrors.length) return false;
+export function looksLikeNetworkFlake(run) {
+  if (run.pageErrors.length) return false;
+  if (run.consoleErrors.some((error) => !/Failed to load resource/i.test(error.text || ''))) return false;
   if (!run.failedRequests.length) return false;
   return run.failedRequests.every((failure) => /fonts\.(?:googleapis|gstatic)|cdn\.jsdelivr|unpkg|esm\.sh|cdnjs/i.test(failure.url || ''));
 }
-
-const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net/npm/mermaid@'];
 
 async function executeRun(browser, ctx, runMeta, screensDir, options) {
   const context = await browser.newContext({
@@ -215,8 +218,7 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
   const page = await context.newPage();
   await page.route('**/*', (route) => {
     const url = route.request().url();
-    const allowed = url.startsWith('file:') || url.startsWith('data:') || url.startsWith('blob:') || ALLOWED_REMOTE.some((origin) => url.startsWith(origin));
-    return allowed ? route.continue() : route.abort('blockedbyclient');
+    return isAllowedBrowserRequest(url) ? route.continue() : route.abort('blockedbyclient');
   });
   const consoleErrors = [];
   const pageErrors = [];
@@ -251,7 +253,7 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
   try {
     await page.emulateMedia({ colorScheme: runMeta.scheme, reducedMotion: runMeta.reducedMotion ? 'reduce' : 'no-preference' });
     await page.goto(pathToFileURL(ctx.filePath).href, { waitUntil: 'load', timeout: 30000 });
-    await waitForPageSettled(page, ctx);
+    const settlement = await waitForPageSettled(page, ctx, options);
 
     const metrics = await page.evaluate(({ meta, source }) => {
       const collect = new Function(`${source}; return collectBrowserMetrics;`)();
@@ -259,6 +261,14 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
     }, { meta: runMeta, source: BROWSER_METRIC_SOURCE });
     for (const id of Object.keys(metrics)) {
       metrics[id] = metrics[id] ?? null;
+    }
+    if (settlement.mermaidError) {
+      const metric = metrics['mermaid-rendered'] || { count: 0, offenders: [] };
+      metric.readinessError = settlement.mermaidError;
+      if (!metric.offenders?.length) {
+        metric.offenders = [{ selector: 'mermaid readiness', text: settlement.mermaidError }];
+      }
+      metrics['mermaid-rendered'] = metric;
     }
     await page.evaluate((collected) => { window.__veLastMetrics = collected; }, metrics);
     const renderedInventory = await page.evaluate(() => Array.from(
@@ -313,17 +323,25 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
   }
 }
 
-async function waitForPageSettled(page, ctx) {
+async function waitForPageSettled(page, ctx, options = {}) {
+  let mermaidError = null;
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
   });
 
-  const hasMermaid = ctx.flags?.hasMermaid || /class=["'][^"']*\bmermaid\b/i.test(ctx.html || '');
+  const hasMermaid = await page.locator('.mermaid, pre.mermaid, [data-ve-mermaid-shell]').count() > 0;
   if (hasMermaid) {
-    await page.waitForFunction(() => {
-      const mermaids = [...document.querySelectorAll('.mermaid, pre.mermaid')];
-      return mermaids.length === 0 || mermaids.every((el) => el.querySelector('svg'));
-    }, null, { timeout: 8000 }).catch(() => {});
+    const timeout = Number.isFinite(options.mermaidTimeoutMs) && options.mermaidTimeoutMs > 0
+      ? options.mermaidTimeoutMs
+      : 8000;
+    try {
+      await page.waitForFunction(() => {
+        const mermaids = [...document.querySelectorAll('.mermaid, pre.mermaid, [data-ve-mermaid-shell]')];
+        return mermaids.length > 0 && mermaids.every((el) => el.matches('svg') || el.querySelector('svg'));
+      }, null, { timeout });
+    } catch (error) {
+      mermaidError = `Mermaid rendering did not complete within ${timeout}ms; every Mermaid container must contain an SVG`;
+    }
   }
 
   await page.evaluate(async () => {
@@ -338,6 +356,7 @@ async function waitForPageSettled(page, ctx) {
     window.scrollTo(0, 0);
     await new Promise((resolve) => requestAnimationFrame(resolve));
   });
+  return { mermaidError };
 }
 
 async function collectBrowserMetrics(runMeta) {
@@ -1425,7 +1444,7 @@ function reelTypographyMetrics(doc, px, compact) {
 }
 
 function mermaidMetrics(doc, compact) {
-  const blocks = [...doc.querySelectorAll('.mermaid, pre.mermaid')];
+  const blocks = [...doc.querySelectorAll('.mermaid, pre.mermaid, [data-ve-mermaid-shell]')];
   return {
     count: blocks.length,
     offenders: blocks.filter((el) => {

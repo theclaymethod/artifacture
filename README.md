@@ -53,8 +53,8 @@ Video formats (9:16 reel, 16:9 long-form) render to MP4 through Hyperframes; sam
 ## What it adds to upstream visual-explainer
 
 - **ve-verify** (`scripts/verify/`): 152 executable mechanics checks plus one grounded, profile-aware artifact review. Static scans and real-browser measurements catch shipping failures; the finalizer binds review verdicts to the artifact, truth brief, rendered inventory, and screenshot evidence.
-- **Tiered agent docs**: SKILL.md is a ~2.5k-token bootstrap plus one ~300-token card per use case (`cards/`). A covered flow reads about 3,100 tokens instead of 62,000. Deep references load only on escalation.
-- **17 shared components** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
+- **Tiered agent docs**: SKILL.md plus one covered-flow card now reads about 1,400–1,600 tokens instead of 62,000. A checked-in 3,000-token budget prevents the default path from regressing; deep references load only when their branch is selected.
+- **Shared component system** (`visual-explainer-mdx/components.tsx`): DiagramCanvas with computed layout and CSS-only mobile linearization, build-time Shiki CodeBlock, DiffBlock, TerminalBlock, JsonTree, an interactive Quiz, MermaidBlock with zoom/pan chrome, decks, posters, and more. Strict-export integrity checks catch bad edge ids and undefined components at build time.
 - **PresentationDeck** (`visual-explainer-mdx/presentation.tsx`): a second deck engine for presented (not scrolled) decks — a fixed 1920×1080 stage scaled to fit any screen, collapsible slide rail, two-axis keyboard navigation (Left/Right for slides; Up/Down for ordered click-ins or custom states, falling through to the next slide when exhausted), and drill-down primitives (click-to-expand cards/sheets with a click-anywhere-to-close guard, ladder/fanout diagrams, metrics, steppers). Fully `--ve-*` token-driven so every preset skins it; its behavioral contract is pinned by a headless eval suite (`npm run ve:eval-presentation`). See [docs/presentation-deck.md](docs/presentation-deck.md) for when to use it vs `SlideDeck`.
 - **`/explain-diff`**: a literate diff mode (background → intuition → walkthrough → quiz), adapted from Geoffrey Litt's prompt pattern.
 - **Product and model evals with separate jobs**: a six-case, human-reviewed product benchmark governs artifact quality. `evals/model-matrix/` generates evidence; `evals/visual-model-policy/` is resumable, budgeted model-routing research. Detector consistency is not treated as product improvement.
@@ -97,8 +97,8 @@ npx impeccable skills install
 npx skills add theclaymethod/unslop
 ```
 
-First generation clones the render pipeline to `~/.artifacture` (one-time,
-Node >= 22); full-clone installs use the repo in place. The companion skills
+When the render pipeline is not already installed, setup clones it to
+`~/.artifacture` (one-time, Node >= 22); full-clone installs use the repo in place. The companion skills
 remain independently versioned and keep ownership of their prompts.
 
 **Claude Code, as a plugin:**

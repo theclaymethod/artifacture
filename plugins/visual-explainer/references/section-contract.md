@@ -91,8 +91,8 @@ Every sub-agent returns a single JSON object as its final message. Do not return
 | `hero` | `ve-hero-builder` | tokens, components → "Hero number" | The single moment-of-surprise. Used at most once per page. |
 | `diagram` | `ve-diagram-builder` | `diagram-design`, `diagrams-svg`, `diagram-tokens`; add Pretext or libraries only when routed | One accessible inline-SVG diagram by default, or a Mermaid fallback with full zoom/pan chrome. |
 | `table` | `ve-table-builder` | tokens, components → "Data table" | A real `<table>` with sticky header, status colors on values. |
-| `dashboard` | `ve-dashboard-builder` | tokens, components → "Module strip", "Segmented progress bar", "Bracketed system message" | KPI strip, instrument widgets, segmented bars. |
-| `prose` | `ve-prose-builder` | tokens, components → "Lead paragraph", "Pull quote" | Lead paragraphs, callouts, pull quotes. Run `$unslop` when available; otherwise apply `quality.md`. |
+| `dashboard` | generic worker with a `dashboard` role brief | tokens, components → "Module strip", "Segmented progress bar", "Bracketed system message" | KPI strip, instrument widgets, segmented bars. |
+| `prose` | generic worker with a `prose` role brief | tokens, components → "Lead paragraph", "Pull quote" | Lead paragraphs, callouts, pull quotes. Run `$unslop` when available; otherwise apply `quality.md`. |
 
 If a section doesn't fit any role, the orchestrator builds it itself rather than inventing a new role. New roles require updating this contract.
 
@@ -100,7 +100,7 @@ If a section doesn't fit any role, the orchestrator builds it itself rather than
 
 ## Stitching examples
 
-**Font dedup.** If `ve-hero-builder` returns `fonts_needed: ["Geist Pixel Square"]` and `ve-dashboard-builder` returns `fonts_needed: []`, the orchestrator emits the Geist Pixel `@font-face` block exactly once. If two fragments both name the same Geist Pixel variant, it's still emitted once.
+**Font dedup.** If the hero specialist returns `fonts_needed: ["Geist Pixel Square"]` and the dashboard worker returns `fonts_needed: []`, the orchestrator emits the Geist Pixel `@font-face` block exactly once. If two fragments both name the same Geist Pixel variant, it's still emitted once.
 
 **Library dedup.** If three diagram sub-agents each return `libraries_needed: ["mermaid"]`, the orchestrator emits the Mermaid script tag and init code exactly once. Each diagram's escaped source goes into its own hidden `<pre class="ve-diagram__source" data-id="...">` element, and the init code walks every match with `textContent`.
 

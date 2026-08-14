@@ -14,12 +14,103 @@ test('extracted values are sanitized at ingestion; private hosts are blocked', a
   assert.equal(sanitizeExtractedValue('Acme</style><script>, serif'), 'Acme/stylescript, serif');
   assert.equal(sanitizeExtractedValue('Nice Stack, sans-serif'), 'Nice Stack, sans-serif');
   const { isPrivateHost } = await import('./learn-sources.mjs');
-  for (const host of ['localhost', '127.0.0.1', '10.0.0.5', '172.16.0.1', '192.168.0.1', '169.254.10.10', '::1', 'fd12::1']) {
+  for (const host of [
+    'localhost',
+    '127.0.0.1',
+    '10.0.0.5',
+    '172.16.0.1',
+    '192.168.0.1',
+    '169.254.10.10',
+    '::1',
+    'fd12::1',
+    '::ffff:127.0.0.1',
+    '::ffff:7f00:1',
+    '0:0:0:0:0:ffff:c0a8:101',
+  ]) {
     assert.equal(isPrivateHost(host), true, host);
   }
-  for (const host of ['example.com', '8.8.8.8', '172.32.0.1', '2606:4700::1111']) {
+  for (const host of ['example.com', '8.8.8.8', '172.32.0.1', '2606:4700::1111', '::ffff:8.8.8.8']) {
     assert.equal(isPrivateHost(host), false, host);
   }
+});
+
+test('URL extraction manually validates redirects and uses the final URL as the stylesheet base', async () => {
+  const { extractFromUrlSource } = await import('./learn-sources.mjs');
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url, redirect: options.redirect });
+    if (url === 'https://example.com/start') {
+      return new Response(null, { status: 302, headers: { location: '/nested/page.html' } });
+    }
+    if (url === 'https://example.com/nested/page.html') {
+      return new Response('<link rel="stylesheet" href="styles/theme.css"><h1>Example</h1>', {
+        headers: { 'content-type': 'text/html' },
+      });
+    }
+    if (url === 'https://example.com/nested/styles/theme.css') {
+      return new Response(':root { --brand-bg: #123456; }', {
+        headers: { 'content-type': 'text/css' },
+      });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  };
+
+  const extraction = await extractFromUrlSource('https://example.com/start', { fetchImpl });
+  assert.equal(extraction.colors[0]?.value, '#123456');
+  assert.deepEqual(calls, [
+    { url: 'https://example.com/start', redirect: 'manual' },
+    { url: 'https://example.com/nested/page.html', redirect: 'manual' },
+    { url: 'https://example.com/nested/styles/theme.css', redirect: 'manual' },
+  ]);
+});
+
+test('URL extraction blocks private IPv4-mapped IPv6 redirect destinations', async () => {
+  const { extractFromUrlSource } = await import('./learn-sources.mjs');
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(url);
+    return new Response(null, {
+      status: 302,
+      headers: { location: 'http://[::ffff:127.0.0.1]/private' },
+    });
+  };
+
+  await assert.rejects(
+    extractFromUrlSource('https://example.com/start', { fetchImpl }),
+    /Refusing to fetch private\/loopback host/,
+  );
+  assert.deepEqual(calls, ['https://example.com/start']);
+});
+
+test('URL extraction permits private redirects only with allowPrivate and caps redirect hops', async () => {
+  const { extractFromUrlSource } = await import('./learn-sources.mjs');
+  let privateCalls = 0;
+  const privateFetch = async () => {
+    privateCalls += 1;
+    if (privateCalls === 1) {
+      return new Response(null, {
+        status: 302,
+        headers: { location: 'http://[::ffff:7f00:1]/private' },
+      });
+    }
+    return new Response('<h1>Local reference</h1>', { headers: { 'content-type': 'text/html' } });
+  };
+  await extractFromUrlSource('https://example.com/start', {
+    fetchImpl: privateFetch,
+    allowPrivate: true,
+  });
+  assert.equal(privateCalls, 2);
+
+  let redirectCalls = 0;
+  const loopingFetch = async () => {
+    redirectCalls += 1;
+    return new Response(null, { status: 302, headers: { location: '/again' } });
+  };
+  await assert.rejects(
+    extractFromUrlSource('https://example.com/start', { fetchImpl: loopingFetch }),
+    /Too many redirects.*maximum 5/,
+  );
+  assert.equal(redirectCalls, 6);
 });
 
 test('detectModality: url, image extensions, everything else is code', () => {

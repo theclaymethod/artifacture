@@ -1,5 +1,16 @@
 import React, { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { edgePath, labelLeaderEndpoint, layoutDiagram, mobileConnectorEdges, splitSvgText, wrapWords, type LaidOutNode } from './diagram-layout';
+import type { DiagramCanvasProps, DiagramEdge, DiagramNode } from './diagram-types';
+export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
+
+declare global {
+  interface Window {
+    mermaid?: {
+      initialize(config: Record<string, unknown>): void;
+      render(id: string, chart: string): Promise<{ svg: string }>;
+    };
+  }
+}
 
 // Built-in preset names, plus any slug resolvable from the external
 // design-system registry (see docs/design-systems.md). `(string & {})` keeps
@@ -103,32 +114,6 @@ type RiskLedgerProps = {
 type FlowDiagramProps = {
   nodes: Array<{ id: string; label: string; detail?: string }>;
   edges: Array<{ from: string; to: string; label?: string }>;
-};
-
-type DiagramNode = {
-  id: string;
-  label: string;
-  detail?: string;
-  shape?: 'rect' | 'oval' | 'diamond' | 'dot';
-  accent?: boolean;
-  lane?: string;
-  date?: string;
-};
-
-type DiagramEdge = {
-  from: string;
-  to: string;
-  label?: string;
-  style?: 'solid' | 'dashed' | 'bidirectional';
-};
-
-type DiagramCanvasProps = {
-  nodes: DiagramNode[];
-  edges: DiagramEdge[];
-  layout?: 'flow' | 'tree' | 'swimlane' | 'timeline';
-  lanes?: Array<{ id: string; label: string }>;
-  dates?: string[];
-  title?: string;
 };
 
 type CodeBlockProps = {
@@ -330,7 +315,7 @@ export function RiskLedger({ risks }: RiskLedgerProps) {
   );
 }
 
-export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, title = 'Diagram' }: DiagramCanvasProps) {
+export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
   const rawId = useId().replace(/:/g, '');
   const diagram = useMemo(() => layoutDiagram(nodes, edges, layout, lanes, dates), [nodes, edges, layout, lanes, dates]);
   const hasMobileVariant = layout === 'swimlane' && diagram.orientation === 'vertical';
@@ -338,11 +323,14 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, tit
   const arrowAccentId = `ve-arrow-accent-${rawId}`;
   const arrowStartId = `ve-arrow-start-${rawId}`;
   const dotsId = `ve-diagram-dots-${rawId}`;
+  const titleId = `ve-diagram-title-${rawId}`;
+  const descriptionId = `ve-diagram-desc-${rawId}`;
+  const accessibleDescription = description ?? `${layout} diagram with ${nodes.length} nodes and ${edges.length} connections.`;
   return (
     <figure className={`ve-diagram-shell${hasMobileVariant ? ' ve-diagram-has-mobile' : ''} rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-4 sm:p-5`}>
       <div className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop">
       <svg
-        aria-label={title}
+        aria-labelledby={`${titleId} ${descriptionId}`}
         className="h-auto w-full"
         data-diagram-role="diagram"
         role="img"
@@ -357,6 +345,8 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, tit
         width="100%"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <title id={titleId}>{title}</title>
+        <desc id={descriptionId}>{accessibleDescription}</desc>
         <defs>
           <marker id={arrowId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="9" refY="5" viewBox="0 0 10 10">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ve-diagram-muted)" />
@@ -652,7 +642,7 @@ function JsonPrimitive({ value }: { value: unknown }) {
 export function Quiz({ questions }: QuizProps) {
   const [answers, setAnswers] = useState<Array<number | null>>(() => questions.map(() => null));
   const answeredCount = answers.filter((answer) => answer !== null).length;
-  const score = answers.reduce((sum, answer, index) => {
+  const score = answers.reduce<number>((sum, answer, index) => {
     if (answer === null) return sum;
     return questions[index]?.options[answer]?.correct ? sum + 1 : sum;
   }, 0);
@@ -712,11 +702,12 @@ export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
       const host = hostRef.current;
       if (!host) return;
       await loadMermaid();
-      if (cancelled || !window.mermaid) return;
+      const mermaid = window.mermaid;
+      if (cancelled || !mermaid) return;
       const styles = getComputedStyle(document.documentElement);
-      window.mermaid.initialize({
+      mermaid.initialize({
         startOnLoad: false,
-        securityLevel: 'loose',
+        securityLevel: 'strict',
         theme: 'base',
         themeVariables: {
           background: styles.getPropertyValue('--ve-diagram-bg').trim() || '#09090b',
@@ -729,9 +720,9 @@ export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
           fontFamily: styles.getPropertyValue('--ve-font-body').trim() || 'ui-sans-serif',
         },
       });
-      const result = await window.mermaid.render(`ve-mermaid-${rawId}`, wrappedChart);
+      const result = await mermaid.render(`ve-mermaid-${rawId}`, wrappedChart);
       if (!cancelled) {
-        host.innerHTML = result.svg;
+        host.replaceChildren(parseMermaidSvg(result.svg));
         requestAnimationFrame(() => {
           if (!cancelled) fitMermaidForeignObjects(host);
         });
@@ -939,6 +930,25 @@ function loadMermaid() {
     script.onerror = () => reject(new Error('Failed to load Mermaid'));
     document.head.appendChild(script);
   });
+}
+
+function parseMermaidSvg(svgText: string) {
+  const document = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  if (document.querySelector('parsererror') || document.documentElement.localName !== 'svg') {
+    throw new Error('Mermaid returned invalid SVG');
+  }
+  const svg = document.documentElement;
+  for (const element of svg.querySelectorAll('script, iframe, object, embed, link')) element.remove();
+  for (const element of [svg, ...svg.querySelectorAll('*')]) {
+    for (const attribute of [...element.attributes]) {
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value.trim().toLowerCase();
+      if (name.startsWith('on') || ((name === 'href' || name === 'xlink:href') && /^(?:javascript:|data:text\/html)/.test(value))) {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  }
+  return window.document.importNode(svg, true);
 }
 
 function fitMermaidForeignObjects(host: HTMLElement) {

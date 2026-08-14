@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Generate beautiful, self-contained HTML artifacts from MDX/React sources that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, code walkthrough, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled generated HTML page instead.
+description: Generate beautiful, self-contained HTML artifacts from MDX/React sources that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, code walkthrough, or any visual explanation of technical concepts. Also use proactively when a table would need at least 4 rows or 3 columns.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -10,121 +10,47 @@ metadata:
 
 # Visual Explainer
 
-MDX/TSX -> HTML -> verify. Never ASCII; 4+ row or 3+ column tables become HTML.
+Produce an editable MDX/TSX source, export it to self-contained HTML, and verify the result. Use HTML instead of ASCII for substantial diagrams and tables.
 
-## Pipeline location
+## Resolve the runtime
 
-Rendering requires the Artifacture repo (components + export pipeline).
-Resolve `REPO` first:
-- If `../../visual-explainer-mdx/components.tsx` exists relative to this
-  file, you are inside a full clone: `REPO` = the repo root (two directories
-  up from this file).
-- Otherwise clone or update it once: `git clone --depth 1
-  https://github.com/theclaymethod/artifacture ~/.artifacture` (if
-  `~/.artifacture` exists: `git -C ~/.artifacture pull --ff-only`), then
-  `npm install --prefix ~/.artifacture`. `REPO` = `~/.artifacture`.
-  Requires Node >= 22.
+Set `REPO` to the Artifacture checkout before authoring:
 
-All `npm run ve:*` commands below run from `REPO`; author your `.mdx`/`.tsx`
-source anywhere and pass absolute paths.
+1. If `../../visual-explainer-mdx/components.tsx` exists relative to this file, use the repository two directories above this file.
+2. Otherwise, use `~/.artifacture` when it contains `visual-explainer-mdx/components.tsx` and `package.json`.
+3. If neither exists, clone `https://github.com/theclaymethod/artifacture` to `~/.artifacture` and run `npm install --prefix ~/.artifacture`, then resume. Require Node 22 or newer. Do not update an existing runtime as a side effect of generation.
 
-## Tier 0
+Run every `npm run ve:*` command from `REPO`. Sources may live elsewhere; pass absolute paths.
 
-Workflow, in order:
+## Execute the flow
 
-1. Pick the flow's card from the routing table below and read it (plus this file — nothing else for covered flows).
-2. Author `.mdx` (default; `.tsx` only for state/custom SVG/video). Import shared components from `REPO/visual-explainer-mdx/components.tsx` exactly as the card skeleton shows.
-3. Export: `npm --prefix REPO run ve:export -- <abs-src> --out <abs-out>` (static video: `npm --prefix REPO run ve:export-static -- <abs-tsx> --out <abs-out>`). Fix any strict-export integrity errors at the source.
-4. Verify (§6 below), then open the artifact and tell the user the file path. The MDX/TSX source stays the editable source of truth — apply feedback there and re-export.
+1. Select one route below and read its card. Covered flows need this file and that card only until a conditional pointer fires.
+2. Author `.mdx` by default. Use `.tsx` only for local state, generated/custom SVG, or video. Import shared components from `REPO/visual-explainer-mdx/components.tsx` as the card shows.
+3. Export with `npm --prefix REPO run ve:export -- <abs-source> --out <abs-output>`. For static video, use `npm --prefix REPO run ve:export-static -- <abs-source.tsx> --out <abs-output>`. Fix strict-export failures in the source.
+4. Read [verification.md](references/verification.md), execute its routed checks, open the artifact, and report the source, HTML, report JSON, and any incomplete verification.
 
-## Components
+Completion requires an editable source, a successful export, and evidence for every required verification pass. Apply feedback to the source and re-export.
 
-- ExplainerShell(title,summary?,preset?,reviewTools?)
-- Section(title,kicker?)
-- Callout(children)
-- Pipeline(steps)
-- DecisionMatrix(rows)
-- RiskLedger(risks)
-- DiagramCanvas(nodes,edges,layout?,lanes?,dates?; shape rect/oval/diamond/dot; style solid/dashed/bidirectional)
-- FlowDiagram(nodes,edges)
-- CodeBlock(code,language,filename?,highlightLines?,annotations?,diff?)
-- DiffBlock(patch? OR before+after,language?,filename?,mode?)
-- TerminalBlock(content,title?,showPrompt?)
-- JsonTree(data,collapsedDepth?)
-- Quiz(questions)
-- MermaidBlock(chart,caption?)
-- SlideDeck(title,orientation?,preset?,reviewTools?)
-- Slide(title,kicker?,tone?)
-- PosterCanvas(eyebrow?,title,stat?,footer?,preset?)
+## Route
 
-Presentation deck (presented/interactive decks — fixed 1920×1080 stage scaled to fit, slide rail, keyboard nav, drill-downs; when in doubt see `REPO/docs/presentation-deck.md` for PresentationDeck vs SlideDeck):
+| Request | Read first | Read only when needed |
+|---|---|---|
+| diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
+| implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
+| comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
+| slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
+| code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |
+| explain a diff | [explain-diff.md](cards/explain-diff.md) | — |
+| project recap | [project-recap.md](cards/project-recap.md) | — |
 
-Before creating or editing presentation chrome, read
-`./references/deck-navigation-shell.md`. Reuse the workspace's canonical shell
-and shader when present; do not copy either implementation into a new deck.
+For point-and-click annotation, read [annotate.md](commands/annotate.md). If the request lacks a material choice that cannot be inferred, read [clarify.md](references/clarify.md). For a component API not shown by the selected card, read [mdx-components.md](references/mdx-components.md). For poster, video, brand-heavy, or bespoke HTML work, read [legacy-html.md](references/legacy-html.md) and only the branch it selects.
 
-- PresentationDeck(title,eyebrow?,preset?,stageWidth?,stageHeight?,railAutoCollapseMs?)
-- PresentationSlide(kicker,title?,shortTitle?,tone?,rightLabel?,footer?,sub?)
-- DrillCard(drillId,title,eyebrow?,body?,hint?,accent?,origin?,minHeight?)
-- DrillChip(label,onClick,drillId,variant?,hint?)
-- DrillSheet(eyebrow,onClose,origin?)
-- CloseX(onClose)
-- LayerExplorer(layers,initialIndex?,drillIdPrefix?,listWidth?)
-- LadderDiagram(stages,stepOffset?,gridBackdrop?,renderStage?,framed?)
-- FanoutDiagram(source,outputs,sourceWidth?,connectorWidth?)
-- PullQuote(quote,attribution,size?,panel?)
-- Metric(value,label,size?)
-- StatRow(stats)
-- HairlineList(items,accent?,gap?,columns?)
-- Stepper(steps,accentIndex?)
-- CodePanel(rows? OR lines?,fontSize?)
-- MonoLabel(children,size?,color?,ls?,caps?,block?)
-- DisplayText(children,size?,lh?,color?,italic?,maxW?)
-- IconChip(icon,accent?,size?)
-- ShineOverlay(color?,radius?)
-- IconBase(children,size?,color?)
-- IconFile(color?,size?)
-- IconTool(color?,size?)
-- IconAction(color?,size?)
-- IconLoop(color?,size?)
-- IconGauge(color?,size?)
-- IconTag(color?,size?)
-- IconFit(color?,size?)
-- IconFilter(color?,size?)
-- IconCorpus(color?,size?)
-- IconArrowDown(color?,size?)
-- IconArrowRight(color?,size?)
+## Shared contracts
 
-Presets: mono-industrial, nothing, blueprint, editorial, paper-ink, terminal, custom; use `--ve-*`. Any other preset name resolves against the external design-system registry ($ARTIFACTURE_DESIGN_DIR → ~/.artifacture/design-systems → repo design-systems/) and its tokens.css is inlined at export; learn new systems with `npm run ve:learn -- <code|url|image> --name <slug>`. See docs/design-systems.md.
+- Keep MDX/TSX as the source of truth; generated HTML is disposable output.
+- Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
+- Use `DiagramCanvas` for ordinary diagrams. Use Mermaid only when automatic graph layout is materially better and the result retains zoom, pan, reset, and expand controls.
+- Treat facts, labels, and visual encodings as claims. Keep them traceable to the user brief or inspected sources; mark uncertainty instead of inventing rationale.
+- Preserve accessibility, responsive containment, and reduced-motion behavior.
 
-|Flow|Card|Tier 2|
-|-|-|-|
-|diagram|cards/web-diagram.md|references/diagram-design.md, then references/diagrams-svg.md|
-|plan|cards/visual-plan.md||
-|table|cards/comparison-table.md||
-|slides|cards/slide-deck.md|references/slide-patterns.md|
-|code|cards/code-walkthrough.md||
-|explain-diff|cards/explain-diff.md||
-|annotate|commands/annotate.md|references/developer-preview.md|
-
-Clarify: `./references/clarify.md`. Use components/tokens, not hand CSS/coords. Run Unslop on drafted copy. Delegated checks: `./references/delegated-skills.md`; model policy: `./references/model-routing.md`. Optional media: `./references/media.md`. Diagram mechanics: `./references/quality.md`. Poster/video/brand/bespoke -> `./references/legacy-html.md`.
-
-## 6. Verify
-
-Read `./references/verification.md`, `./references/delegated-skills.md`, and `./references/model-routing.md`; run `node {{skill_dir}}/scripts/verify/ve-verify.mjs <artifact.html> --json <report.json> --screens <screens-dir>` (in this repo, `{{skill_dir}}` = `plugins/visual-explainer`); run only the routed Artifacture passes and delegated Impeccable/Unslop checks. For a slide or fixed-stage presentation, consume the generated deck-review manifest and review every base, drill, and progressive state; never substitute the opening screenshot for the complete state set. If `P-deck-review` fails, read `./references/deck-visual-review-repair.md` and use that bounded repair operator on only the grounded findings before the final complete-deck recapture. The main thread orchestrates and summarizes; it does not perform screenshot judgment. Dispatch each Artifacture-owned visual pass to the smallest eval-qualified model and exact batch size in the generated policy. If no qualified route can run, use the best available visual-capable model, preserve the pass evidence contract, and label its execution `unqualified-fallback`; skip only when no visual-capable model is available. Report the artifact path, report JSON, actual model/batch/qualification per pass, per-pass pass/fail, and an explicit disclosure if anything could not be verified.
-
-## Design-craft delegation
-
-Artifacture does not maintain a general AI-slop checklist. Use the ownership
-contract in `./references/delegated-skills.md`:
-
-- Impeccable owns general visual craft, design specificity, typography, color,
-  generic decoration, and visual AI tells.
-- Unslop owns prose patterns, cadence, voice, and AI-writing tells.
-- Artifacture owns mechanical artifact checks and the explicit
-  `artifacture:slop-gap` pass.
-
-The Artifacture gap is limited to decoration that falsely implies sequence,
-measured state/confidence, or provenance/verification. Do not expand that list
-with generic taste rules. If Impeccable or Unslop is unavailable, disclose the
-skipped delegated check instead of recreating its rubric here.
+Use [delegated-skills.md](references/delegated-skills.md) only when its delegated visual/prose checks are available. Use [model-routing.md](references/model-routing.md) only when dispatching visual-review passes. The main thread orchestrates those passes and consumes their evidence; a visual-capable reviewer judges screenshots.

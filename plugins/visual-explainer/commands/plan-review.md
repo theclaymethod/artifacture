@@ -91,6 +91,4 @@ Verify each claim against the code and the plan. If something cannot be verified
 
 Include responsive section navigation. Use a current-vs-planned visual language throughout: blue/neutral for current state, green/purple for planned additions, amber for areas of concern, red for gaps or risks. Write to `~/.agent/diagrams/` and open in browser.
 
-Ultrathink.
-
 $@

@@ -26,3 +26,26 @@ test('checked-in eval size and generation context stay inside product budgets', 
     `product benchmark prompts use ${totalTokens} tokens; budget is ${budgets.product_generation_prompt_max_tokens}`,
   );
 });
+
+test('every covered skill flow stays inside the progressive-disclosure read budget', async () => {
+  const budgets = await readJson('evals/budgets.json');
+  const skill = await readFile(resolve(ROOT, 'plugins/visual-explainer/SKILL.md'), 'utf8');
+  const cards = [
+    'web-diagram.md',
+    'visual-plan.md',
+    'comparison-table.md',
+    'slide-deck.md',
+    'code-walkthrough.md',
+    'explain-diff.md',
+    'project-recap.md',
+  ];
+
+  for (const card of cards) {
+    const cardText = await readFile(resolve(ROOT, 'plugins/visual-explainer/cards', card), 'utf8');
+    const approxTokens = Math.ceil((skill.length + cardText.length) / 4);
+    assert.ok(
+      approxTokens <= budgets.covered_flow_max_tokens,
+      `${card} requires about ${approxTokens} tokens; budget is ${budgets.covered_flow_max_tokens}`,
+    );
+  }
+});

@@ -20,6 +20,7 @@ import { spawn } from "node:child_process";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const MAX_BODY_BYTES = 1_000_000;
+const PREVIEW_SESSION_COOKIE = "__ve_preview_session";
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".mdx", ".ts", ".tsx"]);
 const SOURCE_IGNORED_DIRECTORIES = new Set([".git", ".next", "build", "dist", "node_modules", "published"]);
 const MIME_TYPES = new Map([
@@ -218,8 +219,23 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
   const clients = new Set();
   const editHistory = [];
   let lastHash = hashSource(await readFile(targetPath, "utf8"));
-  let publishInFlight = false;
+  let mutationQueue = Promise.resolve();
+  let pendingMutations = 0;
   let watchTimer;
+
+  async function withMutationGuard(operation) {
+    pendingMutations += 1;
+    const previous = mutationQueue;
+    let release;
+    mutationQueue = new Promise((resolvePromise) => { release = resolvePromise; });
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      pendingMutations -= 1;
+      release();
+    }
+  }
 
   const server = createServer(async (request, response) => {
     try {
@@ -227,6 +243,7 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
       setSecurityHeaders(response);
 
       if (request.method === "GET" && url.pathname === "/") {
+        setPreviewSessionCookie(response, session);
         return sendFile(response, join(SCRIPT_DIR, "preview-shell.html"));
       }
       if (request.method === "GET" && url.pathname === "/__ve/shell.css") {
@@ -235,6 +252,9 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
       if (request.method === "GET" && url.pathname === "/__ve/shell.js") {
         return sendFile(response, join(SCRIPT_DIR, "preview-shell.js"));
       }
+      if (request.method === "GET" && url.pathname === "/__ve/annotations.js") {
+        return sendFile(response, join(SCRIPT_DIR, "preview-annotations.mjs"));
+      }
       if (request.method === "GET" && url.pathname === "/__ve/bridge.js") {
         if (url.searchParams.get("session") !== session) {
           throw createHttpError(403, "Invalid preview session.");
@@ -242,6 +262,7 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
         return sendFile(response, join(SCRIPT_DIR, "preview-bridge.js"));
       }
       if (request.method === "GET" && url.pathname === "/__ve/meta") {
+        setPreviewSessionCookie(response, session);
         const source = await readFile(targetPath, "utf8");
         lastHash = hashSource(source);
         return sendJson(response, 200, {
@@ -267,38 +288,42 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
         request.on("close", () => clients.delete(response));
         return;
       }
+      if (request.method === "POST" && url.pathname.startsWith("/__ve/")) {
+        validatePreviewPost(request, session);
+      }
       if (request.method === "POST" && url.pathname === "/__ve/patch") {
         const body = parsePatchRequest(await readJsonBody(request));
-        const targetSource = await readFile(targetPath, "utf8");
-        const currentHash = hashSource(targetSource);
-        if (body.artifactRevision !== currentHash) {
-          throw createHttpError(
-            409,
-            "The HTML changed after editing began. Reload the preview and try again.",
-          );
-        }
+        return await withMutationGuard(async () => {
+          const targetSource = await readFile(targetPath, "utf8");
+          const currentHash = hashSource(targetSource);
+          if (body.artifactRevision !== currentHash) {
+            throw createHttpError(
+              409,
+              "The HTML changed after editing began. Reload the preview and try again.",
+            );
+          }
 
-        let nextHash;
-        let sourcePaths = [];
-        if (publisher) {
-          if (publishInFlight) throw createHttpError(409, "A publish is already running.");
-          const occurrences = await findProjectSourceOccurrences(publisher.cwd, body.before);
-          const selected = selectProjectSourceOccurrences(occurrences, body.anchor, {
-            occurrence: body.occurrence,
-            replaceAll: body.replaceAll === true,
-          });
-          const changes = buildProjectSourceChanges(selected, body.before, body.after);
-          publishInFlight = true;
-          try {
-            for (const change of changes) await atomicWrite(change.path, change.afterDocument);
+          let nextHash;
+          let sourcePaths = [];
+          if (publisher) {
+            const occurrences = await findProjectSourceOccurrences(publisher.cwd, body.before);
+            const selected = selectProjectSourceOccurrences(occurrences, body.anchor, {
+              occurrence: body.occurrence,
+              replaceAll: body.replaceAll === true,
+            });
+            const changes = buildProjectSourceChanges(selected, body.before, body.after);
+            await writeDocumentsTransaction(changes, "afterDocument", "beforeDocument");
             try {
               await runPublisher(publisher);
+              const builtSource = await readFile(targetPath, "utf8");
+              nextHash = hashSource(builtSource);
             } catch (error) {
-              for (const change of changes) await atomicWrite(change.path, change.beforeDocument);
+              await restoreAfterFailure(error, [
+                ...changes.map((change) => ({ contents: change.beforeDocument, path: change.path })),
+                { contents: targetSource, path: targetPath },
+              ]);
               throw error;
             }
-            const builtSource = await readFile(targetPath, "utf8");
-            nextHash = hashSource(builtSource);
             sourcePaths = changes.map((change) => relative(publisher.cwd, change.path));
             editHistory.push({
               afterHash: nextHash,
@@ -312,80 +337,78 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
                 path,
               })),
             });
-          } finally {
-            publishInFlight = false;
+          } else {
+            const patch = applyUniqueTextPatch(targetSource, body.before, body.after, {
+              anchor: body.anchor,
+              occurrence: body.occurrence,
+              replaceAll: body.replaceAll === true,
+            });
+            await atomicWrite(targetPath, patch.source);
+            nextHash = hashSource(patch.source);
+            editHistory.push({
+              afterHash: nextHash,
+              afterText: body.after,
+              beforeDocument: targetSource,
+              beforeText: body.before,
+              kind: "generated-html",
+            });
           }
-        } else {
-          const patch = applyUniqueTextPatch(targetSource, body.before, body.after, {
-            anchor: body.anchor,
-            occurrence: body.occurrence,
-            replaceAll: body.replaceAll === true,
+          if (editHistory.length > 20) editHistory.shift();
+          lastHash = nextHash;
+          broadcast(clients, "artifact-changed", { artifactRevision: nextHash, reason: publisher ? "source-edit" : "text-edit" });
+          return sendJson(response, 200, {
+            artifactRevision: nextHash,
+            canUndo: true,
+            rebuilt: Boolean(publisher),
+            sourcePaths,
           });
-          await atomicWrite(targetPath, patch.source);
-          nextHash = hashSource(patch.source);
-          editHistory.push({
-            afterHash: nextHash,
-            afterText: body.after,
-            beforeDocument: targetSource,
-            beforeText: body.before,
-            kind: "generated-html",
-          });
-        }
-        if (editHistory.length > 20) editHistory.shift();
-        lastHash = nextHash;
-        broadcast(clients, "artifact-changed", { artifactRevision: nextHash, reason: publisher ? "source-edit" : "text-edit" });
-        return sendJson(response, 200, {
-          artifactRevision: nextHash,
-          canUndo: true,
-          rebuilt: Boolean(publisher),
-          sourcePaths,
         });
       }
       if (request.method === "POST" && url.pathname === "/__ve/undo") {
-        const latest = editHistory.at(-1);
-        if (!latest) throw createHttpError(409, "There is no preview edit to undo.");
-        const source = await readFile(targetPath, "utf8");
-        const currentHash = hashSource(source);
-        if (currentHash !== latest.afterHash) {
-          throw createHttpError(
-            409,
-            "The HTML changed after the last preview edit, so undo was stopped to avoid overwriting newer work.",
-          );
-        }
-        if (latest.kind === "react-source") {
-          for (const change of latest.sourceChanges) {
-            const currentSource = await readFile(change.path, "utf8");
-            if (hashSource(currentSource) !== change.afterHash) {
-              throw createHttpError(
-                409,
-                `The React source changed after this preview edit (${relative(publisher.cwd, change.path)}), so undo was stopped.`,
-              );
-            }
+        return await withMutationGuard(async () => {
+          const latest = editHistory.at(-1);
+          if (!latest) throw createHttpError(409, "There is no preview edit to undo.");
+          const source = await readFile(targetPath, "utf8");
+          const currentHash = hashSource(source);
+          if (currentHash !== latest.afterHash) {
+            throw createHttpError(
+              409,
+              "The HTML changed after the last preview edit, so undo was stopped to avoid overwriting newer work.",
+            );
           }
-          publishInFlight = true;
-          try {
-            for (const change of latest.sourceChanges) await atomicWrite(change.path, change.beforeDocument);
+          if (latest.kind === "react-source") {
+            for (const change of latest.sourceChanges) {
+              const currentSource = await readFile(change.path, "utf8");
+              if (hashSource(currentSource) !== change.afterHash) {
+                throw createHttpError(
+                  409,
+                  `The React source changed after this preview edit (${relative(publisher.cwd, change.path)}), so undo was stopped.`,
+                );
+              }
+            }
+            await writeDocumentsTransaction(latest.sourceChanges, "beforeDocument", "afterDocument");
             try {
               await runPublisher(publisher);
             } catch (error) {
-              for (const change of latest.sourceChanges) await atomicWrite(change.path, change.afterDocument);
+              await restoreAfterFailure(error, [
+                ...latest.sourceChanges.map((change) => ({ contents: change.afterDocument, path: change.path })),
+                { contents: source, path: targetPath },
+              ]);
               throw createHttpError(422, `Rebuilding after undo failed, so the React edit was kept: ${error.message}`);
             }
-          } finally {
-            publishInFlight = false;
+          } else {
+            await atomicWrite(targetPath, latest.beforeDocument);
           }
-        } else {
-          await atomicWrite(targetPath, latest.beforeDocument);
-        }
-        editHistory.pop();
-        lastHash = hashSource(await readFile(targetPath, "utf8"));
-        broadcast(clients, "artifact-changed", { artifactRevision: lastHash, reason: "undo" });
-        return sendJson(response, 200, {
-          after: latest.afterText,
-          artifactRevision: lastHash,
-          before: latest.beforeText,
-          canUndo: editHistory.length > 0,
-          rebuilt: latest.kind === "react-source",
+          editHistory.pop();
+          lastHash = hashSource(await readFile(targetPath, "utf8"));
+          broadcast(clients, "artifact-changed", { artifactRevision: lastHash, reason: "undo" });
+          return sendJson(response, 200, {
+            after: latest.afterText,
+            artifactRevision: lastHash,
+            before: latest.beforeText,
+            canUndo: editHistory.length > 0,
+            rebuilt: latest.kind === "react-source",
+          });
         });
       }
       if (request.method === "POST" && url.pathname === "/__ve/review") {
@@ -396,14 +419,19 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
         return sendJson(response, 200, { markdown, resolved });
       }
       if (request.method === "POST" && url.pathname === "/__ve/publish") {
-        if (!publisher) {
-          throw createHttpError(409, "No publish, export, or build script was found in an owning package.json.");
-        }
-        if (publishInFlight) throw createHttpError(409, "A publish is already running.");
-        publishInFlight = true;
-        try {
+        return await withMutationGuard(async () => {
+          if (!publisher) {
+            throw createHttpError(409, "No publish, export, or build script was found in an owning package.json.");
+          }
           const startedAt = Date.now();
-          const output = await runPublisher(publisher);
+          const beforePublish = await readFile(targetPath, "utf8");
+          let output;
+          try {
+            output = await runPublisher(publisher);
+          } catch (error) {
+            await restoreAfterFailure(error, [{ contents: beforePublish, path: targetPath }]);
+            throw error;
+          }
           const source = await readFile(targetPath, "utf8");
           lastHash = hashSource(source);
           broadcast(clients, "artifact-changed", { artifactRevision: lastHash, reason: "publish" });
@@ -413,9 +441,7 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
             outputPath: targetPath,
             publishedFiles: extractPublishedFiles(output),
           });
-        } finally {
-          publishInFlight = false;
-        }
+        });
       }
       if (request.method === "GET" && url.pathname.startsWith("/file/")) {
         const relativePath = decodeURIComponent(url.pathname.slice("/file/".length));
@@ -453,7 +479,7 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
     clearTimeout(watchTimer);
     watchTimer = setTimeout(async () => {
       try {
-        if (publishInFlight) return;
+        if (pendingMutations > 0) return;
         const nextHash = hashSource(await readFile(targetPath, "utf8"));
         if (nextHash === lastHash) return;
         lastHash = nextHash;
@@ -810,6 +836,42 @@ async function atomicWrite(filePath, contents) {
   }
 }
 
+async function writeDocumentsTransaction(changes, contentsKey, rollbackKey) {
+  const written = [];
+  try {
+    for (const change of changes) {
+      await atomicWrite(change.path, change[contentsKey]);
+      written.push(change);
+    }
+  } catch (error) {
+    await restoreAfterFailure(
+      error,
+      written.reverse().map((change) => ({ contents: change[rollbackKey], path: change.path })),
+    );
+    throw error;
+  }
+}
+
+async function restoreAfterFailure(originalError, snapshots) {
+  const failures = [];
+  for (const snapshot of [...snapshots].reverse()) {
+    try {
+      await atomicWrite(snapshot.path, snapshot.contents);
+    } catch (error) {
+      failures.push({ error, path: snapshot.path });
+    }
+  }
+  if (failures.length > 0) {
+    const rollbackError = createHttpError(
+      500,
+      "The preview mutation failed and rollback could not restore every affected file.",
+      { cause: originalError },
+    );
+    rollbackError.rollbackFailures = failures;
+    throw rollbackError;
+  }
+}
+
 async function readJsonBody(request) {
   const chunks = [];
   let received = 0;
@@ -861,6 +923,56 @@ function parseAnnotationRequest(value) {
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function setPreviewSessionCookie(response, session) {
+  response.setHeader(
+    "Set-Cookie",
+    `${PREVIEW_SESSION_COOKIE}=${session}; HttpOnly; SameSite=Strict; Path=/`,
+  );
+}
+
+function validatePreviewPost(request, session) {
+  const contentType = String(request.headers["content-type"] || "").split(";", 1)[0].trim().toLowerCase();
+  if (contentType !== "application/json") {
+    throw createHttpError(415, "Preview POST requests require application/json.");
+  }
+
+  const cookies = parseCookies(request.headers.cookie);
+  if (cookies.get(PREVIEW_SESSION_COOKIE) !== session) {
+    throw createHttpError(403, "Invalid preview session.");
+  }
+
+  const origin = String(request.headers.origin || "");
+  const host = String(request.headers.host || "");
+  if (!origin || !host || origin !== `http://${host}`) {
+    throw createHttpError(403, "Preview mutations require a same-origin request.");
+  }
+  const originUrl = new URL(origin);
+  if (!isLoopbackHostname(originUrl.hostname)) {
+    throw createHttpError(403, "Preview mutations are restricted to the loopback origin.");
+  }
+
+  const fetchSite = String(request.headers["sec-fetch-site"] || "").toLowerCase();
+  if (fetchSite && fetchSite !== "same-origin") {
+    throw createHttpError(403, "Cross-site preview mutations are not allowed.");
+  }
+}
+
+function parseCookies(header) {
+  const cookies = new Map();
+  for (const pair of String(header || "").split(";")) {
+    const separator = pair.indexOf("=");
+    if (separator === -1) continue;
+    const name = pair.slice(0, separator).trim();
+    const value = pair.slice(separator + 1).trim();
+    if (name) cookies.set(name, value);
+  }
+  return cookies;
+}
+
+function isLoopbackHostname(hostname) {
+  return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "[::1]";
 }
 
 function setSecurityHeaders(response) {

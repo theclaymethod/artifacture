@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -15,6 +15,26 @@ import {
   rankPackageRunners,
   startPreviewServer,
 } from "./preview.mjs";
+import { annotationsForFrame } from "./preview-annotations.mjs";
+
+async function readPreviewMeta(preview) {
+  const response = await fetch(`${preview.url}/__ve/meta`);
+  return response.json();
+}
+
+function postPreview(preview, session, endpoint, body, { headers = {} } = {}) {
+  return fetch(`${preview.url}/__ve/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `__ve_preview_session=${session}`,
+      Origin: preview.url,
+      "Sec-Fetch-Site": "same-origin",
+      ...headers,
+    },
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  });
+}
 
 test("developer preview keeps the persistent chrome focused on the core workflow", async () => {
   const shellPath = new URL("./preview-shell.html", import.meta.url);
@@ -38,6 +58,23 @@ test("developer preview mirrors the active artifact hash in its shareable URL", 
   assert.match(shellScript, /postToFrame\("set-location"/);
   assert.match(bridgeScript, /case "set-location"/);
   assert.match(bridgeScript, /for \(const method of \["pushState", "replaceState"\]\)/);
+});
+
+test("annotation markers are scoped to the active slide while the review stays deck-wide", () => {
+  const annotations = [
+    { id: "cover", anchor: { location: "/file/deck.html#cover" } },
+    { id: "details", anchor: { location: "/file/deck.html#details" } },
+    { id: "legacy", anchor: { location: "" } },
+  ];
+
+  assert.deepEqual(
+    annotationsForFrame(annotations, "#details").map(({ id }) => id),
+    ["details", "legacy"],
+  );
+  assert.deepEqual(
+    annotationsForFrame(annotations, "#cover").map(({ id }) => id),
+    ["cover", "legacy"],
+  );
 });
 
 test("preview host and bridge keep their message protocol symmetric", async () => {
@@ -173,53 +210,163 @@ test("server patches, undoes, reviews, and never writes the injected bridge to t
     await rm(directory, { recursive: true, force: true });
   });
 
-  const meta = await fetch(`${preview.url}/__ve/meta`).then((response) => response.json());
+  const meta = await readPreviewMeta(preview);
   const artifact = await fetch(`${preview.url}${meta.artifactUrl}`).then((response) => response.text());
   assert.match(artifact, /\/__ve\/bridge\.js/);
   assert.doesNotMatch(await readFile(filePath, "utf8"), /\/__ve\/bridge\.js/);
 
-  const patchResponse = await fetch(`${preview.url}/__ve/patch`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      after: "Edited heading",
-      anchor: { selector: "h1" },
-      artifactRevision: hashSource(original),
-      before: "Original heading",
-    }),
+  const patchResponse = await postPreview(preview, meta.session, "patch", {
+    after: "Edited heading",
+    anchor: { selector: "h1" },
+    artifactRevision: hashSource(original),
+    before: "Original heading",
   });
   assert.equal(patchResponse.status, 200);
   assert.match(await readFile(filePath, "utf8"), /<h1>Edited heading<\/h1>/);
 
-  const undoResponse = await fetch(`${preview.url}/__ve/undo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
-  });
+  const undoResponse = await postPreview(preview, meta.session, "undo", {});
   assert.equal(undoResponse.status, 200);
   const undoResult = await undoResponse.json();
   assert.equal(undoResult.after, "Edited heading");
   assert.equal(undoResult.before, "Original heading");
   assert.equal(await readFile(filePath, "utf8"), original);
 
-  const reviewResponse = await fetch(`${preview.url}/__ve/review`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      annotations: [{ number: 1, comment: "Tighten this.", anchor: { selector: "h1", tagName: "h1" } }],
-    }),
+  const reviewResponse = await postPreview(preview, meta.session, "review", {
+    annotations: [{ number: 1, comment: "Tighten this.", anchor: { selector: "h1", tagName: "h1" } }],
   });
   assert.equal(reviewResponse.status, 200);
   assert.match((await reviewResponse.json()).markdown, /Tighten this\./);
 
   for (const endpoint of ["patch", "review"]) {
-    const invalidResponse = await fetch(`${preview.url}/__ve/${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: "null",
-    });
+    const invalidResponse = await postPreview(preview, meta.session, endpoint, "null");
     assert.equal(invalidResponse.status, 400);
   }
+});
+
+test("preview POST routes reject missing sessions, cross-origin metadata, and non-JSON bodies", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "ve-preview-auth-test-"));
+  const filePath = join(directory, "deck.html");
+  const original = "<!doctype html><h1>Original heading</h1>";
+  await writeFile(filePath, original);
+  const preview = await startPreviewServer({ filePath, openBrowser: false, port: 0 });
+  context.after(async () => {
+    await preview.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+  const meta = await readPreviewMeta(preview);
+  const patch = {
+    after: "Edited heading",
+    anchor: { selector: "h1" },
+    artifactRevision: meta.artifactRevision,
+    before: "Original heading",
+  };
+
+  for (const [endpoint, body] of [
+    ["patch", patch],
+    ["undo", {}],
+    ["review", { annotations: [] }],
+    ["publish", {}],
+  ]) {
+    const unauthorized = await fetch(`${preview.url}/__ve/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: preview.url,
+        "Sec-Fetch-Site": "same-origin",
+      },
+      body: JSON.stringify(body),
+    });
+    assert.equal(unauthorized.status, 403, endpoint);
+  }
+
+  const crossOrigin = await postPreview(preview, meta.session, "patch", patch, {
+    headers: { Origin: "https://example.invalid" },
+  });
+  assert.equal(crossOrigin.status, 403);
+
+  const crossSite = await postPreview(preview, meta.session, "patch", patch, {
+    headers: { "Sec-Fetch-Site": "cross-site" },
+  });
+  assert.equal(crossSite.status, 403);
+
+  const wrongContentType = await postPreview(preview, meta.session, "patch", patch, {
+    headers: { "Content-Type": "text/plain" },
+  });
+  assert.equal(wrongContentType.status, 415);
+  assert.equal(await readFile(filePath, "utf8"), original);
+});
+
+test("concurrent patches serialize before reading the artifact revision", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "ve-preview-concurrency-test-"));
+  const filePath = join(directory, "deck.html");
+  const original = "<!doctype html><h1>Original heading</h1>";
+  await writeFile(filePath, original);
+  const preview = await startPreviewServer({ filePath, openBrowser: false, port: 0 });
+  context.after(async () => {
+    await preview.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+  const meta = await readPreviewMeta(preview);
+  const request = (after) => postPreview(preview, meta.session, "patch", {
+    after,
+    anchor: { selector: "h1" },
+    artifactRevision: meta.artifactRevision,
+    before: "Original heading",
+  });
+
+  const responses = await Promise.all([request("First edit"), request("Second edit")]);
+  assert.deepEqual(responses.map((response) => response.status).sort(), [200, 409]);
+  const written = await readFile(filePath, "utf8");
+  assert.ok(written.includes("First edit") || written.includes("Second edit"));
+  assert.ok(!written.includes("Original heading"));
+
+  const undo = await postPreview(preview, meta.session, "undo", {});
+  assert.equal(undo.status, 200);
+  assert.equal(await readFile(filePath, "utf8"), original);
+});
+
+test("failed publisher rolls back every selected source and the generated preview artifact", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "ve-preview-rollback-test-"));
+  const outputDirectory = join(directory, "dist");
+  const filePath = join(outputDirectory, "deck.html");
+  const firstSourcePath = join(directory, "first.tsx");
+  const secondSourcePath = join(directory, "second.tsx");
+  const originalHtml = "<!doctype html><h1>Original heading</h1>";
+  const firstSource = 'export const first = <h1>Original heading</h1>;\n';
+  const secondSource = 'export const second = <h2>Original heading</h2>;\n';
+  await mkdir(outputDirectory);
+  await writeFile(firstSourcePath, firstSource);
+  await writeFile(secondSourcePath, secondSource);
+  await writeFile(filePath, originalHtml);
+  await writeFile(join(directory, "package.json"), JSON.stringify({
+    private: true,
+    scripts: { export: "node build.mjs" },
+    type: "module",
+  }));
+  await writeFile(join(directory, "build.mjs"), [
+    'import fs from "node:fs";',
+    'fs.writeFileSync("dist/deck.html", "<!doctype html><h1>Partial output</h1>");',
+    'console.error("seeded publisher failure");',
+    'process.exitCode = 1;',
+  ].join("\n"));
+  const preview = await startPreviewServer({ filePath, openBrowser: false, port: 0 });
+  context.after(async () => {
+    await preview.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+  const meta = await readPreviewMeta(preview);
+
+  const response = await postPreview(preview, meta.session, "patch", {
+    after: "Edited heading",
+    anchor: { selector: "h1" },
+    artifactRevision: meta.artifactRevision,
+    before: "Original heading",
+    replaceAll: true,
+  });
+  assert.equal(response.status, 422);
+  assert.equal(await readFile(firstSourcePath, "utf8"), firstSource);
+  assert.equal(await readFile(secondSourcePath, "utf8"), secondSource);
+  assert.equal(await readFile(filePath, "utf8"), originalHtml);
 });
 
 test("malformed nearest package manifest stops publisher detection", async () => {
@@ -263,17 +410,13 @@ test("React-owned previews edit TSX, rebuild HTML, publish, and undo through sou
     await rm(directory, { recursive: true, force: true });
   });
 
-  const meta = await fetch(`${preview.url}/__ve/meta`).then((response) => response.json());
+  const meta = await readPreviewMeta(preview);
   assert.equal(meta.publisher.command, "npm run export");
-  const patchResponse = await fetch(`${preview.url}/__ve/patch`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      after: "Edited heading",
-      anchor: { selector: "h1", tagName: "h1" },
-      before: "Original heading",
-      artifactRevision: meta.artifactRevision,
-    }),
+  const patchResponse = await postPreview(preview, meta.session, "patch", {
+    after: "Edited heading",
+    anchor: { selector: "h1", tagName: "h1" },
+    before: "Original heading",
+    artifactRevision: meta.artifactRevision,
   });
   assert.equal(patchResponse.status, 200);
   const patchResult = await patchResponse.json();
@@ -283,36 +426,24 @@ test("React-owned previews edit TSX, rebuild HTML, publish, and undo through sou
   assert.match(await readFile(sourcePath, "utf8"), /shortTitle: "Original heading"/);
   assert.match(await readFile(filePath, "utf8"), /<h1>Edited heading<\/h1>/);
 
-  const undoResponse = await fetch(`${preview.url}/__ve/undo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
-  });
+  const undoResponse = await postPreview(preview, meta.session, "undo", {});
   assert.equal(undoResponse.status, 200);
   assert.equal((await undoResponse.json()).rebuilt, true);
   assert.equal(await readFile(sourcePath, "utf8"), originalSource);
   assert.equal(await readFile(filePath, "utf8"), originalHtml);
 
   await writeFile(sourcePath, originalSource.replaceAll("Original heading", "Published heading"));
-  const publishResponse = await fetch(`${preview.url}/__ve/publish`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
-  });
+  const publishResponse = await postPreview(preview, meta.session, "publish", {});
   assert.equal(publishResponse.status, 200);
   assert.deepEqual((await publishResponse.clone().json()).publishedFiles, ["deck.html"]);
   assert.match(await readFile(filePath, "utf8"), /<h1>Published heading<\/h1>/);
 
-  const reviewResponse = await fetch(`${preview.url}/__ve/review`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      annotations: [{
-        number: 1,
-        comment: "Shorten this.",
-        anchor: { html: "<h1>Published heading</h1>", selector: "h1", tagName: "h1", text: "Published heading" },
-      }],
-    }),
+  const reviewResponse = await postPreview(preview, meta.session, "review", {
+    annotations: [{
+      number: 1,
+      comment: "Shorten this.",
+      anchor: { html: "<h1>Published heading</h1>", selector: "h1", tagName: "h1", text: "Published heading" },
+    }],
   });
   assert.equal(reviewResponse.status, 200);
   const review = await reviewResponse.json();

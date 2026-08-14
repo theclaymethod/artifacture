@@ -30,8 +30,8 @@ After drafting the page outline, count the major sections.
 
 1. **Read the contract** at `plugins/visual-explainer/references/section-contract.md` before dispatching. It defines the fragment schema, role table, and stitching rules. Also read `plugins/visual-explainer/references/tokens.md` and `plugins/visual-explainer/references/components.md` so you understand what the sub-agents will produce.
 2. **Assign a role to every section** from the role table: `hero`, `diagram`, `table`, `dashboard`, or `prose`. If a section doesn't fit any role, build it yourself rather than inventing a new role.
-3. **Dispatch in parallel.** Send a single message containing one `Task` tool-use per section. For each:
-   - `subagent_type`: `ve-{role}-builder`
+3. **Dispatch in parallel.** Send one task per section. Use the registered `ve-hero-builder`, `ve-diagram-builder`, or `ve-table-builder` specialist for those roles. Dispatch `dashboard` and `prose` through the host's generic worker with the role named in its brief. For each:
+   - worker: the registered specialist or the explicit generic-worker mapping above
    - `description`: short label like "Build hero — request ledger"
    - `prompt`: a self-contained brief with the section's content, role, index number, and a pointer to read `tokens.md`, `components.md`, `section-contract.md`, and the relevant component recipe before producing output. Pass headlines/lede/descriptions **already unslopped** — do NOT make sub-agents call `/unslop` themselves (the prose sub-agent is the only exception).
 4. **Collect fragments** from each sub-agent. Each returns a single JSON object matching the contract schema.

@@ -701,6 +701,7 @@
     "max_other_errors": 0,
     "allowed_co_fires": [
       "autofit-safety-net-present-and-ordered",
+      "mermaid-rendered",
       "min-slide-body-text-16px",
       "slide-viewport-fit-no-internal-scroll"
     ]

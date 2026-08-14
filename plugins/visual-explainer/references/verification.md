@@ -59,7 +59,7 @@ disclose `unqualified-fallback`; do not silently treat it as qualified.
 
 ## 2. Build the evidence package
 
-Use `rubrics/pass-artifact-review.md` for every profile. Supply:
+Use [`pass-artifact-review.md`](../scripts/verify/rubrics/pass-artifact-review.md) for every profile. Supply:
 
 - the detected profile and mechanics report;
 - standard desktop and mobile screenshots where applicable;

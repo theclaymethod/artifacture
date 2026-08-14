@@ -53,10 +53,21 @@ else
   DATA=$(base64 -w 0 "$FILE")
 fi
 
+html_escape_attribute() {
+  printf '%s' "$1" | sed \
+    -e 's/&/\&amp;/g' \
+    -e 's/</\&lt;/g' \
+    -e 's/>/\&gt;/g' \
+    -e 's/"/\&quot;/g' \
+    -e "s/'/\&#39;/g"
+}
+
+ALT_ESCAPED=$(html_escape_attribute "$ALT")
+
 if [[ "$KIND" == "img" ]]; then
   cat <<HTML
 <img src="data:$MIME;base64,$DATA"
-     alt="$ALT"
+     alt="$ALT_ESCAPED"
      style="width:100%;max-width:1200px;display:block;margin:0 auto;border-radius:8px;">
 HTML
 else

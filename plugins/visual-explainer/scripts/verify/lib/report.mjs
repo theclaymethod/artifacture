@@ -2,10 +2,22 @@ import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import crypto from 'node:crypto';
 import { buildLlmDispatchPlan } from './model-policy.mjs';
+import { detectReviewProfile } from './profile.mjs';
 
 export function buildReport(ctx, checks, screenshots = []) {
+  const effectiveChecks = ctx.htmlParseError
+    ? [{
+      id: 'artifact-html-parse',
+      stage: 'static-dom',
+      severity: 'error',
+      status: 'fail',
+      evidence: `HTML could not be parsed: ${ctx.htmlParseError}`,
+      where: ctx.filePath,
+      fix_hint: 'Repair the HTML so DOM verification can run.',
+    }, ...checks]
+    : checks;
   const summary = { errors: 0, warns: 0, skipped: 0, passed: 0 };
-  for (const check of checks) {
+  for (const check of effectiveChecks) {
     if (check.status === 'pass') summary.passed += 1;
     else if (check.status === 'skip' || check.status === 'skipped-static') summary.skipped += 1;
     else if (check.status === 'unimplemented') summary.warns += 1;
@@ -14,14 +26,19 @@ export function buildReport(ctx, checks, screenshots = []) {
     else if (check.status === 'fail') summary.warns += 1;
   }
 
-  const llmPasses = llmPassesFor(ctx, checks);
+  const llmPasses = llmPassesFor(ctx, effectiveChecks);
   const reviewContract = buildReviewContract(ctx, screenshots, llmPasses);
+  const mechanicsProfile = ctx.mechanicsProfile || ctx.profile;
+  const reviewProfile = ctx.reviewProfile || detectReviewProfile(mechanicsProfile, ctx.html || '');
   return {
     file: ctx.filePath,
-    profile: ctx.profile,
+    // Legacy alias: mechanics profile.
+    profile: mechanicsProfile,
+    mechanics_profile: mechanicsProfile,
+    review_profile: reviewProfile,
     preset: ctx.preset,
     summary,
-    checks,
+    checks: effectiveChecks,
     screenshots,
     llm_passes_required: llmPasses,
     llm_dispatch_plan: buildLlmDispatchPlan(llmPasses),
@@ -37,7 +54,7 @@ export function printHumanReport(report, { quiet = false } = {}) {
   if (quiet) return;
   const failing = report.checks.filter((check) => ['fail', 'warn', 'unimplemented'].includes(check.status));
   console.log(`${report.file}`);
-  console.log(`profile=${report.profile} preset=${report.preset} errors=${report.summary.errors} warns=${report.summary.warns} skipped=${report.summary.skipped} passed=${report.summary.passed}`);
+  console.log(`mechanics_profile=${report.mechanics_profile || report.profile} review_profile=${report.review_profile || report.profile} preset=${report.preset} errors=${report.summary.errors} warns=${report.summary.warns} skipped=${report.summary.skipped} passed=${report.summary.passed}`);
   for (const check of failing.slice(0, 80)) {
     const where = check.where ? ` ${check.where}` : '';
     const evidence = check.evidence ? ` - ${check.evidence}` : '';
@@ -54,7 +71,8 @@ export function printHumanReport(report, { quiet = false } = {}) {
 
 function llmPassesFor(ctx, checks) {
   const required = new Set();
-  const reviewProfile = reviewProfileFor(ctx);
+  const mechanicsProfile = ctx.mechanicsProfile || ctx.profile;
+  const reviewProfile = ctx.reviewProfile || detectReviewProfile(mechanicsProfile, ctx.html || '');
   if (['page', 'slides', 'magazine', 'poster', 'video-comp'].includes(reviewProfile)) {
     required.add(`artifact-review:${reviewProfile}`);
   }
@@ -67,7 +85,8 @@ function llmPassesFor(ctx, checks) {
 }
 
 function buildReviewContract(ctx, screenshots, requiredPasses) {
-  const reviewProfile = reviewProfileFor(ctx);
+  const mechanicsProfile = ctx.mechanicsProfile || ctx.profile;
+  const reviewProfile = ctx.reviewProfile || detectReviewProfile(mechanicsProfile, ctx.html || '');
   const deckManifests = (ctx.browser?.runs || [])
     .map((run) => run.deckReview?.manifestPath)
     .filter(Boolean);
@@ -84,6 +103,9 @@ function buildReviewContract(ctx, screenshots, requiredPasses) {
   const contract = {
     schema_version: 1,
     artifact_sha256: sha256(ctx.html || ''),
+    mechanics_profile: mechanicsProfile,
+    review_profile: reviewProfile,
+    // Legacy alias: review profile.
     profile: reviewProfile,
     preset: ctx.preset,
     truth_sha256: ctx.truth?.sha256 || null,
@@ -104,7 +126,7 @@ function buildReviewContract(ctx, screenshots, requiredPasses) {
 }
 
 export function reviewContractIdentity(contract) {
-  return {
+  const identity = {
     schema_version: contract.schema_version,
     artifact_sha256: contract.artifact_sha256,
     profile: contract.profile,
@@ -115,14 +137,15 @@ export function reviewContractIdentity(contract) {
     evidence_sha256: contract.evidence_sha256,
     required_passes: contract.required_passes,
   };
+  // Preserve the identity of legacy reports while binding explicit profile
+  // semantics for newly generated contracts.
+  if ('mechanics_profile' in contract) identity.mechanics_profile = contract.mechanics_profile;
+  if ('review_profile' in contract) identity.review_profile = contract.review_profile;
+  return identity;
 }
 
 export function reviewContractSha256(contract) {
   return sha256(JSON.stringify(reviewContractIdentity(contract)));
-}
-
-function reviewProfileFor(ctx) {
-  return /data-ve-presentation/i.test(ctx.html || '') ? 'slides' : ctx.profile;
 }
 
 function hashFile(filePath) {

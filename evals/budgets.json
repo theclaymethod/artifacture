@@ -5,6 +5,7 @@
   "seeded_fixture_max_cases": 170,
   "product_benchmark_max_cases": 6,
   "product_generation_prompt_max_tokens": 17000,
+  "covered_flow_max_tokens": 3000,
   "paid_eval_max_requests": 45,
   "paid_eval_max_observations": 90,
   "paid_eval_max_cost_usd": 0.9

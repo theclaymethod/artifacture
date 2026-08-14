@@ -62,6 +62,4 @@ This is not a re-review. It does not second-guess analysis, opinions, or design 
 
 Write corrections to the original file.
 
-Ultrathink.
-
 $@

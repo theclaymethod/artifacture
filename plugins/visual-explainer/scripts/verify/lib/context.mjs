@@ -2,22 +2,25 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
-import { detectPreset, detectPresetHint, detectProfile } from './profile.mjs';
+import {
+  assertSupportedProfile,
+  detectPreset,
+  detectPresetHint,
+  detectProfile,
+  detectReviewProfile,
+} from './profile.mjs';
 
 export async function buildContext(filePath, options = {}) {
   const absolute = path.resolve(filePath);
   const html = await fs.readFile(absolute, 'utf8');
-  let dom = null;
-  try {
-    dom = parseHTML(html).document;
-  } catch {
-    dom = null;
-  }
+  const parsed = parseHtmlDocument(html);
+  const dom = parsed.document;
 
   const styles = extractTagBodies(html, 'style').join('\n');
   const scripts = extractTagBodies(html, 'script').join('\n');
   const inlineStyles = Array.from(html.matchAll(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/gi), (match) => match[2]);
-  const profile = options.profile || detectProfile(absolute, html);
+  const mechanicsProfile = assertSupportedProfile(options.profile || detectProfile(absolute, html));
+  const reviewProfile = detectReviewProfile(mechanicsProfile, html);
   const preset = options.preset || detectPreset(absolute, html);
   const presetHint = preset === 'custom' ? detectPresetHint(absolute, html) : preset;
 
@@ -32,7 +35,7 @@ export async function buildContext(filePath, options = {}) {
     hasDiagramRoleTags: /data-diagram-role\s*=/i.test(html),
     hasAnimations: /@keyframes|\banimation(?:-[a-z-]+)?\s*:|\btransition(?:-[a-z-]+)?\s*:/i.test(styles),
     hasThemeToggle: /data-theme|theme-toggle|role\s*=\s*["']radiogroup/i.test(html),
-    isFixedCanvas: isFixedCanvas(profile, html, styles),
+    isFixedCanvas: isFixedCanvas(mechanicsProfile, html, styles),
   };
 
   return {
@@ -43,7 +46,12 @@ export async function buildContext(filePath, options = {}) {
     inlineStyles,
     text,
     dom,
-    profile,
+    // `profile` remains the mechanics alias for existing check registries and
+    // browser callers. New report consumers should use the explicit fields.
+    profile: mechanicsProfile,
+    mechanicsProfile,
+    reviewProfile,
+    htmlParseError: parsed.error,
     preset,
     presetHint,
     flags,
@@ -51,6 +59,19 @@ export async function buildContext(filePath, options = {}) {
     truth: truthText == null ? null : buildTruthRecord(truthPath, truthText),
     renderedInventory,
   };
+}
+
+export function parseHtmlDocument(html) {
+  try {
+    const document = parseHTML(html).document;
+    if (!document?.documentElement) throw new Error('parser produced no document element');
+    return { document, error: null };
+  } catch (error) {
+    return {
+      document: null,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 export function buildRenderedInventory(dom) {

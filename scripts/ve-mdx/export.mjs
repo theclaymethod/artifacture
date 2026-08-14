@@ -113,12 +113,8 @@ async function main() {
         outDir: dist,
         emptyOutDir: true,
         assetsInlineLimit: Number.MAX_SAFE_INTEGER,
+        codeSplitting: false,
         cssCodeSplit: false,
-        rollupOptions: {
-          output: {
-            inlineDynamicImports: true,
-          },
-        },
       },
     });
 

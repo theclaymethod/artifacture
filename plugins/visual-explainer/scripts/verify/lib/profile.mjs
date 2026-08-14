@@ -1,3 +1,13 @@
+import path from 'node:path';
+
+export const PROFILES = Object.freeze([
+  'page',
+  'slides',
+  'magazine',
+  'poster',
+  'video-comp',
+]);
+
 const PRESETS = [
   'mono-industrial',
   'nothing',
@@ -8,6 +18,26 @@ const PRESETS = [
   'ide',
   'custom',
 ];
+
+export function isSupportedProfile(profile) {
+  return PROFILES.includes(profile);
+}
+
+export function assertSupportedProfile(profile) {
+  if (!isSupportedProfile(profile)) {
+    throw new Error(`Unsupported profile "${profile}". Expected one of: ${PROFILES.join(', ')}`);
+  }
+  return profile;
+}
+
+export function isFixedStagePresentation(html) {
+  return /data-ve-presentation/i.test(html || '');
+}
+
+export function detectReviewProfile(mechanicsProfile, html) {
+  assertSupportedProfile(mechanicsProfile);
+  return isFixedStagePresentation(html) ? 'slides' : mechanicsProfile;
+}
 
 export function detectProfile(filePath, html) {
   const text = html.toLowerCase();
@@ -144,4 +174,3 @@ function hasClassCluster(html, patterns) {
 function escapeForRe(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-import path from 'node:path';

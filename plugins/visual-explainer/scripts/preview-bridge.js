@@ -196,7 +196,10 @@
   }
 
   function installLocationReporting() {
-    const report = () => post("location-state", { locationHash: location.hash });
+    const report = () => {
+      scheduleReconcile();
+      post("location-state", { locationHash: location.hash });
+    };
     window.addEventListener("hashchange", report);
     window.addEventListener("popstate", report);
     for (const method of ["pushState", "replaceState"]) {

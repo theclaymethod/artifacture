@@ -1,7 +1,6 @@
 # Web Diagram Card
-Read `../references/diagram-design.md` to select the routed diagram type and
-semantic pattern, then `../references/diagrams-svg.md` for shared SVG geometry.
-Use `ExplainerShell`, `Section`, `DiagramCanvas`: lanes, details, one accent.
+Use `ExplainerShell`, `Section`, and `DiagramCanvas`: lanes, details, one accent.
+The default component-backed path needs no diagram reference.
 In MDX prose, write literal braces as `&#123;` or inside code spans — bare { } in prose breaks the compiler.
 Default Tailwind spacing only; no [Npx].
 ```mdx
@@ -22,6 +21,8 @@ import { ExplainerShell, Section, DiagramCanvas } from 'REPO/visual-explainer-md
   </Section>
 </ExplainerShell>
 ```
-None fit -> use an accessible inline SVG inside the component shell. Mermaid is
-the fallback only when its layout is a better fit and it retains the complete
-zoom, pan, reset, and expand controls.
+If the content needs a specialized diagram family or the right semantic pattern
+is unclear, read `../references/diagram-design.md`. If no computed layout fits
+and custom SVG geometry is justified, then read `../references/diagrams-svg.md`.
+Mermaid is the fallback only when automatic layout is materially better and the
+result retains complete zoom, pan, reset, and expand controls.

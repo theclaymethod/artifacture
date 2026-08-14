@@ -29,6 +29,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { isAllowedBrowserRequest } from './network-policy.mjs';
 
 // Dynamic import so we can fail with an actionable message instead of a raw
 // ERR_MODULE_NOT_FOUND trace when Playwright isn't installed.
@@ -101,18 +102,30 @@ const pageHeight = Number(flags.height)
 const chartFixScript = `
 <script>
 window.addEventListener('load', function() {
-  setTimeout(function() {
-    document.querySelectorAll('canvas').forEach(function(canvas) {
+  setTimeout(async function() {
+    var canvases = Array.from(document.querySelectorAll('canvas'));
+    var state = { complete: false, expected: canvases.length, converted: 0, failures: 0 };
+    window.__vePdfCanvasState = state;
+    for (var canvas of canvases) {
       try {
+        if (canvas.width === 0 || canvas.height === 0) throw new Error('zero-sized canvas');
+        var dataUrl = canvas.toDataURL('image/png');
+        if (!dataUrl.startsWith('data:image/png;base64,')) throw new Error('invalid PNG data URL');
         var img = new Image();
-        img.src = canvas.toDataURL('image/png');
+        img.src = dataUrl;
         img.style.width = canvas.style.width || canvas.width + 'px';
         img.style.height = canvas.style.height || canvas.height + 'px';
         img.style.maxWidth = '100%';
+        if (typeof img.decode === 'function') await img.decode();
+        if (!canvas.parentNode) throw new Error('canvas is detached');
         canvas.parentNode.replaceChild(img, canvas);
-      } catch (e) { /* tainted canvas — leave it */ }
-    });
-    document.body.setAttribute('data-pdf-ready', 'true');
+        state.converted += 1;
+      } catch (error) {
+        state.failures += 1;
+      }
+    }
+    state.complete = true;
+    document.body.setAttribute('data-pdf-ready', state.failures === 0 ? 'true' : 'false');
   }, 1200);
 });
 </script>`;
@@ -231,11 +244,12 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
 });
 const page = await context.newPage();
-const ALLOWED_REMOTE = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net/npm/mermaid@', `http://127.0.0.1:${port}`];
+const localOrigin = `http://127.0.0.1:${port}`;
 await page.route('**/*', (route) => {
   const url = route.request().url();
-  const allowed = url.startsWith('file:') || url.startsWith('data:') || url.startsWith('blob:') || ALLOWED_REMOTE.some((origin) => url.startsWith(origin));
-  return allowed ? route.continue() : route.abort('blockedbyclient');
+  return isAllowedBrowserRequest(url, { additionalOrigins: [localOrigin] })
+    ? route.continue()
+    : route.abort('blockedbyclient');
 });
 
 try {
@@ -247,11 +261,44 @@ try {
   process.exit(1);
 }
 
-// Canvas → image swap has a 1.2s delay; wait for the marker.
+// Canvas → image swap has a 1.2s delay. Any canvas observed by the conversion
+// pass must complete before export; if readiness times out, a canvas still in
+// the DOM makes the export fail closed.
+let canvasState;
+let canvasReadinessError;
 try {
-  await page.waitForSelector('[data-pdf-ready="true"]', { timeout: 6000 });
-} catch {
-  // No canvases — fine.
+  await page.waitForFunction(
+    () => window.__vePdfCanvasState?.complete === true,
+    undefined,
+    { timeout: 6000 },
+  );
+  canvasState = await page.evaluate(() => window.__vePdfCanvasState);
+} catch (error) {
+  canvasReadinessError = error;
+}
+
+let canvasFailure;
+if (canvasState) {
+  const remainingCanvases = await page.locator('canvas').count();
+  if (
+    canvasState.failures > 0
+    || canvasState.converted !== canvasState.expected
+    || remainingCanvases > 0
+  ) {
+    canvasFailure = `converted ${canvasState.converted} of ${canvasState.expected} canvas elements; ${remainingCanvases} remain`;
+  }
+} else {
+  const observedCanvases = await page.locator('canvas').count();
+  if (observedCanvases > 0) {
+    canvasFailure = canvasReadinessError?.message || 'readiness state was not reported';
+  }
+}
+
+if (canvasFailure) {
+  console.error(`Canvas preparation failed; PDF was not exported (${canvasFailure}).`);
+  await browser.close();
+  server.close();
+  process.exit(1);
 }
 
 // ---------- Print-time DOM surgery ----------

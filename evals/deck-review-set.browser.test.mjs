@@ -4,10 +4,111 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { runBrowserStage } from '../plugins/visual-explainer/scripts/verify/lib/browser.mjs';
+import { looksLikeNetworkFlake, runBrowserStage } from '../plugins/visual-explainer/scripts/verify/lib/browser.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = path.join(ROOT, 'evals/fixtures/deck-review/presentation-states.html');
+
+test('transient CDN asset errors qualify for one browser retry', () => {
+  assert.equal(looksLikeNetworkFlake({
+    consoleErrors: [{ text: 'Failed to load resource: the server responded with a status of 404 ()' }],
+    pageErrors: [],
+    failedRequests: [{ url: 'https://fonts.gstatic.com/s/example.woff2', status: 404 }],
+  }), true);
+  assert.equal(looksLikeNetworkFlake({
+    consoleErrors: [{ text: 'Uncaught TypeError: broken()' }],
+    pageErrors: [],
+    failedRequests: [{ url: 'https://fonts.gstatic.com/s/example.woff2', status: 404 }],
+  }), false);
+});
+
+test('default browser evidence directories are unique across verification runs', async () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-browser-evidence-'));
+  const artifact = path.join(workDir, 'poster.html');
+  fs.writeFileSync(artifact, '<!doctype html><html><body><main><h1>Poster</h1></main></body></html>');
+  const evidenceDirs = [];
+  const makeContext = () => ({
+    filePath: artifact,
+    html: fs.readFileSync(artifact, 'utf8'),
+    profile: 'poster',
+    preset: 'custom',
+    flags: { hasAnimations: false, hasMermaid: false },
+  });
+
+  try {
+    const first = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    const firstPath = first.runs[0].screenshotPath;
+    evidenceDirs.push(path.dirname(firstPath));
+    const firstEvidence = fs.readFileSync(firstPath);
+
+    const second = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    const secondPath = second.runs[0].screenshotPath;
+    evidenceDirs.push(path.dirname(secondPath));
+
+    assert.notEqual(path.dirname(firstPath), path.dirname(secondPath));
+    assert.notEqual(firstPath, secondPath);
+    assert.deepEqual(fs.readFileSync(firstPath), firstEvidence, 'a later run did not overwrite bound evidence');
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+    for (const evidenceDir of evidenceDirs) fs.rmSync(evidenceDir, { recursive: true, force: true });
+  }
+});
+
+test('browser verification records a failing metric when declared Mermaid content never renders', async () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-mermaid-readiness-'));
+  const artifact = path.join(workDir, 'poster.html');
+  const screensDir = path.join(workDir, 'screens');
+  const html = '<!doctype html><html><body><main><div class="mermaid">graph TD; A--&gt;B</div></main></body></html>';
+  fs.writeFileSync(artifact, html);
+  const ctx = {
+    filePath: artifact,
+    html,
+    profile: 'poster',
+    preset: 'custom',
+    flags: { hasAnimations: false, hasMermaid: true },
+  };
+
+  try {
+    const result = await runBrowserStage(ctx, {
+      screensDir,
+      profile: 'poster',
+      captureDeckReview: false,
+      mermaidTimeoutMs: 100,
+    });
+    const metric = result.runs[0].metrics['mermaid-rendered'];
+    assert.match(metric.readinessError, /Mermaid rendering did not complete within 100ms/);
+    assert.equal(metric.offenders.length > 0, true);
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  }
+});
+
+test('browser verification recognizes the component-backed Mermaid shell', async () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-mermaid-shell-'));
+  const artifact = path.join(workDir, 'poster.html');
+  const screensDir = path.join(workDir, 'screens');
+  const html = '<!doctype html><html><body><main><figure data-ve-mermaid-shell><div><svg role="img"></svg></div></figure></main></body></html>';
+  fs.writeFileSync(artifact, html);
+  const ctx = {
+    filePath: artifact,
+    html,
+    profile: 'poster',
+    preset: 'custom',
+    flags: { hasAnimations: false, hasMermaid: true },
+  };
+
+  try {
+    const result = await runBrowserStage(ctx, {
+      screensDir,
+      profile: 'poster',
+      captureDeckReview: false,
+      mermaidTimeoutMs: 100,
+    });
+    assert.equal(result.runs.length > 0, true);
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  }
+});
 
 test('browser stage captures every presentation base, drill, and progressive state', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));

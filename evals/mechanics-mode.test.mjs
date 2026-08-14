@@ -9,6 +9,43 @@ const REPO_ROOT = resolve(import.meta.dirname, '..');
 const CLI = resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/ve-verify.mjs');
 const FINALIZER = resolve(REPO_ROOT, 'plugins/visual-explainer/scripts/verify/ve-finalize.mjs');
 
+test('the public verifier rejects profiles outside the closed CLI set', () => {
+  const workDir = mkdtempSync(join(tmpdir(), 'artifacture-profile-'));
+  try {
+    const artifact = join(workDir, 'artifact.html');
+    writeFileSync(artifact, '<main><h1>Artifact</h1></main>');
+    const result = spawnSync(process.execPath, [
+      CLI, artifact, '--profile', 'unknown', '--static-only', '--quiet',
+    ], { cwd: REPO_ROOT, encoding: 'utf8' });
+
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /Unsupported profile "unknown"/);
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
+  }
+});
+
+test('the public verifier reports unparseable HTML as a mandatory error', () => {
+  const workDir = mkdtempSync(join(tmpdir(), 'artifacture-html-parse-'));
+  try {
+    const artifact = join(workDir, 'artifact.html');
+    const reportPath = join(workDir, 'report.json');
+    writeFileSync(artifact, '<!--');
+    const result = spawnSync(process.execPath, [
+      CLI, artifact, '--json', reportPath, '--static-only', '--quiet',
+    ], { cwd: REPO_ROOT, encoding: 'utf8' });
+
+    assert.equal(result.status, 1, result.stderr);
+    const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+    const parseCheck = report.checks.find((check) => check.id === 'artifact-html-parse');
+    assert.equal(parseCheck?.status, 'fail');
+    assert.equal(parseCheck?.severity, 'error');
+    assert.ok(report.summary.errors >= 1);
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
+  }
+});
+
 test('mechanics-only reaches a seeded deck check without running complete-deck review', () => {
   const workDir = mkdtempSync(join(tmpdir(), 'artifacture-mechanics-'));
   try {

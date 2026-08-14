@@ -124,12 +124,11 @@ async function assertStaticGenerated(filePath) {
   if (failures.length) throw new Error(`${filePath}: ${failures.join(', ')}`);
 }
 
-// Roster-sync guard (plan 008 step 5): components.tsx's named exports,
-// integrity.mjs's sharedComponents set, and SKILL.md's bulleted roster are
-// three hand-maintained lists describing the same 17 components with no
-// automatic sync between them. A component added to one but not another
-// silently produces false integrity failures (sharedComponents) or stale
-// docs (SKILL.md). This does not derive one list from another — deriving
+// Roster-sync guard: components.tsx's named exports, integrity.mjs's
+// sharedComponents set, and the progressively disclosed component reference
+// are hand-maintained lists with no automatic sync between them. A component
+// added to one but not another silently produces false integrity failures or
+// stale docs. This does not derive one list from another — deriving
 // integrity.mjs's set from the module at runtime means importing TSX into a
 // plain-node context, which is messier than a guard (deferred; see plan
 // 008's maintenance notes) — it only asserts the lists still agree.
@@ -159,18 +158,19 @@ async function assertRosterInSync() {
     throw new Error(`Component roster out of sync — ${details.join('; ')}`);
   }
 
-  // SKILL.md's roster is prose documentation (a bullet list with inline prop
-  // hints appended), more brittle to parse reliably than a source export
-  // list, so a mismatch here is a warning rather than a build failure.
-  const skillDoc = await fs.readFile(path.resolve(repoRoot, 'plugins/visual-explainer/SKILL.md'), 'utf8');
-  const documented = new Set([...skillDoc.matchAll(/^- (\w+)\(/gm)].map((match) => match[1]));
-  const missingFromSkill = [...exported].filter((name) => !documented.has(name));
-  const extraInSkill = [...documented].filter((name) => !exported.has(name));
-  if (missingFromSkill.length || extraInSkill.length) {
+  // The full roster intentionally lives outside SKILL.md so ordinary flows do
+  // not pay its context cost. A mismatch remains a warning because this is
+  // prose documentation rather than a machine-readable API declaration.
+  const componentDocPath = 'plugins/visual-explainer/references/mdx-components.md';
+  const componentDoc = await fs.readFile(path.resolve(repoRoot, componentDocPath), 'utf8');
+  const documented = new Set([...componentDoc.matchAll(/`([A-Z][a-z][A-Za-z0-9]*)(?:\(|`)/g)].map((match) => match[1]));
+  const missingFromDocs = [...exported].filter((name) => !documented.has(name));
+  const extraInDocs = [...documented].filter((name) => !exported.has(name));
+  if (missingFromDocs.length || extraInDocs.length) {
     const details = [];
-    if (missingFromSkill.length) details.push(`not documented in SKILL.md: ${missingFromSkill.join(', ')}`);
-    if (extraInSkill.length) details.push(`documented in SKILL.md but not exported: ${extraInSkill.join(', ')}`);
-    console.warn(`WARN: component roster vs SKILL.md drift — ${details.join('; ')}`);
+    if (missingFromDocs.length) details.push(`not documented in ${componentDocPath}: ${missingFromDocs.join(', ')}`);
+    if (extraInDocs.length) details.push(`documented in ${componentDocPath} but not exported: ${extraInDocs.join(', ')}`);
+    console.warn(`WARN: component roster documentation drift — ${details.join('; ')}`);
   }
 }
 

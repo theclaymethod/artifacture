@@ -1,3 +1,5 @@
+import { annotationsForFrame } from "/__ve/annotations.js";
+
 const elements = {
   annotationCount: document.querySelector("#annotation-count"),
   annotationList: document.querySelector("#annotation-list"),
@@ -176,6 +178,7 @@ function handleBridgeMessage(event) {
       break;
     case "location-state":
       syncFrameHash(message.locationHash);
+      syncMarkers();
       break;
     case "target-selected":
       if (state.mode !== "comment" || !isAnchor(message.anchor) || !isRect(message.rect)) return;
@@ -238,6 +241,7 @@ function handleHostHashChange() {
   const nextHash = normalizeHash(location.hash);
   if (nextHash === state.frameHash) return;
   state.frameHash = nextHash;
+  syncMarkers();
   postToFrame("set-location", { locationHash: nextHash });
 }
 
@@ -423,7 +427,8 @@ function focusAnnotation(id) {
 
 function syncMarkers() {
   postToFrame("set-markers", {
-    annotations: state.annotations.map(({ anchor, id, number }) => ({ anchor, id, number })),
+    annotations: annotationsForFrame(state.annotations, state.frameHash)
+      .map(({ anchor, id, number }) => ({ anchor, id, number })),
   });
 }
 

@@ -2,8 +2,8 @@
 import crypto from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { parseHTML } from 'linkedom';
-import { buildRenderedInventory, buildTruthRecord } from './lib/context.mjs';
+import { buildRenderedInventory, buildTruthRecord, parseHtmlDocument } from './lib/context.mjs';
+import { assertSupportedProfile, detectReviewProfile } from './lib/profile.mjs';
 import { reviewContractSha256 } from './lib/report.mjs';
 
 export function finalizeReport(report, verdictBundle) {
@@ -44,14 +44,17 @@ function validateInputs(report, verdictBundle) {
   if (reviewContractSha256(contract) !== contract.sha256) {
     throw new Error('report review_contract identity is invalid');
   }
-  if (
-    contract.profile !== report.profile
-    || contract.preset !== report.preset
-    || JSON.stringify(contract.required_passes) !== JSON.stringify(report.llm_passes_required || [])
-  ) throw new Error('report metadata does not match review_contract');
   const artifact = readFileSync(report.file);
   if (sha256(artifact) !== contract.artifact_sha256) throw new Error('artifact changed after review capture');
-  const staticInventory = buildRenderedInventory(parseHTML(artifact.toString('utf8')).document);
+  const artifactHtml = artifact.toString('utf8');
+  const parsedArtifact = parseHtmlDocument(artifactHtml);
+  if (parsedArtifact.error) throw new Error(`artifact HTML could not be parsed: ${parsedArtifact.error}`);
+  validateProfileSemantics(report, contract, artifactHtml);
+  if (
+    contract.preset !== report.preset
+    || JSON.stringify(contract.required_passes) !== JSON.stringify(report.llm_passes_required || [])
+  ) throw new Error('report metadata does not match review_contract');
+  const staticInventory = buildRenderedInventory(parsedArtifact.document);
   const inventory = contract.inventory_provenance === 'browser-rendered'
     ? contract.inventory
     : staticInventory;
@@ -99,6 +102,29 @@ function validateInputs(report, verdictBundle) {
     if (!Array.isArray(entry.findings)) throw new Error(`findings[] is required for ${entry.pass}`);
     if (entry.status === 'pass' && entry.findings.length) throw new Error(`passing verdict cannot contain findings: ${entry.pass}`);
   }
+}
+
+function validateProfileSemantics(report, contract, artifactHtml) {
+  const mechanicsProfile = assertSupportedProfile(report.mechanics_profile || report.profile);
+  const expectedReviewProfile = detectReviewProfile(mechanicsProfile, artifactHtml);
+  const reviewProfile = assertSupportedProfile(report.review_profile || expectedReviewProfile);
+  const contractMechanicsProfile = assertSupportedProfile(contract.mechanics_profile || mechanicsProfile);
+  const contractReviewProfile = assertSupportedProfile(contract.review_profile || contract.profile);
+
+  if (
+    report.profile !== mechanicsProfile
+    || reviewProfile !== expectedReviewProfile
+    || contract.profile !== contractReviewProfile
+    || contractMechanicsProfile !== mechanicsProfile
+    || contractReviewProfile !== reviewProfile
+  ) throw new Error('report profile metadata does not match artifact review semantics');
+
+  const artifactReviewPasses = (report.llm_passes_required || [])
+    .filter((pass) => pass.startsWith('artifact-review:'));
+  if (
+    artifactReviewPasses.length !== 1
+    || artifactReviewPasses[0] !== `artifact-review:${reviewProfile}`
+  ) throw new Error('report required passes do not match artifact review profile');
 }
 
 function sha256(value) {

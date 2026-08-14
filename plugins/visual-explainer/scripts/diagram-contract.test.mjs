@@ -57,9 +57,10 @@ test("diagram routing exposes the pinned 27 types and seven semantic patterns", 
   assert.doesNotMatch(routing, /Cocoon AI/);
 });
 
-test("diagram route is SVG-first and stores Mermaid source as inert text", async () => {
-  const [skill, builder, contract, components, css, mono, mermaid] = await Promise.all([
+test("diagram route progressively discloses SVG guidance and stores Mermaid source as inert text", async () => {
+  const [skill, card, builder, contract, components, css, mono, mermaid] = await Promise.all([
     read("SKILL.md"),
+    read("cards/web-diagram.md"),
     read(".claude/agents/ve-diagram-builder.md"),
     read("references/section-contract.md"),
     read("references/components.md"),
@@ -68,7 +69,9 @@ test("diagram route is SVG-first and stores Mermaid source as inert text", async
     read("templates/mermaid-flowchart.html"),
   ]);
 
-  assert.match(skill, /references\/diagram-design\.md/);
+  assert.doesNotMatch(skill, /references\/diagram-design\.md/);
+  assert.match(card, /references\/diagram-design\.md/);
+  assert.match(card, /custom SVG geometry[\s\S]+references\/diagrams-svg\.md/);
   assert.match(builder, /accessible inline SVG by default/);
   assert.match(builder, /Mermaid only/);
   assert.match(contract, /Inline-SVG fragments return `\[\]`/);
@@ -106,4 +109,36 @@ test("active diagram instructions contain no stale type count or executable sour
 
   assert.doesNotMatch(combined, /13 supported/i);
   assert.doesNotMatch(combined, /<script[^>]+type=["']text\/plain["']/i);
+});
+
+test("every advertised section role maps to an available worker", async () => {
+  const [command, contract] = await Promise.all([
+    read("commands/generate-web-diagram.md"),
+    read("references/section-contract.md"),
+  ]);
+
+  for (const specialist of ["ve-hero-builder", "ve-diagram-builder", "ve-table-builder"]) {
+    await read(`.claude/agents/${specialist}.md`);
+    assert.match(command, new RegExp(specialist));
+    assert.match(contract, new RegExp(specialist));
+  }
+
+  for (const role of ["dashboard", "prose"]) {
+    assert.match(command, new RegExp(`generic worker[^\\n]+${role}|${role}[^\\n]+generic worker`, "i"));
+    assert.ok(contract.includes(`| \`${role}\` | generic worker`));
+  }
+  assert.doesNotMatch(`${command}\n${contract}`, /ve-(?:dashboard|prose)-builder/);
+});
+
+test("computed and Mermaid diagrams use accessible, strict SVG contracts", async () => {
+  const components = await read("../../visual-explainer-mdx/components.tsx");
+  const canvas = components.slice(components.indexOf("export function DiagramCanvas"), components.indexOf("function MobileSwimlaneVariant"));
+  const mermaid = components.slice(components.indexOf("export function MermaidBlock"), components.indexOf("function DiagramNodeShape"));
+
+  assert.match(canvas, /aria-labelledby=/);
+  assert.ok(canvas.indexOf("<title id=") < canvas.indexOf("<desc id="));
+  assert.ok(canvas.indexOf("<desc id=") < canvas.indexOf("<defs>"));
+  assert.match(mermaid, /securityLevel: 'strict'/);
+  assert.match(mermaid, /replaceChildren\(parseMermaidSvg/);
+  assert.doesNotMatch(mermaid, /innerHTML/);
 });

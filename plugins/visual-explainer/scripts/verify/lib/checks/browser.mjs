@@ -1,8 +1,16 @@
 const PAGE = ['page'];
 const DECK = ['slides', 'magazine'];
 const ALL_RENDERED = ['page', 'slides', 'magazine', 'poster', 'video-comp'];
+const MERMAID_RENDERED = ['page', 'slides', 'magazine', 'video-comp'];
 
 export const checks = {
+  'mermaid-rendered': metricCheck('mermaid-rendered', {
+    profiles: MERMAID_RENDERED,
+    failWhen: (metric) => !metric || metric.offenders?.length,
+    evidence: (failures) => `Mermaid render failures: ${summarizeOffenders(failures, 'offenders')}`,
+    fix_hint: 'Wait for every declared Mermaid container to produce an SVG and fix any parse or runtime error before verification completes.'
+  }),
+
   'prose-readability-minimums': metricCheck('prose-readability-minimums', {
     profiles: PAGE,
     appliesWhen: (ctx) => /\.prose\b/.test(ctx.html || ''),

@@ -115,5 +115,3 @@ Verify each against the code. If something cannot be verified, mark it as uncert
 - Test tables with wide content don't overflow their container
 
 Write source to a sibling `.mdx` or `.tsx` file when practical, then write generated HTML to `~/.agent/diagrams/` with a descriptive filename (e.g., `feature-name-plan.html`). Open the result in the browser. Tell the user the source path and generated HTML path.
-
-Ultrathink.

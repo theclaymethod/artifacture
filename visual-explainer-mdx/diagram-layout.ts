@@ -1,4 +1,4 @@
-import type { DiagramNode, DiagramEdge, DiagramCanvasProps } from './components';
+import type { DiagramCanvasProps, DiagramEdge, DiagramNode } from './diagram-types';
 
 export type LaidOutNode = DiagramNode & {
   x: number;
@@ -275,7 +275,7 @@ function edgeRoute(from: LaidOutNode, to: LaidOutNode, orientation: SwimlaneOrie
 
 function placeEdgeLabels(edges: Array<Omit<LaidOutEdge, 'label'>>, nodes: LaidOutNode[], bounds: { minX: number; minY: number; maxX: number; maxY: number }, dense: boolean): LaidOutEdge[] {
   const occupied = nodes.map((node) => expandRect(nodeRect(node), 5));
-  const laidOut = edges.map((item) => {
+  const laidOut: LaidOutEdge[] = edges.map((item): LaidOutEdge => {
     const lines = item.edge.label ? splitSvgText(item.edge.label, dense ? 18 : 24).slice(0, 2) : [];
     if (!lines.length) return item;
     const width = Math.max(64, Math.min(dense ? 128 : 168, Math.max(...lines.map((line) => line.length)) * 6 + 24));
@@ -284,7 +284,7 @@ function placeEdgeLabels(edges: Array<Omit<LaidOutEdge, 'label'>>, nodes: LaidOu
     occupied.push(expandRect(labelRect(label), 4));
     return { ...item, label };
   });
-  const overlaps = collectLabelOverlaps(laidOut.filter((edge): edge is LaidOutEdge => Boolean(edge.label)), nodes);
+  const overlaps = collectLabelOverlaps(laidOut.filter((edge) => Boolean(edge.label)), nodes);
   if (overlaps.length && typeof console !== 'undefined') {
     console.warn(`DiagramCanvas edge-label overlap avoided incompletely: ${overlaps.slice(0, 4).join(', ')}`);
   }
