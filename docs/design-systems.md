@@ -1,6 +1,6 @@
 # External design systems
 
-Artifacture's built-in presets (`mono-industrial`, `nothing`, `blueprint`,
+Artifacture's built-in presets (`oa-design`, `mono-industrial`, `nothing`, `blueprint`,
 `editorial`, `paper-ink`, `terminal`, `custom`) live in
 `visual-explainer-mdx/global.css`. Everything else is a **design system**: a
 user-owned artifact maintained OUTSIDE the skill and the repo, resolved from a
@@ -102,7 +102,7 @@ derived fallbacks and font imports) into the standalone HTML as a
 `<style data-ve-design-system>` block. Built-in names never consult the
 registry, so a user system named `terminal` cannot shadow the built-in.
 Unknown names warn and fall back to the default built-in tokens
-(`mono-industrial`) so nothing ships unstyled.
+(`oa-design`) so nothing ships unstyled.
 
 The static/Hyperframes path (`ve:export-static`) renders compositions that
 carry their own styles and does not consult the registry.

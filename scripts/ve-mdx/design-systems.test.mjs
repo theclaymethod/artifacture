@@ -117,5 +117,6 @@ test('presetNamesInSource finds preset props and data attributes, builtin set in
   `;
   assert.deepEqual(presetNamesInSource(code).sort(), ['acme-dark', 'acme-terracotta', 'terminal']);
   assert.equal(BUILTIN_PRESETS.has('terminal'), true);
+  assert.equal(BUILTIN_PRESETS.has('oa-design'), true);
   assert.equal(BUILTIN_PRESETS.has('acme-terracotta'), false);
 });

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
 
 @source "../examples/visual-explainer-mdx/**/*.{mdx,tsx,ts,jsx,js}";
@@ -11,6 +11,68 @@
 
 @layer base {
   :root,
+  [data-ve-preset="oa-design"] {
+    --ve-font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 500;
+    --ve-heading-weight: 500;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 1.5rem;
+    --ve-radius: 26px;
+    --ve-poster-radius: 26px;
+    --ve-bg: #f6f6f6;
+    --ve-bg-alt: #191919;
+    --ve-panel: #ffffff;
+    --ve-panel-strong: #f6f6f6;
+    --ve-row: color-mix(in srgb, #292929 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #292929 12%, transparent);
+    --ve-heading: #292929;
+    --ve-text: rgb(41 41 41 / 0.92);
+    --ve-muted: #6d6d6d;
+    --ve-faint: #6d6d6d;
+    --ve-accent: #305dde;
+    --ve-accent-soft: color-mix(in srgb, #305dde 7%, transparent);
+    --ve-accent-contrast: #ffffff;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #f6f6f6;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #ffffff;
+    --ve-node-stroke: color-mix(in srgb, #292929 14%, transparent);
+    --ve-diagram-ink: #292929;
+    --ve-diagram-muted: #6d6d6d;
+    --ve-diagram-frame: color-mix(in srgb, #292929 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #305dde 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 18;
+    --ve-chip-radius: 999;
+    --ve-code-bg: #191919;
+    --ve-code-text: #ededed;
+    --ve-code-muted: #969696;
+    --ve-code-rule: color-mix(in srgb, #ededed 14%, transparent);
+    --ve-code-accent: #296ff0;
+    --ve-poster-bg: #ffffff;
+    --ve-poster-text: #292929;
+    --ve-poster-muted: #6d6d6d;
+    --ve-poster-rule: color-mix(in srgb, #292929 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #ffffff;
+    --ve-slide-text: #292929;
+    --ve-slide-muted: #6d6d6d;
+    --ve-slide-rule: color-mix(in srgb, #292929 12%, transparent);
+  }
+
   [data-ve-preset="mono-industrial"] {
     --ve-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -54,7 +116,7 @@
     --ve-diagram-accent-fill: rgb(94 234 212 / 0.12);
     --ve-diagram-grid-size: 22;
     --ve-grid-dot-r: 0.9;
-    --ve-grid-dot-opacity: 0.58;
+    --ve-grid-dot-opacity: 0;
     --ve-grid-line-opacity: 0;
     --ve-grid-scanline-opacity: 0;
     --ve-node-radius: 6;
@@ -108,7 +170,7 @@
     --ve-diagram-accent-fill: rgb(215 25 33 / 0.13);
     --ve-diagram-grid-size: 16;
     --ve-grid-dot-r: 1;
-    --ve-grid-dot-opacity: 0.82;
+    --ve-grid-dot-opacity: 0;
     --ve-grid-line-opacity: 0;
     --ve-grid-scanline-opacity: 0;
     --ve-node-radius: 0;
@@ -153,8 +215,8 @@
     --ve-diagram-grid-size: 20;
     --ve-grid-line: rgb(102 179 255 / 0.34);
     --ve-grid-dot-r: 0.45;
-    --ve-grid-dot-opacity: 0.24;
-    --ve-grid-line-opacity: 0.64;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
     --ve-grid-line-width: 0.7;
     --ve-grid-scanline-opacity: 0;
     --ve-node-radius: 2;
@@ -200,7 +262,7 @@
     --ve-diagram-grid-size: 28;
     --ve-grid-dot-r: 0;
     --ve-grid-dot-opacity: 0;
-    --ve-grid-line-opacity: 0.38;
+    --ve-grid-line-opacity: 0;
     --ve-grid-line-width: 0.6;
     --ve-grid-scanline-opacity: 0;
     --ve-node-radius: 8;
@@ -245,8 +307,8 @@
     --ve-diagram-grid-size: 26;
     --ve-grid-line: rgb(45 33 25 / 0.15);
     --ve-grid-dot-r: 0.6;
-    --ve-grid-dot-opacity: 0.45;
-    --ve-grid-line-opacity: 0.18;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
     --ve-grid-line-width: 0.8;
     --ve-grid-scanline-opacity: 0;
     --ve-node-radius: 10;
@@ -298,9 +360,9 @@
     --ve-grid-line: rgb(74 222 128 / 0.22);
     --ve-grid-dot-r: 0;
     --ve-grid-dot-opacity: 0;
-    --ve-grid-line-opacity: 0.18;
+    --ve-grid-line-opacity: 0;
     --ve-grid-line-width: 0.8;
-    --ve-grid-scanline-opacity: 0.42;
+    --ve-grid-scanline-opacity: 0;
     --ve-grid-scanline-width: 0.6;
     --ve-node-radius: 0;
     --ve-chip-radius: 0;
@@ -450,7 +512,6 @@
   .ve-diagram-mobile-node {
     min-width: 0;
     border: 1px solid var(--ve-diagram-frame);
-    border-left: 3px solid var(--ve-node-stroke);
     border-radius: var(--ve-radius);
     background: var(--ve-node-bg);
     padding: 0.85rem 0.95rem;
@@ -822,6 +883,192 @@
 }
 
 @layer components {
+  .ve-shell-header {
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  .ve-shell-source-card,
+  .ve-pipeline-item,
+  .ve-risk-card,
+  .ve-preset-card,
+  .ve-callout {
+    border: 1px solid var(--ve-rule);
+    border-radius: var(--ve-radius);
+    background: var(--ve-panel);
+    padding: 1.25rem;
+  }
+
+  .ve-pipeline {
+    gap: 0.75rem;
+  }
+
+  .ve-risk-ledger {
+    gap: 1rem;
+  }
+
+  [data-ve-preset="oa-design"] {
+    color-scheme: light;
+    caret-color: var(--ve-accent);
+  }
+
+  [data-ve-preset="oa-design"] ::selection {
+    background: color-mix(in srgb, var(--ve-accent) 18%, transparent);
+    color: var(--ve-heading);
+  }
+
+  [data-ve-preset="oa-design"] :focus-visible {
+    outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent);
+    outline-offset: 3px;
+  }
+
+  [data-ve-preset="oa-design"] .ve-shell-inner {
+    gap: 0;
+    padding-block: clamp(1rem, 3vw, 2.5rem) clamp(4rem, 8vw, 8rem);
+  }
+
+  [data-ve-preset="oa-design"] .ve-table-shell,
+  [data-ve-preset="oa-design"] .ve-diagram-shell,
+  [data-ve-preset="oa-design"] [data-ve-mermaid-shell],
+  [data-ve-preset="oa-design"] [data-ve-code-block] {
+    border-color: var(--ve-rule);
+    background: var(--ve-panel);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+    corner-shape: squircle;
+  }
+
+  [data-ve-preset="oa-design"] .ve-shell-header {
+    align-items: end;
+    padding: clamp(2rem, 5vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem);
+    border: 0;
+    border-top: 1px solid var(--ve-rule);
+    border-bottom: 1px solid var(--ve-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-ve-preset="oa-design"] .ve-shell-header h1 {
+    max-width: 13ch;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  [data-ve-preset="oa-design"] .ve-shell-header > div > p {
+    max-width: 68ch;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 1.55;
+  }
+
+  [data-ve-preset="oa-design"] .ve-shell-source-card {
+    padding: 0 0 0 clamp(1rem, 2vw, 1.5rem);
+    border: 0;
+    border-left: 1px solid var(--ve-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-ve-preset="oa-design"] .ve-section {
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: clamp(2rem, 5vw, 4.75rem) 0;
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  [data-ve-preset="oa-design"] .ve-section-heading h2 {
+    max-width: 16ch;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  [data-ve-preset="oa-design"] .ve-pipeline,
+  [data-ve-preset="oa-design"] .ve-risk-ledger {
+    gap: 0;
+  }
+
+  [data-ve-preset="oa-design"] .ve-pipeline-item,
+  [data-ve-preset="oa-design"] .ve-risk-card,
+  [data-ve-preset="oa-design"] .ve-preset-card {
+    padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
+    border: 0;
+    border-top: 1px solid var(--ve-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-ve-preset="oa-design"] .ve-callout {
+    padding: 1rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--ve-accent);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-ve-preset="oa-design"] .ve-pipeline-item > div:first-child {
+    color: var(--ve-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="low"] > p:first-child {
+    color: var(--ve-ok);
+  }
+
+  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="medium"] > p:first-child {
+    color: var(--ve-warn);
+  }
+
+  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="high"] > p:first-child {
+    color: var(--ve-danger);
+  }
+
+  [data-ve-preset="oa-design"] button {
+    min-height: 2.25rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--ve-panel-strong);
+    color: var(--ve-heading);
+    font: 500 0.875rem/1 var(--ve-font-body);
+    transition: background-color 160ms ease-out, color 160ms ease-out, transform 100ms ease-out;
+  }
+
+  [data-ve-preset="oa-design"] button:hover {
+    background: color-mix(in srgb, var(--ve-heading) 8%, transparent);
+  }
+
+  [data-ve-preset="oa-design"] button:active {
+    transform: translateY(1px) scale(0.98);
+  }
+
+  [data-ve-preset="oa-design"] code:not([data-ve-code-block] code) {
+    border-radius: 999px;
+  }
+
+  [data-ve-preset="oa-design"] [data-ve-default-preset="true"] > p:first-child {
+    color: var(--ve-accent);
+  }
+
+  [data-ve-preset="oa-design"] [data-ve-default-preset="true"] > div:last-child {
+    background: var(--ve-accent);
+  }
+
+  @media (max-width: 1023px) {
+    [data-ve-preset="oa-design"] .ve-shell-header {
+      padding: 2rem 0;
+    }
+
+    [data-ve-preset="oa-design"] .ve-shell-source-card {
+      padding: 1rem 0 0;
+      border-top: 1px solid var(--ve-rule);
+      border-left: 0;
+    }
+  }
+
   .ve-output {
     --ve-page-pad-x: clamp(20px, 3vw, 44px);
     --ve-page-pad-y: clamp(44px, 7vw, 108px);
@@ -840,6 +1087,32 @@
     width: min(1180px, calc(100vw - (var(--ve-page-pad-x) * 2)));
     margin: 0 auto;
     padding: var(--ve-page-pad-y) 0;
+  }
+
+  .ve-output--oa-design .ve-output-inner {
+    width: min(76rem, calc(100vw - (var(--ve-page-pad-x) * 2)));
+  }
+
+  .ve-output--oa-design .ve-output-header,
+  .ve-output--oa-design .ve-oa-plate {
+    border: 0;
+    border-top: 1px solid var(--ve-rule);
+    border-bottom: 1px solid var(--ve-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .ve-output--oa-design .ve-output-header {
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .ve-output--oa-design .ve-output-header h1 {
+    letter-spacing: -0.035em;
+  }
+
+  .ve-output--oa-design .ve-oa-plate {
+    padding: clamp(1.5rem, 4vw, 3rem);
   }
 
   .ve-output-header {
@@ -1020,8 +1293,6 @@
   .ve-dot-field {
     min-height: 420px;
     padding: clamp(24px, 5vw, 56px);
-    background-image: radial-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px);
-    background-size: 14px 14px;
   }
 
   .ve-output--nothing .ve-display-metric {
@@ -1066,14 +1337,7 @@
     border-color: #d71921;
   }
 
-  .ve-output--blueprint {
-    background-image:
-      linear-gradient(to right, rgb(96 165 250 / 0.11) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(96 165 250 / 0.11) 1px, transparent 1px),
-      linear-gradient(to right, rgb(96 165 250 / 0.18) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(96 165 250 / 0.18) 1px, transparent 1px);
-    background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
-  }
+  .ve-output--blueprint { background-color: var(--ve-bg); }
 
   .ve-output--blueprint .ve-output-header {
     grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr);
@@ -1209,12 +1473,7 @@
     margin-top: 48px;
   }
 
-  .ve-output--paper-ink {
-    background-image:
-      linear-gradient(rgb(41 31 24 / 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(41 31 24 / 0.05) 1px, transparent 1px);
-    background-size: 32px 32px;
-  }
+  .ve-output--paper-ink { background-color: var(--ve-bg); }
 
   .ve-paper-proof {
     position: relative;
@@ -1263,12 +1522,7 @@
     text-transform: uppercase;
   }
 
-  .ve-output--terminal {
-    background-image:
-      linear-gradient(rgb(79 255 143 / 0.055) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(79 255 143 / 0.045) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
+  .ve-output--terminal { background-color: var(--ve-bg); }
 
   .ve-terminal {
     margin-bottom: clamp(28px, 5vw, 52px);
@@ -1346,14 +1600,31 @@
   }
 
   .ve-review-panel {
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
+    position: static;
+    width: auto;
+    margin: 32px 20px 20px;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.08),
+      0 8px 24px rgb(0 0 0 / 0.12);
   }
 
-  /* The fixed review panel must never sit over content: the shell reserves its space. */
   .ve-has-review {
-    padding-bottom: 240px;
+    padding-bottom: 0;
+  }
+
+  /* A desktop rail keeps the floating review tool from occluding the artifact. */
+  @media (min-width: 1200px) {
+    .ve-review-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: min(320px, calc(100vw - 32px));
+      margin: 0;
+    }
+
+    .ve-has-review {
+      padding-right: 352px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1377,14 +1648,8 @@
     }
 
     .ve-review-panel {
-      position: static;
-      width: auto;
       margin: 32px 20px 20px;
       box-shadow: none;
-    }
-
-    .ve-has-review {
-      padding-bottom: 0;
     }
   }
 }

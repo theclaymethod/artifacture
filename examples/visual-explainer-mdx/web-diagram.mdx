@@ -1,4 +1,4 @@
-import { Callout, ExplainerShell, FlowDiagram, Section } from '../../visual-explainer-mdx/components';
+import { Callout, DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
 
 export default function WebDiagramExample() {
   return (
@@ -8,7 +8,7 @@ export default function WebDiagramExample() {
       summary="This example represents the migrated /generate-web-diagram path: MDX source, reusable diagram component, generated standalone HTML."
     >
       <Section kicker="diagram" title="Source To Artifact">
-        <FlowDiagram
+        <DiagramCanvas
           nodes={[
             { id: 'prompt', label: 'Prompt', detail: 'topic + audience' },
             { id: 'mdx', label: 'MDX', detail: 'component source' },

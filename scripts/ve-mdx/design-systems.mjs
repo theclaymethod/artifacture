@@ -22,6 +22,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 export const BUILTIN_PRESETS = new Set([
+  'oa-design',
   'mono-industrial',
   'nothing',
   'blueprint',
@@ -31,7 +32,7 @@ export const BUILTIN_PRESETS = new Set([
   'custom',
 ]);
 
-export const DEFAULT_FALLBACK_PRESET = 'mono-industrial';
+export const DEFAULT_FALLBACK_PRESET = 'oa-design';
 
 // Token keys a complete design system is expected to provide (directly or via
 // the derived fallbacks the exporter injects). Used for coverage reporting by
@@ -248,7 +249,7 @@ const SAFE_IMPORT_URL = /^https?:\/\/[^\s'"<>\\()]+$/;
 
 export function validatedFontImports(system) {
   const imports = system.manifest?.fonts?.imports ?? [];
-  if (!Array.isArray(imports) || imports.some((entry) => typeof entry !== 'string')) {
+  if (!Array.isArray(imports) || imports.some((entry) => entry?.constructor !== String)) {
     throw new DesignSystemError(
       `Design system "${system.name}" manifest.fonts.imports must be an array of URL strings.`,
       { name: system.name, dir: system.dir },

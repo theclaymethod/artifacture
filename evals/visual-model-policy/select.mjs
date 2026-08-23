@@ -128,7 +128,7 @@ export function qualificationFor(result, thresholds = DEFAULT_THRESHOLDS) {
 
 export function selectVisualModelPolicy(input) {
   validateInput(input);
-  const thresholds = { ...DEFAULT_THRESHOLDS, ...(input.thresholds || {}) };
+  const thresholds = { ...DEFAULT_THRESHOLDS, ...input.thresholds };
   const candidateById = new Map(input.candidates.map((candidate) => [candidate.id, candidate]));
   const passes = [...new Set(input.results.map((result) => result.pass))].sort();
   const routes = {};
@@ -165,26 +165,29 @@ export function selectVisualModelPolicy(input) {
     }
     const ladder = [...bestByModel.values()].sort(compareModels);
     const selected = ladder[0];
+    const evidence = {
+      runs: selected.runs,
+      cases: selected.cases,
+      positives: selected.positives,
+      negatives: selected.negatives,
+    };
+    if (selected.unique_cases !== undefined) {
+      Object.assign(evidence, {
+        unique_cases: selected.unique_cases,
+        unique_positives: selected.unique_positives,
+        unique_negatives: selected.unique_negatives,
+        unique_images: selected.unique_images,
+        unique_image_positives: selected.unique_image_positives,
+        unique_image_negatives: selected.unique_image_negatives,
+      });
+    }
     routes[pass] = {
       model: selected.model,
       model_class: selected.model_class,
       provider: selected.provider,
       batch_size: selected.batch_size,
       metrics: roundMetrics(selected.metrics),
-      evidence: {
-        runs: selected.runs,
-        cases: selected.cases,
-        positives: selected.positives,
-        negatives: selected.negatives,
-        ...(selected.unique_cases === undefined ? {} : {
-          unique_cases: selected.unique_cases,
-          unique_positives: selected.unique_positives,
-          unique_negatives: selected.unique_negatives,
-          unique_images: selected.unique_images,
-          unique_image_positives: selected.unique_image_positives,
-          unique_image_negatives: selected.unique_image_negatives,
-        }),
-      },
+      evidence,
       escalation_chain: ladder.slice(1).map((row) => ({
         model: row.model,
         model_class: row.model_class,
@@ -267,7 +270,7 @@ function validateInput(input) {
       'telemetry_complete',
       'experiment_complete',
     ]) {
-      if (typeof result[field] !== 'boolean') throw new Error(`${field} must be a boolean`);
+      if (![true, false].includes(result[field])) throw new Error(`${field} must be a boolean`);
     }
     positiveInt(result.grounding_total, 'grounding_total');
     if (result.total_cost_usd !== null) {

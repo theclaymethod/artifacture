@@ -1102,21 +1102,9 @@ Inline SVG accents lift slides from functional to editorial. Use sparingly — o
 </svg>
 ```
 
-### Geometric Background Pattern
+### Background Restraint
 
-```css
-/* Faint grid dots behind a slide */
-.slide--with-grid::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
-}
-```
+Keep slide fields flat by default. Use alignment, whitespace, rules, and content geometry for structure; decorative dot grids, graph paper, and repeated-line backgrounds are not part of any explainer aesthetic.
 
 ### Per-Slide Background Variation
 
@@ -1342,7 +1330,7 @@ Background: warm radial glow at bottom left. Terracotta accent borders on cards.
 
 ### Terminal Mono
 
-Dark, monospace everything, green/cyan accents, faint grid. Developer-native. Dark-first.
+Dark, monospace everything, green/cyan accents, and crisp flat fields. Developer-native. Dark-first.
 
 ```css
 :root {
@@ -1379,11 +1367,11 @@ Dark, monospace everything, green/cyan accents, faint grid. Developer-native. Da
 }
 ```
 
-Background: faint dot grid. Everything in mono. Title slides use large weight-400 mono instead of bold display. Code slides feel native.
+Background: flat near-black with quiet surface shifts. Everything in mono. Title slides use large weight-400 mono instead of bold display. Code slides feel native.
 
 ### Swiss Clean
 
-White, geometric sans, single bold accent, visible grid. Minimal and precise. Light-first.
+White, geometric sans, single bold accent, and rigorous alignment. Minimal and precise. Light-first.
 
 ```css
 :root {
@@ -1420,7 +1408,7 @@ White, geometric sans, single bold accent, visible grid. Minimal and precise. Li
 }
 ```
 
-Background: clean white or near-black, no gradients. Visible grid lines (the `--with-grid` pattern). Tight geometric layouts. Single accent color used sparingly for emphasis. Data-heavy and analytical content shines here.
+Background: clean white or near-black, with no decorative pattern. Use an underlying layout grid without drawing it. Tight geometric layouts and a single restrained accent suit data-heavy, analytical content.
 
 ## Magazine Mode (Horizontal)
 

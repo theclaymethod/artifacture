@@ -80,11 +80,11 @@ export interface ToneVals {
   mut: string;
 }
 
-export const TONES: Record<Tone, ToneVals> = {
+export const TONES = {
   paper: { bg: colors.paper, fg: colors.ink, hair: colors.border, mut: colors.muted },
   night: { bg: colors.night, fg: colors.paper, hair: "rgba(247,243,234,.24)", mut: "rgba(247,243,234,.6)" },
   primary: { bg: colors.primary, fg: colors.paper, hair: "rgba(247,243,234,.36)", mut: "rgba(247,243,234,.7)" },
-};
+} satisfies Record<Tone, ToneVals>;
 
 /** Grid-paper backdrop for diagram areas (32px grid). */
 export const gridPaper = (line = "rgba(201,194,180,.45)"): CSSProperties => ({

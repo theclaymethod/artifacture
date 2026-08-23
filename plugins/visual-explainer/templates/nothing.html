@@ -293,19 +293,6 @@
     overflow: hidden;
     isolation: isolate;
   }
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, var(--border-visible) 1px, transparent 1px);
-    background-size: 16px 16px;
-    background-position: -1px -1px;
-    opacity: 0.55;
-    pointer-events: none;
-    z-index: -1;
-    mask-image: linear-gradient(to bottom, black 60%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
-  }
   .hero__meta {
     display: flex;
     flex-direction: column;

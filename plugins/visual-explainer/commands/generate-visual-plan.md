@@ -15,7 +15,7 @@ The generated HTML is the artifact, not the source of truth. If facts change or 
 
 **Clarify.** This is a Tier 1 command per `./references/clarify.md`. Ask via `AskUserQuestion` only if the feature scope, audience, or required depth is unclear. Skip the ask if the request + codebase context answer all four brief dimensions. Bypass with `--no-ask`.
 
-Follow the visual-explainer skill workflow and the card. Use the default Mono-Industrial preset unless the user requests a named alternative.
+Follow the visual-explainer skill workflow and the card. Use the default OA Design preset and read `references/oa-design.md` unless the user requests a named alternative.
 
 **Data gathering phase** — understand the context before designing:
 

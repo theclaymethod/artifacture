@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-23T14:30:36Z",
+  "title": "Design System: Artifacture Visual Explainer",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Instrument Blue",
+        "canonical": "#305dde",
+        "tonalRamp": ["oklch(15% 0.12 263)", "oklch(26% 0.14 263)", "oklch(38% 0.16 263)", "oklch(50% 0.18 263)", "oklch(62% 0.16 263)", "oklch(74% 0.13 263)", "oklch(86% 0.07 263)", "oklch(95% 0.03 263)"]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Instrument Blue Wash",
+        "canonical": "color-mix(in srgb, #305dde 7%, transparent)",
+        "tonalRamp": ["oklch(15% 0.04 263)", "oklch(26% 0.04 263)", "oklch(38% 0.04 263)", "oklch(50% 0.04 263)", "oklch(62% 0.035 263)", "oklch(74% 0.03 263)", "oklch(86% 0.02 263)", "oklch(95% 0.01 263)"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Quiet Canvas",
+        "canonical": "#f6f6f6",
+        "tonalRamp": ["oklch(15% 0.004 260)", "oklch(27% 0.004 260)", "oklch(39% 0.004 260)", "oklch(52% 0.004 260)", "oklch(65% 0.004 260)", "oklch(78% 0.004 260)", "oklch(89% 0.003 260)", "oklch(97% 0.002 260)"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Porcelain Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(90% 0 0)", "oklch(100% 0 0)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Near-Black Ink",
+        "canonical": "#292929",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Reading Ink",
+        "canonical": "rgb(41 41 41 / 0.92)",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Measured Gray",
+        "canonical": "#6d6d6d",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline Rule",
+        "canonical": "color-mix(in srgb, #292929 12%, transparent)",
+        "tonalRamp": ["oklch(15% 0 0 / 0.18)", "oklch(27% 0 0 / 0.17)", "oklch(39% 0 0 / 0.16)", "oklch(52% 0 0 / 0.15)", "oklch(65% 0 0 / 0.14)", "oklch(78% 0 0 / 0.13)", "oklch(89% 0 0 / 0.12)", "oklch(95% 0 0 / 0.1)"]
+      },
+      "inverse-surface": {
+        "role": "neutral",
+        "displayName": "Inverse Surface",
+        "canonical": "#191919",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "inverse-text": {
+        "role": "neutral",
+        "displayName": "Inverse Text",
+        "canonical": "#ededed",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "inverse-muted": {
+        "role": "neutral",
+        "displayName": "Inverse Muted",
+        "canonical": "#969696",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(89% 0 0)", "oklch(95% 0 0)"]
+      },
+      "code-accent": {
+        "role": "primary",
+        "displayName": "Code Blue",
+        "canonical": "#296ff0",
+        "tonalRamp": ["oklch(15% 0.12 259)", "oklch(26% 0.14 259)", "oklch(38% 0.17 259)", "oklch(50% 0.19 259)", "oklch(62% 0.17 259)", "oklch(74% 0.13 259)", "oklch(86% 0.07 259)", "oklch(95% 0.03 259)"]
+      },
+      "info": {
+        "role": "primary",
+        "displayName": "Information Blue",
+        "canonical": "#1d4ed8",
+        "tonalRamp": ["oklch(15% 0.1 263)", "oklch(26% 0.13 263)", "oklch(38% 0.16 263)", "oklch(50% 0.18 263)", "oklch(62% 0.16 263)", "oklch(74% 0.12 263)", "oklch(86% 0.07 263)", "oklch(95% 0.03 263)"]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Verified Green",
+        "canonical": "#047857",
+        "tonalRamp": ["oklch(15% 0.06 165)", "oklch(26% 0.08 165)", "oklch(38% 0.1 165)", "oklch(50% 0.11 165)", "oklch(62% 0.1 165)", "oklch(74% 0.08 165)", "oklch(86% 0.05 165)", "oklch(95% 0.025 165)"]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Caution Ochre",
+        "canonical": "#a16207",
+        "tonalRamp": ["oklch(15% 0.06 75)", "oklch(26% 0.08 75)", "oklch(38% 0.1 75)", "oklch(50% 0.12 75)", "oklch(62% 0.11 75)", "oklch(74% 0.09 75)", "oklch(86% 0.05 75)", "oklch(95% 0.025 75)"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Critical Red",
+        "canonical": "#b91c1c",
+        "tonalRamp": ["oklch(15% 0.08 28)", "oklch(26% 0.11 28)", "oklch(38% 0.14 28)", "oklch(50% 0.16 28)", "oklch(62% 0.14 28)", "oklch(74% 0.11 28)", "oklch(86% 0.06 28)", "oklch(95% 0.03 28)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero titles and large metrics at the system's medium-weight ceiling." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles and major plate headings." },
+      "title": { "displayName": "Title", "purpose": "Card, pipeline, and risk titles." },
+      "body": { "displayName": "Body", "purpose": "Readable explanatory prose in Inter Tight." },
+      "label": { "displayName": "Label", "purpose": "Uppercase kickers, captions, state labels, indices, and metadata." },
+      "control": { "displayName": "Control", "purpose": "Compact buttons and interactive controls at medium weight." },
+      "code": { "displayName": "Code", "purpose": "Code, diffs, terminal output, and structured data." }
+    },
+    "shadows": [
+      { "name": "resting-plate", "value": "0 1px 2px rgb(0 0 0 / 0.06)", "purpose": "Minimal ambient separation for white structural surfaces on the gray canvas." },
+      { "name": "floating-tool", "value": "0 1px 2px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12)", "purpose": "Two-layer lift for fixed review chrome only." }
+    ],
+    "motion": [
+      { "name": "press", "value": "100ms ease-out", "purpose": "Active controls move by translateY(1px) scale(0.98)." },
+      { "name": "state", "value": "160ms ease-out", "purpose": "Default background and color state transition for static HTML controls." },
+      { "name": "panel-spring", "value": "stiffness 550, damping 38", "purpose": "React panel entrances and exits." },
+      { "name": "layout-spring", "value": "stiffness 550, damping 40", "purpose": "React layout changes." },
+      { "name": "pop-spring", "value": "stiffness 400, damping 26", "purpose": "React pop-in motion; exits use stiffness 380 and damping 28." },
+      { "name": "banner-spring", "value": "stiffness 400, damping 30", "purpose": "React banner motion." },
+      { "name": "flick-spring", "value": "stiffness 900, damping 50", "purpose": "Short directional flicks." },
+      { "name": "chart-spring", "value": "stiffness 300, damping 28", "purpose": "Chart and diagram transitions." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "640px" },
+      { "name": "narrow", "value": "760px" },
+      { "name": "review-rail", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Pill Control",
+      "kind": "button",
+      "refersTo": "button-control",
+      "description": "The default compact action for inspection and view controls.",
+      "html": "<button class=\"ds-pill-control\" type=\"button\">Expand diagram</button>",
+      "css": ".ds-pill-control { min-height: 2.25rem; border: 1px solid transparent; border-radius: 999px; background: var(--ve-panel-strong, #f6f6f6); padding: .5rem .75rem; color: var(--ve-heading, #292929); font: 500 .875rem/1 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; transition: background-color 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; cursor: pointer; } .ds-pill-control:hover { background: color-mix(in srgb, var(--ve-heading, #292929) 8%, transparent); } .ds-pill-control:focus-visible { outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent); outline-offset: 3px; } .ds-pill-control:active { transform: translateY(1px) scale(.98); }"
+    },
+    {
+      "name": "Callout Plate",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A calm white surface for a focused explanatory note.",
+      "html": "<aside class=\"ds-callout-plate\"><p class=\"ds-callout-label\">SOURCE CONTRACT</p><p class=\"ds-callout-copy\">MDX is the editable source; standalone HTML is the generated artifact.</p></aside>",
+      "css": ".ds-callout-plate { border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 22px; background: var(--ve-panel, #fff); padding: 1.25rem; color: var(--ve-text, rgb(41 41 41 / .92)); box-shadow: 0 1px 2px rgb(0 0 0 / .06); corner-shape: squircle; } .ds-callout-label { margin: 0 0 .75rem; color: var(--ve-muted, #6d6d6d); font: 400 .6875rem/1.25 \"Geist Mono\", ui-monospace, monospace; letter-spacing: .13em; } .ds-callout-copy { margin: 0; max-width: 58ch; font: 400 1rem/1.6 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; } .ds-callout-plate:focus-within { outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent); outline-offset: 3px; }"
+    },
+    {
+      "name": "Pipeline Step",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A numbered process card with restrained mono metadata and an editorial title.",
+      "html": "<article class=\"ds-pipeline-step\"><span class=\"ds-pipeline-index\">01</span><h3 class=\"ds-pipeline-title\">Author source</h3><p class=\"ds-pipeline-copy\">Write compact MDX or TSX that stays easy to inspect and revise.</p></article>",
+      "css": ".ds-pipeline-step { min-width: 0; border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 22px; background: var(--ve-panel, #fff); padding: 1.25rem; box-shadow: 0 1px 2px rgb(0 0 0 / .06); corner-shape: squircle; } .ds-pipeline-index { color: var(--ve-muted, #6d6d6d); font: 400 .75rem/1.25 \"Geist Mono\", ui-monospace, monospace; font-variant-numeric: tabular-nums; } .ds-pipeline-title { margin: 1rem 0 0; color: var(--ve-heading, #292929); font: 500 1.25rem/1.2 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; } .ds-pipeline-copy { margin: .75rem 0 0; color: var(--ve-muted, #6d6d6d); font: 400 .875rem/1.5 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Decision Matrix",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "A locally scrollable comparison table with mono headers and hairline rows.",
+      "html": "<div class=\"ds-matrix-shell\"><table class=\"ds-matrix\"><thead><tr><th>Option</th><th>Best for</th><th>Tradeoff</th></tr></thead><tbody><tr><td>MDX</td><td>Editable explainers</td><td>Build step</td></tr><tr><td>HTML</td><td>Portable delivery</td><td>Generated output</td></tr></tbody></table></div>",
+      "css": ".ds-matrix-shell { max-width: 100%; overflow-x: auto; border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 26px; background: var(--ve-panel, #fff); box-shadow: 0 1px 2px rgb(0 0 0 / .06); corner-shape: squircle; } .ds-matrix { width: 100%; min-width: 560px; border-collapse: collapse; color: var(--ve-text, rgb(41 41 41 / .92)); font: 400 .875rem/1.5 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; text-align: left; } .ds-matrix th { border-bottom: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); background: var(--ve-panel-strong, #f6f6f6); padding: .75rem 1rem; color: var(--ve-muted, #6d6d6d); font: 500 .75rem/1.25 \"Geist Mono\", ui-monospace, monospace; letter-spacing: .13em; text-transform: uppercase; } .ds-matrix td { border-bottom: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); padding: 1rem; } .ds-matrix tbody tr:nth-child(odd) { background: color-mix(in srgb, var(--ve-heading, #292929) 4%, transparent); } .ds-matrix tbody tr:hover { background: color-mix(in srgb, var(--ve-accent, #305dde) 7%, transparent); }"
+    },
+    {
+      "name": "Risk Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A labeled status card where color supports, but never replaces, the risk label.",
+      "html": "<article class=\"ds-risk-card\"><p class=\"ds-risk-level\">MEDIUM</p><h3 class=\"ds-risk-title\">Wide content</h3><p class=\"ds-risk-copy\"><strong>Signal:</strong> the page root scrolls sideways.</p><p class=\"ds-risk-copy\"><strong>Mitigation:</strong> keep overflow inside the inspection surface.</p></article>",
+      "css": ".ds-risk-card { border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 22px; background: var(--ve-panel, #fff); padding: 1.25rem; color: var(--ve-text, rgb(41 41 41 / .92)); box-shadow: 0 1px 2px rgb(0 0 0 / .06); corner-shape: squircle; } .ds-risk-level { margin: 0; color: var(--ve-warn, #a16207); font: 400 .6875rem/1.25 \"Geist Mono\", ui-monospace, monospace; letter-spacing: .16em; } .ds-risk-title { margin: .75rem 0 0; color: var(--ve-heading, #292929); font: 500 1.125rem/1.3 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; } .ds-risk-copy { margin: .75rem 0 0; color: var(--ve-muted, #6d6d6d); font: 400 .875rem/1.5 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; } .ds-risk-copy strong { color: var(--ve-text, rgb(41 41 41 / .92)); font-weight: 500; }"
+    },
+    {
+      "name": "Code Block",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "A compact inverse inspection surface for source and generated output.",
+      "html": "<figure class=\"ds-code-block\"><figcaption class=\"ds-code-caption\"><span>example.mdx</span><span>MDX</span></figcaption><pre class=\"ds-code-content\"><code><span class=\"ds-code-accent\">&lt;Callout&gt;</span>Source stays editable.<span class=\"ds-code-accent\">&lt;/Callout&gt;</span></code></pre></figure>",
+      "css": ".ds-code-block { overflow: hidden; border: 1px solid color-mix(in srgb, #ededed 14%, transparent); border-radius: 26px; background: var(--ve-code-bg, #191919); color: var(--ve-code-text, #ededed); } .ds-code-caption { display: flex; justify-content: space-between; gap: .75rem; border-bottom: 1px solid color-mix(in srgb, #ededed 14%, transparent); padding: .75rem 1rem; color: var(--ve-code-muted, #969696); font: 400 .75rem/1.25 \"Geist Mono\", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; } .ds-code-content { margin: 0; overflow-x: auto; padding: 1rem; font: 400 .875rem/1.7 \"Geist Mono\", ui-monospace, monospace; white-space: pre-wrap; } .ds-code-accent { color: var(--ve-code-accent, #296ff0); } .ds-code-block:focus-within { outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent); outline-offset: 3px; }"
+    },
+    {
+      "name": "Flow Diagram",
+      "kind": "custom",
+      "refersTo": "diagram-node",
+      "description": "A clean, unpatterned diagram where blue marks only the focal path.",
+      "html": "<figure class=\"ds-flow-shell\"><svg class=\"ds-flow-svg\" viewBox=\"0 0 520 180\" role=\"img\" aria-label=\"Source flows through build to artifact\"><defs><marker id=\"ds-arrow\" markerWidth=\"7\" markerHeight=\"7\" refX=\"9\" refY=\"5\" viewBox=\"0 0 10 10\" orient=\"auto\"><path d=\"M0 0L10 5L0 10z\" fill=\"#305dde\"/></marker></defs><rect class=\"ds-flow-node\" x=\"24\" y=\"52\" width=\"132\" height=\"76\" rx=\"18\"/><text class=\"ds-flow-label\" x=\"90\" y=\"95\">SOURCE</text><path class=\"ds-flow-path\" d=\"M156 90H276\" marker-end=\"url(#ds-arrow)\"/><rect class=\"ds-flow-node ds-flow-node-accent\" x=\"286\" y=\"52\" width=\"210\" height=\"76\" rx=\"18\"/><text class=\"ds-flow-label\" x=\"391\" y=\"95\">VERIFIED ARTIFACT</text></svg></figure>",
+      "css": ".ds-flow-shell { margin: 0; overflow-x: auto; border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 26px; background: var(--ve-panel, #fff); padding: 1rem; box-shadow: 0 1px 2px rgb(0 0 0 / .06); corner-shape: squircle; } .ds-flow-svg { display: block; width: 100%; min-width: 520px; background: var(--ve-diagram-bg, #f6f6f6); } .ds-flow-node { fill: var(--ve-node-bg, #fff); stroke: color-mix(in srgb, var(--ve-heading, #292929) 14%, transparent); stroke-width: 1; } .ds-flow-node-accent { fill: color-mix(in srgb, var(--ve-accent, #305dde) 7%, transparent); stroke: var(--ve-accent, #305dde); stroke-width: 2; } .ds-flow-label { fill: var(--ve-heading, #292929); font: 500 11px \"Geist Mono\", ui-monospace, monospace; letter-spacing: 1px; text-anchor: middle; } .ds-flow-path { fill: none; stroke: var(--ve-accent, #305dde); stroke-width: 1.6; stroke-linecap: round; }"
+    },
+    {
+      "name": "Diagram Label Chip",
+      "kind": "chip",
+      "refersTo": "label-chip",
+      "description": "A compact mono connector label used in responsive diagram stacks.",
+      "html": "<span class=\"ds-diagram-chip\">GENERATES</span>",
+      "css": ".ds-diagram-chip { display: inline-flex; max-width: 100%; border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 999px; background: var(--ve-diagram-bg, #f6f6f6); padding: .24rem .45rem; color: var(--ve-heading, #292929); font: 400 .68rem/1.3 \"Geist Mono\", ui-monospace, monospace; letter-spacing: .06em; overflow-wrap: anywhere; } .ds-diagram-chip:hover { border-color: var(--ve-accent, #305dde); color: var(--ve-accent, #305dde); } .ds-diagram-chip:focus-visible { outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent); outline-offset: 3px; }"
+    },
+    {
+      "name": "Quiz Option",
+      "kind": "button",
+      "refersTo": "button-control",
+      "description": "A full-width answer control with explicit text feedback and semantic support color.",
+      "html": "<button class=\"ds-quiz-option\" type=\"button\"><span class=\"ds-quiz-choice\">A</span><span class=\"ds-quiz-label\">Keep wide content local</span><span class=\"ds-quiz-result\">Correct</span></button>",
+      "css": ".ds-quiz-option { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; width: 100%; min-height: 44px; border: 1px solid var(--ve-ok, #047857); border-radius: 999px; background: color-mix(in srgb, var(--ve-ok, #047857) 12%, transparent); padding: .75rem; color: var(--ve-text, rgb(41 41 41 / .92)); font: 500 .875rem/1.2 \"Inter Tight\", ui-sans-serif, system-ui, sans-serif; text-align: left; transition: background-color 160ms ease-out, transform 100ms ease-out; cursor: pointer; } .ds-quiz-choice { display: inline-grid; place-items: center; min-height: 2rem; border: 1px solid var(--ve-rule, rgb(41 41 41 / .12)); border-radius: 999px; color: var(--ve-muted, #6d6d6d); font-family: \"Geist Mono\", ui-monospace, monospace; } .ds-quiz-result { color: var(--ve-ok, #047857); font: 400 .75rem/1 \"Geist Mono\", ui-monospace, monospace; } .ds-quiz-option:hover { background: color-mix(in srgb, var(--ve-ok, #047857) 16%, transparent); } .ds-quiz-option:focus-visible { outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent); outline-offset: 3px; } .ds-quiz-option:active { transform: translateY(1px) scale(.98); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Instrument",
+    "overview": "The Quiet Instrument treats every explainer as a precise working artifact: calm enough to study, composed enough to trust, and visually articulate without performing for attention. A quiet gray canvas holds a small number of generous white plates; near-black ink, disciplined spacing, and a single restrained blue carry the hierarchy.\n\nThe system is editorial and tool-native rather than decorative. It favors readable measures, immediate chrome, and self-contained technical regions that remain useful from mobile to desktop. OA Design is the default reference for interaction and surface grammar, while the existing visual-explainer token contract keeps every export portable.",
+    "keyCharacteristics": [
+      "Quiet gray canvas with white continuous-curvature plates.",
+      "Near-black ink with restrained blue reserved for focal action and path.",
+      "Inter Tight hierarchy capped at medium weight, with Geist Mono for technical labels.",
+      "Generous whitespace, hairline rules, and only two established depth levels.",
+      "Responsive stacking and locally scrollable dense regions on a clean, undecorated canvas."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Use the primary blue only for focal action, navigation, selection, or a diagram's focal path; never distribute it as decoration.", "section": "colors" },
+      { "name": "The Labeled Status Rule", "body": "Semantic color may support text, dots, or paths, but a visible label must also communicate the status.", "section": "colors" },
+      { "name": "The Medium Ceiling Rule", "body": "Keep display and heading text at 500 or below; use scale, spacing, and ink opacity—not heavy weight—to build hierarchy.", "section": "typography" },
+      { "name": "The Mono Is Metadata Rule", "body": "Reserve Geist Mono for code, labels, indices, and tabular technical detail; prose remains in Inter Tight.", "section": "typography" },
+      { "name": "The Local Overflow Rule", "body": "Dense technical content may scroll inside its own surface; the artifact page itself never scrolls horizontally.", "section": "layout" },
+      { "name": "The Two-Layer Limit Rule", "body": "Use only the resting plate shadow or the floating tool shadow; do not invent intermediate elevations.", "section": "elevation" },
+      { "name": "The Squircle Plate Rule", "body": "Use continuous-curvature corners for major white plates and cards, with the established radius stepping down as the component becomes smaller.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do build hierarchy with whitespace, scale, and ink opacity before adding color or weight.",
+      "Do group related information into a small number of generous white squircle plates on the quiet gray canvas.",
+      "Do keep headings at medium weight or lighter and reserve Geist Mono for technical structure.",
+      "Do stack responsive layouts and keep overflow local to dense inspection surfaces.",
+      "Do preserve visible focus, readable touch targets, browser zoom, and reduced-motion behavior."
+    ],
+    "donts": [
+      "Don't add decorative grid, dot-matrix, blueprint, graph-paper, scanline, paper, or terminal backgrounds.",
+      "Don't use decorative gradients, glass panels, generic SaaS card grids, or repeated icon-card compositions.",
+      "Don't distribute the primary blue across secondary decoration or allow color to communicate status alone.",
+      "Don't invent heavier heading weights, intermediate shadows, or extra elevation levels.",
+      "Don't treat named presets as color swaps; typography, rhythm, motifs, and composition must remain systemic."
+    ]
+  }
+}

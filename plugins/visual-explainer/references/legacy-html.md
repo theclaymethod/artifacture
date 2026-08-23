@@ -56,7 +56,8 @@ Shared React surfaces accept a `preset` prop that maps to semantic CSS tokens fo
 
 Available presets:
 
-- `mono-industrial` — default Swiss/monochrome, type-led hierarchy.
+- `oa-design` — default white-plate system with ink-derived neutrals.
+- `mono-industrial` — opt-in Swiss/monochrome, type-led hierarchy.
 - `nothing` — black instrument-panel styling with red accent.
 - `blueprint` — technical drawing palette and precise blue rules.
 - `editorial` — warm serif editorial treatment.
@@ -125,17 +126,17 @@ For prose accents, see "Prose Page Elements" in `./css-patterns.md`. For everyth
 
 **What type of content?** Architecture, flowchart, sequence, data flow, schema/ER, state machine, mind map, class diagram, C4 architecture, data table, timeline, dashboard, or prose-first page. Each has distinct layout needs and rendering approaches (see Diagram Types below).
 
-**What aesthetic?** **Default to Mono-Industrial** unless the user names a different one. The other aesthetics listed below remain available, but they are opt-in — they do not rotate in by default.
+**What aesthetic?** **Default to OA Design** unless the user names a different one. Read `./oa-design.md`; the other aesthetics listed below remain opt-in and do not rotate in by default.
 
-**Default aesthetic — Mono-Industrial (Swiss, monochrome, typography-first).** Inspired by Nothing, Braun, Teenage Engineering. `./mono-industrial.md` is the canonical spec (three-layer rule, font budget, color system, motion, moment-of-surprise) — **read it before generating**; its rules are not restated here. For architecture output, base on `../templates/mono-industrial.html`. For slide decks, base on `../templates/mono-industrial-slides.html`.
+**Default aesthetic — OA Design.** White plates on a quiet grey stage, one ink-derived neutral system, one restrained blue accent, a 500-weight ceiling, continuous-curvature surfaces, pill actions, and no decorative grid backgrounds. `./oa-design.md` is the canonical local adaptation. Legacy templates may supply mechanics or content structure, but their visual tokens are not the default.
 
 **Named alternatives (use only when the user explicitly requests one).** The aesthetics below exist for users who ask for Nothing, Blueprint, Editorial, Paper/ink, Monochrome terminal, or an IDE-inspired palette by name. Do not rotate through them on your own initiative, and do not select them as a "change of pace" for variety.
 
 **Brand aesthetics:**
-- **Nothing** — instrument-panel aesthetic adapted from [dominikmartn/nothing-design-skill](https://github.com/dominikmartn/nothing-design-skill). OLED-black canvas (`#000`) in dark mode, warm off-white (`#F5F5F5`) in light. Three fonts total: Doto (hero dot-matrix, one per page), Space Grotesk (body), Space Mono (every label, ALL CAPS with 0.08em tracking). Signature motifs: segmented progress bars with square ends + 2px gaps, radial-gradient dot-grid backgrounds, bracket-notation UI states (`[ LOADING… ]`, `[ NO DATA ]`, `[ SAVED ]`), and accent red (`#D71921`) used at most once per page and only for urgent / destructive. Flat chrome — borders only, no shadows, no gradients, no blur. Break the grid in exactly one place per page. **Before generating, read `./nothing.md`.** Base on `../templates/nothing.html` (scrollable) or `../templates/nothing-magazine.html` (horizontal zine). Trigger: user says "nothing", "Nothing design", "Nothing OS", "Ndot", "dot-matrix", or "instrument panel". Always verify BOTH modes before delivery.
+- **Nothing** — instrument-panel aesthetic adapted from [dominikmartn/nothing-design-skill](https://github.com/dominikmartn/nothing-design-skill). OLED-black canvas (`#000`) in dark mode, warm off-white (`#F5F5F5`) in light. Three fonts total: Doto (hero dot-matrix, one per page), Space Grotesk (body), Space Mono (every label, ALL CAPS with 0.08em tracking). Signature motifs: segmented progress bars with square ends + 2px gaps, clean flat fields, bracket-notation UI states (`[ LOADING… ]`, `[ NO DATA ]`, `[ SAVED ]`), and accent red (`#D71921`) used at most once per page and only for urgent / destructive. Flat chrome — borders only, no shadows, no gradients, no blur. **Before generating, read `./nothing.md`.** Base on `../templates/nothing.html` (scrollable) or `../templates/nothing-magazine.html` (horizontal zine). Trigger: user says "nothing", "Nothing design", "Nothing OS", "Ndot", "dot-matrix", or "instrument panel". Always verify BOTH modes before delivery.
 
 **Constrained aesthetics (prefer these):**
-- Blueprint (technical drawing feel, subtle grid background, deep slate/blue palette, monospace labels, precise borders)
+- Blueprint (technical drawing feel, flat deep slate/blue canvas, monospace labels, precise borders)
 - Editorial (serif headlines like Newsreader or Crimson Pro, generous whitespace, muted earth tones or deep navy + gold)
 - Paper/ink (warm cream `#faf7f5` background, terracotta/sage accents, informal feel)
 - Monochrome terminal (green/amber on near-black, monospace everything, CRT glow optional)
@@ -149,13 +150,15 @@ For prose accents, see "Prose Page Elements" in `./css-patterns.md`. For everyth
 - Gradient mesh (pink/purple/cyan blobs) — too generic
 - Any combination of Inter font + violet/indigo accents + gradient text
 
-**Do not rotate aesthetics on your own.** Mono-Industrial is the default for every fresh generation. Switch only when the user requests a named alternative ("do it in Editorial style", "use the Dracula palette", "make it paper/ink"). The previous guidance to "vary the choice each time" is obsolete — variety is not a goal, consistent identity is. The swap test still applies within whichever aesthetic you pick: if you replaced the fonts and colors with a generic default and nobody would notice, you haven't designed anything.
+**Do not rotate aesthetics on your own.** OA Design is the default for every fresh generation. Switch only when the user requests a named alternative ("use Mono-Industrial", "do it in Editorial style", "use the Dracula palette"). The previous guidance to "vary the choice each time" is obsolete — variety is not a goal, consistent identity is. The swap test still applies within whichever aesthetic you pick: if you replaced the fonts and colors with a generic default and nobody would notice, you haven't designed anything.
 
 ### 2. Structure
 
 **Read the reference material** before generating. Don't memorize it — read it each time to absorb the patterns.
 
-**For Mono-Industrial output (the default), always read `./mono-industrial.md` first.** Then, depending on output type:
+**For OA Design output (the default), always read `./oa-design.md` first.** Use the MDX/React components as the authoring surface. If legacy HTML is the only available path, borrow mechanics from the nearest template and replace its visual grammar with OA Design.
+
+**For Mono-Industrial output (named alternative), read `./mono-industrial.md` first.** Then, depending on output type:
 - Scrollable architecture / plan / diff / recap / table / mixed: `../templates/mono-industrial.html`
 - Slide deck (`--slides` or `/generate-slides`): `../templates/mono-industrial-slides.html` (still consult `./slide-patterns.md` for engine-level patterns like scroll-snap, nav chrome, and slide-type roles)
 
@@ -168,7 +171,7 @@ For prose accents, see "Prose Page Elements" in `./css-patterns.md`. For everyth
 
 **For CSS/layout patterns and SVG connectors**, read `./css-patterns.md`.
 
-**For diagram generation specifically**, select the route from `./diagram-design.md` and **default to inline SVG**, not Mermaid. Read `./diagrams-svg.md` for the shared shape semantics (ovals = start/end, rects = steps, diamonds = decisions, dots = merges), complexity budgets, removal test, annotation primitive, sketchy filter, and anti-patterns list. Read `./diagram-tokens.md` for the per-aesthetic token mapping so the same diagram rules produce aesthetic-appropriate output across Mono-Industrial, Nothing, Editorial-Diagram, Blueprint, Paper/ink, Terminal, and IDE-inspired palettes. Start from `../templates/svg-diagram-starter.html` — it ships the `<defs>` block (dot pattern, arrow markers, sketchy filter), the 4px grid, masked arrow labels, and a bottom legend strip. Mermaid remains available as a fallback — see the table below.
+**For diagram generation specifically**, select the route from `./diagram-design.md` and **default to inline SVG**, not Mermaid. Read `./diagrams-svg.md` for the shared shape semantics (ovals = start/end, rects = steps, diamonds = decisions, dots = merges), complexity budgets, removal test, annotation primitive, and anti-patterns list. Read `./diagram-tokens.md` for the per-aesthetic token mapping. Start from `../templates/svg-diagram-starter.html` for arrow markers, masked labels, and legend structure. The 4px coordinate grid is a hidden alignment system; never render it as a background. Mermaid remains available as a fallback.
 
 **SVG layout math goes through pretext, not hand-guessed geometry.** Whenever a diagram needs to size a box around wrapped text — node rectangles, sequence-note boxes, callouts with dashed leaders, legend items, masked arrow labels — route the label through [`chenglou/pretext`](https://github.com/chenglou/pretext) to measure and wrap it, then derive `boxWidth`, `boxHeight`, and edge-anchor Y values from the returned metrics. Don't eyeball line counts or pad a guessed height "to be safe" — that leaks into brittle line breaks, mis-sized label masks, and drifted arrow anchors. Read `./pretext-layout.md` for the helper shape (`{ lines, lineCount, maxLineWidth, contentWidth, boxWidth, boxHeight, anchors }`) and the opt-out list: don't use pretext for Mermaid internals, graph routing/packing, or one-line labels in fixed-size boxes where the current rules are already stable. ELK / dagre / manual placement still own graph layout; pretext owns text measurement.
 
@@ -293,7 +296,7 @@ See `./demo-capture.md` for the full capture workflow, frame pacing, aesthetic f
 
 ### 3. Style
 
-**If generating Mono-Industrial (the default), follow `./mono-industrial.md` — not the rules below.** The guidance in this section (font rotation, multi-accent palettes, staggered fade-in animation) applies only when the user has explicitly requested a named alternative aesthetic (Blueprint, Editorial, Paper/ink, Monochrome terminal, IDE-inspired). Mono-Industrial overrides all of it: fixed typography (Space Grotesk + Space Mono + optional Geist Pixel Square), grayscale palette with status colors only, zero on-load motion.
+**If generating Mono-Industrial as a named alternative, follow `./mono-industrial.md` — not the rules below.** The guidance in this section (font rotation, multi-accent palettes, staggered fade-in animation) applies only when the user has explicitly requested a named alternative aesthetic (Blueprint, Editorial, Paper/ink, Monochrome terminal, IDE-inspired). Mono-Industrial overrides all of it: fixed typography (Space Grotesk + Space Mono + optional Geist Pixel Square), grayscale palette with status colors only, zero on-load motion.
 
 Apply these principles to every diagram in a **named alternative aesthetic**:
 
@@ -335,7 +338,7 @@ Put your primary aesthetic in `:root` and the alternate in the media query:
 
 **Surfaces whisper, they don't shout.** Build depth through subtle lightness shifts (2-4% between levels), not dramatic color changes. Borders should be low-opacity rgba (`rgba(255,255,255,0.08)` in dark mode, `rgba(0,0,0,0.08)` in light) — visible when you look, invisible when you don't.
 
-**Backgrounds create atmosphere.** Don't use flat solid colors for the page background. Subtle gradients, faint grid patterns via CSS, or gentle radial glows behind focal areas. The background should feel like a space, not a void.
+**Backgrounds stay quiet.** Start with the flat field defined by the active design system. A named expressive direction may use one gentle focal gradient, but decorative dot grids, graph paper, scanlines, and repeated-line backgrounds are forbidden.
 
 **Visual weight signals importance.** Not every section deserves equal visual treatment. Executive summaries and key metrics should dominate the viewport on load (larger type, more padding, subtle accent-tinted background zone). Reference sections (file maps, dependency lists, decision logs) should be compact and stay out of the way. Use `<details>/<summary>` for sections that are useful but not primary — the collapsible pattern is in `./css-patterns.md`.
 
@@ -575,7 +578,7 @@ Magazine is a slide mode, not a separate format — the compositional rules, con
 
 **Before generating slides**, read `./slide-patterns.md` (engine CSS, slide types, transitions, nav chrome, presets, magazine mode) and one of:
 - `../templates/mono-industrial-slides.html` (vertical, Mono-Industrial)
-- `../templates/mono-industrial-magazine.html` (horizontal, Mono-Industrial — default magazine)
+- `../templates/mono-industrial-magazine.html` (horizontal, Mono-Industrial named alternative)
 - `../templates/nothing-magazine.html` (horizontal, Nothing — when the user asks for Nothing / instrument-panel / dot-matrix)
 - `../templates/slide-deck.html` (vertical, legacy aesthetics)
 

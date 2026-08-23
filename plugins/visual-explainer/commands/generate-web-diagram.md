@@ -8,7 +8,7 @@ Load the visual-explainer skill, then generate an HTML diagram for: $@
 **MDX/React pipeline.** Prefer the generated pipeline for this command:
 
 1. Author the editable source as `.mdx` by default, or `.tsx` when the diagram needs local React state, custom interaction, or generated SVG logic.
-2. Use shared components from `visual-explainer-mdx/components.tsx` such as `ExplainerShell`, `Section`, `FlowDiagram`, `Pipeline`, `DecisionMatrix`, `RiskLedger`, and `Callout`.
+2. Use shared components from `visual-explainer-mdx/components.tsx` such as `ExplainerShell`, `Section`, `DiagramCanvas`, `Pipeline`, `DecisionMatrix`, `RiskLedger`, and `Callout`.
 3. Export the final artifact with `npm run ve:export -- <source.mdx|source.tsx> --out ~/.agent/diagrams/<slug>.html`.
 4. Treat the generated `.html` as an artifact only. Do not hand-edit the final HTML to make content changes; change the MDX/TSX source and re-export.
 5. Browser-verify the generated HTML using the same desktop/mobile/no-overflow checks below.
@@ -17,7 +17,7 @@ Raw HTML templates remain reference material for style and parity, not the prefe
 
 **Clarify.** This is a Tier 1 command per `./references/clarify.md`. Before generating, check that you can form a 1-sentence brief covering topic, audience, depth, and aesthetic. If any dimension is unclear, ask 1–3 questions via `AskUserQuestion`. If all four are answerable from the request + context, generate directly. Bypass with `--no-ask`.
 
-Follow the visual-explainer skill workflow and the selected card. Default to the Mono-Industrial preset unless the user explicitly requests a named alternative.
+Follow the visual-explainer skill workflow and the selected card. Default to the OA Design preset and read `references/oa-design.md` unless the user explicitly requests a named alternative.
 
 ## Sub-agent fan-out (default for 3+ sections)
 

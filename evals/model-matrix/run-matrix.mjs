@@ -588,7 +588,7 @@ async function generateOpenRouter(model, prompt) {
 }
 
 function firstNonEmptyString(...values) {
-  return values.find((value) => typeof value === 'string' && value.trim().length > 0) || '';
+  return values.find((value) => value?.constructor === String && value.trim().length > 0) || '';
 }
 
 async function prepareComponentResolution({ cellDir, runDir }) {

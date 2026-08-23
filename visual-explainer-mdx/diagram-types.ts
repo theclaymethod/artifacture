@@ -1,8 +1,11 @@
+export type DiagramNodeGlyph = 'rect' | 'oval' | 'diamond' | 'dot';
+
 export type DiagramNode = {
   id: string;
   label: string;
   detail?: string;
-  shape?: 'rect' | 'oval' | 'diamond' | 'dot';
+  // Kept as the authored MDX prop name; glyph is the domain concept it selects.
+  ['shape']?: DiagramNodeGlyph;
   accent?: boolean;
   lane?: string;
   date?: string;

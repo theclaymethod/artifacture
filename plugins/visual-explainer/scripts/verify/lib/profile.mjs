@@ -96,8 +96,6 @@ export function detectProfile(filePath, html) {
 }
 
 export function detectPreset(filePath, html) {
-  const text = html.toLowerCase();
-
   const declaredPresets = new Set(Array.from(html.matchAll(/\sdata-ve-preset\s*=\s*["']([^"']+)["']/gi), (m) => normalizePreset(m[1])));
   if (declaredPresets.size > 1) return 'custom';
   if (declaredPresets.size === 1) {
@@ -164,11 +162,6 @@ function normalizePreset(value = '') {
 function coreMonoTokenCount(html) {
   const coreTokens = ['--text-display', '--text-primary', '--rule', '--size-display', '--size-caption'];
   return coreTokens.filter((token) => new RegExp(`${escapeForRe(token)}\\b`, 'i').test(html)).length;
-}
-
-function hasClassCluster(html, patterns) {
-  const classText = Array.from(html.matchAll(/\sclass\s*=\s*["']([^"']+)["']/gi), (match) => match[1]).join(' ');
-  return patterns.every((pattern) => pattern.test(classText));
 }
 
 function escapeForRe(value) {

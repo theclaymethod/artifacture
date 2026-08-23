@@ -102,7 +102,7 @@ function validateGeneratedPolicy(policy, source) {
     !/^[a-f0-9]{64}$/i.test(policy.source_sha256 || '') ||
     !policy.thresholds ||
     !policy.routes ||
-    typeof policy.routes !== 'object'
+    Object.prototype.toString.call(policy.routes) !== '[object Object]'
   ) {
     throw new Error(`invalid or non-selector visual model policy: ${source}`);
   }

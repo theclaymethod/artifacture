@@ -440,21 +440,6 @@ function styleFor(ctx, el) {
   return `${matched};${inline}`;
 }
 
-function rgbHue(r, g, b) {
-  r /= 255;
-  g /= 255;
-  b /= 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  if (!d) return 0;
-  let h = 0;
-  if (max === r) h = ((g - b) / d) % 6;
-  else if (max === g) h = (b - r) / d + 2;
-  else h = (r - g) / d + 4;
-  return (h * 60 + 360) % 360;
-}
-
 function selectorMatchesSimple(selector, tag, classes, id) {
   const clean = selector.replace(/:[\w-]+(?:\([^)]*\))?/g, '').trim();
   if (!clean || /[>+~\s]/.test(clean)) return false;
@@ -479,17 +464,6 @@ function authoredFontFamilies(ctx) {
 
 function firstFamily(stack) {
   return (stack.split(',')[0] || '').trim().replace(/^['"]|['"]$/g, '').replace(/\s*!important$/, '');
-}
-
-function isMutedDescriptorStyle(ctx, el) {
-  const klass = el.getAttribute('class') || '';
-  const style = styleFor(ctx, el);
-  return /(?:muted|dim|subtle|caption|subtitle|description|desc|meta|gloss|sublabel|hint)/i.test(klass) ||
-    /(?:color\s*:\s*(?:var\(--(?:ve-)?(?:muted|text-dim|.*muted|.*dim)\)|rgba?\([^)]*,\s*0\.[1-8]\)|#[789a-f][0-9a-f]{2,5})|opacity\s*:\s*0\.[1-8])/i.test(style);
-}
-
-function descriptorGuardedText(text) {
-  return /(?:^\$|[$€£¥]|\b\d{1,4}(?:[-/]\d{1,2}){1,2}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\b|\b\d+(?:\.\d+)?\s*(?:px|rem|em|ms|s|sec|min|hr|kb|mb|gb|tb|%|x)\b)/i.test(text);
 }
 
 function caseKind(value) {

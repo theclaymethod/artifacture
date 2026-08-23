@@ -1,4 +1,4 @@
-# Mono-Industrial — Default Aesthetic
+# Mono-Industrial — Named Alternative Aesthetic
 
 Canonical spec for this aesthetic. The MDX preset tokens (`visual-explainer-mdx/global.css`, `data-ve-preset='mono-industrial'`) implement it; `templates/mono-industrial.html` is a frozen legacy rendering.
 
@@ -420,12 +420,12 @@ Run through this list before generating. If any answer is no, stop and revise.
 
 ## 18. When NOT to Use Mono-Industrial
 
-Mono-Industrial is the default, but some requests imply a different aesthetic:
+Mono-Industrial is an opt-in alternative. Use it when the user explicitly names the aesthetic or asks for its Swiss, monochrome, status-color-only language.
 
 - User says "use Blueprint" / "use Editorial" / etc. → honor the named aesthetic
 - User provides a specific palette or typographic direction → follow their direction
 - The output is a creative/expressive piece (poster, brand page, illustration-heavy) → use a different aesthetic
 
-Anything else — architecture, diff review, plan review, project recap, fact check, data tables, slide decks, documentation — produces Mono-Industrial by default.
+Unspecified architecture, diff review, plan review, project recap, fact check, data tables, slide decks, and documentation use OA Design by default.
 
 No rotation. No varying the choice. Mono-Industrial every time.

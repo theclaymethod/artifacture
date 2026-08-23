@@ -79,7 +79,7 @@ export function mergeMeasurements(measurements, {
 
   validateLadderCoverage({
     candidates: first.candidates,
-    thresholds: { ...DEFAULT_THRESHOLDS, ...(first.thresholds || {}) },
+    thresholds: { ...DEFAULT_THRESHOLDS, ...first.thresholds },
     results,
     artifactByModelPass,
     measurementByModelPass,

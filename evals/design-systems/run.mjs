@@ -90,8 +90,8 @@ function looksLikeColor(value) {
     /^#[0-9a-f]{3,8}$/i.test(value) ||
     /^rgba?\(/.test(value) ||
     /^hsla?\(/.test(value) ||
-    /^color-mix\(/.test(value) ||
-    /^var\(--/.test(value)
+    value.startsWith('color-mix(') ||
+    value.startsWith('var(--')
   );
 }
 
@@ -287,8 +287,8 @@ function evalUnknownPresetFallback() {
     if (!css || !css.includes('[data-ve-preset="not-a-real-system"]')) {
       failures.push('fallback CSS should scope built-in tokens to the unknown name');
     }
-    if (!css || !css.includes('--ve-bg: #09090b')) {
-      failures.push('fallback CSS should carry the default built-in (mono-industrial) tokens');
+    if (!css || !css.includes('--ve-bg: #f6f6f6')) {
+      failures.push('fallback CSS should carry the default built-in (oa-design) tokens');
     }
     record('loader-unknown-preset-fallback', failures);
   });

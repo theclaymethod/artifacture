@@ -106,9 +106,9 @@ export function expandCorpus(corpus, { corpusPath = DEFAULT_CORPUS_PATH } = {}) 
           render: state.render,
           viewport: {
             ...DEFAULT_VIEWPORT,
-            ...(family.viewport || {}),
-            ...(pair.viewport || {}),
-            ...(state.viewport || {}),
+            ...family.viewport,
+            ...pair.viewport,
+            ...state.viewport,
           },
           image: {
             id: imageId,
@@ -236,9 +236,9 @@ export function validateCorpus(corpus, options = {}) {
         }
         const viewport = {
           ...DEFAULT_VIEWPORT,
-          ...(family.viewport || {}),
-          ...(pair.viewport || {}),
-          ...(state.viewport || {}),
+          ...family.viewport,
+          ...pair.viewport,
+          ...state.viewport,
         };
         if (
           !Number.isInteger(viewport.width)

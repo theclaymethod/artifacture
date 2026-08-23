@@ -66,6 +66,20 @@ async function fixture(t) {
   };
 }
 
+async function corpusWithFixtureImages(dir) {
+  const { expandCorpus, loadCorpus } = await import('./corpus.mjs');
+  const corpus = {
+    ...await loadCorpus(),
+    rendered_root: path.join(dir, 'rendered-corpus'),
+  };
+  const cases = expandCorpus(corpus);
+  await fs.mkdir(corpus.rendered_root, { recursive: true });
+  await Promise.all(cases.map((entry, index) => (
+    fs.writeFile(entry.image.path, Buffer.from(`fixture-image-${index}`))
+  )));
+  return corpus;
+}
+
 test('batch requests put immutable evidence before one criterion suffix and hide labels', async (t) => {
   const { case: evalCase } = await fixture(t);
   const request = await buildBatchRequest({
@@ -351,9 +365,8 @@ test('an unknown pass cannot become an empty successful experiment', async () =>
 });
 
 test('a repeated experiment resumes without paying for completed request ids', async (t) => {
-  const { loadCorpus } = await import('./corpus.mjs');
-  const corpus = await loadCorpus();
   const { dir } = await fixture(t);
+  const corpus = await corpusWithFixtureImages(dir);
   const recordsPath = path.join(dir, 'records.jsonl');
   const experiment = {
     id: 'resume-paid-work',
@@ -402,9 +415,8 @@ test('a repeated experiment resumes without paying for completed request ids', a
 });
 
 test('resume retries a provider error instead of poisoning the request matrix', async (t) => {
-  const { loadCorpus } = await import('./corpus.mjs');
-  const corpus = await loadCorpus();
   const { dir } = await fixture(t);
+  const corpus = await corpusWithFixtureImages(dir);
   const recordsPath = path.join(dir, 'records.jsonl');
   const experiment = {
     id: 'resume-provider-error',

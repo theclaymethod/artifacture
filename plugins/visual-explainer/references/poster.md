@@ -2,7 +2,7 @@
 
 Secondary output modality for visual-explainer. Uses the [`poster-ai`](https://github.com/Michaelliv/poster) CLI (binary: `poster`) to turn a single TSX file into a self-contained HTML poster or a rasterized PNG/SVG/PDF/JPG/WebP.
 
-**This is an opt-in supplementary path, not a replacement.** The primary output for scrollable, interactive, responsive, theme-switching pages remains the hand-written HTML + Mermaid flow — `mono-industrial.html` by default, with the legacy reference templates (`architecture.html`, `mermaid-flowchart.html`, `data-table.html`) available when the user asks for a named alternative aesthetic. Use poster when the output is intrinsically a **fixed-canvas graphic**: a shareable summary, a dashboard, an infographic, an individual slide, or an embedded hero image inside a larger HTML page.
+**This is an opt-in supplementary path, not a replacement.** The primary output for scrollable, interactive, responsive pages remains the MDX/React pipeline with the OA Design preset by default. The legacy HTML references (`mono-industrial.html`, `architecture.html`, `mermaid-flowchart.html`, `data-table.html`) remain structural references or named alternatives only. Use poster when the output is intrinsically a **fixed-canvas graphic**: a shareable summary, a dashboard, an infographic, an individual slide, or an embedded hero image inside a larger HTML page.
 
 Check availability before using: `which poster`. If not installed: `npm install -g poster-ai`. If unavailable, fall back to hand-written HTML or an SVG/CSS illustration — don't error.
 

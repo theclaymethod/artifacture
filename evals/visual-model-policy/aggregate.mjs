@@ -46,8 +46,6 @@ export function aggregateRecords(records, {
     if (!preparedPlan) {
       throw new Error('preparedPlan is required for experiment-bound aggregation');
     }
-    const cases = expandCorpus(corpus, { corpusPath: experiment.corpus_path });
-    const selectedPasses = new Set(experiment.passes || cases.map((entry) => entry.family));
     const plan = preparedPlan;
     if (plan.length === 0) throw new Error('expected experiment request matrix cannot be empty');
     expectedByRequest = new Map(plan.map((cell) => [
@@ -455,7 +453,7 @@ function validateRequestRecord(record) {
   if (!Array.isArray(record.observations) || record.observations.length === 0) {
     throw new Error(`request ${record.request_id} requires observations[]`);
   }
-  if (typeof record.synthetic !== 'boolean') {
+  if (![true, false].includes(record.synthetic)) {
     throw new Error(`request ${record.request_id} synthetic must be a boolean`);
   }
   if (Number(record.actual_batch_size) !== Number(record.configured_batch_size)) {

@@ -1,4 +1,4 @@
-import type { DiagramCanvasProps, DiagramEdge, DiagramNode } from './diagram-types';
+import type { DiagramCanvasProps, DiagramEdge, DiagramNode, DiagramNodeGlyph } from './diagram-types';
 
 export type LaidOutNode = DiagramNode & {
   x: number;
@@ -66,7 +66,7 @@ export function layoutDiagram(
       : dense ? 168 : 184
     : columnGap;
   const swimlaneNodeMax = swimlaneOrientation === 'vertical' ? Math.max(124, Math.min(164, swimlaneColumnPitch - 32)) : 240;
-  const orderedDates = dates ?? Array.from(new Set(nodes.map((node) => node.date).filter(Boolean))) as string[];
+  const orderedDates = dates ?? Array.from(new Set(nodes.map((node) => node.date).filter(isDeclaredDate)));
   const dateIndex = new Map(orderedDates.map((date, index) => [date, index]));
   const rankCounts = new Map<number, number>();
   const laneRankCounts = new Map<string, number>();
@@ -143,14 +143,14 @@ export function layoutDiagram(
     width: finalMaxX - minX - 36,
     height: rowGap,
   }));
-  const shapeSet = new Set(nodes.map((node) => node.shape ?? 'rect'));
+  const glyphSet = new Set(nodes.map(nodeGlyph));
   const styleSet = new Set(edges.map((edge) => edge.style ?? 'solid'));
   const legendEntries: LegendEntry[] = [];
   if (nodes.some((node) => node.accent)) legendEntries.push({ label: 'FOCAL', accent: true });
   if (styleSet.has('solid') && styleSet.size > 1) legendEntries.push({ label: 'SOLID' });
   if (styleSet.has('dashed')) legendEntries.push({ label: 'DASHED', dashed: true });
   if (styleSet.has('bidirectional')) legendEntries.push({ label: 'TWO-WAY' });
-  if (shapeSet.size > 1) legendEntries.push({ label: 'SHAPES VARY' });
+  if (glyphSet.size > 1) legendEntries.push({ label: 'SHAPES VARY' });
   return {
     nodes: laidOut,
     edges: connectedEdges,
@@ -184,18 +184,27 @@ function rankForNode(
   return dateIndex.get(node.date) ?? declarationIndex;
 }
 
+function isDeclaredDate(date: string | undefined): date is string {
+  return Boolean(date);
+}
+
+function nodeGlyph(node: DiagramNode): DiagramNodeGlyph {
+  return node['shape'] ?? 'rect';
+}
+
 function measureDiagramNode(node: DiagramNode, dense: boolean, nodeHeight: number, maxWidth = 240) {
-  const width = node.shape === 'dot'
+  const glyph = nodeGlyph(node);
+  const width = glyph === 'dot'
     ? 32
     : dense
       ? Math.max(124, Math.min(Math.min(152, maxWidth), node.label.length * 8 + 48))
       : Math.max(Math.min(152, maxWidth), Math.min(maxWidth, node.label.length * 10 + 72, (node.detail?.length ?? 0) * 5 + 72));
   const compact = width <= 140;
   const detailMaxLines = compact ? 2 : 3;
-  const labelLineCount = node.shape === 'dot' ? 1 : splitSvgText(node.label, compact ? 15 : 20, { maxLines: 2 }).length;
-  const detailLineCount = node.detail && node.shape !== 'dot' ? splitSvgText(node.detail, compact ? 17 : 28, { ellipsis: true, maxLines: detailMaxLines }).length : 0;
+  const labelLineCount = glyph === 'dot' ? 1 : splitSvgText(node.label, compact ? 15 : 20, { maxLines: 2 }).length;
+  const detailLineCount = node.detail && glyph !== 'dot' ? splitSvgText(node.detail, compact ? 17 : 28, { ellipsis: true, maxLines: detailMaxLines }).length : 0;
   const textBottom = (compact ? 59 : 72) + Math.max(0, labelLineCount - 1) * (compact ? 16 : 18) + (detailLineCount > 0 ? (detailLineCount - 1) * 13 + 12 : 0);
-  const height = node.shape === 'dot' ? 42 : Math.max(nodeHeight, textBottom + 14);
+  const height = glyph === 'dot' ? 42 : Math.max(nodeHeight, textBottom + 14);
   return { width, height };
 }
 
@@ -224,7 +233,7 @@ function layoutVerticalSwimlane<T extends LaidOutNode & { laneStack: number }>(
   }
   const rankY = new Map<number, number>();
   let cursorY = padding.top + 54;
-  const rankRows = Array.from(new Set([...rankIndex.values()])).sort((a, b) => a - b);
+  const rankRows = Array.from(new Set(rankIndex.values())).sort((a, b) => a - b);
   for (const rankRow of rankRows) {
     rankY.set(rankRow, cursorY);
     cursorY += (rowHeights.get(rankRow) ?? 96) + rowGap;
@@ -285,8 +294,8 @@ function placeEdgeLabels(edges: Array<Omit<LaidOutEdge, 'label'>>, nodes: LaidOu
     return { ...item, label };
   });
   const overlaps = collectLabelOverlaps(laidOut.filter((edge) => Boolean(edge.label)), nodes);
-  if (overlaps.length && typeof console !== 'undefined') {
-    console.warn(`DiagramCanvas edge-label overlap avoided incompletely: ${overlaps.slice(0, 4).join(', ')}`);
+  if (overlaps.length) {
+    globalThis.console?.warn(`DiagramCanvas edge-label overlap avoided incompletely: ${overlaps.slice(0, 4).join(', ')}`);
   }
   return laidOut;
 }
@@ -377,7 +386,7 @@ function collectLabelOverlaps(edges: LaidOutEdge[], nodes: LaidOutNode[]) {
 function computeRanks(nodes: DiagramNode[], edges: DiagramEdge[]) {
   const ids = new Set(nodes.map((node) => node.id));
   const incoming = new Map(nodes.map((node) => [node.id, 0]));
-  const outgoing = new Map(nodes.map((node) => [node.id, [] as string[]]));
+  const outgoing = new Map<string, string[]>(nodes.map((node) => [node.id, []]));
   for (const edge of edges) {
     if (!ids.has(edge.from) || !ids.has(edge.to)) continue;
     incoming.set(edge.to, (incoming.get(edge.to) ?? 0) + 1);

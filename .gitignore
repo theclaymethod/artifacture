@@ -34,3 +34,7 @@ evals/visual-model-policy/policy.generated.json
 evals/visual-model-policy/experiment.local.json
 docs/goals/
 artifacts/
+
+# Local Impeccable review artifacts; keep the shared design contract only.
+/.impeccable/hook.cache.json
+/.impeccable/review/

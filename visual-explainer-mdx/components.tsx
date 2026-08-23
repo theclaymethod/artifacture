@@ -1,21 +1,40 @@
 import React, { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { edgePath, labelLeaderEndpoint, layoutDiagram, mobileConnectorEdges, splitSvgText, wrapWords, type LaidOutNode } from './diagram-layout';
-import type { DiagramCanvasProps, DiagramEdge, DiagramNode } from './diagram-types';
+import type { DiagramCanvasProps } from './diagram-types';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 
 declare global {
   interface Window {
     mermaid?: {
-      initialize(config: Record<string, unknown>): void;
+      initialize(config: MermaidConfiguration): void;
       render(id: string, chart: string): Promise<{ svg: string }>;
     };
   }
 }
 
+type MermaidThemeVariables = {
+  background: string;
+  primaryColor: string;
+  primaryTextColor: string;
+  primaryBorderColor: string;
+  lineColor: string;
+  secondaryColor: string;
+  tertiaryColor: string;
+  fontFamily: string;
+};
+
+type MermaidConfiguration = {
+  startOnLoad: boolean;
+  securityLevel: 'strict';
+  theme: 'base';
+  themeVariables: MermaidThemeVariables;
+};
+
 // Built-in preset names, plus any slug resolvable from the external
 // design-system registry (see docs/design-systems.md). `(string & {})` keeps
 // literal autocompletion for the built-ins while admitting registry names.
 export type VisualPreset =
+  | 'oa-design'
   | 'mono-industrial'
   | 'nothing'
   | 'blueprint'
@@ -103,17 +122,14 @@ type PipelineProps = {
   steps: Array<string | { title: string; body?: string }>;
 };
 
+type PipelineStep = PipelineProps['steps'][number];
+
 type DecisionMatrixProps = {
   rows: Array<Record<string, ReactNode>>;
 };
 
 type RiskLedgerProps = {
   risks: Array<{ risk: string; signal: string; mitigation: string; level?: 'low' | 'medium' | 'high' }>;
-};
-
-type FlowDiagramProps = {
-  nodes: Array<{ id: string; label: string; detail?: string }>;
-  edges: Array<{ from: string; to: string; label?: string }>;
 };
 
 type CodeBlockProps = {
@@ -151,9 +167,13 @@ type TerminalBlockProps = {
 };
 
 type JsonTreeProps = {
-  data: unknown;
+  data: JsonTreeData;
   collapsedDepth?: number;
 };
+
+type JsonTreePrimitive = null | boolean | number | string;
+type JsonTreeRecord = { readonly [key: string]: JsonTreeData };
+type JsonTreeData = JsonTreePrimitive | readonly JsonTreeData[] | JsonTreeRecord;
 
 type QuizProps = {
   questions: Array<{
@@ -201,24 +221,22 @@ type Annotation = {
 
 export function ExplainerShell({
   title,
-  eyebrow = 'Visual Explainer',
   summary,
-  preset = 'mono-industrial',
+  preset = 'oa-design',
   reviewTools = true,
   children,
 }: ShellProps) {
   return (
-    <main className={`min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
-      <div className="mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
-        <header className="grid gap-6 border-b border-[color:var(--ve-rule)] pb-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <main className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
+      <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
+        <header className="ve-shell-header grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{eyebrow}</p>
-            <h1 className="mt-5 max-w-5xl text-5xl leading-[0.95] tracking-normal text-[var(--ve-heading)] sm:text-7xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+            <h1 className="max-w-5xl text-5xl leading-[0.95] tracking-normal text-[var(--ve-heading)] sm:text-7xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
               {title}
             </h1>
             {summary ? <p className="mt-6 max-w-3xl text-lg leading-8 text-[var(--ve-muted)]">{summary}</p> : null}
           </div>
-          <aside className="self-end rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5">
+          <aside className="ve-shell-source-card self-end">
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">source contract</p>
             <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">
               Authored as MDX or TSX. Exported as generated standalone HTML.
@@ -232,29 +250,28 @@ export function ExplainerShell({
   );
 }
 
-export function Section({ title, kicker, children }: SectionProps) {
+export function Section({ title, children }: SectionProps) {
   return (
-    <section className="grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-      <div>
-        {kicker ? <p className="text-xs uppercase tracking-[0.2em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">{kicker}</p> : null}
-        <h2 className="mt-2 text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{title}</h2>
+    <section className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="ve-section-heading">
+        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{title}</h2>
       </div>
-      <div className="min-w-0">{children}</div>
+      <div className="ve-section-body min-w-0">{children}</div>
     </section>
   );
 }
 
 export function Callout({ children }: { children: ReactNode }) {
-  return <div className="rounded-[var(--ve-radius)] border-l-4 border-[var(--ve-accent)] bg-[var(--ve-accent-soft)] p-5 text-[var(--ve-text)]">{children}</div>;
+  return <div className="ve-callout text-[var(--ve-text)]">{children}</div>;
 }
 
 export function Pipeline({ steps }: PipelineProps) {
   return (
-    <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <ol className="ve-pipeline grid md:grid-cols-2 xl:grid-cols-4">
       {steps.map((step, index) => {
-        const item = typeof step === 'string' ? { title: step } : step;
+        const item = normalizePipelineStep(step);
         return (
-          <li key={`${item.title}-${index}`} className="min-w-0 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5">
+          <li key={`${item.title}-${index}`} className="ve-pipeline-item min-w-0">
             <div className="text-xs text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{String(index + 1).padStart(2, '0')}</div>
             <h3 className="mt-4 text-xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{item.title}</h3>
             {item.body ? <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">{item.body}</p> : null}
@@ -265,10 +282,18 @@ export function Pipeline({ steps }: PipelineProps) {
   );
 }
 
+function normalizePipelineStep(step: PipelineStep): { title: string; body?: string } {
+  return isPipelineTitle(step) ? { title: step } : step;
+}
+
+function isPipelineTitle(step: PipelineStep): step is string {
+  return Object.prototype.toString.call(step) === '[object String]';
+}
+
 export function DecisionMatrix({ rows }: DecisionMatrixProps) {
   const columns = Array.from(new Set(rows.flatMap((row) => Object.keys(row))));
   return (
-    <div className="overflow-x-auto rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)]">
+    <div className="ve-table-shell overflow-x-auto rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)]">
       <table className="w-full min-w-[720px] border-collapse text-left text-sm">
         <thead className="bg-[var(--ve-panel-strong)] text-xs uppercase tracking-[0.16em] text-[var(--ve-muted)] [font-family:var(--ve-font-mono)]">
           <tr>
@@ -296,11 +321,10 @@ export function DecisionMatrix({ rows }: DecisionMatrixProps) {
 }
 
 export function RiskLedger({ risks }: RiskLedgerProps) {
-  const color = { low: 'border-[var(--ve-info)]', medium: 'border-[var(--ve-warn)]', high: 'border-[var(--ve-danger)]' };
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="ve-risk-ledger grid md:grid-cols-3">
       {risks.map((risk) => (
-        <article key={risk.risk} className={`rounded-[var(--ve-radius)] border-l-4 ${color[risk.level ?? 'medium']} bg-[var(--ve-panel)] p-5`}>
+        <article data-ve-risk-level={risk.level ?? 'medium'} key={risk.risk} className="ve-risk-card">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">{risk.level ?? 'medium'}</p>
           <h3 className="mt-3 text-lg tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{risk.risk}</h3>
           <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">
@@ -322,7 +346,6 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, tit
   const arrowId = `ve-arrow-${rawId}`;
   const arrowAccentId = `ve-arrow-accent-${rawId}`;
   const arrowStartId = `ve-arrow-start-${rawId}`;
-  const dotsId = `ve-diagram-dots-${rawId}`;
   const titleId = `ve-diagram-title-${rawId}`;
   const descriptionId = `ve-diagram-desc-${rawId}`;
   const accessibleDescription = description ?? `${layout} diagram with ${nodes.length} nodes and ${edges.length} connections.`;
@@ -357,15 +380,8 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, tit
           <marker id={arrowStartId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="1" refY="5" viewBox="0 0 10 10">
             <path d="M 10 0 L 0 5 L 10 10 z" fill="var(--ve-diagram-muted)" />
           </marker>
-          <pattern id={dotsId} height="var(--ve-diagram-grid-size, 22)" patternUnits="userSpaceOnUse" width="var(--ve-diagram-grid-size, 22)" x="0" y="0">
-            <line opacity="var(--ve-grid-line-opacity, 0)" stroke="var(--ve-grid-line)" strokeWidth="var(--ve-grid-line-width, 1)" x1="0" x2="100%" y1="0" y2="0" />
-            <line opacity="var(--ve-grid-line-opacity, 0)" stroke="var(--ve-grid-line)" strokeWidth="var(--ve-grid-line-width, 1)" x1="0" x2="0" y1="0" y2="100%" />
-            <line opacity="var(--ve-grid-scanline-opacity, 0)" stroke="var(--ve-grid-line)" strokeWidth="var(--ve-grid-scanline-width, 1)" x1="0" x2="100%" y1="50%" y2="50%" />
-            <circle cx="50%" cy="50%" fill="var(--ve-grid-line)" opacity="var(--ve-grid-dot-opacity, 0.58)" r="var(--ve-grid-dot-r, 0.9)" />
-          </pattern>
         </defs>
         <rect fill="var(--ve-diagram-bg)" height={diagram.viewBox.height} width={diagram.viewBox.width} x={diagram.viewBox.x} y={diagram.viewBox.y} />
-        <rect fill={`url(#${dotsId})`} height={diagram.bodyBottom - diagram.viewBox.y} width={diagram.viewBox.width} x={diagram.viewBox.x} y={diagram.viewBox.y} />
         <rect fill="none" height={diagram.viewBox.height - 1} stroke="var(--ve-diagram-frame)" strokeWidth="1" width={diagram.viewBox.width - 1} x={diagram.viewBox.x + 0.5} y={diagram.viewBox.y + 0.5} />
         <g data-diagram-role="layer">
           {diagram.lanes.map((lane) => (
@@ -426,7 +442,7 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, tit
             );
           })}
           {diagram.nodes.map((item, index) => (
-            <DiagramNodeShape item={item} index={index} key={item.id} />
+            <DiagramNodeGlyph item={item} index={index} key={item.id} />
           ))}
           {diagram.legend.entries.length ? (
             <g data-diagram-role="legend">
@@ -488,10 +504,6 @@ function MobileSwimlaneVariant({ diagram }: { diagram: ReturnType<typeof layoutD
       </div>
     </div>
   );
-}
-
-export function FlowDiagram({ nodes, edges }: FlowDiagramProps) {
-  return <DiagramCanvas edges={edges} layout="flow" nodes={nodes} title="Flow diagram" />;
 }
 
 export function CodeBlock({ code, language, filename, highlightLines = [], annotations = [], diff, html }: CodeBlockProps) {
@@ -601,24 +613,38 @@ export function TerminalBlock({ content, title = 'Terminal', showPrompt = false 
 }
 
 export function JsonTree({ data, collapsedDepth = 2 }: JsonTreeProps) {
+  const rootEntry = parseJsonTreeEntry(data);
   return (
     <div className="ve-json-tree" data-ve-json-tree>
-      <JsonNode name="root" value={data} depth={0} collapsedDepth={collapsedDepth} root />
+      <JsonNode name="root" entry={rootEntry} depth={0} collapsedDepth={collapsedDepth} root />
     </div>
   );
 }
 
-function JsonNode({ name, value, depth, collapsedDepth, root = false }: { name: string; value: unknown; depth: number; collapsedDepth: number; root?: boolean }) {
-  if (value === null || typeof value !== 'object') {
+type JsonTreeEntry = JsonLeafEntry | JsonBranchEntry;
+
+type JsonLeafEntry = {
+  kind: 'leaf';
+  display: string;
+  valueType: string;
+};
+
+type JsonBranchEntry = {
+  kind: 'branch';
+  branchType: 'Array' | 'Object';
+  children: Array<[string, JsonTreeEntry]>;
+};
+
+function JsonNode({ name, entry, depth, collapsedDepth, root = false }: { name: string; entry: JsonTreeEntry; depth: number; collapsedDepth: number; root?: boolean }) {
+  if (entry.kind === 'leaf') {
     return (
       <div className="ve-json-leaf">
         {!root ? <span className="ve-json-key">{JSON.stringify(name)}: </span> : null}
-        <JsonPrimitive value={value} />
+        <JsonPrimitive entry={entry} />
       </div>
     );
   }
-  const entries = Array.isArray(value) ? value.map((item, index) => [String(index), item] as const) : Object.entries(value as Record<string, unknown>);
-  const label = Array.isArray(value) ? `Array(${entries.length})` : `Object(${entries.length})`;
+  const label = `${entry.branchType}(${entry.children.length})`;
   return (
     <details className="ve-json-branch" open={depth < collapsedDepth}>
       <summary>
@@ -626,17 +652,57 @@ function JsonNode({ name, value, depth, collapsedDepth, root = false }: { name: 
         <span className="ve-json-type">{label}</span>
       </summary>
       <div className="ve-json-children">
-        {entries.map(([key, child]) => (
-          <JsonNode collapsedDepth={collapsedDepth} depth={depth + 1} key={key} name={key} value={child} />
+        {entry.children.map(([key, child]) => (
+          <JsonNode collapsedDepth={collapsedDepth} depth={depth + 1} key={key} name={key} entry={child} />
         ))}
       </div>
     </details>
   );
 }
 
-function JsonPrimitive({ value }: { value: unknown }) {
-  const type = value === null ? 'null' : typeof value;
-  return <span data-ve-json-type={type}>{typeof value === 'string' ? JSON.stringify(value) : String(value)}</span>;
+function JsonPrimitive({ entry }: { entry: JsonLeafEntry }) {
+  return <span data-ve-json-type={entry.valueType}>{entry.display}</span>;
+}
+
+function parseJsonTreeEntry(value: JsonTreeData): JsonTreeEntry {
+  if (value === null) return { kind: 'leaf', display: 'null', valueType: 'null' };
+  if (isJsonTreeList(value)) {
+    return {
+      kind: 'branch',
+      branchType: 'Array',
+      children: value.map((item, index) => [String(index), parseJsonTreeEntry(item)]),
+    };
+  }
+  if (isJsonTreeRecord(value)) {
+    return {
+      kind: 'branch',
+      branchType: 'Object',
+      children: Object.entries(value).map(([key, child]) => [key, parseJsonTreeEntry(child)]),
+    };
+  }
+  const valueType = jsonValueType(value);
+  return {
+    kind: 'leaf',
+    display: isJsonText(value) ? JSON.stringify(value) : String(value),
+    valueType,
+  };
+}
+
+function isJsonTreeRecord(value: JsonTreeData): value is JsonTreeRecord {
+  return Object.prototype.toString.call(value) === '[object Object]';
+}
+
+function isJsonTreeList(value: JsonTreeData): value is readonly JsonTreeData[] {
+  return Array.isArray(value);
+}
+
+function isJsonText(value: JsonTreePrimitive): value is string {
+  return Object.prototype.toString.call(value) === '[object String]';
+}
+
+function jsonValueType(value: JsonTreePrimitive): string {
+  const tag = Object.prototype.toString.call(value);
+  return tag.slice(8, -1).toLowerCase();
 }
 
 export function Quiz({ questions }: QuizProps) {
@@ -755,39 +821,40 @@ export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
   );
 }
 
-function DiagramNodeShape({ item, index }: { item: LaidOutNode; index: number }) {
+function DiagramNodeGlyph({ item, index }: { item: LaidOutNode; index: number }) {
   const compact = item.width <= 140;
-  const labelY = item.shape === 'dot' ? item.y + item.height + 20 : item.y + (compact ? 37 : 44);
-  const labelLines = splitSvgText(item.label, item.shape === 'dot' ? 14 : compact ? 15 : 20, { maxLines: 2 });
+  const glyph = item['shape'] ?? 'rect';
+  const labelY = glyph === 'dot' ? item.y + item.height + 20 : item.y + (compact ? 37 : 44);
+  const labelLines = splitSvgText(item.label, glyph === 'dot' ? 14 : compact ? 15 : 20, { maxLines: 2 });
   const detailLines = item.detail ? splitSvgText(item.detail, compact ? 17 : 28, { ellipsis: true, maxLines: compact ? 2 : 3 }) : [];
   const detailY = item.y + (compact ? 59 : 72) + Math.max(0, labelLines.length - 1) * (compact ? 16 : 18);
   const stroke = item.isAccented ? 'var(--ve-accent)' : 'var(--ve-node-stroke)';
   const fill = item.isAccented ? 'var(--ve-diagram-accent-fill)' : 'var(--ve-node-bg)';
-  const textX = item.shape === 'dot' ? item.x + item.width / 2 : item.x + (compact ? 12 : 20);
+  const textX = glyph === 'dot' ? item.x + item.width / 2 : item.x + (compact ? 12 : 20);
   return (
     <g data-diagram-role="node" data-ve-label={item.label} key={item.id}>
-      {item.shape === 'oval' ? (
+      {glyph === 'oval' ? (
         <rect fill={fill} height={item.height} rx={compact ? 16 : 24} stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} width={item.width} x={item.x} y={item.y} />
-      ) : item.shape === 'diamond' ? (
+      ) : glyph === 'diamond' ? (
         <polygon fill={fill} points={`${item.x + item.width / 2},${item.y} ${item.x + item.width},${item.y + item.height / 2} ${item.x + item.width / 2},${item.y + item.height} ${item.x},${item.y + item.height / 2}`} stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} />
-      ) : item.shape === 'dot' ? (
+      ) : glyph === 'dot' ? (
         <circle cx={item.x + item.width / 2} cy={item.y + item.height / 2} fill={stroke} r={item.width / 2} />
       ) : (
         <rect fill={fill} height={item.height} rx="var(--ve-node-radius, 6)" stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} width={item.width} x={item.x} y={item.y} />
       )}
-      {item.shape === 'dot' ? null : (
+      {glyph === 'dot' ? null : (
         <text fill={item.isAccented ? 'var(--ve-accent)' : 'var(--ve-faint)'} fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="0.8" style={svgTextOverflowStyle} x={item.x + (compact ? 12 : 20)} y={item.y + 20}>
           {String(index + 1).padStart(2, '0')}
         </text>
       )}
-      <text className="ve-diagram-node-label" fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize={item.shape === 'dot' ? 14 : compact ? 14 : 15} fontWeight={item.isAccented ? '700' : '600'} style={svgTextOverflowStyle} textAnchor={item.shape === 'dot' ? 'middle' : 'start'} x={textX} y={labelY}>
+      <text className="ve-diagram-node-label" fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize={glyph === 'dot' ? 14 : compact ? 14 : 15} fontWeight={item.isAccented ? '700' : '600'} style={svgTextOverflowStyle} textAnchor={glyph === 'dot' ? 'middle' : 'start'} x={textX} y={labelY}>
         {labelLines.map((line, lineIndex) => (
-          <tspan dy={lineIndex === 0 ? 0 : item.shape === 'dot' ? 16 : compact ? 16 : 18} key={`${item.id}-label-${lineIndex}`} x={textX}>
+          <tspan dy={lineIndex === 0 ? 0 : glyph === 'dot' ? 16 : compact ? 16 : 18} key={`${item.id}-label-${lineIndex}`} x={textX}>
             {line}
           </tspan>
         ))}
       </text>
-      {item.detail && item.shape !== 'dot' ? (
+      {item.detail && glyph !== 'dot' ? (
         <text fill="var(--ve-muted)" fontFamily="var(--ve-font-mono)" fontSize={compact ? 8 : 10} style={svgTextOverflowStyle} x={textX} y={detailY}>
           {detailLines.map((line, lineIndex) => (
             <tspan dy={lineIndex === 0 ? 0 : 13} key={`${item.id}-detail-${lineIndex}`} x={textX}>
@@ -877,7 +944,8 @@ function diffLines(before: string, after: string): DiffRow[] {
 function parseAnsi(input: string) {
   const output: Array<{ text: string; className?: string }> = [];
   let active = '';
-  const pattern = /\x1b\[([0-9;]*)m/g;
+  const ansiEscape = String.fromCharCode(27);
+  const pattern = new RegExp(`${ansiEscape}\\[([0-9;]*)m`, 'g');
   let last = 0;
   for (const match of input.matchAll(pattern)) {
     if (match.index > last) output.push({ text: input.slice(last, match.index), className: active || undefined });
@@ -940,7 +1008,7 @@ function parseMermaidSvg(svgText: string) {
   const svg = document.documentElement;
   for (const element of svg.querySelectorAll('script, iframe, object, embed, link')) element.remove();
   for (const element of [svg, ...svg.querySelectorAll('*')]) {
-    for (const attribute of [...element.attributes]) {
+    for (const attribute of element.attributes) {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim().toLowerCase();
       if (name.startsWith('on') || ((name === 'href' || name === 'xlink:href') && /^(?:javascript:|data:text\/html)/.test(value))) {
@@ -961,7 +1029,7 @@ function fitMermaidForeignObjects(host: HTMLElement) {
     node.style.overflow = 'hidden';
     const width = Number(node.getAttribute('width')) || node.getBoundingClientRect().width;
     const height = Number(node.getAttribute('height')) || node.getBoundingClientRect().height;
-    const child = node.firstElementChild as HTMLElement | null;
+    const child = node.firstElementChild instanceof HTMLElement ? node.firstElementChild : null;
     if (child) {
       child.style.maxWidth = 'none';
       child.style.whiteSpace = 'normal';
@@ -989,7 +1057,7 @@ function fitMermaidForeignObjects(host: HTMLElement) {
 
 function wrapMermaidLabels(chart: string) {
   return chart.split('\n').map((line) => line.replace(
-    /(\b[A-Za-z][\w-]*\b)(\[\[|\[\(|\[|\{\{|\{|\(\(|\()("[^"]+"|'[^']+'|[^\]\}\)\n]+)(\]\]|\]\)|\]|\}\}|\}|\)\)|\))/g,
+    /(\b[A-Za-z][\w-]*\b)(\[\[|\[\(|\[|\{\{|\{|\(\(|\()("[^"]+"|'[^']+'|[^\]})\n]+)(\]\]|\]\)|\]|\}\}|\}|\)\)|\))/g,
     (match, id, open, rawLabel, close) => {
       const quote = rawLabel.startsWith('"') || rawLabel.startsWith("'") ? rawLabel[0] : '';
       const label = quote ? rawLabel.slice(1, -1) : rawLabel;
@@ -1011,7 +1079,7 @@ export function SlideDeck({
   eyebrow = 'Slide Deck',
   children,
   orientation = 'vertical',
-  preset = 'mono-industrial',
+  preset = 'oa-design',
   reviewTools = true,
 }: SlideDeckProps) {
   const isHorizontal = orientation === 'horizontal';
@@ -1028,6 +1096,8 @@ export function SlideDeck({
       // Slide's body-text font-size is computed as `clamp(var(--min-font-size), <fluid>, <cap>)`,
       // so shrinking the fluid term below this floor at narrow viewports still
       // renders at (at least) --min-font-size instead of continuing to shrink.
+      // SAFETY: React's standard CSSProperties excludes custom properties, but this
+      // declaration supplies exactly the documented --min-font-size token above.
       style={{ '--min-font-size': '16px' } as React.CSSProperties}
     >
       <nav className="fixed left-4 top-4 z-40 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-nav-bg)] px-3 py-2 text-xs uppercase tracking-[0.16em] text-[var(--ve-muted)] [font-family:var(--ve-font-mono)]">
@@ -1064,7 +1134,7 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
   );
 }
 
-export function PosterCanvas({ eyebrow = 'Poster', title, stat, footer, preset = 'mono-industrial', children }: PosterCanvasProps) {
+export function PosterCanvas({ eyebrow = 'Poster', title, stat, footer, preset = 'oa-design', children }: PosterCanvasProps) {
   return (
     <main className="min-h-screen bg-[var(--ve-bg)] p-4 text-[var(--ve-text)] sm:p-8 [font-family:var(--ve-font-body)]" data-ve-preset={preset}>
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] items-center justify-center sm:min-h-[calc(100vh-4rem)]">
@@ -1073,7 +1143,6 @@ export function PosterCanvas({ eyebrow = 'Poster', title, stat, footer, preset =
           data-ve-label={title}
           data-ve-poster
         >
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--ve-poster-grid)_1px,transparent_1px),linear-gradient(var(--ve-poster-grid)_1px,transparent_1px)] bg-[size:40px_40px]" />
           <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_minmax(180px,0.42fr)] gap-[5%]">
             <div className="flex min-w-0 flex-col justify-between">
               <div>
@@ -1140,7 +1209,7 @@ function AnnotationLayer() {
 
   return (
     <aside
-      className="ve-review-panel z-50 flex w-[min(420px,calc(100vw-32px))] flex-col gap-3 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-review-bg)] p-4 text-sm text-[var(--ve-text)] shadow-2xl shadow-black/40 [font-family:var(--ve-font-body)]"
+      className="ve-review-panel z-50 flex w-[min(420px,calc(100vw-32px))] flex-col gap-3 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-review-bg)] p-4 text-sm text-[var(--ve-text)] [font-family:var(--ve-font-body)]"
       data-ve-review-ui
     >
       <div className="flex items-center justify-between gap-3">

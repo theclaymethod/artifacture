@@ -475,7 +475,7 @@ export function deriveTokens(core) {
   const codeInk = dark ? core.text : core.bg;
   const gridSize = core.grid?.size ?? 24;
   const gridLineOpacity = core.grid?.lineOpacity ?? (core.grid ? 0.5 : 0.3);
-  return {
+  const tokens = {
     '--ve-font-display': core.fontDisplay,
     '--ve-font-body': core.fontBody,
     '--ve-font-mono': core.fontMono,
@@ -535,8 +535,9 @@ export function deriveTokens(core) {
     '--ve-poster-muted': rgbA(core.heading, 0.62),
     '--ve-poster-rule': rgbA(core.heading, 0.2),
     '--ve-poster-grid': rgbA(core.heading, 0.08),
-    ...(core.ease ? { '--ve-ease': core.ease } : {}),
   };
+  if (core.ease) tokens['--ve-ease'] = core.ease;
+  return tokens;
 }
 
 /** Render a token map as a tokens.css file body. */

@@ -168,7 +168,7 @@ function connectEvents() {
 function handleBridgeMessage(event) {
   if (event.source !== elements.artifactFrame.contentWindow) return;
   const message = event.data;
-  if (!isRecord(message) || message.source !== "ve-preview-bridge" || message.session !== state.meta?.session || typeof message.type !== "string") return;
+  if (!isRecord(message) || message.source !== "ve-preview-bridge" || message.session !== state.meta?.session || !isString(message.type)) return;
 
   switch (message.type) {
     case "bridge-ready":
@@ -185,7 +185,7 @@ function handleBridgeMessage(event) {
       openCommentDraft(message.anchor, message.rect);
       break;
     case "edit-start":
-      if (state.mode !== "edit" || !isAnchor(message.anchor) || typeof message.before !== "string") return;
+      if (state.mode !== "edit" || !isAnchor(message.anchor) || !isString(message.before)) return;
       closeTargetOptions();
       closeEditConflict();
       state.edit = {
@@ -199,17 +199,17 @@ function handleBridgeMessage(event) {
       setStatus("Editing text · ⌘ Enter to save");
       break;
     case "edit-change":
-      if (state.edit && typeof message.value === "string") state.edit.value = message.value;
+      if (state.edit && isString(message.value)) state.edit.value = message.value;
       break;
     case "edit-commit":
-      if (state.edit && typeof message.value === "string") commitEdit(message.value);
+      if (state.edit && isString(message.value)) commitEdit(message.value);
       break;
     case "edit-cancelled":
       closeEditConflict();
       finishEdit("Edit cancelled");
       break;
     case "marker-click":
-      if (typeof message.id === "string") focusAnnotation(message.id);
+      if (isString(message.id)) focusAnnotation(message.id);
       break;
     case "target-unavailable":
       if (isAnchor(message.anchor) && isRect(message.rect)) openTargetOptions(message);
@@ -461,7 +461,7 @@ function clearAnnotations() {
 
 async function commitEdit(value, resolution = {}) {
   if (!state.edit || state.saving) return;
-  const after = typeof value === "string" ? value : state.edit.value;
+  const after = isString(value) ? value : state.edit.value;
   if (after === state.edit.before) {
     cancelEdit();
     return;
@@ -542,14 +542,14 @@ function closeEditConflict() {
 
 function resolveConflict(occurrence) {
   const after = state.conflict?.after;
-  if (typeof after !== "string") return;
+  if (!isString(after)) return;
   closeEditConflict();
   commitEdit(after, { occurrence });
 }
 
 function resolveAllConflicts() {
   const after = state.conflict?.after;
-  if (typeof after !== "string") return;
+  if (!isString(after)) return;
   closeEditConflict();
   commitEdit(after, { replaceAll: true });
 }
@@ -605,7 +605,7 @@ async function copyReview() {
     });
     markdown = result.markdown;
     resolved = result.resolved || 0;
-  } catch (error) {
+  } catch {
     markdown = formatReviewForClipboard();
     mappingUnavailable = true;
   }
@@ -729,10 +729,10 @@ function restoreAnnotations() {
 }
 
 function normalizeStoredAnnotation(item, index) {
-  if (!item || typeof item !== "object") return null;
+  if (!isRecord(item)) return null;
   const anchor = item.anchor;
-  if (!anchor || typeof anchor !== "object") return null;
-  if (typeof item.id !== "string" || typeof item.comment !== "string" || typeof anchor.selector !== "string") return null;
+  if (!isRecord(anchor)) return null;
+  if (!isString(item.id) || !isString(item.comment) || !isString(anchor.selector)) return null;
   return {
     anchor: reviewAnchor(anchor),
     comment: item.comment.slice(0, 20_000),
@@ -743,15 +743,15 @@ function normalizeStoredAnnotation(item, index) {
 
 function reviewAnchor(anchor) {
   return {
-    label: typeof anchor.label === "string" ? anchor.label : "Element",
-    location: typeof anchor.location === "string" ? anchor.location : "",
-    ownText: typeof anchor.ownText === "string" ? anchor.ownText : "",
+    label: isString(anchor.label) ? anchor.label : "Element",
+    location: isString(anchor.location) ? anchor.location : "",
+    ownText: isString(anchor.ownText) ? anchor.ownText : "",
     point: anchor.point && Number.isFinite(anchor.point.x) && Number.isFinite(anchor.point.y)
       ? { x: anchor.point.x, y: anchor.point.y }
       : null,
     selector: anchor.selector,
-    tagName: typeof anchor.tagName === "string" ? anchor.tagName : "",
-    text: typeof anchor.text === "string" ? anchor.text : "",
+    tagName: isString(anchor.tagName) ? anchor.tagName : "",
+    text: isString(anchor.text) ? anchor.text : "",
   };
 }
 
@@ -887,11 +887,21 @@ function safeJson(value) {
 }
 
 function isRecord(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
+  if (value === null || Object(value) !== value || Array.isArray(value)) return false;
+  try {
+    Function.prototype.toString.call(value);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function isString(value) {
+  return value !== null && Object(value) !== value && String(value) === value;
 }
 
 function isAnchor(value) {
-  return isRecord(value) && typeof value.selector === "string";
+  return isRecord(value) && isString(value.selector);
 }
 
 function isRect(value) {

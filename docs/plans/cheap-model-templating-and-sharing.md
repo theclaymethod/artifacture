@@ -11,7 +11,7 @@ Grounded in measured analysis of sideshow (token economics), sharehtml (deployme
   before writing a line.
 - Emit cost is already solved for covered cases (MDX sources 300–1,900 tokens; the Vite
   exporter deterministically expands to ~237KB artifacts, 96.6% byte-identical scaffolding).
-  But components.tsx covers 1 of 13 documented diagram types (FlowDiagram — linear only,
+  But components.tsx covers 1 of 13 documented diagram types (the legacy helper was linear only,
   confirmed viewBox overflow at index 4: x = 40 + i*250 vs viewBox 960) and has no CodeBlock,
   so diagrams and code pages fall back to full legacy read+hand-author costs.
 - Sideshow's verified lesson: typed data surfaces + pre-built rendering yield 87–96% output
@@ -47,8 +47,8 @@ A1. `DiagramCanvas` in visual-explainer-mdx/components.tsx:
     diagrams-svg.md (oval start/end rx=20, rect steps rx=6, diamond decisions, dot merges);
     accent budget enforced in-component (max 2); emits data-diagram-role attributes so
     ve-verify's counting checks run deterministically. Covers architecture, flowchart, state,
-    tree, swimlane, timeline (6/13 types). FlowDiagram becomes a thin deprecated wrapper over
-    DiagramCanvas(layout:'flow') — existing examples keep building.
+    tree, swimlane, timeline (6/13 types). DiagramCanvas is the sole shared diagram entry point;
+    `DiagramCanvas(layout: 'flow')` keeps existing examples building.
 A2. `CodeBlock`: props {code, language, filename?, highlightLines?, annotations? [{line, note}],
     diff?: 'unified'}. Shiki at build time (add devDependency; NO runtime CDN), terminal-dark
     per mono-industrial.md §16 token mapping, honors --ve-* tokens both modes, pre-wrap policy

@@ -13,7 +13,7 @@ This skill fixes that. Real typography, dark/light themes, interactive Mermaid d
 
 ## What's different from upstream visual-explainer
 
-The major additions, on top of the upstream skill. Mono-Industrial is still the default aesthetic, and every upstream command still works.
+The major additions, on top of the upstream skill. OA Design is the default aesthetic, and every upstream command still works.
 
 Since the fork, the largest changes are structural:
 
@@ -34,12 +34,12 @@ Reusable primitives live in [`visual-explainer-mdx/components.tsx`](../visual-ex
 The shared components now support design-system presets through semantic tokens:
 
 ```tsx
-<ExplainerShell preset="mono-industrial" title="..." />
+<ExplainerShell preset="oa-design" title="..." />
 <SlideDeck preset="nothing" orientation="horizontal" title="..." />
 <PosterCanvas preset="blueprint" title="..." />
 ```
 
-Available presets are `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal`. The token layer covers palette, typography, border radius, page rhythm, diagram colors, slide tones, poster canvas styling, and annotation review UI. See [`examples/visual-explainer-mdx/preset-gallery.mdx`](../examples/visual-explainer-mdx/preset-gallery.mdx) for the fixture.
+Available presets are `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal`. The token layer covers palette, typography, border radius, page rhythm, diagram colors, slide tones, poster canvas styling, and annotation review UI. See [`examples/visual-explainer-mdx/preset-gallery.mdx`](../examples/visual-explainer-mdx/preset-gallery.mdx) for the fixture.
 
 **Agent invocation.** In Codex Desktop, invoke `$visual-explainer` or an installed prompt wrapper and ask for the artifact; the agent should write MDX/TSX source, run `npm run ve:export`, and browser-verify the HTML. In Claude Code, use the namespaced command such as `/visual-explainer:generate-web-diagram` when installed. The direct CLI path is the same `npm run ve:export` command above.
 
@@ -123,11 +123,12 @@ Requires Playwright in the cwd (`npm install playwright && npx playwright instal
 
 ## Aesthetics
 
-Mono-Industrial is the default. Named alternatives are opt-in — the agent only selects them when you explicitly ask.
+OA Design is the default. Named alternatives are opt-in — the agent only selects them when you explicitly ask.
 
 | Aesthetic | Trigger | Reference |
 |---|---|---|
-| **Mono-Industrial** *(default)* | Every generation unless named otherwise | [`references/mono-industrial.md`](../plugins/visual-explainer/references/mono-industrial.md) |
+| **OA Design** *(default)* | Every generation unless named otherwise | [`references/oa-design.md`](../plugins/visual-explainer/references/oa-design.md) |
+| Mono-Industrial | "use Mono-Industrial style" | [`references/mono-industrial.md`](../plugins/visual-explainer/references/mono-industrial.md) |
 | Blueprint | "use Blueprint style" | legacy |
 | Editorial | "use Editorial style" | legacy |
 | Paper/ink | "use paper/ink style" | legacy |
@@ -195,7 +196,8 @@ plugins/
     ├── SKILL.md                          ← workflow + design principles
     ├── commands/                         ← slash commands (incl. generate-video, render-video)
     ├── references/
-    │   ├── mono-industrial.md            ← default aesthetic
+    │   ├── oa-design.md                  ← default aesthetic
+    │   ├── mono-industrial.md            ← named alternative
     │   ├── diagrams-svg.md               ← 13-type SVG diagram rules (this fork)
     │   ├── diagram-tokens.md             ← per-aesthetic token maps (this fork)
     │   ├── hyperframes.md                ← Hyperframes integration (this fork)
@@ -210,7 +212,7 @@ plugins/
     │   ├── slide-patterns.md             ← vertical deck + magazine + PDF export (this fork)
     │   └── …
     ├── templates/
-    │   ├── mono-industrial.html          ← default scrollable
+    │   ├── mono-industrial.html          ← historical scrollable reference
     │   ├── mono-industrial-slides.html
     │   ├── mono-industrial-magazine.html ← horizontal zine (this fork)
     │   ├── svg-diagram-starter.html      ← inline-SVG diagram ref (this fork)
@@ -244,4 +246,3 @@ At every viewport size the pill stays pinned top-right as a single centered glyp
 ## Responsive
 
 Every template adapts from 1440px+ desktop down to 390px mobile. The theme toggle keeps its top-right collapsed-glyph position at every breakpoint; layout responsiveness comes from the content — wide tables scroll inside wrappers, diagrams resize or gain local scrolling, and hero type scales without chrome relocation.
-

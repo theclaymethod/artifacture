@@ -1,6 +1,6 @@
 # Template Status Ledger
 
-The `frozen-reference` templates predate the current 207-check verifier and ALL fail it (verified 2026-07-06 with `scripts/verify/ve-verify.mjs`). They are kept as historical reference for hand-authoring patterns only — do NOT copy them as-is. New work goes through the MDX pipeline (SKILL.md Tier 0), and hand-authored output must pass ve-verify regardless. Deletion candidates are tracked by the Consumer column; removal is a maintainer decision.
+The `frozen-reference` templates predate the current 207-check verifier and ALL fail it (verified 2026-07-06 with `scripts/verify/ve-verify.mjs`). They are kept as historical reference for hand-authoring patterns only — do NOT copy them as-is. New work goes through the MDX pipeline (SKILL.md Tier 0), whose default is the OA Design preset documented in `references/oa-design.md`; named legacy templates do not define the default visual system. Decorative grid backgrounds are forbidden in both active and frozen references. Hand-authored output must pass ve-verify regardless. Deletion candidates are tracked by the Consumer column; removal is a maintainer decision.
 
 | Template | Status | Consumer | Verified |
 |---|---|---|---|

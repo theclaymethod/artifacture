@@ -15,6 +15,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "lint": "oxlint .",
     "ve:export": "node scripts/ve-mdx/export.mjs",
     "ve:export-static": "node scripts/ve-mdx/export-static.mjs",
     "ve:check": "node scripts/ve-mdx/check.mjs",
@@ -51,9 +52,11 @@
     "vite": "^8.0.12"
   },
   "devDependencies": {
+    "@oxlint/plugins": "^1.79.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "linkedom": "0.18.12",
+    "oxlint": "^1.79.0",
     "playwright": "1.60.0",
     "playwright-core": "1.60.0",
     "shiki": "4.3.1",

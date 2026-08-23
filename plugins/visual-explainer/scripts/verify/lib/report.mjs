@@ -26,7 +26,7 @@ export function buildReport(ctx, checks, screenshots = []) {
     else if (check.status === 'fail') summary.warns += 1;
   }
 
-  const llmPasses = llmPassesFor(ctx, effectiveChecks);
+  const llmPasses = llmPassesFor(ctx);
   const reviewContract = buildReviewContract(ctx, screenshots, llmPasses);
   const mechanicsProfile = ctx.mechanicsProfile || ctx.profile;
   const reviewProfile = ctx.reviewProfile || detectReviewProfile(mechanicsProfile, ctx.html || '');
@@ -69,7 +69,7 @@ export function printHumanReport(report, { quiet = false } = {}) {
   }
 }
 
-function llmPassesFor(ctx, checks) {
+function llmPassesFor(ctx) {
   const required = new Set();
   const mechanicsProfile = ctx.mechanicsProfile || ctx.profile;
   const reviewProfile = ctx.reviewProfile || detectReviewProfile(mechanicsProfile, ctx.html || '');

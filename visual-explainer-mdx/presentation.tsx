@@ -87,7 +87,7 @@ const PRESENTATION_CSS = `
    accent tint layered above via background-image — the composite is fully
    opaque, so grid lines can never show through (CSS solidTint()). */
 .ve-pres-solid { background-color: var(--ve-slide-bg); background-image: linear-gradient(var(--ve-pres-fill, transparent), var(--ve-pres-fill, transparent)); }
-.ve-pres-grid-paper { background-image: linear-gradient(var(--ve-pres-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--ve-pres-grid-line) 1px, transparent 1px); background-size: 40px 40px; }
+.ve-pres-grid-paper { background-color: var(--ve-slide-bg); }
 @keyframes vePresSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes vePresDrillIn { from { opacity: 0; transform: scale(.955); } to { opacity: 1; transform: none; } }
 @keyframes vePresPanelIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
@@ -96,7 +96,15 @@ const PRESENTATION_CSS = `
 }
 `;
 
-const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+function isBrowserRuntime(): boolean {
+  return 'window' in globalThis;
+}
+
+function getElementTarget(target: EventTarget | null): Element | null {
+  return target instanceof Element ? target : null;
+}
+
+const useIsoLayoutEffect = isBrowserRuntime() ? useLayoutEffect : useEffect;
 
 /* ==================================================================== */
 /* Text primitives                                                      */
@@ -159,6 +167,7 @@ export function DisplayText({
     <p
       style={{
         fontFamily: 'var(--ve-font-display)',
+        // SAFETY: The CSS custom property resolves to a valid font-weight token at render time; CSSProperties cannot model var() here.
         fontWeight: 'var(--ve-display-weight)' as CSSProperties['fontWeight'],
         fontStyle: italic ? 'italic' : 'normal',
         fontSize: size,
@@ -407,10 +416,8 @@ const PRESENTATION_STATE_NAV_EVENT = 'presentation-state-navigate';
 function getPresentationStateDirection(event: Event): PresentationStateDirection | null {
   if (!('detail' in event)) return null;
   const detail = event.detail;
-  if (!detail || typeof detail !== 'object' || !('direction' in detail)) return null;
-  return detail.direction === 'previous' || detail.direction === 'next'
-    ? detail.direction
-    : null;
+  if (!(detail instanceof Object) || !('direction' in detail)) return null;
+  return detail.direction === 'previous' || detail.direction === 'next' ? detail.direction : null;
 }
 
 /**
@@ -573,7 +580,7 @@ export function DrillSheet({
 }) {
   useEscape(true, onClose);
   const handleSurfaceClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (shouldDismissDrillSheet(e.target as Element | null)) onClose();
+    if (shouldDismissDrillSheet(getElementTarget(e.target))) onClose();
   };
   return (
     <div
@@ -584,6 +591,7 @@ export function DrillSheet({
       onClick={handleSurfaceClick}
       className="ve-pres-solid"
       style={
+        // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
         {
           position: 'absolute',
           inset: 0,
@@ -665,6 +673,7 @@ export function DrillCard({
         onClick={() => setOpen(true)}
         onMouseMove={trackShine}
         style={
+          // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
           {
             display: 'block',
             width: '100%',
@@ -772,6 +781,7 @@ export function PullQuote({
       <div
         className="ve-pres-solid"
         style={
+          // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
           {
             '--ve-pres-fill': 'color-mix(in srgb, var(--ve-slide-text) 5%, transparent)',
             border: '1px solid var(--ve-pres-hair)',
@@ -802,6 +812,7 @@ export function Metric({ value, label, size = 54 }: { value: string; label: stri
         style={{
           margin: 0,
           fontFamily: 'var(--ve-font-display)',
+          // SAFETY: The CSS custom property resolves to a valid font-weight token at render time; CSSProperties cannot model var() here.
           fontWeight: 'var(--ve-display-weight)' as CSSProperties['fontWeight'],
           fontSize: fitSize,
           lineHeight: 1,
@@ -842,6 +853,12 @@ export function StatRow({ stats }: { stats: Array<{ value: string; label: string
 
 export type HairlineItem = string | { head: string; body: string };
 
+type HairlinePair = Exclude<HairlineItem, string>;
+
+function isHairlinePair(item: HairlineItem): item is HairlinePair {
+  return item instanceof Object;
+}
+
 /** Left-hairline list rows. Accepts plain strings or {head, body} pairs. */
 export function HairlineList({
   items,
@@ -865,7 +882,7 @@ export function HairlineList({
       }
     >
       {items.map((item, i) => {
-        const isPair = typeof item !== 'string';
+        const isPair = isHairlinePair(item);
         return (
           <div key={isPair ? item.head : `${item}-${i}`} style={{ borderLeft: `1px solid ${border}`, paddingLeft: 22 }}>
             {isPair ? (
@@ -1018,10 +1035,11 @@ export function LadderDiagram({
   renderStage?: (stage: LadderStage, i: number) => ReactNode;
   framed?: boolean;
 }) {
-  const defaultStage = (s: LadderStage, i: number) => (
+  const defaultStage = (s: LadderStage) => (
     <div
       className="ve-pres-solid"
       style={
+        // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
         {
           border: `1px solid ${s.dim ? 'var(--ve-pres-hair)' : s.accent ?? 'var(--ve-pres-hair)'}`,
           '--ve-pres-fill': !s.dim && s.accent ? `color-mix(in srgb, ${s.accent} 8%, transparent)` : 'transparent',
@@ -1109,6 +1127,7 @@ export function FanoutDiagram({
         <div
           className="ve-pres-solid"
           style={
+            // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
             {
               width: sourceWidth,
               border: `1px solid ${source.accent ?? 'var(--ve-pres-hair)'}`,
@@ -1207,6 +1226,7 @@ export function LayerExplorer({
               onClick={() => setSel(i)}
               onMouseMove={trackShine}
               style={
+                // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
                 {
                   display: 'flex',
                   alignItems: 'center',
@@ -1243,6 +1263,7 @@ export function LayerExplorer({
         data-drill-open={sel !== initialIndex ? 'true' : undefined}
         className="ve-pres-solid"
         style={
+          // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
           {
             flex: 1,
             border: '1px solid var(--ve-pres-hair)',
@@ -1307,6 +1328,10 @@ export interface PresentationSlideProps {
   children: ReactNode;
 }
 
+function isStringNode(value: ReactNode): value is string {
+  return Object.prototype.toString.call(value) === '[object String]';
+}
+
 export function PresentationSlide({
   kicker,
   title,
@@ -1320,7 +1345,7 @@ export function PresentationSlide({
   contentMarginTop = 36,
 }: PresentationSlideProps) {
   const deck = useContext(DeckContext);
-  const autoSize = titleSize ?? (typeof title === 'string' && title.length > 44 ? 70 : 76);
+  const autoSize = titleSize ?? (isStringNode(title) && title.length > 44 ? 70 : 76);
   return (
     <section
       data-ve-slide
@@ -1357,6 +1382,7 @@ export function PresentationSlide({
         <h1
           style={{
             fontFamily: 'var(--ve-font-display)',
+            // SAFETY: The CSS custom property resolves to a valid font-weight token at render time; CSSProperties cannot model var() here.
             fontWeight: 'var(--ve-display-weight)' as CSSProperties['fontWeight'],
             fontSize: autoSize,
             lineHeight: 0.96,
@@ -1491,6 +1517,7 @@ function SlideRail({
               style={{
                 margin: 0,
                 fontFamily: 'var(--ve-font-display)',
+                // SAFETY: The CSS custom property resolves to a valid font-weight token at render time; CSSProperties cannot model var() here.
                 fontWeight: 'var(--ve-display-weight)' as CSSProperties['fontWeight'],
                 fontSize: 15,
                 lineHeight: 1,
@@ -1539,7 +1566,7 @@ function SlideRail({
                     background: active ? 'color-mix(in srgb, var(--ve-accent) 14%, transparent)' : 'transparent',
                     color: active ? 'var(--ve-heading)' : 'var(--ve-muted)',
                     transition: 'background-color .2s ease, color .2s ease',
-                  } as CSSProperties
+                  } satisfies CSSProperties
                 }
               >
                 {active ? (
@@ -1744,7 +1771,7 @@ function requestPresentationVerticalNavigation(
 export function PresentationDeck({
   title,
   eyebrow,
-  preset = 'mono-industrial',
+  preset = 'oa-design',
   stageWidth = 1920,
   stageHeight = 1080,
   railAutoCollapseMs = 900,
@@ -1793,8 +1820,8 @@ export function PresentationDeck({
       // Never intercept browser/OS shortcuts (Cmd+Arrow history nav,
       // Ctrl+Space, Alt+Arrow word-jump, …).
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const t = e.target as HTMLElement | null;
-      const closest = t && typeof t.closest === 'function' ? (sel: string) => t.closest(sel) : () => null;
+      const t = getElementTarget(e.target);
+      const closest = (sel: string) => t?.closest(sel) ?? null;
       // Typing context: text fields own EVERY key (arrows move the caret,
       // Space types a space, Home/End jump within the value). Never hijack.
       if (closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) {
@@ -1843,7 +1870,7 @@ export function PresentationDeck({
   const { scale, left, top } = fitStage(avail.w, avail.h, stageWidth, stageHeight);
   const entries = slides.map((slide, i) => {
     const p = slide.props;
-    return p.shortTitle ?? (typeof p.title === 'string' ? p.title : p.kicker) ?? `Slide ${i + 1}`;
+    return p.shortTitle ?? (isStringNode(p.title) ? p.title : p.kicker) ?? `Slide ${i + 1}`;
   });
   const active = slides[index] ?? null;
 

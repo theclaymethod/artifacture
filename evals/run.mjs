@@ -80,7 +80,6 @@ async function checkViolation(fileName, expected) {
   const filePath = join(violationsRoot, fileName);
   const stage = stagesByFixture.get(fileName)
     ?? checksCatalog.find((check) => expected.must_fire.includes(check.id))?.stage;
-  const html = readFileSync(filePath, 'utf8');
   const { result, report, args } = await runVerifier(filePath, stage);
   const fired = failedChecks(report);
   const firedIds = new Set(fired.map((check) => check.id));
@@ -159,7 +158,7 @@ if (missingCatalogFixtures.length) {
 }
 
 async function mapWithConcurrency(items, concurrency, mapper) {
-  const results = new Array(items.length);
+  const results = Array.from({ length: items.length });
   let nextIndex = 0;
   async function worker() {
     while (nextIndex < items.length) {
