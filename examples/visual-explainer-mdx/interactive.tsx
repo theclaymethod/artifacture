@@ -54,8 +54,8 @@ export default function InteractiveExplainer() {
                 key={key}
                 className={`border px-4 py-3 text-left font-mono text-sm uppercase tracking-[0.14em] transition ${
                   key === mode
-                    ? 'border-teal-300 bg-teal-300 text-zinc-950'
-                    : 'border-white/15 bg-white/[0.04] text-zinc-300 hover:border-white/40'
+                    ? 'border-[var(--ve-accent)] bg-[var(--ve-accent)] text-[var(--ve-accent-contrast)]'
+                    : 'border-[color:var(--ve-rule)] text-[var(--ve-muted)] hover:border-[var(--ve-accent)]'
                 }`}
                 onClick={() => setMode(key)}
                 type="button"
@@ -64,11 +64,11 @@ export default function InteractiveExplainer() {
               </button>
             ))}
           </div>
-          <div className="border border-white/15 bg-white/[0.04] p-6">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-teal-300">selected path</p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-normal text-white">{selected.label}</h2>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">{selected.body}</p>
-            <p className="mt-6 font-mono text-sm text-zinc-500">{selected.output}</p>
+          <div className="border-y border-[color:var(--ve-rule)] py-6">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--ve-accent)]">selected path</p>
+            <h2 className="mt-4 text-4xl font-semibold tracking-normal text-[var(--ve-heading)]">{selected.label}</h2>
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--ve-muted)]">{selected.body}</p>
+            <p className="mt-6 font-mono text-sm text-[var(--ve-faint)]">{selected.output}</p>
           </div>
         </div>
       </Section>
