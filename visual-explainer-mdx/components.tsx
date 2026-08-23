@@ -229,14 +229,14 @@ export function ExplainerShell({
   return (
     <main className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
       <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
-        <header className="ve-shell-header grid gap-6 border-b border-[color:var(--ve-rule)] pb-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <header className="ve-shell-header grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
             <h1 className="max-w-5xl text-5xl leading-[0.95] tracking-normal text-[var(--ve-heading)] sm:text-7xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
               {title}
             </h1>
             {summary ? <p className="mt-6 max-w-3xl text-lg leading-8 text-[var(--ve-muted)]">{summary}</p> : null}
           </div>
-          <aside className="ve-shell-source-card self-end rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5">
+          <aside className="ve-shell-source-card self-end">
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">source contract</p>
             <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">
               Authored as MDX or TSX. Exported as generated standalone HTML.
@@ -262,16 +262,16 @@ export function Section({ title, children }: SectionProps) {
 }
 
 export function Callout({ children }: { children: ReactNode }) {
-  return <div className="ve-callout rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5 text-[var(--ve-text)]">{children}</div>;
+  return <div className="ve-callout text-[var(--ve-text)]">{children}</div>;
 }
 
 export function Pipeline({ steps }: PipelineProps) {
   return (
-    <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <ol className="ve-pipeline grid md:grid-cols-2 xl:grid-cols-4">
       {steps.map((step, index) => {
         const item = normalizePipelineStep(step);
         return (
-          <li key={`${item.title}-${index}`} className="ve-pipeline-item min-w-0 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5">
+          <li key={`${item.title}-${index}`} className="ve-pipeline-item min-w-0">
             <div className="text-xs text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{String(index + 1).padStart(2, '0')}</div>
             <h3 className="mt-4 text-xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{item.title}</h3>
             {item.body ? <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">{item.body}</p> : null}
@@ -322,9 +322,9 @@ export function DecisionMatrix({ rows }: DecisionMatrixProps) {
 
 export function RiskLedger({ risks }: RiskLedgerProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="ve-risk-ledger grid md:grid-cols-3">
       {risks.map((risk) => (
-        <article data-ve-risk-level={risk.level ?? 'medium'} key={risk.risk} className="ve-risk-card rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5">
+        <article data-ve-risk-level={risk.level ?? 'medium'} key={risk.risk} className="ve-risk-card">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">{risk.level ?? 'medium'}</p>
           <h3 className="mt-3 text-lg tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{risk.risk}</h3>
           <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">

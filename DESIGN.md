@@ -117,16 +117,16 @@ components:
 
 **Creative North Star: "The Quiet Instrument"**
 
-The Quiet Instrument treats every explainer as a precise working artifact: calm enough to study, composed enough to trust, and visually articulate without performing for attention. A quiet gray canvas holds a small number of generous white plates; near-black ink, disciplined spacing, and a single restrained blue carry the hierarchy.
+The Quiet Instrument treats every explainer as a precise working artifact: calm enough to study, composed enough to trust, and visually articulate without performing for attention. A quiet gray canvas supports open editorial sections; near-black ink, disciplined spacing, hairline rules, and a single restrained blue carry the hierarchy.
 
 The system is editorial and tool-native rather than decorative. It favors readable measures, immediate chrome, and self-contained technical regions that remain useful from mobile to desktop. OA Design is the default reference for interaction and surface grammar, while the existing visual-explainer token contract keeps every export portable.
 
 **Key Characteristics:**
 
-- Quiet gray canvas with white continuous-curvature plates.
+- Quiet gray canvas with open, rule-separated editorial sections.
 - Near-black ink with restrained blue reserved for focal action and path.
 - Inter Tight hierarchy capped at medium weight, with Geist Mono for technical labels.
-- Generous whitespace, hairline rules, and only two established depth levels.
+- Generous whitespace, hairline rules, and containers reserved for bounded technical content.
 - Responsive stacking and locally scrollable dense regions on a clean, undecorated canvas.
 
 ## Colors

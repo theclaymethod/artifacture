@@ -14,7 +14,7 @@ Artifacture's default explainer preset follows [OpenLabs' oa-design](https://git
 
 ## Explainer adaptation
 
-Explainers are Read surfaces. Keep the body measure readable, render the title and shell immediately, and group content into a small number of white plates separated by the grey stage. Avoid rules between page sections; the gap is the divider. Tables, code, diagrams, and dense lists may scroll inside their own surface, while the page root never scrolls sideways.
+Explainers are Read surfaces. Keep the body measure readable, render the title and shell immediately, and let page-level content sit in open editorial sections separated by whitespace and hairline rules. Reserve white plates for bounded technical regions such as tables, code, diagrams, and review tools. Repeated steps, risks, and summaries use ruled ledgers instead of nested cards. Dense regions may scroll inside their own surface, while the page root never scrolls sideways.
 
 Use semantic colors only on text, dots, or the focal path. A status must include a label; color never carries meaning alone. Keep headings at 500 or below and use size, spacing, and ink opacity for hierarchy.
 

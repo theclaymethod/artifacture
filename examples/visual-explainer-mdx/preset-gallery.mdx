@@ -33,7 +33,7 @@ export default function PresetGallery() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {presets.map((preset) => (
             <article
-              className="min-w-0 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-5"
+              className="ve-preset-card min-w-0"
               data-ve-default-preset={preset === 'oa-design' ? 'true' : undefined}
               key={preset}
             >
