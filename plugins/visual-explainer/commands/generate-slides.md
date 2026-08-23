@@ -25,7 +25,7 @@ Follow the visual-explainer skill workflow and the card. Escalate to `./referenc
 
 If the user hasn't specified and the content is ambiguous (could work as either), ask via AskUserQuestion: "Vertical slide deck, horizontal magazine, or video (MP4)?" See `./references/clarify.md` for the tiered ask policy — slides are a high-cost command and benefit from confirmation.
 
-**Aesthetic.** Pick from the 4 slide presets in slide-patterns.md (Midnight Editorial, Warm Signal, Terminal Mono, Swiss Clean) or use the default Mono-Industrial. Vary from previous decks. Commit to one direction and carry it through every slide.
+**Aesthetic.** Pick from the 4 slide presets in slide-patterns.md (Midnight Editorial, Warm Signal, Terminal Mono, Swiss Clean) or use the default OA Design. Read `references/oa-design.md`, then commit to one direction and carry it through every slide.
 
 **Narrative structure.** Slides have a temporal dimension — compose a story arc, not a list of sections. Start with impact (title/cover), build context, deep dive (content, diagrams, data), resolve (summary/next steps/back cover). Plan the sequence and assign a layout per slide before writing HTML.
 

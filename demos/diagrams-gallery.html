@@ -205,9 +205,6 @@
     <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-label="Three-tier architecture for the ingest pipeline">
       <defs>
-        <pattern id="dots-01" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
-        </pattern>
         <marker id="arr-01" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
         </marker>
@@ -217,7 +214,6 @@
       </defs>
 
       <rect width="1000" height="660" fill="var(--paper)" />
-      <rect width="1000" height="600" fill="url(#dots-01)" opacity="0.55" />
 
       <!--
         Layout (4px grid):
@@ -407,9 +403,6 @@
     <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-label="Retry decision flowchart">
       <defs>
-        <pattern id="dots-02" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
-        </pattern>
         <marker id="arr-02" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
         </marker>
@@ -419,7 +412,6 @@
       </defs>
 
       <rect width="1000" height="660" fill="var(--paper)" />
-      <rect width="1000" height="600" fill="url(#dots-02)" opacity="0.55" />
 
       <!-- ====== ARROWS FIRST ====== -->
       <!-- start -> isTransient? -->
@@ -566,9 +558,6 @@
     <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-label="Sequence diagram between client, gateway, validator, and store">
       <defs>
-        <pattern id="dots-03" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
-        </pattern>
         <marker id="arr-03" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
         </marker>
@@ -578,7 +567,6 @@
       </defs>
 
       <rect width="1000" height="660" fill="var(--paper)" />
-      <rect width="1000" height="600" fill="url(#dots-03)" opacity="0.55" />
 
       <!-- Lifelines (dashed vertical) behind everything else -->
       <line x1="160" y1="128" x2="160" y2="540" stroke="var(--rule-solid)" stroke-width="1" stroke-dasharray="4 4" />
@@ -698,13 +686,9 @@
     <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-label="Latency vs cost quadrant prioritization">
       <defs>
-        <pattern id="dots-04" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
-        </pattern>
       </defs>
 
       <rect width="1000" height="660" fill="var(--paper)" />
-      <rect width="1000" height="600" fill="url(#dots-04)" opacity="0.55" />
 
       <!-- Top-right (do first) quadrant tint -->
       <rect x="500" y="100" width="400" height="200" fill="var(--accent-tint)" />
@@ -829,13 +813,9 @@
     <svg class="diagram" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-label="Event conversion funnel">
       <defs>
-        <pattern id="dots-05" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.9" fill="var(--ink)" opacity="0.10" />
-        </pattern>
       </defs>
 
       <rect width="1000" height="660" fill="var(--paper)" />
-      <rect width="1000" height="600" fill="url(#dots-05)" opacity="0.55" />
 
       <!--
         Funnel widths proportional to conversion.

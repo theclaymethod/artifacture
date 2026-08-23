@@ -32,8 +32,12 @@ function postPreview(preview, session, endpoint, body, { headers = {} } = {}) {
       "Sec-Fetch-Site": "same-origin",
       ...headers,
     },
-    body: typeof body === "string" ? body : JSON.stringify(body),
+    body: isString(body) ? body : JSON.stringify(body),
   });
+}
+
+function isString(value) {
+  return value !== null && Object(value) !== value && String(value) === value;
 }
 
 test("developer preview keeps the persistent chrome focused on the core workflow", async () => {
@@ -127,7 +131,7 @@ test("publisher output reports generated HTML destinations", () => {
 test("injectBridge loads before artifact scripts without touching the saved source", () => {
   const result = injectBridge("<!doctype html><body><h1>Hello</h1></body>", "abc 123");
   assert.match(result, /<h1>Hello<\/h1><script src="\/__ve\/bridge\.js\?session=abc%20123"><\/script>\n<\/body>/);
-  const withHead = injectBridge("<html><head><script>window.app = true<\/script></head></html>", "safe");
+  const withHead = injectBridge("<html><head><script>window.app = true</script></head></html>", "safe");
   assert.match(withHead, /<head><script src="\/__ve\/bridge\.js\?session=safe"><\/script>\n<script>window\.app/);
 });
 

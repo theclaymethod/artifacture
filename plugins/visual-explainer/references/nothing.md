@@ -1,6 +1,6 @@
 # Nothing — Instrument-Panel Aesthetic
 
-A named alternative aesthetic for visual-explainer. Use when the user asks for "nothing", "nothing design", "Nothing OS", an "instrument-panel" feel, or a dot-matrix / Ndot look. **Not the default** — the default remains Mono-Industrial. Select Nothing only when explicitly requested.
+A named alternative aesthetic for visual-explainer. Use when the user asks for "nothing", "nothing design", "Nothing OS", an "instrument-panel" feel, or an Ndot look. **Not the default** — the default is OA Design. Select Nothing only when explicitly requested, and omit grid or dot-field backgrounds.
 
 Source: [dominikmartn/nothing-design-skill](https://github.com/dominikmartn/nothing-design-skill) (SHA `74affbb`). The tokens, motifs, and constraints below are lifted directly from that repo.
 
@@ -65,7 +65,7 @@ The token names match across modes. Values flip.
   --surface:         #111111;   /* cards, raised chrome */
   --surface-raised:  #1A1A1A;   /* dropdowns, modals, elevated panels */
   --border:          #222222;   /* default hairline */
-  --border-visible:  #333333;   /* emphasized borders, dot-grid dots */
+  --border-visible:  #333333;   /* emphasized borders */
 
   --text-disabled:   #666666;
   --text-secondary:  #999999;
@@ -167,20 +167,9 @@ Discrete rectangular blocks with 2px gaps. Square ends — no `border-radius`. F
 .seg--off { background: var(--border); }
 ```
 
-### 4.4 Dot-grid backgrounds
+### 4.4 Clean fields
 
-Radial-gradient pattern, 12–16px grid, very low opacity. Used on hero sections and empty states to imply the underlying coordinate system.
-
-```css
-.dot-grid {
-  background-image: radial-gradient(circle, var(--border-visible) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-.dot-grid-subtle {
-  background-image: radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
-  background-size: 12px 12px;
-}
-```
+Use flat black or warm off-white fields. Dot grids, graph paper, scanlines, and other coordinate-pattern backgrounds are intentionally removed from explainers; the instrument character comes from typography, segmented data, and bracket notation.
 
 ### 4.5 Bracket-notation UI states
 
@@ -320,7 +309,7 @@ Pick Nothing when:
 Do **not** pick Nothing when:
 - The content is editorial / essay-first (use Editorial or Paper/ink)
 - The content needs a different named brand system
-- The user hasn't named it — default stays Mono-Industrial
+- The user hasn't named it — default stays OA Design
 
 ---
 

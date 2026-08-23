@@ -46,7 +46,7 @@ async function main() {
 
   try {
     const mod = await server.ssrLoadModule(viteFsPath(source));
-    if (typeof mod.default !== 'function') throw new Error('Static source must export a default React component.');
+    if (!(mod.default instanceof Function)) throw new Error('Static source must export a default React component.');
     const markup = renderToStaticMarkup(React.createElement(mod.default));
     const html = `<!doctype html>\n${markup}\n`;
     await fs.mkdir(path.dirname(out), { recursive: true });

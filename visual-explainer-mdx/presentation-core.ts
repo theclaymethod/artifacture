@@ -58,8 +58,8 @@ export function clampSlideIndex(next: number, count: number): number {
 export const DRILL_DISMISS_GUARD_SELECTOR =
   'button, a, input, select, textarea, [data-interactive], [data-drill-target]';
 
-interface ClosestLike {
-  closest?: (selector: string) => unknown;
+interface DrillDismissTarget {
+  closest?: (selector: string) => Element | null;
 }
 
 /**
@@ -67,8 +67,8 @@ interface ClosestLike {
  * Accepts anything Element-like (needs only .closest) so it is testable with
  * linkedom and reusable outside React.
  */
-export function shouldDismissDrillSheet(target: ClosestLike | null | undefined): boolean {
-  if (!target || typeof target.closest !== 'function') return true;
+export function shouldDismissDrillSheet(target: DrillDismissTarget | null | undefined): boolean {
+  if (!target || !(target.closest instanceof Function)) return true;
   return !target.closest(DRILL_DISMISS_GUARD_SELECTOR);
 }
 

@@ -339,7 +339,7 @@ async function waitForPageSettled(page, ctx, options = {}) {
         const mermaids = [...document.querySelectorAll('.mermaid, pre.mermaid, [data-ve-mermaid-shell]')];
         return mermaids.length > 0 && mermaids.every((el) => el.matches('svg') || el.querySelector('svg'));
       }, null, { timeout });
-    } catch (error) {
+    } catch {
       mermaidError = `Mermaid rendering did not complete within ${timeout}ms; every Mermaid container must contain an SVG`;
     }
   }
@@ -359,7 +359,7 @@ async function waitForPageSettled(page, ctx, options = {}) {
   return { mermaidError };
 }
 
-async function collectBrowserMetrics(runMeta) {
+async function collectBrowserMetrics() {
   const win = window;
   const doc = document;
   const docEl = doc.documentElement;
@@ -368,7 +368,7 @@ async function collectBrowserMetrics(runMeta) {
 
   const px = (value) => Number.parseFloat(value || '0') || 0;
   const text = (el) => (el.textContent || '').replace(/\s+/g, ' ').trim();
-  const className = (el) => typeof el.className === 'string' ? el.className : String(el.getAttribute('class') || '');
+  const className = (el) => String(el.className?.baseVal ?? el.getAttribute('class') ?? '');
   const tag = (el) => el.tagName.toLowerCase();
   const compact = (el) => ({
     tag: tag(el),
@@ -572,7 +572,7 @@ function selectorFor(el) {
   let cur = el;
   while (cur && cur.nodeType === 1 && parts.length < 4) {
     let part = cur.tagName.toLowerCase();
-    const cls = typeof cur.className === 'string' ? cur.className.trim().split(/\s+/).filter(Boolean).slice(0, 2) : [];
+    const cls = String(cur.className?.baseVal ?? cur.getAttribute('class') ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2);
     if (cls.length) part += `.${cls.join('.')}`;
     const parent = cur.parentElement;
     if (parent) {
@@ -727,7 +727,7 @@ function isUpperLabel(value) {
 }
 
 function classNameForMetric(el) {
-  return typeof el.className === 'string' ? el.className : String(el.getAttribute('class') || '');
+  return String(el.className?.baseVal ?? el.getAttribute('class') ?? '');
 }
 
 function matchedCssText(el) {
@@ -990,7 +990,7 @@ function arrowEndpointPoint(arrow, endpoint = 'end') {
   if (tag === 'line') {
     const suffix = endpoint === 'start' ? '1' : '2';
     point = { x: Number(arrow.getAttribute(`x${suffix}`)), y: Number(arrow.getAttribute(`y${suffix}`)) };
-  } else if (typeof arrow.getTotalLength === 'function' && typeof arrow.getPointAtLength === 'function') {
+  } else if ('getTotalLength' in arrow && 'getPointAtLength' in arrow) {
     const len = arrow.getTotalLength();
     point = Number.isFinite(len) && len >= 0 ? arrow.getPointAtLength(endpoint === 'start' ? 0 : len) : null;
   } else if ((tag === 'polyline' || tag === 'polygon') && arrow.points?.numberOfItems) {

@@ -153,7 +153,7 @@
   function handleHostMessage(event) {
     if (event.source !== window.parent) return;
     const message = event.data;
-    if (!isRecord(message) || message.source !== TARGET_SOURCE || message.session !== session || typeof message.type !== "string") return;
+    if (!isRecord(message) || message.source !== TARGET_SOURCE || message.session !== session || !isString(message.type)) return;
     switch (message.type) {
       case "set-mode":
         setMode(message.mode);
@@ -190,7 +190,7 @@
         applyVisibleText(message.from, message.to);
         break;
       case "set-location":
-        if (typeof message.locationHash === "string" && location.hash !== message.locationHash) location.hash = message.locationHash;
+        if (isString(message.locationHash) && location.hash !== message.locationHash) location.hash = message.locationHash;
         break;
     }
   }
@@ -494,7 +494,7 @@
   }
 
   function applyVisibleText(from, to) {
-    if (typeof from !== "string" || typeof to !== "string") return;
+    if (!isString(from) || !isString(to)) return;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
     let element = walker.currentNode;
     while (element) {
@@ -703,6 +703,16 @@
   }
 
   function isRecord(value) {
-    return value !== null && typeof value === "object" && !Array.isArray(value);
+    if (value === null || Object(value) !== value || Array.isArray(value)) return false;
+    try {
+      Function.prototype.toString.call(value);
+      return false;
+    } catch {
+      return true;
+    }
+  }
+
+  function isString(value) {
+    return value !== null && Object(value) !== value && String(value) === value;
   }
 })();

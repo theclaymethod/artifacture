@@ -1,5 +1,4 @@
 import React from 'react';
-import type { VisualPreset } from '../../visual-explainer-mdx/components';
 
 type PresetCopy = {
   title: string;
@@ -9,7 +8,26 @@ type PresetCopy = {
   checks: string[];
 };
 
-const presetCopy: Record<VisualPreset, PresetCopy> = {
+type PresetCopyMap = {
+  'oa-design': PresetCopy;
+  'mono-industrial': PresetCopy;
+  nothing: PresetCopy;
+  blueprint: PresetCopy;
+  editorial: PresetCopy;
+  'paper-ink': PresetCopy;
+  terminal: PresetCopy;
+};
+
+type PresetKey = keyof PresetCopyMap;
+
+const presetCopy = {
+  'oa-design': {
+    title: 'Artifact Review',
+    summary: 'White plates, ink-derived neutrals, continuous-curvature surfaces, and one restrained blue focal action.',
+    metric: '06',
+    label: 'verified surfaces',
+    checks: ['Source ready', 'Structure clear', 'Diagram clean', 'Evidence attached'],
+  },
   'mono-industrial': {
     title: 'Request Ledger',
     summary: 'Swiss, monochrome hierarchy. Spacing and type carry the explainer before color appears.',
@@ -52,22 +70,22 @@ const presetCopy: Record<VisualPreset, PresetCopy> = {
     label: 'exit code',
     checks: ['npm run ve:check', 'npm run ve:export', 'browser verify', 'archive receipt'],
   },
-};
+} satisfies PresetCopyMap;
 
-const queryPreset = new URLSearchParams(window.location.search).get('preset') as VisualPreset | null;
-const filePreset = window.location.pathname.match(/preset-artifact-([a-z-]+)\.html$/)?.[1] as VisualPreset | undefined;
-const selected: VisualPreset =
-  queryPreset && queryPreset in presetCopy
-    ? queryPreset
-    : filePreset && filePreset in presetCopy
-      ? filePreset
-      : 'mono-industrial';
+function isPresetKey(value: string | null | undefined): value is PresetKey {
+  return value !== null && value !== undefined && Object.hasOwn(presetCopy, value);
+}
+
+const queryPreset = new URLSearchParams(window.location.search).get('preset');
+const filePreset = window.location.pathname.match(/preset-artifact-([a-z-]+)\.html$/)?.[1];
+const selected: PresetKey = isPresetKey(queryPreset) ? queryPreset : isPresetKey(filePreset) ? filePreset : 'oa-design';
 const copy = presetCopy[selected];
 
 export default function PresetArtifact() {
   return (
     <main className={`ve-output ve-output--${selected}`} data-ve-preset={selected}>
       <div className="ve-output-inner">
+        {selected === 'oa-design' ? <OaArtifact copy={copy} /> : null}
         {selected === 'nothing' ? <NothingArtifact copy={copy} /> : null}
         {selected === 'mono-industrial' ? <MonoArtifact copy={copy} /> : null}
         {selected === 'blueprint' ? <BlueprintArtifact copy={copy} /> : null}
@@ -76,6 +94,23 @@ export default function PresetArtifact() {
         {selected === 'terminal' ? <TerminalArtifact copy={copy} /> : null}
       </div>
     </main>
+  );
+}
+
+function OaArtifact({ copy }: { copy: PresetCopy }) {
+  return (
+    <>
+      <Header copy={copy} eyebrow="oa-design" />
+      <section className="ve-oa-plate ve-ledger">
+        <div>
+          <p className="ve-kicker">Review status</p>
+          <div className="ve-display-metric">{copy.metric}</div>
+          <p className="ve-muted">{copy.label}</p>
+        </div>
+        <ProcessList items={copy.checks} />
+      </section>
+      <FooterRule />
+    </>
   );
 }
 

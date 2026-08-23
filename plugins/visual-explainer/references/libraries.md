@@ -78,7 +78,7 @@ Always use `theme: 'base'` — it's the only theme where all `themeVariables` ar
 
 **FORBIDDEN in Mermaid themeVariables:** `#8b5cf6`, `#7c3aed`, `#a78bfa` (indigo/violet), `#d946ef` (fuchsia). Use teal, slate, amber, emerald, or colors from your page's palette.
 
-### Mono-Industrial Mermaid Theme (default aesthetic)
+### Mono-Industrial Mermaid Theme (named alternative)
 
 When generating output in the Mono-Industrial aesthetic (see `./mono-industrial.md` for the full system), Mermaid renders in grayscale only. Color is reserved for status (success / warning / error) and applied via `classDef` to specific edges or nodes that semantically represent those states — never as a role-color palette for the diagram as a whole.
 

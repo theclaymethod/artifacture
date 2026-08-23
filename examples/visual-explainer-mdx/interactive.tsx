@@ -21,6 +21,12 @@ const modes = {
 
 type Mode = keyof typeof modes;
 
+function isMode(value: string): value is Mode {
+  return Object.hasOwn(modes, value);
+}
+
+const modeKeys = Object.keys(modes).filter(isMode);
+
 export default function InteractiveExplainer() {
   const [mode, setMode] = useState<Mode>('mdx');
   const selected = modes[mode];
@@ -43,7 +49,7 @@ export default function InteractiveExplainer() {
       <Section kicker="interaction" title="Mode Switcher">
         <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div className="flex flex-col gap-3">
-            {(Object.keys(modes) as Mode[]).map((key) => (
+            {modeKeys.map((key) => (
               <button
                 key={key}
                 className={`border px-4 py-3 text-left font-mono text-sm uppercase tracking-[0.14em] transition ${

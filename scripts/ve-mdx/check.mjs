@@ -60,7 +60,7 @@ function runStatic(args) {
 // parser would, so body.textContent would silently read 0 for those roots.
 function documentTextLength(html) {
   const { document } = parseHTML(html);
-  for (const el of [...document.querySelectorAll('script, style')]) el.remove();
+    for (const el of document.querySelectorAll('script, style')) el.remove();
   const text = (document.documentElement?.textContent ?? '').replace(/\s+/g, ' ').trim();
   return text.length;
 }

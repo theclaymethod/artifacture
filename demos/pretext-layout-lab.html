@@ -839,13 +839,7 @@ return {
 
     svg.setAttribute("viewBox", `0 0 ${PANEL_WIDTH} ${panelHeight}`);
     svg.innerHTML = `
-      <defs>
-        <pattern id="${mode}-dots" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="1" fill="var(--fg)" opacity="0.08"></circle>
-        </pattern>
-      </defs>
       <rect width="${PANEL_WIDTH}" height="${panelHeight}" rx="28" fill="var(--bg-2)"></rect>
-      <rect width="${PANEL_WIDTH}" height="${panelHeight}" rx="28" fill="url(#${mode}-dots)"></rect>
       <text
         x="${PANEL_PADDING_SIDE}"
         y="34"

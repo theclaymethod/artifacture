@@ -125,9 +125,9 @@ Drop that markup wherever the demo belongs in the explainer — typically inside
 
 Match the demo's visual presentation to the page's aesthetic direction.
 
-- **Mono-Industrial (default):** 8px corners, no border, no shadow. Let the video sit flush like a diagram. Optionally caption with a Space Mono ALL CAPS label above (e.g., `DEMO · LOGIN FLOW`).
+- **OA Design (default):** continuous-curvature corners, one ink-derived border, and the resting `0 1px 2px rgb(0 0 0 / 0.06)` shadow. Let the video sit as one white plate on the quiet grey stage.
 - **Editorial:** Slight rounded corners (12–16px), subtle border in the page's muted earth tone, generous whitespace above and below.
-- **Blueprint:** Sharp corners, 1px border in slate/blue, inset slightly so the drawing-grid background reads around the edges.
+- **Blueprint:** Sharp corners, 1px border in slate/blue, and precise spacing on a flat canvas.
 - **Paper/ink:** Warm cream frame, no border, optional hand-drawn annotation overlay (SVG) pointing at the focal element.
 - **IDE-inspired / terminal:** 0–4px corners, monospace caption, optional filename-style chrome above (`demo.webm`).
 

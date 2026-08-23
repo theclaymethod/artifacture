@@ -659,21 +659,9 @@
     `;
   }
 
-  function patternDefs(id) {
+  function baseCanvas(width, height) {
     return `
-      <defs>
-        <pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="1" fill="var(--fg)" opacity="0.08"></circle>
-        </pattern>
-      </defs>
-    `;
-  }
-
-  function baseCanvas(width, height, patternId) {
-    return `
-      ${patternDefs(patternId)}
       <rect width="${width}" height="${height}" rx="28" fill="var(--bg-2)"></rect>
-      <rect width="${width}" height="${height}" rx="28" fill="url(#${patternId})"></rect>
     `;
   }
 
@@ -701,7 +689,7 @@
     }).join("");
 
     svg.innerHTML = `
-      ${baseCanvas(720, Math.max(620, y + 20), "stack-dots")}
+      ${baseCanvas(720, Math.max(620, y + 20))}
       ${connectors}
       ${nodes.map((node) => boxNode(node.x, node.y, node.block, { kicker: `STEP 0${node.index + 1}`, stroke: node.index === 2 ? "var(--ok)" : "var(--rule-strong)" })).join("")}
     `;
@@ -727,7 +715,7 @@
     const fixedY = 372;
 
     svg.innerHTML = `
-      ${baseCanvas(720, 520, "flowchart-dots")}
+      ${baseCanvas(720, 520)}
       <path d="M ${startX + start.width / 2} ${startY + start.height} L ${chooseX + choose.width / 2} ${chooseY}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
       <path d="M ${chooseX + choose.width / 2} ${chooseY + choose.height} L ${decisionCx} ${decisionCy - decision.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
       <path d="M ${decisionCx - decision.width / 2} ${decisionCy} L ${measuredX + measured.width} ${measuredY + measured.height / 2}" fill="none" stroke="var(--ok)" stroke-width="2" />
@@ -754,7 +742,7 @@
     const y = 118;
 
     svg.innerHTML = `
-      ${baseCanvas(720, 320, "edge-label-dots")}
+      ${baseCanvas(720, 320)}
       <path d="M ${x1 + left.width} ${y + left.height / 2} L ${x2} ${y + middle.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
       <path d="M ${x2 + middle.width} ${y + middle.height / 2} L ${x3} ${y + right.height / 2}" fill="none" stroke="var(--rule-strong)" stroke-width="2" />
       ${boxNode(x1, y, left, { kicker: "01" })}
@@ -800,7 +788,7 @@
     const right = measureBlock("Rendered figure", 150, { minWidth: 150, minHeight: 54 });
 
     svg.innerHTML = `
-      ${baseCanvas(720, 360, "legend-dots")}
+      ${baseCanvas(720, 360)}
       <line x1="40" y1="278" x2="680" y2="278" stroke="var(--rule)" stroke-width="1" />
       <path d="M 180 132 L 300 132" fill="none" stroke="var(--accent)" stroke-width="2" />
       <path d="M 420 132 L 540 132" fill="none" stroke="var(--rule-strong)" stroke-width="2" stroke-dasharray="6 6" />
@@ -838,7 +826,7 @@
     const rightY = 226;
 
     svg.innerHTML = `
-      ${baseCanvas(720, 430, "callout-dots")}
+      ${baseCanvas(720, 430)}
       <path d="M ${leftX + leftCallout.width} ${leftY + leftCallout.height - 24} C 240 130, 250 150, ${boxX} ${boxY + 30}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4" />
       <path d="M ${boxX + main.width} ${boxY + 42} C 520 170, 520 230, ${rightX} ${rightY + 26}" fill="none" stroke="var(--accent-2)" stroke-width="1.5" stroke-dasharray="4 4" />
       <circle cx="${boxX}" cy="${boxY + 30}" r="3" fill="var(--muted)" />
@@ -870,7 +858,7 @@
     const canvasHeight = Math.max(height, y + 18);
     svg.setAttribute("viewBox", `0 0 ${width} ${canvasHeight}`);
     svg.innerHTML = `
-      ${baseCanvas(width, canvasHeight, `${svgId}-dots`)}
+      ${baseCanvas(width, canvasHeight)}
       ${nodes.slice(0, -1).map((node, index) => {
         const next = nodes[index + 1];
         const x = node.x + node.block.width / 2;

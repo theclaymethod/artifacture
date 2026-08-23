@@ -1,6 +1,6 @@
 import { codeToHtml } from 'shiki';
 
-const diagramComponents = new Set(['DiagramCanvas', 'FlowDiagram']);
+const diagramComponents = new Set(['DiagramCanvas']);
 // Exported so scripts/ve-mdx/check.mjs can assert this set stays in sync with
 // components.tsx's actual named exports (roster-sync guard, plan 008 step 5).
 // Contents are unchanged — this only adds visibility, not a refactor of how
@@ -12,7 +12,6 @@ export const sharedComponents = new Set([
   'Pipeline',
   'DecisionMatrix',
   'RiskLedger',
-  'FlowDiagram',
   'DiagramCanvas',
   'CodeBlock',
   'DiffBlock',
@@ -124,8 +123,8 @@ export function collectIntegrityDiagnostics(code, id = 'source') {
     }
     if (patchExpr) {
       if (!isLiteralExpression(patchExpr)) continue;
-      const patch = evaluateLiteral(patchExpr, id, 'DiffBlock.patch', diagnostics);
-      if (typeof patch !== 'string') {
+      const patch = readLiteralText(evaluateLiteral(patchExpr, id, 'DiffBlock.patch', diagnostics));
+      if (patch === null) {
         diagnostics.push(error(id, 'DiffBlock', 'patch must be a string'));
         continue;
       }
@@ -135,9 +134,9 @@ export function collectIntegrityDiagnostics(code, id = 'source') {
       }
     } else if (beforeExpr && afterExpr) {
       if (!isLiteralExpression(beforeExpr) || !isLiteralExpression(afterExpr)) continue;
-      const before = evaluateLiteral(beforeExpr, id, 'DiffBlock.before', diagnostics);
-      const after = evaluateLiteral(afterExpr, id, 'DiffBlock.after', diagnostics);
-      if (typeof before !== 'string' || typeof after !== 'string') {
+      const before = readLiteralText(evaluateLiteral(beforeExpr, id, 'DiffBlock.before', diagnostics));
+      const after = readLiteralText(evaluateLiteral(afterExpr, id, 'DiffBlock.after', diagnostics));
+      if (before === null || after === null) {
         diagnostics.push(error(id, 'DiffBlock', 'before and after must be strings'));
       } else if (before === after) {
         diagnostics.push(error(id, 'DiffBlock', 'before and after must differ'));
@@ -370,6 +369,10 @@ function isLiteralExpression(expr) {
   return trimmed.startsWith('[') || trimmed.startsWith('{') || trimmed.startsWith('`') || trimmed.startsWith('"') || trimmed.startsWith("'");
 }
 
+function readLiteralText(value) {
+  return Object.prototype.toString.call(value) === '[object String]' ? value : null;
+}
+
 function skipLiteralWhitespace(state) {
   while (state.pos < state.input.length && /\s/.test(state.input[state.pos])) state.pos += 1;
 }
@@ -578,8 +581,8 @@ function computeSimpleLayout(nodes) {
     id: node.id,
     x: padding.left + index * 270,
     y: padding.top,
-    width: node.shape === 'dot' ? 42 : Math.max(150, Math.min(270, String(node.label ?? '').length * 12 + 70, String(node.detail ?? '').length * 7 + 56)),
-    height: node.shape === 'dot' ? 42 : 94,
+    width: node['shape'] === 'dot' ? 42 : Math.max(150, Math.min(270, String(node.label ?? '').length * 12 + 70, String(node.detail ?? '').length * 7 + 56)),
+    height: node['shape'] === 'dot' ? 42 : 94,
   }));
 }
 
@@ -594,9 +597,9 @@ async function injectCodeBlockHtml(code) {
     const languageExpr = getPropExpression(tag, 'language');
     if (!codeExpr || !languageExpr) continue;
     const diagnostics = [];
-    const rawCode = evaluateLiteral(codeExpr, 'CodeBlock', 'code', diagnostics);
-    const language = evaluateLiteral(languageExpr, 'CodeBlock', 'language', diagnostics);
-    if (diagnostics.length || typeof rawCode !== 'string' || typeof language !== 'string') continue;
+    const rawCode = readLiteralText(evaluateLiteral(codeExpr, 'CodeBlock', 'code', diagnostics));
+    const language = readLiteralText(evaluateLiteral(languageExpr, 'CodeBlock', 'language', diagnostics));
+    if (diagnostics.length || rawCode === null || language === null) continue;
     const html = await highlightCode(rawCode, language);
     const injected = tag.replace(/\s*\/>$/, ` html={${JSON.stringify(html)}} />`);
     output = output.replace(tag, injected);
@@ -615,12 +618,12 @@ async function injectDiffBlockRows(code) {
     if (!rows) continue;
     const languageExpr = getPropExpression(tag, 'language');
     const diagnostics = [];
-    const language = languageExpr ? evaluateLiteral(languageExpr, 'DiffBlock', 'language', diagnostics) : 'text';
+    const language = languageExpr ? readLiteralText(evaluateLiteral(languageExpr, 'DiffBlock', 'language', diagnostics)) ?? 'text' : 'text';
     const highlightedRows = [];
     for (const row of rows) {
       highlightedRows.push({
         ...row,
-        html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, typeof language === 'string' ? language : 'text'),
+        html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, language),
       });
     }
     const injected = tag.replace(/\s*\/>$/, ` rows={${JSON.stringify(highlightedRows)}} />`);
@@ -635,15 +638,15 @@ function buildRowsFromDiffTag(tag) {
   const afterExpr = getPropExpression(tag, 'after');
   const diagnostics = [];
   if (patchExpr) {
-    const patch = evaluateLiteral(patchExpr, 'DiffBlock', 'patch', diagnostics);
-    if (diagnostics.length || typeof patch !== 'string') return null;
+    const patch = readLiteralText(evaluateLiteral(patchExpr, 'DiffBlock', 'patch', diagnostics));
+    if (diagnostics.length || patch === null) return null;
     const parsed = parseUnifiedDiff(patch);
     return parsed.errors.length ? null : parsed.rows;
   }
   if (beforeExpr && afterExpr) {
-    const before = evaluateLiteral(beforeExpr, 'DiffBlock', 'before', diagnostics);
-    const after = evaluateLiteral(afterExpr, 'DiffBlock', 'after', diagnostics);
-    if (diagnostics.length || typeof before !== 'string' || typeof after !== 'string') return null;
+    const before = readLiteralText(evaluateLiteral(beforeExpr, 'DiffBlock', 'before', diagnostics));
+    const after = readLiteralText(evaluateLiteral(afterExpr, 'DiffBlock', 'after', diagnostics));
+    if (diagnostics.length || before === null || after === null) return null;
     return diffLines(before, after);
   }
   return null;
@@ -756,10 +759,10 @@ function diffLines(before, after) {
 function assertJsonSerializable(value) {
   const seen = new Set();
   function visit(item, path) {
-    if (item === undefined || typeof item === 'function' || typeof item === 'symbol' || typeof item === 'bigint') {
+    if (isUnsupportedJsonValue(item)) {
       return `${path} is not JSON-serializable`;
     }
-    if (item && typeof item === 'object') {
+    if (isReferenceValue(item)) {
       if (seen.has(item)) return `${path} contains a cycle`;
       seen.add(item);
       for (const [key, child] of Object.entries(item)) {
@@ -778,6 +781,15 @@ function assertJsonSerializable(value) {
     return `data could not be JSON.stringify()'d: ${cause instanceof Error ? cause.message : cause}`;
   }
   return null;
+}
+
+function isUnsupportedJsonValue(value) {
+  const valueTag = Object.prototype.toString.call(value);
+  return value === undefined || valueTag === '[object Function]' || valueTag === '[object Symbol]' || valueTag === '[object BigInt]';
+}
+
+function isReferenceValue(value) {
+  return value !== null && Object(value) === value;
 }
 
 function error(file, component, message) {

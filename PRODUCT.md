@@ -1,9 +1,5 @@
 # Product
 
-## Register
-
-brand
-
 ## Users
 
 Coding agents and engineers use this skill while explaining code, system design, plans, reviews, and generated media. They are usually inside Codex Desktop, Claude Code, or a terminal workflow and need a shareable artifact that is easier to inspect than terminal ASCII, markdown tables, or raw logs.

@@ -46,19 +46,6 @@
     transform-origin: center center;
   }
 
-  /* Subtle grain/grid texture for industrial feel */
-  #stage::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
   /* Top chrome strip — mimics brand tag */
   .chrome {
     position: absolute;
@@ -126,7 +113,6 @@
     color: var(--accent);
     letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 120px rgba(247, 89, 31, 0.35);
   }
   .hook-label {
     font-family: "Space Mono", ui-monospace, monospace;
@@ -228,7 +214,6 @@
     color: var(--accent);
     letter-spacing: -0.05em;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 140px rgba(247, 89, 31, 0.45);
   }
   .proof-label {
     font-family: "Space Mono", ui-monospace, monospace;
@@ -305,7 +290,7 @@
     max-width: 100%;
     opacity: 0;
     border-radius: 2px;
-    border-left: 3px solid var(--accent);
+    border: 1px solid var(--accent);
     letter-spacing: -0.005em;
   }
 </style>

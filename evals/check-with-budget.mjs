@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
 const budgets = JSON.parse(readFileSync(new URL('./budgets.json', import.meta.url), 'utf8'));
 const maxSeconds = Number(process.env.ARTIFACTURE_CHECK_MAX_SECONDS || budgets.canonical_max_seconds);

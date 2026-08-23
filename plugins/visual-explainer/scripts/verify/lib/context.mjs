@@ -28,7 +28,6 @@ export async function buildContext(filePath, options = {}) {
   const truthPath = options.truth ? path.resolve(options.truth) : null;
   const truthText = truthPath ? await fs.readFile(truthPath, 'utf8') : null;
   const renderedInventory = buildRenderedInventory(dom);
-  const lowered = html.toLowerCase();
   const flags = {
     hasMermaid: /class\s*=\s*["'][^"']*\bmermaid\b|mermaid\.initialize|\.mermaid\b/i.test(html),
     hasInlineSvgDiagram: /<svg\b/i.test(html),

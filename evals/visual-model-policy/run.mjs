@@ -341,11 +341,11 @@ export async function runExperiment({
     return {
       experiment_id: experiment.id,
       dry_run: true,
-      requests: preparedPlan.map(({ request, ...cell }) => cell),
+      requests: preparedPlan.map(({ request: _request, ...cell }) => cell),
       budget: summarizeExperimentPlan(preparedPlan, experiment.thresholds),
     };
   }
-  if (!adapter || typeof adapter.invoke !== 'function') {
+  if (!adapter || !(adapter.invoke instanceof Function)) {
     throw new Error('adapter must export invoke(request, context)');
   }
   if (
@@ -605,7 +605,7 @@ function validateVerdict({ verdict, evalCase, criterionId, duplicate }) {
     if (!verdict.reason) return 'abstention requires reason';
     return null;
   }
-  if (typeof verdict.pass !== 'boolean' || !Array.isArray(verdict.findings)) {
+  if (![true, false].includes(verdict.pass) || !Array.isArray(verdict.findings)) {
     return 'verdict requires pass boolean and findings[]';
   }
   for (const finding of verdict.findings) {
@@ -707,7 +707,7 @@ function validateLadderProgress(experiment, selectedPasses) {
     if (
       !candidateById.has(entry?.id)
       || !entry.pass_evidence
-      || typeof entry.pass_evidence !== 'object'
+      || Object.prototype.toString.call(entry.pass_evidence) !== '[object Object]'
     ) {
       throw new Error(
         'each completed candidate requires a configured id and pass_evidence',
@@ -804,7 +804,7 @@ export function assertGraduationImageDiversity(cases, imageHashesByCase) {
 
 async function loadAdapter(adapterPath) {
   const module = await import(pathToFileURL(path.resolve(adapterPath)).href);
-  if (typeof module.invoke !== 'function') {
+  if (!(module.invoke instanceof Function)) {
     throw new Error(`adapter ${adapterPath} must export invoke(request, context)`);
   }
   return module;

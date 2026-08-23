@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const MAX_BODY_BYTES = 1_000_000;
 const PREVIEW_SESSION_COOKIE = "__ve_preview_session";
+const ANSI_STYLE_PATTERN = new RegExp(`${String.fromCodePoint(0x1b)}\\[[0-9;]*m`, "g");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".mdx", ".ts", ".tsx"]);
 const SOURCE_IGNORED_DIRECTORIES = new Set([".git", ".next", "build", "dist", "node_modules", "published"]);
 const MIME_TYPES = new Map([
@@ -103,10 +104,10 @@ export function applyUniqueTextPatch(source, before, after, {
   occurrence,
   replaceAll = false,
 } = {}) {
-  if (typeof before !== "string" || before.length === 0) {
+  if (!isString(before) || before.length === 0) {
     throw createHttpError(400, "The original text is empty.");
   }
-  if (typeof after !== "string") {
+  if (!isString(after)) {
     throw createHttpError(400, "The replacement text is invalid.");
   }
 
@@ -500,7 +501,7 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
   });
 
   const address = server.address();
-  const actualPort = typeof address === "object" && address ? address.port : port;
+  const actualPort = parseListeningPort(address, port);
   const url = `http://127.0.0.1:${actualPort}`;
   if (openBrowser) openUrl(url);
 
@@ -542,7 +543,7 @@ async function detectPublisher(targetPath) {
     const packagePath = join(current, "package.json");
     try {
       const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
-      const script = ["publish", "export", "build"].find((name) => typeof packageJson?.scripts?.[name] === "string");
+      const script = ["publish", "export", "build"].find((name) => isString(packageJson?.scripts?.[name]));
       if (script) {
         const runner = await selectPackageRunner(current, packageJson);
         return { cwd: current, runner, script };
@@ -724,7 +725,7 @@ function runPublisher(publisher) {
     child.stderr.on("data", append);
     child.once("error", (error) => rejectPromise(createHttpError(422, `Publish could not start: ${error.message}`)));
     child.once("close", (code) => {
-      const cleaned = output.replace(/\x1b\[[0-9;]*m/g, "").trim();
+      const cleaned = output.replace(ANSI_STYLE_PATTERN, "").trim();
       if (code === 0) resolvePromise(cleaned);
       else rejectPromise(createHttpError(422, cleaned || `Publish exited with code ${code}.`));
     });
@@ -890,15 +891,15 @@ async function readJsonBody(request) {
 function parsePatchRequest(value) {
   if (!isRecord(value)) throw createHttpError(400, "Patch request must be a JSON object.");
   for (const key of ["after", "artifactRevision", "before"]) {
-    if (typeof value[key] !== "string") throw createHttpError(400, `Patch field \"${key}\" must be a string.`);
+    if (!isString(value[key])) throw createHttpError(400, `Patch field "${key}" must be a string.`);
   }
-  if (!isRecord(value.anchor) || typeof value.anchor.selector !== "string") {
+  if (!isRecord(value.anchor) || !isString(value.anchor.selector)) {
     throw createHttpError(400, "Patch field \"anchor\" must identify a selector.");
   }
   if (value.occurrence !== undefined && (!Number.isInteger(value.occurrence) || value.occurrence < 0)) {
     throw createHttpError(400, "Patch field \"occurrence\" must be a non-negative integer.");
   }
-  if (value.replaceAll !== undefined && typeof value.replaceAll !== "boolean") {
+  if (value.replaceAll !== undefined && !isBoolean(value.replaceAll)) {
     throw createHttpError(400, "Patch field \"replaceAll\" must be a boolean.");
   }
   return value;
@@ -913,7 +914,7 @@ function parseAnnotationRequest(value) {
     if (!isRecord(annotation) || !isRecord(annotation.anchor)) {
       throw createHttpError(400, `Annotation ${index + 1} is invalid.`);
     }
-    if (typeof annotation.comment !== "string" || typeof annotation.anchor.selector !== "string") {
+    if (!isString(annotation.comment) || !isString(annotation.anchor.selector)) {
       throw createHttpError(400, `Annotation ${index + 1} is missing a comment or selector.`);
     }
     return annotation;
@@ -922,7 +923,25 @@ function parseAnnotationRequest(value) {
 }
 
 function isRecord(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
+  if (value === null || Object(value) !== value || Array.isArray(value)) return false;
+  try {
+    Function.prototype.toString.call(value);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function isString(value) {
+  return value !== null && Object(value) !== value && String(value) === value;
+}
+
+function isBoolean(value) {
+  return value === true || value === false;
+}
+
+function parseListeningPort(address, fallback) {
+  return isRecord(address) ? address.port : fallback;
 }
 
 function setPreviewSessionCookie(response, session) {

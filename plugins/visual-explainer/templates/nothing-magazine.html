@@ -20,7 +20,7 @@
 
   Nothing-specific beats spread across the pages:
   - Doto hero on cover + full-bleed stat (one per page, never multiples)
-  - Dot-grid background on dark panels
+  - Clean black fields on dark panels
   - Segmented progress bars as the primary data-viz motif on the quadrant
   - Bracket-notation labels: [ STATUS ], [ NO DATA ], [ LIVE ]
   - Accent red (#D71921) used exactly once — on the one critical stat
@@ -212,14 +212,6 @@
     --border:         #222222;
     --border-visible: #333333;
     color: var(--text-primary);
-  }
-
-  /* Dot-grid backdrop — signature Nothing motif, reserved for dark pages. */
-  .page--dotgrid {
-    background-color: #000000;
-    background-image: radial-gradient(circle, #333333 1px, transparent 1px);
-    background-size: 16px 16px;
-    background-position: -1px -1px;
   }
 
   /* ============ TYPOGRAPHY ============ */
@@ -541,8 +533,8 @@
 
 <div class="mag" id="mag" aria-label="Magazine">
 
-  <!-- Page 1 — COVER. Dark canvas, dot-grid behind, Doto hero. -->
-  <section class="page page--dark page--dotgrid page--cover" aria-label="Cover">
+  <!-- Page 1 — COVER. Dark canvas with a Doto hero. -->
+  <section class="page page--dark page--cover" aria-label="Cover">
     <div class="meta-row">
       <span class="label label--on">[ NOTHING · FIELD REPORT ]</span>
       <span class="label">2026-Q2 · ISSUE 01</span>
@@ -603,7 +595,7 @@
   </section>
 
   <!-- Page 4 — Full-bleed stat. The one Doto per page rule still holds. -->
-  <section class="page page--dark page--dotgrid page--stat" aria-label="Key stat">
+  <section class="page page--dark page--stat" aria-label="Key stat">
     <div class="stat-anchor">
       <div class="doto" aria-label="99.98 percent">99.98<span style="font-family: var(--font-mono); font-size: 0.18em; color: var(--text-secondary); margin-left: 0.1em; vertical-align: 0.6em;">%</span></div>
       <span class="doto-unit">UPTIME · 30-DAY · POST-PARTITION</span>
@@ -680,8 +672,8 @@
     </div>
   </section>
 
-  <!-- Page 6 — Interior dark panel w/ dot-grid. The third required dark page. -->
-  <section class="page page--dark page--dotgrid page--content page--centered" aria-label="Reframe">
+  <!-- Page 6 — Interior dark panel. The third required dark page. -->
+  <section class="page page--dark page--content page--centered" aria-label="Reframe">
     <div style="max-width: 28ch;">
       <span class="eyebrow">§ 02 · REFRAME</span>
       <h2 class="display" style="margin-top: 24px;">Partition keys encode the contract you actually sell.</h2>
@@ -748,8 +740,8 @@
     </div>
   </section>
 
-  <!-- Page 8 — BACK COVER. Dark, dot-grid. Closing brk line. -->
-  <section class="page page--dark page--dotgrid page--cover" aria-label="Back cover">
+  <!-- Page 8 — BACK COVER. Dark canvas with a closing brk line. -->
+  <section class="page page--dark page--cover" aria-label="Back cover">
     <div class="meta-row">
       <span class="label label--on">[ END OF DISPATCH ]</span>
       <span class="label">No. 01 · 2026-Q2</span>

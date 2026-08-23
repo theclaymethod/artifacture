@@ -89,7 +89,7 @@
   },
   {
     "family": "F4_presets",
-    "req": "Aesthetic selection: Mono-Industrial is the default; deviate only when the user names a different aesthetic, supplies a specific palette/typographic direction, or requests a creative/expressive piece. Confirm the chosen aesthetic matches the request before generating."
+    "req": "Aesthetic selection: OA Design is the default; deviate only when the user names a different aesthetic, supplies a specific palette/typographic direction, or requests a creative/expressive piece. Confirm the chosen aesthetic matches the request before generating, and never use a decorative grid background."
   },
   {
     "family": "F4_presets",

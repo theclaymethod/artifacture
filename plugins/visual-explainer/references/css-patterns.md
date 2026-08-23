@@ -58,37 +58,13 @@ Always define both light and dark palettes via custom properties. Start with whi
 
 ## Background Atmosphere
 
-Flat backgrounds feel dead. Use subtle gradients or patterns.
+Default to a flat field from the active design system. If a named aesthetic needs more atmosphere, use one restrained focal gradient. Never use dot grids, graph paper, scanlines, or repeated-line patterns as a decorative background.
 
 ```css
-/* Radial glow behind focal area */
+/* Optional focal wash for a named expressive direction */
 body {
   background: var(--bg);
   background-image: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%);
-}
-
-/* Faint dot grid */
-body {
-  background-color: var(--bg);
-  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Diagonal subtle lines */
-body {
-  background-color: var(--bg);
-  background-image: repeating-linear-gradient(
-    -45deg, transparent, transparent 40px,
-    var(--border) 40px, var(--border) 41px
-  );
-}
-
-/* Gradient mesh (pick 2-3 positioned radials) */
-body {
-  background: var(--bg);
-  background-image:
-    radial-gradient(at 20% 20%, var(--node-a-dim) 0%, transparent 50%),
-    radial-gradient(at 80% 60%, var(--node-b-dim) 0%, transparent 50%);
 }
 ```
 

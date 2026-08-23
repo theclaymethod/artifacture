@@ -40,7 +40,33 @@ Font tokens:
 
 ## Per-Aesthetic Mappings
 
-### Mono-Industrial (default)
+### OA Design (default)
+
+OA diagrams use a clean inset canvas with one ink-derived neutral system. The hidden 4px coordinate grid still governs geometry, but no dot, graph-paper, scanline, or ruled background is rendered.
+
+```css
+--paper:       #f6f6f6;
+--paper-2:     #ffffff;
+--ink:         #292929;
+--muted:       #6d6d6d;
+--soft:        rgba(41, 41, 41, 0.52);
+--rule:        rgba(41, 41, 41, 0.08);
+--rule-solid:  rgba(41, 41, 41, 0.12);
+--accent:      #305dde;
+--accent-tint: rgba(48, 93, 222, 0.07);
+--link:        #305dde;
+
+--font-display: "Inter Tight", system-ui, sans-serif;
+--font-body:    "Inter Tight", system-ui, sans-serif;
+--font-mono:    "Geist Mono", ui-monospace, monospace;
+```
+
+Notes:
+- All label and heading weights stop at 500.
+- Surface corners use the shared squircle radius; action chips are pills.
+- Spend blue on the focal path only. Semantic colors are text or small-dot roles and always include labels.
+
+### Mono-Industrial
 
 Diagrams inside an MI page inherit MI's grayscale-plus-status-colors rule. The "accent" in an MI diagram is a status color drawn from the content itself — `--ok` for healthy paths, `--warn` for degraded, `--err` for failure. Neutral accent fallback is `--ink` at 100% opacity on an otherwise softened diagram.
 
@@ -116,7 +142,7 @@ Notes:
 - Every text node label in a Nothing diagram is **Space Mono ALL CAPS** with `letter-spacing: 0.08em`. Body-copy callouts use Space Grotesk.
 - **No zebra fills** on layer stacks or swimlanes. Use hairline dividers only.
 - **Segmented progress bars substitute for bar charts** wherever applicable (2px gaps, square ends, status-color fills).
-- Dot-grid backdrop (`radial-gradient(circle, #333 1px, transparent 1px) / 16px 16px`) is the signature hero backdrop; omit it on dense diagrams where it fights with the nodes.
+- Keep diagram canvases flat black; do not add dot-grid or scanline backdrops.
 - Accent red (`#D71921`) is reserved — use `--warning` or `--success` drawn from content status for everything else. Hitting red means "the viewer is looking at the one urgent element on the page."
 - No shadows, no blur, no gradients. Borders only.
 
@@ -174,7 +200,7 @@ Technical-drawing feel. Deep slate canvas with cyan accent. Monospace-heavy.
 ```
 
 Notes:
-- Add a faint grid background at 40px spacing using a second `<pattern>` with 1px lines at 12% opacity. This replaces the dot pattern from the default.
+- Keep the blue canvas flat. Use precise rules and node geometry for the technical-drawing character, never a rendered grid field.
 
 ### Paper/ink
 

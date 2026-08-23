@@ -23,7 +23,7 @@ Capture the verified generated page as the PNG artifact with browser screenshot 
    - Portrait editorial: `w-[1200px] h-[1500px]`
    - Social card (Twitter/LinkedIn): `w-[1200px] h-[628px]`
    - Square (Slack, Instagram): `w-[1080px] h-[1080px]`
-3. Commit to the Mono-Industrial aesthetic by default (Swiss, monochrome, hierarchy-first, Space Grotesk + Space Mono + optional Geist Pixel Square hero). Follow `./references/mono-industrial.md` for tokens and the pre-render gate. Use a named alternative only if the user requests one.
+3. Commit to OA Design by default: clean white plate, quiet grey stage, one ink, one restrained blue accent, Inter Tight at 500 or below, continuous-curvature surfaces, and no grid background. Read `./references/oa-design.md`. Use `mono-industrial-poster.tsx` only as a mechanical poster-ai scaffold until it is replaced; do not inherit its visual tokens. Use a named alternative only if the user requests one.
 
 **Authoring:**
 

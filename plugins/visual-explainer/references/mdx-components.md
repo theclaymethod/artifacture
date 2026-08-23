@@ -11,7 +11,6 @@ Read this only when the selected card does not show the component or prop you ne
 - `DecisionMatrix(rows)`
 - `RiskLedger(risks)`
 - `DiagramCanvas(nodes, edges, layout?, lanes?, dates?, description?)`
-- `FlowDiagram(nodes, edges)` — compatibility wrapper; prefer `DiagramCanvas`
 - `CodeBlock(code, language, filename?, highlightLines?, annotations?, diff?)`
 - `DiffBlock(patch? | before+after, language?, filename?, mode?)`
 - `TerminalBlock(content, title?, showPrompt?)`
@@ -38,4 +37,4 @@ Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentati
 
 ## Presets
 
-Built-in presets are `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Other names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` only when learning or using an external design system.
+Built-in presets are `oa-design` (default), `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Other names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` only when learning or using an external design system.

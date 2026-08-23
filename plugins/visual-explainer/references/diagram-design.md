@@ -1,6 +1,6 @@
 # Diagram design routing
 
-This is the canonical selection contract for visual-explainer diagrams. It adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to this skill's Mono-Industrial default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
+This is the canonical selection contract for visual-explainer diagrams. It adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to this skill's OA Design default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
 
 ## Contents
 

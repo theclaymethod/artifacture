@@ -32,7 +32,7 @@ For everything else, ask 1–3 questions via `AskUserQuestion` **only when the s
 1. **Topic** — what is the content about?
 2. **Audience** — who is reading / viewing? (dev / PM / exec / team / public)
 3. **Depth** — overview (5 min read) / deep dive (20 min read) / reference doc?
-4. **Aesthetic** — Mono-Industrial (default) or a named alternative?
+4. **Aesthetic** — OA Design (default) or a named alternative?
 
 If any of these four is genuinely unclear from the user's prompt + current context, ask. If all four are answerable from the request, generate directly.
 
@@ -120,7 +120,7 @@ Q1: How many pages?
     - Extended — 22-30 pages (year-in-review scale)
 
 Q2: Aesthetic?
-    - Mono-Industrial (recommended) — grayscale tints, status color as focal
+    - OA Design (recommended) — white plates, quiet grey stage, one ink, restrained blue
     - Nothing — instrument-panel black/white surfaces with one urgent red accent
     - Editorial-Diagram — warm stone, rust/coral accent
     - Custom — tell me in free text
@@ -149,7 +149,7 @@ Q2: How deep?
 
 Questions that feel like friction kill the flow. Skip these:
 - **Layout questions the skill can answer.** Don't ask "should this be a card grid or a table?" — pick the right format.
-- **Aesthetic when the default is clearly correct.** If the user didn't name an alternative, Mono-Industrial is fine; don't confirm.
+- **Aesthetic when the default is clearly correct.** If the user didn't name an alternative, OA Design is fine; don't confirm.
 - **Questions with an obvious answer from context.** If the user said "for my team," don't ask "who's the audience?"
 - **Technical implementation questions.** Never ask "Mermaid or inline SVG?" — follow the decision table in SKILL.md.
 - **Meta questions.** Don't ask "ready to generate?" or "does this plan look good?" — just do the work.
@@ -175,7 +175,7 @@ User: "Draw me a diagram of our auth flow, it's for the engineering team, keep i
 - Topic: auth flow ✓
 - Audience: engineering team ✓
 - Depth: dense (deep dive) ✓
-- Aesthetic: not specified → default to Mono-Industrial (OK to skip)
+- Aesthetic: not specified → default to OA Design (OK to skip)
 
 **Action:** Generate directly. No AskUserQuestion.
 
@@ -214,4 +214,4 @@ Q: 45 seconds is typically reel duration. Which did you mean?
 
 User: "/generate-video make an explainer about our queue redesign --no-ask"
 
-**Action:** Skip AskUserQuestion entirely. Use best defaults: long-form 16:9, 90 seconds, TTS narration, Mono-Industrial aesthetic. Generate.
+**Action:** Skip AskUserQuestion entirely. Use best defaults: long-form 16:9, 90 seconds, TTS narration, OA Design aesthetic. Generate.
