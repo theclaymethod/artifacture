@@ -1,0 +1,36 @@
+{
+  "archify": {
+    "repository": "https://github.com/tt-a1i/archify.git",
+    "version": "2.16.0",
+    "revision": "c826e6c3a7abad19c0f3cd1ca57207d54b1ad8de",
+    "license": "MIT",
+    "integration": "Pinned CLI runtime installed by scripts/archify.mjs; upstream notices remain in the checkout."
+  },
+  "lieflat": {
+    "repository": "https://github.com/larashero3-dotcom/lieflat-charts",
+    "license": "PolyForm-Noncommercial-1.0.0",
+    "integration": "Visual reference for five original LieflatChart families and JSON authoring: rung-bars, unit-field, barcode, bubble-matrix, and threads. No upstream code, templates, or assets bundled."
+  },
+  "algebrica": {
+    "repository": "https://github.com/antoniolupetti/algebrica",
+    "license": "CC-BY-NC-4.0",
+    "integration": "Visual reference only. Original theme and examples; no upstream content or assets bundled."
+  },
+  "mono-color": {
+    "repository": "https://github.com/yanliudesign/mono-color-skill",
+    "license": "MIT for code; separate terms for images",
+    "integration": "Visual reference only. Original theme; no upstream example or reference images bundled.",
+    "originalAsset": "plugins/visual-explainer/templates/assets/repair-mouse.webp — generated for Artifacture with OpenAI image generation; original opened-mouse still life, no upstream image supplied."
+  },
+  "pr-lens": {
+    "repository": "https://github.com/coldteadotai/pr-lens",
+    "revision": "c49b49e190d055ccd3a62743fccf8d96e2b10ba2",
+    "license": "MIT",
+    "integration": "Reference for ordered data-flow motion. Original Artifacture walkthrough controller; no upstream app, posting workflow, or renderer source bundled."
+  },
+  "typography": {
+    "url": "https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography",
+    "author": "Pierrick Calvez",
+    "integration": "Reference for text grouping, hierarchy, measure, spacing, and optical alignment. No article text or illustrations bundled."
+  }
+}

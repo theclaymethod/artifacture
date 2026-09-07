@@ -4,16 +4,14 @@ const timeline = `
 window.__timelines = window.__timelines || {};
 const tl = gsap.timeline({ paused: true });
 tl.addLabel("s1", 0);
-tl.to(".scene1", { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" }, "s1+=0.1");
-tl.from(".scene1 .headline", { y: 36, opacity: 0, duration: 0.6, ease: "power2.out" }, "s1+=0.3");
-tl.to(".scene1", { opacity: 0, duration: 0.4, overwrite: "auto" }, "s1+=3.8");
-tl.addLabel("s2", 4);
-tl.to(".scene2", { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" }, "s2+=0.1");
-tl.from(".scene2 .card", { y: 32, opacity: 0, duration: 0.5, stagger: 0.12, ease: "power2.out" }, "s2+=0.4");
-tl.to(".scene2", { opacity: 0, duration: 0.4, overwrite: "auto" }, "s2+=3.6");
-tl.addLabel("s3", 8);
-tl.to(".scene3", { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" }, "s3+=0.1");
-tl.from(".scene3 .headline", { y: 36, opacity: 0, duration: 0.6, ease: "power2.out" }, "s3+=0.4");
+tl.set(".scene1", { opacity: 1 }, 0);
+tl.to(".scene1", { opacity: 0, duration: 0.3, overwrite: "auto" }, 7.7);
+tl.addLabel("s2", 8);
+tl.to(".scene2", { opacity: 1, duration: 0.3, overwrite: "auto" }, 8);
+tl.to(".scene2", { opacity: 0, duration: 0.3, overwrite: "auto" }, 15.7);
+tl.addLabel("s3", 16);
+tl.to(".scene3", { opacity: 1, duration: 0.3, overwrite: "auto" }, 16);
+tl.set(".scene3", { opacity: 1 }, 24);
 window.__timelines["ve-mdx-longform"] = tl;
 `;
 
@@ -22,54 +20,37 @@ export default function VideoLongform() {
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
-        <title>VE MDX Longform Video</title>
+        <title>Give retries a stopping point</title>
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          html, body { width: 100%; height: 100%; overflow: hidden; background: #09090b; color: #f4f4f5; font-family: system-ui, sans-serif; }
-          #stage { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: #09090b; }
-          .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 96px 128px; opacity: 0; }
-          .kicker { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 24px; letter-spacing: .22em; text-transform: uppercase; color: #5eead4; margin-bottom: 32px; }
-          .headline { max-width: 1400px; text-align: center; font-size: 118px; line-height: 1.02; font-weight: 650; letter-spacing: -0.02em; }
-          .body { margin-top: 34px; max-width: 1080px; text-align: center; color: #a1a1aa; font-size: 38px; line-height: 1.35; }
-          .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 1440px; }
-          .card { border: 2px solid rgba(255,255,255,.16); background: rgba(255,255,255,.045); padding: 38px; min-height: 260px; }
-          .card b { display: block; color: #5eead4; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 28px; margin-bottom: 28px; }
-          .card span { display: block; font-size: 42px; line-height: 1.1; }
+          html, body { width: 100%; height: 100%; overflow: hidden; background: #f0efeb; color: #1c1c1a; font-family: Inter, system-ui, sans-serif; }
+          #stage { width: 1920px; height: 1080px; position: relative; overflow: hidden; }
+          .scene { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 120px 160px; opacity: 0; }
+          .scene1 { opacity: 1; }
+          .headline { max-width: 1350px; font-size: 100px; line-height: 1.08; font-weight: 600; letter-spacing: -0.035em; }
+          .body { margin-top: 48px; max-width: 1250px; color: #65645f; font-size: 42px; line-height: 1.45; }
+          .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; margin-top: 76px; }
+          .path { padding-top: 32px; border-top: 2px solid #c8c7c1; }
+          .path h3 { font-size: 38px; font-weight: 600; }
+          .path p { margin-top: 24px; color: #65645f; font-size: 34px; line-height: 1.5; }
         `}</style>
       </head>
       <body>
-        <div
-          data-composition-id="ve-mdx-longform"
-          data-duration="12"
-          data-height="1080"
-          data-start="0"
-          data-width="1920"
-          id="stage"
-        >
+        <div data-composition-id="ve-mdx-longform" data-duration="24" data-height="1080" data-start="0" data-width="1920" id="stage">
           <section className="scene scene1">
-            <div className="kicker">generated from TSX</div>
-            <h1 className="headline">MDX and React can feed video.</h1>
-            <p className="body">This static composition is generated, not hand-written final HTML.</p>
+            <h1 className="headline">A retry is another attempt, not a new operation.</h1>
+            <p className="body">Keep the same job identity. A timeout may have hidden a successful side effect.</p>
           </section>
           <section className="scene scene2">
-            <div className="grid">
-              <div className="card">
-                <b>01</b>
-                <span>Author components.</span>
-              </div>
-              <div className="card">
-                <b>02</b>
-                <span>Export static markup.</span>
-              </div>
-              <div className="card">
-                <b>03</b>
-                <span>Render through Hyperframes.</span>
-              </div>
+            <h2 className="headline">The failure chooses the path.</h2>
+            <div className="paths">
+              <div className="path"><h3>Temporary failure</h3><p>Wait before retrying. Stay within a fixed attempt budget.</p></div>
+              <div className="path"><h3>Permanent failure</h3><p>Retain the job and its error. Another identical attempt cannot repair invalid input.</p></div>
             </div>
           </section>
           <section className="scene scene3">
-            <div className="kicker">next gate</div>
-            <h2 className="headline">Draft MP4 plus keyframes.</h2>
+            <h2 className="headline">Stop retrying. Keep the evidence.</h2>
+            <p className="body">Quarantine preserves the payload reference, attempt history, and reason for failure so a person can repair and replay the job deliberately.</p>
           </section>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" />

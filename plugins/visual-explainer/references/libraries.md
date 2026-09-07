@@ -12,9 +12,9 @@ Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include 
 
 ## Mermaid.js — Diagramming Engine
 
-Use for flowcharts, sequence diagrams, ER diagrams, state machines, mind maps, class diagrams, and any diagram where automatic node positioning and edge routing saves effort. Mermaid handles layout — you handle theming.
+Use Mermaid only after [diagram-design.md](diagram-design.md) selects it, or when explicitly requested. Compact supported diagrams use `DiagramCanvas`; complex typed system maps use [Archify](archify.md).
 
-Do NOT use for dashboards — CSS Grid card layouts with Chart.js look better for those. Data tables use `<table>` elements.
+For quantitative data, follow [charts.md](charts.md); use `DataChart` for supported bar, line, and dot charts, or a semantic table for exact lookup.
 
 **CDN:**
 ```html
@@ -40,43 +40,9 @@ Without the ELK import and registration, `layout: 'elk'` silently falls back to 
 
 ### Deep Theming
 
-Always use `theme: 'base'` — it's the only theme where all `themeVariables` are fully customizable. The built-in themes (`default`, `dark`, `forest`, `neutral`) ignore most variable overrides.
+Use `theme: 'base'` and `securityLevel: 'strict'`. Read the active host tokens with `getComputedStyle`, then provide actual color/font values to `themeVariables`; SVG output must not introduce a second palette. Map node fill, stroke, text, line, and note roles through [diagram-tokens.md](diagram-tokens.md). Start labels at 16px and inspect their displayed size; retain at least 14px after scaling.
 
-```html
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'base',
-    look: 'classic',
-    themeVariables: {
-      // Background and surfaces — teal/slate palette (not violet/indigo!)
-      primaryColor: isDark ? '#134e4a' : '#ccfbf1',
-      primaryBorderColor: isDark ? '#14b8a6' : '#0d9488',
-      primaryTextColor: isDark ? '#f0fdfa' : '#134e4a',
-      secondaryColor: isDark ? '#1e293b' : '#f0fdf4',
-      secondaryBorderColor: isDark ? '#059669' : '#16a34a',
-      secondaryTextColor: isDark ? '#f1f5f9' : '#1e293b',
-      tertiaryColor: isDark ? '#27201a' : '#fef3c7',
-      tertiaryBorderColor: isDark ? '#d97706' : '#f59e0b',
-      tertiaryTextColor: isDark ? '#fef3c7' : '#27201a',
-      // Lines and edges
-      lineColor: isDark ? '#64748b' : '#94a3b8',
-      // Text
-      fontSize: '16px',
-      fontFamily: 'var(--font-body)',
-      // Notes and labels
-      noteBkgColor: isDark ? '#1e293b' : '#fefce8',
-      noteTextColor: isDark ? '#f1f5f9' : '#1e293b',
-      noteBorderColor: isDark ? '#fbbf24' : '#d97706',
-    }
-  });
-</script>
-```
-
-**FORBIDDEN in Mermaid themeVariables:** `#8b5cf6`, `#7c3aed`, `#a78bfa` (indigo/violet), `#d946ef` (fuchsia). Use teal, slate, amber, emerald, or colors from your page's palette.
+Use the shared `MermaidBlock` where possible. For custom integration, render source from inert text, preserve scoped IDs, and rerender when the effective theme changes. Load only the layout engine the graph needs.
 
 ### Mono-Industrial Mermaid Theme (named alternative)
 
@@ -137,11 +103,11 @@ graph TD
   %% or inject via a pre-render string replace.
 ```
 
-**Edge-label treatment.** In Mono-Industrial, edge labels go through the CSS overrides to render in Space Mono, ALL CAPS, 11px. Keep label text terse (`SLOW`, `ASYNC`, `FALLBACK`).
+**Edge-label treatment.** In Mono-Industrial, edge labels go through the CSS overrides to render in the host label font, sentence case, at least 14px. Keep label text terse (`slow`, `async`, `fallback`).
 
 **Node-label fonts.** Space Grotesk at 15px (docs) or 20px (slide decks).
 
-**When to use this theme:** default for all visual-explainer output. Switch to the teal/slate/earth palettes shown earlier in this file only when the user explicitly requests a named aesthetic (Blueprint, Editorial, Paper/ink, Monochrome terminal, IDE-inspired).
+**When to use this theme:** only for an explicit Mono-Industrial request. Default output inherits the `lieflat` preset.
 
 ### CSS Overrides on Mermaid SVG
 
@@ -182,7 +148,7 @@ Mermaid renders SVG. Override its classes for pixel-perfect control that `themeV
 /* Edge labels — smaller than node labels for visual hierarchy */
 .mermaid .edgeLabel {
   font-family: var(--font-mono) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 /* Node labels — 16px default; drop to 14px for complex diagrams (20+ nodes) */
@@ -199,7 +165,7 @@ Mermaid renders SVG. Override its classes for pixel-perfect control that `themeV
 /* Sequence diagram messages */
 .mermaid .messageText {
   font-family: var(--font-mono) !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 /* ER diagram entities */
@@ -669,7 +635,7 @@ pre.code-block[class*="language-"] {
   border-radius: 4px;
   padding: 16px 18px;
   font-family: 'Space Mono', 'SF Mono', Consolas, monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.55;
   overflow-x: auto;
   white-space: pre;
@@ -731,14 +697,13 @@ pre.code-block .line-inserted { background: rgba(107, 212, 142, 0.10); color: #6
 
 ### File header pattern
 
-Pair the code block with a minimal Space Mono caption for filename + language. The header sits above the dark block, not inside it — keeps the terminal rectangle undivided.
+Pair the code block with a minimal Space Mono caption for the filename when it provides useful location context. The header sits above the dark block, not inside it — keeps the terminal rectangle undivided.
 
 ```html
 <figure class="code-file">
   <figcaption class="code-file__cap">
     <span class="code-file__name">src/api/auth.ts</span>
-    <span class="code-file__lang">TYPESCRIPT</span>
-  </figcaption>
+      </figcaption>
   <pre class="code-block"><code class="language-ts">...</code></pre>
 </figure>
 ```
@@ -751,9 +716,9 @@ Pair the code block with a minimal Space Mono caption for filename + language. T
   align-items: baseline;
   padding: 0 2px 6px;
   font-family: 'Space Mono', monospace;
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text-secondary, rgba(242, 237, 229, 0.58));
 }
 .code-file__name { color: var(--text-primary, rgba(242, 237, 229, 0.90)); }

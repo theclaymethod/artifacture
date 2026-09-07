@@ -1,6 +1,6 @@
-# OA Design — Default Reference
+# OA Design compatibility preset
 
-Artifacture's default explainer preset follows [OpenLabs' oa-design](https://github.com/OpenLabs-so/oa-design/tree/bd200daeac8eca2501139cb0fa29cc12e4709303) as its visual reference. The upstream design language is the authority for interaction and surface grammar; Artifacture maps it onto the existing `--ve-*` token contract so exported explainers remain standalone and named legacy presets remain available.
+The explicit `oa-design` preset follows [OpenLabs' oa-design](https://github.com/OpenLabs-so/oa-design/tree/bd200daeac8eca2501139cb0fa29cc12e4709303) as its visual reference. The upstream design language is the authority for interaction and surface grammar; Artifacture maps it onto the existing `--ve-*` token contract so exported explainers remain standalone and named legacy presets remain available.
 
 ## Default character
 

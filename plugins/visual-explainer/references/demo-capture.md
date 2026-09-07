@@ -125,7 +125,8 @@ Drop that markup wherever the demo belongs in the explainer — typically inside
 
 Match the demo's visual presentation to the page's aesthetic direction.
 
-- **OA Design (default):** continuous-curvature corners, one ink-derived border, and the resting `0 1px 2px rgb(0 0 0 / 0.06)` shadow. Let the video sit as one white plate on the quiet grey stage.
+- **Lieflat (default):** paper-gray field, charcoal controls, and a simple bounded recording. Keep framing quiet and label only the action being demonstrated.
+- **OA Design (explicit compatibility):** continuous-curvature corners, one ink-derived border, and the resting `0 1px 2px rgb(0 0 0 / 0.06)` shadow. Let the video sit as one white plate on the quiet grey stage.
 - **Editorial:** Slight rounded corners (12–16px), subtle border in the page's muted earth tone, generous whitespace above and below.
 - **Blueprint:** Sharp corners, 1px border in slate/blue, and precise spacing on a flat canvas.
 - **Paper/ink:** Warm cream frame, no border, optional hand-drawn annotation overlay (SVG) pointing at the focal element.

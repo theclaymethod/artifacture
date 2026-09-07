@@ -1,10 +1,10 @@
 # Comparison Table Card
 Use `ExplainerShell`, `Section`, `DecisionMatrix`, optional `Callout`. Best for 4+ rows or 3+ columns. Same keys in every row.
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { ExplainerShell, Section, DecisionMatrix, Callout } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Search Cache Decision" summary="Pick the smallest store that keeps imports inspectable." preset="blueprint">
-  <Section kicker="recommendation" title="SQLite is the default"><Callout>Focal move: one local file, indexed lookups, and a clear migration path if the cache becomes shared.</Callout></Section>
+<ExplainerShell title="Search Cache Decision" summary="Pick the smallest store that keeps imports inspectable.">
+  <Section title="SQLite is the default"><Callout>A local file provides indexed lookups without a separate service.</Callout></Section>
   <Section title="Tradeoff matrix"><DecisionMatrix rows={[
     {Option:'SQLite',Setup:'File',Lookup:'Indexed SQL',Failure:'File lock during bulk import',Fit:'Best'},
     {Option:'Redis',Setup:'Service',Lookup:'Key/value',Failure:'Extra network dependency',Fit:'Fast but heavier'},

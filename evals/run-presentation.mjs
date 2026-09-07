@@ -211,24 +211,24 @@ async function main() {
 
         await page.keyboard.press('ArrowDown');
         await expectSheetOpen(page, 'first vertical drill');
-        assert((await label()) === 'Behavior · Click-anywhere-to-close', 'ArrowDown must open the first drill');
+        assert((await label()) === 'Inspect a quarantined job', 'ArrowDown must open the first drill');
         assert((await slideIndex(page)) === 1, 'vertical navigation must not change slides');
 
         await page.keyboard.press('ArrowDown');
         await page.waitForTimeout(50);
         await expectSheetOpen(page, 'second vertical drill');
-        assert((await label()) === 'Engine · Scale-to-fit stage', 'second ArrowDown must advance to the next drill');
+        assert((await label()) === 'An atomic claim', 'second ArrowDown must advance to the next drill');
 
         await page.keyboard.press('ArrowDown');
         await page.waitForTimeout(50);
-        assert((await label()) === 'Theming · Preset-driven', 'third ArrowDown must advance to the last drill');
+        assert((await label()) === 'A stable replay key', 'third ArrowDown must advance to the last drill');
 
         await page.keyboard.press('ArrowUp');
         await page.waitForTimeout(50);
-        assert((await label()) === 'Engine · Scale-to-fit stage', 'ArrowUp must reverse through drills');
+        assert((await label()) === 'An atomic claim', 'ArrowUp must reverse through drills');
         await page.keyboard.press('ArrowUp');
         await page.waitForTimeout(50);
-        assert((await label()) === 'Behavior · Click-anywhere-to-close', 'ArrowUp must reach the first drill');
+        assert((await label()) === 'Inspect a quarantined job', 'ArrowUp must reach the first drill');
         await page.keyboard.press('ArrowUp');
         await expectSheetClosed(page, 'vertical return to base state');
         assert((await slideIndex(page)) === 1, 'returning to the base state must stay on the slide');
@@ -328,7 +328,7 @@ async function main() {
           );
         }
         // A click on passive prose MUST close it.
-        await page.locator('[data-drill-open] p', { hasText: 'as does Escape or the X' }).click();
+        await page.locator('[data-drill-open] p').first().click();
         await expectSheetClosed(page, 'passive prose click');
       }),
     );
@@ -568,32 +568,26 @@ async function main() {
       }),
     );
 
-    await record('geometry', 'metric-value-no-wrap', async () => {
-      // Regression: Metric values must render on a single line and inside
-      // their cell under EVERY preset, including mono-display presets whose
-      // glyphs are much wider than the default. The second-preset export
-      // (terminal: fully monospace display font) is the worst case.
+    await record('geometry', 'slide-text-readable-and-contained', async () => {
       for (const url of [primaryUrl, secondUrl]) {
         await withPage(browser, { url }, async (page) => {
-          const metrics = await page.locator('[data-ve-metric-value]').evaluateAll((els) =>
-            els.map((el) => ({
-              text: el.textContent,
-              clientHeight: el.clientHeight,
-              scrollWidth: el.scrollWidth,
-              fontSize: parseFloat(getComputedStyle(el).fontSize),
-              cellWidth: el.parentElement.clientWidth,
-            })),
+          const text = await page.locator('[data-stage] p, [data-stage] h1, [data-stage] h2, [data-stage] h3').evaluateAll((els) =>
+            els.filter((el) => el.textContent.trim() && el.getBoundingClientRect().width).map((el) => {
+              const rect = el.getBoundingClientRect();
+              const stage = el.closest('[data-stage]').getBoundingClientRect();
+              const scale = stage.width / el.closest('[data-stage]').offsetWidth;
+              return {
+                text: el.textContent,
+                renderedSize: parseFloat(getComputedStyle(el).fontSize) * scale,
+                contained: rect.left >= stage.left - 1 && rect.right <= stage.right + 1 && rect.bottom <= stage.bottom + 1,
+                overflow: el.scrollWidth > el.clientWidth + 1,
+              };
+            }),
           );
-          assert(metrics.length > 0, 'demo must render at least one Metric');
-          for (const m of metrics) {
-            assert(
-              m.clientHeight <= m.fontSize * 1.4,
-              `Metric "${m.text}" wrapped onto multiple lines (height ${m.clientHeight} vs font ${m.fontSize})`,
-            );
-            assert(
-              m.scrollWidth <= m.cellWidth + 1,
-              `Metric "${m.text}" overflows its cell (scrollWidth ${m.scrollWidth} vs cell ${m.cellWidth})`,
-            );
+          assert(text.length > 0, 'the opening slide must contain readable text');
+          for (const item of text) {
+            assert(item.renderedSize >= 14, `Text "${item.text}" renders below 14px (${item.renderedSize})`);
+            assert(item.contained && !item.overflow, `Text "${item.text}" exceeds its slide or text column`);
           }
         });
       }

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
 
 @source "../examples/visual-explainer-mdx/**/*.{mdx,tsx,ts,jsx,js}";
@@ -11,6 +11,197 @@
 
 @layer base {
   :root,
+  [data-ve-preset="lieflat"] {
+    --ve-shell-title-size: clamp(2.25rem, 9.6vw, 4.5rem);
+    --ve-shell-summary-size: 1.125rem;
+    --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 600;
+    --ve-heading-weight: 600;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 12px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #f0efeb;
+    --ve-bg-alt: #1c1c1a;
+    --ve-panel: #f7f6f2;
+    --ve-panel-strong: #f0efeb;
+    --ve-row: color-mix(in srgb, #1c1c1a 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #1c1c1a 12%, transparent);
+    --ve-heading: #1c1c1a;
+    --ve-text: #1c1c1a;
+    --ve-muted: #65645f;
+    --ve-faint: #65645f;
+    --ve-accent: #1c1c1a;
+    --ve-accent-soft: color-mix(in srgb, #1c1c1a 7%, transparent);
+    --ve-accent-contrast: #f0efeb;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #f0efeb;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #f7f6f2;
+    --ve-node-stroke: color-mix(in srgb, #1c1c1a 14%, transparent);
+    --ve-diagram-ink: #1c1c1a;
+    --ve-diagram-muted: #65645f;
+    --ve-diagram-frame: color-mix(in srgb, #1c1c1a 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #1c1c1a 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 8;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #1c1c1a;
+    --ve-code-text: #f0efeb;
+    --ve-code-muted: #b5b3aa;
+    --ve-code-rule: color-mix(in srgb, #f0efeb 14%, transparent);
+    --ve-code-accent: #d5d3cc;
+    --ve-poster-bg: #f0efeb;
+    --ve-poster-text: #1c1c1a;
+    --ve-poster-muted: #65645f;
+    --ve-poster-rule: color-mix(in srgb, #1c1c1a 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #f0efeb;
+    --ve-slide-text: #1c1c1a;
+    --ve-slide-muted: #65645f;
+    --ve-slide-rule: color-mix(in srgb, #1c1c1a 12%, transparent);
+  }
+
+  [data-ve-preset="mono-color"] {
+    --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 700;
+    --ve-heading-weight: 600;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 0px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #fafaf7;
+    --ve-bg-alt: #2148b8;
+    --ve-panel: #f4f4ee;
+    --ve-panel-strong: #fafaf7;
+    --ve-row: color-mix(in srgb, #2148b8 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-heading: #2148b8;
+    --ve-text: #2148b8;
+    --ve-muted: #415b99;
+    --ve-faint: #415b99;
+    --ve-accent: #a94c2b;
+    --ve-accent-soft: color-mix(in srgb, #2148b8 7%, transparent);
+    --ve-accent-contrast: #fafaf7;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #fafaf7;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #f4f4ee;
+    --ve-node-stroke: color-mix(in srgb, #2148b8 14%, transparent);
+    --ve-diagram-ink: #2148b8;
+    --ve-diagram-muted: #415b99;
+    --ve-diagram-frame: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #2148b8 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 4;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #2148b8;
+    --ve-code-text: #fafaf7;
+    --ve-code-muted: #d5d3cc;
+    --ve-code-rule: color-mix(in srgb, #fafaf7 14%, transparent);
+    --ve-code-accent: #d5d3cc;
+    --ve-poster-bg: #fafaf7;
+    --ve-poster-text: #2148b8;
+    --ve-poster-muted: #415b99;
+    --ve-poster-rule: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #fafaf7;
+    --ve-slide-text: #2148b8;
+    --ve-slide-muted: #415b99;
+    --ve-slide-rule: color-mix(in srgb, #2148b8 12%, transparent);
+  }
+
+  [data-ve-preset="algebrica"] {
+    --ve-shell-title-size: clamp(2.25rem, 4.5vw, 3.5rem);
+    --ve-shell-title-measure: 24ch;
+    --ve-shell-summary-size: 1.25rem;
+    --ve-font-display: "EB Garamond", Georgia, serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 400;
+    --ve-heading-weight: 500;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 8px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #f4f0ef;
+    --ve-bg-alt: #312f2f;
+    --ve-panel: #faf7f6;
+    --ve-panel-strong: #f4f0ef;
+    --ve-row: color-mix(in srgb, #312f2f 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-heading: #312f2f;
+    --ve-text: #312f2f;
+    --ve-muted: #68615f;
+    --ve-faint: #68615f;
+    --ve-accent: #784c3a;
+    --ve-accent-soft: color-mix(in srgb, #312f2f 7%, transparent);
+    --ve-accent-contrast: #f4f0ef;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #f4f0ef;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #faf7f6;
+    --ve-node-stroke: color-mix(in srgb, #312f2f 14%, transparent);
+    --ve-diagram-ink: #312f2f;
+    --ve-diagram-muted: #68615f;
+    --ve-diagram-frame: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #312f2f 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 4;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #312f2f;
+    --ve-code-text: #f4f0ef;
+    --ve-code-muted: #b5b3aa;
+    --ve-code-rule: color-mix(in srgb, #f4f0ef 14%, transparent);
+    --ve-code-accent: #d5d3cc;
+    --ve-poster-bg: #f4f0ef;
+    --ve-poster-text: #312f2f;
+    --ve-poster-muted: #68615f;
+    --ve-poster-rule: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #f4f0ef;
+    --ve-slide-text: #312f2f;
+    --ve-slide-muted: #68615f;
+    --ve-slide-rule: color-mix(in srgb, #312f2f 12%, transparent);
+  }
+
   [data-ve-preset="oa-design"] {
     --ve-font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
     --ve-font-body: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
@@ -383,35 +574,47 @@
     --ve-slide-rule: var(--ve-rule);
   }
 
+  /* Resolve these on the preset before an inverse surface remaps its ink. */
+  :root, [data-ve-preset] {
+    --ve-inverse-bg: var(--ve-bg-alt);
+    --ve-inverse-ink: var(--ve-bg);
+    --ve-accent-bg: var(--ve-accent);
+    --ve-accent-ink: var(--ve-accent-contrast);
+  }
+
   [data-ve-tone="light"] {
-    /* --ve-bg-alt is authored as the opposite-polarity surface of --ve-bg in
-       every preset, so --ve-bg is always a high-contrast "ink" color against
-       it. Content components (Pipeline, etc.) read --ve-muted/--ve-heading/
-       --ve-accent directly rather than the --ve-slide-* tokens, so those must
-       be remapped here too or they keep resolving to values tuned for the
-       preset's default (dark) surface and go near-invisible on this light
-       one. Solid values only (no color-mix on alpha) so contrast tooling that
-       reads computed text color can parse it. */
-    --ve-slide-bg: var(--ve-bg-alt);
-    --ve-slide-text: var(--ve-bg);
-    --ve-slide-muted: var(--ve-bg);
-    --ve-slide-rule: color-mix(in srgb, var(--ve-bg) 22%, transparent);
-    --ve-muted: var(--ve-bg);
-    --ve-heading: var(--ve-bg);
-    --ve-accent: var(--ve-bg);
+    --ve-surface: var(--ve-inverse-bg);
+    --ve-surface-ink: var(--ve-inverse-ink);
   }
 
   [data-ve-tone="accent"] {
-    --ve-slide-bg: var(--ve-accent);
-    --ve-slide-text: var(--ve-accent-contrast);
-    /* Solid, not color-mix: an alpha color-mix() result computes to a
-       `color(srgb ...)` string in this engine, which the contrast checker's
-       computed-color parser (rgb()/hex only) cannot read, so it silently
-       treats the text as invisible and fails it regardless of true
-       contrast. --ve-accent-contrast is already the correct high-contrast
-       ink for this surface. */
-    --ve-slide-muted: var(--ve-accent-contrast);
-    --ve-slide-rule: color-mix(in srgb, var(--ve-accent-contrast) 25%, transparent);
+    --ve-surface: var(--ve-accent-bg);
+    --ve-surface-ink: var(--ve-accent-ink);
+  }
+
+  :is([data-ve-tone="light"], [data-ve-tone="accent"]) {
+    --ve-slide-bg: var(--ve-surface);
+    --ve-slide-text: var(--ve-surface-ink);
+    --ve-slide-muted: var(--ve-surface-ink);
+    --ve-slide-rule: color-mix(in srgb, var(--ve-surface-ink) 25%, transparent);
+    --ve-heading: var(--ve-surface-ink);
+    --ve-text: var(--ve-surface-ink);
+    --ve-muted: var(--ve-surface-ink);
+    --ve-faint: var(--ve-surface-ink);
+    --ve-panel: var(--ve-surface);
+    --ve-panel-strong: var(--ve-surface);
+    --ve-row: color-mix(in srgb, var(--ve-surface-ink) 5%, transparent);
+    --ve-rule: var(--ve-slide-rule);
+    --ve-accent: var(--ve-surface-ink);
+    --ve-accent-contrast: var(--ve-surface);
+    --ve-accent-soft: color-mix(in srgb, var(--ve-surface-ink) 8%, transparent);
+    --ve-diagram-bg: var(--ve-surface);
+    --ve-node-bg: var(--ve-surface);
+    --ve-node-stroke: color-mix(in srgb, var(--ve-surface-ink) 35%, transparent);
+    --ve-diagram-ink: var(--ve-surface-ink);
+    --ve-diagram-muted: var(--ve-surface-ink);
+    --ve-diagram-frame: var(--ve-slide-rule);
+    --ve-diagram-accent-fill: var(--ve-accent-soft);
   }
 
   html {
@@ -491,12 +694,25 @@
   }
 
   .ve-diagram-shell {
-    overflow-x: auto;
+    min-width: 0;
+    margin: 0;
+    background: var(--ve-diagram-bg);
   }
 
   .ve-diagram-variant-desktop {
     min-width: 0;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-color: var(--ve-diagram-muted) var(--ve-diagram-bg);
+  }
+
+  .ve-diagram-variant-desktop:focus-visible {
+    outline: 2px solid var(--ve-accent);
+    outline-offset: 4px;
+  }
+
+  .ve-diagram-variant-desktop svg {
+    display: block;
   }
 
   .ve-diagram-variant-mobile {
@@ -505,31 +721,27 @@
 
   .ve-diagram-mobile-list {
     display: grid;
-    gap: 0;
     min-width: 0;
   }
 
   .ve-diagram-mobile-node {
     min-width: 0;
-    border: 1px solid var(--ve-diagram-frame);
-    border-radius: var(--ve-radius);
-    background: var(--ve-node-bg);
-    padding: 0.85rem 0.95rem;
+    padding: 1.25rem 0;
     color: var(--ve-diagram-ink);
+    overflow-wrap: anywhere;
+    scroll-margin-top: 1rem;
   }
 
-  .ve-diagram-mobile-node[data-ve-accent="true"] {
-    border-left-color: var(--ve-accent);
+  .ve-diagram-mobile-node + .ve-diagram-mobile-node {
+    border-top: 1px solid var(--ve-diagram-frame);
   }
 
   .ve-diagram-mobile-lane {
-    margin: 0 0 0.35rem;
-    color: var(--ve-faint);
-    font-family: var(--ve-font-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.14em;
-    line-height: 1.35;
-    text-transform: uppercase;
+    margin: 0 0 0.4rem;
+    color: var(--ve-diagram-muted);
+    font-family: var(--ve-font-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   .ve-diagram-mobile-node h3 {
@@ -537,79 +749,42 @@
     color: var(--ve-diagram-ink);
     font-family: var(--ve-font-body);
     font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.25;
+    font-weight: 600;
+    line-height: 1.4;
   }
 
   .ve-diagram-mobile-node p:not(.ve-diagram-mobile-lane) {
-    margin: 0.45rem 0 0;
-    color: var(--ve-muted);
-    font-family: var(--ve-font-mono);
-    font-size: 0.78rem;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
+    margin: 0.4rem 0 0;
+    color: var(--ve-diagram-muted);
+    font-family: var(--ve-font-body);
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
-  .ve-diagram-mobile-connector {
+  .ve-diagram-mobile-connections {
     display: grid;
-    grid-template-columns: 1px minmax(0, 1fr);
-    gap: 0.8rem;
-    min-height: 3rem;
-    padding: 0.35rem 0 0.35rem 1rem;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
-  .ve-diagram-mobile-line {
-    display: block;
-    width: 1px;
-    min-height: 2.3rem;
-    background: var(--ve-diagram-muted);
-  }
-
-  .ve-diagram-mobile-connector[data-ve-edge-style="dashed"] .ve-diagram-mobile-line {
-    background: repeating-linear-gradient(to bottom, var(--ve-diagram-muted) 0 5px, transparent 5px 10px);
-  }
-
-  .ve-diagram-mobile-chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    align-items: center;
-    gap: 0.4rem;
-    min-width: 0;
-  }
-
-  .ve-diagram-mobile-chip {
-    max-width: 100%;
-    border: 1px solid var(--ve-diagram-frame);
-    background: var(--ve-diagram-bg);
-    padding: 0.24rem 0.45rem;
+  .ve-diagram-mobile-connections a {
+    display: inline-block;
+    padding-block: 0.4rem;
     color: var(--ve-diagram-ink);
-    font-family: var(--ve-font-mono);
-    font-size: 0.68rem;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
-  .ve-diagram-mobile-chip[data-ve-edge-style="dashed"] {
-    border-style: dashed;
-  }
-
-  [data-ve-preset="nothing"] [data-diagram-role="diagram"] .ve-diagram-node-label {
-    font-family: var(--ve-font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  [data-ve-preset="terminal"] [data-diagram-role="diagram"] text {
-    letter-spacing: 0.06em;
+  .ve-diagram-mobile-connections a:focus-visible {
+    outline: 2px solid var(--ve-accent);
+    outline-offset: 3px;
   }
 
   @media (max-width: 640px) {
-    .ve-diagram-has-mobile {
-      overflow-x: clip;
-      padding: 0.85rem;
-    }
-
     .ve-diagram-has-mobile .ve-diagram-variant-desktop {
       display: none;
     }
@@ -907,37 +1082,53 @@
     gap: 1rem;
   }
 
-  [data-ve-preset="oa-design"] {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) {
     color-scheme: light;
     caret-color: var(--ve-accent);
   }
 
-  [data-ve-preset="oa-design"] ::selection {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) ::selection {
     background: color-mix(in srgb, var(--ve-accent) 18%, transparent);
     color: var(--ve-heading);
   }
 
-  [data-ve-preset="oa-design"] :focus-visible {
-    outline: 3px solid color-mix(in srgb, #3ba6f1 52%, transparent);
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :focus-visible {
+    outline: 3px solid var(--ve-accent);
     outline-offset: 3px;
   }
 
-  [data-ve-preset="oa-design"] .ve-shell-inner {
+  .ve-shell,
+  [data-ve-poster] {
+    --ve-copy-measure: 56ch;
+    font-kerning: normal;
+  }
+
+  .ve-shell p,
+  [data-ve-poster] p {
+    text-wrap: pretty;
+  }
+
+  .ve-section-body > p,
+  .ve-section-body > :is(ul, ol):not([class]),
+  .ve-section-body > .ve-callout {
+    max-width: var(--ve-copy-measure, 56ch);
+  }
+
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-inner {
     gap: 0;
     padding-block: clamp(1rem, 3vw, 2.5rem) clamp(4rem, 8vw, 8rem);
   }
 
-  [data-ve-preset="oa-design"] .ve-table-shell,
-  [data-ve-preset="oa-design"] .ve-diagram-shell,
-  [data-ve-preset="oa-design"] [data-ve-mermaid-shell],
-  [data-ve-preset="oa-design"] [data-ve-code-block] {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-table-shell,
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-mermaid-shell],
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-code-block] {
     border-color: var(--ve-rule);
     background: var(--ve-panel);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
     corner-shape: squircle;
   }
 
-  [data-ve-preset="oa-design"] .ve-shell-header {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
     align-items: end;
     padding: clamp(2rem, 5vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem);
     border: 0;
@@ -948,36 +1139,28 @@
     box-shadow: none;
   }
 
-  [data-ve-preset="oa-design"] .ve-shell-header h1 {
-    max-width: 13ch;
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header h1 {
+    max-width: 18ch;
     font-size: clamp(3rem, 7vw, 6rem);
-    line-height: 0.94;
+    line-height: 1.04;
     letter-spacing: -0.035em;
     text-wrap: balance;
   }
 
-  [data-ve-preset="oa-design"] .ve-shell-header > div > p {
-    max-width: 68ch;
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header > div > p {
+    max-width: 52ch;
     font-size: clamp(1rem, 1.6vw, 1.25rem);
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
-  [data-ve-preset="oa-design"] .ve-shell-source-card {
-    padding: 0 0 0 clamp(1rem, 2vw, 1.5rem);
-    border: 0;
-    border-left: 1px solid var(--ve-rule);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
 
-  [data-ve-preset="oa-design"] .ve-section {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section {
     gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(2rem, 5vw, 4.75rem) 0;
     border-bottom: 1px solid var(--ve-rule);
   }
 
-  [data-ve-preset="oa-design"] .ve-section-heading h2 {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section-heading h2 {
     max-width: 16ch;
     font-size: clamp(1.35rem, 2vw, 1.75rem);
     line-height: 1.1;
@@ -985,14 +1168,14 @@
     text-wrap: balance;
   }
 
-  [data-ve-preset="oa-design"] .ve-pipeline,
-  [data-ve-preset="oa-design"] .ve-risk-ledger {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline,
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger {
     gap: 0;
   }
 
-  [data-ve-preset="oa-design"] .ve-pipeline-item,
-  [data-ve-preset="oa-design"] .ve-risk-card,
-  [data-ve-preset="oa-design"] .ve-preset-card {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline-item,
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-card,
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-preset-card {
     padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
     border: 0;
     border-top: 1px solid var(--ve-rule);
@@ -1001,7 +1184,7 @@
     box-shadow: none;
   }
 
-  [data-ve-preset="oa-design"] .ve-callout {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-callout {
     padding: 1rem 0 0;
     border: 0;
     border-top: 1px solid var(--ve-accent);
@@ -1010,24 +1193,24 @@
     box-shadow: none;
   }
 
-  [data-ve-preset="oa-design"] .ve-pipeline-item > div:first-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline-item > div:first-child {
     color: var(--ve-muted);
     font-variant-numeric: tabular-nums;
   }
 
-  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="low"] > p:first-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-card[data-ve-risk-level="low"] > p:first-child {
     color: var(--ve-ok);
   }
 
-  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="medium"] > p:first-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-card[data-ve-risk-level="medium"] > p:first-child {
     color: var(--ve-warn);
   }
 
-  [data-ve-preset="oa-design"] .ve-risk-card[data-ve-risk-level="high"] > p:first-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-card[data-ve-risk-level="high"] > p:first-child {
     color: var(--ve-danger);
   }
 
-  [data-ve-preset="oa-design"] button {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button {
     min-height: 2.25rem;
     border: 1px solid transparent;
     border-radius: 999px;
@@ -1037,37 +1220,43 @@
     transition: background-color 160ms ease-out, color 160ms ease-out, transform 100ms ease-out;
   }
 
-  [data-ve-preset="oa-design"] button:hover {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:hover {
     background: color-mix(in srgb, var(--ve-heading) 8%, transparent);
   }
 
-  [data-ve-preset="oa-design"] button:active {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:active {
     transform: translateY(1px) scale(0.98);
   }
 
-  [data-ve-preset="oa-design"] code:not([data-ve-code-block] code) {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) code:not([data-ve-code-block] code) {
     border-radius: 999px;
   }
 
-  [data-ve-preset="oa-design"] [data-ve-default-preset="true"] > p:first-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > p:first-child {
     color: var(--ve-accent);
   }
 
-  [data-ve-preset="oa-design"] [data-ve-default-preset="true"] > div:last-child {
+  :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > div:last-child {
     background: var(--ve-accent);
   }
 
+  [data-ve-preset="algebrica"] .ve-shell-header h1 {
+    letter-spacing: -0.02em;
+  }
+
+  [data-ve-preset="algebrica"] .ve-shell-header > div > p,
+  [data-ve-preset="algebrica"] .ve-section-body > p {
+    font-family: "EB Garamond", Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
   @media (max-width: 1023px) {
-    [data-ve-preset="oa-design"] .ve-shell-header {
+    :is([data-ve-preset="oa-design"], [data-ve-preset="lieflat"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
       padding: 2rem 0;
     }
 
-    [data-ve-preset="oa-design"] .ve-shell-source-card {
-      padding: 1rem 0 0;
-      border-top: 1px solid var(--ve-rule);
-      border-left: 0;
     }
-  }
 
   .ve-output {
     --ve-page-pad-x: clamp(20px, 3vw, 44px);

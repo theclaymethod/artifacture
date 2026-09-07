@@ -1,28 +1,26 @@
 # PresentationDeck vs SlideDeck
 
-Artifacture ships two deck engines. They solve different problems; neither
-replaces the other.
+Choose the deck engine for how the audience will read it.
 
 | | `SlideDeck` / `Slide` | `PresentationDeck` / `PresentationSlide` |
 |-|-|-|
-| Mental model | A scrolling document of slide-sized sections | A fixed 1920×1080 stage a presenter drives |
+| Format | A scrolling document of slide-sized sections | A fixed 1920×1080 stage |
 | Layout | Responsive; content reflows per viewport | Designed once at stage size; scaled to fit, letterboxed |
 | Navigation | Scroll / scroll-snap (vertical or horizontal) | Two-axis keyboard navigation: Left/Right changes slides; Up/Down changes internal states. Space, PageUp/Down, Home/End, edge click zones, and the rail remain slide-level navigation. |
-| Interactivity | Static content, optional review tools | Drill-down cards and sheets, layer explorers, progressive disclosure |
+| Interactivity | Embedded interactive components, optional review tools | Drill-down cards and sheets, layer explorers, ordered states |
 | Reading mode | Self-serve: send the link, reader scrolls | Presented: one slide at a time, details on demand |
 | Verifier profile | `slides` (scroll-snap contract) | `page` (fixed stage never scrolls) |
-| Best for | Handouts, recaps, docs-as-slides, PDF-ish exports | Exec/architecture walkthroughs, demos, talks with Q&A drill-downs |
+| Best for | Handouts, recaps, printable slide documents | Architecture walkthroughs, demos, talks with supporting detail |
 
 ## When to use which
 
 Use **SlideDeck** when the artifact is read without you in the room. It
 behaves like a document: responsive, printable, scannable top to bottom.
 
-Use **PresentationDeck** when a human presents the artifact. The fixed stage
-guarantees your layout survives any projector or window size (the engine
-scales `min(w/1920, h/1080)` and letterboxes the rest), and the drill-down
-primitives let you keep slides sparse while holding detail one click away —
-the deck is the appendix.
+Use **PresentationDeck** for a presented sequence. It scales the stage by
+`min(w/1920, h/1080)` and letterboxes the remaining space. Drill-downs hold
+supporting detail without crowding the base slide. On small screens the
+whole stage shrinks; use `SlideDeck` when mobile reading matters.
 
 Both are exported the same way (`npm run ve:export -- <src> --out <out>`)
 and both consume the `--ve-*` preset tokens, so the same preset skins either.
@@ -30,17 +28,20 @@ and both consume the `--ve-*` preset tokens, so the same preset skins either.
 ## PresentationDeck quick start
 
 ```tsx
-import { PresentationDeck, PresentationSlide, DrillCard, StatRow } from 'visual-explainer-mdx/components';
+import { PresentationDeck, PresentationSlide, DrillCard, HairlineList } from 'visual-explainer-mdx/components';
 
 export default function Deck() {
   return (
-    <PresentationDeck title="Q3 Architecture" eyebrow="Platform review" preset="paper-ink">
-      <PresentationSlide kicker="01 · Context" title="Where we are" shortTitle="Context" tone="dark">
-        <StatRow stats={[{ value: '3', label: 'Services' }, { value: '2', label: 'Regions' }]} />
+    <PresentationDeck title="How a queue recovers" preset="lieflat">
+      <PresentationSlide title="A timeout can hide success" shortTitle="Uncertainty">
+        <HairlineList items={[
+          { head: 'Preserve identity', body: 'Every attempt uses the same operation key.' },
+          { head: 'Look for an outcome', body: 'Reconcile the previous attempt before repeating a side effect.' },
+        ]} />
       </PresentationSlide>
-      <PresentationSlide kicker="02 · Plan" title="Where we go" shortTitle="Plan" tone="accent">
-        <DrillCard drillId="detail" title="The migration" body="Click for the full sequence.">
-          Detail content shown in an expanding sheet.
+      <PresentationSlide title="Keep the evidence for repair" shortTitle="Repair">
+        <DrillCard drillId="repair" title="A quarantined job" body="Retain the input, last error, and attempt history.">
+          <p>Inspect the cause, repair the input, and replay with the original operation key.</p>
         </DrillCard>
       </PresentationSlide>
     </PresentationDeck>
@@ -55,11 +56,16 @@ Notes:
   wrap `PresentationSlide` in your own component (e.g. to hold drill state),
   pass `shortTitle` and `tone` at the usage site and forward them.
 - **Tones** reuse `Slide`'s contract: `dark` (the preset's base surface),
-  `light` (`--ve-bg-alt`, opposite polarity), `accent` (`--ve-accent` surface;
+  `light` (the preset's contrasting surface), `accent` (`--ve-accent` surface;
   CTAs automatically flip to the tone's ink color).
 - **Stage size** defaults to 1920×1080; override with
   `stageWidth`/`stageHeight`. All font sizes inside slides are stage-space
-  pixels — the scale transform handles the rest.
+  pixels. Shared labels use at least 24px and body recipes use 26–28px;
+  custom text should follow that floor. Inspect the exported deck at its
+  intended viewport, with the rail open. Reduce content before reducing type.
+- **Visual language** defaults to `lieflat`. Choose `algebrica` for scholarly
+  reading or `mono-color` for one or two inks. Use tone changes to explain a
+  change in content; omit decorative kickers, counts, badges, and hover effects.
 
 ## Two-axis navigation
 
@@ -117,23 +123,24 @@ rendering.
   that isn't on `button, a, input, select, textarea, [data-interactive]`,
   with `transform-origin` controlled by `origin` for corner-anchored
   expansion), `LayerExplorer` (card list + detail panel).
-- **Diagrams** — `LadderDiagram` (ascending staircase on grid paper; card
-  fills are always opaque so grid lines never bleed through),
+- **Diagrams** — `LadderDiagram` (ascending sequence with content-sized stages),
   `FanoutDiagram` (one source, N outputs).
 - **Composition** — `StatRow`/`Metric`, `PullQuote`, `Stepper`,
   `HairlineList`, `CodePanel`, `MonoLabel`, `DisplayText`, `IconChip` + the
-  geometric icon set, `ShineOverlay`/`trackShine` (pointer-follow shine).
+  geometric icon set. Use metrics only for relevant values with provenance.
+  `ShineOverlay`/`trackShine` remain available for explicit effect requests;
+  shared content panels do not enable them.
 - **Helpers** — `fitStage` (scale-to-fit math), `shouldDismissDrillSheet`
   (the dismiss guard), `tint`/`solidTint` (hex tinting; for token-driven
   fills use the `.ve-pres-solid` opaque-layer idiom instead).
 
 ## Behavioral contract (evals)
 
-The engine's behavior is pinned by `evals/run-presentation.mjs`
+The engine's behavior is checked by `evals/run-presentation.mjs`
 (`npm run ve:eval-presentation`, runs in CI): the click-anywhere-to-close
 guard matrix, two-axis keyboard-nav matrix, drill CTA contract (click + Enter + Space;
 primary vs secondary computed styles), reduced-motion, scale-to-fit geometry
-across viewports, rail collapse/expand widths, and preset re-skinning with a
-an allowlist-based scan proving the module ships zero color/font literals. Unit tests for the pure logic live in
+across viewports, rail collapse/expand widths, and preset re-skinning. A source
+scan checks that fonts and colors come from theme tokens. Unit tests for the pure logic live in
 `visual-explainer-mdx/presentation-core.test.mjs` (`npm test`). Change the
 engine, run both.

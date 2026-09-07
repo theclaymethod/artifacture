@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keep it. Repair it.</title>
+<!-- Original editorial illustration. Keep this file beside assets/ while authoring;
+     embed local media before delivering a standalone HTML file. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; --paper: #fafaf7; --ink: #2148b8; --accent: #a94c2b; --rule: #c5cce0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 18px/1.5 Inter, system-ui, sans-serif; }
+  main { max-width: 1440px; margin: auto; padding: clamp(24px, 5.5vw, 80px); }
+  header { display: grid; grid-template-columns: 1.6fr 1fr; gap: 56px; align-items: end; }
+  h1 { margin: 0; font: 400 clamp(72px, 10.6vw, 152px)/.95 'Source Serif 4', Georgia, serif; letter-spacing: -.055em; }
+  h1 span { display: block; }
+  .lede { max-width: 27ch; margin: 0 0 8px; font-size: clamp(18px, 1.7vw, 24px); line-height: 1.45; text-wrap: pretty; }
+  figure { margin: 52px 0 56px 12%; }
+  img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+  .reading { display: grid; grid-template-columns: 1fr 1.5fr; gap: 80px; padding-top: 32px; border-top: 1px solid var(--rule); }
+  h2 { font: 500 clamp(28px, 3vw, 40px)/1.1 'Source Serif 4', Georgia, serif; letter-spacing: -.025em; margin: 0; max-width: 15ch; text-wrap: balance; }
+  p { margin: 0; max-width: 49ch; text-wrap: pretty; }
+  .accent { color: var(--accent); }
+  ::selection { background: var(--ink); color: var(--paper); }
+  @media (max-width: 700px) {
+    header, .reading { grid-template-columns: 1fr; gap: 28px; }
+    .lede { max-width: 32ch; }
+    figure { margin: 36px -24px; }
+    .reading { padding-top: 28px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><span>Keep it.</span><span>Repair it.</span></h1>
+    <p class="lede">Screws, clips and replaceable parts make a small repair possible. Design the way in as carefully as the way it works.</p>
+  </header>
+  <figure>
+    <img src="assets/repair-mouse.webp" width="1536" height="1024" alt="Two-ink illustration of an opened wired mouse: its shell sits beside the exposed circuit board and scroll wheel, with a small terracotta screwdriver." />
+  </figure>
+  <section class="reading" aria-labelledby="repair-heading">
+    <h2 id="repair-heading">Access is part of the design.</h2>
+    <p>A removable shell exposes the parts that wear out. Keep fasteners reachable, make the assembly legible, and let one failed component be replaced. <span class="accent">The rest can stay.</span></p>
+  </section>
+</main>
+</body>
+</html>

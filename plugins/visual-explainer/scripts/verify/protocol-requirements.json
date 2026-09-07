@@ -13,7 +13,7 @@
   },
   {
     "family": "F1_slop_global",
-    "req": "Never fall back to ASCII-art tables or diagrams while this skill is loaded; render the content as a styled HTML artifact instead (proactively for any table with 4+ rows or 3+ columns)."
+    "req": "Use a styled chart, diagram, or table when the visual improves understanding. Prefer concise prose for relationships or facts that do not need a visual; do not force an artifact from a row or column count alone."
   },
   {
     "family": "F1_slop_global",
@@ -21,7 +21,7 @@
   },
   {
     "family": "F1_slop_global",
-    "req": "Run all prose (headlines, leads, body paragraphs, card descriptions, callouts, pull quotes, slide body copy) through /unslop before writing it into the HTML."
+    "req": "Edit all visible prose for specific meaning and concise wording before export. Remove decorative labels, redundant captions, and unsupported claims; use the available prose-review workflow when useful."
   },
   {
     "family": "F1_slop_global",
@@ -29,7 +29,7 @@
   },
   {
     "family": "F2_responsive",
-    "req": "Detect artifact profile before running any responsive check: fixed-canvas profiles (horizontal --magazine deck, poster, vertical/horizontal slide deck, reel, video-comp) are exempt from the mobile responsiveness contract and must never be failed by it. Detection signals: fixed px width+height on root/body matching a known canvas, a data-layout=slide|magazine|poster marker, or absence of any @media(max-width) query."
+    "req": "Detect the artifact profile before responsive checks. Use declared layout and canvas dimensions to distinguish responsive pages from fixed canvases; absence of a mobile media query alone does not establish a fixed-canvas profile. Verify each profile at its intended display and export sizes."
   },
   {
     "family": "F2_responsive",
@@ -53,7 +53,7 @@
   },
   {
     "family": "F3_diagrams",
-    "req": "Bounded repair loop: the post-screenshot repair loop is capped at 2 attempts on hand-authored SVG; if defects remain after attempt 2, the figure must be replaced with Mermaid rather than iterating further."
+    "req": "Bounded repair loop: after two unsuccessful repairs to hand-authored SVG, simplify or split the diagram, choose another renderer that preserves its meaning, or report the remaining defect. Do not switch to Mermaid solely because a repair count was reached."
   },
   {
     "family": "F3_diagrams",
@@ -61,7 +61,7 @@
   },
   {
     "family": "F3_diagrams",
-    "req": "Mermaid gating: Mermaid is used only when genuinely superior (15+ node graph, uniform-shape forest where auto-layout beats hand placement, or explicit user request); when used, its rendered SVG remains subject to the diagram anti-pattern, focal, masking, and 4px-grid checks."
+    "req": "Renderer selection: use DiagramCanvas for compact flow, tree, swimlane, or timeline; Archify for complex typed system maps; custom SVG for specialized geometry. Use Mermaid when explicitly requested or when its graph grammar and layout fit better. Inspect every renderer for complete labels, meaningful encodings, and readable initial scale."
   },
   {
     "family": "F3_diagrams",
@@ -69,7 +69,7 @@
   },
   {
     "family": "F4_presets",
-    "req": "Sub-agent fragment contract (enforced at stitch time by the orchestrator, before assembly): each sub-agent's final message must be a single valid JSON object (no prose/markdown/code fences) with required keys role, section_html, scoped_css, fonts_needed, libraries_needed, diagram_sources (notes optional), correct types, and role ∈ {hero,diagram,table,dashboard,prose}. Reject the fragment otherwise."
+    "req": "Legacy raw-HTML fragment contract, used only when the MDX/TSX route is blocked: each section worker returns one JSON object with role, section_html, scoped_css, fonts_needed, libraries_needed, and diagram_sources; notes are optional. Validate field types and role against references/section-contract.md. Ordinary MDX/TSX work uses separate file ownership and parent integration."
   },
   {
     "family": "F4_presets",
@@ -77,7 +77,7 @@
   },
   {
     "family": "F4_presets",
-    "req": "Sub-agent fonts_needed entries must be drawn from {Geist Pixel variants, Doto, Space Grotesk, Space Mono} and libraries_needed from {mermaid, chart.js, anime}; reject unknown fonts/libraries at the fragment gate."
+    "req": "For legacy HTML fragments, fonts_needed contains only fonts from the selected preset or the parent's approved list; Inter is the default body face. Supported libraries_needed are mermaid, chart.js, and anime. Reject unapproved additions; do not substitute an unrelated legacy font whitelist."
   },
   {
     "family": "F4_presets",
@@ -85,11 +85,11 @@
   },
   {
     "family": "F4_presets",
-    "req": "Fan-out policy: 1–2 sections build sequentially with no sub-agents; 3+ sections dispatch one sub-agent per section in a single parallel Task batch, unless --no-parallel is explicitly requested."
+    "req": "For legacy HTML assembly, build 1–2 sections sequentially; fan out 3+ independent sections only when parallel agents are available and --no-parallel was not requested. Use the host's available agent mechanism. Ordinary source work uses bounded file ownership."
   },
   {
     "family": "F4_presets",
-    "req": "Aesthetic selection: OA Design is the default; deviate only when the user names a different aesthetic, supplies a specific palette/typographic direction, or requests a creative/expressive piece. Confirm the chosen aesthetic matches the request before generating, and never use a decorative grid background."
+    "req": "Aesthetic selection: lieflat is the default, with paper gray, charcoal, Inter, and readable data marks. Follow a user's named preset or supplied direction. Remove ornamental metadata and decorative grids; preserve necessary state, ownership, provenance, and navigation."
   },
   {
     "family": "F4_presets",
@@ -97,11 +97,11 @@
   },
   {
     "family": "F5_slides",
-    "req": "Before writing any deck HTML, inventory the source document: enumerate and count every section, subsection, card, table row, decision, specification, collapsible detail, and footnote (slide-patterns Step 1). A 7-section source typically yields 18-25 slides, not 10-13."
+    "req": "Before authoring a deck, inventory requested claims, decisions, comparisons, examples, and qualifications. Map each material item to a slide or deliberate detail state; the argument determines the slide count, not a section-to-slide quota."
   },
   {
     "family": "F5_slides",
-    "req": "After outlining, run the coverage-verify step (Step 5): scan the Step-1 inventory and confirm nothing is unmapped; if a reader of the source would notice something missing, add slides before generating HTML."
+    "req": "After outlining, confirm every material source item is represented or deliberately omitted with an explanation. Add or revise slides when necessary to preserve the requested argument and depth."
   },
   {
     "family": "F5_slides",
@@ -109,7 +109,7 @@
   },
   {
     "family": "F5_slides",
-    "req": "When --magazine is passed, follow the flag workflow in order: use the horizontal engine, rotate tints (no consecutive repeats), enforce dark cover + dark back cover + >=1 interior dark panel, insert >=1 full-bleed 100px+ stat page, add the nav-dots strip + arrow-key handler, and apply consecutive-layout variety."
+    "req": "When --magazine is passed, use the horizontal reader engine and preserve current-page state with reachable navigation. Choose page composition from the argument; do not require tint rotation, dark-page quotas, a full-bleed statistic, or decorative layout variation."
   },
   {
     "family": "F5_slides",
@@ -121,7 +121,7 @@
   },
   {
     "family": "F6_poster_video",
-    "req": "Poster: after every `poster export`, load and visually inspect the exact exported PNG against the 6-point canvas-fit checklist (edge clipping, cut elements, unexplained blank space, hierarchy survives, hero/moment-of-surprise not shrunk away, status color still only on values) BEFORE reporting the poster done; never claim success if any check fails, even if it 'kind of' fits."
+    "req": "After each poster export, inspect the exact exported image for clipped text, cut elements, unintended blank space, readable hierarchy, and faithful meaning. Repair observed defects before reporting completion."
   },
   {
     "family": "F6_poster_video",
@@ -165,7 +165,7 @@
   },
   {
     "family": "F6_poster_video",
-    "req": "Typography: never reuse the same font pairing on two consecutive generated artifacts."
+    "req": "Typography: preserve the selected preset's font system across related artifacts. Change typography only when the content or a user's visual direction calls for it; do not rotate font pairs for novelty."
   },
   {
     "family": "F6_poster_video",
@@ -173,19 +173,19 @@
   },
   {
     "family": "F7_process",
-    "req": "CLARIFY TIER 0 (must ask): When the invoked command is /generate-video, /render-video, /generate-slides --magazine, or /generate-poster, call AskUserQuestion exactly once (1-3 questions) BEFORE running any render/export/build command — UNLESS the user passed --no-ask, or the user's message already contains an escape-hatch phrase ('just generate', \"don't ask\", 'go ahead', 'use defaults'), or the user already supplied a complete brief answering the questions."
+    "req": "CLARIFY MATERIAL CHOICES: Before costly rendering, resolve only missing inputs or choices that materially change the result. Honor a complete brief and preferences already supplied. Rendering cost alone does not require reconfirmation; --no-ask and equivalent requests skip optional questions."
   },
   {
     "family": "F7_process",
-    "req": "CLARIFY TIER 2 (never ask): When the invoked command is /fact-check or /share, do NOT call AskUserQuestion at all — operate on the existing target directly."
+    "req": "MECHANICAL ROUTES: For fact-checking and sharing, operate on the specified target and authorized destination. Ask only when required input or destination is missing."
   },
   {
     "family": "F7_process",
-    "req": "CLARIFY TIER 1 (ask only if unclear): For every other command, write a one-sentence brief covering topic, audience, depth, and aesthetic. If you can write it confidently, generate directly with no AskUserQuestion. If one or more of those four dimensions is unclear, call AskUserQuestion addressing only the unclear dimension(s), then generate."
+    "req": "BRIEF: Infer topic, audience, depth, and visual direction from the request and available context. Proceed when the brief is sufficient; ask one concise question only about an unresolved material choice."
   },
   {
     "family": "F7_process",
-    "req": "ASKUSERQUESTION SHAPE: Each AskUserQuestion dialog has 1 to 4 questions. Each question that is not multiSelect has 2 to 4 mutually-exclusive options. Each question header is at most 12 characters. When a question has a sensible default, list that option first and label it '(recommended)'."
+    "req": "QUESTION TOOL: Use the host's available question mechanism and follow its schema. Do not assume AskUserQuestion exists. Keep questions concise and avoid asking the user to select routine components or layout algorithms."
   },
   {
     "family": "F7_process",
@@ -193,7 +193,7 @@
   },
   {
     "family": "F7_process",
-    "req": "SOURCE OF TRUTH: Make all content changes in the .mdx/.tsx source and re-export with `npm run ve:export`. Never hand-edit the generated HTML. If no MDX/React source exists and you must hand-write HTML, do it only because the MDX/React path is blocked, and state that fallback explicitly to the user in your final message."
+    "req": "SOURCE OF TRUTH: Apply content changes to editable MDX/TSX or Archify JSON and export through that route. Never patch generated HTML to bypass source or validation. Use hand-authored HTML only when the source route is blocked and disclose that fallback."
   },
   {
     "family": "F7_process",
@@ -229,7 +229,7 @@
   },
   {
     "family": "F7_process",
-    "req": "FAN-OUT POLICY: If the outline has 3 or more sections and --no-parallel was not passed, dispatch one sub-agent Task per section in a single parallel batch. If it has 1-2 sections, build sequentially with no sub-agents."
+    "req": "FAN-OUT POLICY: Delegate independent work through available agents with clear ownership; avoid overlapping edits. The legacy raw-HTML section contract applies only to that fallback route and respects --no-parallel."
   },
   {
     "family": "F7_process",

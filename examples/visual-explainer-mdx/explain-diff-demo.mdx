@@ -1,98 +1,26 @@
 import { CodeBlock, DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from '../../visual-explainer-mdx/components';
 
-export default function ExplainDiffDemo() {
-  return (
-    <ExplainerShell
-      eyebrow="explain-diff"
-      preset="blueprint"
-      reviewTools={false}
-      title="Why This Diff Adds a Cache"
-      summary="A literate walkthrough reads the surrounding behavior first, then uses the patch as evidence."
-    >
-      <Section kicker="background" title="The function was a direct database read">
-        <DiagramCanvas
-          layout="flow"
-          nodes={[
-            { id: 'caller', label: 'Caller', shape: 'oval' },
-            { id: 'loader', label: 'loadSession', accent: true },
-            { id: 'db', label: 'Database' },
-          ]}
-          edges={[
-            { from: 'caller', to: 'loader', label: 'id' },
-            { from: 'loader', to: 'db', label: 'find' },
-          ]}
-        />
-      </Section>
-
-      <Section kicker="intuition" title="The new branch avoids repeated work">
-        <DiagramCanvas
-          layout="flow"
-          nodes={[
-            { id: 'call', label: 'Request', shape: 'oval' },
-            { id: 'cache', label: 'Cache?', shape: 'diamond', accent: true },
-            { id: 'return', label: 'Return cached' },
-            { id: 'query', label: 'Query database' },
-          ]}
-          edges={[
-            { from: 'call', to: 'cache' },
-            { from: 'cache', to: 'return', label: 'hit' },
-            { from: 'cache', to: 'query', label: 'miss' },
-          ]}
-        />
-      </Section>
-
-      <Section kicker="code" title="Read the control-flow change before the storage calls">
-        <DiffBlock
-          filename="src/session.ts"
-          language="ts"
-          mode="split"
-          patch={`--- a/src/session.ts
-+++ b/src/session.ts
-@@ -1,8 +1,11 @@
- export async function loadSession(id: string) {
--  const row = await db.sessions.find(id);
--  return row;
-+  const cached = cache.get(id);
-+  if (cached) return cached;
-+  const row = await db.sessions.find(id);
-+  cache.set(id, row);
-+  return row;
- }`}
-        />
-        <CodeBlock
-          filename="session invariant"
-          language="ts"
-          code={`if (cached) return cached;
-cache.set(id, row);`}
-          annotations={[
-            { line: 1, note: 'The early return changes the common path.' },
-            { line: 2, note: 'The miss path seeds the next request.' },
-          ]}
-        />
-      </Section>
-
-      <Section kicker="quiz" title="Check the mental model">
-        <Quiz
-          questions={[
-            {
-              q: 'Which line changes the common path for repeat requests?',
-              options: [
-                { text: 'if (cached) return cached;', correct: true, why: 'That branch returns before the database call on a cache hit.' },
-                { text: 'const row = await db.sessions.find(id);', why: 'That line still handles misses; it is not the new common-path exit.' },
-                { text: 'return row;', why: 'That return already existed conceptually after loading the row.' },
-              ],
-            },
-            {
-              q: 'What background fact matters before explaining this diff?',
-              options: [
-                { text: 'The caller provides a session id.', why: 'Useful, but it does not explain why caching changes behavior.' },
-                { text: 'The old function always asked the database.', correct: true, why: 'The cache only matters because the old path had no fast return.' },
-                { text: 'The file is TypeScript.', why: 'Language context helps syntax, not the design change.' },
-              ],
-            },
-          ]}
-        />
-      </Section>
-    </ExplainerShell>
-  );
-}
+<ExplainerShell title="A cache adds an early return" summary="An example change to an immutable catalog reader: repeat requests reuse the same version instead of loading it again." reviewTools={false}>
+  <Section title="The old path always reads the origin">
+    <DiagramCanvas nodes={[{id:'request',label:'Request',shape:'oval'},{id:'read',label:'Read origin'},{id:'return',label:'Return catalog'}]} edges={[{from:'request',to:'read'},{from:'read',to:'return'}]} />
+  </Section>
+  <Section title="The new path distinguishes a hit from a miss">
+    <DiagramCanvas layout="flow" nodes={[{id:'request',label:'Request',shape:'oval'},{id:'lookup',label:'Version cached?',shape:'diamond'},{id:'hit',label:'Return cached catalog'},{id:'miss',label:'Read and cache catalog'}]} edges={[{from:'request',to:'lookup'},{from:'lookup',to:'hit',label:'hit'},{from:'lookup',to:'miss',label:'miss'}]} />
+  </Section>
+  <Section title="The early return is the behavior change">
+    <DiffBlock language="ts" filename="Illustrative catalog.ts" mode="split" before={`export async function loadCatalog(version: string) {
+  return readOrigin(version);
+}`} after={`export async function loadCatalog(version: string) {
+  const cached = cache.get(version);
+  if (cached !== undefined) return cached;
+  const catalog = await readOrigin(version);
+  cache.set(version, catalog);
+  return catalog;
+}`} />
+    <CodeBlock language="ts" code={`if (cached !== undefined) return cached;`} annotations={[{line:1,note:'A hit leaves before the origin read.'}]} />
+    <p>The key contains the immutable catalog version. This avoids mixing published versions, but it does not bound memory or coalesce simultaneous misses. Those policies need separate decisions.</p>
+  </Section>
+  <Section title="Check the read path">
+    <Quiz questions={[{q:'What does a cache hit skip?',options:[{text:'The origin read.',correct:true,why:'The early return occurs before readOrigin.'},{text:'The cache lookup.',why:'Every request must look up its version before it can be classified as a hit.'}]},{q:'Does this patch prevent simultaneous misses from loading twice?',options:[{text:'No; both may reach readOrigin.',correct:true,why:'No in-flight request is stored or shared.'},{text:'Yes; cache.set runs eventually.',why:'An eventual value does not coordinate two earlier reads.'}]}]} />
+  </Section>
+</ExplainerShell>

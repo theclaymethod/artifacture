@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projection: the closest point on a line</title>
+<!-- An original mathematical explainer inspired by Algebrica's warm surfaces,
+     serif hierarchy, and open reading layout. No upstream content or assets. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light dark; --paper: #f4efee; --ink: #302c2b; --muted: #68605e; --rule: #d5ccca; --line: #8a7771; --font-body: 'EB Garamond', Georgia, serif; --font-ui: 'Inter', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #211e1e; --ink: #f0e9e6; --muted: #bcb0aa; --rule: #554946; --line: #c2aaa0; } }
+  :root[data-theme="dark"] { --paper: #211e1e; --ink: #f0e9e6; --muted: #bcb0aa; --rule: #554946; --line: #c2aaa0; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scrollbar-color: var(--line) var(--paper); }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 20px/1.5 var(--font-body); font-kerning: normal; }
+  .layout { display: grid; grid-template-columns: 190px minmax(0, 860px); gap: 64px; max-width: 1280px; margin: auto; padding: 52px 36px 96px; }
+  main { min-width: 0; }
+  nav { align-self: start; position: sticky; top: 40px; padding-top: 10px; font-family: var(--font-ui); }
+  nav a { display: block; padding: 9px 0; color: var(--muted); font-size: 15px; text-decoration: none; }
+  nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 5px; }
+  nav a[aria-current="location"] { color: var(--ink); font-weight: 500; }
+  .theme-toggle { margin-top: 28px; border-top: 1px solid var(--rule); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .theme-toggle button { min-height: 40px; padding: 8px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font: 400 14px var(--font-ui); cursor: pointer; }
+  .theme-toggle button[aria-checked="true"] { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+  h1, h2 { font-weight: 400; line-height: 1.2; text-wrap: balance; }
+  h1 { font-size: clamp(36px, 3vw, 42px); letter-spacing: -.015em; margin: 0 0 24px; }
+  h2 { font-size: clamp(27px, 2.5vw, 30px); margin: 0 0 20px; }
+  p { max-width: 64ch; margin: 0 0 20px; text-wrap: pretty; }
+  .lede { max-width: 54ch; font-size: 22px; line-height: 1.4; color: var(--muted); }
+  section { padding-top: 42px; margin-top: 42px; border-top: 1px solid var(--rule); scroll-margin-top: 28px; }
+  figure { margin: 32px 0 0; }
+  svg { display: block; width: 100%; max-width: 480px; height: auto; margin: 0 auto; }
+  svg text { font: 400 16px var(--font-ui); fill: var(--ink); }
+  .axis { stroke: var(--line); stroke-width: 1; }
+  .vector { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+  .normal { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; fill: none; }
+  .formula { margin: 28px 0; padding: 20px 0; font-size: clamp(24px, 3vw, 30px); line-height: 1.5; }
+  .formula sup { font-size: .65em; }
+  .example { display: grid; grid-template-columns: 160px minmax(0,1fr); gap: 16px 28px; margin: 24px 0 0; }
+  dt, dd { margin: 0; padding: 16px 0; border-top: 1px solid var(--rule); }
+  dt { color: var(--muted); }
+  a { color: inherit; text-underline-offset: 4px; }
+  ::selection { background: var(--ink); color: var(--paper); }
+  :focus-visible { outline: 3px solid var(--line); outline-offset: 5px; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; gap: 40px; padding: 24px 22px 64px; } nav { position: static; display: flex; flex-wrap: wrap; gap: 4px 20px; } .theme-toggle { margin: 0; padding: 0; border: 0; } .example { grid-template-columns: 1fr; gap: 0; } dd { border: 0; padding-top: 0; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav aria-label="On this page">
+    <a href="#idea" aria-current="location">The idea</a>
+    <a href="#construction">The construction</a>
+    <a href="#calculation">The calculation</a>
+    <div class="theme-toggle" role="radiogroup" aria-label="Color theme">
+      <button type="button" role="radio" data-theme="light" aria-checked="false">Light</button>
+      <button type="button" role="radio" data-theme="dark" aria-checked="false">Dark</button>
+      <button type="button" role="radio" data-theme="system" aria-checked="true">Auto</button>
+    </div>
+  </nav>
+  <main>
+    <header id="idea">
+      <h1>The closest point on a line</h1>
+      <p class="lede">A projection keeps the part of a vector that points along a chosen direction.</p>
+      <p>Start with a point <i>v</i> and a line through the origin. The shortest route from the point to the line meets it at a right angle. That meeting point is the projection of <i>v</i> onto the line.</p>
+    </header>
+    <section id="construction">
+      <h2>Separate the two directions</h2>
+      <p>The vector from the origin to <i>v</i> splits into a component along the line and a perpendicular remainder. Moving to any other point on the line makes the distance longer.</p>
+      <figure>
+        <svg viewBox="0 0 360 290" role="img" aria-labelledby="projection-title projection-desc">
+          <title id="projection-title">Projection onto a horizontal line</title>
+          <desc id="projection-desc">A vector v runs from origin O to point (4, 3). Its projection onto the horizontal line is p at (4, 0). A dashed vertical line connects p to v and meets the horizontal line at a right angle.</desc>
+          <defs><marker id="projection-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink)"/></marker></defs>
+          <line class="axis" x1="20" y1="220" x2="342" y2="220"/>
+          <path class="vector" d="M 40 220 L 232 76" marker-end="url(#projection-arrow)"/>
+          <path class="vector" d="M 40 220 H 232" marker-end="url(#projection-arrow)"/>
+          <path class="normal" d="M 232 76 V 220"/>
+          <path class="axis" d="M 218 220 V 206 H 232" fill="none"/>
+          <circle cx="40" cy="220" r="2.5" fill="var(--ink)"/><circle cx="232" cy="76" r="3" fill="var(--ink)"/>
+          <text x="32" y="248">O</text><text x="242" y="72">v = (4, 3)</text><text x="230" y="248">p = (4, 0)</text>
+          <text x="100" y="204">Along the line</text><text x="242" y="158">Perpendicular</text><text x="180" y="278" text-anchor="middle">Direction u</text>
+        </svg>
+      </figure>
+    </section>
+    <section id="calculation">
+      <h2>Find the amount along the line</h2>
+      <p>For any nonzero direction vector <i>u</i>, the dot product measures how much <i>v</i> points along it. Dividing by <i>u</i> · <i>u</i> accounts for the length of the direction vector.</p>
+      <p class="formula" aria-label="p equals v dot u divided by u dot u, times u">p = ((v · u) / (u · u)) u</p>
+      <dl class="example">
+        <dt>Choose a direction</dt><dd>u = (1, 0), the horizontal axis.</dd>
+        <dt>Take the dot product</dt><dd>(4, 3) · (1, 0) = 4.</dd>
+        <dt>Find the projection</dt><dd>p = 4(1, 0) = (4, 0).</dd>
+        <dt>Check the remainder</dt><dd>v − p = (0, 3), which is perpendicular to (1, 0).</dd>
+      </dl>
+    </section>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const buttons = [...document.querySelectorAll('.theme-toggle button')];
+  function setTheme(mode) {
+    if (mode === 'system') delete root.dataset.theme;
+    else root.dataset.theme = mode;
+    buttons.forEach(button => button.setAttribute('aria-checked', String(button.dataset.theme === mode)));
+    try { localStorage.setItem('algebrica-theme', mode); } catch { /* Theme remains usable when storage is disabled. */ }
+  }
+  let initial = 'system';
+  try { initial = localStorage.getItem('algebrica-theme') || initial; } catch { /* Use the system theme. */ }
+  setTheme(['light', 'dark', 'system'].includes(initial) ? initial : 'system');
+  buttons.forEach(button => button.addEventListener('click', () => setTheme(button.dataset.theme)));
+  const links = [...document.querySelectorAll('nav a')];
+  links.forEach(link => link.addEventListener('click', () => {
+    links.forEach(item => item.removeAttribute('aria-current'));
+    link.setAttribute('aria-current', 'location');
+  }));
+</script>
+</body>
+</html>

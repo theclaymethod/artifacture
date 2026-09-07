@@ -1,4 +1,4 @@
-# Mono-Industrial Components
+# HTML fragment components
 
 Named, reusable patterns. Sub-agents pick from this catalog when building a section. Each component declares its **role** (which sub-agent uses it), the **HTML skeleton**, the **scoped CSS** (already prefixed under `.ve-{role}__`), and any **fonts/libraries it needs**.
 
@@ -10,146 +10,23 @@ For the contract that connects components → sub-agents → orchestrator, see `
 
 ## Hero number
 
-**Role:** `hero` · **Fonts needed:** `["Geist Pixel Square"]` · **Libraries:** none
-
-The one moment-of-surprise. Use exactly once per page. Pair an oversized Geist Pixel value with a Space Mono caps label and a Space Grotesk lede on the left.
-
-```html
-<section class="ve-hero">
-  <div class="ve-hero__copy">
-    <h1 class="ve-hero__headline">{{HEADLINE}}</h1>
-    <p class="ve-hero__lede">{{LEDE}}</p>
-  </div>
-  <div class="ve-hero__display" aria-label="{{ARIA}}">
-    {{VALUE}}
-    <small>{{LABEL}}</small>
-  </div>
-</section>
-```
-
-```css
-.ve-hero {
-  padding: var(--space-6) 0;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--space-4);
-  align-items: end;
-}
-.ve-hero__headline {
-  font-size: clamp(36px, 5.5vw, 64px);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.02;
-  color: var(--text-display);
-  text-wrap: balance;
-  max-width: 20ch;
-}
-.ve-hero__lede {
-  margin-top: var(--space-3);
-  max-width: 52ch;
-  color: var(--text-secondary);
-}
-.ve-hero__display {
-  font-family: var(--font-display);
-  font-size: var(--size-display);
-  font-weight: 400;
-  line-height: 0.9;
-  color: var(--text-display);
-  letter-spacing: -0.02em;
-  justify-self: end;
-  align-self: end;
-}
-.ve-hero__display small {
-  display: block;
-  margin-top: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--size-caption);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  text-align: right;
-}
-@media (max-width: 900px) {
-  .ve-hero { grid-template-columns: 1fr; padding: var(--space-5) 0; }
-  .ve-hero__display { justify-self: start; }
-}
-```
-
----
+**Role:** `hero`. Lead with a concrete title and useful introductory sentence. A large value is optional and must be sourced, labeled with its unit and context, and central to the explanation. Use the host display face; do not load a pixel font or invent a number for visual impact.
 
 ## Metadata row
 
-**Role:** any (typically appears once at the top, not its own sub-agent — orchestrator emits this in the page shell) · **Fonts needed:** none extra · **Libraries:** none
-
-Top-of-page tertiary band. Space Mono ALL CAPS, single hairline below.
-
-```html
-<header class="ve-meta">
-  <span>{{LEFT}}</span>
-  <span class="ve-meta__right">
-    {{RIGHT_ITEMS}}
-  </span>
-</header>
-```
-
-```css
-.ve-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-4);
-  font-family: var(--font-mono);
-  font-size: var(--size-caption);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
-}
-.ve-meta__right { display: flex; gap: var(--space-4); }
-```
-
----
+Omit by default. Add a source, ownership, date, or state only when it is factual and changes interpretation or operation. Prefer placing it beside the content it qualifies rather than creating a repeated top band.
 
 ## Section label
 
-**Used by every sub-agent** as the lead-in band for its section. Numbered index in Space Mono caps + descriptor on the left, optional right-side meta.
-
-```html
-<div class="ve-section__label">
-  <span><span class="ve-section__index">{{NN}}</span>&nbsp;&nbsp;{{TITLE}}</span>
-  <span>{{RIGHT_META}}</span>
-</div>
-```
-
-```css
-.ve-section__label {
-  font-family: var(--font-mono);
-  font-size: var(--size-caption);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--rule);
-  margin-bottom: var(--space-4);
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.ve-section__index { color: var(--text-disabled); }
-```
-
-The orchestrator assigns the `{{NN}}` index based on section order in the outline. Sub-agents leave it as `{{NN}}` and the orchestrator substitutes during stitching.
-
----
+Use a semantic heading that names the section. Do not add `{{NN}}` or a second uppercase descriptor unless the number communicates actual sequence or navigation. `{{NN}}` remains a supported fragment placeholder for those cases.
 
 ## Mermaid container
 
 **Role:** `diagram` · **Fonts needed:** none extra · **Libraries:** `["mermaid"]` (orchestrator adds the script tag once)
 
-Wraps a single Mermaid diagram with full zoom/pan/expand chrome. Copy the `diagram-shell` skeleton from `./templates/mermaid-flowchart.html` (or the equivalent in `./templates/mono-industrial.html` lines ~120–280) and rename top-level classes from `.diagram-shell` → `.ve-diagram__shell`, `.mermaid-wrap` → `.ve-diagram__wrap`, etc.
+Wraps a single Mermaid diagram with full zoom/pan/expand chrome. Copy the `diagram-shell` skeleton from `../templates/mermaid-flowchart.html` (or the equivalent in `../templates/mono-industrial.html` lines ~120–280) and rename top-level classes from `.diagram-shell` → `.ve-diagram__shell`, `.mermaid-wrap` → `.ve-diagram__wrap`, etc.
 
-**Constraint:** Never use bare `<pre class="mermaid">`. Always include the zoom/pan controls and the click-to-expand handler. See SKILL.md "Mermaid containers" for the full requirement.
+**Constraint:** Never use bare `<pre class="mermaid">`. Always include the zoom/pan controls and the click-to-expand handler. See [css-patterns.md](css-patterns.md) → "Mermaid Containers" for the control shell.
 
 The diagram source goes in a hidden inert `<pre class="ve-diagram__source">` element as escaped text. The orchestrator's bottom-of-page module reads each source element with `textContent` and renders it into its sibling `.ve-diagram__canvas`.
 
@@ -161,7 +38,7 @@ The diagram source goes in a hidden inert `<pre class="ve-diagram__source">` ele
 
 Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right-aligned in Space Mono with `tabular-nums`. Status colors on the value only.
 
-**Below 640px the table reformats as stacked rows.** Each `<tr>` becomes a vertical group; each `<td>`'s column label appears as a Space Mono caps callout via `::before { content: attr(data-label) }`. This honors Mono-Industrial's "no cards" rule — the rows stack with hairlines between them, like instrument-panel readouts. Sub-agents **must** emit `data-label="..."` on every `<td>` for the stack pattern to work; the value is the human-readable column name (sentence case is fine — CSS uppercases it).
+**Below 640px the table reformats as stacked rows.** Each `<tr>` becomes a vertical group; each `<td>`'s column label appears as a readable label via `::before { content: attr(data-label) }`. This honors Mono-Industrial's "no cards" rule — the rows stack with hairlines between them, like instrument-panel readouts. Sub-agents **must** emit `data-label="..."` on every `<td>` for the stack pattern to work; the value is the human-readable column name (preserve sentence case).
 
 ```html
 <table class="ve-table">
@@ -194,7 +71,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   font-family: var(--font-mono);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text-secondary);
   text-align: left;
   padding: var(--space-3) var(--space-3) var(--space-3) 0;
@@ -215,7 +92,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   font-family: var(--font-mono);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .ve-table__status--ok   { color: var(--ok); }
 .ve-table__status--warn { color: var(--warn); }
@@ -259,7 +136,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
     font-family: var(--font-mono);
     font-size: var(--size-caption);
     letter-spacing: 0.08em;
-    text-transform: uppercase;
+    text-transform: none;
     color: var(--text-secondary);
   }
   .ve-table__num {
@@ -297,7 +174,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   font-family: var(--font-mono);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text-secondary);
   margin-bottom: var(--space-2);
 }
@@ -349,7 +226,7 @@ Discrete blocks with 2px gaps. No rounded corners. Status color on overflow segm
 
 **Role:** any · **Fonts needed:** none extra · **Libraries:** none
 
-Inline Space Mono ALL CAPS, square-bracketed. Use for empty/error/loading states. No mascots, no toasts, no multi-paragraph copy.
+Plain text naming the actual state; bracket styling is optional. Use for empty/error/loading states. No mascots, no toasts, no multi-paragraph copy.
 
 ```html
 <span class="ve-sysmsg">[NO DATA]</span>
@@ -362,7 +239,7 @@ Inline Space Mono ALL CAPS, square-bracketed. Use for empty/error/loading states
   font-family: var(--font-mono);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text-secondary);
 }
 .ve-sysmsg--ok  { color: var(--ok); }

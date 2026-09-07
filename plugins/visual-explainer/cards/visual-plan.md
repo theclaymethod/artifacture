@@ -1,10 +1,10 @@
 # Visual Plan Card
-Use `ExplainerShell`, `Section`, `Pipeline`, `DecisionMatrix`, `RiskLedger`. Real choices, one focal stat.
+Use `ExplainerShell`, `Section`, `Pipeline`, `DecisionMatrix`, `RiskLedger`. Grounded choices, explicit tradeoffs.
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { ExplainerShell, Section, Pipeline, DecisionMatrix, RiskLedger } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Retry Queue Plan" summary="Bound failed invoice jobs." preset="paper-ink">
-  <Section kicker="target" title="48h to visible failure">
+<ExplainerShell title="Retry Queue Plan" summary="Bound failed invoice jobs.">
+  <Section title="Make failed jobs inspectable">
     <Pipeline steps={[
       {title:'Classify',body:'Network, validation, outage.'},
       {title:'Back off',body:'5 tries over 32 minutes.'},

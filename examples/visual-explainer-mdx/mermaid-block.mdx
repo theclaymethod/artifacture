@@ -1,25 +1,16 @@
 import { ExplainerShell, MermaidBlock, Section } from '../../visual-explainer-mdx/components';
 
-export default function MermaidBlockExample() {
-  return (
-    <ExplainerShell
-      eyebrow="mermaid shell"
-      preset="custom"
-      reviewTools={false}
-      title="Grammar-Owned Diagrams"
-      summary="Complex diagram grammars stay in Mermaid while the shell owns zoom, expansion, and token theming."
-    >
-      <Section kicker="state" title="Review Lifecycle">
-        <MermaidBlock
-          caption="Runtime Mermaid, themed from --ve-* tokens."
-          chart={`stateDiagram-v2
-  [*] --> Draft
-  Draft --> Review: share
-  Review --> Draft: comments
-  Review --> Approved: done
-  Approved --> [*]`}
-        />
-      </Section>
-    </ExplainerShell>
-  );
-}
+<ExplainerShell title="A job can wait, finish, or need repair" summary="This state model separates a scheduled retry from a completed attempt and a failure that needs human attention." reviewTools={false}>
+  <Section title="Bound the retry path">
+    <MermaidBlock chart={`stateDiagram-v2
+  [*] --> Queued
+  Queued --> Running: claim
+  Running --> Complete: success
+  Running --> Waiting: temporary failure
+  Waiting --> Queued: delay elapsed
+  Running --> Quarantined: invalid input or exhausted budget
+  Quarantined --> Queued: repair and replay
+  Complete --> [*]`} />
+    <p>A delayed job has not completed. Quarantine preserves its identity and failure context. Manual replay returns to the normal queue so the same claiming and idempotency rules still apply.</p>
+  </Section>
+</ExplainerShell>

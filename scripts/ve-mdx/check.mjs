@@ -9,6 +9,8 @@ import { sharedComponents } from './integrity.mjs';
 const repoRoot = process.cwd();
 const MIN_BODY_TEXT_LENGTH = 200;
 const outputs = [
+  ['examples/visual-explainer-mdx/animated-diagram.mdx', 'dist/visual-explainer-mdx/animated-diagram.html'],
+  ['examples/visual-explainer-mdx/data-charts.mdx', 'dist/visual-explainer-mdx/data-charts.html'],
   ['examples/visual-explainer-mdx/pipeline.mdx', 'dist/visual-explainer-mdx/pipeline.html'],
   ['examples/visual-explainer-mdx/interactive.tsx', 'dist/visual-explainer-mdx/interactive.html'],
   ['examples/visual-explainer-mdx/web-diagram.mdx', 'dist/visual-explainer-mdx/web-diagram.html'],

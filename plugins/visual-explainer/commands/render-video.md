@@ -23,10 +23,7 @@ This is different from `/generate-video`:
 
 ### 1. Clarify
 
-Video is high-cost. Always confirm via AskUserQuestion unless the user passes `--no-ask`:
-- **Style:** long-form (16:9, scene-per-slide, slide dwell times) or reel (9:16, compress to 6–8 beats, hard cuts)
-- **Narration:** `auto` (TTS from slide copy), `<script>` (user-provided), `none` (silent)
-- **Duration target** if narration is `none` or `auto` — per-slide dwell in long-form mode
+Use the supplied style, narration, and duration. Apply `references/clarify.md` only when a material choice remains unresolved; defaults do not require reconfirmation.
 
 ### 2. Check prerequisites
 
@@ -53,10 +50,9 @@ Extract per-slide:
 
 **For `--style=long-form` (default when each slide should become a scene):**
 Every source slide maps to one scene in the Hyperframes composition. Per-scene dwell: 8–12s unless narration audio dictates otherwise. Copy the slide's content into the composition structure used by `templates/hyperframes-longform.html`. Animate per scene:
-- Eyebrow: fade-up
 - Headline: fade-up, staggered
 - Body: fade-up
-- Stat / hero number: count-up from zero
+- Sourced values: remain visible and accurate
 - Diagram: progressive reveal per `reel-patterns.md` § Progressive Diagram Reveal
 - Scene exit: fade-out at scene-end
 
@@ -98,9 +94,9 @@ Report: final MP4 path, duration, size, first keyframe as thumbnail. Note which 
 
 | Source slide type | Long-form scene | Reel beat |
 |---|---|---|
-| Title | Scene 1 (eyebrow + headline + subtitle fade-up) | HOOK (if it has a stat) or intro card before HOOK |
+| Title | Scene 1 (headline + supporting text fade-up) | HOOK (if it has a stat) or intro card before HOOK |
 | Section Divider | Short scene with shader transition in | Skipped (reel doesn't section-divide) |
-| Content | Standard scene (eyebrow + headline + body) | CONTEXT or RESOLUTION |
+| Content | Standard scene (headline + body) | CONTEXT or RESOLUTION |
 | Split | Two-column scene with staggered fade-up per side | Skipped (reel is single-focal) |
 | Diagram | Progressive diagram reveal scene | MECHANISM |
 | Dashboard | KPI grid with staggered count-ups | PROOF (pick 1 stat) |
@@ -111,7 +107,7 @@ Report: final MP4 path, duration, size, first keyframe as thumbnail. Note which 
 | full-bleed-stat | Count-up with Ken Burns label | HOOK |
 | split-color-block | Two-color fade-up | Skipped (compress to single-focal) |
 | quadrant | 2×2 staggered fade-scale | MECHANISM or PROOF |
-| dark-panel | Dark scene with eyebrow + headline | PROBLEM or RESOLUTION |
+| dark-panel | Dark scene with headline | PROBLEM or RESOLUTION |
 
 ---
 

@@ -9,6 +9,10 @@ export const PROFILES = Object.freeze([
 ]);
 
 const PRESETS = [
+  'lieflat',
+  'algebrica',
+  'mono-color',
+  'oa-design',
   'mono-industrial',
   'nothing',
   'blueprint',
@@ -144,7 +148,7 @@ function stripStyleBlocks(html) {
 function removePresetScopedCss(html) {
   return html
     .replace(/\[data-ve-preset=[^\]]+\][^{]*\{[^}]*\}/gi, '')
-    .replace(/\.ve-output--(?:mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide)\b[^{]*\{[^}]*\}/gi, '');
+    .replace(/\.ve-output--(?:lieflat|algebrica|mono-color|oa-design|mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide)\b[^{]*\{[^}]*\}/gi, '');
 }
 
 function detectEmittedRuntimePreset(filePath, html) {

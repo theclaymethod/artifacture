@@ -287,8 +287,8 @@ function evalUnknownPresetFallback() {
     if (!css || !css.includes('[data-ve-preset="not-a-real-system"]')) {
       failures.push('fallback CSS should scope built-in tokens to the unknown name');
     }
-    if (!css || !css.includes('--ve-bg: #f6f6f6')) {
-      failures.push('fallback CSS should carry the default built-in (oa-design) tokens');
+    if (!css || !css.includes('--ve-bg: #f0efeb')) {
+      failures.push('fallback CSS should carry the default built-in (lieflat) tokens');
     }
     record('loader-unknown-preset-fallback', failures);
   });

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "From source to verified HTML",
+    "locale": "en",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "source",
+      "type": "external",
+      "label": "Editable source",
+      "sublabel": "MDX or TSX",
+      "pos": [
+        48,
+        96
+      ],
+      "size": [
+        180,
+        80
+      ]
+    },
+    {
+      "id": "export",
+      "type": "backend",
+      "label": "Exporter",
+      "sublabel": "Vite + React",
+      "pos": [
+        344,
+        96
+      ],
+      "size": [
+        180,
+        80
+      ]
+    },
+    {
+      "id": "html",
+      "type": "frontend",
+      "label": "Standalone HTML",
+      "sublabel": "CSS and JS inlined",
+      "pos": [
+        640,
+        96
+      ],
+      "size": [
+        200,
+        80
+      ]
+    },
+    {
+      "id": "mechanics",
+      "type": "backend",
+      "label": "Browser checks",
+      "sublabel": "Layout and interaction",
+      "pos": [
+        344,
+        304
+      ],
+      "size": [
+        200,
+        80
+      ]
+    },
+    {
+      "id": "review",
+      "type": "external",
+      "label": "Visual review",
+      "sublabel": "Screenshots + brief",
+      "pos": [
+        640,
+        304
+      ],
+      "size": [
+        200,
+        80
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "source-export",
+      "from": "source",
+      "to": "export",
+      "label": "compile"
+    },
+    {
+      "id": "export-html",
+      "from": "export",
+      "to": "html",
+      "label": "bundle"
+    },
+    {
+      "id": "html-review",
+      "from": "html",
+      "to": "review",
+      "label": "inspect",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        795,
+        240
+      ]
+    },
+    {
+      "id": "html-mechanics",
+      "from": "html",
+      "to": "mechanics",
+      "label": "render",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "via": [
+        [
+          740,
+          240
+        ],
+        [
+          584,
+          240
+        ],
+        [
+          584,
+          344
+        ]
+      ],
+      "labelAt": [
+        560,
+        270
+      ]
+    }
+  ]
+}

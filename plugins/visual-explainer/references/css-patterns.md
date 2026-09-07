@@ -5,145 +5,35 @@ Reusable patterns for layout, connectors, theming, and visual effects in self-co
 ## Contents
 
 - [Theme](#theme-setup) · [Backgrounds](#background-atmosphere) · [Links](#link-styling) · [Sections and cards](#section--card-components) · [Code](#code-blocks) · [Directory trees](#directory-tree) · [Overflow](#overflow-protection) · [Mermaid](#mermaid-containers)
-- [Grids](#grid-layouts) · [Connectors](#connectors) · [Animations](#animations) · [Sparklines](#sparklines-and-simple-charts-pure-svg) · [Responsive](#responsive-breakpoint) · [Badges](#badges-and-tags) · [Lists](#lists-inside-nodes)
-- [KPI cards](#kpi--metric-cards) · [Before/after](#before--after-panels) · [Collapsibles](#collapsible-sections) · [Prose](#prose-page-elements) · [Generated images](#generated-images)
+- [Grids](#grid-layouts) · [Connectors](#connectors) · [Animations](#animations) · [Sparklines](#sparklines-and-simple-charts-pure-svg) · [Responsive](#responsive-breakpoint) · [State labels](#badges-and-tags) · [Lists](#lists-inside-nodes)
+- [Data summaries](#kpi--metric-cards) · [Before/after](#before--after-panels) · [Collapsibles](#collapsible-sections) · [Prose](#prose-page-elements) · [Generated images](#generated-images)
 
 ## Theme Setup
 
-Always define both light and dark palettes via custom properties. Start with whichever fits the chosen aesthetic, ensure both work.
-
-```css
-:root {
-  --font-body: 'Outfit', system-ui, sans-serif;
-  --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
-
-  --bg: #f8f9fa;
-  --surface: #ffffff;
-  --surface-elevated: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-bright: rgba(0, 0, 0, 0.15);
-  --text: #1a1a2e;
-  --text-dim: #6b7280;
-  --accent: #0891b2;
-  --accent-dim: rgba(8, 145, 178, 0.1);
-  /* Semantic accents for diagram elements */
-  --node-a: #0891b2;
-  --node-a-dim: rgba(8, 145, 178, 0.1);
-  --node-b: #059669;
-  --node-b-dim: rgba(5, 150, 105, 0.1);
-  --node-c: #d97706;
-  --node-c-dim: rgba(217, 119, 6, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface-elevated: #1c2333;
-    --border: rgba(255, 255, 255, 0.06);
-    --border-bright: rgba(255, 255, 255, 0.12);
-    --text: #e6edf3;
-    --text-dim: #8b949e;
-    --accent: #22d3ee;
-    --accent-dim: rgba(34, 211, 238, 0.12);
-    --node-a: #22d3ee;
-    --node-a-dim: rgba(34, 211, 238, 0.12);
-    --node-b: #34d399;
-    --node-b-dim: rgba(52, 211, 153, 0.12);
-    --node-c: #fbbf24;
-    --node-c-dim: rgba(251, 191, 36, 0.12);
-  }
-}
-```
+Use the active preset from `REPO/visual-explainer-mdx/global.css`; `lieflat` is the default. Raw HTML publishes equivalent values once. Alias older CSS roles such as `--bg`, `--surface`, `--text`, and `--accent` to that preset, rather than copying a second palette. See [tokens.md](tokens.md) and [diagram-tokens.md](diagram-tokens.md). Verify all supported themes.
 
 ## Background Atmosphere
 
-Default to a flat field from the active design system. If a named aesthetic needs more atmosphere, use one restrained focal gradient. Never use dot grids, graph paper, scanlines, or repeated-line patterns as a decorative background.
-
-```css
-/* Optional focal wash for a named expressive direction */
-body {
-  background: var(--bg);
-  background-image: radial-gradient(ellipse at 50% 0%, var(--accent-dim) 0%, transparent 60%);
-}
-```
+Use a flat field from the selected preset. Alignment and content geometry provide structure. Do not add dot grids, graph paper, scanlines, repeated-line patterns, or filler gradients.
 
 ## Link Styling
 
-**Never rely on browser default link colors.** The default blue (`#0000EE`) has poor contrast on dark backgrounds. Style links with `color: var(--accent)` and keep underlines for discoverability. On dark backgrounds, use bright accents (`#22d3ee`, `#34d399`, `#fbbf24`). On light backgrounds, use deeper tones (`#0891b2`, `#059669`, `#d97706`).
+Use an underlined link with sufficient contrast in every supported theme. Its color comes from the active preset. Preserve a visible keyboard focus indicator.
 
 ## Section / Card Components
 
-The fundamental building block. A colored card representing a system component, pipeline step, or data entity.
+Use open sections for prose and ruled rows for comparable items. Bound diagrams, tables, code, and controls only when containment helps. Do not stack elevated, recessed, hero, or glass treatments to manufacture hierarchy.
 
-**IMPORTANT: Never use `.node` as a CSS class name.** Mermaid.js internally uses `.node` on its SVG `<g>` elements with `transform: translate(x, y)` for positioning. Any page-level `.node` styles (hover transforms, box-shadows, transitions) will leak into Mermaid diagrams and break their layout. Use `.ve-card` instead (namespaced to avoid collisions with CSS frameworks like Bootstrap/Tailwind that also use `.card`).
+Never use `.node` as a page CSS class: Mermaid uses it for positioned SVG groups. Namespace component rules, for example `.ve-figure`, and keep the host's token values.
 
 ```css
-.ve-card {
-  background: var(--surface);
+.ve-figure {
+  min-width: 0;
+  padding: 24px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 20px;
-  position: relative;
+  background: var(--surface);
 }
-
-/* Colored accent border (left or top) */
-.ve-card--accent-a {
-  border-left: 3px solid var(--node-a);
-}
-
-/* --- Depth tiers: vary card depth to signal importance --- */
-
-/* Elevated: KPIs, key sections, anything that should pop */
-.ve-card--elevated {
-  background: var(--surface-elevated);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-/* Recessed: code blocks, secondary content, detail panels */
-.ve-card--recessed {
-  background: color-mix(in srgb, var(--bg) 70%, var(--surface) 30%);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
-  border-color: var(--border);
-}
-
-/* Hero: executive summaries, focal elements — demands attention */
-.ve-card--hero {
-  background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
-  border-color: color-mix(in srgb, var(--border) 50%, var(--accent) 50%);
-}
-
-/* Glass: special-occasion overlay effect (use sparingly) */
-.ve-card--glass {
-  background: color-mix(in srgb, var(--surface) 60%, transparent 40%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Section label (monospace, uppercase, small) */
-.ve-card__label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--node-a);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Colored dot indicator */
-.ve-card__label::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-}
+.ve-figure__title { margin: 0 0 16px; font-size: 20px; line-height: 1.3; }
 ```
 
 ## Code Blocks
@@ -155,7 +45,7 @@ Code blocks need explicit whitespace preservation and a max-height constraint. W
 ```css
 .code-block {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -198,13 +88,13 @@ function example() {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-dim);
 }
 
 .code-file__body {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   padding: 16px;
   background: var(--surface-elevated);
@@ -277,7 +167,7 @@ For file structures, use `<pre>` with monospace + `white-space: pre`. Tree conne
 ```css
 .dir-tree {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -287,7 +177,7 @@ For file structures, use `<pre>` with monospace + `white-space: pre`. Tree conne
   white-space: pre;
 }
 
-.dir-tree .ann { color: var(--text-dim); font-size: 11px; font-style: italic; }
+.dir-tree .ann { color: var(--text-dim); font-size: 14px; font-style: italic; }
 .dir-tree .hl  { color: var(--accent); font-weight: 600; }
 ```
 
@@ -309,8 +199,8 @@ For labeled trees, wrap in a card. For side-by-side comparisons, put two cards i
 .dir-tree-card__header {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
-  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1.5px;
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+  text-transform: none; letter-spacing: 1.5px;
 }
 .dir-tree-card .dir-tree { border: none; border-radius: 0; }
 
@@ -323,7 +213,7 @@ For labeled trees, wrap in a card. For side-by-side comparisons, put two cards i
 
 ## Overflow Protection
 
-Grid and flex children default to `min-width: auto`, which prevents them from shrinking below their content width. Long text, inline code badges, and non-wrapping elements will blow out containers.
+Grid and flex children default to `min-width: auto`, which prevents them from shrinking below their content width. Long text, inline code, and non-wrapping elements will blow out containers.
 
 ### Global rules
 
@@ -362,12 +252,12 @@ body {
 
 ### Never use `display: flex` on `<li>` for marker characters
 
-Using `display: flex` on a list item to position a `::before` marker creates an anonymous flex item for the remaining text content. That anonymous flex item gets `min-width: auto` and you **cannot** set `min-width: 0` on anonymous boxes. Lines with many inline `<code>` badges will overflow their container with no CSS fix possible.
+Using `display: flex` on a list item to position a `::before` marker creates an anonymous flex item for the remaining text content. That anonymous flex item gets `min-width: auto` and you **cannot** set `min-width: 0` on anonymous boxes. Lines with many inline `<code>` spans will overflow their container with no CSS fix possible.
 
 Use absolute positioning for markers instead:
 
 ```css
-/* WRONG — causes overflow with inline code badges */
+/* WRONG — causes overflow with inline code */
 li {
   display: flex;
   align-items: baseline;
@@ -562,7 +452,7 @@ Add zoom controls to every `.mermaid-wrap` container for complex diagrams.
 
 .diagram-shell__hint {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   margin-bottom: 8px;
   opacity: 0.7;
@@ -584,7 +474,7 @@ Add zoom controls to every `.mermaid-wrap` container for complex diagrams.
 
 .zoom-label {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-dim);
   padding: 0 6px;
   white-space: nowrap;
@@ -735,7 +625,7 @@ This pattern removes all hardcoded IDs and supports unlimited diagrams per page.
 }
 ```
 
-### Card Grid (dashboard / metrics)
+### Independent items
 ```css
 .card-grid {
   display: grid;
@@ -766,7 +656,7 @@ Use real `<table>` elements for tabular data. Wrap in a scrollable container for
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -780,9 +670,9 @@ Use real `<table>` elements for tabular data. Wrap in a scrollable container for
 .data-table th {
   background: var(--surface-elevated, var(--surface2, var(--surface)));
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 1px;
   color: var(--text-dim);
   text-align: left;
@@ -835,7 +725,7 @@ Use real `<table>` elements for tabular data. Wrap in a scrollable container for
 /* Code inside cells */
 .data-table code {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   background: var(--accent-dim);
   color: var(--accent);
   padding: 1px 5px;
@@ -846,7 +736,7 @@ Use real `<table>` elements for tabular data. Wrap in a scrollable container for
 .data-table small {
   display: block;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 14px;
   margin-top: 2px;
 }
 ```
@@ -861,7 +751,7 @@ Styled spans for match/gap/warning states. Never use emoji.
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   padding: 3px 10px;
   border-radius: 6px;
@@ -916,7 +806,7 @@ For totals, counts, or aggregate status at the bottom:
 .data-table tfoot td {
   background: var(--surface-elevated, var(--surface2, var(--surface)));
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
   border-top: 2px solid var(--border-bright);
   border-bottom: none;
   padding: 12px 16px;
@@ -950,7 +840,7 @@ For totals, counts, or aggregate status at the bottom:
   gap: 8px;
   color: var(--text-dim);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 0;
 }
 
@@ -996,120 +886,7 @@ Position the parent container as `position: relative` to scope the SVG overlay.
 
 ## Animations
 
-### Staggered Fade-In on Load
-
-Define the keyframe once, then stagger via a `--i` CSS variable set per element. This approach works regardless of DOM nesting or interleaved non-animated elements (unlike `nth-child` which breaks when siblings aren't all the same type).
-
-```css
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.ve-card {
-  animation: fadeUp 0.4s ease-out both;
-  animation-delay: calc(var(--i, 0) * 0.05s);
-}
-```
-
-Set `--i` per element in the HTML to control stagger order:
-
-```html
-<div class="ve-card" style="--i: 0">First</div>
-<div class="connector">...</div>
-<div class="ve-card" style="--i: 1">Second</div>
-<div class="connector">...</div>
-<div class="ve-card" style="--i: 2">Third</div>
-```
-
-### Hover Lift
-```css
-.ve-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ve-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-```
-
-### Scale-Fade (for KPI cards, badges, status indicators)
-
-```css
-@keyframes fadeScale {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.kpi-card {
-  animation: fadeScale 0.35s ease-out both;
-  animation-delay: calc(var(--i, 0) * 0.06s);
-}
-```
-
-### SVG Draw-In (for connectors, progress rings, path elements)
-
-```css
-@keyframes drawIn {
-  from { stroke-dashoffset: var(--path-length); }
-  to { stroke-dashoffset: 0; }
-}
-
-/* Set --path-length to the path's getTotalLength() value */
-.connector path {
-  stroke-dasharray: var(--path-length);
-  animation: drawIn 0.8s ease-in-out both;
-  animation-delay: calc(var(--i, 0) * 0.1s);
-}
-```
-
-### CSS Counter (for hero numbers without JS)
-
-Uses `@property` to animate a custom property as an integer, then display it via `counter()`. No JS required. Falls back to showing the final value immediately in browsers without `@property` support.
-
-```css
-@property --count {
-  syntax: '<integer>';
-  initial-value: 0;
-  inherits: false;
-}
-
-@keyframes countUp {
-  to { --count: var(--target); }
-}
-
-.kpi-card__value--animated {
-  --target: 247;
-  counter-reset: val var(--count);
-  animation: countUp 1.2s ease-out forwards;
-}
-
-.kpi-card__value--animated::after {
-  content: counter(val);
-}
-```
-
-### Choreography
-
-Don't use the same animation for everything. Mix types by element role, with easing stagger (fast-then-slow, not linear):
-
-- **Cards**: `fadeUp` — the default entrance, reliable and subtle
-- **KPI / badges**: `fadeScale` — scale draws the eye to important numbers
-- **SVG connectors**: `drawIn` — reveals flow direction, pairs with card stagger
-- **Hero numbers**: `countUp` — counting motion signals "this number matters"
-- **Stagger timing**: `calc(var(--i) * 0.06s)` with lower `--i` values on important elements so they appear first
-
-### Respect Reduced Motion
-```css
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+Static content is the default. Animate only meaningful change or user interaction; do not stagger every section, lift non-interactive cards, count up statistics, or draw every connector on load. Follow [diagram-design.md](diagram-design.md) for explicit diagram motion and preserve complete reduced-motion and print states.
 
 ## Sparklines and Simple Charts (Pure SVG)
 
@@ -1183,19 +960,7 @@ Wrap every `<table>` wider than ~600px in `<div class="scroll-x">` (or combine `
 
 ## Badges and Tags
 
-Small inline labels for categorizing elements:
-
-```css
-.tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--node-a-dim);
-  color: var(--node-a);
-}
-```
+Do not use decorative badges or tags. Show actual state or necessary classification as plain readable text beside the affected item. Use a control only when the label performs an action.
 
 ## Lists Inside Nodes
 
@@ -1206,7 +971,7 @@ For tool listings, feature lists, table columns:
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 
@@ -1225,7 +990,7 @@ For tool listings, feature lists, table columns:
 
 .node-list code {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   background: var(--accent-dim);
   color: var(--accent);
   padding: 1px 5px;
@@ -1235,61 +1000,7 @@ For tool listings, feature lists, table columns:
 
 ## KPI / Metric Cards
 
-Large hero number with trend indicator and label. For dashboards, review summaries, and impact sections.
-
-```css
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.kpi-card {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.kpi-card__value {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.kpi-card__label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-dim);
-  margin-top: 6px;
-}
-
-.kpi-card__trend {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.kpi-card__trend--up { color: var(--node-b, #059669); }
-.kpi-card__trend--down { color: var(--red, #ef4444); }
-```
-
-```html
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="kpi-card__value">247</div>
-    <div class="kpi-card__label">Lines Added</div>
-    <div class="kpi-card__trend kpi-card__trend--up">+34%</div>
-  </div>
-  <!-- ... more cards -->
-</div>
-```
+Use a sourced comparison in prose, a semantic table, or a chart from [charts.md](charts.md). Do not frame counts as tiles to fill a summary. A focal value needs its unit, baseline, and relevant period.
 
 ## Before / After Panels
 
@@ -1309,9 +1020,9 @@ Two-column comparison with diff-colored headers. For review pages, migration doc
 
 .diff-panel__header {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 1px;
   padding: 10px 16px;
 }
@@ -1331,7 +1042,7 @@ Two-column comparison with diff-colored headers. For review pages, migration doc
 .diff-panel__body {
   padding: 16px;
   background: var(--surface);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -1371,7 +1082,7 @@ details.collapsible summary {
   padding: 14px 20px;
   background: var(--surface);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   list-style: none;
@@ -1391,7 +1102,7 @@ details.collapsible summary::-webkit-details-marker { display: none; }
 /* Chevron indicator */
 details.collapsible summary::before {
   content: '▸';
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   transition: transform 0.15s ease;
 }
@@ -1403,7 +1114,7 @@ details.collapsible[open] summary::before {
 details.collapsible .collapsible__body {
   padding: 16px 20px;
   border-top: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 ```
@@ -1520,24 +1231,7 @@ Key insights pulled out for emphasis. Use sparingly — one or two per article m
 
 ### Section Dividers
 
-```css
-/* Horizontal rule */
-hr {
-  border: none;
-  height: 1px;
-  background: var(--border);
-  margin: 48px 0;
-}
-
-/* Ornamental divider — use: <div class="divider">✦ ✦ ✦</div> */
-.divider {
-  text-align: center;
-  margin: 48px 0;
-  color: var(--text-dim);
-  font-size: 18px;
-  letter-spacing: 12px;
-}
-```
+Use whitespace or a single hairline between meaningful sections. Do not add stars, ornaments, or repeated labels.
 
 ### Article Hero Patterns
 
@@ -1550,9 +1244,9 @@ hr {
   margin: 0 auto;
 }
 .hero__category {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 2px;
   color: var(--accent);
   margin-bottom: 16px;
@@ -1571,7 +1265,7 @@ hr {
   margin: 0 auto 24px;
 }
 .hero__meta {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
 }
 
@@ -1609,7 +1303,7 @@ hr {
   display: block;
 }
 .byline__meta {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
 }
 ```
@@ -1792,7 +1486,7 @@ Centered image with border, shadow, and optional caption. Use within content sec
 
 .illus figcaption {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   margin-top: 8px;
 }

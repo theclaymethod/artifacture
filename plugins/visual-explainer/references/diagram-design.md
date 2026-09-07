@@ -1,6 +1,6 @@
 # Diagram design routing
 
-This is the canonical selection contract for visual-explainer diagrams. It adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to this skill's OA Design default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
+This is the canonical selection contract for visual-explainer diagrams. It adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to Artifacture's Lieflat-inspired default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
 
 ## Contents
 
@@ -24,9 +24,9 @@ This is the canonical selection contract for visual-explainer diagrams. It adapt
 4. Set format, size, detail, and audience before drawing.
 5. Apply budget precedence in this order: semantic pattern cap, selected type cap, then an explicit import-detail override.
 6. Split into overview plus detail when the resolved budget is exceeded.
-7. Choose inline SVG or Mermaid using the renderer gate below.
+7. Choose `DiagramCanvas`, Archify, custom SVG, or Mermaid using the renderer gate below.
 
-Record the selection before authoring as:
+Record this selection in working notes, not as visible metadata:
 
 ```text
 pattern=<name|none>; type=<name>; format=<format>; size=<preset>; detail=<level>; audience=<audience>; renderer=<renderer>; motion=<mode>
@@ -100,7 +100,7 @@ Load [`diagrams-svg.md`](./diagrams-svg.md) for shared geometry. Type-specific f
 | Nested | Use concentric containment with labels on masked boundary tabs; emphasize the innermost focal scope. |
 | Tree | Use orthogonal parent-child connectors, a single root, and no more than four levels. |
 | Org chart | Show ownership and reporting or routing; separate escalation from ordinary reporting when both exist. |
-| Layer stack | Use aligned horizontal bands with consistent indexing; reserve emphasis for the constraining or paying-rent layer. |
+| Layer stack | Use aligned horizontal bands; label actual levels and emphasize the constraint when relevant. |
 | Venn | Use two or three proportionate circles, labels outside sets, and terms in intersections. |
 | Pyramid / funnel | Make widths proportional to rank, quantity, or conversion; use one orientation throughout. |
 | Bar chart | Start quantitative bars from a shared zero unless a clearly disclosed range is essential; label values directly. |
@@ -126,7 +126,7 @@ Apply these before layout because they change the canvas, type ramp, density, an
 | Audience | `engineer`, `mixed`, `executive` | `mixed` |
 
 - **Format** chooses the delivery artifact. This skill still defaults to one self-contained HTML page; emit separate SVG or PNG only when the user requests that format or the calling route requires it.
-- **Size** selects the viewBox and type ramp. Projected slides need larger labels than document figures.
+- **Size** selects the viewBox and type ramp. Keep labels at least 14px at rendered document scale and larger for projected slides. Measure before placing; split before shrinking.
 - **Detail** is an import/redraw dial: `simplified` permits ≤7 nodes and ≤9 edges, `balanced` ≤12/≤16, and `faithful` ≤24/≤32 with zones above the normal budget.
 - **Audience** changes wording, not source coverage. Preserve technical language for engineers; translate labels for mixed or executive readers without silently dropping material.
 
@@ -134,13 +134,17 @@ The normal nine-node budget applies to fresh diagrams. Resolve conflicts as: sem
 
 ## Renderer selection
 
-Use accessible inline SVG by default for every supported type that fits its budget. Inline SVG provides the editorial control needed for hierarchy, connector routing, type-specific shapes, and precise labels.
+Use `DiagramCanvas` for compact flow, tree, swimlane, and timeline layouts. It provides content-sized nodes and computed routing. Use [Archify](archify.md) for complex typed architecture, workflow, sequence, dataflow, or lifecycle maps. Keep its JSON source and validated standalone HTML.
 
-Use Mermaid when one of these is true:
+When a compact graph benefits from an ordered walkthrough, use opt-in [`DiagramWalkthrough`](animated-diagrams.md). It retains `DiagramCanvas` geometry and labels while explaining one directed handoff at a time.
+
+Use accessible inline SVG when the diagram needs a specialized grammar those renderers cannot express. Follow [diagrams-svg.md](diagrams-svg.md) for measured text and routing. For quantitative charts, follow [charts.md](charts.md).
+
+Use Mermaid when one of these applies:
 
 - The user explicitly requests Mermaid source.
-- An over-budget graph requires automatic packing and splitting would reduce comprehension.
-- The diagram is a large homogeneous graph where hand placement adds no editorial value.
+- The required graph grammar is unsupported by the routes above and automatic packing improves comprehension.
+- An existing Mermaid source must remain editable in that format.
 
 Mermaid is a fallback renderer, not a separate visual type. Apply the same type, pattern, audience, focal, accessibility, and verification decisions around it.
 
@@ -169,15 +173,15 @@ Mermaid is a fallback renderer, not a separate visual type. Apply the same type,
 | Gantt tasks | 12 |
 | Scatter points | 30 |
 | Annotation callouts | 2 |
-| Motion steps / marked items / simultaneous items | 8 / 12 / 2 |
+| Walkthrough steps / packets in motion | 8 / 1 |
 
 When a type exceeds its limit, apply this fixed degrade ladder in order:
 
 1. Remove decorative cells and source chrome.
 2. Merge exact duplicates into a labeled multiplicity such as `Worker ×N`.
 3. Collapse all-leaf clusters to their container.
-4. Remove degree-1 sinks that do not change the story.
-5. Remove cross-cutting infrastructure; at `balanced`, retain at most one item only when germane.
+4. Move secondary paths into a detail diagram without dropping their meaning.
+5. Separate cross-cutting infrastructure into its own view when it obscures the primary path.
 6. Split into overview and detail diagrams.
 
 Record steps 2–6 in the fidelity ledger. Switching to Mermaid does not waive information hierarchy, resolved budgets, or readability.
@@ -211,11 +215,11 @@ HTML-escape source labels. Keep source content out of scripts, styles, event att
 
 Static output is the default. Add motion only when the user requests it or ordered change becomes materially clearer.
 
-Supported modes are `none`, `reveal`, `step`, and `loop`. `reveal` plays once and ends complete; `step` is user-controlled; `loop` may repeat only a decorative token and cannot change meaning. Motion never changes static meaning or increases the complexity budget. The initial no-JavaScript, print, export, and reduced-motion states all show the complete diagram.
+Use [`DiagramWalkthrough`](animated-diagrams.md) for an explicit sequence of existing directed edges. Steps reference stable edge IDs and carry one useful sentence each. Never infer execution order from node placement or edge-array order. Keep the graph's branches and all labels visible.
 
-Motion limits: ≤8 semantic steps (target 3–6), ≤12 marked items, ≤2 simultaneous reveals, ≤2 drawn paths, one decorative flow-token loop, 160–600 ms transitions, 400–1200 ms holds, ≤24 px translation, and 3–8 seconds total autoplay. Never animate layout coordinates, connector routes, the `viewBox`, node dimensions, or semantic text. Do not use randomness, springs, flashing, glow, particles, or runtime geometry.
+Playback starts paused, moves one packet along one real route, and stops after the final step. Play/Pause, Previous/Next, and Reset remain available. Reduced motion uses manual static steps. Keep the complete diagram readable in print and static exports.
 
-Use only a reviewed, deterministic controller owned once by the delivery route; fragments remain script-free. If no approved controller is available, deliver the complete static diagram and report that motion was omitted.
+Target 3–6 steps; cap at 8. Preserve layout coordinates, connector routes, node dimensions, and semantic text. Do not add decorative loops, flashing, glows, particle trails, or autonomous camera movement. If the delivery route lacks a suitable controller, use the complete static diagram.
 
 ## Completion receipt
 

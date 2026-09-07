@@ -1,0 +1,18 @@
+.ve-lieflat-threads { color: var(--ve-heading, #1c1c1a); }
+.ve-thread-control { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: 1.5rem 0 2.5rem; font-size: 0.9375rem; }
+.ve-thread-control select { max-width: 100%; min-height: 44px; border: 1px solid var(--ve-rule, #d8d6d0); border-radius: 0; padding: 0.5rem 2rem 0.5rem 0.75rem; font: inherit; color: inherit; background: transparent; }
+.ve-thread-scroll, .ve-thread-table-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.ve-thread-scroll svg { display: block; max-width: none; font-family: inherit; }
+.ve-thread-stage-headings { position: relative; font-weight: 600; font-size: 1rem; height: 3rem; margin-bottom: 1.25rem; }
+.ve-thread-stage-headings > span { position: absolute; top: 0; overflow-wrap: anywhere; }
+.ve-thread-label { paint-order: stroke; stroke: var(--ve-bg, #f0efeb); stroke-width: 7px; stroke-linejoin: round; }
+.ve-thread-selection { margin: 1.25rem 0; font-size: 0.9375rem; line-height: 1.6; max-width: 70ch; }
+.ve-thread-selection:empty { display: none; }
+.ve-thread-scroll-hint { font-size: 0.875rem; line-height: 1.5; margin-bottom: 1rem; color: var(--ve-muted); }
+.ve-thread-portrait-label { display: grid; gap: 5px; text-align: center; font-size: 14px; line-height: 18px; overflow-wrap: anywhere; }
+.ve-thread-portrait-label span:first-child { background: var(--ve-bg, #f0efeb); }
+.ve-thread-selection strong { font-weight: 600; }
+.ve-thread-table-scroll table { border-collapse: collapse; width: 100%; text-align: left; font-size: 0.875rem; }
+.ve-thread-table-scroll th, .ve-thread-table-scroll td { padding: 0.65rem 1rem 0.65rem 0; border-bottom: 1px solid var(--ve-rule, #d8d6d0); }
+.ve-thread-table-scroll caption { text-align: left; margin: 1rem 0; }
+@media print { .ve-thread-control, .ve-thread-selection { display: none; } .ve-thread-scroll { overflow: visible; } .ve-thread-scroll svg { max-width: 100%; height: auto; } }

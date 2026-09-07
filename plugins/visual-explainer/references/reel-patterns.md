@@ -37,7 +37,7 @@ Pick by asking where the video will be watched. If the primary surface is a feed
 - Caption synchronization to beat boundaries
 - TTS + burned-in captions pattern
 
-Pick aspect via the `--aspect=9:16` or `--aspect=16:9` flag on `/generate-video` when `--style=reel`. If the user doesn't specify, ask via `AskUserQuestion` (reel is a Tier 0 command — aspect is a first-class question).
+Pick aspect via the `--aspect=9:16` or `--aspect=16:9` flag on `/generate-video` when `--style=reel`. If unspecified, use the default 9:16. Ask only when supplied requirements conflict; follow [clarify.md](clarify.md).
 
 ---
 
@@ -101,7 +101,7 @@ Reel typography is louder and blunter than page or long-form typography.
 | Beat title | 60–80px | 500 | Entrance: slide in from right, fade out up |
 | Body copy | 32–48px | 400 | One or two lines; never a paragraph |
 | Caption (burned-in) | 28–36px | 600 | Bottom third; white on black scrim; word-level highlighting optional |
-| Attribution / kicker | 18–22px | 500 | Mono; all-caps; 0.12em tracking |
+| Source attribution | 18–22px | 500 | Host font; sentence case; normal tracking |
 
 Body-copy paragraphs belong in long-form, not reel. If the content needs a paragraph, it needs long-form.
 

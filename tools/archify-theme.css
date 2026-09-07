@@ -1,0 +1,43 @@
+/* Artifacture's reader treatment. Geometry and viewer controls stay upstream. */
+[data-preset="editorial"][data-theme="light"] {
+  --bg: #f0efeb; --text: #1c1c1a; --text-muted: #65645f; --text-dim: #65645f;
+  --text-faint: #65645f; --grid: transparent; --panel: #f7f6f2;
+  --panel-border: #ceccc4; --mask: #f7f6f2; --lane-fill: #e9e7e0; --lane-stroke: #8c8980;
+  --arrow: #65645f; --arrow-emphasis: #1c1c1a;
+  --frontend-fill: #f7f6f2; --frontend-stroke: #77746c;
+  --backend-fill: #f7f6f2; --backend-stroke: #77746c;
+  --database-fill: #f7f6f2; --database-stroke: #77746c;
+  --cloud-fill: #f7f6f2; --cloud-stroke: #77746c;
+  --security-fill: #f7f6f2; --security-stroke: #77746c;
+  --messagebus-fill: #f7f6f2; --messagebus-stroke: #77746c;
+  --external-fill: #f7f6f2; --external-stroke: #77746c;
+  --toolbar-bg: #f7f6f2; --toolbar-border: #ceccc4; --toolbar-text: #1c1c1a;
+  --toolbar-hover: #e9e7e0; --toolbar-menu-bg: #f7f6f2;
+}
+[data-preset="editorial"][data-theme="dark"] {
+  --bg: #1c1c1a; --text: #f0efeb; --text-muted: #c2c0b8; --text-dim: #c2c0b8;
+  --text-faint: #c2c0b8; --grid: transparent; --panel: #242421;
+  --panel-border: #55544d; --mask: #242421; --lane-fill: #2e2e29; --lane-stroke: #8c8980;
+  --arrow: #b5b3aa; --arrow-emphasis: #f0efeb;
+  --frontend-fill: #242421; --frontend-stroke: #9d9b92;
+  --backend-fill: #242421; --backend-stroke: #9d9b92;
+  --database-fill: #242421; --database-stroke: #9d9b92;
+  --cloud-fill: #242421; --cloud-stroke: #9d9b92;
+  --security-fill: #242421; --security-stroke: #9d9b92;
+  --messagebus-fill: #242421; --messagebus-stroke: #9d9b92;
+  --external-fill: #242421; --external-stroke: #9d9b92;
+  --toolbar-bg: #242421; --toolbar-border: #55544d; --toolbar-text: #f0efeb;
+  --toolbar-hover: #35352f; --toolbar-menu-bg: #242421;
+}
+html[data-preset="editorial"] body { background-image: none; font-family: Inter, Arial, sans-serif; }
+html[data-preset="editorial"] h1, html[data-preset="editorial"] .card h3 { font-family: Inter, Arial, sans-serif; font-weight: 600; }
+html[data-preset="editorial"] .header-row::after,
+html[data-preset="editorial"] .diagram-container::before,
+html[data-preset="editorial"] .diagram-container::after,
+html[data-preset="editorial"] .pulse-dot { display: none; }
+html[data-preset="editorial"] .diagram-container { background: var(--panel); box-shadow: none; border-radius: 12px; }
+html[data-preset="editorial"] .header { margin-bottom: 24px; }
+html[data-preset="editorial"] .header-subtitle { margin-left: 0; }
+svg[data-preset="editorial"], svg[data-preset="editorial"] text { font-family: Inter, Arial, sans-serif; }
+html[data-preset="editorial"] .toolbar { font-family: Inter, Arial, sans-serif; }
+html[data-preset="editorial"] :focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }

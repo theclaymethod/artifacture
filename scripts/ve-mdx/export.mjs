@@ -10,7 +10,7 @@ import { preflightSource } from './integrity.mjs';
 import { injectDesignSystemCss, resolvePresetCssForExport } from './design-systems.mjs';
 
 const repoRoot = process.cwd();
-const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap';
+const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap';
 
 function parseArgs(argv) {
   const args = [...argv];

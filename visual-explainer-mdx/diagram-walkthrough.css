@@ -1,0 +1,94 @@
+.ve-diagram-walkthrough {
+  margin-block: 1.5rem;
+}
+
+.ve-diagram-walkthrough .ve-diagram-shell {
+  margin: 0;
+}
+
+.ve-diagram-walkthrough svg [data-ve-walkthrough-active] {
+  stroke: var(--ve-accent);
+  stroke-width: 2.5;
+}
+
+.ve-diagram-walkthrough .ve-diagram-mobile-node {
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 1rem;
+}
+
+.ve-diagram-walkthrough .ve-diagram-mobile-node[data-ve-walkthrough-active] {
+  border-inline-start-color: var(--ve-accent);
+}
+
+.ve-walkthrough-packet {
+  fill: var(--ve-accent);
+  stroke: var(--ve-diagram-bg);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.ve-walkthrough-reader {
+  padding-block: 1.25rem;
+  border-top: 1px solid var(--ve-rule);
+}
+
+.ve-walkthrough-caption {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0 0 1rem;
+  color: var(--ve-text);
+  font-family: var(--ve-font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.ve-walkthrough-position {
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-walkthrough-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ve-walkthrough-controls button {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius, 6px);
+  background: var(--ve-panel);
+  color: var(--ve-text);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ve-walkthrough-controls button:hover:not(:disabled) {
+  border-color: var(--ve-accent);
+}
+
+.ve-walkthrough-controls button:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 3px;
+}
+
+.ve-walkthrough-controls button:disabled {
+  color: var(--ve-muted);
+  cursor: default;
+}
+
+.ve-walkthrough-motion-note {
+  margin: 1rem 0 0;
+  color: var(--ve-muted);
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ve-walkthrough-packet {
+    display: none;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Lamps filled the repair bench",
+  "description": "Seventy-two devices arrived in June. Each rung counts one device.",
+  "source": { "label": "Illustrative workshop records" },
+  "spec": {
+    "kind": "rung-bars",
+    "unit": 1,
+    "unitLabel": "device",
+    "data": [
+      { "label": "Lamps", "value": 24 },
+      { "label": "Headphones", "value": 18 },
+      { "label": "Kettles", "value": 16 },
+      { "label": "Radios", "value": 14 }
+    ]
+  }
+}

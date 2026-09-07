@@ -1,28 +1,37 @@
-# Web Diagram Card
-Use `ExplainerShell`, `Section`, and `DiagramCanvas`: lanes, details, one accent.
-The default component-backed path needs no diagram reference.
-In MDX prose, write literal braces as `&#123;` or inside code spans — bare { } in prose breaks the compiler.
-Default Tailwind spacing only; no [Npx].
+# Web diagram
+
+Choose the route before authoring:
+
+- **Compact flow, tree, swimlane, or timeline:** `DiagramCanvas` sizes and lays out nodes from their content. Use the example below; no additional diagram reference is needed.
+- **Ordered walkthrough of a compact graph:** read [animated-diagrams.md](../references/animated-diagrams.md) for opt-in `DiagramWalkthrough`. Author explicit steps against stable edge IDs; playback starts paused.
+- **Complex architecture, workflow, sequence, dataflow, or lifecycle:** read [archify.md](../references/archify.md). Keep editable typed JSON and use Archify's validated standalone HTML delivery.
+- **Quantitative comparison or trend:** read [charts.md](../references/charts.md).
+- **Specialized diagram family:** read [diagram-design.md](../references/diagram-design.md). If no computed layout fits and custom SVG geometry is justified, read [diagrams-svg.md](../references/diagrams-svg.md).
+
+Start with the relationship the reader needs to understand. Use short, specific node names; add detail only when it distinguishes the node. Label edges with information that direction alone cannot convey. Add lanes for actual ownership and legends only for non-obvious encodings.
+
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+{/* REPO = Artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { ExplainerShell, Section, DiagramCanvas } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Checkout" summary="Lanes, sublabels, focal handoff.">
-  <Section title="Service path">
-    <DiagramCanvas layout="swimlane"
-      lanes={[{id:'edge',label:'Edge'},{id:'app',label:'App'},{id:'data',label:'Data'}]}
+
+<ExplainerShell title="How a cache miss reaches storage">
+  <Section title="Request path">
+    <DiagramCanvas layout="flow" description="The API checks the cache before reading Postgres."
       nodes={[
-        {id:'client',label:'Browser',detail:'cookie',shape:'oval',lane:'edge'},
-        {id:'gateway',label:'Gateway',detail:'TLS + limit',accent:true,lane:'edge'},
-        {id:'cart',label:'Cart API',detail:'stock check',lane:'app'},
-        {id:'pay',label:'Payment?',detail:'3DS',shape:'diamond',lane:'app'},
-        {id:'db',label:'Orders DB',detail:'serial write',lane:'data'}
+        {id:'client',label:'Browser',shape:'oval'},
+        {id:'api',label:'API'},
+        {id:'cache',label:'Cache'},
+        {id:'db',label:'Postgres'}
       ]}
-      edges={[{from:'client',to:'gateway',label:'HTTPS'},{from:'gateway',to:'cart',label:'request'},{from:'cart',to:'pay',label:'auth'},{from:'pay',to:'db',label:'approved'},{from:'cart',to:'db',label:'audit',style:'dashed'}]} />
+      edges={[
+        {from:'client',to:'api'},
+        {from:'api',to:'cache',label:'lookup'},
+        {from:'cache',to:'db',label:'miss'}
+      ]} />
   </Section>
 </ExplainerShell>
 ```
-If the content needs a specialized diagram family or the right semantic pattern
-is unclear, read `../references/diagram-design.md`. If no computed layout fits
-and custom SVG geometry is justified, then read `../references/diagrams-svg.md`.
-Mermaid is the fallback only when automatic layout is materially better and the
-result retains complete zoom, pan, reset, and expand controls.
+
+This example shows a logical request path; replace it with relationships verified in the source. Keep figure labels at least 14px at initial display size and body text at least 16px. Measure content, expand spacing, or split the graph before reducing type. Inspect branches, labels, arrowheads, and mobile containment after export; zoom is for detail, not basic readability.
+
+In MDX prose, escape literal braces as `&#123;` or put them inside code spans. Use shared spacing tokens. Mermaid remains available when explicitly requested or when it fits an unsupported graph grammar better; retain zoom, pan, reset, and expand controls.
