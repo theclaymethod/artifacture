@@ -1,0 +1,40 @@
+import { LieflatChart } from '../../visual-explainer-mdx/components';
+import { repairOutcomes, repairDevices, repairTimeline, repairFaults, repairPaths } from './repair-story-data';
+import './repair-story.css';
+
+export default function RepairStory() {
+  return (
+    <main className="repair-story" data-ve-preset="lieflat">
+      <header className="repair-story-header">
+        <h1>A little repair goes a long way.</h1>
+        <p>Seventy-two devices reached a neighborhood repair bench in June. Fifty-four went home working. Follow the marks to see what could be saved.</p>
+        <p className="repair-story-source">An illustrative dataset, created to demonstrate Lieflat chart authoring.</p>
+      </header>
+      <section className="repair-story-opening">
+        <LieflatChart title="Three quarters returned to use" spec={repairOutcomes} />
+        <LieflatChart title="Lamps filled the bench" spec={repairDevices} />
+      </section>
+      <section className="repair-story-section">
+        <div className="repair-story-aside">
+          <h2>The rhythm of a month</h2>
+          <p>Arrivals were uneven. The busiest day brought seven devices; most brought one or two. The peaks give the month a shape that its total cannot.</p>
+        </div>
+        <LieflatChart title="June, one day at a time" spec={repairTimeline} />
+      </section>
+      <section className="repair-story-section">
+        <div className="repair-story-aside">
+          <h2>Small parts, useful repairs</h2>
+          <p>Cables and switches accounted for 43 devices. Each of those devices was repaired. Circuit faults account for all ten devices awaiting parts and all eight beyond repair.</p>
+        </div>
+        <LieflatChart title="The fault depended on the device" spec={repairFaults} />
+      </section>
+      <section className="repair-story-paths">
+        <LieflatChart title="Follow a device from fault to outcome" description="The same 72 records connect all three stages." spec={repairPaths} />
+      </section>
+      <footer className="repair-story-footer">
+        <p>Counts, dates, and paths remain editable data. These five chart families are reusable through <code>LieflatChart</code> or the JSON chart command.</p>
+        <a href="https://github.com/larashero3-dotcom/lieflat-charts">Visual direction: Lieflat Charts</a>
+      </footer>
+    </main>
+  );
+}

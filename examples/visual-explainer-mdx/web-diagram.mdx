@@ -1,34 +1,24 @@
-import { Callout, DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
+import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
 
-export default function WebDiagramExample() {
-  return (
-    <ExplainerShell
-      eyebrow="web diagram command"
-      title="Generated Explainer Flow"
-      summary="This example represents the migrated /generate-web-diagram path: MDX source, reusable diagram component, generated standalone HTML."
-    >
-      <Section kicker="diagram" title="Source To Artifact">
-        <DiagramCanvas
-          nodes={[
-            { id: 'prompt', label: 'Prompt', detail: 'topic + audience' },
-            { id: 'mdx', label: 'MDX', detail: 'component source' },
-            { id: 'review', label: 'Review', detail: 'point + annotate' },
-            { id: 'html', label: 'HTML', detail: 'generated artifact' },
-          ]}
-          edges={[
-            { from: 'prompt', to: 'mdx', label: 'author' },
-            { from: 'mdx', to: 'review', label: 'preview' },
-            { from: 'review', to: 'html', label: 'export' },
-          ]}
-        />
-      </Section>
-
-      <Section kicker="rule" title="Command Contract">
-        <Callout>
-          The command writes MDX/TSX as the editable source. The standalone HTML is produced by
-          <code>npm run ve:export</code>.
-        </Callout>
-      </Section>
-    </ExplainerShell>
-  );
-}
+<ExplainerShell title="A cache changes the read path" summary="A hit returns a stored value. A miss reads the origin and stores the result for the next request." reviewTools={false}>
+  <Section title="Two possible outcomes">
+    <DiagramCanvas layout="flow"
+          direction="vertical" description="Requests check the cache. Hits return immediately; misses read the origin."
+      nodes={[
+        {id:'request',label:'Request',shape:'oval'},
+        {id:'lookup',label:'Value cached?',shape:'diamond'},
+        {id:'hit',label:'Return cached value'},
+        {id:'origin',label:'Read origin'},
+        {id:'store',label:'Cache and return'}
+      ]}
+      edges={[
+        {from:'request',to:'lookup'},
+        {from:'lookup',to:'hit',label:'hit'},
+        {from:'lookup',to:'origin',label:'miss'},
+        {from:'origin',to:'store'}
+      ]} />
+  </Section>
+  <Section title="Freshness is a separate decision">
+    <p>This example describes cache-aside reads. It does not determine when a stored value becomes stale. A real cache needs an expiry policy, invalidation after writes, or a key that changes with the source version.</p>
+  </Section>
+</ExplainerShell>

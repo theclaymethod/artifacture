@@ -21,16 +21,16 @@ Run this before emitting SVG:
 - The selected type teaches more than prose, bullets, or a compact table.
 - Every node represents a distinct idea; merge nodes that always travel together.
 - Every connector carries information that layout alone does not communicate.
-- One focal element dominates and the accent appears on at most two elements.
+- Emphasis follows the question; use at most two focal accents only when needed.
 - The diagram fits the selected type budget or has been split into overview and detail.
 - Every material source item is represented, merged explicitly, or listed in the fidelity ledger.
 
 ## Canvas and layers
 
 - Derive the `viewBox` and type ramp from the size preset in `diagram-design.md`. Reserve roughly 60px of height for a bottom legend when a legend is needed.
-- Use clean paper as the default background. Add the optional 22×22 dot texture only for a dedicated editorial canvas; omit it inside cards, slides, and product-page chrome.
+- Use a flat host-paper background. Do not render construction grids, dot texture, or decorative patterns.
 - Place wide SVGs inside the route's horizontal-scroll wrapper. Keep the SVG responsive with `width: 100%; height: auto;` and a stable `viewBox`.
-- Use a 4px construction grid for coordinates, font sizes, dimensions, gaps, and padding. Stroke widths, opacity, and the optional 22px dot pattern are exempt.
+- Use a 4px construction grid for coordinates, font sizes, dimensions, gaps, and padding. Text measurements, stroke widths, and opacity need not snap to the grid.
 
 Paint in this order:
 
@@ -53,7 +53,7 @@ This order keeps connectors behind their endpoints while leaving connector label
 5. Fan multiple connectors along a shared node edge. For edge length `L` and `N` connectors, position connector `k` at `L × k / (N + 1)` from the leading corner.
 6. Use a bridge/hop when orthogonal routes cross. Reroute any connector that would pass behind an unrelated node.
 
-An unavoidable transit behind a non-endpoint node is a narrow exception: use a dashed stroke, keep the label at a visible end, and land the marker only at the true destination.
+If a route cannot avoid an unrelated node, reposition nodes or split the diagram. Dashed styling cannot repair an obscured connection.
 
 ### Markers and IDs
 
@@ -71,7 +71,7 @@ Draw each marker in the same semantic token family as its connector. Use dashed 
 
 ## Labels and text measurement
 
-Use sans text for human-readable names, mono for ports, commands, URLs, types, axis labels, and short connector labels, and the selected display face only for titles or bounded editorial callouts.
+Use the host sans face for names, axes, and edge labels; reserve mono for literal identifiers, ports, commands, and types. Keep figure labels at least 14px at rendered scale and body text at least 16px.
 
 For wrapped node labels, notes, legends, or masks, read [`pretext-layout.md`](./pretext-layout.md). Measure the text first, then derive box width, box height, and anchors from the returned metrics. Layout engines or manual placement own graph positioning; Pretext owns text measurement.
 
@@ -94,11 +94,11 @@ Shape communicates category; color communicates focal importance or operational 
 
 ### Annotation callout
 
-Use an italic display/serif note with a dashed leader and landing dot. Keep it in the margin, connect it visibly to one target, and limit a diagram to two callouts.
+Add a note only when it explains a relationship the labels cannot. Use the host type, keep it outside routes, and connect it to one target only when the attachment would otherwise be unclear. Limit a diagram to two notes.
 
 ### Sketchy variant
 
-Use deterministic `feTurbulence` plus `feDisplacementMap` only for narrative or essay contexts. Apply the filter to shapes, never text. Set an explicit seed and keep displacement restrained.
+Use hand-drawn effects only when explicitly requested. Keep text and connectors crisp and deterministic; effects must not change apparent node boundaries.
 
 ### Legend
 
@@ -138,7 +138,7 @@ For every figure, check:
 - Wrapped text remains inside measured boxes.
 - Accent appears on at most two focal elements.
 - Legends are complete and outside the diagram body.
-- Nothing clips, overflows, overlaps, or relies on unreadably small text.
+- Nothing clips, overlaps, or requires zoom to read the main path; labels remain at least 14px at initial scale. Wide detail scrolls inside its own wrapper.
 - Light and dark output remain legible under the selected aesthetic.
 - Static and reduced-motion states communicate the complete meaning.
 - The console and asset checks are clean.

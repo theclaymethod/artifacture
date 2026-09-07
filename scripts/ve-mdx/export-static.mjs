@@ -34,6 +34,7 @@ async function main() {
     appType: 'custom',
     logLevel: 'warn',
     plugins: [mdx(), react()],
+    optimizeDeps: { noDiscovery: true, include: [] },
     server: {
       middlewareMode: true,
       hmr: false,

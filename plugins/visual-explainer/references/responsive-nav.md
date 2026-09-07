@@ -71,9 +71,9 @@ Key structural rules:
 
 .toc-title {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 2px;
   color: var(--text-dim);
   padding: 0 0 10px;
@@ -83,7 +83,7 @@ Key structural rules:
 
 .toc a {
   display: block;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   text-decoration: none;
   padding: 4px 8px;
@@ -134,7 +134,7 @@ Replace `var(--accent)` with your page's primary accent color variable (e.g., `v
     border-bottom: 2px solid transparent;
     border-radius: 4px 4px 0 0;
     padding: 6px 10px;
-    font-size: 10px;
+    font-size: 14px;
   }
   .toc a.active {
     border-left: none;

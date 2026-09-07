@@ -57,7 +57,9 @@ const PRESENTATION_CSS = `
 .ve-pres-root button { font: inherit; color: inherit; background: none; border: none; padding: 0; margin: 0; text-align: inherit; cursor: pointer; }
 .ve-pres-root button:focus-visible { outline: 2px solid var(--ve-pres-cta, var(--ve-accent)); outline-offset: 3px; }
 .ve-pres-slide {
+  font-size: 26px;
   --ve-pres-ink: var(--ve-slide-text);
+  --ve-pres-label-min: 24px;
   --ve-pres-muted: var(--ve-slide-muted);
   --ve-pres-hair: var(--ve-slide-rule);
   --ve-pres-panel: color-mix(in srgb, var(--ve-slide-text) 6%, transparent);
@@ -73,9 +75,9 @@ const PRESENTATION_CSS = `
    renders ink-on-ink. */
 .ve-pres-slide[data-ve-tone="accent"],
 .ve-pres-slide[data-ve-tone="light"] { --ve-pres-cta: var(--ve-slide-text); --ve-pres-cta-ink: var(--ve-slide-bg); }
-.ve-pres-card, .ve-pres-chip { transition: border-color .25s ${EASE}, background-color .25s ${EASE}, transform .25s ${EASE}; }
+.ve-pres-card, .ve-pres-chip { transition: border-color .25s ${EASE}, background-color .25s ${EASE}; }
 .ve-pres-card { position: relative; }
-.ve-pres-card:hover { transform: translateY(-2px); border-color: var(--ve-pres-cta) !important; }
+.ve-pres-card:hover { border-color: var(--ve-pres-cta) !important; }
 .ve-pres-chip:hover { border-color: var(--ve-pres-cta) !important; }
 .ve-pres-shine { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 2; transition: opacity .3s ease; }
 .ve-pres-card:hover > .ve-pres-shine, .ve-pres-card:focus-visible > .ve-pres-shine { opacity: 1; }
@@ -112,10 +114,10 @@ const useIsoLayoutEffect = isBrowserRuntime() ? useLayoutEffect : useEffect;
 
 export function MonoLabel({
   children,
-  size = 13,
+  size = 14,
   color,
-  ls = 1.5,
-  caps = true,
+  ls = 0,
+  caps = false,
   block = false,
   style,
 }: {
@@ -132,7 +134,7 @@ export function MonoLabel({
       style={{
         display: block ? 'block' : undefined,
         fontFamily: 'var(--ve-font-mono)',
-        fontSize: size,
+        fontSize: `max(${size}px, var(--ve-pres-label-min, 14px))`,
         letterSpacing: `${ls}px`,
         textTransform: caps ? 'uppercase' : 'none',
         color,
@@ -519,7 +521,7 @@ export function DrillChip({
   onClick,
   drillId,
   variant = 'secondary',
-  hint = 'Click to expand',
+  hint = '',
 }: {
   label: string;
   onClick: () => void;
@@ -549,10 +551,10 @@ export function DrillChip({
         <line x1="6" y1="1" x2="6" y2="11" />
         <line x1="1" y1="6" x2="11" y2="6" />
       </svg>
-      <MonoLabel size={12} ls={1.8}>
+      <MonoLabel size={12}>
         {label}
       </MonoLabel>
-      <MonoLabel size={10} ls={1.5} style={{ opacity: 0.75 }}>
+      <MonoLabel size={10} style={{ opacity: 0.75 }}>
         <span className="ve-pres-hint">{hint}</span>
       </MonoLabel>
     </button>
@@ -617,7 +619,7 @@ export function DrillSheet({
           marginBottom: 26,
         }}
       >
-        <MonoLabel size={13} ls={2} color="var(--ve-pres-cta)">
+        <MonoLabel size={13} color="var(--ve-pres-cta)">
           {eyebrow}
         </MonoLabel>
         <CloseX onClose={onClose} />
@@ -641,7 +643,7 @@ export function DrillCard({
   eyebrow,
   title,
   body,
-  hint = 'Click for detail',
+  hint = 'View details',
   accent,
   detailEyebrow,
   origin = 'left center',
@@ -671,12 +673,13 @@ export function DrillCard({
         className="ve-pres-card ve-pres-solid"
         data-drill-target={drillId}
         onClick={() => setOpen(true)}
-        onMouseMove={trackShine}
         style={
           // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
           {
             display: 'block',
             width: '100%',
+            borderRadius: 8,
+            textAlign: 'left',
             border: `1px solid ${accent ?? 'var(--ve-pres-hair)'}`,
             '--ve-pres-fill': accent ? `color-mix(in srgb, ${accent} 8%, transparent)` : 'transparent',
             padding: '18px 20px',
@@ -685,9 +688,8 @@ export function DrillCard({
           } as CSSProperties
         }
       >
-        <ShineOverlay color={cta} />
         {eyebrow ? (
-          <MonoLabel size={13} ls={2} color={accent ?? 'var(--ve-pres-muted)'} block>
+          <MonoLabel size={13} color={accent ?? 'var(--ve-pres-muted)'} block>
             {eyebrow}
           </MonoLabel>
         ) : null}
@@ -695,23 +697,21 @@ export function DrillCard({
           style={{
             display: 'block',
             marginTop: eyebrow ? 10 : 0,
-            fontFamily: 'var(--ve-font-mono)',
-            fontSize: 15,
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
+            fontFamily: 'var(--ve-font-body)',
+            fontSize: 28,
+            letterSpacing: 0,
+            textTransform: 'none',
           }}
         >
           {title}
         </span>
         {body ? (
-          <span style={{ display: 'block', marginTop: 10, fontSize: 15.5, lineHeight: 1.35, color: 'var(--ve-pres-muted)' }}>
+          <span style={{ display: 'block', marginTop: 10, fontSize: 26, lineHeight: 1.35, color: 'var(--ve-pres-muted)' }}>
             {body}
           </span>
         ) : null}
         {hint ? (
-          /* Always-visible secondary CTA (hard rule: no drill trigger may
-             look like passive content). Outline + mono text in the tone's
-             CTA color; opaque fill keeps it grid-safe. */
+          /* Visible action text distinguishes the trigger from passive content. */
           <span style={{ display: 'flex', marginTop: 14 }}>
             <span
               className="ve-pres-solid"
@@ -719,16 +719,14 @@ export function DrillCard({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                border: `1px solid ${cta}`,
                 color: cta,
-                padding: '5px 11px',
               }}
             >
               <svg width="9" height="9" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                 <line x1="6" y1="1" x2="6" y2="11" />
                 <line x1="1" y1="6" x2="11" y2="6" />
               </svg>
-              <MonoLabel size={10.5} ls={1.6}>
+              <MonoLabel size={10.5}>
                 {hint}
               </MonoLabel>
             </span>
@@ -770,7 +768,7 @@ export function PullQuote({
         &#8220;{quote}&#8221;
       </DisplayText>
       <p style={{ margin: '18px 0 0' }}>
-        <MonoLabel size={12} ls={2} color="var(--ve-pres-muted)">
+        <MonoLabel size={12} color="var(--ve-pres-muted)">
           {attribution}
         </MonoLabel>
       </p>
@@ -823,7 +821,7 @@ export function Metric({ value, label, size = 54 }: { value: string; label: stri
         {value}
       </p>
       <p style={{ margin: '12px 0 0' }}>
-        <MonoLabel size={11.5} ls={1.6} color="var(--ve-pres-muted)">
+        <MonoLabel size={11.5} color="var(--ve-pres-muted)">
           {label}
         </MonoLabel>
       </p>
@@ -887,13 +885,13 @@ export function HairlineList({
           <div key={isPair ? item.head : `${item}-${i}`} style={{ borderLeft: `1px solid ${border}`, paddingLeft: 22 }}>
             {isPair ? (
               <>
-                <MonoLabel size={12.5} ls={1.8} color="var(--ve-pres-cta)" block>
+                <MonoLabel size={12.5} color="var(--ve-pres-cta)" block>
                   {item.head}
                 </MonoLabel>
-                <p style={{ margin: '9px 0 0', fontSize: 17.5, lineHeight: 1.42, color: 'var(--ve-pres-muted)' }}>{item.body}</p>
+                <p style={{ margin: '9px 0 0', fontSize: 26, lineHeight: 1.42, color: 'var(--ve-pres-muted)' }}>{item.body}</p>
               </>
             ) : (
-              <span style={{ fontSize: 19, lineHeight: 1.36, color: 'var(--ve-pres-muted)' }}>{item}</span>
+              <span style={{ fontSize: 26, lineHeight: 1.36, color: 'var(--ve-pres-muted)' }}>{item}</span>
             )}
           </div>
         );
@@ -936,14 +934,14 @@ export function Stepper({
               zIndex: 1,
             }}
           >
-            <MonoLabel size={13} ls={1} color={i === accentIndex ? 'var(--ve-pres-cta)' : undefined}>
+            <MonoLabel size={13} color={i === accentIndex ? 'var(--ve-pres-cta)' : undefined}>
               {s.num}
             </MonoLabel>
           </div>
-          <p style={{ margin: '22px 0 0', fontFamily: 'var(--ve-font-mono)', fontSize: 16, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          <p style={{ margin: '22px 0 0', fontFamily: 'var(--ve-font-body)', fontSize: 28, letterSpacing: 0, textTransform: 'none' }}>
             {s.name}
           </p>
-          <p style={{ margin: '14px 0 0', fontSize: 18.5, lineHeight: 1.45, color: 'var(--ve-pres-muted)', maxWidth: 360 }}>{s.body}</p>
+          <p style={{ margin: '14px 0 0', fontSize: 26, lineHeight: 1.45, color: 'var(--ve-pres-muted)', maxWidth: 360 }}>{s.body}</p>
         </div>
       ))}
     </div>
@@ -954,7 +952,7 @@ export function Stepper({
 export function CodePanel({
   rows,
   lines,
-  fontSize = 14.5,
+  fontSize = 24,
 }: {
   /** JSON mode: [key, value] string pairs */
   rows?: Array<[string, string]>;
@@ -1001,14 +999,14 @@ export function CodePanel({
 }
 
 /* ==================================================================== */
-/* LadderDiagram — ascending staircase of stage cards on grid paper     */
+/* LadderDiagram — ascending sequence of stage cards                    */
 /* ==================================================================== */
 
 export interface LadderStage {
   num: string;
   name: string;
   short?: string;
-  /** mono tag rendered above the card, e.g. "◀ THIS DECK" */
+  /** Optional state or annotation above the stage. */
   tag?: string;
   /** dim the stage content (the box stays opaque — grid-safe) */
   dim?: boolean;
@@ -1017,15 +1015,14 @@ export interface LadderStage {
 }
 
 /**
- * Ascending staircase of stage cards on a grid-paper backdrop with a dashed
- * ascent line. Pass renderStage to substitute your own card (e.g. a
+ * Ascending sequence of stage cards. Pass renderStage to substitute a
  * DrillCard); the container is position:relative, so expanded DrillCards
  * cover the ladder area. Stage fills are opaque (solid-over-grid rule).
  */
 export function LadderDiagram({
   stages,
   stepOffset = 58,
-  gridBackdrop = true,
+  gridBackdrop = false,
   renderStage,
   framed = true,
 }: {
@@ -1049,14 +1046,14 @@ export function LadderDiagram({
       }
     >
       <div style={{ opacity: s.dim ? 0.55 : 1 }}>
-        <MonoLabel size={12.5} ls={2} color={s.dim ? 'var(--ve-pres-muted)' : s.accent ?? 'var(--ve-pres-muted)'} block>
+        <MonoLabel size={12.5} color={s.dim ? 'var(--ve-pres-muted)' : s.accent ?? 'var(--ve-pres-muted)'} block>
           {s.num}
         </MonoLabel>
-        <p style={{ margin: '10px 0 0', fontFamily: 'var(--ve-font-mono)', fontSize: 14.5, letterSpacing: '1px', textTransform: 'uppercase' }}>
+        <p style={{ margin: '10px 0 0', fontFamily: 'var(--ve-font-body)', fontSize: 28, letterSpacing: 0, textTransform: 'none' }}>
           {s.name}
         </p>
         {s.short ? (
-          <p style={{ margin: '10px 0 0', fontSize: 15, lineHeight: 1.38, color: 'var(--ve-pres-muted)' }}>{s.short}</p>
+          <p style={{ margin: '10px 0 0', fontSize: 26, lineHeight: 1.38, color: 'var(--ve-pres-muted)' }}>{s.short}</p>
         ) : null}
       </div>
     </div>
@@ -1071,20 +1068,12 @@ export function LadderDiagram({
         position: 'relative',
       }}
     >
-      <svg
-        aria-hidden="true"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-        viewBox="0 0 1656 430"
-        preserveAspectRatio="none"
-      >
-        <line x1="60" y1="400" x2="1600" y2="80" stroke="var(--ve-pres-hair)" strokeWidth="1" strokeDasharray="6 6" />
-      </svg>
       <div style={{ display: 'flex', gap: 22, alignItems: 'flex-end', height: '100%', position: 'relative' }}>
         {stages.map((s, i) => (
           <div key={s.num} style={{ flex: 1, marginBottom: i * stepOffset, display: 'flex', flexDirection: 'column' }}>
             {s.tag ? (
               <p style={{ margin: '0 0 8px' }}>
-                <MonoLabel size={12} ls={2} color="var(--ve-pres-cta)">
+                <MonoLabel size={12} color="var(--ve-pres-cta)">
                   {s.tag}
                 </MonoLabel>
               </p>
@@ -1138,12 +1127,12 @@ export function FanoutDiagram({
         >
           {source.icon ? <IconChip icon={source.icon} accent={source.accent} /> : null}
           <p style={{ margin: source.icon ? '14px 0 0' : 0 }}>
-            <MonoLabel size={15} ls={2}>
+            <MonoLabel size={15}>
               {source.label}
             </MonoLabel>
           </p>
           {source.body ? (
-            <p style={{ margin: '12px 0 0', fontSize: 15.5, lineHeight: 1.4, color: 'var(--ve-pres-muted)' }}>{source.body}</p>
+            <p style={{ margin: '12px 0 0', fontSize: 26, lineHeight: 1.4, color: 'var(--ve-pres-muted)' }}>{source.body}</p>
           ) : null}
         </div>
       </div>
@@ -1172,10 +1161,10 @@ export function FanoutDiagram({
             }}
           >
             {o.icon ? <IconChip icon={o.icon} /> : null}
-            <MonoLabel size={o.cap ? 14 : 13} ls={1.8}>
+            <MonoLabel size={o.cap ? 14 : 13}>
               {o.label}
             </MonoLabel>
-            {o.cap ? <span style={{ fontSize: 16, color: 'var(--ve-pres-muted)' }}>{o.cap}</span> : null}
+            {o.cap ? <span style={{ fontSize: 26, color: 'var(--ve-pres-muted)' }}>{o.cap}</span> : null}
           </div>
         ))}
       </div>
@@ -1224,13 +1213,14 @@ export function LayerExplorer({
               data-drill-target={`${drillIdPrefix}-${l.id}`}
               aria-pressed={active}
               onClick={() => setSel(i)}
-              onMouseMove={trackShine}
               style={
                 // SAFETY: The object contains a valid --ve-pres-fill custom property; React's CSSProperties omits custom-property keys.
                 {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 18,
+                  borderRadius: 8,
+                  textAlign: 'left',
                   border: `1px solid ${active ? 'var(--ve-pres-cta)' : 'var(--ve-pres-hair)'}`,
                   '--ve-pres-fill': active ? 'color-mix(in srgb, var(--ve-pres-cta) 12%, transparent)' : 'transparent',
                   padding: '22px 24px',
@@ -1238,22 +1228,18 @@ export function LayerExplorer({
                 } as CSSProperties
               }
             >
-              <ShineOverlay />
               {l.icon ? <IconChip icon={l.icon} /> : null}
               <span style={{ flex: 1 }}>
-                <MonoLabel size={12} ls={2} color={active ? 'var(--ve-pres-cta)' : 'var(--ve-pres-muted)'}>
-                  LAYER {l.num}
+                <MonoLabel size={12} color={active ? 'var(--ve-pres-cta)' : 'var(--ve-pres-muted)'}>
+                  {l.num}
                 </MonoLabel>
                 <span style={{ display: 'block', marginTop: 6 }}>
-                  <MonoLabel size={16} ls={1.5}>
+                  <MonoLabel size={16}>
                     {l.name}
                   </MonoLabel>
                 </span>
-                <span style={{ display: 'block', marginTop: 6, fontSize: 15.5, color: 'var(--ve-pres-muted)' }}>{l.lead}</span>
+                <span style={{ display: 'block', marginTop: 6, fontSize: 26, color: 'var(--ve-pres-muted)' }}>{l.lead}</span>
               </span>
-              <MonoLabel size={10} ls={1.5} color="var(--ve-pres-muted)">
-                <span className="ve-pres-hint">{active ? 'Selected' : 'Click to open'}</span>
-              </MonoLabel>
             </button>
           );
         })}
@@ -1275,22 +1261,22 @@ export function LayerExplorer({
           } as CSSProperties
         }
       >
-        <MonoLabel size={13} ls={2} color="var(--ve-pres-cta)">
-          LAYER {layer.num} · {layer.name}
+        <MonoLabel size={13} color="var(--ve-pres-cta)">
+          {layer.name}
         </MonoLabel>
         <DisplayText size={34} lh={1.15} style={{ marginTop: 18 }}>
           {layer.lead}
         </DisplayText>
         <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 28px' }}>
           {layer.points.map((p) => (
-            <div key={p} style={{ borderLeft: '1px solid var(--ve-pres-hair)', paddingLeft: 18, fontSize: 18, lineHeight: 1.35 }}>
+            <div key={p} style={{ borderLeft: '1px solid var(--ve-pres-hair)', paddingLeft: 18, fontSize: 26, lineHeight: 1.35 }}>
               {p}
             </div>
           ))}
         </div>
         {layer.foot ? (
           <p style={{ marginTop: 'auto', marginBottom: 0, paddingTop: 22, borderTop: '1px solid var(--ve-pres-hair)' }}>
-            <MonoLabel size={12.5} ls={1.6} color="var(--ve-pres-muted)">
+            <MonoLabel size={12.5} color="var(--ve-pres-muted)">
               {layer.foot}
             </MonoLabel>
           </p>
@@ -1307,8 +1293,8 @@ export function LayerExplorer({
 const DeckContext = createContext<{ index: number; count: number } | null>(null);
 
 export interface PresentationSlideProps {
-  /** Kicker text next to the dot, e.g. "01 · Thesis" */
-  kicker: string;
+  /** Optional context below the title. Omit when it repeats the heading. */
+  kicker?: string;
   /** Display-font headline. Omit for fully custom layouts. */
   title?: ReactNode;
   /** Short label for the slide rail; falls back to string titles. */
@@ -1318,9 +1304,9 @@ export interface PresentationSlideProps {
   tone?: PresentationTone;
   titleSize?: number;
   titleMax?: number;
-  /** Top-right mono label */
+  /** Optional ownership or source information. */
   rightLabel?: string;
-  /** Footer-left mono motif text */
+  /** Optional source citation or supporting note. */
   footer?: string;
   /** Optional node rendered directly under the title */
   sub?: ReactNode;
@@ -1365,19 +1351,9 @@ export function PresentationSlide({
         flexDirection: 'column',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span aria-hidden="true" style={{ width: 12, height: 12, borderRadius: 999, background: 'var(--ve-pres-cta)', display: 'inline-block' }} />
-          <MonoLabel size={13} ls={2}>
-            {kicker}
-          </MonoLabel>
-        </div>
-        {rightLabel ? (
-          <MonoLabel size={13} ls={2} color="var(--ve-pres-muted)">
-            {rightLabel}
-          </MonoLabel>
-        ) : null}
-      </div>
+      {rightLabel ? (
+        <p style={{ margin: '0 0 24px', fontSize: 18, color: 'var(--ve-pres-muted)', textAlign: 'right' }}>{rightLabel}</p>
+      ) : null}
       {title ? (
         <h1
           style={{
@@ -1394,22 +1370,21 @@ export function PresentationSlide({
           {title}
         </h1>
       ) : null}
+      {kicker ? <p style={{ margin: '18px 0 0', fontSize: 22, lineHeight: 1.4, color: 'var(--ve-pres-muted)' }}>{kicker}</p> : null}
       {sub}
       {/* position:relative — drill sheets fill this content area */}
       <div style={{ marginTop: title ? contentMarginTop : 0, flex: 1, minHeight: 0, position: 'relative' }}>{children}</div>
       <div
         style={{
           marginTop: 28,
-          borderTop: '1px solid var(--ve-pres-hair)',
+          borderTop: footer ? '1px solid var(--ve-pres-hair)' : undefined,
           paddingTop: 16,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        <MonoLabel size={12} ls={2} color="var(--ve-pres-muted)">
-          {footer ?? ''}
-        </MonoLabel>
+        {footer ? <span style={{ fontSize: 18, color: 'var(--ve-pres-muted)' }}>{footer}</span> : null}
         {/* spacer: the deck root overlays prev/next + counter here */}
         <span style={{ width: 220 }} />
       </div>
@@ -1511,7 +1486,6 @@ function SlideRail({
         aria-hidden={expanded ? undefined : true}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '15px 14px', borderBottom: '1px solid var(--ve-rule)' }}>
-          <span aria-hidden="true" style={{ width: 11, height: 11, borderRadius: 999, background: 'var(--ve-accent)', flexShrink: 0 }} />
           <div style={{ minWidth: 0 }}>
             <p
               style={{
@@ -1530,7 +1504,7 @@ function SlideRail({
             </p>
             {eyebrow ? (
               <p style={{ margin: '6px 0 0' }}>
-                <MonoLabel size={9.5} ls={1.2} color="var(--ve-muted)">
+                <MonoLabel size={14} color="var(--ve-muted)">
                   {eyebrow}
                 </MonoLabel>
               </p>
@@ -1562,6 +1536,7 @@ function SlideRail({
                     alignItems: 'center',
                     gap: 10,
                     width: '100%',
+                    borderRadius: 0,
                     padding: '8px 14px',
                     background: active ? 'color-mix(in srgb, var(--ve-accent) 14%, transparent)' : 'transparent',
                     color: active ? 'var(--ve-heading)' : 'var(--ve-muted)',
@@ -1577,7 +1552,7 @@ function SlideRail({
                     width: 24,
                     flexShrink: 0,
                     fontFamily: 'var(--ve-font-mono)',
-                    fontSize: 11,
+                    fontSize: 14,
                     fontVariantNumeric: 'tabular-nums',
                     color: active ? 'var(--ve-accent)' : 'var(--ve-faint)',
                   }}
@@ -1592,7 +1567,7 @@ function SlideRail({
           })}
         </div>
         <div style={{ borderTop: '1px solid var(--ve-rule)', padding: '11px 14px' }}>
-          <MonoLabel size={9.5} ls={1.2} color="var(--ve-muted)">
+          <MonoLabel size={14} color="var(--ve-muted)">
             {String(index + 1).padStart(2, '0')} / {String(entries.length).padStart(2, '0')}
           </MonoLabel>
         </div>
@@ -1615,9 +1590,6 @@ function SlideRail({
         }}
         aria-hidden={expanded ? true : undefined}
       >
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '15px 0 13px', borderBottom: '1px solid var(--ve-rule)' }}>
-          <span aria-hidden="true" style={{ width: 11, height: 11, borderRadius: 999, background: 'var(--ve-accent)' }} />
-        </div>
         <div
           style={{
             flex: 1,
@@ -1771,7 +1743,7 @@ function requestPresentationVerticalNavigation(
 export function PresentationDeck({
   title,
   eyebrow,
-  preset = 'oa-design',
+  preset = 'lieflat',
   stageWidth = 1920,
   stageHeight = 1080,
   railAutoCollapseMs = 900,
@@ -1955,7 +1927,7 @@ export function PresentationDeck({
             >
               <NavChevron dir="prev" />
             </button>
-            <MonoLabel size={13} ls={2} color="var(--ve-pres-muted)" style={{ whiteSpace: 'nowrap' }}>
+            <MonoLabel size={14} color="var(--ve-pres-muted)" style={{ whiteSpace: 'nowrap' }}>
               <span data-ve-deck-counter="true">
                 {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
               </span>

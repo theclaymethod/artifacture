@@ -25,7 +25,7 @@ Credit: this mode adapts Geoffrey Litt's "explain-diff" gist: https://gist.githu
 **Authoring contract.**
 Read `cards/explain-diff.md`. Write MDX, no top-level tabs. Use a long-page format with a table of contents and four sections: Background, Intuition, Code, Quiz. Use `DiffBlock`, `CodeBlock`, and `Quiz`; use `DiagramCanvas`/`MermaidBlock` for 1-2 reusable diagram families and reuse them across sections with example data.
 
-Prose bar: clarity and flow of Martin Kleppmann, classic style, smooth transitions. Then run the standard unslop step from `SKILL.md` before export.
+Prose bar: clarity and flow of Martin Kleppmann, classic style, smooth transitions. Remove prose that adds no explanation; use the optional companion route only when requested.
 
 Output path:
 
@@ -34,6 +34,6 @@ mkdir -p ~/.agent/diagrams
 npm run ve:export -- <source.mdx> --out ~/.agent/diagrams/$(date +%F)-explain-<slug>.html
 ```
 
-Then run §6 Verify from `SKILL.md` on the exported HTML and report the artifact path, report JSON, screenshots directory, and any remaining uncertainty.
+Then complete `references/verification.md` on the exported HTML and report the artifact path, report JSON, screenshots directory, and any remaining uncertainty.
 
 $@

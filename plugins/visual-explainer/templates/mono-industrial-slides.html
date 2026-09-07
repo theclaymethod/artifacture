@@ -4,41 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Request Ledger — Mono-Industrial Slides</title>
-<!--
-  Mono-Industrial slide-deck reference template.
-  Companion to mono-industrial.html (scrollable architecture reference).
-  See ./references/mono-industrial.md for the full design system.
 
-  Patterns demonstrated here:
-  - 9 slides, all 10 slide-type roles covered across them
-  - Instant-cut transitions: slides pop in without fade/scale/reveal stagger
-  - Three-layer composition per slide (display / body / metadata)
-  - Font budget: Space Grotesk + Space Mono + one Geist Pixel hero
-  - Grayscale Mermaid at presentation scale
-  - One slide per deck breaks its own grid (the "moment of surprise")
-  - Status colors only on values, never row backgrounds
-  - Nav chrome is flat (no backdrop-blur, hairline borders)
--->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* Geist Pixel Square — the hero/display font (SIL OFL, Vercel + basement.studio).
-     Loaded from jsDelivr because Geist Pixel is npm-only, not on Google Fonts. */
-  @font-face {
-    font-family: 'Geist Pixel Square';
-    src: url('https://cdn.jsdelivr.net/npm/geist@1.7.0/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
 
-  /* ============ TOKENS ============ */
   :root {
     --font-body: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
-    --font-display: 'Geist Pixel Square', 'Space Grotesk', system-ui, sans-serif;
+    --font-display: var(--font-body);
 
     --bg: #000000;
     --fg: #f2ede5;
@@ -46,7 +22,7 @@
     --text-display: rgba(242, 237, 229, 1.00);
     --text-primary: rgba(242, 237, 229, 0.90);
     --text-secondary: rgba(242, 237, 229, 0.58);
-    --text-disabled: rgba(242, 237, 229, 0.36);
+    --text-disabled: rgba(242, 237, 229, 0.65);
 
     --rule: rgba(242, 237, 229, 0.14);
     --rule-strong: rgba(242, 237, 229, 0.28);
@@ -58,18 +34,14 @@
     --mermaid-container: #0c0c0c;
   }
 
-  /* Light mode applies when:
-       (1) OS prefers light AND no explicit override, OR
-       (2) the user picked "light" via the theme toggle ([data-theme="light"]).
-     The [data-theme="dark"] override pins the page to dark regardless of OS. */
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
       --bg: #f6f4f0;
       --fg: #16130f;
       --text-display: rgba(22, 19, 15, 1.00);
       --text-primary: rgba(22, 19, 15, 0.90);
-      --text-secondary: rgba(22, 19, 15, 0.56);
-      --text-disabled: rgba(22, 19, 15, 0.36);
+      --text-secondary: rgba(22, 19, 15, 0.68);
+      --text-disabled: rgba(22, 19, 15, 0.62);
       --rule: rgba(22, 19, 15, 0.12);
       --rule-strong: rgba(22, 19, 15, 0.24);
       --ok:   #2f7a3e;
@@ -79,14 +51,13 @@
     }
   }
 
-  /* Explicit toggle override — beats the media query either way. */
   :root[data-theme="light"] {
     --bg: #f6f4f0;
     --fg: #16130f;
     --text-display: rgba(22, 19, 15, 1.00);
     --text-primary: rgba(22, 19, 15, 0.90);
-    --text-secondary: rgba(22, 19, 15, 0.56);
-    --text-disabled: rgba(22, 19, 15, 0.36);
+    --text-secondary: rgba(22, 19, 15, 0.68);
+    --text-disabled: rgba(22, 19, 15, 0.62);
     --rule: rgba(22, 19, 15, 0.12);
     --rule-strong: rgba(22, 19, 15, 0.24);
     --ok:   #2f7a3e;
@@ -94,108 +65,20 @@
     --err:  #a51818;
     --mermaid-container: #ffffff;
   }
-
-  /* ============ THEME TOGGLE ============
-     Always top-right. Collapsed to a single centered icon at rest; unfurls on
-     hover or focus-within (tap-to-focus on touch). Never moves bottom-right,
-     never stretches full-width. Same contract as ./mono-industrial.html. */
-  .theme-toggle {
-    position: fixed;
-    top: clamp(12px, 2vw, 24px);
-    right: clamp(12px, 2vw, 24px);
-    z-index: 99;
-    display: flex;
-    gap: 0;
-    padding: 0;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    transition: background 120ms ease-out, border-color 120ms ease-out,
-                padding 120ms ease-out, gap 120ms ease-out,
-                backdrop-filter 120ms ease-out;
-  }
-  .theme-toggle button {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    padding: 7px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    line-height: 1;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 999px;
-    overflow: hidden;
-    white-space: nowrap;
-    transition: color 120ms ease-out, background 120ms ease-out,
-                padding 120ms ease-out, gap 120ms ease-out,
-                max-width 120ms ease-out, opacity 120ms ease-out;
-  }
-  .theme-toggle__glyph { display: block; flex-shrink: 0; width: 12px; height: 12px; }
-  .theme-toggle__label {
-    display: inline-block;
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    transition: max-width 120ms ease-out, opacity 120ms ease-out 40ms;
-  }
+  .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; gap: 2px; padding: 3px; border: 1px solid var(--rule, var(--border)); border-radius: 8px; background: var(--bg, var(--surface)); }
+  .theme-toggle button { appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 5px; background: transparent; color: var(--text-secondary); font: 400 14px var(--font-body); cursor: pointer; }
+  .theme-toggle button[aria-checked="true"] { background: color-mix(in srgb, var(--text-display) 9%, transparent); color: var(--text-display); }
   .theme-toggle button:hover { color: var(--text-display); }
-  .theme-toggle button:focus-visible {
-    outline: 1px solid var(--text-display);
-    outline-offset: 2px;
-  }
+  .theme-toggle__glyph { width: 14px; height: 14px; flex-shrink: 0; }
+  .theme-toggle__label { display: inline; }
+  .theme-toggle button:focus-visible { outline: 3px solid var(--text-display); outline-offset: 2px; }
 
-  /* Collapsed default: only the active indicator is visible. */
-  .theme-toggle button:not([aria-checked="true"]) {
-    max-width: 0; padding: 0; opacity: 0;
-  }
-  .theme-toggle button[aria-checked="true"] {
-    color: var(--text-display);
-    background: transparent;
-  }
 
-  /* Expanded on hover or focus-within. Pill chrome only appears here. */
-  .theme-toggle:hover,
-  .theme-toggle:focus-within {
-    background: color-mix(in srgb, var(--fg) 8%, transparent);
-    border-color: var(--rule-strong);
-    backdrop-filter: blur(10px) saturate(1.1);
-    -webkit-backdrop-filter: blur(10px) saturate(1.1);
-    padding: 4px;
-    gap: 2px;
-  }
-  .theme-toggle:hover button:not([aria-checked="true"]),
-  .theme-toggle:focus-within button:not([aria-checked="true"]) {
-    max-width: 120px; padding: 7px 12px; opacity: 1; gap: 6px;
-  }
-  .theme-toggle:hover button[aria-checked="true"],
-  .theme-toggle:focus-within button[aria-checked="true"] {
-    background: color-mix(in srgb, var(--fg) 10%, transparent);
-    padding: 7px 12px; gap: 6px;
-  }
-  .theme-toggle:hover .theme-toggle__label,
-  .theme-toggle:focus-within .theme-toggle__label {
-    max-width: 80px; opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .theme-toggle,
-    .theme-toggle button,
-    .theme-toggle__label { transition: none; }
-  }
-
-  /* ============ RESET ============ */
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  :focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+  html { scrollbar-color: var(--text-dim, var(--text-secondary)) transparent; }
+  h1, h2{ text-wrap: balance; }
+  p { max-width: 70ch; }
 
   html, body {
     max-width: 100%;
@@ -204,6 +87,7 @@
   }
 
   body {
+    overflow-x: clip;
     font-family: var(--font-body);
     color: var(--text-primary);
     background: var(--bg);
@@ -213,7 +97,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ============ DECK ENGINE ============ */
   .deck {
     height: 100dvh;
     overflow-y: auto;
@@ -222,13 +105,10 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* INSTANT CUT: no opacity transition, no transform, no reveal stagger.
-     The slide is fully composed on paint. This is the Mono-Industrial
-     default posture — percussive, not fluid. */
   .slide {
     height: 100dvh;
     scroll-snap-align: start;
-    overflow: hidden;
+    overflow: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -242,12 +122,11 @@
     * { transition: none !important; animation: none !important; }
   }
 
-  /* ============ NAV CHROME (flat, no blur) ============ */
   .deck-progress {
     position: fixed; top: 0; left: 0; height: 2px;
     background: var(--text-primary); z-index: 100;
     pointer-events: none;
-    transition: width 120ms ease-out;
+
   }
 
   .deck-dots {
@@ -279,10 +158,9 @@
     position: fixed;
     bottom: clamp(12px, 2vh, 20px);
     right: clamp(12px, 2vw, 20px);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-size: 14px;
+
     color: var(--text-secondary);
     z-index: 100;
     font-variant-numeric: tabular-nums;
@@ -293,10 +171,9 @@
     bottom: clamp(12px, 2vh, 20px);
     left: 50%;
     transform: translateX(-50%);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-size: 14px;
+
     color: var(--text-disabled);
     z-index: 100;
     transition: opacity 120ms ease-out;
@@ -304,29 +181,6 @@
   }
 
   .deck-hints.faded { opacity: 0; pointer-events: none; }
-
-  /* ============ SHARED SLIDE ELEMENTS ============ */
-  .slide__label {
-    font-family: var(--font-mono);
-    font-size: clamp(10px, 1.2vw, 13px);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .slide__display {
-    font-size: clamp(56px, 10vw, 132px);
-    font-weight: 500;
-    letter-spacing: -0.03em;
-    line-height: 0.98;
-    color: var(--text-display);
-    text-wrap: balance;
-  }
 
   .slide__heading {
     font-size: clamp(32px, 5.2vw, 56px);
@@ -354,59 +208,20 @@
     max-width: 58ch;
   }
 
-  .slide__foot {
-    font-family: var(--font-mono);
-    font-size: clamp(10px, 1.1vw, 12px);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-disabled);
-    display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    padding-top: 12px;
-    border-top: 1px solid var(--rule);
-  }
+  .slide--layered { display: flex; justify-content: center; }
 
-  /* Vertical rhythm: label top, body center, foot bottom. */
-  .slide--layered {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: clamp(24px, 4vh, 48px);
-  }
-
-  /* ============ SLIDE TYPES ============ */
-
-  /* TITLE: one big headline, vast empty space. Metadata top, a single mono caption bottom. */
-  .slide--title {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: clamp(32px, 5vh, 64px);
-  }
+  .slide--title { display: flex; justify-content: center; gap: 32px; }
 
   .slide--title .slide__heading {
-    font-size: clamp(48px, 8vw, 108px);
+    font-size: clamp(48px, 7vw, 92px);
     font-weight: 500;
     letter-spacing: -0.03em;
     line-height: 0.98;
     max-width: 16ch;
-    align-self: end;
+    align-self: start;
   }
 
-  /* SECTION: just a number and a heading. No body. Push a vast amount of space. */
-  .slide--section {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-  }
-
-  .slide--section .section-number {
-    font-family: var(--font-display);
-    font-size: clamp(120px, 22vw, 300px);
-    font-weight: 400;
-    color: var(--text-display);
-    line-height: 0.86;
-    letter-spacing: -0.02em;
-    align-self: end;
-  }
+  .slide--section { display: flex; align-items: center; }
 
   .slide--section .section-title {
     font-size: clamp(28px, 4vw, 44px);
@@ -414,26 +229,16 @@
     color: var(--text-display);
     letter-spacing: -0.01em;
     line-height: 1.15;
-    align-self: end;
+    align-self: start;
     max-width: 28ch;
     margin-top: 16px;
   }
 
-  /* CONTENT: heading + body, left-anchored. */
   .slide--content .slide__body {
     margin-top: clamp(12px, 2vh, 20px);
   }
 
-  /* SPLIT: left-heavy two-column composition. */
-  .slide--split {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto;
-    gap: clamp(24px, 4vw, 56px);
-  }
-
-  .slide--split .slide__label { grid-column: 1 / -1; }
-  .slide--split .slide__foot  { grid-column: 1 / -1; }
+  .slide--split { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 48px; }
 
   .split__points {
     display: flex;
@@ -442,19 +247,7 @@
     align-self: center;
   }
 
-  .split__item {
-    display: grid;
-    grid-template-columns: 3ch 1fr;
-    gap: 12px;
-  }
-
-  .split__item-num {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    color: var(--text-disabled);
-    padding-top: 4px;
-  }
+  .split__item { display: block; }
 
   .split__item-text {
     font-size: clamp(16px, 1.8vw, 20px);
@@ -467,68 +260,7 @@
     font-weight: 500;
   }
 
-  /* DASHBOARD / KPIs */
-  .slide--dashboard {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    gap: clamp(16px, 2.5vh, 28px);
-  }
-
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: clamp(24px, 4vw, 56px);
-    align-self: center;
-  }
-
-  .kpi {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .kpi__label {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-
-  .kpi__val {
-    font-family: var(--font-mono);
-    font-size: clamp(42px, 6vw, 72px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text-display);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .kpi__val--hero {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(72px, 11vw, 160px);
-    letter-spacing: -0.02em;
-  }
-
-  .kpi__delta {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .kpi__delta--ok { color: var(--ok); }
-  .kpi__delta--warn { color: var(--warn); }
-  .kpi__delta--err { color: var(--err); }
-
-  /* DIAGRAM */
-  .slide--diagram {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    gap: clamp(12px, 2vh, 20px);
-  }
+  .slide--diagram { display: flex; justify-content: center; gap: 32px; }
 
   .mermaid-wrap {
     position: relative;
@@ -537,7 +269,7 @@
     padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 28px);
     overflow: auto;
     cursor: grab;
-    min-height: 0;
+    min-height: 360px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -570,41 +302,10 @@
     padding: 2px;
   }
 
-  .mermaid-wrap .zoom-controls button {
-    width: 28px; height: 24px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 120ms ease-out;
-  }
+  .mermaid-wrap .zoom-controls button { min-width: 44px; min-height: 44px; padding: 8px; border: 0; border-radius: 5px; background: transparent; color: var(--text, var(--text-primary)); font: 400 15px var(--font-body); cursor: pointer; }
 
   .mermaid-wrap .zoom-controls button:hover {
     color: var(--text-display);
-  }
-
-  .mermaid .nodeLabel {
-    font-family: var(--font-body) !important;
-    font-size: 20px !important;
-    color: var(--text-primary) !important;
-  }
-
-  .mermaid .edgeLabel {
-    font-family: var(--font-mono) !important;
-    font-size: 13px !important;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-secondary) !important;
-    background-color: var(--mermaid-container) !important;
-  }
-
-  .mermaid .edgeLabel rect {
-    fill: var(--mermaid-container) !important;
   }
 
   .mermaid .node rect,
@@ -618,12 +319,7 @@
     stroke-width: 2px !important;
   }
 
-  /* TABLE */
-  .slide--table {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    gap: clamp(12px, 2vh, 20px);
-  }
+  .slide--table { display: flex; justify-content: center; gap: 32px; }
 
   .table-scroll {
     overflow: auto;
@@ -645,10 +341,9 @@
   }
 
   .data-row thead th {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-size: 14px;
+
     color: var(--text-secondary);
     border-bottom: 1px solid var(--rule);
     padding-bottom: 8px;
@@ -668,14 +363,8 @@
 
   .data-row .status-ok  { color: var(--ok); }
   .data-row .status-warn { color: var(--warn); }
-  .data-row .status-err { color: var(--err); }
 
-  /* CODE */
-  .slide--code {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    gap: clamp(12px, 2vh, 20px);
-  }
+  .slide--code { display: flex; justify-content: center; gap: 32px; }
 
   .code-block {
     border: 1px solid var(--rule);
@@ -687,9 +376,8 @@
 
   .code-filename {
     font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 14px;
+
     color: var(--text-disabled);
     display: block;
     margin-bottom: 12px;
@@ -697,20 +385,19 @@
 
   .code-block pre {
     font-family: var(--font-mono);
-    font-size: clamp(13px, 1.4vw, 16px);
+    font-size: clamp(16px, 1.4vw, 20px);
     line-height: 1.65;
     color: var(--text-primary);
     white-space: pre-wrap;
     word-break: break-word;
   }
 
-  .code-block .kw { color: var(--text-display); font-weight: 700; }
+  .code-block .kw { color: var(--text-display); font-weight: 600; }
   .code-block .cm { color: var(--text-disabled); }
 
-  /* QUOTE: vast empty space, one sentence centered, one attribution below. */
   .slide--quote {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
   }
 
   .quote-body {
@@ -725,118 +412,65 @@
   }
 
   .quote-cite {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-size: 14px;
+
     color: var(--text-secondary);
     margin-top: 24px;
-    align-self: end;
+    align-self: start;
   }
 
-  /* FULL-BLEED / BREAK-THE-GRID:
-     This is the one moment of surprise. A single Geist Pixel display character
-     fills the slide; everything else is pushed to the corners. */
-  .slide--bleed {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-  }
+  .slide--bleed { display: flex; justify-content: center; gap: 32px; }
 
-  .slide--bleed .break-grid {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(180px, 36vw, 520px);
-    line-height: 0.82;
-    letter-spacing: -0.04em;
-    color: var(--text-display);
-    align-self: center;
-    justify-self: start;
-  }
-
-  .slide--bleed .break-grid-caption {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    align-self: end;
-    justify-self: end;
-    max-width: 24ch;
-    text-align: right;
-    line-height: 1.6;
-  }
-
-  /* ============ RESPONSIVE ============ */
   @media (max-width: 768px) {
     .slide { padding: 24px 20px; }
-    .slide--split { grid-template-columns: 1fr; }
-    .kpi-row { grid-template-columns: 1fr 1fr; gap: 20px; }
+    .slide--split { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 48px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Theme toggle: Light / Dark / Auto. Choice persists to localStorage. -->
 <div class="theme-toggle" role="radiogroup" aria-label="Theme">
-  <button type="button" role="radio" data-theme="light"  aria-checked="false">
+  <button type="button" role="radio" data-theme="light" aria-checked="false">
     <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
-      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
     </svg>
     <span class="theme-toggle__label">Light</span>
   </button>
-  <button type="button" role="radio" data-theme="dark"   aria-checked="false">
+  <button type="button" role="radio" data-theme="dark" aria-checked="false">
     <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
-      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="5" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
     </svg>
     <span class="theme-toggle__label">Dark</span>
   </button>
   <button type="button" role="radio" data-theme="system" aria-checked="true">
     <svg class="theme-toggle__glyph" viewBox="0 0 16 16" aria-hidden="true">
-      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor"/>
+      <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <path d="M 8 3 A 5 5 0 0 1 8 13 Z" fill="currentColor" />
     </svg>
     <span class="theme-toggle__label">Auto</span>
   </button>
 </div>
 
-
 <div class="deck">
 
-  <!-- SLIDE 1 — TITLE -->
   <section class="slide slide--title">
-    <header class="slide__label">
-      <span>Request Ledger / Architecture Review</span>
-      <span>2026 &middot; 04 &middot; 16</span>
-    </header>
-    <h1 class="slide__heading">A write-first ledger for request and response telemetry.</h1>
-    <footer class="slide__foot">
-      <span>Deck 01 &middot; Mono-Industrial</span>
-      <span>Platform Eng</span>
-    </footer>
-  </section>
 
-  <!-- SLIDE 2 — SECTION DIVIDER (break: huge Geist Pixel number) -->
+    <h1 class="slide__heading">Write each request before handling it.</h1>
+
+  <p class="slide__body">An illustrative architecture for durable request telemetry.</p></section>
+
   <section class="slide slide--section">
-    <header class="slide__label">
-      <span>Part One</span>
-      <span>Context</span>
-    </header>
+
     <div>
-      <div class="section-number">01</div>
+
       <div class="section-title">Why a ledger, and why now.</div>
     </div>
-    <footer class="slide__foot">
-      <span>01 / 04</span>
-      <span>Context</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 3 — CONTENT (three-layer) -->
   <section class="slide slide--layered slide--content">
-    <header class="slide__label">
-      <span>Context &middot; The problem</span>
-      <span>Slide 03</span>
-    </header>
+
     <div>
       <h2 class="slide__heading">We were losing telemetry during handler failures.</h2>
       <p class="slide__body" style="margin-top: 16px;">
@@ -845,18 +479,11 @@
         to decouple logging from handling: write first, then route.
       </p>
     </div>
-    <footer class="slide__foot">
-      <span>Owner &middot; Platform</span>
-      <span>Ref &middot; RFC-204</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 4 — SPLIT (three principles) -->
   <section class="slide slide--split">
-    <header class="slide__label">
-      <span>Design Principles</span>
-      <span>Slide 04</span>
-    </header>
+
     <div>
       <h2 class="slide__heading">Three rules the ledger enforces.</h2>
       <p class="slide__body" style="margin-top: 16px;">
@@ -866,89 +493,47 @@
     </div>
     <div class="split__points">
       <div class="split__item">
-        <span class="split__item-num">01</span>
-        <div class="split__item-text"><strong>Write before handle.</strong> No handler runs until the request is durably logged.</div>
+
+        <div class="split__item-text"><strong>Persist before handling.</strong> No handler runs until the request is durably logged.</div>
       </div>
       <div class="split__item">
-        <span class="split__item-num">02</span>
+
         <div class="split__item-text"><strong>Read from the ledger, not the stream.</strong> Downstream services subscribe by offset.</div>
       </div>
       <div class="split__item">
-        <span class="split__item-num">03</span>
-        <div class="split__item-text"><strong>Replay is free.</strong> Any consumer can rewind to any offset at any time.</div>
+
+        <div class="split__item-text"><strong>Replay is explicit.</strong> Consumers can return to a retained offset.</div>
       </div>
     </div>
-    <footer class="slide__foot">
-      <span>Source &middot; design-doc</span>
-      <span>Owner &middot; Platform</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 5 — DIAGRAM -->
   <section class="slide slide--diagram">
-    <header class="slide__label">
-      <span>Data Flow &middot; Write &rarr; Read</span>
-      <span>Slide 05</span>
-    </header>
+
     <h2 class="slide__subheading">The durability boundary separates who can lose data from who can't.</h2>
     <div class="mermaid-wrap">
       <div class="zoom-controls">
-        <button type="button" onclick="zoomDiagram(this, 1.1)" title="Zoom in">+</button>
-        <button type="button" onclick="zoomDiagram(this, 0.9)" title="Zoom out">&minus;</button>
-        <button type="button" onclick="resetZoom(this)" title="Reset">1:1</button>
-        <button type="button" onclick="openDiagramFullscreen(this)" title="Open full size">&#x26F6;</button>
+        <button aria-label="Zoom in" type="button" onclick="zoomDiagram(this, 1.1)" title="Zoom in">+</button>
+        <button aria-label="Zoom out" type="button" onclick="zoomDiagram(this, 0.9)" title="Zoom out">−</button>
+        <button aria-label="Reset" type="button" onclick="resetZoom(this)" title="Reset">1:1</button>
+        <button aria-label="Open full size" type="button" onclick="openDiagramFullscreen(this)" title="Open full size">⛶</button>
       </div>
       <pre class="mermaid">
 graph LR
-  CLIENT[Client] --> GW[Gateway]
-  GW --> LEDGER[(Append-only Ledger)]
-  LEDGER --> IDX[Indexer]
-  LEDGER --> BILL[Billing Consumer]
-  IDX --> API[Query API]
+  CLIENT[Client] --&gt; GW[Gateway]
+  GW --&gt; LEDGER[(Append-only Ledger)]
+  LEDGER --&gt; IDX[Indexer]
+  LEDGER --&gt; BILL[Billing Consumer]
+  IDX --&gt; API[Query API]
       </pre>
     </div>
-    <footer class="slide__foot">
-      <span>Mermaid &middot; grayscale theme</span>
-      <span>Ctrl/Cmd + scroll to zoom</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 6 — DASHBOARD (one hero KPI + supporting metrics) -->
-  <section class="slide slide--dashboard">
-    <header class="slide__label">
-      <span>Capacity &middot; Production</span>
-      <span>Slide 06</span>
-    </header>
-    <h2 class="slide__subheading">Peak load, sustained throughput, and headroom.</h2>
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="kpi__label">Events / sec &middot; peak</div>
-        <div class="kpi__val kpi__val--hero">1.2M</div>
-        <div class="kpi__delta kpi__delta--ok">+ 18% vs Q4</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi__label">Sustained throughput</div>
-        <div class="kpi__val">480k/s</div>
-        <div class="kpi__delta kpi__delta--ok">Within SLO</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi__label">Headroom to ceiling</div>
-        <div class="kpi__val">2.6&times;</div>
-        <div class="kpi__delta kpi__delta--warn">Below 3&times; target</div>
-      </div>
-    </div>
-    <footer class="slide__foot">
-      <span>Source &middot; 24h p99</span>
-      <span>Target &middot; 3&times; headroom</span>
-    </footer>
-  </section>
+  <section class="slide slide--table"><h2 class="slide__subheading">Capacity needs a recovery margin</h2><p class="slide__body">Illustrative measurements; retain the measurement window when replacing these values.</p><div class="table-scroll"><table class="data-row"><thead><tr><th>Measure</th><th class="num">Observed</th><th>Interpretation</th></tr></thead><tbody><tr><td>Peak events per second</td><td class="num">1.2 million</td><td>Short bursts</td></tr><tr><td>Sustained events per second</td><td class="num">480,000</td><td>Continuous load</td></tr><tr><td>Headroom</td><td class="num">2.6×</td><td>Below the 3× target</td></tr></tbody></table></div></section>
 
-  <!-- SLIDE 7 — TABLE -->
   <section class="slide slide--table">
-    <header class="slide__label">
-      <span>Latency &middot; Write Path</span>
-      <span>Slide 07</span>
-    </header>
+
     <h2 class="slide__subheading">End-to-end budget is 80ms. We are on it, but one hop is over.</h2>
     <div class="table-scroll">
       <table class="data-row">
@@ -962,50 +547,43 @@ graph LR
         </thead>
         <tbody>
           <tr>
-            <td>Client &rarr; Gateway</td>
-            <td>&le; 15 ms</td>
+            <td>Client → Gateway</td>
+            <td>≤ 15 ms</td>
             <td class="num">12</td>
             <td class="status-ok">WITHIN</td>
           </tr>
           <tr>
             <td>Gateway validate</td>
-            <td>&le; 10 ms</td>
+            <td>≤ 10 ms</td>
             <td class="num">9</td>
             <td class="status-ok">WITHIN</td>
           </tr>
           <tr>
             <td>Ledger quorum ack</td>
-            <td>&le; 40 ms</td>
+            <td>≤ 40 ms</td>
             <td class="num">47</td>
-            <td class="status-warn">OVER &middot; 17%</td>
+            <td class="status-warn">OVER · 17%</td>
           </tr>
           <tr>
-            <td>Gateway &rarr; Client</td>
-            <td>&le; 15 ms</td>
+            <td>Gateway → Client</td>
+            <td>≤ 15 ms</td>
             <td class="num">11</td>
             <td class="status-ok">WITHIN</td>
           </tr>
           <tr>
             <td>End-to-end</td>
-            <td>&le; 80 ms</td>
+            <td>≤ 80 ms</td>
             <td class="num">79</td>
             <td class="status-ok">WITHIN</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <footer class="slide__foot">
-      <span>Window &middot; 24h</span>
-      <span>p99 per hop</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 8 — CODE -->
   <section class="slide slide--code">
-    <header class="slide__label">
-      <span>Interface &middot; Gateway</span>
-      <span>Slide 08</span>
-    </header>
+
     <h2 class="slide__subheading">Producers call one function. Everything else is routing.</h2>
     <div class="code-block">
       <span class="code-filename">gateway/write.ts</span>
@@ -1017,36 +595,18 @@ graph LR
   <span class="kw">return</span> ack;
 }</pre>
     </div>
-    <footer class="slide__foot">
-      <span>Module &middot; gateway</span>
-      <span>v 2.4.0</span>
-    </footer>
+
   </section>
 
-  <!-- SLIDE 9 — QUOTE -->
   <section class="slide slide--quote">
-    <header class="slide__label">
-      <span>Operating Principle</span>
-      <span>Slide 09</span>
-    </header>
+
     <blockquote class="quote-body">If it isn't in the ledger, it didn't happen.</blockquote>
-    <cite class="quote-cite">Platform Eng &middot; internal wiki</cite>
+    <cite class="quote-cite">Design principle in this example</cite>
   </section>
 
-  <!-- SLIDE 10 — FULL-BLEED / BREAK-THE-GRID (the moment of surprise) -->
-  <section class="slide slide--bleed">
-    <header class="slide__label">
-      <span>End of deck</span>
-      <span>Slide 10</span>
-    </header>
-    <div class="break-grid">END.</div>
-    <div class="break-grid-caption">
-      Questions &rarr; #platform-eng<br>
-      Next review: 2026 &middot; 05 &middot; 07
-    </div>
-  </section>
+  <section class="slide slide--bleed"><h2 class="slide__heading">Check the failure boundary.</h2><p class="slide__body">Stop a handler, replay its records, and confirm that requests remain recoverable.</p></section>
 
-</div><!-- /deck -->
+</div>
 
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -1090,7 +650,9 @@ graph LR
       startOnLoad: false,
       theme: 'base',
       look: 'classic',
-      flowchart: { useMaxWidth: true, htmlLabels: true },
+      securityLevel: 'strict',
+      htmlLabels: false,
+      flowchart: { useMaxWidth: false, htmlLabels: false, nodeSpacing: 48, rankSpacing: 64, padding: 20 },
       themeVariables: mermaidTheme(),
     });
   }
@@ -1115,7 +677,12 @@ graph LR
       if (el.dataset.source) el.textContent = el.dataset.source;
       el.removeAttribute('data-processed');
     });
+    await document.fonts.ready;
     await mermaid.run();
+    document.querySelectorAll('.mermaid svg').forEach(svg => {
+      const bounds = svg.getBBox();
+      svg.setAttribute('viewBox', [bounds.x - 16, bounds.y - 16, bounds.width + 32, bounds.height + 32].join(' '));
+    });
     autoFit();
   }
 

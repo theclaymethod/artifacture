@@ -1,11 +1,21 @@
 # External design systems
 
-Artifacture's built-in presets (`oa-design`, `mono-industrial`, `nothing`, `blueprint`,
+Artifacture's built-in presets (`lieflat`, `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`,
 `editorial`, `paper-ink`, `terminal`, `custom`) live in
 `visual-explainer-mdx/global.css`. Everything else is a **design system**: a
 user-owned artifact maintained OUTSIDE the skill and the repo, resolved from a
 registry at export time. Your brand tokens survive skill upgrades because they
 were never inside the skill to begin with.
+
+Lieflat combines editorial chart storytelling with Inter and open layouts. Its
+`LieflatChart` renderer provides five families for units, dates, categorical
+intersections, and individual paths; changing palette alone does not author
+those encodings. See the [chart guide](../plugins/visual-explainer/references/charts.md)
+for JSON and MDX recipes. Algebrica uses EB Garamond for headings and
+reading prose, with Inter for controls and figure labels. Mono Color uses
+limited inks and an asymmetric composition. These built-in treatments do
+not change the external token contract below; define each font's role in
+the system's manifest and review it in the rendered artifact.
 
 ## File format
 
@@ -61,8 +71,8 @@ automatically, mirroring the built-in `custom` preset.
   backslashes, parentheses, or whitespace (anything else is rejected loudly).
   Remote fonts are a self-containment trade-off — every stack must end in a
   system fallback so artifacts degrade gracefully offline.
-- `notes` carry the system's hard rules (e.g. "solid fills over grid paper",
-  "accent color reserved for CTAs") so an agent styling with the system can
+- `notes` carry the system's hard rules (e.g. "serif reading text, sans-serif controls",
+  "accent color identifies the selected series") so an agent styling with the system can
   honor them.
 
 ## Registry resolution order
@@ -102,7 +112,7 @@ derived fallbacks and font imports) into the standalone HTML as a
 `<style data-ve-design-system>` block. Built-in names never consult the
 registry, so a user system named `terminal` cannot shadow the built-in.
 Unknown names warn and fall back to the default built-in tokens
-(`oa-design`) so nothing ships unstyled.
+(`lieflat`) so nothing ships unstyled.
 
 The static/Hyperframes path (`ve:export-static`) renders compositions that
 carry their own styles and does not consult the registry.

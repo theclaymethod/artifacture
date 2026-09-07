@@ -18,11 +18,14 @@ a defect.
 2. **Completeness:** Are important source claims present, with examples and
    supporting detail attached to the right claim?
 3. **Visual hierarchy:** Is the intended reading path obvious, with one clear
-   focal region and quieter support at each state?
+   focal region and quieter support at each state? Remove labels, badges,
+   decorative numbering, and metric tiles that add no information or interaction.
 4. **Mobile usability:** Where mobile applies, is content readable and usable
    without clipping, obstruction, or cramped interaction?
 5. **Shipping quality:** Does the artifact feel coherent and deliberate enough
-   to deliver, without template residue or unresolved visual defects?
+   to deliver, without template residue or unresolved visual defects? Read diagram
+   labels at the displayed size; trace every connector and verify that chart
+   scales, missing values, and annotations preserve the source data.
 
 For slides, compare every paired state named by the manifest. Check continuity
 within a slide and purposeful variation between adjacent slides. Do not judge

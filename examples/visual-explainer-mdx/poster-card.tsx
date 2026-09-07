@@ -3,11 +3,18 @@ import { PosterCanvas } from '../../visual-explainer-mdx/components';
 
 export default function PosterCardExample() {
   return (
-    <PosterCanvas eyebrow="poster command" footer="React source -> generated HTML -> PNG capture" stat="1:1" title="Generated Poster">
-      <p>
-        Fixed-canvas explainers can use React components and Tailwind while keeping HTML as a generated artifact.
-        The PNG is captured from the verified generated page.
-      </p>
+    <PosterCanvas title="A retry needs a stopping point" preset="mono-color" reviewTools={false}>
+      <div style={{ maxWidth: '44rem', display: 'grid', gap: '2rem' }}>
+        <p>Keep trying while the failure may clear. Keep the evidence when it does not.</p>
+        <div style={{ borderTop: '1px solid var(--ve-poster-rule)', paddingTop: '1.5rem' }}>
+          <h2>Temporary failure</h2>
+          <p>Delay the next attempt and preserve the job identity.</p>
+        </div>
+        <div style={{ borderTop: '1px solid var(--ve-poster-rule)', paddingTop: '1.5rem' }}>
+          <h2>Invalid input or exhausted budget</h2>
+          <p>Retain the payload reference, error, and attempt history for repair. Reconcile an uncertain outcome before replaying a side effect.</p>
+        </div>
+      </div>
     </PosterCanvas>
   );
 }

@@ -7,9 +7,9 @@ Load this reference only when imagery, a code-generated graphic, or a short UI d
 | Need | Medium | Tool |
 |---|---|---|
 | Illustrative, conceptual, photographic, or atmospheric image | Generated raster image | Installed image-generation capability |
-| Exact KPI, chart, hierarchy, schematic, or data-art composition | Code-driven raster graphic | Installed graphics capability or `poster` |
+| Exact chart, hierarchy, or schematic | Code-driven raster graphic | Installed graphics capability or `poster` |
 | Running UI behavior or a short interaction sequence | Silent WebM/MP4 loop | Browser capture + FFmpeg |
-| Structure, topology, process, state, or data relationships | Native diagram | SVG, Mermaid, CSS, or Chart.js; do not use optional media |
+| Structure, topology, process, state, or data relationships | Native diagram | DiagramCanvas, Archify, DataChart, or a routed specialized renderer |
 
 Skip generic decoration. Every image or video must explain, orient, or establish a deliberate visual tone.
 
@@ -29,7 +29,7 @@ Check availability with `which poster`. Use poster when layout and values must b
 poster export /tmp/ve-graphic.tsx -o /tmp/ve-graphic.png --quiet
 ```
 
-Read [`poster.md`](./poster.md) for canvas sizes, TSX constraints, and Mono-Industrial idioms. Do not put Mermaid inside a poster. Verify the exported PNG for clipping before embedding it.
+Read [`poster.md`](./poster.md) for canvas sizes, TSX constraints, and source/export constraints. Do not put Mermaid inside a poster. Verify the exported PNG for clipping before embedding it.
 
 ## Recorded UI demonstration
 

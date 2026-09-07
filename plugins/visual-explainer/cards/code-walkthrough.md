@@ -1,13 +1,13 @@
 # Code Walkthrough Card
 Use `ExplainerShell`, `Section`, `CodeBlock`, `Pipeline`. Focused snippets, not whole files.
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { ExplainerShell, Section, CodeBlock, Pipeline } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Webhook Signature Gate" summary="Protect every billing write." preset="terminal">
-  <Section kicker="hot path" title="Four checks before handlers">
+<ExplainerShell title="Webhook Signature Gate" summary="Protect every billing write.">
+  <Section title="Four checks before handlers">
     <Pipeline steps={['Read raw body','Recompute HMAC','Check timestamp','Attach verified event']} />
   </Section>
-  <Section title="Focal branch">
+  <Section title="Reject invalid events before billing">
     <CodeBlock language="ts" filename="src/webhooks/verify.ts" highlightLines={[4,8]} annotations={[
       {line:4,note:'Reject replay before JSON.'},
       {line:8,note:'Verified events reach billing.'}

@@ -7,14 +7,14 @@ only when the user explicitly asks for magazine mode, a horizontal zine, or
 editorial pages; that prop changes the artifact contract to magazine mode.
 
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Pipeline location" */}
+{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { DiagramCanvas, Slide, SlideDeck } from 'REPO/visual-explainer-mdx/components';
 
-<SlideDeck title="Release Readiness" eyebrow="Go / No-go" preset="editorial">
+<SlideDeck title="Release Readiness">
   <Slide title="One unresolved blocker">
     <p>Payments ship after replay is capped and support sees the dead-letter queue.</p>
   </Slide>
-  <Slide title="Gate flow" kicker="decision path" tone="light">
+  <Slide title="Gate flow" tone="light">
     <DiagramCanvas
       layout="flow"
       nodes={[

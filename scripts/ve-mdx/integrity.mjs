@@ -1,6 +1,6 @@
 import { codeToHtml } from 'shiki';
 
-const diagramComponents = new Set(['DiagramCanvas']);
+const diagramComponents = new Set(['DiagramCanvas', 'DiagramWalkthrough']);
 // Exported so scripts/ve-mdx/check.mjs can assert this set stays in sync with
 // components.tsx's actual named exports (roster-sync guard, plan 008 step 5).
 // Contents are unchanged — this only adds visibility, not a refactor of how
@@ -13,6 +13,9 @@ export const sharedComponents = new Set([
   'DecisionMatrix',
   'RiskLedger',
   'DiagramCanvas',
+  'DiagramWalkthrough',
+  'DataChart',
+  'LieflatChart',
   'CodeBlock',
   'DiffBlock',
   'TerminalBlock',
@@ -94,6 +97,25 @@ export function collectIntegrityDiagnostics(code, id = 'source') {
       if (!nodeIds.has(edge?.from)) diagnostics.push(error(id, tag.name, `edge[${index}] from="${edge?.from}" does not match a declared node id`));
       if (!nodeIds.has(edge?.to)) diagnostics.push(error(id, tag.name, `edge[${index}] to="${edge?.to}" does not match a declared node id`));
     });
+    if (tag.name === 'DiagramWalkthrough') {
+      const stepsExpr = getPropExpression(tag.source, 'steps');
+      const edgeIds = new Set();
+      for (const edge of edges) {
+        if (edge?.id === undefined) continue;
+        if (!readLiteralText(edge.id)?.trim() || edgeIds.has(edge.id)) diagnostics.push(error(id, tag.name, `edge id "${edge.id}" must be nonempty and unique`));
+        edgeIds.add(edge.id);
+      }
+      if (!stepsExpr) diagnostics.push(error(id, tag.name, 'provide steps with explicit edgeId references and captions'));
+      else if (isLiteralExpression(stepsExpr)) {
+        const steps = evaluateLiteral(stepsExpr, id, `${tag.name}.steps`, diagnostics);
+        if (!Array.isArray(steps) || !steps.length) diagnostics.push(error(id, tag.name, 'steps must be a nonempty array'));
+        else steps.forEach((step, index) => {
+          if (!edgeIds.has(step?.edgeId)) diagnostics.push(error(id, tag.name, `step[${index}] references unknown edge "${step?.edgeId}"; add that id to a declared edge`));
+          if (!readLiteralText(step?.caption)?.trim()) diagnostics.push(error(id, tag.name, `step[${index}] needs a nonempty caption`));
+          if (step?.durationMs !== undefined && (!Number.isFinite(step.durationMs) || step.durationMs <= 0)) diagnostics.push(error(id, tag.name, `step[${index}].durationMs must be a finite positive number`));
+        });
+      }
+    }
     const forcedViewBoxExpr = getPropExpression(tag.source, 'integrityViewBox') ?? getPropExpression(tag.source, 'viewBox');
     const forcedViewBox = forcedViewBoxExpr ? evaluateLiteral(forcedViewBoxExpr, id, `${tag.name}.integrityViewBox`, diagnostics) : null;
     const clipDiagnostics = checkDiagramClip(nodes, forcedViewBox);

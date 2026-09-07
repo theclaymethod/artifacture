@@ -1,48 +1,20 @@
 import { DiffBlock, ExplainerShell, JsonTree, Section, TerminalBlock } from '../../visual-explainer-mdx/components';
 
-export default function DiffTerminalJsonExample() {
-  return (
-    <ExplainerShell
-      eyebrow="components"
-      preset="terminal"
-      reviewTools={false}
-      title="Diff, Terminal, JSON"
-      summary="Three reusable blocks cover code deltas, command output, and structured payloads without hand-built chrome."
-    >
-      <Section kicker="diff" title="Unified change">
-        <DiffBlock
-          filename="src/cache.ts"
-          language="ts"
-          patch={`--- a/src/cache.ts
-+++ b/src/cache.ts
-@@ -1,5 +1,7 @@
- export function readCache(key: string) {
--  return store.get(key);
-+  const hit = store.get(key);
-+  metrics.count(hit ? 'hit' : 'miss');
-+  return hit;
- }`}
-        />
-      </Section>
-
-      <Section kicker="terminal" title="Command output">
-        <TerminalBlock
-          title="npm run ve:check"
-          content={`\u001b[36mexport\u001b[0m examples/visual-explainer-mdx/diff-terminal-json.mdx
-\u001b[32mve:check passed\u001b[0m`}
-        />
-      </Section>
-
-      <Section kicker="json" title="Payload">
-        <JsonTree
-          collapsedDepth={2}
-          data={{
-            artifact: 'diff-terminal-json.html',
-            checks: { export: true, verify: true },
-            warnings: [],
-          }}
-        />
-      </Section>
-    </ExplainerShell>
-  );
-}
+<ExplainerShell title="Make a missing value explicit" summary="The same example appears as a patch, an interactive lookup, and the value a caller receives." reviewTools={false}>
+  <Section title="Preserve a cached zero">
+    <DiffBlock language="ts" filename="Illustrative cache.ts" before={`const value = cache.get(key);
+return { found: Boolean(value), value };`} after={`const value = cache.get(key);
+return { found: value !== undefined, value };`} />
+    <p>Truthiness would label zero as missing. The revised branch tests the sentinel defined by this numeric cache's contract.</p>
+  </Section>
+  <Section title="Example lookup">
+    <TerminalBlock title="Node REPL" content={`> const cache = new Map([['balance', 0]])
+> const value = cache.get('balance')
+> ({ found: value !== undefined, value })
+{ found: true, value: 0 }`} />
+  </Section>
+  <Section title="The caller receives both facts">
+    <JsonTree data={{key:'balance',found:true,value:0}} />
+    <p>The presence flag describes the lookup. The value belongs to the application. Keeping them separate avoids interpreting a valid number as an error or a missing record.</p>
+  </Section>
+</ExplainerShell>

@@ -1,0 +1,29 @@
+import { DiagramWalkthrough, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
+
+export default function RequestWalkthrough() {
+  return (
+    <ExplainerShell title="Follow a request through the cache" summary="A cache miss reaches the database before the response can return. Play the sequence or step through each connection." reviewTools={false}>
+      <DiagramWalkthrough title="Request handling on a cache miss" layout="flow" direction="horizontal"
+          nodes={[
+            { id: 'request', label: 'Request', detail: 'GET /items/:id' },
+            { id: 'cache', label: 'Cache', detail: 'No current entry' },
+            { id: 'database', label: 'Database', detail: 'Read the record' },
+            { id: 'response', label: 'Response', detail: 'Return the record' },
+          ]}
+          edges={[
+            { id: 'check-cache', from: 'request', to: 'cache' },
+            { id: 'read-record', from: 'cache', to: 'database', label: 'miss' },
+            { id: 'return-record', from: 'database', to: 'response' },
+          ]}
+          steps={[
+            { edgeId: 'check-cache', caption: 'The request asks the cache for an existing result.' },
+            { edgeId: 'read-record', caption: 'The cache has no current entry, so the database reads the record.' },
+            { edgeId: 'return-record', caption: 'The record returns to the caller in the response.' },
+          ]}
+      />
+      <Section title="What this sequence shows">
+        <p>The moving point follows each declared connection in order. Its speed is a reading aid, not a measurement of network latency. A cache hit would take a different path; this example follows only the miss.</p>
+      </Section>
+    </ExplainerShell>
+  );
+}

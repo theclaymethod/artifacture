@@ -1,30 +1,17 @@
 import { Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
 
-export default function SlideDeckExample() {
-  return (
-    <SlideDeck eyebrow="slides command" title="Generated Deck">
-      <Slide kicker="01 / contract" title="Slides Are Source Files" tone="dark">
-        <p>
-          The migrated slide path keeps MDX or TSX as the editable source and exports standalone HTML as the artifact.
-        </p>
-      </Slide>
-
-      <Slide kicker="02 / pipeline" title="Author, Review, Export" tone="light">
-        <Pipeline
-          steps={[
-            { title: 'Prompt', body: 'Capture audience, format, and story arc.' },
-            { title: 'MDX', body: 'Compose slides with shared React components.' },
-            { title: 'Annotate', body: 'Use point-and-click feedback in the generated preview.' },
-            { title: 'HTML', body: 'Ship the generated static artifact.' },
-          ]}
-        />
-      </Slide>
-
-      <Slide kicker="03 / parity" title="Secondary Exports Stay Optional" tone="accent">
-        <p>
-          PDF and per-slide poster exports remain follow-on artifacts. The interactive HTML deck stays canonical.
-        </p>
-      </Slide>
-    </SlideDeck>
-  );
-}
+<SlideDeck title="Give retries a stopping point" reviewTools={false}>
+  <Slide title="Repeated failure is still failure">
+    <p>Retrying can recover from a temporary outage. Without a limit, the same mechanism can keep invalid work alive indefinitely and hide the jobs that need repair.</p>
+  </Slide>
+  <Slide title="Make the next step explicit">
+    <Pipeline steps={[
+      {title:'Classify',body:'Is the failure temporary or permanent?'},
+      {title:'Delay',body:'Retry temporary failures within a fixed budget.'},
+      {title:'Retain',body:'Keep exhausted or invalid jobs for inspection.'}
+    ]} />
+  </Slide>
+  <Slide title="Preserve identity through replay">
+    <p>A timeout can hide a successful side effect. Keep the original idempotency key and reconcile the outcome before repeating the action. A new attempt should not create a new business operation.</p>
+  </Slide>
+</SlideDeck>

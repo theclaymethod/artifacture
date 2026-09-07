@@ -1,0 +1,143 @@
+.ve-data-chart {
+  container-type: inline-size;
+}
+
+.ve-chart-narrow {
+  display: none;
+}
+
+@container (max-width: 639px) {
+  .ve-chart-wide {
+    display: none;
+  }
+
+  .ve-chart-narrow {
+    display: block;
+  }
+}
+
+.ve-chart-unit {
+  margin: 0 0 0.75rem;
+  color: var(--ve-muted, #66645f);
+  font-size: 1rem;
+}
+
+.ve-chart-values {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-chart-value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ve-chart-value-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ve-chart-value-row > span:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-chart-track {
+  position: relative;
+  height: 28px;
+  margin: 0.4rem 0 0;
+}
+
+.ve-chart-zero,
+.ve-chart-zero-value,
+.ve-chart-bar,
+.ve-chart-dot {
+  position: absolute;
+}
+
+.ve-chart-zero {
+  inset-block: 0;
+  width: 1px;
+  background: var(--ve-rule, #d8d6d0);
+}
+
+.ve-chart-zero-value {
+  top: 8px;
+  width: 2px;
+  height: 12px;
+  transform: translateX(-1px);
+  background: var(--ve-heading, #242424);
+}
+
+.ve-chart-bar {
+  top: 8px;
+  height: 12px;
+  background: var(--ve-heading, #242424);
+}
+
+.ve-chart-dot {
+  top: 9px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--ve-heading, #242424);
+}
+
+.ve-chart-scale {
+  position: relative;
+  height: 28px;
+  margin-inline: 0;
+  color: var(--ve-muted, #66645f);
+  font-size: 0.875rem;
+}
+
+.ve-chart-scale > span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.ve-chart-line-plot {
+  position: relative;
+}
+
+.ve-chart-line-plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ve-chart-line-zero {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  color: var(--ve-muted, #66645f);
+  font-size: 0.875rem;
+}
+
+.ve-chart-line-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+  color: var(--ve-muted, #66645f);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ve-chart-line-ends > span {
+  min-width: 0;
+  max-width: 48%;
+}
+
+.ve-chart-line-ends > span:last-child {
+  text-align: right;
+}

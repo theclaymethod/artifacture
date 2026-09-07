@@ -439,7 +439,10 @@ async function collectBrowserMetrics() {
 
   metrics['overflow-source-census'] = {
     offenders: all
-      .filter((el) => el.clientWidth > 0 && el.scrollWidth > el.clientWidth + EPS && overflowX(el) === 'visible')
+      // SVG text reports client and scroll widths in different coordinate
+      // spaces when its viewBox is scaled. SVG containment is checked against
+      // the rendered frame by diagramTextMetrics instead.
+      .filter((el) => !el.ownerSVGElement && el.clientWidth > 0 && el.scrollWidth > el.clientWidth + EPS && overflowX(el) === 'visible')
       .slice(0, 10)
       .map((el) => ({
         ...compact(el),
@@ -1031,11 +1034,15 @@ function diagramTextMetrics(doc, compact, viewBoxRect) {
   const svgs = [...doc.querySelectorAll('svg')].filter((svg) => !svg.closest('.mermaid'));
   const offenders = [];
   for (const svg of svgs) {
-    const vb = viewBoxRect(svg);
-    if (!vb) continue;
-    const texts = [...svg.querySelectorAll('text')].map((el) => ({ el, box: el.getBBox?.() })).filter((item) => item.box);
+    if (!viewBoxRect(svg)) continue;
+    const frame = svg.getBoundingClientRect();
+    if (!frame.width || !frame.height) continue;
+    // Client rectangles share a coordinate space across translated/scaled groups.
+    // getBBox() alone compares unrelated local coordinate systems.
+    const texts = [...svg.querySelectorAll('text')].map((el) => ({ el, box: el.getBoundingClientRect() }))
+      .filter(({ el, box }) => box.width && box.height && getComputedStyle(el).visibility !== 'hidden');
     for (const { el, box } of texts) {
-      if (box.x < vb.x - 1 || box.y < vb.y - 1 || box.x + box.width > vb.right + 1 || box.y + box.height > vb.bottom + 1) {
+      if (box.left < frame.left - 1 || box.top < frame.top - 1 || box.right > frame.right + 1 || box.bottom > frame.bottom + 1) {
         offenders.push({ kind: 'outside-viewBox', text: compact(el), box });
       }
     }
@@ -1265,7 +1272,7 @@ function diagramSlideMetrics(doc, px, compact) {
     const wrapW = wrap.getBoundingClientRect().width;
     const svgW = svg.getBoundingClientRect().width;
     const fixedHeight = Boolean(svg.getAttribute('height'));
-    const smallLabels = [...svg.querySelectorAll('.nodeLabel')].filter((el) => px(getComputedStyle(el).fontSize) < 18).map(compact);
+    const smallLabels = [...svg.querySelectorAll('.nodeLabel')].filter((el) => px(getComputedStyle(el).fontSize) * (svg.getScreenCTM ? Math.hypot(svg.getScreenCTM()?.c ?? 0, svg.getScreenCTM()?.d ?? 1) : 1) < 18).map(compact);
     const thinEdges = [...svg.querySelectorAll('.edgePath path,.flowchart-link')].filter((el) => px(getComputedStyle(el).strokeWidth) < 2).map(compact);
     const nodes = svg.querySelectorAll('.node').length;
     if (fixedHeight || Math.abs(wrapW - svgW) > 8 || smallLabels.length || thinEdges.length) {

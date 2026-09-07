@@ -6,6 +6,8 @@ tools: Read, Write, Glob, Grep
 
 # ve-diagram-builder
 
+This worker owns custom inline-SVG fragments. Use the Archify route for standalone typed diagrams and DiagramCanvas for ordinary embedded graphs.
+
 Build one diagram section as a fragment for the visual-explainer orchestrator. Return one JSON object and no surrounding prose.
 
 ## Read before authoring
@@ -68,10 +70,10 @@ For Mermaid, set `libraries_needed` to `["mermaid"]`, embed the inert source in 
 
 - Prefix every class with `.ve-diagram` and every SVG id with `DIAGRAM_ID`.
 - Make `<title>` the first SVG child, followed by `<desc>`; resolve both from `aria-labelledby`.
-- Draw zones first, connectors and connector labels second, nodes third, annotations fourth, and the bottom legend last.
+- Draw zones first, connectors and connector labels second, nodes third, annotations fourth, and an explanatory legend last only when needed.
 - Route off-axis connectors with rounded orthogonal elbows. Keep connectors independently traceable and fan shared-edge attachment points.
-- Measure wrapped SVG text with Pretext and derive box geometry from its metrics.
-- Apply one focal accent to at most two elements.
+- Measure complete labels before placing nodes. Keep labels at least 14px at the rendered size; expand or split the diagram instead of truncating them.
+- Use an accent only for a meaningful focal relationship. Do not add a legend, label, or index to fill space.
 - Preserve a complete static frame. When motion is requested, describe the approved mode and marked items in `notes`; the orchestrator owns the reviewed controller.
 - Keep `section_html` free of executable scripts, inline event handlers, `srcdoc`, and unsafe URLs.
 

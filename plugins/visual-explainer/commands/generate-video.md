@@ -23,7 +23,7 @@ The generated `index.html` is the Hyperframes input artifact, not the source of 
 
 ## Styles
 
-Two styles, picked via `--style` or confirmed via AskUserQuestion.
+Two styles, chosen by `--style`, the request, or the defaults below.
 
 ### `long-form` (default when unsure)
 
@@ -55,7 +55,7 @@ Two styles, picked via `--style` or confirmed via AskUserQuestion.
 
 ### 1. Clarify
 
-If the request is ambiguous (missing: style, duration, audience, aesthetic), ask 1–3 questions via AskUserQuestion. See `references/clarify.md`. **Video is a high-cost command** — always ask at least "style" and "duration" before rendering, even if the user was otherwise clear. Bypass only when the user passed `--no-ask` or stated both style and duration explicitly.
+Use `references/clarify.md` for material unresolved choices. Honor supplied style, duration, audience, and narration without reconfirmation.
 
 ### 2. Check prerequisites
 

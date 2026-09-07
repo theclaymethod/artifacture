@@ -12,6 +12,7 @@ export type DiagramNode = {
 };
 
 export type DiagramEdge = {
+  id?: string;
   from: string;
   to: string;
   label?: string;
@@ -27,6 +28,7 @@ export type DiagramCanvasProps = {
   nodes: DiagramNode[];
   edges: DiagramEdge[];
   layout?: 'flow' | 'tree' | 'swimlane' | 'timeline';
+  direction?: 'auto' | 'horizontal' | 'vertical';
   lanes?: DiagramLane[];
   dates?: string[];
   title?: string;

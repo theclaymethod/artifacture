@@ -1,248 +1,97 @@
 # Features
 
-The full capability reference for Artifacture. The [README](../README.md) has install and the short version.
+Artifacture creates charts, diagrams, presentations, and visual explanations from editable source. The [README](../README.md) covers installation; the [example guide](../examples/README.md) links working sources.
 
-## Why
+## Source and export
 
-Every coding agent defaults to ASCII art when you ask for a diagram. Box-drawing characters, monospace alignment hacks, text arrows. It works for trivial cases, but anything beyond a 3-box flowchart turns into an unreadable mess.
-
-Tables are worse. Ask the agent to compare 15 requirements against a plan and you get a wall of pipes and dashes that wraps and breaks in the terminal. The data is there but it's painful to read.
-
-This skill fixes that. Real typography, dark/light themes, interactive Mermaid diagrams with zoom and pan. No build step, no dependencies beyond a browser.
-
-
-## What's different from upstream visual-explainer
-
-The major additions, on top of the upstream skill. OA Design is the default aesthetic, and every upstream command still works.
-
-Since the fork, the largest changes are structural:
-
-The original eight feature additions, in detail:
-
-### 0. MDX/React source-first generation
-
-The editable source is now MDX by default, with TSX/React available when an artifact needs local state, custom interaction, generated SVG logic, or Hyperframes-compatible static composition output. HTML is a build output; the canonical, editable file is the MDX or TSX source.
+Use MDX for composed pages and TSX for state, custom SVG, or video compositions. Generated HTML is disposable output: revise the source and export again. Authoring requires Node 22 or newer and the repository dependencies; readers open the exported HTML in a browser.
 
 ```bash
-npm run ve:export -- examples/visual-explainer-mdx/pipeline.mdx --out /tmp/pipeline.html
-npm run ve:export -- examples/visual-explainer-mdx/interactive.tsx --out /tmp/interactive.html
-npm run ve:export-static -- examples/visual-explainer-mdx/video-longform.tsx --out /tmp/video/index.html
+npm run ve:export -- examples/visual-explainer-mdx/data-charts.mdx --out dist/charts.html
+npm run ve:export -- examples/visual-explainer-mdx/interactive.tsx --out dist/interactive.html
+npm run ve:export-static -- examples/visual-explainer-mdx/video-longform.tsx --out dist/video/index.html
 ```
 
-Reusable primitives live in [`visual-explainer-mdx/components.tsx`](../visual-explainer-mdx/components.tsx). Generated pages include point-and-click annotation controls so a reviewer can attach feedback to page elements, then the agent applies that feedback to the MDX/TSX source and re-exports.
+Shared components live in [`visual-explainer-mdx/components.tsx`](../visual-explainer-mdx/components.tsx). `ExplainerShell`, `SlideDeck`, and `PosterCanvas` include optional annotation controls; set `reviewTools={false}` when those controls are unnecessary. Apply feedback to the source before re-exporting.
 
-The shared components now support design-system presets through semantic tokens:
+Archify diagrams use typed JSON and their own validated delivery route.
+
+## Visual language
+
+`lieflat` is the default: paper gray, charcoal, Inter, open spacing, and directly labeled data. Algebrica and Mono Color provide named alternatives. Artifacture implements its own themes and components; see [provenance](../tools/visual-sources.json) for the visual references and their licenses.
 
 ```tsx
-<ExplainerShell preset="oa-design" title="..." />
-<SlideDeck preset="nothing" orientation="horizontal" title="..." />
-<PosterCanvas preset="blueprint" title="..." />
+<ExplainerShell preset="lieflat" title="Request handling" />
+<SlideDeck preset="algebrica" orientation="horizontal" title="A proof in steps" />
+<PosterCanvas preset="mono-color" title="An editorial composition" />
 ```
 
-Available presets are `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal`. The token layer covers palette, typography, border radius, page rhythm, diagram colors, slide tones, poster canvas styling, and annotation review UI. See [`examples/visual-explainer-mdx/preset-gallery.mdx`](../examples/visual-explainer-mdx/preset-gallery.mdx) for the fixture.
+| Preset | Use | Reference |
+|---|---|---|
+| `lieflat` | Charts, comparisons, and technical explanations | [Charts](../plugins/visual-explainer/references/charts.md) |
+| `algebrica` | Definitions, proofs, and long-form explanations | [Algebrica](../plugins/visual-explainer/references/algebrica.md) |
+| `mono-color` | Posters, covers, and editorial presentations | [Mono Color](../plugins/visual-explainer/references/mono-color.md) |
+| `oa-design` | Explicit compatibility with the earlier default | [OA Design](../plugins/visual-explainer/references/oa-design.md) |
+| `mono-industrial` | Explicit technical report styling | [Mono-Industrial](../plugins/visual-explainer/references/mono-industrial.md) |
 
-**Agent invocation.** In Codex Desktop, invoke `$visual-explainer` or an installed prompt wrapper and ask for the artifact; the agent should write MDX/TSX source, run `npm run ve:export`, and browser-verify the HTML. In Claude Code, use the namespaced command such as `/visual-explainer:generate-web-diagram` when installed. The direct CLI path is the same `npm run ve:export` command above.
+The `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom` presets remain available. The standalone Algebrica template replaces the retired Nothing dashboard. Unknown preset names can resolve through the [external design-system registry](design-systems.md).
 
-### 1. Terminal code blocks for Mono-Industrial
+Presets change typography and palette, not factual standards. Remove decorative numbering, badges, kickers, metric tiles, and redundant captions. Keep metadata that explains state, ownership, provenance, sequence, or navigation.
 
-Every code block on a Mono-Industrial page now renders as a dark terminal pane regardless of whether the page itself is in light or dark mode, with Prism.js syntax highlighting. The token palette uses only the existing status variables — `--warn` (amber) for strings and numbers, `--err` (red) for tags and deletions, `--ok` (green) for diff insertions, plus three opacity tiers of `--fg` for everything else. No new colors.
+## Charts and diagrams
 
-The one place in the aesthetic that intentionally breaks the grayscale rule. Rationale: code is already its own language with its own visual conventions, and a dark terminal block reads as *this is executable material* in a way a warm-cream block never will.
+| Content | Tool |
+|---|---|
+| Bar, line, or dot comparison | `DataChart` |
+| Compact flow, tree, swimlane, or milestone sequence | `DiagramCanvas` |
+| Complex architecture, workflow, sequence, dataflow, or lifecycle | Archify |
+| Specialized visual grammar | Custom SVG or Mermaid through the diagram routing reference |
 
-See [`plugins/visual-explainer/references/libraries.md`](../plugins/visual-explainer/references/libraries.md#prismjs--syntax-highlighting) § Prism.js for the full CSS.
+`DataChart` displays exact values, supports signed quantities, and distinguishes zero from missing data. Bars start at zero; line charts leave gaps for missing measurements. Labels stay visible without tooltips. Supply units, a useful title, and actual provenance when available. Line points are evenly spaced categories; use a continuous time scale for irregular intervals. See [charts.md](../plugins/visual-explainer/references/charts.md).
 
-### 2. Recorded UI demos, self-contained
+`DiagramCanvas` measures full node and edge labels, separates branches, and routes around unrelated nodes. It supports `flow`, `tree`, `swimlane`, and `timeline`, with `direction="auto"`, `"horizontal"`, or `"vertical"`. Large figures scroll locally; the mobile reading view links actual destinations. Dates order milestones rather than encode elapsed duration. Figure text stays at least 14px at natural scale.
 
-New capture workflow for explaining running UI features. Playwright MCP takes screenshots at each beat, `scripts/frames-to-webm.sh` stitches them into a VP9 webm via ffmpeg, and `scripts/embed-media.sh` emits a paste-ready `<video>` tag with the webm base64-inlined. The HTML file stays self-contained.
+For other diagrams, the [routing reference](../plugins/visual-explainer/references/diagram-design.md) selects among 27 visual types and seven semantic patterns. Complexity limits depend on the selected type and meaning; split crowded figures into overview and detail. Shapes and labels convey semantics. Add legends only for encodings that need explanation. Custom SVG uses [the geometry contract](../plugins/visual-explainer/references/diagrams-svg.md) and inherits [host tokens](../plugins/visual-explainer/references/diagram-tokens.md).
+
+## Archify
+
+Install the pinned runtime once, then keep editable JSON beside the delivered HTML:
 
 ```bash
-# After capturing frames via Playwright MCP → ~/.agent/diagrams/<slug>/
-bash plugins/visual-explainer/scripts/frames-to-webm.sh \
-  ~/.agent/diagrams/<slug> \
-  ~/.agent/diagrams/<slug>.webm \
-  2   # fps — 2 for UI demos
-
-bash plugins/visual-explainer/scripts/embed-media.sh \
-  ~/.agent/diagrams/<slug>.webm "demo alt text" > snippet.html
+npm run ve:archify -- setup
+npm run ve:archify -- guide "API request with cache fallback" --json
+npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifacture.architecture.json dist/architecture.html --json
 ```
 
-`embed-media.sh` handles any media type (png/jpg/gif/webp/webm/mp4) and warns on stderr when the file will base64-inflate past 2MB. See [`plugins/visual-explainer/references/demo-capture.md`](../plugins/visual-explainer/references/demo-capture.md) for the full pattern, including `agent-browser`-based capture as an alternate path.
+The wrapper defaults to showcase quality and preserves upstream diagnostics and atomic delivery. Set `meta.visual_preset` to `"editorial"` for Artifacture's restrained treatment; authored alternative presets remain available. Rendering checks establish layout constraints, not live operational behavior. Complete screenshot review after delivery. See [archify.md](../plugins/visual-explainer/references/archify.md).
 
-### 3. Editorial-grade inline-SVG diagrams (13 types)
+## Code and structured content
 
-Inline SVG is now the default diagram renderer for 13 editorial types (architecture, flowchart, sequence, state machine, ER, timeline, swimlane, quadrant, nested, tree, layer stack, Venn, pyramid/funnel). Rules paraphrased with attribution from [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) (MIT): shape-carries-meaning (oval/rect/diamond/dot), complexity budgets (≤ 9 nodes, ≤ 12 arrows, ≤ 2 accent uses), 4px grid on every coordinate, z-order arrows-first, opaque masking rects behind every arrow label, horizontal legend strip at the bottom, annotation callouts in italic serif + dashed leader, optional sketchy filter for narrative contexts.
+`CodeBlock`, `DiffBlock`, `TerminalBlock`, `JsonTree`, `DecisionMatrix`, `RiskLedger`, and `Quiz` cover source excerpts, comparisons, structured data, and checks for understanding. Keep snippets focused on observable behavior. Read the [component API](../plugins/visual-explainer/references/mdx-components.md) for props and the [example guide](../examples/README.md) for usage.
 
-Tokens are aesthetic-aware — ten semantic roles (paper, ink, muted, rule, accent, link, etc.) map differently per host aesthetic, so the same rules produce Mono-Industrial grayscale inside an MI page, Nothing instrument-panel treatment inside a Nothing page, and the native rust-accent editorial look when a user explicitly asks for "editorial diagram" style. Mermaid remains a fallback for graphs past the complexity budget.
+## Presentations and magazines
 
-See [`references/diagrams-svg.md`](../plugins/visual-explainer/references/diagrams-svg.md), [`references/diagram-tokens.md`](../plugins/visual-explainer/references/diagram-tokens.md), and [`templates/svg-diagram-starter.html`](../plugins/visual-explainer/templates/svg-diagram-starter.html).
+Use `SlideDeck` and `Slide` for a reader deck. `orientation="horizontal"` provides a magazine sequence. Use `PresentationDeck` and `PresentationSlide` for a fixed stage with navigation and supporting detail.
 
-### 4. Video output via Hyperframes — explainer MP4s, not just HTML
+The argument determines slide count and layout. No statistic, dark-page quota, decorative divider, or tint rotation is required. Preserve readable comparisons and reachable controls on narrow screens. See [slide patterns](../plugins/visual-explainer/references/slide-patterns.md).
 
-Two new commands turn topics and decks into MP4 video via HeyGen's open-source [Hyperframes](https://github.com/heygen-com/hyperframes) renderer (Apache 2.0). Hyperframes is a local HTML → MP4 pipeline — headless Chrome captures frames, GSAP drives paused timelines, FFmpeg encodes. No cloud account, no API keys. Requires Node ≥ 22 and FFmpeg.
+An explicit `--pdf` request adds a PDF to the HTML deck. The [PDF exporter](../plugins/visual-explainer/scripts/export-slides-pdf.mjs) captures each slide as rendered, preserving diagrams and layout. Keep the interactive HTML available alongside it.
 
-- **`/generate-video`** — greenfield. Picks `--style=long-form` (16:9 slide-paced explainer, 60–180s) or `--style=reel` (9:16 brain-rot-friendly 30–60s hard-cut reel with kinetic typography, progressive diagram reveal, TTS narration, burned-in captions).
-- **`/render-video`** — converts an existing HTML deck or magazine to an MP4.
+## Posters and video
 
-Verification is mandatory for video: `hyperframes-doctor.sh` checks prerequisites, `hyperframes lint && validate` runs a contrast audit, a draft render happens first, `extract-keyframes.sh` pulls start/mid/end stills for user approval, then the final standard-quality render runs.
+`PosterCanvas` supports fixed compositions; follow [poster.md](../plugins/visual-explainer/references/poster.md) for export and canvas-fit review.
 
-See [`references/hyperframes.md`](../plugins/visual-explainer/references/hyperframes.md), [`references/gsap-rules.md`](../plugins/visual-explainer/references/gsap-rules.md), [`references/reel-patterns.md`](../plugins/visual-explainer/references/reel-patterns.md), and the templates in [`templates/hyperframes-longform.html`](../plugins/visual-explainer/templates/hyperframes-longform.html) and [`templates/hyperframes-reel.html`](../plugins/visual-explainer/templates/hyperframes-reel.html).
+`/generate-video` authors a new video; `/render-video` adapts existing material. Editable TSX exports through `ve:export-static`, then Hyperframes renders locally. Video requires its renderer prerequisites, including FFmpeg. Long-form and reel conventions, draft review, and final rendering are defined in [hyperframes.md](../plugins/visual-explainer/references/hyperframes.md) and [reel-patterns.md](../plugins/visual-explainer/references/reel-patterns.md).
 
-### 5. Magazine mode — horizontal-snap editorial layout
+For a recorded UI demonstration, [demo capture](../plugins/visual-explainer/references/demo-capture.md) covers browser frames, `frames-to-webm.sh`, and inline media export. Media must explain the subject or supply evidence.
 
-`/generate-slides --magazine` flips the scroll-snap axis from vertical to horizontal. Each page is 100vw × 100vh, full-bleed edge-to-edge, with nav dots at the bottom and arrow-key + swipe navigation. The cover and back cover are dark; at least three pages are dark total for rhythm; each interior page uses a different tint from the active aesthetic's ramp. Every magazine includes at least one full-bleed stat page with the primary number rendered at `clamp(160px, 22vw, 360px)` as the visual anchor.
+## Verify and revise
 
-Five new layout types ship — quadrant (2×2), full-bleed stat, dark panel, color block, and viewport-filling grid (3×2 or 4×3) — all of which also work in the vertical deck. The existing split layout (left/right color-block) gets magazine-style treatment too. Tints adapt to whichever aesthetic is active (MI grayscale, Nothing black/white surfaces, Editorial warm-stone, Blueprint slate).
+Use the selected artifact profile to check dimensions, containment, text, and interaction. Responsive pages need desktop and mobile review; fixed canvases need their intended display and export states. Inspect supported themes, diagram branches, labels, and every material detail state.
 
-See the Magazine Mode section in [`references/slide-patterns.md`](../plugins/visual-explainer/references/slide-patterns.md) and [`templates/mono-industrial-magazine.html`](../plugins/visual-explainer/templates/mono-industrial-magazine.html) for the 8-page reference implementation.
-
-### 6. Clarify policy — AskUserQuestion before expensive generations
-
-The skill now explicitly checks whether it can form a 1-sentence brief (topic, audience, depth, aesthetic) before generating. When any dimension is unclear, it asks 1–3 questions via `AskUserQuestion` instead of guessing. The policy is tiered by command cost:
-
-- **Tier 0 (always ask):** `/generate-video`, `/render-video`, `/generate-slides --magazine`, `/generate-poster`. High wall-clock cost; a 30-second dialog saves minutes of rework.
-- **Tier 1 (ask when ambiguous):** `/generate-web-diagram`, `/generate-visual-plan`, `/generate-slides` (vertical), `/diff-review`, `/plan-review`, `/project-recap`.
-- **Tier 2 (never ask):** `/fact-check`, `/share`. Mechanical commands with no creative choices.
-
-Escape hatches: `--no-ask` flag, phrases like "just generate" / "use defaults", or a prompt that explicitly answers all four dimensions.
-
-See [`references/clarify.md`](../plugins/visual-explainer/references/clarify.md) for the full policy, question-phrasing guide, and dialog templates.
-
-### 7. PDF export for slide decks and magazines
-
-`/generate-slides --pdf` renders a multi-page landscape PDF alongside the HTML (1920×1080, one slide/page per PDF page). Auto-detects vertical deck vs horizontal magazine from the DOM. The exporter uses a generalized screenshot-and-composite path for deck and magazine layouts.
-
-```
-/generate-slides --pdf "q2 roadmap"
-/generate-slides --magazine --pdf "quarterly engineering recap"
+```bash
+npm run ve:verify -- dist/charts.html --json dist/charts.report.json --screens dist/charts-screens
+npm run check:fast
 ```
 
-The exporter uses screenshot-and-composite rather than Chromium's native `page.pdf()`. Scroll-snap decks reliably break under native print in four interacting ways — trailing blank pages from `break-after: page` cascading past the last slide, theme toggle / progress bar / nav dots repeating on every printed page because of `position: fixed`, flex-centered Mermaid diagrams collapsing to their authored size instead of filling the slide, and live pan/zoom `transform` state leaking into the render. Per-slide `element.screenshot()` captures the live view exactly as the author intended, so none of those failure modes apply. The tradeoff is file size: ~1 MB instead of ~175 KB for a 10-slide deck, which is fine for email and still a reasonable attachment.
-
-Requires Playwright in the cwd (`npm install playwright && npx playwright install chromium`); the script fails gracefully with an install hint if it's missing. See [`plugins/visual-explainer/scripts/export-slides-pdf.mjs`](../plugins/visual-explainer/scripts/export-slides-pdf.mjs) for the script itself, and [`references/slide-patterns.md`](../plugins/visual-explainer/references/slide-patterns.md#pdf-export) → "PDF Export" for the full contract, flags, and troubleshooting.
-
-
-## Aesthetics
-
-OA Design is the default. Named alternatives are opt-in — the agent only selects them when you explicitly ask.
-
-| Aesthetic | Trigger | Reference |
-|---|---|---|
-| **OA Design** *(default)* | Every generation unless named otherwise | [`references/oa-design.md`](../plugins/visual-explainer/references/oa-design.md) |
-| Mono-Industrial | "use Mono-Industrial style" | [`references/mono-industrial.md`](../plugins/visual-explainer/references/mono-industrial.md) |
-| Blueprint | "use Blueprint style" | legacy |
-| Editorial | "use Editorial style" | legacy |
-| Paper/ink | "use paper/ink style" | legacy |
-| Monochrome terminal | "use terminal style" | legacy |
-| IDE-inspired | "use Dracula palette", "Catppuccin", etc. | legacy |
-
-
-## Slide Deck Mode
-
-Any command that produces a scrollable page supports `--slides` to generate a slide deck instead:
-
-```
-/diff-review --slides
-/project-recap --slides 2w
-```
-
-`/generate-slides` also accepts `--magazine` for the horizontal editorial layout (100vw × 100vh pages, dark cover + back cover, per-page tint, nav dots, arrow keys, at least one full-bleed stat page):
-
-```
-/generate-slides --magazine "quarterly engineering recap"
-```
-
-Pass `--pdf` to also render a multi-page landscape PDF (1920×1080, one slide/page per PDF page). See § 8 above for the full rationale.
-
-```
-/generate-slides --pdf "q2 roadmap"
-/generate-slides --magazine --pdf "quarterly engineering recap"
-```
-
-<p align="center">
-  <video src="../demos/videos/reel-16x9.mp4" controls muted playsinline width="820"></video>
-  <br>
-  <em>16:9 reel — kinetic-typography fast-cut variant via <code>/generate-video --style=reel</code>.</em>
-</p>
-
-
-## Video Mode
-
-Generate MP4 explainer videos locally via Hyperframes. No cloud account, no API keys — requires Node ≥ 22 and FFmpeg.
-
-```
-/generate-video "how our queue redesign works" --style=long-form
-/generate-video "one-stat hook about the 8.4x throughput" --style=reel
-/render-video ~/.agent/diagrams/quarterly-recap-magazine.html --style=reel
-```
-
-Two styles: `long-form` (16:9, 60–180s, slide-paced with TTS narration) or `reel` (9:16, 30–60s, hard-cut kinetic typography with burned-in captions). Video is a high-cost command — the skill always confirms style and duration via `AskUserQuestion` before rendering, and extracts three keyframes from a fast draft render for approval before committing to the final-quality pass.
-
-<p align="center">
-  <video src="../demos/videos/reel-9x16.mp4" controls muted playsinline width="320"></video>
-  <br>
-  <em>9:16 vertical reel — phone-shaped output for social sharing.</em>
-</p>
-
-
-## How It Works
-
-```
-.claude-plugin/
-├── plugin.json
-└── marketplace.json
-plugins/
-└── visual-explainer/
-    ├── .claude-plugin/plugin.json
-    ├── SKILL.md                          ← workflow + design principles
-    ├── commands/                         ← slash commands (incl. generate-video, render-video)
-    ├── references/
-    │   ├── oa-design.md                  ← default aesthetic
-    │   ├── mono-industrial.md            ← named alternative
-    │   ├── diagrams-svg.md               ← 13-type SVG diagram rules (this fork)
-    │   ├── diagram-tokens.md             ← per-aesthetic token maps (this fork)
-    │   ├── hyperframes.md                ← Hyperframes integration (this fork)
-    │   ├── gsap-rules.md                 ← GSAP constraints for video (this fork)
-    │   ├── reel-patterns.md              ← 9:16 fast-cut reel rules (this fork)
-    │   ├── clarify.md                    ← AskUserQuestion tier policy (this fork)
-    │   ├── css-patterns.md               ← layouts, animations, theming
-    │   ├── libraries.md                  ← Mermaid, Chart.js, Prism.js, fonts
-    │   ├── demo-capture.md               ← UI demo → webm workflow (this fork)
-    │   ├── poster.md                     ← fixed-canvas output via poster-ai
-    │   ├── responsive-nav.md             ← sticky TOC for multi-section pages
-    │   ├── slide-patterns.md             ← vertical deck + magazine + PDF export (this fork)
-    │   └── …
-    ├── templates/
-    │   ├── mono-industrial.html          ← historical scrollable reference
-    │   ├── mono-industrial-slides.html
-    │   ├── mono-industrial-magazine.html ← horizontal zine (this fork)
-    │   ├── svg-diagram-starter.html      ← inline-SVG diagram ref (this fork)
-    │   ├── hyperframes-longform.html     ← 16:9 video starter (this fork)
-    │   ├── hyperframes-reel.html         ← 9:16 reel starter (this fork)
-    │   ├── architecture.html             ← legacy
-    │   ├── mermaid-flowchart.html
-    │   ├── data-table.html
-    │   └── slide-deck.html
-    └── scripts/
-        ├── share.sh                      ← deploy HTML to Vercel
-        ├── frames-to-webm.sh             ← PNG frames → webm (this fork)
-        ├── export-slides-pdf.mjs         ← HTML deck/magazine → multi-page PDF (this fork)
-        ├── embed-media.sh                ← media → base64 inline snippet (this fork)
-        ├── hyperframes-doctor.sh         ← video prereq check (this fork)
-        └── extract-keyframes.sh          ← MP4 → 3 stills for review (this fork)
-```
-
-**Output:** `~/.agent/diagrams/filename.html` → opens in browser.
-
-The skill routes to the right approach automatically: Mermaid for flowcharts, CSS Grid for architecture overviews, HTML tables for data, Chart.js for dashboards.
-
-
-## Theme toggle
-
-Every Mono-Industrial page ships with a three-option selector (`○ Light · ● Dark · ◐ Auto`) docked top-right. Choice persists to `localStorage` and beats the OS `prefers-color-scheme` preference; `Auto` removes the override and tracks the OS live. Mermaid diagrams re-render in the new palette on every flip — no page refresh required. Mono-Industrial stays monochrome (`--fg` tint only, no accent color in chrome).
-
-At every viewport size the pill stays pinned top-right as a single centered glyph and unfurls to the three labeled options on `:hover` or `:focus-within` — the latter covers touch via tap-to-focus. No bottom-dock, no full-width stretch, no separate mobile layout.
-
-
-## Responsive
-
-Every template adapts from 1440px+ desktop down to 390px mobile. The theme toggle keeps its top-right collapsed-glyph position at every breakpoint; layout responsiveness comes from the content — wide tables scroll inside wrappers, diagrams resize or gain local scrolling, and hero type scales without chrome relocation.
+A successful export is not visual verification. Follow [verification.md](../plugins/visual-explainer/references/verification.md), retain the report and review evidence, and fix the source before regenerating affected views. Resolve only material missing choices through the host's available question tool; a complete brief does not need reconfirmation.

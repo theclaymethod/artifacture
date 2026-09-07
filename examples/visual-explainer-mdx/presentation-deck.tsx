@@ -16,8 +16,6 @@ import {
   LayerExplorer,
   PresentationDeck,
   PresentationSlide,
-  PullQuote,
-  StatRow,
   Stepper,
   usePresentationStateNavigation,
 } from '../../visual-explainer-mdx/components';
@@ -42,57 +40,47 @@ function ThesisSlide({ shortTitle, tone }: SlideMeta) {
   const [open, setOpen] = React.useState(false);
   return (
     <PresentationSlide
-      kicker="01 · Thesis"
-      title="Ship the deck as an artifact, keep the source editable"
+
+      title="A failed job needs a durable next step"
       shortTitle={shortTitle}
       tone={tone}
-      rightLabel="Presentation Deck"
-      footer="MDX/React source · standalone HTML artifact"
+
+
     >
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 56, height: '100%', alignContent: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-          <StatRow
-            stats={[
-              { value: '1920×1080', label: 'Fixed stage, scaled to fit' },
-              { value: '6', label: 'Keyboard nav keys' },
-              { value: '0', label: 'Hardcoded color literals' },
-            ]}
-          />
-          <PullQuote
-            quote="A presenter deck is an interface, not a scroll. The slide is the viewport; everything else is progressive disclosure."
-            attribution="Design note · deck engine spec"
-            panel
-          />
+          <p style={{ fontSize: 40, lineHeight: 1.35, margin: 0 }}>Retry a temporary failure. Retain the evidence when the job needs repair.</p>
+          <p style={{ fontSize: 28, lineHeight: 1.55, color: 'var(--ve-pres-muted)', margin: 0 }}>This example follows one job through claiming, processing, delayed retries, and quarantine. A timeout can hide success, so every attempt keeps the same operation identity.</p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <HairlineList
             items={[
-              { head: 'Engine', body: 'ResizeObserver-scaled stage, letterboxed, with a collapsible slide rail.' },
-              { head: 'Primitives', body: 'Drill cards and sheets, ladder and fanout diagrams, metrics, steppers.' },
-              { head: 'Tokens', body: 'Everything reads --ve-* custom properties, so any preset skins the deck.' },
+              { head: 'Identity', body: 'A stable job key follows every attempt and replay.' },
+              { head: 'State', body: 'Queued, running, waiting, and quarantined mean different things.' },
+              { head: 'Evidence', body: 'Retain the last error and attempt history when work cannot proceed.' },
             ]}
           />
           <div>
-            <DrillChip drillId="thesis-contract" label="The export contract" variant="primary" onClick={() => setOpen(true)} />
+            <DrillChip drillId="thesis-contract" label="The job record" variant="primary" onClick={() => setOpen(true)} />
           </div>
         </div>
       </div>
       {open ? (
-        <DrillSheet eyebrow="Thesis · Export contract" onClose={() => setOpen(false)} origin="right center">
+        <DrillSheet eyebrow="The job record" onClose={() => setOpen(false)} origin="right center">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, height: '100%', alignContent: 'start' }}>
             <CodePanel
               rows={[
-                ['source', 'examples/visual-explainer-mdx/presentation-deck.tsx'],
-                ['command', 'npm run ve:export -- <source> --out <artifact>'],
-                ['artifact', 'self-contained HTML, inlined CSS and JS'],
-                ['verify', 've-verify + evals/run-presentation.mjs'],
+                ['job key', 'catalog-refresh:v7'],
+                ['payload', 'A reference to the immutable catalog version'],
+                ['attempts', 'Counted each time a worker starts processing'],
+                ['last error', 'Enough context to classify or repair the failure'],
               ]}
             />
             <HairlineList
               items={[
-                { head: 'Editable source', body: 'Feedback lands in the TSX, never in the exported artifact.' },
-                { head: 'One file to share', body: 'The artifact opens from disk with no server and no network dependency.' },
-                { head: 'Deterministic gate', body: 'The eval harness replays keyboard, drill, and geometry contracts on every change.' },
+                { head: 'Stable identity', body: 'Replay preserves the original operation key.' },
+                { head: 'Durable evidence', body: 'A process restart must not erase the failure history.' },
+                { head: 'Explicit policy', body: 'Attempt budgets and permanent errors determine when retries stop.' },
               ]}
             />
           </div>
@@ -105,38 +93,38 @@ function ThesisSlide({ shortTitle, tone }: SlideMeta) {
 function SystemSlide({ shortTitle, tone }: SlideMeta) {
   return (
     <PresentationSlide
-      kicker="02 · The system"
-      title="Five stages, three drill-downs"
+
+      title="Separate retry from repair"
       shortTitle={shortTitle}
       tone={tone}
-      rightLabel="Presentation Deck"
-      footer="Grid backdrops stay behind opaque cards"
+
+
     >
       <div style={{ display: 'grid', gridTemplateRows: '1fr auto', gap: 26, height: '100%' }}>
         <LadderDiagram
           stepOffset={34}
           stages={[
-            { num: 'S1', name: 'Author', short: 'Slides are TSX composed from primitives.' },
-            { num: 'S2', name: 'Export', short: 'The standard ve:export path inlines everything.' },
-            { num: 'S3', name: 'Verify', short: 'The deterministic design gate runs per artifact.' },
-            { num: 'S4', name: 'Evaluate', short: 'Interaction contracts replay in a headless browser.', tag: 'THIS DECK' },
-            { num: 'S5', name: 'Present', short: 'Keyboard-first, letterboxed, any screen.', accent: 'var(--ve-accent)' },
+            { num: '1', name: 'Claim', short: 'One worker acquires the job.' },
+            { num: '2', name: 'Process', short: 'Use the original operation key.' },
+            { num: '3', name: 'Classify', short: 'Temporary or permanent failure?' },
+            { num: '4', name: 'Wait', short: 'Delay a permitted retry.' },
+            { num: '5', name: 'Repair', short: 'Inspect a quarantined record.' },
           ]}
         />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 22 }}>
           <DrillCard
             drillId="sys-guard"
-            eyebrow="Behavior"
-            title="Click-anywhere-to-close"
-            body="Sheets dismiss on any click that is not interactive."
+            eyebrow=""
+            title="Inspect a quarantined job"
+            body="Keep the failure context beside the repair controls."
             origin="left bottom"
             minHeight={132}
           >
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignContent: 'start' }}>
               <HairlineList
                 items={[
-                  { head: 'Guarded', body: 'Buttons, links, form controls, and data-interactive regions keep their clicks.' },
-                  { head: 'Everything else', body: 'Panel padding, prose, and whitespace all close the sheet — as does Escape or the X.' },
+                  { head: 'Review the cause', body: 'Read the stored error before deciding whether the job can be replayed.' },
+                  { head: 'Preserve the record', body: 'Keep a note of the repair with the original job identity.' },
                 ]}
               />
               {/* Deliberate interaction fixture: one of every element class the
@@ -147,66 +135,66 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
                   data-fixture="button"
                   style={{ border: '1px solid var(--ve-pres-cta)', color: 'var(--ve-pres-cta)', padding: '10px 16px', alignSelf: 'flex-start' }}
                 >
-                  A button keeps its click
+                  Keep for review
                 </button>
-                <a href="#sys-guard" data-fixture="link" style={{ color: 'var(--ve-pres-cta)', fontSize: 16 }}>
-                  A link keeps its click
+                <a href="#sys-guard" data-fixture="link" style={{ color: 'var(--ve-pres-cta)', fontSize: 24 }}>
+                  Jump to this job record
                 </a>
                 <input
-                  aria-label="Sample input"
+                  aria-label="Job key"
                   data-fixture="input"
-                  defaultValue="An input keeps focus"
+                  defaultValue="catalog-refresh:v7"
                   style={{ border: '1px solid var(--ve-pres-hair)', background: 'transparent', color: 'inherit', padding: '10px 12px', font: 'inherit' }}
                 />
-                <select aria-label="Sample select" data-fixture="select" defaultValue="a" style={{ border: '1px solid var(--ve-pres-hair)', background: 'transparent', color: 'inherit', padding: '10px 12px', font: 'inherit' }}>
-                  <option value="a">Select stays open</option>
-                  <option value="b">Second option</option>
+                <select aria-label="Repair decision" data-fixture="select" defaultValue="a" style={{ border: '1px solid var(--ve-pres-hair)', background: 'transparent', color: 'inherit', padding: '10px 12px', font: 'inherit' }}>
+                  <option value="a">Input repaired</option>
+                  <option value="b">Needs investigation</option>
                 </select>
                 <textarea
-                  aria-label="Sample notes"
+                  aria-label="Repair notes"
                   data-fixture="textarea"
-                  defaultValue="A textarea keeps its click"
+                  defaultValue="Record what changed before replay."
                   rows={2}
                   style={{ border: '1px solid var(--ve-pres-hair)', background: 'transparent', color: 'inherit', padding: '10px 12px', font: 'inherit', resize: 'none' }}
                 />
-                <span data-interactive="true" data-fixture="opt-out" style={{ fontSize: 15, color: 'var(--ve-pres-muted)' }}>
-                  Any region can opt out with data-interactive.
+                <span data-interactive="true" data-fixture="opt-out" style={{ fontSize: 24, color: 'var(--ve-pres-muted)' }}>
+                  Repair notes stay available while this sheet is open.
                 </span>
               </div>
             </div>
           </DrillCard>
           <DrillCard
             drillId="sys-scale"
-            eyebrow="Engine"
-            title="Scale-to-fit stage"
-            body="One layout, every screen: min(w/1920, h/1080)."
+            eyebrow=""
+            title="An atomic claim"
+            body="Prevent two workers from owning the same attempt."
             origin="center bottom"
             minHeight={132}
           >
             <div style={{ maxWidth: 900 }}>
               <HairlineList
                 items={[
-                  { head: 'Fixed canvas', body: 'Slides are designed once at 1920×1080; the engine letterboxes the rest.' },
-                  { head: 'Live re-fit', body: 'A ResizeObserver keeps the transform correct even mid rail animation.' },
-                  { head: 'No reflow', body: 'Because the stage never reflows, diagrams and drill sheets keep their geometry.' },
+                  { head: 'Claim once', body: 'Use the store’s atomic operation to select and claim an eligible job.' },
+                  { head: 'Define expiry', body: 'A lease lets another worker recover work after a crash.' },
+                  { head: 'Check ownership', body: 'A worker must still own the lease when committing a result.' },
                 ]}
               />
             </div>
           </DrillCard>
           <DrillCard
             drillId="sys-tokens"
-            eyebrow="Theming"
-            title="Preset-driven"
-            body="Swap data-ve-preset and the whole deck reskins."
+            eyebrow=""
+            title="A stable replay key"
+            body="A second attempt is still the same operation."
             origin="right bottom"
             minHeight={132}
           >
             <div style={{ maxWidth: 900 }}>
               <HairlineList
                 items={[
-                  { head: 'Slide tones', body: 'dark, light, and accent map to the same --ve-slide-* tokens Slide uses.' },
-                  { head: 'CTA discipline', body: 'Primary triggers fill with the tone CTA color; secondary triggers outline it.' },
-                  { head: 'Grid-safe fills', body: 'Opaque surface + translucent tint layers compose to solid — grid lines never bleed through.' },
+                  { head: 'Reuse identity', body: 'Keep the operation key stable across attempts.' },
+                  { head: 'Reconcile first', body: 'After a timeout, look for a recorded outcome before repeating a side effect.' },
+                  { head: 'Bound retention', body: 'Retain the key long enough to cover the replay window.' },
                 ]}
               />
             </div>
@@ -221,12 +209,12 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
   const [open, setOpen] = React.useState(false);
   return (
     <PresentationSlide
-      kicker="03 · The layers"
-      title="One engine, three layers"
+
+      title="Three contracts keep replay predictable"
       shortTitle={shortTitle}
       tone={tone}
-      rightLabel="Presentation Deck"
-      footer="Opposite-polarity surface via tone=light"
+
+
     >
       <div style={{ display: 'grid', gridTemplateRows: '1fr auto', gap: 30, height: '100%' }}>
         <div style={{ minHeight: 0 }}>
@@ -236,44 +224,41 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
           {
             id: 'engine',
             num: '1',
-            name: 'Engine',
-            lead: 'Stage scaling, rail, keyboard routing.',
+            name: 'Ownership',
+            lead: 'One worker owns each active attempt.',
             icon: <IconGauge />,
             points: [
-              'fitStage() math is pure and unit-tested.',
-              'Edge click zones mirror ArrowLeft/ArrowRight.',
-              'The rail auto-collapses and re-expands on hover.',
-              'Reduced-motion collapses every animation to 1ms.',
+              'Claim eligible work atomically.',
+              'Record the owner and lease duration.',
+              'Recover abandoned work after lease expiry.',
+              'Reject a result from a worker that lost its lease.',
             ],
-            foot: 'EVAL: geometry contract in evals/run-presentation.mjs',
           },
           {
             id: 'primitives',
             num: '2',
-            name: 'Primitives',
-            lead: 'Cards, sheets, chips, diagrams, metrics.',
+            name: 'Identity',
+            lead: 'Every replay names the same operation.',
             icon: <IconTool />,
             points: [
-              'Drill triggers are real buttons — Enter and Space work.',
-              'Sheets close on Escape, the X, or any passive click.',
-              'Corner-anchored expansion via transform-origin.',
-              'Shine and hover-lift are CSS-only and token-tinted.',
+              'Keep the same operation key for every attempt.',
+              'Record a completed outcome before acknowledging.',
+              'Look up that outcome after an uncertain timeout.',
+              'Do not confuse a new attempt with a new operation.',
             ],
-            foot: 'EVAL: interaction contract in evals/run-presentation.mjs',
           },
           {
             id: 'tokens',
             num: '3',
-            name: 'Tokens',
-            lead: 'Presets own every color and font.',
+            name: 'Evidence',
+            lead: 'A failed job keeps enough context for repair.',
             icon: <IconFit />,
             points: [
-              'No hex values ship in the module.',
-              'Tones remap CTA colors on accent surfaces.',
-              'Code panels reuse the --ve-code-* surface.',
-              'The letterbox reads --ve-deck-letterbox.',
+              'Retain a reference to the original payload.',
+              'Record errors with their attempt numbers.',
+              'Save the reason for quarantine.',
+              'Attach repair notes before manual replay.',
             ],
-            foot: 'EVAL: token-consumption contract across two presets',
           },
         ]}
       />
@@ -282,17 +267,17 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
           {/* Light-tone primary CTA: --ve-accent remaps to the ink color on
               this surface, so the chip must flip its text to the slide
               background — pinned by the light-tone-primary-cta eval. */}
-          <DrillChip drillId="layers-tones" label="How tones remap" variant="primary" onClick={() => setOpen(true)} />
+          <DrillChip drillId="layers-tones" label="What each outcome means" variant="primary" onClick={() => setOpen(true)} />
         </div>
       </div>
       {open ? (
-        <DrillSheet eyebrow="The layers · Tone remapping" onClose={() => setOpen(false)} origin="left bottom">
+        <DrillSheet eyebrow="Job outcomes" onClose={() => setOpen(false)} origin="left bottom">
           <div style={{ maxWidth: 1100 }}>
             <HairlineList
               items={[
-                { head: 'dark', body: 'The preset base surface: --ve-slide-bg is --ve-bg, CTAs use the real accent.' },
-                { head: 'light', body: 'Opposite polarity: the accent token remaps to ink, so primary CTAs flip their text to the surface color.' },
-                { head: 'accent', body: 'The accent IS the surface: CTAs render in the tone ink with surface-colored text.' },
+                { head: 'Complete', body: 'The operation finished and its outcome was recorded.' },
+                { head: 'Waiting', body: 'A temporary failure has a future retry time.' },
+                { head: 'Quarantined', body: 'The job requires inspection before another attempt.' },
               ]}
             />
           </div>
@@ -312,12 +297,12 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
   });
   return (
     <PresentationSlide
-      kicker="04 · Adoption"
-      title="When to reach for it"
+
+      title="Choose the recovery path"
       shortTitle={shortTitle}
       tone={tone}
-      rightLabel="Presentation Deck"
-      footer="PresentationDeck vs SlideDeck: docs/presentation-deck.md"
+
+
     >
       <div
         {...stateNavigation}
@@ -327,30 +312,30 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
           <Stepper
             accentIndex={step}
             steps={[
-              { num: '1', name: 'Scrolling handout', body: 'Use SlideDeck: scroll-snap sections that read top to bottom and print well.' },
-              { num: '2', name: 'Editorial spread', body: 'Use SlideDeck with orientation=horizontal for magazine-style pagination.' },
-              { num: '3', name: 'Presented deck', body: 'Use PresentationDeck: a presenter, a projector, drill-downs on demand.' },
+              { num: '1', name: 'Retry', body: 'A temporary failure remains within the attempt budget.' },
+              { num: '2', name: 'Reconcile', body: 'A timeout leaves the previous outcome uncertain.' },
+              { num: '3', name: 'Repair', body: 'Invalid input or an exhausted budget requires inspection.' },
             ]}
           />
         </div>
         <div style={{ alignSelf: 'end', display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 44 }}>
           <div>
-            <DrillChip drillId="ask-fanout" label="Where one source lands" onClick={() => setOpen(true)} />
+            <DrillChip drillId="ask-fanout" label="Where the record is used" onClick={() => setOpen(true)} />
           </div>
         </div>
       </div>
       {open ? (
-        <DrillSheet eyebrow="Adoption · One source, many surfaces" onClose={() => setOpen(false)} origin="left bottom">
+        <DrillSheet eyebrow="A durable job record" onClose={() => setOpen(false)} origin="left bottom">
           <FanoutDiagram
             source={{
-              label: 'Deck source (TSX)',
-              body: 'One editable file, exported through the standard pipeline.',
+              label: 'Job record',
+              body: 'Stable identity, payload reference, and attempt history.',
               icon: <IconFile />,
             }}
             outputs={[
-              { label: 'Standalone HTML', cap: 'The presented artifact', icon: <IconCorpus /> },
-              { label: 'Eval fixture', cap: 'Interaction contracts replay against it', icon: <IconLoop /> },
-              { label: 'Screenshots', cap: 'Verifier and PR evidence', icon: <IconFit /> },
+              { label: 'Scheduler', cap: 'Finds the next eligible attempt', icon: <IconCorpus /> },
+              { label: 'Worker', cap: 'Claims and processes the job', icon: <IconLoop /> },
+              { label: 'Repair view', cap: 'Explains why the job stopped', icon: <IconFit /> },
             ]}
           />
         </DrillSheet>
@@ -359,13 +344,13 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
   );
 }
 
-export default function PresentationDeckDemo({ preset = 'paper-ink' }: { preset?: string }) {
+export default function PresentationDeckDemo({ preset = 'lieflat' }: { preset?: string }) {
   return (
-    <PresentationDeck title="Presentation Deck" eyebrow="Engine + primitives demo" preset={preset}>
-      <ThesisSlide shortTitle="Thesis" tone="dark" />
-      <SystemSlide shortTitle="The system" tone="dark" />
-      <LayersSlide shortTitle="The layers" tone="light" />
-      <AskSlide shortTitle="Adoption" tone="accent" />
+    <PresentationDeck title="How a queue recovers" preset={preset}>
+      <ThesisSlide shortTitle="Recovery" tone="dark" />
+      <SystemSlide shortTitle="Attempts" tone="dark" />
+      <LayersSlide shortTitle="Contracts" tone="light" />
+      <AskSlide shortTitle="Outcomes" tone="accent" />
     </PresentationDeck>
   );
 }

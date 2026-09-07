@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Generate beautiful, self-contained HTML artifacts from MDX/React sources that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, code walkthrough, or any visual explanation of technical concepts. Also use proactively when a table would need at least 4 rows or 3 columns.
+description: Use when explaining systems, code changes, plans, or data with diagrams, charts, comparison tables, HTML pages, or slides.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -10,7 +10,9 @@ metadata:
 
 # Visual Explainer
 
-Produce an editable MDX/TSX source, export it to self-contained HTML, and verify the result. Use HTML instead of ASCII for substantial diagrams and tables.
+Produce editable source and verified, self-contained HTML. Use Lieflat by default: visual stories shaped by observations, units, and relationships, with readable type and generous space. Prefer prose when a visual would add no understanding.
+
+Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
 ## Resolve the runtime
 
@@ -25,16 +27,17 @@ Run every `npm run ve:*` command from `REPO`. Sources may live elsewhere; pass a
 ## Execute the flow
 
 1. Select one route below and read its card. Covered flows need this file and that card only until a conditional pointer fires.
-2. Author `.mdx` by default. Use `.tsx` only for local state, generated/custom SVG, or video. Import shared components from `REPO/visual-explainer-mdx/components.tsx` as the card shows.
-3. Export with `npm --prefix REPO run ve:export -- <abs-source> --out <abs-output>`. For static video, use `npm --prefix REPO run ve:export-static -- <abs-source.tsx> --out <abs-output>`. Fix strict-export failures in the source.
+2. For a standalone chart, author a `LieflatChart` JSON envelope; for a data story, compose its figures in MDX. Archify uses typed JSON. Otherwise author `.mdx` by default, or `.tsx` for local state, generated/custom SVG, or video. Import shared components from `REPO/visual-explainer-mdx/components.tsx`.
+3. Export chart JSON with `npm --prefix REPO run ve:chart -- <abs-source.json> --out <abs-output.html>`. Archify uses its validated delivery command. For MDX/TSX, use `npm --prefix REPO run ve:export -- <abs-source> --out <abs-output>`; for static video, use `ve:export-static`. Fix export failures in the source.
 4. Read [verification.md](references/verification.md), execute its routed checks, open the artifact, and report the source, HTML, report JSON, and any incomplete verification.
 
-Completion requires an editable source, a successful export, and evidence for every required verification pass. Apply feedback to the source and re-export.
+Completion requires editable source, a successful export, and evidence for every required verification pass. Apply feedback to the source and re-export.
 
 ## Route
 
 | Request | Read first | Read only when needed |
 |---|---|---|
+| chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
 | diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
@@ -47,10 +50,15 @@ For point-and-click annotation, read [annotate.md](commands/annotate.md). If the
 
 ## Shared contracts
 
-- Keep MDX/TSX as the source of truth; generated HTML is disposable output.
+- Keep MDX/TSX, chart JSON, or Archify JSON as the source of truth; generated HTML is disposable output.
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
-- Use `DiagramCanvas` for ordinary diagrams. Use Mermaid only when automatic graph layout is materially better and the result retains zoom, pan, reset, and expand controls.
+- Use `LieflatChart` for editorial data stories and `DataChart` for quick bar, line, or dot comparisons. Marks must encode evidence; never invent records or quantities to fill a pattern.
+- When adjusting type, read [typography.md](references/typography.md). Compose readable text blocks through measure, grouping, weight, and spacing.
+- Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.
 - Treat facts, labels, and visual encodings as claims. Keep them traceable to the user brief or inspected sources; mark uncertainty instead of inventing rationale.
-- Preserve accessibility, responsive containment, and reduced-motion behavior.
+- Preserve accessibility, responsive containment, and reduced-motion behavior. Optional metadata requires factual state, sequence, provenance, ownership, or navigation.
+
+**Bad:** “Architecture overview · 01 · Production ready” above an unexplained graph.
+**Good:** “A cache miss reads Postgres” above a graph whose edges identify the reads.
 
 Use [delegated-skills.md](references/delegated-skills.md) only when its delegated visual/prose checks are available. Use [model-routing.md](references/model-routing.md) only when dispatching visual-review passes. The main thread orchestrates those passes and consumes their evidence; a visual-capable reviewer judges screenshots.

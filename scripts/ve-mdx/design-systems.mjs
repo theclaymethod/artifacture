@@ -22,6 +22,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 export const BUILTIN_PRESETS = new Set([
+  'lieflat',
+  'mono-color',
+  'algebrica',
   'oa-design',
   'mono-industrial',
   'nothing',
@@ -32,7 +35,7 @@ export const BUILTIN_PRESETS = new Set([
   'custom',
 ]);
 
-export const DEFAULT_FALLBACK_PRESET = 'oa-design';
+export const DEFAULT_FALLBACK_PRESET = 'lieflat';
 
 // Token keys a complete design system is expected to provide (directly or via
 // the derived fallbacks the exporter injects). Used for coverage reporting by

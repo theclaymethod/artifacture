@@ -1,7 +1,13 @@
-import React, { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { edgePath, labelLeaderEndpoint, layoutDiagram, mobileConnectorEdges, splitSvgText, wrapWords, type LaidOutNode } from './diagram-layout';
+import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { diagramTypography, edgePath, labelLeaderEndpoint, layoutDiagram, wrapWords, type LaidOutNode } from './diagram-layout';
 import type { DiagramCanvasProps } from './diagram-types';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
+export { DataChart } from './charts';
+export type { ChartDatum, DataChartProps } from './charts';
+export { LieflatChart } from './lieflat-charts';
+export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
+export { DiagramWalkthrough } from './diagram-walkthrough';
+export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 
 declare global {
   interface Window {
@@ -34,6 +40,9 @@ type MermaidConfiguration = {
 // design-system registry (see docs/design-systems.md). `(string & {})` keeps
 // literal autocompletion for the built-ins while admitting registry names.
 export type VisualPreset =
+  | 'lieflat'
+  | 'mono-color'
+  | 'algebrica'
   | 'oa-design'
   | 'mono-industrial'
   | 'nothing'
@@ -209,6 +218,7 @@ type PosterCanvasProps = {
   stat?: string;
   footer?: string;
   preset?: VisualPreset;
+  reviewTools?: boolean;
   children: ReactNode;
 };
 
@@ -222,26 +232,20 @@ type Annotation = {
 export function ExplainerShell({
   title,
   summary,
-  preset = 'oa-design',
+  preset = 'lieflat',
   reviewTools = true,
   children,
 }: ShellProps) {
   return (
     <main className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
       <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
-        <header className="ve-shell-header grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <header className="ve-shell-header grid gap-6">
           <div>
-            <h1 className="max-w-5xl text-5xl leading-[0.95] tracking-normal text-[var(--ve-heading)] sm:text-7xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+            <h1 className="max-w-[var(--ve-shell-title-measure,18ch)] text-balance text-[length:var(--ve-shell-title-size)] leading-[1.04] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
               {title}
             </h1>
-            {summary ? <p className="mt-6 max-w-3xl text-lg leading-8 text-[var(--ve-muted)]">{summary}</p> : null}
+            {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}
           </div>
-          <aside className="ve-shell-source-card self-end">
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">source contract</p>
-            <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">
-              Authored as MDX or TSX. Exported as generated standalone HTML.
-            </p>
-          </aside>
         </header>
         {children}
       </div>
@@ -272,9 +276,9 @@ export function Pipeline({ steps }: PipelineProps) {
         const item = normalizePipelineStep(step);
         return (
           <li key={`${item.title}-${index}`} className="ve-pipeline-item min-w-0">
-            <div className="text-xs text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{String(index + 1).padStart(2, '0')}</div>
+            <div className="text-sm text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{String(index + 1).padStart(2, '0')}</div>
             <h3 className="mt-4 text-xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{item.title}</h3>
-            {item.body ? <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">{item.body}</p> : null}
+            {item.body ? <p className="mt-3 text-base leading-6 text-[var(--ve-muted)]">{item.body}</p> : null}
           </li>
         );
       })}
@@ -295,7 +299,7 @@ export function DecisionMatrix({ rows }: DecisionMatrixProps) {
   return (
     <div className="ve-table-shell overflow-x-auto rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)]">
       <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-        <thead className="bg-[var(--ve-panel-strong)] text-xs uppercase tracking-[0.16em] text-[var(--ve-muted)] [font-family:var(--ve-font-mono)]">
+        <thead className="bg-[var(--ve-panel-strong)] text-sm text-[var(--ve-muted)]">
           <tr>
             {columns.map((column) => (
               <th key={column} className="border-b border-[color:var(--ve-rule)] px-4 py-3 font-medium">
@@ -325,12 +329,12 @@ export function RiskLedger({ risks }: RiskLedgerProps) {
     <div className="ve-risk-ledger grid md:grid-cols-3">
       {risks.map((risk) => (
         <article data-ve-risk-level={risk.level ?? 'medium'} key={risk.risk} className="ve-risk-card">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--ve-faint)] [font-family:var(--ve-font-mono)]">{risk.level ?? 'medium'}</p>
+          {risk.level ? <p className="text-sm text-[var(--ve-faint)]">{risk.level} risk</p> : null}
           <h3 className="mt-3 text-lg tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{risk.risk}</h3>
-          <p className="mt-3 text-sm leading-6 text-[var(--ve-muted)]">
+          <p className="mt-3 text-base leading-6 text-[var(--ve-muted)]">
             <span className="text-[var(--ve-text)]">Signal:</span> {risk.signal}
           </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--ve-muted)]">
+          <p className="mt-2 text-base leading-6 text-[var(--ve-muted)]">
             <span className="text-[var(--ve-text)]">Mitigation:</span> {risk.mitigation}
           </p>
         </article>
@@ -339,168 +343,151 @@ export function RiskLedger({ risks }: RiskLedgerProps) {
   );
 }
 
-export function DiagramCanvas({ nodes, edges, layout = 'flow', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
+export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
   const rawId = useId().replace(/:/g, '');
-  const diagram = useMemo(() => layoutDiagram(nodes, edges, layout, lanes, dates), [nodes, edges, layout, lanes, dates]);
-  const hasMobileVariant = layout === 'swimlane' && diagram.orientation === 'vertical';
+  const figureRef = useRef<HTMLElement>(null);
+  const [availableWidth, setAvailableWidth] = useState<number | null>(null);
+  const candidates = useMemo(() => {
+    const initial = layoutDiagram(nodes, edges, layout, lanes, dates, direction);
+    if (layout !== 'flow' || direction !== 'auto') return { initial, horizontal: initial, vertical: initial };
+    return {
+      initial,
+      horizontal: layoutDiagram(nodes, edges, layout, lanes, dates, 'horizontal'),
+      vertical: layoutDiagram(nodes, edges, layout, lanes, dates, 'vertical'),
+    };
+  }, [nodes, edges, layout, lanes, dates, direction]);
+  useLayoutEffect(() => {
+    const figure = figureRef.current;
+    if (!figure || layout !== 'flow' || direction !== 'auto') return;
+    const updateWidth = (width: number) => {
+      if (width <= 0) return;
+      const next = Math.floor(width);
+      setAvailableWidth((previous) => previous === next ? previous : next);
+    };
+    updateWidth(figure.clientWidth);
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) updateWidth(entry.contentRect.width);
+    });
+    observer.observe(figure);
+    return () => observer.disconnect();
+  }, [layout, direction]);
+  const diagram = useMemo(() => {
+    if (availableWidth === null || layout !== 'flow' || direction !== 'auto') return candidates.initial;
+    const { horizontal, vertical } = candidates;
+    if (horizontal.viewBox.width <= availableWidth) return horizontal;
+    return vertical.viewBox.width < horizontal.viewBox.width ? vertical : horizontal;
+  }, [availableWidth, candidates, layout, direction]);
   const arrowId = `ve-arrow-${rawId}`;
-  const arrowAccentId = `ve-arrow-accent-${rawId}`;
-  const arrowStartId = `ve-arrow-start-${rawId}`;
   const titleId = `ve-diagram-title-${rawId}`;
   const descriptionId = `ve-diagram-desc-${rawId}`;
-  const accessibleDescription = description ?? `${layout} diagram with ${nodes.length} nodes and ${edges.length} connections.`;
+  const accessibleDescription = description ?? nodes.map((node) => {
+    const targets = diagram.edges.filter(({ edge }) => edge.from === node.id).map(({ edge, to }) => `${edge.label ? `${edge.label}: ` : ''}${to.label}${edge.style === 'bidirectional' ? ' (both directions)' : ''}`);
+    return `${node.label}${node.detail ? `: ${node.detail}` : ''}.${targets.length ? ` Connects to ${targets.join('; ')}.` : ''}`;
+  }).join(' ');
   return (
-    <figure className={`ve-diagram-shell${hasMobileVariant ? ' ve-diagram-has-mobile' : ''} rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-panel)] p-4 sm:p-5`}>
-      <div className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop">
-      <svg
-        aria-labelledby={`${titleId} ${descriptionId}`}
-        className="h-auto w-full"
-        data-diagram-role="diagram"
-        role="img"
-        style={{
-          aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`,
-          // Legibility floor: never render below 90% of natural scale — the figure
-          // scrolls horizontally instead (responsive contract: wide SVGs scroll in
-          // their own container; text stays >=12px effective).
-          minWidth: Math.max(560, Math.round(diagram.viewBox.width * 0.9)),
-        }}
-        viewBox={`${diagram.viewBox.x} ${diagram.viewBox.y} ${diagram.viewBox.width} ${diagram.viewBox.height}`}
-        width="100%"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <title id={titleId}>{title}</title>
-        <desc id={descriptionId}>{accessibleDescription}</desc>
-        <defs>
-          <marker id={arrowId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="9" refY="5" viewBox="0 0 10 10">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ve-diagram-muted)" />
-          </marker>
-          <marker id={arrowAccentId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="9" refY="5" viewBox="0 0 10 10">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ve-accent)" />
-          </marker>
-          <marker id={arrowStartId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="1" refY="5" viewBox="0 0 10 10">
-            <path d="M 10 0 L 0 5 L 10 10 z" fill="var(--ve-diagram-muted)" />
-          </marker>
-        </defs>
-        <rect fill="var(--ve-diagram-bg)" height={diagram.viewBox.height} width={diagram.viewBox.width} x={diagram.viewBox.x} y={diagram.viewBox.y} />
-        <rect fill="none" height={diagram.viewBox.height - 1} stroke="var(--ve-diagram-frame)" strokeWidth="1" width={diagram.viewBox.width - 1} x={diagram.viewBox.x + 0.5} y={diagram.viewBox.y + 0.5} />
-        <g data-diagram-role="layer">
-          {diagram.lanes.map((lane) => (
-            <g data-diagram-role="lane" key={lane.id}>
-              {lane.orientation === 'vertical' ? (
-                <>
-                  {lane.divider ? <line stroke="var(--ve-diagram-frame)" strokeWidth="1" x1={lane.x + lane.width} x2={lane.x + lane.width} y1={lane.y + 8} y2={lane.y + lane.height} /> : null}
-                  <line stroke="var(--ve-diagram-frame)" strokeWidth="1" x1={lane.x + 12} x2={lane.x + lane.width - 12} y1={lane.y + 38} y2={lane.y + 38} />
-                </>
-              ) : (
-                <line stroke="var(--ve-diagram-frame)" strokeWidth="1" x1={lane.x} x2={lane.x + lane.width} y1={lane.y} y2={lane.y} />
-              )}
-              <text fill="var(--ve-faint)" fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="1.8" style={svgTextOverflowStyle} textAnchor={lane.orientation === 'vertical' ? 'middle' : 'start'} x={lane.orientation === 'vertical' ? lane.x + lane.width / 2 : lane.x + 16} y={lane.orientation === 'vertical' ? lane.y + 24 : lane.y + 24}>
-                {lane.label}
-              </text>
-            </g>
-          ))}
-          {diagram.edges.map(({ edge, from, to, path, label }, index) => {
-            const isAccentEdge = from.isAccented || to.isAccented;
-            return (
-              <g key={`${edge.from}-${edge.to}-${index}`}>
-                <path
-                  d={edgePath(path)}
-                  data-diagram-role="arrow"
-                  fill="none"
-                  markerEnd={`url(#${isAccentEdge ? arrowAccentId : arrowId})`}
-                  markerStart={edge.style === 'bidirectional' ? `url(#${arrowStartId})` : undefined}
-                  stroke={isAccentEdge ? 'var(--ve-accent)' : 'var(--ve-diagram-muted)'}
-                  strokeDasharray={edge.style === 'dashed' ? '5 5' : undefined}
-                  strokeLinecap="round"
-                  strokeWidth={isAccentEdge ? '1.6' : '1.2'}
-                />
-                {label ? (
-                  <g data-diagram-role="arrow-label">
-                    {label.leader ? (
-                      <line
-                        opacity="0.72"
-                        stroke="var(--ve-diagram-frame)"
-                        strokeDasharray="3 3"
-                        strokeWidth="1"
-                        x1={label.anchor.x}
-                        x2={labelLeaderEndpoint(label).x}
-                        y1={label.anchor.y}
-                        y2={labelLeaderEndpoint(label).y}
-                      />
-                    ) : null}
-                    <rect data-diagram-role="arrow-label-mask" fill="var(--ve-diagram-bg)" height={label.height} rx="var(--ve-chip-radius, 0)" stroke="var(--ve-diagram-frame)" strokeWidth="1" width={label.width} x={label.x - label.width / 2} y={label.y - label.height / 2} />
-                    <text fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="0.6" style={svgTextOverflowStyle} textAnchor="middle" x={label.x} y={label.y - (label.lines.length > 1 ? 5 : -3)}>
-                      {label.lines.map((line, lineIndex) => (
-                        <tspan dy={lineIndex === 0 ? 0 : 12} key={`${edge.from}-${edge.to}-label-${lineIndex}`} x={label.x}>
-                          {line}
-                        </tspan>
-                      ))}
-                    </text>
-                  </g>
-                ) : null}
+    <figure className="ve-diagram-shell ve-diagram-has-mobile" ref={figureRef}>
+      <div aria-label={`${title}, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" role="region" tabIndex={0}>
+        <svg
+          aria-labelledby={`${titleId} ${descriptionId}`}
+          className="h-auto w-full"
+          data-diagram-role="diagram"
+          role="img"
+          style={{ aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`, minWidth: diagram.viewBox.width, maxWidth: diagram.viewBox.width, marginInline: 'auto' }}
+          viewBox={`${diagram.viewBox.x} ${diagram.viewBox.y} ${diagram.viewBox.width} ${diagram.viewBox.height}`}
+          width="100%"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id={titleId}>{title}</title>
+          <desc id={descriptionId}>{accessibleDescription || 'No nodes to display.'}</desc>
+          <defs>
+            <marker id={arrowId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="9" refY="5" viewBox="0 0 10 10">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" />
+            </marker>
+          </defs>
+          <rect fill="var(--ve-diagram-bg)" height={diagram.viewBox.height} width={diagram.viewBox.width} x={diagram.viewBox.x} y={diagram.viewBox.y} />
+          <g data-diagram-role="layer">
+            {diagram.lanes.map((lane) => (
+              <g data-diagram-role="lane" key={lane.id}>
+                {lane.orientation === 'vertical' ? (
+                  <>
+                    {lane.divider ? <line stroke="var(--ve-diagram-frame)" x1={lane.x + lane.width} x2={lane.x + lane.width} y1={lane.y} y2={lane.y + lane.height} /> : null}
+                    <line stroke="var(--ve-diagram-frame)" x1={lane.x + 16} x2={lane.x + lane.width - 16} y1={lane.y + lane.lines.length * 20 + 20} y2={lane.y + lane.lines.length * 20 + 20} />
+                  </>
+                ) : <line stroke="var(--ve-diagram-frame)" x1={lane.x} x2={lane.x + lane.width} y1={lane.y} y2={lane.y} />}
+                <text fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize="14" fontWeight="600" textAnchor={lane.orientation === 'vertical' ? 'middle' : 'start'} x={lane.orientation === 'vertical' ? lane.x + lane.width / 2 : lane.x + 16} y={lane.y + 24}>
+                  {lane.lines.map((line, index) => <tspan dy={index ? 20 : 0} key={index} x={lane.orientation === 'vertical' ? lane.x + lane.width / 2 : lane.x + 16}>{line}</tspan>)}
+                </text>
               </g>
-            );
-          })}
-          {diagram.nodes.map((item, index) => (
-            <DiagramNodeGlyph item={item} index={index} key={item.id} />
-          ))}
-          {diagram.legend.entries.length ? (
-            <g data-diagram-role="legend">
-              <line stroke="var(--ve-diagram-frame)" strokeWidth="1" x1={diagram.viewBox.x + 24} x2={diagram.viewBox.x + diagram.viewBox.width - 24} y1={diagram.bodyBottom} y2={diagram.bodyBottom} />
-              <text fill="var(--ve-faint)" fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="1" style={svgTextOverflowStyle} x={diagram.legend.x} y={diagram.legend.y}>
-                {layout.toUpperCase()} / {nodes.length} nodes / {edges.length} edges
+            ))}
+            {diagram.timeline.map((tick) => (
+              <text fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize="14" fontWeight="600" key={tick.label} textAnchor="middle" x={tick.x} y={tick.y}>
+                {tick.lines.map((line, index) => <tspan dy={index ? 20 : 0} key={index} x={tick.x}>{line}</tspan>)}
               </text>
-              {diagram.legend.entries.map((entry, entryIndex) => (
-                <g key={entry.label}>
-                  <line stroke={entry.accent ? 'var(--ve-accent)' : 'var(--ve-diagram-muted)'} strokeDasharray={entry.dashed ? '5 5' : undefined} strokeWidth={entry.accent ? '1.6' : '1.2'} x1={diagram.legend.entryStartX + entryIndex * 136} x2={diagram.legend.entryStartX + 32 + entryIndex * 136} y1={diagram.legend.y - 3} y2={diagram.legend.y - 3} />
-                  <text fill="var(--ve-faint)" fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="0.8" style={svgTextOverflowStyle} x={diagram.legend.entryStartX + 40 + entryIndex * 136} y={diagram.legend.y}>
-                    {entry.label}
-                  </text>
-                </g>
-              ))}
-            </g>
-          ) : null}
-        </g>
-      </svg>
+            ))}
+            {diagram.edges.map(({ edge, from, to, path }, index) => (
+              <path
+                d={edgePath(path)}
+                data-diagram-role="arrow"
+                data-diagram-source={`ve-node-${rawId}-${from.order}`}
+                data-diagram-source-anchor={diagramNodeAnchor(from, path[0])}
+                data-diagram-target={`ve-node-${rawId}-${to.order}`}
+                data-diagram-target-anchor={diagramNodeAnchor(to, path.at(-1))}
+                data-ve-edge-id={edge.id}
+                fill="none"
+                key={`${edge.from}-${edge.to}-${index}`}
+                markerEnd={`url(#${arrowId})`}
+                markerStart={edge.style === 'bidirectional' ? `url(#${arrowId})` : undefined}
+                stroke={from.isAccented || to.isAccented ? 'var(--ve-accent)' : 'var(--ve-diagram-muted)'}
+                strokeDasharray={edge.style === 'dashed' ? '6 5' : undefined}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+              />
+            ))}
+            {diagram.edges.map(({ edge, label }, index) => label ? (
+              <g data-diagram-role="arrow-label" key={`${edge.from}-${edge.to}-label-${index}`}>
+                {label.leader ? <line stroke="var(--ve-diagram-muted)" strokeWidth="1" x1={label.anchor.x} x2={labelLeaderEndpoint(label).x} y1={label.anchor.y} y2={labelLeaderEndpoint(label).y} /> : null}
+                <rect data-diagram-role="arrow-label-mask" fill="var(--ve-diagram-bg)" height={label.height} width={label.width} x={label.x - label.width / 2} y={label.y - label.height / 2} />
+                <text fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize={diagramTypography.edgeSize} textAnchor="middle" x={label.x} y={label.y - (label.lines.length - 1) * diagramTypography.edgeLeading / 2 + 5}>
+                  {label.lines.map((line, lineIndex) => <tspan dy={lineIndex ? diagramTypography.edgeLeading : 0} key={lineIndex} x={label.x}>{line}</tspan>)}
+                </text>
+              </g>
+            ) : null)}
+            {diagram.nodes.map((item) => <DiagramNodeGlyph item={item} key={item.id} nodeId={`ve-node-${rawId}-${item.order}`} />)}
+            {!nodes.length ? <text fill="var(--ve-diagram-muted)" fontFamily="var(--ve-font-body)" fontSize="16" x="40" y="64">No nodes to display.</text> : null}
+          </g>
+        </svg>
       </div>
-      {hasMobileVariant ? <MobileSwimlaneVariant diagram={diagram} /> : null}
+      <MobileSwimlaneVariant diagram={diagram} idPrefix={rawId} title={title} />
     </figure>
   );
 }
 
-function MobileSwimlaneVariant({ diagram }: { diagram: ReturnType<typeof layoutDiagram> }) {
+function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
   const sortedNodes = [...diagram.nodes].sort((a, b) => a.rank - b.rank || a.order - b.order);
-  const nodeOrder = new Map(sortedNodes.map((node, index) => [node.id, index]));
   return (
-    <div className="ve-diagram-variant ve-diagram-variant-mobile" data-diagram-role="diagram-mobile" data-ve-variant="mobile">
+    <div aria-label={title} className="ve-diagram-variant ve-diagram-variant-mobile" data-diagram-role="diagram-mobile" data-ve-variant="mobile" role="group">
       <div className="ve-diagram-mobile-list">
-        {sortedNodes.map((node, index) => {
-          const connectorEdges = mobileConnectorEdges(diagram.edges, nodeOrder, index);
-          const dashed = connectorEdges.some(({ edge }) => edge.style === 'dashed');
+        {sortedNodes.map((node) => {
+          const connections = diagram.edges.filter(({ edge }) => edge.from === node.id || (edge.style === 'bidirectional' && edge.to === node.id && edge.from !== node.id));
+          const context = [node.lane ? diagram.laneLabels.get(node.lane) ?? node.lane : undefined, node.date].filter(Boolean).join(' · ');
           return (
-            <React.Fragment key={node.id}>
-              <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined}>
-                <p className="ve-diagram-mobile-lane">{diagram.laneLabels.get(node.lane ?? 'default') ?? node.lane ?? 'Default'}</p>
-                <h3>{node.label}</h3>
-                {node.detail ? <p>{node.detail}</p> : null}
-              </article>
-              {index < sortedNodes.length - 1 ? (
-                <div className="ve-diagram-mobile-connector" data-diagram-role="mobile-connector" data-ve-edge-style={dashed ? 'dashed' : 'solid'}>
-                  <span className="ve-diagram-mobile-line" />
-                  {connectorEdges.length ? (
-                    <div className="ve-diagram-mobile-chips">
-                      {connectorEdges.map(({ edge }, edgeIndex) => edge.label ? (
-                        <span className="ve-diagram-mobile-chip" data-ve-edge-style={edge.style === 'dashed' ? 'dashed' : 'solid'} key={`${edge.from}-${edge.to}-${edgeIndex}`}>
-                          {edge.label}
-                        </span>
-                      ) : null)}
-                    </div>
-                  ) : null}
-                </div>
+            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
+              {context ? <p className="ve-diagram-mobile-lane">{context}</p> : null}
+              <h3>{node.label}</h3>
+              {node.detail ? <p>{node.detail}</p> : null}
+              {connections.length ? (
+                <ul aria-label={`Connections from ${node.label}`} className="ve-diagram-mobile-connections">
+                  {connections.map(({ edge, from, to }, index) => {
+                    const target = from.id === node.id ? to : from;
+                    return <li key={index}>{edge.label ? `${edge.label}: ` : 'To '}<a href={`#ve-mobile-${idPrefix}-${target.order}`}>{target.label}</a>{edge.style === 'bidirectional' ? ' (both directions)' : ''}</li>;
+                  })}
+                </ul>
               ) : null}
-            </React.Fragment>
+            </article>
           );
         })}
+        {!sortedNodes.length ? <p>No nodes to display.</p> : null}
       </div>
     </div>
   );
@@ -512,9 +499,9 @@ export function CodeBlock({ code, language, filename, highlightLines = [], annot
   const annotationMap = new Map(annotations.map((item) => [item.line, item.note]));
   return (
     <figure className="overflow-hidden rounded-[var(--ve-radius)] border border-[color:var(--ve-code-rule)] bg-[var(--ve-code-bg)] text-[var(--ve-code-text)]" data-ve-code-block>
-      <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--ve-code-rule)] px-4 py-3 text-xs uppercase tracking-[0.14em] text-[var(--ve-code-muted)] [font-family:var(--ve-font-mono)]">
+      <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--ve-code-rule)] px-4 py-3 text-sm text-[var(--ve-code-muted)] [font-family:var(--ve-font-mono)]">
         <span>{filename ?? language}</span>
-        <span>{diff === 'unified' ? 'diff' : language}</span>
+        {diff === 'unified' ? <span>diff</span> : null}
       </figcaption>
       <div className="grid max-h-[620px] overflow-auto">
         <div className="ve-code-shiki" dangerouslySetInnerHTML={{ __html: highlighted }} />
@@ -601,7 +588,6 @@ export function TerminalBlock({ content, title = 'Terminal', showPrompt = false 
     <figure className="ve-terminal-block" data-ve-terminal-block>
       <figcaption className="ve-code-caption">
         <span>{title}</span>
-        <span>ansi</span>
       </figcaption>
       <pre className="ve-terminal-content">
         {parseAnsi(lines).map((segment, index) => (
@@ -821,53 +807,55 @@ export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
   );
 }
 
-function DiagramNodeGlyph({ item, index }: { item: LaidOutNode; index: number }) {
-  const compact = item.width <= 140;
+function diagramNodeAnchor(node: LaidOutNode, point?: { x: number; y: number }) {
+  if (!point) return undefined;
+  const dot = node['shape'] === 'dot';
+  const cx = node.x + node.width / 2;
+  const cy = dot ? node.y + 12 : node.y + node.height / 2;
+  const halfWidth = dot ? 12 : node.width / 2;
+  const halfHeight = dot ? 12 : node.height / 2;
+  if (Math.abs(point.y - cy) < 0.5) {
+    if (point.x < cx - halfWidth) return 'left-center';
+    if (point.x > cx + halfWidth) return 'right-center';
+  }
+  if (Math.abs(point.x - cx) < 0.5) {
+    if (point.y < cy - halfHeight) return 'top-center';
+    if (point.y > cy + halfHeight) return 'bottom-center';
+  }
+  return undefined;
+}
+
+function DiagramNodeGlyph({ item, nodeId }: { item: LaidOutNode; nodeId: string }) {
   const glyph = item['shape'] ?? 'rect';
-  const labelY = glyph === 'dot' ? item.y + item.height + 20 : item.y + (compact ? 37 : 44);
-  const labelLines = splitSvgText(item.label, glyph === 'dot' ? 14 : compact ? 15 : 20, { maxLines: 2 });
-  const detailLines = item.detail ? splitSvgText(item.detail, compact ? 17 : 28, { ellipsis: true, maxLines: compact ? 2 : 3 }) : [];
-  const detailY = item.y + (compact ? 59 : 72) + Math.max(0, labelLines.length - 1) * (compact ? 16 : 18);
+  const centered = glyph === 'diamond' || glyph === 'oval' || glyph === 'dot';
+  const textX = centered ? item.x + item.width / 2 : item.x + 20;
+  const textTop = glyph === 'dot' ? item.y + 40 : item.y + (item.height - item.textHeight) / 2;
+  const labelY = textTop + 16;
+  const detailY = textTop + item.labelLines.length * diagramTypography.labelLeading + 8 + 14;
   const stroke = item.isAccented ? 'var(--ve-accent)' : 'var(--ve-node-stroke)';
   const fill = item.isAccented ? 'var(--ve-diagram-accent-fill)' : 'var(--ve-node-bg)';
-  const textX = glyph === 'dot' ? item.x + item.width / 2 : item.x + (compact ? 12 : 20);
   return (
-    <g data-diagram-role="node" data-ve-label={item.label} key={item.id}>
+    <g data-ve-label={item.label}>
       {glyph === 'oval' ? (
-        <rect fill={fill} height={item.height} rx={compact ? 16 : 24} stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} width={item.width} x={item.x} y={item.y} />
+        <rect data-diagram-id={nodeId} data-diagram-role="node" data-ve-node-id={item.id} fill={fill} height={item.height} rx={item.height / 2} stroke={stroke} strokeWidth="1.5" width={item.width} x={item.x} y={item.y} />
       ) : glyph === 'diamond' ? (
-        <polygon fill={fill} points={`${item.x + item.width / 2},${item.y} ${item.x + item.width},${item.y + item.height / 2} ${item.x + item.width / 2},${item.y + item.height} ${item.x},${item.y + item.height / 2}`} stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} />
+        <polygon data-diagram-id={nodeId} data-diagram-role="node" data-ve-node-id={item.id} fill={fill} points={`${item.x + item.width / 2},${item.y} ${item.x + item.width},${item.y + item.height / 2} ${item.x + item.width / 2},${item.y + item.height} ${item.x},${item.y + item.height / 2}`} stroke={stroke} strokeWidth="1.5" />
       ) : glyph === 'dot' ? (
-        <circle cx={item.x + item.width / 2} cy={item.y + item.height / 2} fill={stroke} r={item.width / 2} />
+        <circle data-diagram-id={nodeId} data-diagram-role="node" data-ve-node-id={item.id} cx={item.x + item.width / 2} cy={item.y + 12} fill={stroke} r="12" />
       ) : (
-        <rect fill={fill} height={item.height} rx="var(--ve-node-radius, 6)" stroke={stroke} strokeWidth={item.isAccented ? '2' : '1'} width={item.width} x={item.x} y={item.y} />
+        <rect data-diagram-id={nodeId} data-diagram-role="node" data-ve-node-id={item.id} fill={fill} height={item.height} rx="var(--ve-node-radius, 6)" stroke={stroke} strokeWidth="1.5" width={item.width} x={item.x} y={item.y} />
       )}
-      {glyph === 'dot' ? null : (
-        <text fill={item.isAccented ? 'var(--ve-accent)' : 'var(--ve-faint)'} fontFamily="var(--ve-font-mono)" fontSize="10" letterSpacing="0.8" style={svgTextOverflowStyle} x={item.x + (compact ? 12 : 20)} y={item.y + 20}>
-          {String(index + 1).padStart(2, '0')}
-        </text>
-      )}
-      <text className="ve-diagram-node-label" fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize={glyph === 'dot' ? 14 : compact ? 14 : 15} fontWeight={item.isAccented ? '700' : '600'} style={svgTextOverflowStyle} textAnchor={glyph === 'dot' ? 'middle' : 'start'} x={textX} y={labelY}>
-        {labelLines.map((line, lineIndex) => (
-          <tspan dy={lineIndex === 0 ? 0 : glyph === 'dot' ? 16 : compact ? 16 : 18} key={`${item.id}-label-${lineIndex}`} x={textX}>
-            {line}
-          </tspan>
-        ))}
+      <text className="ve-diagram-node-label" fill="var(--ve-diagram-ink)" fontFamily="var(--ve-font-body)" fontSize={diagramTypography.labelSize} fontWeight="600" textAnchor={centered ? 'middle' : 'start'} x={textX} y={labelY}>
+        {item.labelLines.map((line, index) => <tspan dy={index ? diagramTypography.labelLeading : 0} key={index} x={textX}>{line}</tspan>)}
       </text>
-      {item.detail && glyph !== 'dot' ? (
-        <text fill="var(--ve-muted)" fontFamily="var(--ve-font-mono)" fontSize={compact ? 8 : 10} style={svgTextOverflowStyle} x={textX} y={detailY}>
-          {detailLines.map((line, lineIndex) => (
-            <tspan dy={lineIndex === 0 ? 0 : 13} key={`${item.id}-detail-${lineIndex}`} x={textX}>
-              {line}
-            </tspan>
-          ))}
+      {item.detailLines.length ? (
+        <text fill="var(--ve-diagram-muted)" fontFamily="var(--ve-font-body)" fontSize={diagramTypography.detailSize} textAnchor={centered ? 'middle' : 'start'} x={textX} y={detailY}>
+          {item.detailLines.map((line, index) => <tspan dy={index ? diagramTypography.detailLeading : 0} key={index} x={textX}>{line}</tspan>)}
         </text>
       ) : null}
     </g>
   );
 }
-
-const svgTextOverflowStyle: React.CSSProperties = { overflowX: 'auto', overflowY: 'auto' };
 
 function escapeHtml(input: string) {
   return input.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
@@ -1076,10 +1064,10 @@ function wrapMermaidLabelText(label: string) {
 
 export function SlideDeck({
   title,
-  eyebrow = 'Slide Deck',
+  eyebrow,
   children,
   orientation = 'vertical',
-  preset = 'oa-design',
+  preset = 'lieflat',
   reviewTools = true,
 }: SlideDeckProps) {
   const isHorizontal = orientation === 'horizontal';
@@ -1100,10 +1088,9 @@ export function SlideDeck({
       // declaration supplies exactly the documented --min-font-size token above.
       style={{ '--min-font-size': '16px' } as React.CSSProperties}
     >
-      <nav className="fixed left-4 top-4 z-40 rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)] bg-[var(--ve-nav-bg)] px-3 py-2 text-xs uppercase tracking-[0.16em] text-[var(--ve-muted)] [font-family:var(--ve-font-mono)]">
-        <span className="text-[var(--ve-accent)]">{eyebrow}</span>
-        <span className="mx-2 text-[var(--ve-faint)]">/</span>
+      <nav aria-label="Presentation title" className="fixed left-4 top-4 z-40 max-w-[calc(100%-2rem)] bg-[var(--ve-nav-bg)] px-3 py-2 text-sm text-[var(--ve-muted)]">
         {title}
+        {eyebrow ? <span className="ml-3">{eyebrow}</span> : null}
       </nav>
       {children}
       {reviewTools ? <AnnotationLayer /> : null}
@@ -1120,53 +1107,48 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
     >
       <div className="grid min-h-0 flex-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.7fr)] lg:items-end">
         <div className="min-w-0 self-start">
-          {kicker ? <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-slide-muted)] [font-family:var(--ve-font-mono)]">{kicker}</p> : null}
-          <h1 className="mt-5 max-w-5xl text-5xl leading-[0.95] tracking-normal sm:text-7xl lg:text-8xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+          <h1 className="max-w-5xl text-5xl leading-[0.95] tracking-normal sm:text-7xl lg:text-8xl [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
             {title}
           </h1>
+          {kicker ? <p className="mt-5 text-base text-[var(--ve-slide-muted)]">{kicker}</p> : null}
         </div>
         <div className="min-w-0 border-l border-[color:var(--ve-slide-rule)] pl-6 text-[clamp(var(--min-font-size),3vw,1.125rem)] leading-8 sm:text-[clamp(var(--min-font-size),2.2vw,1.25rem)]">{children}</div>
-      </div>
-      <div className="mt-10 border-t border-[color:var(--ve-slide-rule)] pt-4 text-xs uppercase tracking-[0.16em] text-[var(--ve-slide-muted)] [font-family:var(--ve-font-mono)]">
-        Generated from MDX/React source
       </div>
     </section>
   );
 }
 
-export function PosterCanvas({ eyebrow = 'Poster', title, stat, footer, preset = 'oa-design', children }: PosterCanvasProps) {
+export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'lieflat', reviewTools = true, children }: PosterCanvasProps) {
   return (
     <main className="min-h-screen bg-[var(--ve-bg)] p-4 text-[var(--ve-text)] sm:p-8 [font-family:var(--ve-font-body)]" data-ve-preset={preset}>
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] items-center justify-center sm:min-h-[calc(100vh-4rem)]">
         <section
-          className="relative grid aspect-[16/10] w-full max-w-[1200px] overflow-hidden rounded-[var(--ve-poster-radius)] border border-[color:var(--ve-poster-rule)] bg-[var(--ve-poster-bg)] p-[5%] text-[var(--ve-poster-text)] shadow-2xl shadow-black/50"
+          className="relative grid w-full max-w-[1200px] rounded-[var(--ve-poster-radius)] border border-[color:var(--ve-poster-rule)] bg-[var(--ve-poster-bg)] p-[5%] text-[var(--ve-poster-text)] lg:aspect-[16/10]"
           data-ve-label={title}
           data-ve-poster
         >
-          <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_minmax(180px,0.42fr)] gap-[5%]">
+          <div className="relative z-10 grid h-full gap-10 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.8fr)] md:gap-[6%]">
             <div className="flex min-w-0 flex-col justify-between">
               <div>
-                <p className="text-[clamp(0.55rem,1.2vw,0.9rem)] uppercase tracking-[0.18em] text-[var(--ve-poster-muted)] [font-family:var(--ve-font-mono)]">
-                  {eyebrow}
-                </p>
-                <h1 className="mt-[4%] max-w-[10ch] text-[clamp(2.8rem,8vw,6rem)] leading-[0.9] tracking-normal [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+                <h1 className="max-w-[14ch] text-balance text-[clamp(2.8rem,8vw,5rem)] leading-[1.04] tracking-normal [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
                   {title}
                 </h1>
+                {eyebrow ? <p className="mt-[4%] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.5] text-[var(--ve-poster-muted)]">{eyebrow}</p> : null}
               </div>
               {footer ? (
-                <p className="max-w-[42ch] border-t border-[color:var(--ve-poster-rule)] pt-[3%] text-[clamp(0.55rem,1.1vw,0.85rem)] uppercase tracking-[0.14em] text-[var(--ve-poster-muted)] [font-family:var(--ve-font-mono)]">
+                <p className="max-w-[42ch] border-t border-[color:var(--ve-poster-rule)] pt-[3%] text-base leading-[1.5] text-[var(--ve-poster-muted)]">
                   {footer}
                 </p>
               ) : null}
             </div>
-            <div className="flex min-w-0 flex-col justify-between border-l border-[color:var(--ve-poster-rule)] pl-[10%]">
+            <div className="flex min-w-0 flex-col justify-between border-t border-[color:var(--ve-poster-rule)] pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-[10%]">
               {stat ? <div className="text-[clamp(4rem,12vw,9rem)] leading-none tracking-normal [font-family:var(--ve-font-mono)]">{stat}</div> : null}
-              <div className="text-[clamp(0.8rem,1.8vw,1.35rem)] leading-[1.35] text-[var(--ve-poster-muted)]">{children}</div>
+              <div className="text-[clamp(1rem,1.8vw,1.35rem)] leading-[1.5] text-[var(--ve-poster-muted)] [&_h2]:mb-3 [&_h2]:text-balance [&_h2]:font-semibold [&_h2]:text-[var(--ve-poster-text)]">{children}</div>
             </div>
           </div>
         </section>
       </div>
-      <AnnotationLayer />
+      {reviewTools ? <AnnotationLayer /> : null}
     </main>
   );
 }

@@ -8,7 +8,7 @@ async function main() {
     const args = process.argv.slice(2);
     const options = parseArgs(args);
     if (!options.file) {
-      console.error('Usage: node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> [--truth brief.md] [--profile page|slides|magazine|poster|video-comp] [--preset mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide|custom] [--json out.json] [--screens dir] [--static-only] [--mechanics-only] [--quiet]');
+      console.error('Usage: node plugins/visual-explainer/scripts/verify/ve-verify.mjs <file.html> [--truth brief.md] [--profile page|slides|magazine|poster|video-comp] [--preset lieflat|algebrica|mono-color|oa-design|mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide|custom] [--json out.json] [--screens dir] [--static-only] [--mechanics-only] [--quiet]');
       process.exit(2);
     }
     if (options.profile !== undefined) assertSupportedProfile(options.profile);

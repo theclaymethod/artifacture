@@ -2,7 +2,7 @@
   "name": "artifacture",
   "version": "0.8.0",
   "type": "module",
-  "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources — with a deterministic design-quality verifier and a multi-model eval harness",
+  "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources \u2014 with a deterministic design-quality verifier and a multi-model eval harness",
   "keywords": [
     "claude-code-plugin",
     "agent-skill"
@@ -40,7 +40,9 @@
     "check": "node evals/check-with-budget.mjs",
     "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/network-policy.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs"
+    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/network-policy.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs",
+    "ve:archify": "node scripts/archify.mjs",
+    "ve:chart": "node scripts/lieflat-chart.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",

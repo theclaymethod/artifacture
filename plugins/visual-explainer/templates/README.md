@@ -1,20 +1,29 @@
-# Template Status Ledger
+# Templates
 
-The `frozen-reference` templates predate the current 207-check verifier and ALL fail it (verified 2026-07-06 with `scripts/verify/ve-verify.mjs`). They are kept as historical reference for hand-authoring patterns only — do NOT copy them as-is. New work goes through the MDX pipeline (SKILL.md Tier 0), whose default is the OA Design preset documented in `references/oa-design.md`; named legacy templates do not define the default visual system. Decorative grid backgrounds are forbidden in both active and frozen references. Hand-authored output must pass ve-verify regardless. Deletion candidates are tracked by the Consumer column; removal is a maintainer decision.
+New artifacts use the MDX pipeline. The default `lieflat` visual language uses Inter, paper gray, charcoal, open spacing, and data marks with readable labels. These standalone starters demonstrate layout and export patterns; run the normal artifact checks after adapting one.
 
-| Template | Status | Consumer | Verified |
-|---|---|---|---|
-| architecture.html | frozen-reference | references/poster.md, references/legacy-html.md | FAIL — contrast, overflow-clip, callout roles |
-| data-table.html | frozen-reference | references/poster.md, references/legacy-html.md | FAIL — contrast, overflow-clip |
-| hyperframes-longform.html | active | references/hyperframes.md, references/legacy-html.md, commands/generate-video.md, commands/render-video.md | not gated (active authoring path) |
-| hyperframes-reel-landscape.html | active | references/reel-patterns.md, references/legacy-html.md, commands/generate-video.md | not gated (active authoring path) |
-| hyperframes-reel.html | active | references/hyperframes.md, references/reel-patterns.md, references/legacy-html.md, commands/generate-video.md | not gated (active authoring path) |
-| mermaid-flowchart.html | frozen-reference | references/poster.md, references/components.md, references/css-patterns.md, references/diagrams-svg.md, references/legacy-html.md | FAIL — overflow-clip, flex shrink refusal |
-| mono-industrial-magazine.html | frozen-reference | references/legacy-html.md | FAIL — theme, type budget, motion, hue leak |
-| mono-industrial-poster.tsx | active | references/poster.md, commands/generate-poster.md | not gated (active authoring path) |
-| mono-industrial-slides.html | frozen-reference | references/poster.md, references/mono-industrial.md, references/legacy-html.md | FAIL — theme, type budget, motion, text size |
-| mono-industrial.html | frozen-reference | references/poster.md, references/components.md, references/mono-industrial.md, references/legacy-html.md | FAIL — type budget, hue leak, theme override |
-| nothing-magazine.html | active | references/nothing.md, references/legacy-html.md | not gated (active authoring path) |
-| nothing.html | active | references/nothing.md, references/legacy-html.md | not gated (active authoring path) |
-| slide-deck.html | frozen-reference | references/legacy-html.md | FAIL — 12 errors: theme, runtime, contrast |
-| svg-diagram-starter.html | frozen-reference | references/legacy-html.md | FAIL — grid, accent count, label masking |
+| Starter | Use |
+| --- | --- |
+| `architecture.html` | Small ordered architecture with a stacked mobile layout |
+| `svg-diagram-starter.html` | Explicit SVG geometry, readable labels, and accessible descriptions |
+| `mermaid-flowchart.html` | ELK layout with pan, zoom, and a readable initial scale |
+| `data-table.html` | Requirement comparisons with a locally scrolling table |
+| `slide-deck.html` | Paper-and-charcoal slides with keyboard navigation |
+| `algebrica.html` | Warm mathematical reading layout, serif headings, and precise SVG |
+| `mono-color.html` | Image-led two-ink editorial composition with editable type |
+| `mono-industrial.html` | Optional restrained technical report |
+| `mono-industrial-slides.html` | Optional technical slides |
+| `mono-industrial-magazine.html` | Optional horizontally paged technical story |
+| `nothing-magazine.html` | Optional cool monochrome magazine |
+| `mono-industrial-poster.tsx` | Fixed 1600 × 1000 poster source |
+| `hyperframes-longform.html` | 1920 × 1080, 60-second narrated explainer |
+| `hyperframes-reel-landscape.html` | 1920 × 1080, 32-second video |
+| `hyperframes-reel.html` | 1080 × 1920, 32-second video |
+
+`algebrica.html` replaces the retired `nothing.html` dashboard. Named styles are opt-ins; they do not redefine the default.
+
+Keep `mono-color.html` beside its `assets/` folder while editing. For single-file delivery, replace its image element with the snippet emitted by `bash plugins/visual-explainer/scripts/embed-media.sh plugins/visual-explainer/templates/assets/repair-mouse.webp "Opened mouse with a removable shell and exposed components"`. Its original repair illustration is included; replace the subject and copy together.
+
+Replace illustrative data and copy together. Preserve units, measurement windows, accessible diagram names, theme controls, and export identifiers. Remove any section the subject does not need. Diagrams keep their text readable and scroll locally when necessary.
+
+Lieflat and Algebrica informed the visual direction; these templates contain original layouts, prose, and geometry. No upstream templates or restricted example assets are bundled. For generated architecture visuals, use the Archify adapter described in the diagram guidance.
