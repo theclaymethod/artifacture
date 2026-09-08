@@ -55,6 +55,14 @@ Diagrams size nodes from their labels and route around unrelated nodes. Flow lay
 
 The default `LieflatChart` offers five forms: `rung-bars`, `unit-field`, `barcode`, `bubble-matrix`, and `threads`. Units preserve counts, date positions preserve intervals, circle areas encode quantities, and paths preserve individual records. Use `DataChart` when a few bars or dots answer the question.
 
+The same 72 illustrative repair records become three more views: arrivals over time, faults by device, and each device’s path to an outcome.
+
+![Daily arrivals in June, plotted by date with the busiest day annotated](docs/img/examples/chart-barcode.png)
+
+![A bubble matrix compares cable, switch, battery, and circuit faults across four device types](docs/img/examples/chart-bubble-matrix.png)
+
+![Individual threads connect each device to its fault and repair outcome](docs/img/examples/chart-threads.png)
+
 Edit [lieflat-chart.json](examples/visual-explainer-mdx/lieflat-chart.json) and export it:
 
 ```bash
@@ -95,6 +103,8 @@ npm run ve:archify -- validate architecture examples/visual-explainer-mdx/artifa
 npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifacture.architecture.json dist/architecture.html --json
 ```
 
+![Artifacture’s export pipeline rendered as an Archify architecture diagram](docs/img/examples/archify.png)
+
 The wrapper defaults to showcase quality and preserves Archify's diagnostics and atomic delivery. Set `meta.visual_preset` to `editorial` for paper and charcoal; other Archify styles remain available. Keep the JSON beside the HTML. `npm run ve:archify -- path` locates the installed schemas and examples.
 
 <a id="visual-language"></a>
@@ -114,6 +124,34 @@ Set `preset` on `ExplainerShell`, `SlideDeck`, `PresentationDeck`, or `PosterCan
 Artifacture's original themes and components draw on [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), and [Mono Color](https://github.com/yanliudesign/mono-color-skill). They do not bundle the references' images or noncommercial source code. [Provenance and licenses](tools/visual-sources.json).
 
 Typography follows [Pierrick Calvez's guidance](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography) on hierarchy, text measure, and spacing. See the [authoring rules](plugins/visual-explainer/references/typography.md) and [Algebrica](docs/img/examples/algebrica.png), [Mono Color](docs/img/examples/mono-color.png), and [diagram](docs/img/examples/diagram.png) previews.
+
+## Pages, decks, and posters
+
+Open an image for a closer look. Each format has an [editable example](examples/README.md).
+
+| Reading page | Slide deck |
+|---|---|
+| [![A long-form reading page with diagrams and supporting detail](docs/img/examples/page.png)](docs/img/examples/page.png) | [![A slide deck with large type and a focused argument](docs/img/examples/deck.png)](docs/img/examples/deck.png) |
+
+| Horizontal magazine | Presentation with drill-down details |
+|---|---|
+| [![An editorial magazine spread](docs/img/examples/magazine.png)](docs/img/examples/magazine.png) | [![A fixed-stage presentation with supporting detail](docs/img/examples/presentation-deck.png)](docs/img/examples/presentation-deck.png) |
+
+| Poster | Interactive explanation |
+|---|---|
+| [![A typographic poster](docs/img/examples/poster.png)](docs/img/examples/poster.png) | [![An interactive explanation with answer controls](docs/img/examples/quiz.png)](docs/img/examples/quiz.png) |
+
+### Diagrams that unfold
+
+![A cache-miss walkthrough with playback and step controls](docs/img/examples/animated-diagram.png)
+
+[Author a walkthrough](examples/visual-explainer-mdx/animated-diagram.mdx) to reveal a sequence one step at a time.
+
+### Two other visual languages
+
+| Algebrica | Mono Color |
+|---|---|
+| [![Algebrica uses serif text and geometry to explain vector projection](docs/img/examples/algebrica.png)](docs/img/examples/algebrica.png) | [![Mono Color combines an opened mouse photograph with asymmetric typography](docs/img/examples/mono-color.png)](docs/img/examples/mono-color.png) |
 
 ## Verify and revise
 
