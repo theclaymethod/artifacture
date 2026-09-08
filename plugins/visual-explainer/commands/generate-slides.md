@@ -20,6 +20,6 @@ Read `references/slide-patterns.md` only for custom mechanics, magazine pacing, 
 
 Author MDX/TSX beside `~/.agent/diagrams/<slug>.html` (`<slug>-magazine.html` in magazine mode), export, and complete `references/verification.md`. Open the result and report source, HTML, final report, and any incomplete output.
 
-- `--poster-export`: also export individual slides as PNGs using `references/poster.md` → "Slide decks as per-slide posters". Check for `poster`; if unavailable, report that the requested PNG export is incomplete. Save to `~/.agent/diagrams/<slug>/slides/`.
+- `--poster-export`: also export individual slides as PNGs using `references/poster.md` → "Slide decks as per-slide posters". Use browser capture or the available `poster` path; report any export that cannot be completed. Save to `~/.agent/diagrams/<slug>/slides/`.
 - `--pdf`: use `node <skill-dir>/scripts/export-slides-pdf.mjs <input.html> <output.pdf>`. The exporter captures each slide separately. It requires Playwright and Chromium; see `references/slide-patterns.md` → "PDF export" for setup and flags. Report missing dependencies instead of silently dropping the PDF.
 - `--no-ask`: use the request and documented defaults without optional clarification.

@@ -23,9 +23,9 @@ Credit: this mode adapts Geoffrey Litt's "explain-diff" gist: https://gist.githu
 4. Build a fact sheet with cited file paths, function names, and claims before authoring.
 
 **Authoring contract.**
-Read `cards/explain-diff.md`. Write MDX, no top-level tabs. Use a long-page format with a table of contents and four sections: Background, Intuition, Code, Quiz. Use `DiffBlock`, `CodeBlock`, and `Quiz`; use `DiagramCanvas`/`MermaidBlock` for 1-2 reusable diagram families and reuse them across sections with example data.
+Read `cards/explain-diff.md`. Write MDX, no top-level tabs. Use a long page that establishes the old behavior, explains the change, shows the relevant code, and checks understanding. Name sections for their content; add a table of contents when the length warrants it. Use `DiffBlock`, `CodeBlock`, and `Quiz`; use `DiagramCanvas`/`MermaidBlock` for 1-2 reusable diagram families and reuse them across sections with example data.
 
-Prose bar: clarity and flow of Martin Kleppmann, classic style, smooth transitions. Remove prose that adds no explanation; use the optional companion route only when requested.
+Explain the changed behavior through a concrete input and outcome. Define unfamiliar terms where they enter the explanation; remove sentences that repeat the code or heading. Use the optional companion route only when requested.
 
 Output path:
 

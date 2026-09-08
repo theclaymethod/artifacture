@@ -1,15 +1,25 @@
-# Explain-Diff Card
-Use `ExplainerShell`, `Section`, `DiagramCanvas`/`MermaidBlock`, `DiffBlock`, `Quiz`. Arc: context, intuition, code, quiz.
+# Explain a diff
+
+Connect the old behavior, the change, and a concrete outcome. Use `DiffBlock` for the changed code and `Quiz` only when a question helps the reader check their understanding.
+
+Illustrative example:
+
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
-import { DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Why This Diff Matters" summary="Replay moves from blind retry to idempotent recovery.">
-  <Section title="Behavior">
-    <DiagramCanvas nodes={[{id:'old',label:'Retry loop',detail:'double-charge risk'},{id:'new',label:'Lookup replay',detail:'idempotent',accent:true}]} edges={[{from:'old',to:'new',label:'safer'}]} />
+{/* REPO = Artifacture checkout; see SKILL.md "Resolve the runtime" */}
+import { DiffBlock, ExplainerShell, Quiz, Section } from 'REPO/visual-explainer-mdx/components';
+
+<ExplainerShell title="Cached records return before storage is called">
+  <Section title="The new branch handles a cache hit">
+    <p>Previously every request read storage. The added lookup returns a cached record when one exists; a miss keeps the original path.</p>
+    <DiffBlock before={`return storage.get(key)`} after={`const cached = await cache.get(key)\nif (cached !== null) return cached\nreturn storage.get(key)`} language="ts" />
   </Section>
-  <Section title="Intuition"><p>A timeout can hide success; lookup makes replay reconciliation.</p></Section>
-  <Section title="Code"><DiffBlock before={`await provider.capture(invoice)\nmarkPaid(invoice.id)`} after={`const charge = await provider.find(invoice.key)\nif (!charge) await provider.capture(invoice)\nmarkPaid(invoice.id)`} language="ts" /></Section>
-  <Section title="Quiz"><Quiz questions={[{q:'Why lookup first?',options:[{text:'Prevents duplicates',correct:true,why:'Timeout may hide success.'},{text:'Speeds rendering',why:'Backend recovery.'}]}]} /></Section>
+  <Section title="Check the miss path">
+    <Quiz questions={[{q:'What happens when the cache returns null?',options:[
+      {text:'The request reads storage.',correct:true,why:'The early return is skipped.'},
+      {text:'The request returns null.',why:'Null falls through to storage.get(key).'}
+    ]}]} />
+  </Section>
 </ExplainerShell>
 ```
-Custom HTML -> `references/legacy-html.md`.
+
+Add a diagram through `cards/web-diagram.md` when relationships need explaining. Follow `commands/explain-diff.md` for source inspection and delivery.

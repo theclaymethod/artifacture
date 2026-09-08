@@ -1,12 +1,12 @@
 # Authoring charts
 
-Lieflat is Artifacture's default approach to visual data stories: let observations, units, and relationships shape the page. A field of devices can make a count tangible; individual paths can reveal outcomes that an aggregate hides. Paper, type, and color support that explanation.
+Use `LieflatChart` to show counts, timing, intersections, or individual paths. Choose the form from the reader's question and the available records.
 
-The original `LieflatChart` component implements five families inspired by [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts). This is a bounded implementation, not upstream's full catalog. Its noncommercial source and reference images are not bundled.
+Artifacture implements five original chart families inspired by [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts). It does not bundle upstream's full catalog, noncommercial source, or reference images.
 
-## Choose what the reader should see
+## Choose a form
 
-Start with the observation, the reader's question, and the available evidence. Choose a richer form when its encoding explains something; use a simple comparison when the dataset is sparse. Never invent records to fill a pattern.
+Never invent records to fill a pattern. Use a simple comparison when the evidence does not support a record-level view.
 
 | Question | Family | What the marks mean |
 |---|---|---|

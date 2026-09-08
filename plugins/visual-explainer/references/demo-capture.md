@@ -2,9 +2,7 @@
 
 When a visual explainer is describing a **running UI feature** (a form flow, an interaction pattern, a live dashboard), a short silent loop of the UI in action conveys more than a still screenshot or a hand-drawn diagram. This reference covers how to capture one and embed it self-contained in the HTML output.
 
-**This is a supplementary modality**, like surf-cli (generative illustrations) and poster-ai (structured graphics). Use it when the feature is genuinely interactive or temporal. Skip it for static concepts — Mermaid or a still screenshot is better.
-
----
+Use a recording when time or interaction is part of the explanation. Use a still image or native diagram for static relationships.
 
 ## When to use
 
@@ -16,12 +14,10 @@ When a visual explainer is describing a **running UI feature** (a form flow, an 
 - Showing before-and-after of a UI change (two clips side by side)
 
 **Skip it for:**
-- Architecture, data flow, schemas (use Mermaid)
+- Architecture, data flow, schemas (use the diagram route)
 - Code diffs (use HTML + syntax highlighting)
 - Static screenshots (use `<img>` directly — no need to encode a video)
 - Flows longer than ~20 seconds (base64 inflation makes the HTML sluggish; link externally or use Vercel share instead)
-
----
 
 ## Format choice: webm over gif
 
@@ -29,15 +25,13 @@ Always encode to `webm` (VP9). For equivalent visual quality, a 5-second webm is
 
 Use gif only when the target viewer (Obsidian, certain Markdown renderers, LinkedIn previews) refuses to inline `<video>`. For self-contained HTML pages — the primary visual-explainer output — webm is always the right answer.
 
----
-
 ## Capture paths
 
-Pick whichever is available. Both end at the same place: a webm file on disk.
+Pick whichever is available. Both produce a WebM file on disk.
 
 ### Path A — Playwright MCP (preferred)
 
-Playwright MCP ships with Claude Code's browser tools. It has no native video encoder, so the pattern is **screenshot-per-beat → ffmpeg stitch**. Cheap and deterministic.
+When the available browser tool captures screenshots but not video, take one frame per settled step and stitch them with FFmpeg.
 
 ```
 1. mcp__...__browser_navigate         → the app URL (or file:// for a local page)
@@ -75,13 +69,7 @@ agent-browser record stop
 agent-browser close
 ```
 
-The output is VP8 by default. Quality is lower than Path A (continuous video of a slow demo is wasteful), but setup is trivial. Prefer Path A for anything that ships as an explainer; use Path B for one-off exploratory captures.
-
-### Path C — `/expect` skill
-
-The expect skill is built for adversarial verification, not curated capture. It records internally but doesn't expose the artifact for embed. **Don't use it for this workflow** — mentioned only so the distinction is clear.
-
----
+The output is VP8 by default. Inspect its quality at the delivery size; use selected frames when pauses would make a continuous recording too long.
 
 ## Encode
 
@@ -95,8 +83,6 @@ bash {{skill_dir}}/scripts/frames-to-webm.sh \
 ```
 
 The script uses VP9 with `-crf 32 -b:v 0`, caps width at 1200px, and keeps a 4:2:0 pixel format for universal browser compatibility. For a 6-frame UI demo at 1200×800, expect a file under 300KB.
-
----
 
 ## Embed
 
@@ -119,8 +105,6 @@ Drop that markup wherever the demo belongs in the explainer — typically inside
 
 **Size budget.** Keep the webm under 2MB before base64 encoding. Above that, inline data URIs start to make the HTML itself feel sluggish in the browser. If you're over budget, the fix is always one of: fewer frames, lower fps, narrower scale, or a shorter demo.
 
----
-
 ## Aesthetic notes
 
 Match the demo's visual presentation to the page's aesthetic direction.
@@ -132,10 +116,8 @@ Match the demo's visual presentation to the page's aesthetic direction.
 - **Paper/ink:** Warm cream frame, no border, optional hand-drawn annotation overlay (SVG) pointing at the focal element.
 - **IDE-inspired / terminal:** 0–4px corners, monospace caption, optional filename-style chrome above (`demo.webm`).
 
-Every aesthetic: the video should feel embedded, not glued on. If it looks like an afterthought, shrink the max-width by 100–200px and give it more breathing room rather than framing it with shadows.
-
----
+Align the recording with nearby text or figures. Adjust its width and spacing after inspecting the page; do not add decorative framing to compensate for poor placement.
 
 ## When the demo adds nothing
 
-After capturing, look at the webm honestly: does it explain something a single screenshot wouldn't? If the answer is no, **drop it**. An inline video that shows the cursor moving to a button and clicking it is worse than a still screenshot with a labeled arrow. Save demos for cases where time and interaction are the point.
+After capture, compare the recording with a single still. Keep the recording only if it explains a change or interaction the still cannot show.

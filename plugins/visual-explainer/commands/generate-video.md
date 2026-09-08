@@ -5,27 +5,25 @@ argument-hint: "<topic or outline> [--style=long-form|reel] [--duration=Ns] [--v
 
 # /generate-video
 
-Generate an explainer video from scratch. Wraps Hyperframes (local HTML → MP4 renderer) with specialized modes for explainer content.
+Turn a topic, outline, or source document into an MP4 with Hyperframes.
 
 **Input:** a topic, outline, or source document.
 **Output:** one MP4 in `~/.agent/videos/<slug>.mp4` plus 3 keyframe PNGs for review.
-**Cost:** medium — render wall-clock is typically 30s–5min depending on duration and quality.
+Rendering typically takes 30 seconds to 5 minutes, depending on duration and quality.
 
-**Authoring contract.** Prefer React TSX composition source. Write the editable Hyperframes composition as `.tsx`, register a synchronous paused GSAP timeline on `window.__timelines["<id>"]`, then export static generated HTML with:
+Write the composition in TSX, register a paused GSAP timeline synchronously on `window.__timelines["<id>"]`, and export static HTML:
 
 ```bash
 npm run ve:export-static -- <composition.tsx> --out ~/.agent/videos/<slug>/index.html
 ```
 
-The generated `index.html` is the Hyperframes input artifact, not the source of truth. Apply revisions to the TSX composition and re-export before lint, validate, or render. The legacy `templates/hyperframes-*.html` files are reference material for timing, layout, and GSAP structure; do not hand-write final Hyperframes HTML unless the React static export path is blocked and you explicitly report that fallback.
-
----
+Hyperframes renders `index.html`; revisions belong in TSX. Re-export before linting, validating, or rendering. Use `templates/hyperframes-*.html` for timing and GSAP examples. Hand-write final HTML only if React static export is blocked, and report the fallback.
 
 ## Styles
 
-Two styles, chosen by `--style`, the request, or the defaults below.
+Honor `--style` or the request; otherwise use long-form.
 
-### `long-form` (default when unsure)
+### `long-form`
 
 - **Aspect:** 16:9 landscape, 1920×1080
 - **Duration:** 60–180 seconds
@@ -35,7 +33,7 @@ Two styles, chosen by `--style`, the request, or the defaults below.
 - **Animations:** Fade-ups, count-ups, cross-fades between scenes, optional shader transitions at major beat boundaries
 - **Audio:** TTS narration over dwell scenes; optional soft bed
 
-### `reel` (supports two aspect ratios)
+### `reel`
 
 - **Aspect:** `--aspect=9:16` (default, vertical 1080×1920) OR `--aspect=16:9` (landscape 1920×1080)
 - **Duration:** 30–60 seconds (default 45s)
@@ -48,8 +46,6 @@ Two styles, chosen by `--style`, the request, or the defaults below.
 - **Animations:** Kinetic typography (word-by-word), progressive diagram reveal, Ken Burns on imagery, shader transitions at beat boundaries. 16:9 MECHANISM beats use native split-screen (before/after side-by-side) instead of vertical stacks.
 - **Audio:** TTS narration with burned-in captions; safe zones adapt (9:16 bottom 200px for phone chrome and caption clearance, 16:9 bottom 140px for a centered caption pill)
 - **Read:** `references/reel-patterns.md` § Two aspect ratios — authoritative guide for picking between 9:16 and 16:9 and the layout rules that differ between them.
-
----
 
 ## Workflow
 
@@ -65,13 +61,13 @@ bash {{skill_dir}}/scripts/hyperframes-doctor.sh
 
 If this exits non-zero, **abort** and forward the install hints to the user. Do not attempt to render.
 
-The doctor also probes the upstream `/hyperframes` + `/hyperframes-cli` + `/gsap` skills and warns (non-fatal) if missing. When present, delegate vocab and plumbing to them. When absent, author directly from `references/hyperframes.md`, `references/gsap-rules.md`, and `references/reel-patterns.md`. See `references/hyperframes.md` → "Delegation boundary" for what lives where.
+Missing upstream skills produce non-fatal warnings. When available, use `/hyperframes`, `/hyperframes-cli`, and `/gsap` for their runtime and motion guidance. Otherwise use the local references. See `references/hyperframes.md` → "Delegation boundary".
 
 ### 3. Author the composition
 
-Prefer the upstream `/hyperframes` skill's vocab (motion feel → ease mapping, caption tone typography, transition energy, highlight modes, TTS voice matrix, `class="clip"` timed-element contract) when it's installed. Fall back to our refs below otherwise. Recipe, aesthetic, and reel grammar are always ours.
+Use the upstream `/hyperframes` guidance for easing, captions, transitions, voices, and `class="clip"` timing when installed. Artifacture's references define the composition and reel structure.
 
-- **Long-form:** Author a TSX composition using `templates/hyperframes-longform.html` as reference material. Build one scene per major beat from the outline. Apply unslop to all prose copy before placing it in the composition source.
+- **Long-form:** Author a TSX composition using `templates/hyperframes-longform.html` as reference material. Build one scene per major beat from the outline. Edit the script before placing it in the composition; use Unslop when requested and available.
 - **Reel:** Author a TSX composition using `templates/hyperframes-reel.html` or `templates/hyperframes-reel-landscape.html` as reference material. Compress the outline to HOOK → PROBLEM → CONTEXT → MECHANISM → PROOF → RESOLUTION → CTA. Every scene is a single claim.
 
 Follow the hard rules in `references/gsap-rules.md`:
@@ -88,7 +84,7 @@ npm run ve:export-static -- ~/.agent/videos/<slug>/<slug>.tsx --out ~/.agent/vid
 
 ### 4. Narration
 
-If narration is in scope (default for reel, optional for long-form):
+Include narration unless the request or `--no-narration` omits it:
 
 ```bash
 npx hyperframes tts "Your script here, written as one paragraph." \
@@ -96,7 +92,7 @@ npx hyperframes tts "Your script here, written as one paragraph." \
   --output ~/.agent/videos/<slug>/narration.wav
 ```
 
-Voice menu: ship with Hyperframes. If the user hasn't picked, ask via AskUserQuestion (brief: voice gender + tone). Default `af_nova`.
+Use the requested voice or `af_nova`. Consult Hyperframes' current voice menu if the brief needs another voice.
 
 For reel: generate captions from narration:
 ```bash
@@ -134,9 +130,9 @@ bash {{skill_dir}}/scripts/extract-keyframes.sh \
   ~/.agent/videos/<slug>/keyframes
 ```
 
-Show the 3 keyframes to the user (via `open`, embedding in a markdown response, or any available preview mechanism). Ask: "Ready for the final render, or anything to adjust?" Don't proceed without confirmation — the final render is expensive.
+Inspect the 3 keyframes and fix clipping, illegible text, or incorrect content before the final render. Show them through the available preview. Continue when final rendering is already authorized; resolve any required approval without repeating consent from the session.
 
-### 8. Final render (on approval)
+### 8. Final render
 
 ```bash
 npx hyperframes render \
@@ -154,15 +150,13 @@ Report:
 - Final MP4 path
 - Duration / file size / resolution
 - Thumbnail (first keyframe) inline if the surface supports it
-- Offer `/share` if the user wants a hosted URL (note: `share.sh` currently handles HTML; videos need a different hosting path)
-
----
+- If hosting was requested, use a video-capable destination; `share.sh` handles HTML only
 
 ## Flags
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--style=<long-form\|reel>` | ask | Required if ambiguous |
+| `--style=<long-form\|reel>` | long-form | Honor an explicit reel request |
 | `--aspect=<9:16\|16:9>` | 16:9 (long-form), 9:16 (reel) | Only meaningful for `--style=reel` (long-form is always 16:9) |
 | `--duration=<Ns>` | 60 (long-form), 45 (reel) | Enforced ranges 30–180s |
 | `--voice=<name>` | `af_nova` | Hyperframes TTS voice |
@@ -170,14 +164,12 @@ Report:
 | `--no-captions` | off | Reel only; default is captions on |
 | `--quality=<draft\|standard\|high>` | standard | Final-pass quality |
 | `--fps=<24\|30\|60>` | 30 | `60` doubles render time |
-| `--no-ask` | off | Skip AskUserQuestion; use defaults |
-
----
+| `--no-ask` | off | Use defaults for optional choices |
 
 ## References
 
 - `references/hyperframes.md` — runtime, constraints, CLI flags
 - `references/gsap-rules.md` — GSAP constraints for Hyperframes
 - `references/reel-patterns.md` — reel format rules (authoritative for reel style)
-- `references/clarify.md` — when to ask via AskUserQuestion
+- `references/clarify.md` — when a choice needs clarification
 - `templates/hyperframes-longform.html`, `templates/hyperframes-reel.html` — starter compositions

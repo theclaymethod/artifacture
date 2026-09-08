@@ -1,8 +1,8 @@
 import { DecisionMatrix, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
 
-<SlideDeck orientation="horizontal" title="What a cache remembers" preset="algebrica" reviewTools={false}>
-  <Slide title="A fast answer can be an old answer">
-    <p>A cache stores a previous result so a later request can avoid repeating work. The useful question is how long that result remains valid.</p>
+<SlideDeck orientation="horizontal" title="Cache freshness policies" preset="algebrica" reviewTools={false}>
+  <Slide title="How long is a cached result valid?">
+    <p>A cache reuses an earlier result. Its freshness policy determines when a request must obtain a new one.</p>
   </Slide>
   <Slide title="Three ways to define freshness">
     <DecisionMatrix rows={[
@@ -11,7 +11,7 @@ import { DecisionMatrix, Slide, SlideDeck } from '../../visual-explainer-mdx/com
       {Policy:'Versioned keys',Rule:'Use a new key for a new version',Tradeoff:'Old entries still need eventual cleanup.'}
     ]} />
   </Slide>
-  <Slide title="Choose from the cost of staleness">
-    <p>A generated image can tolerate a different freshness policy from an account balance. Start with what the reader or caller needs to be true, then decide what the cache is allowed to remember.</p>
+  <Slide title="Choose the acceptable staleness">
+    <p>A generated image and an account balance may tolerate different periods of staleness. Set that requirement before choosing expiry, invalidation, or versioned keys.</p>
   </Slide>
 </SlideDeck>

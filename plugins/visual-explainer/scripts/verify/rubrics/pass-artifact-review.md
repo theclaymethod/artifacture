@@ -22,8 +22,8 @@ a defect.
    decorative numbering, and metric tiles that add no information or interaction.
 4. **Mobile usability:** Where mobile applies, is content readable and usable
    without clipping, obstruction, or cramped interaction?
-5. **Shipping quality:** Does the artifact feel coherent and deliberate enough
-   to deliver, without template residue or unresolved visual defects? Read diagram
+5. **Shipping quality:** Are the content, layout, and interactions ready to deliver, without
+   template residue or unresolved visual defects? Read diagram
    labels at the displayed size; trace every connector and verify that chart
    scales, missing values, and annotations preserve the source data.
 

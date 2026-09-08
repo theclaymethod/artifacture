@@ -1,7 +1,7 @@
 import { CodeBlock, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="Count a cache hit without changing its value" summary="A tiny lookup function shows why presence and truthiness are different questions." preset="algebrica" reviewTools={false}>
-  <Section title="Keep the branch explicit">
+<ExplainerShell title="Recognize a cached zero" summary="For a map of numbers, undefined means missing; zero is a valid result." preset="algebrica" reviewTools={false}>
+  <Section title="Test the missing-value sentinel">
     <CodeBlock language="ts" filename="Illustrative cache.ts" highlightLines={[3,4]} annotations={[
       {line:3,note:'Map.get returns undefined for a missing key in this example.'},
       {line:4,note:'A stored zero still counts as a hit.'}
@@ -11,6 +11,6 @@ export function read(key: string) {
   const found = value !== undefined;
   return { found, value };
 }`} />
-    <p>The return value keeps presence separate from data. A caller can display zero without issuing another read. Because this map accepts numbers only, undefined remains an unambiguous missing-value sentinel.</p>
+    <p>The caller receives both found and value, so a cached zero needs no further read. Because the map accepts only numbers, undefined unambiguously means the key is missing.</p>
   </Section>
 </ExplainerShell>

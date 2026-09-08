@@ -1,31 +1,19 @@
-# Design-system registry (repo-local fallback)
+# Local design-system registry
 
-This directory is the LOWEST-priority location the design-system loader
-searches. Design systems are user-owned — and usually private — artifacts
-that live outside the repo:
+The exporter searches these directories in order and uses the first matching slug:
 
-1. `$ARTIFACTURE_DESIGN_DIR` (explicit override)
-2. `~/.artifacture/design-systems/` (user-global registry — the recommended
-   home for your systems, especially brand tokens that must not be published)
-3. `<repo>/design-systems/` (this directory — repo-local fallback)
+1. `$ARTIFACTURE_DESIGN_DIR`
+2. `~/.artifacture/design-systems/`
+3. `<repo>/design-systems/` — this directory
 
-First hit wins. If `~/.artifacture` is itself a clone of this repo, locations
-2 and 3 are the same directory; the loader dedupes the search list, and this
-directory's contents are gitignored (see the repo `.gitignore`) so
-learned/private systems can never be committed by accident. This repo
-intentionally ships NO systems here — the repo ships the mechanism, your
-registry holds the brand.
+Store private brand systems in your user registry. This repository includes only this README and ignores the other contents of `design-systems/`. If `~/.artifacture` is the repository checkout, the second and third paths coincide; the loader searches that directory once.
 
-Each system is a directory named by its slug:
+Each system contains:
 
 ```
 design-systems/<slug>/
-  tokens.css      --ve-* custom properties in a :root { ... } block
-  manifest.json   name, description, source provenance, fonts, notes
+  tokens.css      --ve-* properties in a :root block
+  manifest.json   name, description, provenance, fonts, rules
 ```
 
-For example, a private `acme-brand/tokens.css` would set `--ve-bg`,
-`--ve-text`, `--ve-accent`, the three `--ve-font-*` stacks, and friends; its
-`manifest.json` records where the tokens were learned from and the brand's
-hard rules. Draft one from your own sources with `npm run ve:learn` and refine
-it per `docs/design-systems.md`.
+`tokens.css` defines surfaces, text, accents, font stacks, and the other shared roles. `manifest.json` records the source and usage rules. Run `npm run ve:learn` to extract a draft, then review the rendered result as described in [External design systems](../docs/design-systems.md).

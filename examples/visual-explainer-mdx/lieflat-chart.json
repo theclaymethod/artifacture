@@ -1,6 +1,6 @@
 {
-  "title": "Lamps filled the repair bench",
-  "description": "Seventy-two devices arrived in June. Each rung counts one device.",
+  "title": "Lamps were most common",
+  "description": "Device types among 72 arrivals in June.",
   "source": { "label": "Illustrative workshop records" },
   "spec": {
     "kind": "rung-bars",

@@ -1,8 +1,8 @@
-# Section Contract — Sub-Agent Fan-Out Protocol
+# Independent HTML sections
 
 Use this contract only for independent raw HTML sections when the MDX/TSX route is blocked. Ordinary source components use separate file ownership and parent integration. This compatibility protocol preserves typed JSON fragments for existing specialist workers.
 
-This file is the protocol every sub-agent and the orchestrator must follow. If you are a sub-agent reading this, **you produce one section, not a full page.** If you are the orchestrator, you publish the page shell, dispatch sub-agents in parallel, dedup imports, and run browser verification.
+Workers produce one section. The parent owns the page shell, dependencies, integration, and browser verification.
 
 ## Contents
 
@@ -24,7 +24,7 @@ This file is the protocol every sub-agent and the orchestrator must follow. If y
 | Parallel agents are unavailable | Build sequentially using the same fragment contract. |
 | User explicitly requests `--no-parallel` | Sequential, regardless of section count. Use when debugging stitch issues. |
 
-Fan-out has overhead: spawning sub-agents costs time and context. It pays off only when the sections are independent enough to build in parallel and dense enough that sequential generation would be slow.
+Parallelize substantial, independent sections; build dependent summaries after their source sections.
 
 ---
 
@@ -47,7 +47,7 @@ Every sub-agent returns a single JSON object as its final message. Do not return
 | Field | Required | Meaning |
 |---|---|---|
 | `role` | yes | One of: `hero`, `diagram`, `table`, `dashboard`, `prose`. Identifies which sub-agent produced this. |
-| `section_html` | yes | A single `<section>` element (or `<header>` for the metadata band). All classes prefixed with `.ve-{role}__`. Source excerpts are HTML-escaped. No `<style>`, `<script>`, `<link>`, or `<head>`-level tags. |
+| `section_html` | yes | A single `<section>` element (or `<header>` for the introduction). All classes prefixed with `.ve-{role}__`. Source excerpts are HTML-escaped. No `<style>`, `<script>`, `<link>`, or `<head>`-level tags. |
 | `scoped_css` | yes | All CSS rules used in `section_html`. Every selector must start with `.ve-{role}` or be a descendant of one. No bare element selectors (`p { ... }`), no global resets, no `:root` overrides. |
 | `fonts_needed` | yes | Array of font-family names this section requires *beyond* the active preset's fonts. The parent approves extra fonts from the selected preset. Empty array `[]` if none. |
 | `libraries_needed` | yes | Array of library names this section requires. Currently supported: `"mermaid"`, `"chart.js"`, `"anime"`. Empty array `[]` if none. |
@@ -92,7 +92,7 @@ Every sub-agent returns a single JSON object as its final message. Do not return
 | `diagram` | `ve-diagram-builder` | `diagram-design`, `diagrams-svg`, `diagram-tokens`; add Pretext or libraries only when routed | One accessible inline-SVG diagram by default, or a Mermaid fallback with full zoom/pan chrome. |
 | `table` | `ve-table-builder` | tokens, components → "Data table" | A real `<table>` with sticky header, status colors on values. |
 | `dashboard` | generic worker with a `dashboard` role brief | tokens, components → "Module strip", "Segmented progress bar", "Bracketed system message" | A factual comparison or chart; no decorative metric tiles. |
-| `prose` | generic worker with a `prose` role brief | tokens, components → "Lead paragraph", "Pull quote" | Lead paragraphs, callouts, pull quotes. Run `$unslop` when available; otherwise apply `quality.md`. |
+| `prose` | generic worker with a `prose` role brief | tokens, components → "Lead paragraph", "Pull quote" | Lead paragraphs, callouts, pull quotes. Edit for accuracy and necessity; invoke Unslop only when requested and available. |
 
 If a section doesn't fit any role, the orchestrator builds it itself rather than inventing a new role. New roles require updating this contract.
 
@@ -104,7 +104,7 @@ If a section doesn't fit any role, the orchestrator builds it itself rather than
 
 **Library dedup.** If three diagram sub-agents each return `libraries_needed: ["mermaid"]`, the orchestrator emits the Mermaid script tag and init code exactly once. Each diagram's escaped source goes into its own hidden `<pre class="ve-diagram__source" data-id="...">` element, and the init code walks every match with `textContent`.
 
-**CSS dedup.** Sub-agents may legitimately repeat token-using CSS (e.g., two diagrams both styling `.ve-diagram__hint`). The orchestrator concatenates `scoped_css` blocks in order. Browser CSS deduplication handles the rest — last-rule-wins is acceptable because the rules are identical. Do not attempt to deduplicate at the rule level.
+**CSS dedup.** Sub-agents may legitimately repeat token-using CSS (e.g., two diagrams both styling `.ve-diagram__hint`). The orchestrator concatenates `scoped_css` blocks in order. Identical repeated rules are harmless; conflicting rules need distinct section namespaces. Do not attempt to deduplicate at the rule level.
 
 ---
 
@@ -122,4 +122,4 @@ If a section doesn't fit any role, the orchestrator builds it itself rather than
 - Calls to external APIs
 - Inline `on*` event handlers, `javascript:` URLs, `srcdoc`, or unescaped source excerpts
 
-If you need something the contract doesn't allow, return your best fragment with the constraint flagged in `notes`. The orchestrator decides whether to extend the contract or work around the limitation.
+If the section needs an unsupported capability, return a compliant fragment and name the limitation in `notes`. The parent decides how to resolve it.

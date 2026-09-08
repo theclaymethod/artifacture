@@ -2,7 +2,7 @@
   "name": "artifacture",
   "version": "0.8.0",
   "type": "module",
-  "description": "Agent skill that generates verified, self-contained HTML visual explainers from MDX/React sources \u2014 with a deterministic design-quality verifier and a multi-model eval harness",
+  "description": "Charts, diagrams, and presentations from editable source, exported as standalone HTML.",
   "keywords": [
     "claude-code-plugin",
     "agent-skill"

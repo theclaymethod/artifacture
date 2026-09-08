@@ -1,6 +1,6 @@
 # Diagram design routing
 
-This is the canonical selection contract for visual-explainer diagrams. It adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to Artifacture's Lieflat-inspired default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
+Choose a diagram by the relationship it must explain. This reference adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to Artifacture's Lieflat-inspired default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
 
 ## Contents
 
@@ -34,7 +34,7 @@ pattern=<name|none>; type=<name>; format=<format>; size=<preset>; detail=<level>
 
 ## Semantic patterns
 
-Use one primary pattern only when its trigger matches.
+Use one primary pattern when the source matches its trigger.
 
 | Behavioral trigger | Pattern | Nearest visual type | Tighter budget |
 |---|---|---|---|
@@ -116,7 +116,7 @@ Load [`diagrams-svg.md`](./diagrams-svg.md) for shared geometry. Type-specific f
 
 ## Output dials
 
-Apply these before layout because they change the canvas, type ramp, density, and wording.
+Choose these before layout; they determine canvas size, text size, density, and wording.
 
 | Dial | Options | Default |
 |---|---|---|
@@ -146,7 +146,7 @@ Use Mermaid when one of these applies:
 - The required graph grammar is unsupported by the routes above and automatic packing improves comprehension.
 - An existing Mermaid source must remain editable in that format.
 
-Mermaid is a fallback renderer, not a separate visual type. Apply the same type, pattern, audience, focal, accessibility, and verification decisions around it.
+Mermaid is a fallback renderer, not a separate visual type. Apply the same type, pattern, audience, emphasis, accessibility, and verification rules around it.
 
 ## Complexity budgets
 
@@ -175,7 +175,7 @@ Mermaid is a fallback renderer, not a separate visual type. Apply the same type,
 | Annotation callouts | 2 |
 | Walkthrough steps / packets in motion | 8 / 1 |
 
-When a type exceeds its limit, apply this fixed degrade ladder in order:
+When a type exceeds its limit, simplify in this order:
 
 1. Remove decorative cells and source chrome.
 2. Merge exact duplicates into a labeled multiplicity such as `Worker ×N`.

@@ -1,19 +1,19 @@
-# Mobile Responsiveness Contract
+# Responsive containment
 
 Every page produced by this skill must pass a single rule at mobile widths: **the document body must never scroll horizontally.** Wide content (data tables, Mermaid diagrams, inline SVG graphs, pipelines, directory trees, long code) scrolls horizontally *inside its own container* instead of widening the page.
 
-This contract applies to every explainer, magazine, longform, and slide-in-page layout. Slide decks and reels that intentionally run at `100vw × 100vh` are the only exception.
+Apply this contract to responsive pages, reader decks, and magazines. Fixed presentation stages, video compositions, and native-size poster exports use their canvas contracts instead; their host pages must still contain the canvas.
 
 ## The failure this prevents
 
-At 390px viewport (iPhone 12/13/14/15 baseline), without this contract:
+At a 390px viewport, common causes of page overflow are:
 
 - A wide table pushes `body` to `min-content` and the whole page pans left/right as the user scrolls down.
 - An inline SVG with a fixed `viewBox` forces the page width to the SVG's natural width.
 - A CSS Grid with a fixed-pixel track (`grid-template-columns: 260px 1fr`) refuses to shrink below 260px + content.
 - A long inline `<code>` or URL without `word-break` punches through its container.
 
-With this contract, the page width equals the viewport width always. Individual wide elements become their own horizontal scroll zones.
+Reflow these elements or contain their scrolling locally.
 
 ## Layer 1 — Page-level overflow
 
@@ -43,9 +43,9 @@ body :where(.grid, .flex, [class*="-grid"], [class*="-row"]) > * {
 body { overflow-wrap: anywhere; }
 ```
 
-**Do not** use `overflow-x: hidden` on `body` alone and stop there. It hides the overflow but the layout still computes at the wider width, and touch-scroll chrome still flashes when a child tries to blow past. The `overflow: clip` + `min-width: 0` combo is what actually keeps the layout honest.
+**Do not** use `overflow-x: hidden` on `body` alone and stop there. Clipping alone conceals content without fixing its layout. Let children shrink with `min-width: 0`, and give wide content a local scroll container.
 
-**Do not** use `overflow-x: scroll` on body as a shortcut. That is the failure mode we are preventing.
+**Do not** use `overflow-x: scroll` on body as a shortcut. The document must never scroll horizontally.
 
 ## Layer 2 — The `.scroll-x` wrapper
 
@@ -97,7 +97,7 @@ Any element that is allowed to be wider than the viewport on mobile must sit ins
 
 ## Layer 3 — Mobile breakpoint standards
 
-Use **768px** as the default mobile breakpoint. Use **820px** only when the layout has a sidebar / TOC that needs to collapse earlier. Do not introduce additional breakpoints unless the layout genuinely demands it.
+Use **768px** as the default mobile breakpoint. Use **820px** only when the layout has a sidebar / TOC that needs to collapse earlier. Add another breakpoint only when the rendered content needs it.
 
 ```css
 @media (max-width: 768px) {
@@ -125,21 +125,19 @@ Use **768px** as the default mobile breakpoint. Use **820px** only when the layo
 
 For 2-column hero layouts (the `grid-template-columns: minmax(0,1fr) 160px` pattern common in magazine layouts), collapse to a single column at the same breakpoint. Always use `minmax(0, 1fr)` rather than `1fr` for grid tracks containing wide children — `1fr` defaults to `minmax(auto, 1fr)` which refuses to shrink.
 
-## Layer 4 — Aesthetic-specific adaptations
+## Layer 4 — Component and canvas behavior
 
-The contract is aesthetic-agnostic, but a few named aesthetics have known mobile quirks:
+Shared charts and diagrams measure their containers and provide component-specific mobile layouts. Preserve those layouts before adding page-level overrides. Named presets change typography and color; they do not waive containment.
 
-- **Mono-Industrial**: The three-layer typographic rhythm compresses but is retained. The `margin-left` of section labels drops to 0 below 768px.
-- **Nothing**: Its oversized display type already uses `clamp()` — no override needed. The grid lines disappear below 640px.
-- **Magazine / Poster**: These run at fixed canvases (e.g. 1080×1350, 1280×720). They are *not* responsive. Do not apply this contract to slide or poster layouts — they are viewed at their native canvas.
+A fixed-size poster or video export is judged at its native canvas. A responsive page containing that export still needs a contained preview.
 
 ## Layer 5 — Verification
 
-Every page must pass this at 390×844 (iPhone 14/15 width):
+Check responsive pages at 390×844:
 
 1. `document.documentElement.scrollWidth === window.innerWidth` — the page is exactly viewport-wide.
 2. No horizontal scrollbar on `body`.
-3. Every wide element (tables, diagrams, SVGs, pipelines) is either reflowed to fit OR horizontally scrollable inside its own container, with the scrollbar/edge-fade visible near the right edge.
+3. Every wide element (tables, diagrams, SVGs, pipelines) is either reflowed to fit OR horizontally scrollable inside its own container, with a discoverable scroll affordance.
 4. No text is clipped by `overflow: clip` — if text is getting cut, the element needs `.scroll-x`, not broader clipping.
 5. No content is hidden behind the theme toggle or other fixed-position UI.
 

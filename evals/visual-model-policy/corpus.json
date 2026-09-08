@@ -24,7 +24,7 @@
           "fire": {
             "title": "Heading clipped at the viewport edge",
             "visible_text": "Operational evidence architecture",
-            "truth_excerpt": "The full heading is authored as “Operational evidence architecture.”",
+            "truth_excerpt": "The full heading is authored as \u201cOperational evidence architecture.\u201d",
             "adjudication_notes": "The final word is cut mid-character at the right edge; no ellipsis or disclosure control is present.",
             "render": {
               "template": "text",
@@ -83,8 +83,8 @@
           },
           "fire": {
             "title": "Three primary treatments compete",
-            "visible_text": "Policy router · 93% coverage · Review topology",
-            "truth_excerpt": "The slide’s narrative job is to explain the routing topology.",
+            "visible_text": "Policy router \u00b7 93% coverage \u00b7 Review topology",
+            "truth_excerpt": "The slide\u2019s narrative job is to explain the routing topology.",
             "adjudication_notes": "A huge title, saturated diagram, and equally large KPI row all demand first attention, leaving no single focal point.",
             "render": {
               "template": "slide",
@@ -93,7 +93,7 @@
           },
           "clean": {
             "title": "Dense evidence supports one dominant diagram",
-            "visible_text": "Policy router · 93% coverage · Review topology",
+            "visible_text": "Policy router \u00b7 93% coverage \u00b7 Review topology",
             "truth_excerpt": "The router is the claim; supporting metrics may remain subordinate.",
             "adjudication_notes": "The surface contains many expert details, but scale and contrast clearly make the router diagram the single focal element.",
             "render": {
@@ -111,7 +111,7 @@
           },
           "fire": {
             "title": "Tiny diagram floats in unexplained space",
-            "visible_text": "Input → Review → Output",
+            "visible_text": "Input \u2192 Review \u2192 Output",
             "truth_excerpt": "The three-stage route is the full content of the slide.",
             "adjudication_notes": "The diagram occupies a small corner while most of the canvas is unexplained blank space, making the content feel missing.",
             "render": {
@@ -121,7 +121,7 @@
           },
           "clean": {
             "title": "Authored breathing room frames a short claim",
-            "visible_text": "Input → Review → Output",
+            "visible_text": "Input \u2192 Review \u2192 Output",
             "truth_excerpt": "The brief calls for a quiet transition slide with one compact route.",
             "adjudication_notes": "The blank area is deliberately balanced around a centered claim and does not resemble a collapsed or missing region.",
             "render": {
@@ -139,7 +139,7 @@
           },
           "fire": {
             "title": "Collapsed third column leaves accidental dead space",
-            "visible_text": "Signals · Policy · Actions",
+            "visible_text": "Signals \u00b7 Policy \u00b7 Actions",
             "truth_excerpt": "All three peer stages have content in the source brief.",
             "adjudication_notes": "The third stage collapses to a tiny block and leaves a large blank region that reads as missing content.",
             "render": {
@@ -149,7 +149,7 @@
           },
           "clean": {
             "title": "Evidence rail intentionally leaves reading space",
-            "visible_text": "Narrative · Evidence",
+            "visible_text": "Narrative \u00b7 Evidence",
             "truth_excerpt": "The composition is an editorial 70/30 narrative and evidence split.",
             "adjudication_notes": "The narrow evidence rail and open lower area are authored hierarchy, not a missing peer column.",
             "render": {
@@ -167,7 +167,7 @@
           },
           "fire": {
             "title": "Equivalent peer tracks drift in width",
-            "visible_text": "Input · Router · Output",
+            "visible_text": "Input \u00b7 Router \u00b7 Output",
             "truth_excerpt": "The three stages are declared as equivalent review tracks.",
             "adjudication_notes": "The middle track is inexplicably narrower and divider positions do not align across otherwise equivalent regions.",
             "render": {
@@ -177,7 +177,7 @@
           },
           "clean": {
             "title": "Equivalent peer tracks stay balanced",
-            "visible_text": "Input · Router · Output",
+            "visible_text": "Input \u00b7 Router \u00b7 Output",
             "truth_excerpt": "The three stages are declared as equivalent review tracks.",
             "adjudication_notes": "All three peer tracks use equal widths and aligned dividers, providing the direct clean counterpart for the drift case.",
             "render": {
@@ -195,7 +195,7 @@
           },
           "fire": {
             "title": "Peer row baselines do not align",
-            "visible_text": "Before · After",
+            "visible_text": "Before \u00b7 After",
             "truth_excerpt": "Rows represent direct before/after counterparts.",
             "adjudication_notes": "Corresponding row dividers drift vertically, undermining the declared one-to-one comparison.",
             "render": {
@@ -205,7 +205,7 @@
           },
           "clean": {
             "title": "Peer row baselines align",
-            "visible_text": "Before · After",
+            "visible_text": "Before \u00b7 After",
             "truth_excerpt": "Rows represent direct before/after counterparts.",
             "adjudication_notes": "Corresponding dividers and content baselines align across all three peer tracks.",
             "render": {
@@ -223,7 +223,7 @@
           },
           "fire": {
             "title": "Controls crowd the primary claim",
-            "visible_text": "Model policy · Theme · Filter · Export",
+            "visible_text": "Model policy \u00b7 Theme \u00b7 Filter \u00b7 Export",
             "truth_excerpt": "The page title and selected policy are the primary content.",
             "adjudication_notes": "Large controls surround and visually overpower the title, producing several competing focal targets.",
             "render": {
@@ -233,7 +233,7 @@
           },
           "clean": {
             "title": "Compact expert controls remain subordinate",
-            "visible_text": "Model policy · Theme · Filter · Export",
+            "visible_text": "Model policy \u00b7 Theme \u00b7 Filter \u00b7 Export",
             "truth_excerpt": "Frequent operators need all controls available without losing the page claim.",
             "adjudication_notes": "The surface is dense by design, but compact chrome remains subordinate to one clear title and active policy.",
             "render": {
@@ -440,7 +440,7 @@
           },
           "fire": {
             "title": "Pass example has an underweighted middle track",
-            "visible_text": "Input · Router · Output should read as equal peers",
+            "visible_text": "Input \u00b7 Router \u00b7 Output should read as equal peers",
             "truth_excerpt": "The example is labelled positive because all three regions are direct peers.",
             "adjudication_notes": "The narrow middle track visibly contradicts the example's positive label and peer relationship.",
             "render": {
@@ -450,7 +450,7 @@
           },
           "clean": {
             "title": "Pass example gives direct peers equal tracks",
-            "visible_text": "Input · Router · Output should read as equal peers",
+            "visible_text": "Input \u00b7 Router \u00b7 Output should read as equal peers",
             "truth_excerpt": "The example is labelled positive because all three regions are direct peers.",
             "adjudication_notes": "The three direct peers have equal widths and aligned baselines, so the positive label is visually supported.",
             "render": {
@@ -479,7 +479,7 @@
           },
           "fire": {
             "title": "Swimlanes and containment conflict",
-            "visible_text": "Client · Router · Cache · Store",
+            "visible_text": "Client \u00b7 Router \u00b7 Cache \u00b7 Store",
             "truth_excerpt": "The content describes one request flow.",
             "adjudication_notes": "Half the figure uses lanes while the other half uses nested containment for the same relation.",
             "render": {
@@ -489,7 +489,7 @@
           },
           "clean": {
             "title": "One flow grammar with a highlighted boundary",
-            "visible_text": "Client · Router · Cache · Store",
+            "visible_text": "Client \u00b7 Router \u00b7 Cache \u00b7 Store",
             "truth_excerpt": "The boundary denotes deployment ownership inside one request flow.",
             "adjudication_notes": "A boundary annotation does not create a second diagram type; connectors and nodes retain one stable grammar.",
             "render": {
@@ -507,7 +507,7 @@
           },
           "fire": {
             "title": "One-day and six-month gaps look equal",
-            "visible_text": "Day 1 · Day 2 · Month 6",
+            "visible_text": "Day 1 \u00b7 Day 2 \u00b7 Month 6",
             "truth_excerpt": "The milestones occur after one day and then roughly six months.",
             "adjudication_notes": "Equal visual spacing materially misrepresents the stated time intervals.",
             "render": {
@@ -517,7 +517,7 @@
           },
           "clean": {
             "title": "Compressed timeline explicitly marks a break",
-            "visible_text": "Day 1 · Day 2 · // · Month 6",
+            "visible_text": "Day 1 \u00b7 Day 2 \u00b7 // \u00b7 Month 6",
             "truth_excerpt": "The timeline is compressed and must disclose the discontinuity.",
             "adjudication_notes": "A visible axis break and label make the non-linear spacing explicit rather than deceptively proportional.",
             "render": {
@@ -535,7 +535,7 @@
           },
           "fire": {
             "title": "Near-equal bars represent a fourfold difference",
-            "visible_text": "$10 · $40",
+            "visible_text": "$10 \u00b7 $40",
             "truth_excerpt": "The second value is four times the first.",
             "adjudication_notes": "The bars differ only slightly in length, visually erasing a load-bearing fourfold ratio.",
             "render": {
@@ -545,7 +545,7 @@
           },
           "clean": {
             "title": "Scaled bars preserve the fourfold relation",
-            "visible_text": "$10 baseline · $40 candidate",
+            "visible_text": "$10 baseline \u00b7 $40 candidate",
             "truth_excerpt": "The second value is four times the first.",
             "adjudication_notes": "The bar lengths preserve the load-bearing ratio and agree with their explicit value labels.",
             "render": {
@@ -563,7 +563,7 @@
           },
           "fire": {
             "title": "Legend names an absent cache category",
-            "visible_text": "API · Cache · Store",
+            "visible_text": "API \u00b7 Cache \u00b7 Store",
             "truth_excerpt": "Only API and Store categories are drawn.",
             "adjudication_notes": "The legend includes Cache even though no corresponding mark exists in the figure.",
             "render": {
@@ -573,7 +573,7 @@
           },
           "clean": {
             "title": "Muted category still appears in the figure",
-            "visible_text": "API · Cache · Store",
+            "visible_text": "API \u00b7 Cache \u00b7 Store",
             "truth_excerpt": "Cache is present but intentionally de-emphasized because it is inactive.",
             "adjudication_notes": "Every legend category has a plotted counterpart; low emphasis is not absence.",
             "render": {
@@ -591,7 +591,7 @@
           },
           "fire": {
             "title": "Decision nodes lack a legend entry",
-            "visible_text": "Service · Data",
+            "visible_text": "Service \u00b7 Data",
             "truth_excerpt": "Diamonds encode decisions and rectangles encode services.",
             "adjudication_notes": "A distinct load-bearing diamond category is used repeatedly but the legend never defines it.",
             "render": {
@@ -601,7 +601,7 @@
           },
           "clean": {
             "title": "Annotation callout does not need a legend category",
-            "visible_text": "Service · Data",
+            "visible_text": "Service \u00b7 Data",
             "truth_excerpt": "The lone dashed note is explanatory annotation, not a data category.",
             "adjudication_notes": "A conventional one-off annotation is self-labelled and does not create an unexplained visual category.",
             "render": {
@@ -619,7 +619,7 @@
           },
           "fire": {
             "title": "Three independent bullets are boxed and arrowed",
-            "visible_text": "Reliable · Fast · Affordable",
+            "visible_text": "Reliable \u00b7 Fast \u00b7 Affordable",
             "truth_excerpt": "The brief lists three independent qualities with no sequence or relationship.",
             "adjudication_notes": "Boxes and arrows add a false flow while conveying no information beyond a short list.",
             "render": {
@@ -629,7 +629,7 @@
           },
           "clean": {
             "title": "Three nodes expose a real dependency",
-            "visible_text": "Capture → Adjudicate → Graduate",
+            "visible_text": "Capture \u2192 Adjudicate \u2192 Graduate",
             "truth_excerpt": "Graduation requires adjudication, which requires captured observations.",
             "adjudication_notes": "The connectors encode necessary dependency and therefore add information beyond the labels.",
             "render": {
@@ -647,7 +647,7 @@
           },
           "fire": {
             "title": "Two unrelated nodes claim equal dominance",
-            "visible_text": "Policy Router · Analytics Hub",
+            "visible_text": "Policy Router \u00b7 Analytics Hub",
             "truth_excerpt": "The narrative job is to explain policy routing.",
             "adjudication_notes": "Two saturated oversized nodes compete even though only the router is load-bearing to the claim.",
             "render": {
@@ -657,7 +657,7 @@
           },
           "clean": {
             "title": "Two endpoints frame one dominant transformation",
-            "visible_text": "Evidence · Policy Router · Decision",
+            "visible_text": "Evidence \u00b7 Policy Router \u00b7 Decision",
             "truth_excerpt": "The policy router is the transformation under explanation.",
             "adjudication_notes": "Endpoints remain visible but the central router is unmistakably dominant.",
             "render": {
@@ -714,7 +714,7 @@
           },
           "fire": {
             "title": "Icons disappear against the dark surface",
-            "visible_text": "Inputs · Results",
+            "visible_text": "Inputs \u00b7 Results",
             "truth_excerpt": "Icon and label meaning must remain visible in both modes.",
             "adjudication_notes": "The dark screenshot retains a dark icon fill, making load-bearing symbols effectively invisible.",
             "render": {
@@ -724,7 +724,7 @@
           },
           "clean": {
             "title": "Decorative watermark fades in dark mode",
-            "visible_text": "Inputs · Results",
+            "visible_text": "Inputs \u00b7 Results",
             "truth_excerpt": "The watermark is non-semantic decoration and may be quiet.",
             "adjudication_notes": "All load-bearing icons and text remain visible; only a deliberately non-semantic watermark loses prominence.",
             "render": {
@@ -752,7 +752,7 @@
           },
           "clean": {
             "title": "One warning value carries orange",
-            "visible_text": "Review queue · 3 delayed",
+            "visible_text": "Review queue \u00b7 3 delayed",
             "truth_excerpt": "Three delayed items are a measured warning state.",
             "adjudication_notes": "Color is scoped to the precise delayed count and therefore conveys genuine value semantics.",
             "render": {
@@ -770,19 +770,19 @@
           },
           "fire": {
             "title": "Several unrelated elements break the grid",
-            "visible_text": "Policy · Evidence · Result",
-            "truth_excerpt": "The preset permits one deliberate compositional or typographic surprise.",
-            "adjudication_notes": "Three rotated and oversized elements break the system, so no single authored surprise remains.",
+            "visible_text": "Policy \u00b7 Evidence \u00b7 Result",
+            "truth_excerpt": "Emphasis must help the reader distinguish the decision from supporting evidence.",
+            "adjudication_notes": "Unrelated rotations and size changes compete for attention without explaining the content.",
             "render": {
               "template": "preset",
               "variant": "many-surprises"
             }
           },
           "clean": {
-            "title": "One oversized decision breaks the pattern",
-            "visible_text": "Policy · DECISION · Result",
-            "truth_excerpt": "The decision is the one intended moment of surprise.",
-            "adjudication_notes": "Exactly one typographic element breaks the otherwise consistent system and the break supports hierarchy.",
+            "title": "The decision is visibly emphasized",
+            "visible_text": "Policy \u00b7 DECISION \u00b7 Result",
+            "truth_excerpt": "The decision should be distinguishable from its supporting evidence.",
+            "adjudication_notes": "The larger decision text establishes hierarchy while the supporting content remains aligned and readable.",
             "render": {
               "template": "preset",
               "variant": "one-surprise"
@@ -798,19 +798,19 @@
           },
           "fire": {
             "title": "Five equally loud emphasis layers",
-            "visible_text": "Title · KPI · Section · Label · Note",
-            "truth_excerpt": "The active preset calls for three legible emphasis layers.",
-            "adjudication_notes": "Multiple near-equal weights and sizes create at least five competing emphasis levels with no stable hierarchy.",
+            "visible_text": "Title \u00b7 KPI \u00b7 Section \u00b7 Label \u00b7 Note",
+            "truth_excerpt": "The reader must be able to distinguish headings, evidence, and supporting labels.",
+            "adjudication_notes": "Near-equal weights and sizes compete for attention and obscure the reading order.",
             "render": {
               "template": "preset",
               "variant": "too-many-layers"
             }
           },
           "clean": {
-            "title": "Dense page resolves into three emphasis layers",
-            "visible_text": "Title · KPI · Section · Label · Note",
-            "truth_excerpt": "Dense content is compatible with three clearly grouped emphasis levels.",
-            "adjudication_notes": "Many elements are present, but they resolve into a dominant hero, section level, and quiet instrument text.",
+            "title": "Heading and supporting content are distinguishable",
+            "visible_text": "Title \u00b7 KPI \u00b7 Section \u00b7 Label \u00b7 Note",
+            "truth_excerpt": "Dense content needs distinguishable headings and supporting detail.",
+            "adjudication_notes": "The heading, sections, and labels have distinct visual roles. No fixed number of emphasis levels is required.",
             "render": {
               "template": "preset",
               "variant": "three-layers"
@@ -854,19 +854,19 @@
           },
           "fire": {
             "title": "Three cards independently escape the grid",
-            "visible_text": "Capture · Route · Learn",
-            "truth_excerpt": "The preset allows one meaningful grid break.",
-            "adjudication_notes": "Several arbitrary offsets break the composition without establishing one deliberate exception.",
+            "visible_text": "Capture \u00b7 Route \u00b7 Learn",
+            "truth_excerpt": "Alignment and spacing should make relationships between sections clear.",
+            "adjudication_notes": "Arbitrary offsets interrupt alignment without explaining a relationship or priority.",
             "render": {
               "template": "preset",
               "variant": "many-grid-breaks"
             }
           },
           "clean": {
-            "title": "One review card deliberately spans tracks",
-            "visible_text": "Capture · Route · Learn",
-            "truth_excerpt": "The review card is the composition's one intended grid break.",
-            "adjudication_notes": "One content element deliberately spans tracks while every other card remains on the established grid.",
+            "title": "The review section spans the space it needs",
+            "visible_text": "Capture \u00b7 Route \u00b7 Learn",
+            "truth_excerpt": "A section may span tracks when the content requires more space.",
+            "adjudication_notes": "The review section has enough room while its position remains consistent with the reading order.",
             "render": {
               "template": "preset",
               "variant": "one-grid-break"
@@ -894,7 +894,7 @@
             "title": "Functional browser chrome remains distinct",
             "visible_text": "Live policy inspector",
             "truth_excerpt": "The demo needs a minimal frame to communicate that it is interactive.",
-            "adjudication_notes": "The frame is functionally necessary and still matches the host’s radius, border, color, and caption treatment.",
+            "adjudication_notes": "The frame is functionally necessary and still matches the host\u2019s radius, border, color, and caption treatment.",
             "render": {
               "template": "preset",
               "variant": "matched-demo"
@@ -921,7 +921,7 @@
           },
           "fire": {
             "title": "Four cards hide the selection policy",
-            "visible_text": "Mandatory · Representative · Calibration · Frontier",
+            "visible_text": "Mandatory \u00b7 Representative \u00b7 Calibration \u00b7 Frontier",
             "truth_excerpt": "A policy router assigns cases to distinct review queues with different entry rules.",
             "adjudication_notes": "Equal cards name destinations but omit the router, mandatory path, sampling rule, and deduplication.",
             "render": {
@@ -931,7 +931,7 @@
           },
           "clean": {
             "title": "Router exposes queue selection and overlap handling",
-            "visible_text": "Mandatory · Representative · Calibration · Frontier",
+            "visible_text": "Mandatory \u00b7 Representative \u00b7 Calibration \u00b7 Frontier",
             "truth_excerpt": "A policy router assigns cases to distinct review queues with different entry rules.",
             "adjudication_notes": "The composition shows the universal gate, routing rules, separate queues, and deduplication path.",
             "render": {
@@ -949,7 +949,7 @@
           },
           "fire": {
             "title": "Feedback loop is drawn as a one-way pipeline",
-            "visible_text": "Observe → Adjudicate → Calibrate → Deploy",
+            "visible_text": "Observe \u2192 Adjudicate \u2192 Calibrate \u2192 Deploy",
             "truth_excerpt": "Deployment outcomes feed the next calibration cycle.",
             "adjudication_notes": "The one-way pipeline omits the load-bearing return path and misstates the process as terminal.",
             "render": {
@@ -959,7 +959,7 @@
           },
           "clean": {
             "title": "Feedback path returns outcomes to calibration",
-            "visible_text": "Observe → Adjudicate → Calibrate → Deploy ↩",
+            "visible_text": "Observe \u2192 Adjudicate \u2192 Calibrate \u2192 Deploy \u21a9",
             "truth_excerpt": "Deployment outcomes feed the next calibration cycle.",
             "adjudication_notes": "The return connector and its label make the iterative causal structure reconstructable.",
             "render": {
@@ -977,7 +977,7 @@
           },
           "fire": {
             "title": "Evidence cards omit source-to-decision paths",
-            "visible_text": "Study · Finding · Decision",
+            "visible_text": "Study \u00b7 Finding \u00b7 Decision",
             "truth_excerpt": "The viewer must reconstruct which source supports each decision claim.",
             "adjudication_notes": "Grouped cards contain the right nouns but no connectors or identifiers preserve provenance.",
             "render": {
@@ -987,7 +987,7 @@
           },
           "clean": {
             "title": "Trace IDs connect sources through findings to decisions",
-            "visible_text": "S1 → F1 → D1",
+            "visible_text": "S1 \u2192 F1 \u2192 D1",
             "truth_excerpt": "The viewer must reconstruct which source supports each decision claim.",
             "adjudication_notes": "Stable identifiers and connectors preserve the evidence path without requiring presenter narration.",
             "render": {
@@ -1005,7 +1005,7 @@
           },
           "fire": {
             "title": "Statuses appear without allowed transitions",
-            "visible_text": "Pending · Reviewed · Escalated",
+            "visible_text": "Pending \u00b7 Reviewed \u00b7 Escalated",
             "truth_excerpt": "Cases can escalate from pending or reviewed, but only reviewed cases can close.",
             "adjudication_notes": "Status badges expose no transition rules and cannot communicate the allowed state changes.",
             "render": {
@@ -1015,7 +1015,7 @@
           },
           "clean": {
             "title": "State machine exposes guarded transitions",
-            "visible_text": "Pending → Reviewed → Closed · Escalated",
+            "visible_text": "Pending \u2192 Reviewed \u2192 Closed \u00b7 Escalated",
             "truth_excerpt": "Cases can escalate from pending or reviewed, but only reviewed cases can close.",
             "adjudication_notes": "Directed and labelled transitions make the guarded state changes reconstructable.",
             "render": {
@@ -1033,7 +1033,7 @@
           },
           "fire": {
             "title": "Equation overstates a qualitative comparison",
-            "visible_text": "n × review cost > verification cost",
+            "visible_text": "n \u00d7 review cost > verification cost",
             "truth_excerpt": "The source offers only a qualitative preference and supplies no costs or multiplicative relationship.",
             "adjudication_notes": "The equation asserts a measured quantitative relationship that the source does not establish.",
             "render": {
@@ -1044,7 +1044,7 @@
           },
           "clean": {
             "title": "Equation faithfully expresses a measured comparison",
-            "visible_text": "n × review cost > verification cost",
+            "visible_text": "n \u00d7 review cost > verification cost",
             "truth_excerpt": "The source defines review count n and measured review and verification costs using this exact inequality.",
             "adjudication_notes": "The same equation is legitimate because every term and relationship is supported by the supplied source evidence.",
             "render": {
@@ -1063,8 +1063,8 @@
           },
           "fire": {
             "title": "Interactive workflow is flattened into generic cards",
-            "visible_text": "Evidence · Hypotheses · Next actions",
-            "truth_excerpt": "The clinician’s interaction among evidence, hypotheses, and actions is the claim.",
+            "visible_text": "Evidence \u00b7 Hypotheses \u00b7 Next actions",
+            "truth_excerpt": "The clinician\u2019s interaction among evidence, hypotheses, and actions is the claim.",
             "adjudication_notes": "Three generic cards omit selection, comparison, and action state that define the workflow.",
             "render": {
               "template": "operating",
@@ -1073,8 +1073,8 @@
           },
           "clean": {
             "title": "Simulated workspace exposes the interaction",
-            "visible_text": "Evidence · Hypotheses · Next actions",
-            "truth_excerpt": "The clinician’s interaction among evidence, hypotheses, and actions is the claim.",
+            "visible_text": "Evidence \u00b7 Hypotheses \u00b7 Next actions",
+            "truth_excerpt": "The clinician\u2019s interaction among evidence, hypotheses, and actions is the claim.",
             "adjudication_notes": "The simulated surface faithfully exposes selection state, linked evidence, and available next actions.",
             "render": {
               "template": "operating",
@@ -1102,7 +1102,7 @@
           },
           "fire": {
             "title": "Independent options are numbered and arrowed",
-            "visible_text": "01 Explore → 02 Compare → 03 Export",
+            "visible_text": "01 Explore \u2192 02 Compare \u2192 03 Export",
             "truth_excerpt": "Users may choose Explore, Compare, or Export in any order.",
             "adjudication_notes": "Numbers and arrows imply a required progression that the source explicitly does not establish.",
             "render": {
@@ -1112,7 +1112,7 @@
           },
           "clean": {
             "title": "Numbered workflow follows real dependencies",
-            "visible_text": "01 Capture → 02 Adjudicate → 03 Graduate",
+            "visible_text": "01 Capture \u2192 02 Adjudicate \u2192 03 Graduate",
             "truth_excerpt": "Adjudication requires captured observations; graduation requires adjudication.",
             "adjudication_notes": "Every number and connector corresponds to a documented dependency and real order.",
             "render": {
@@ -1170,7 +1170,7 @@
           },
           "clean": {
             "title": "Deck progress reflects actual navigation",
-            "visible_text": "Slide 7 of 10 · 70%",
+            "visible_text": "Slide 7 of 10 \u00b7 70%",
             "truth_excerpt": "The viewer is currently on slide seven of ten.",
             "adjudication_notes": "The progress treatment is directly bound to real navigation state and accurately calculated.",
             "render": {
@@ -1218,7 +1218,7 @@
           },
           "fire": {
             "title": "Decorative source strip invents freshness",
-            "visible_text": "Snapshot · 2026-07-25 10:30Z",
+            "visible_text": "Snapshot \u00b7 2026-07-25 10:30Z",
             "truth_excerpt": "The content is static prose with no source feed or retrieval time.",
             "adjudication_notes": "Source and timestamp chrome imply a live traceable feed that the artifact does not possess.",
             "render": {
@@ -1229,7 +1229,7 @@
           },
           "clean": {
             "title": "Snapshot timestamp identifies a real retrieval",
-            "visible_text": "Snapshot · 2026-07-25 10:30Z",
+            "visible_text": "Snapshot \u00b7 2026-07-25 10:30Z",
             "truth_excerpt": "Dataset version 18 was retrieved at 2026-07-25 10:30Z and is bundled with the report.",
             "adjudication_notes": "The timestamp and version accurately identify a supplied snapshot rather than manufacturing freshness.",
             "render": {
@@ -1248,7 +1248,7 @@
           },
           "fire": {
             "title": "Fake terminal reports successful deployment",
-            "visible_text": "$ deploy --prod · SUCCESS",
+            "visible_text": "$ deploy --prod \u00b7 SUCCESS",
             "truth_excerpt": "The artifact never ran a deployment command and has no execution result.",
             "adjudication_notes": "Terminal chrome and SUCCESS output imply an executed command and measured state that never occurred.",
             "render": {
@@ -1258,7 +1258,7 @@
           },
           "clean": {
             "title": "Terminal is explicitly labelled as an example",
-            "visible_text": "Example command · $ deploy --dry-run",
+            "visible_text": "Example command \u00b7 $ deploy --dry-run",
             "truth_excerpt": "The panel documents a command example and makes no claim that it ran.",
             "adjudication_notes": "The example label and dry-run wording prevent a reasonable viewer from inferring live execution state.",
             "render": {
@@ -1276,7 +1276,7 @@
           },
           "fire": {
             "title": "Parallel choices are connected as a pipeline",
-            "visible_text": "Self-hosted · Managed · Hybrid",
+            "visible_text": "Self-hosted \u00b7 Managed \u00b7 Hybrid",
             "truth_excerpt": "PDF, Slides, and Web are independent export formats selected one at a time.",
             "adjudication_notes": "Directional arrows falsely imply transformation from one export format into the next.",
             "render": {
@@ -1287,7 +1287,7 @@
           },
           "clean": {
             "title": "Arrows reflect a real deployment sequence",
-            "visible_text": "Self-hosted · Managed · Hybrid",
+            "visible_text": "Self-hosted \u00b7 Managed \u00b7 Hybrid",
             "truth_excerpt": "The documented migration moves from self-hosted to managed operation and then to a hybrid steady state.",
             "adjudication_notes": "The directional sequence is supported by the supplied migration plan rather than invented from parallel choices.",
             "render": {

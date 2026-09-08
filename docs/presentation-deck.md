@@ -1,4 +1,4 @@
-# PresentationDeck vs SlideDeck
+# Choose a deck format
 
 Choose the deck engine for how the audience will read it.
 
@@ -23,7 +23,7 @@ supporting detail without crowding the base slide. On small screens the
 whole stage shrinks; use `SlideDeck` when mobile reading matters.
 
 Both are exported the same way (`npm run ve:export -- <src> --out <out>`)
-and both consume the `--ve-*` preset tokens, so the same preset skins either.
+and both consume the `--ve-*` preset tokens, so either can use the same preset.
 
 ## PresentationDeck quick start
 
@@ -110,9 +110,8 @@ function ProgressiveSlide() {
 `0..count - 1`; invalid state bounds fail immediately instead of producing an
 ambiguous navigation order.
 
-The custom navigator takes precedence over automatic drill traversal. This
-keeps the module's interface small: the deck owns keyboard routing, bounds,
-and fallthrough to the next slide; the slide owns only its ordered state and
+The custom navigator takes precedence over automatic drill traversal. The deck handles keyboard routing, bounds,
+and advancement to the next slide. The slide owns its ordered state and
 rendering.
 
 ## Primitives
@@ -134,7 +133,7 @@ rendering.
   (the dismiss guard), `tint`/`solidTint` (hex tinting; for token-driven
   fills use the `.ve-pres-solid` opaque-layer idiom instead).
 
-## Behavioral contract (evals)
+## Check deck behavior
 
 The engine's behavior is checked by `evals/run-presentation.mjs`
 (`npm run ve:eval-presentation`, runs in CI): the click-anywhere-to-close

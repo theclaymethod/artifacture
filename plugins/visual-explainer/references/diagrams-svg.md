@@ -1,6 +1,6 @@
 # Inline SVG diagram construction
 
-Load this reference after [`diagram-design.md`](./diagram-design.md) selects the semantic pattern, visual type, output dials, and renderer. This file owns shared SVG geometry and rendered QA; `diagram-design.md` owns routing and budgets, while [`diagram-tokens.md`](./diagram-tokens.md) owns aesthetic values.
+Load this reference after [`diagram-design.md`](./diagram-design.md) selects the semantic pattern, visual type, output dials, and renderer. Use this file for geometry and rendered checks, `diagram-design.md` for routing and budgets, and [`diagram-tokens.md`](./diagram-tokens.md) for colors and fonts.
 
 ## Contents
 
@@ -67,7 +67,7 @@ Draw each marker in the same semantic token family as its connector. Use dashed 
 - Leave a visible 6–10px gap between the mask and the connector stroke.
 - Place vertical-segment labels to the side rather than using vertical writing mode.
 - Keep the entire mask in open canvas. A mask that overlaps a later-painted node will be clipped by the node fill.
-- Keep short technical connector labels concise and direct-label longer explanations as nearby notes.
+- Use short connector labels; put longer explanations in nearby notes.
 
 ## Labels and text measurement
 
@@ -75,7 +75,7 @@ Use the host sans face for names, axes, and edge labels; reserve mono for litera
 
 For wrapped node labels, notes, legends, or masks, read [`pretext-layout.md`](./pretext-layout.md). Measure the text first, then derive box width, box height, and anchors from the returned metrics. Layout engines or manual placement own graph positioning; Pretext owns text measurement.
 
-Keep labels inside their boxes with intentional padding. Shorten or wrap copy before shrinking below the size preset's readable type ramp.
+Keep labels inside their boxes with intentional padding. Shorten or wrap copy before shrinking it below the readable minimum.
 
 ## Shape semantics
 

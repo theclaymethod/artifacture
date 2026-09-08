@@ -1,17 +1,17 @@
 import { CodeBlock, DecisionMatrix, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="A cache hit must preserve false values" summary="A small review of a common control-flow mistake: testing truthiness instead of whether a key is present." reviewTools={false}>
-  <Section title="The trigger">
-    <p>Suppose the cache stores a feature flag. The value false is a valid cached result, but a truthiness check treats it as a miss and performs another origin read.</p>
+<ExplainerShell title="False is a valid cache hit" summary="A truthiness check skips cached false, zero, and empty strings." reviewTools={false}>
+  <Section title="A cached feature flag returns false">
+    <p>When the cached feature flag is false, this branch falls through to readOrigin.</p>
     <CodeBlock language="ts" filename="Illustrative read path" code={`const cached = cache.get(key);
 if (cached) return cached;
 return readOrigin(key);`} highlightLines={[2]} annotations={[{line:2,note:'This branch excludes false, zero, and an empty string.'}]} />
   </Section>
-  <Section title="Use the cache contract">
+  <Section title="Choose the presence check">
     <DecisionMatrix rows={[
       {Contract:'undefined means missing',Correction:'cached !== undefined',Limit:'Do not store undefined as a value.'},
       {Contract:'Any value may be stored',Correction:'cache.has(key)',Limit:'Presence and retrieval must refer to the same entry.'}
     ]} />
-    <p>Choose the correction from the cache API, not from the apparent type of one current value. Check false, zero, an empty string, a normal value, and a missing key. These cases distinguish the behavior that the review is meant to protect.</p>
+    <p>Use the presence check defined by the cache API. Verify it with false, zero, an empty string, a normal value, and a missing key.</p>
   </Section>
 </ExplainerShell>

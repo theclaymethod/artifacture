@@ -4,15 +4,15 @@ Lieflat is the default for new artifacts. Use Algebrica for sustained reading an
 
 ## Composition
 
-Give the reader one clear question per chart, diagram, or section. Establish hierarchy with position, scale, weight, and spacing. Use containers for an interaction or a bounded technical region; let prose sit on the page.
+Each chart, diagram, or section answers a question. Establish hierarchy with position, scale, weight, and spacing. Use containers for an interaction or a bounded technical region; let prose sit on the page.
 
 Remove any element whose removal changes neither understanding nor operation. Do not add kickers, decorative numbering, status badges, metric tiles, source-like labels, or captions that repeat the title. Keep real sources, units, sequence, navigation, and state visible.
 
 ## Default: Lieflat
 
-Start with the observations, units, and relationships the reader needs to see. Compose those into a visual story: countable units can make a population tangible; individual paths can reveal outcomes hidden by an aggregate. Choose a simple comparison when the evidence is sparse.
+Choose the observations and relationships the reader needs to see. Use countable marks for quantities and individual paths for outcomes that a total would hide. A simple comparison is enough when there are few observations.
 
-Paper gray (`#f0efeb`), charcoal (`#1c1c1a`), and Inter support the story. Use readable secondary ink (`#65645f`) rather than low-contrast gray. Monospace belongs to code and machine identifiers.
+Use paper gray (`#f0efeb`), charcoal (`#1c1c1a`), and Inter. Use readable secondary ink (`#65645f`) rather than low-contrast gray. Monospace belongs to code and machine identifiers.
 
 Open space separates sections. Fine rules connect related rows. Charts use direct labels, honest scales, and marks tied to actual observations. Bars start at zero; a missing observation remains missing. One color system serves the whole artifact. Color must identify a series, state, or focal relationship.
 
@@ -30,7 +30,7 @@ Use warm stone (`#f4f0ef`), charcoal (`#312f2f`), and EB Garamond for headings a
 
 ## Mono Color
 
-Use neutral paper (`#fafaf7`) and cobalt (`#2148b8`) with a restrained terracotta accent. Give each ink a job. Let an asymmetric composition and one strong image or typographic region carry the page. Preserve empty paper. Halftone is an image treatment for supplied or original imagery, never a background pattern behind diagrams or text.
+Use neutral paper (`#fafaf7`) and cobalt (`#2148b8`) with a restrained terracotta accent. Use ink to distinguish content. Arrange the page around one image or typographic region, leaving open paper around it. Halftone is an image treatment for supplied or original imagery, never a background pattern behind diagrams or text.
 
 ## Diagrams
 
@@ -48,6 +48,6 @@ Author a standalone figure as chart JSON with `ve:chart`, or compose several fig
 
 ## Interaction and verification
 
-Preserve visible focus, browser zoom, reduced motion, and local overflow for dense content. Controls name their action. Review desktop and mobile together; fix the observed defects, then confirm the affected states. Mechanical checks supplement visual judgment.
+Preserve visible focus, browser zoom, reduced motion, and local overflow for dense content. Controls name their action. Review desktop and mobile together; fix the observed defects, then confirm the affected states. Run mechanical checks as well as inspecting screenshots.
 
 The source references and their licenses are recorded in [visual-sources.json](tools/visual-sources.json). Themes and components are original implementations; upstream reference images and noncommercial code are not bundled.

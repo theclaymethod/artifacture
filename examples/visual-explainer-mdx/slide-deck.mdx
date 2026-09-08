@@ -1,10 +1,10 @@
 import { Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
 
-<SlideDeck title="Give retries a stopping point" reviewTools={false}>
-  <Slide title="Repeated failure is still failure">
-    <p>Retrying can recover from a temporary outage. Without a limit, the same mechanism can keep invalid work alive indefinitely and hide the jobs that need repair.</p>
+<SlideDeck title="Bound retries and preserve failed jobs" reviewTools={false}>
+  <Slide title="Stop retrying invalid work">
+    <p>Retries can recover from a temporary outage. An unlimited retry loop can keep invalid jobs running indefinitely and obscure the need for repair.</p>
   </Slide>
-  <Slide title="Make the next step explicit">
+  <Slide title="Classify, delay, or quarantine">
     <Pipeline steps={[
       {title:'Classify',body:'Is the failure temporary or permanent?'},
       {title:'Delay',body:'Retry temporary failures within a fixed budget.'},
@@ -12,6 +12,6 @@ import { Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/component
     ]} />
   </Slide>
   <Slide title="Preserve identity through replay">
-    <p>A timeout can hide a successful side effect. Keep the original idempotency key and reconcile the outcome before repeating the action. A new attempt should not create a new business operation.</p>
+    <p>A timeout can hide a successful side effect. Reconcile the outcome before replay, using the original idempotency key for the same business operation.</p>
   </Slide>
 </SlideDeck>

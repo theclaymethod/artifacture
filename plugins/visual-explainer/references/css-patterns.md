@@ -1,6 +1,6 @@
 # CSS Patterns for Diagrams
 
-Reusable patterns for layout, connectors, theming, and visual effects in self-contained HTML diagrams.
+Use these patterns for custom HTML layout, theming, and containment. Prefer the shared components when they cover the task.
 
 ## Contents
 
@@ -116,49 +116,16 @@ function example() {
 </div>
 ```
 
-### Implementation Plans: Don't Dump Full Files
+### Implementation plans
 
-For implementation plans and architecture docs, **don't display entire source files inline**. Instead:
+Show the affected signatures, branches, or state changes with file paths and a short explanation. Link full files or put them in `<details>` when the reader may need them. Preserve whitespace and contain long snippets locally.
 
-1. **Show structure, not code:**
-   ```html
-   <div class="file-structure">
-     <div class="file-structure__path">src/extension.ts</div>
-     <ul class="file-structure__outline">
-       <li><code>BOOMERANG_INSTRUCTIONS</code> — System prompt for autonomous mode</li>
-       <li><code>clearState()</code> — Reset extension state</li>
-       <li><code>updateStatus()</code> — Update UI status indicator</li>
-       <li><code>/boomerang</code> command — Start autonomous task</li>
-       <li><code>/boomerang-cancel</code> command — Cancel active task</li>
-       <li><code>before_agent_start</code> hook — Inject instructions</li>
-       <li><code>agent_end</code> hook — Generate summary</li>
-     </ul>
-   </div>
-   ```
-
-2. **Use collapsible sections for full code:**
-   ```html
-   <details class="collapsible">
-     <summary>Full implementation (87 lines)</summary>
-     <pre class="code-file__body"><code>...</code></pre>
-   </details>
-   ```
-
-3. **Show key snippets only:**
-   ```html
-   <p>The core logic intercepts task completion:</p>
-   <pre class="code-block"><code>pi.on("agent_end", async () => {
-     const summary = generateSummary(workEntries);
-     boomerangComplete = true;
-   });</code></pre>
-   ```
-
-**Anti-patterns:**
-- Displaying full source files inline (100+ lines overwhelming the page)
-- Code blocks without `white-space: pre-wrap` (code runs together into unreadable wall)
-- No height constraint on long code (page becomes endless scroll)
-
-If someone needs the full file, put it in a collapsible section or link to it.
+```html
+<details class="collapsible">
+  <summary>Full implementation</summary>
+  <pre class="code-file__body"><code>...</code></pre>
+</details>
+```
 
 ## Directory Tree
 
@@ -213,7 +180,7 @@ For labeled trees, wrap in a card. For side-by-side comparisons, put two cards i
 
 ## Overflow Protection
 
-Grid and flex children default to `min-width: auto`, which prevents them from shrinking below their content width. Long text, inline code, and non-wrapping elements will blow out containers.
+Grid and flex children default to `min-width: auto`, which prevents them from shrinking below their content width. Long text, inline code, and non-wrapping elements can overflow their containers.
 
 ### Global rules
 
@@ -376,11 +343,11 @@ mermaid.initialize({
 }
 ```
 
-**Rule of thumb:** If the diagram has 10+ nodes or the text is smaller than 12px rendered, increase fontSize to 18-20px or apply CSS zoom.
+If rendered labels fall below 14px, increase their authored size, expand the canvas, or split the diagram. Keep dense detail in a local scroll container.
 
 ### Zoom Controls
 
-Add zoom controls to every `.mermaid-wrap` container for complex diagrams.
+Preserve zoom, pan, reset, and expand controls on every Mermaid container.
 
 **Small diagrams in slides.** If a diagram has fewer than ~7 nodes with no branching, it will render tiny in a full-viewport slide container. For simple linear flows (A → B → C → D), use CSS pipeline cards instead of Mermaid — see `slide-patterns.md` "CSS Pipeline Slide." Reserve Mermaid for complex graphs where automatic edge routing is actually needed.
 
@@ -481,7 +448,7 @@ Add zoom controls to every `.mermaid-wrap` container for complex diagrams.
 }
 ```
 
-**How the new zoom/pan engine works:**
+**Zoom and pan:**
 
 The SVG is rendered into `.mermaid-canvas` which is absolutely positioned inside `.mermaid-viewport`. Zooming sets the SVG's `width` and `height` styles directly. Panning applies `transform: translate()` to the canvas. The viewport has `overflow: hidden` to clip the panned content. This approach avoids CSS `zoom` (which had cross-browser quirks) and gives precise control over the diagram's size and position.
 
@@ -573,7 +540,7 @@ function initDiagram(shell) {
 document.querySelectorAll('.diagram-shell').forEach(initDiagram);
 ```
 
-This pattern removes all hardcoded IDs and supports unlimited diagrams per page. For the full implementation (including smart fit, pinch zoom, and shared drag state), use `templates/mermaid-flowchart.html` as the canonical source.
+This pattern removes all hardcoded IDs and supports multiple diagrams per page. For the full implementation (including smart fit, pinch zoom, and shared drag state), use `templates/mermaid-flowchart.html` as the canonical source.
 
 ## Grid Layouts
 
@@ -872,17 +839,9 @@ Use `::after` or a literal arrow character:
 }
 ```
 
-### SVG Curved Connector (between arbitrary nodes)
-For connections that aren't simple vertical/horizontal, use an absolutely positioned SVG overlay:
-```html
-<svg class="connectors" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;">
-  <path d="M 150,100 C 150,200 350,100 350,200" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <!-- Arrowhead -->
-  <polygon points="348,195 352,205 356,195" fill="var(--accent)"/>
-</svg>
-```
+### Connectors between positioned nodes
 
-Position the parent container as `position: relative` to scope the SVG overlay.
+Use the measured geometry in [diagrams-svg.md](diagrams-svg.md). Compute anchors from actual node bounds, route off-axis connections with rounded orthogonal elbows, and preserve the 6–10px endpoint gap. A hand-placed arrowhead or decorative curve can misstate the connection.
 
 ## Animations
 
@@ -1069,7 +1028,7 @@ Two-column comparison with diff-colored headers. For review pages, migration doc
 
 ## Collapsible Sections
 
-Native `<details>/<summary>` with styled disclosure. Zero JS, accessible. For lower-priority content: file maps, decision logs, reference sections.
+Use native `<details>/<summary>` for file maps, decision logs, and supporting references. It works without JavaScript and retains keyboard access.
 
 ```css
 details.collapsible {
@@ -1130,7 +1089,7 @@ details.collapsible .collapsible__body {
 
 ## Prose Page Elements
 
-Patterns for documentation, articles, blog posts, and other reading-first content. The key difference from visual explanations: optimize for sustained reading, not scanning.
+Use these patterns for sustained reading. Group paragraphs by their argument and keep figures near the claims they explain.
 
 ### Body Text Settings
 
@@ -1351,66 +1310,7 @@ For warnings, tips, notes, and key takeaways.
 
 ### Theme Toggle
 
-Use `data-theme` attribute for user-controllable light/dark modes. Random initial theme adds variety.
-
-```css
-:root, [data-theme="light"] {
-  --bg: #fafaf9;
-  --surface: #ffffff;
-  --text: #1c1917;
-  --text-dim: #78716c;
-  --border: #e7e5e4;
-  --accent: #0d9488;
-}
-
-[data-theme="dark"] {
-  --bg: #0c0a09;
-  --surface: #1c1917;
-  --text: #fafaf9;
-  --text-dim: #a8a29e;
-  --border: #292524;
-  --accent: #14b8a6;
-}
-```
-
-```javascript
-// Random initial theme
-const themes = ['light', 'dark'];
-document.documentElement.setAttribute('data-theme', themes[Math.floor(Math.random() * 2)]);
-
-// Toggle function
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-}
-```
-
-```html
-<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-  <svg class="theme-toggle__sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-  </svg>
-  <svg class="theme-toggle__moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </svg>
-</button>
-```
-
-```css
-.theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  z-index: 100;
-}
-[data-theme="light"] .theme-toggle__moon { display: none; }
-[data-theme="dark"] .theme-toggle__sun { display: none; }
-```
+Reuse the theme controls in the shared shell or selected standalone template. They preserve the saved preference, system fallback, accessible labels, and chart/diagram updates. Do not paste a second controller into the page or randomize the initial theme. Map custom HTML colors to the active preset through [tokens.md](tokens.md).
 
 ### Prose Anti-Patterns
 
@@ -1424,11 +1324,11 @@ Avoid these in reading-first content:
 
 ## Generated Images
 
-Follow `references/media.md` for image selection, acquisition, rights-sensitive sourcing, self-contained embedding, and fallbacks. Use generated illustrations sparingly — hero banners, conceptual illustrations, educational diagrams, and decorative accents. The patterns below define presentation containers, not acquisition policy.
+Follow `references/media.md` for image selection, acquisition, rights-sensitive sourcing, self-contained embedding, and fallbacks. Use illustrations when they explain the subject or satisfy the visual brief. The patterns below define presentation containers, not acquisition policy.
 
 ### Hero Banner
 
-Full-width image cropped to a fixed height with a gradient fade into the page background. Place at the top of the page before the title, or between the title and the first content section.
+A full-width image can introduce the subject. Preserve the meaningful crop and keep text on a readable background.
 
 ```css
 .hero-img-wrap {
@@ -1464,11 +1364,11 @@ Full-width image cropped to a fixed height with a gradient fade into the page ba
 </div>
 ```
 
-Generate with `--aspect-ratio 16:9` for hero banners.
+Use a 16:9 image when the banner composition calls for it; follow the installed image tool's API.
 
 ### Inline Illustration
 
-Centered image with border, shadow, and optional caption. Use within content sections for conceptual or educational illustrations.
+Place an illustration beside the content it explains. Add a caption only for information the image and surrounding text do not convey.
 
 ```css
 .illus {
@@ -1499,7 +1399,7 @@ Centered image with border, shadow, and optional caption. Use within content sec
 </figure>
 ```
 
-Generate with `--aspect-ratio 1:1` or `--aspect-ratio 4:3` for inline illustrations.
+Use a 1:1 or 4:3 crop when it fits the subject; follow the installed image tool's API.
 
 ### Side Accent
 

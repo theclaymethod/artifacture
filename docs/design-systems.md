@@ -2,10 +2,8 @@
 
 Artifacture's built-in presets (`lieflat`, `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`,
 `editorial`, `paper-ink`, `terminal`, `custom`) live in
-`visual-explainer-mdx/global.css`. Everything else is a **design system**: a
-user-owned artifact maintained OUTSIDE the skill and the repo, resolved from a
-registry at export time. Your brand tokens survive skill upgrades because they
-were never inside the skill to begin with.
+`visual-explainer-mdx/global.css`. Other preset names resolve to user design systems in an external registry.
+Skill updates leave that registry alone.
 
 Lieflat combines editorial chart storytelling with Inter and open layouts. Its
 `LieflatChart` renderer provides five families for units, dates, categorical
@@ -33,12 +31,11 @@ Declaration-only CSS: `--ve-*` custom properties inside a `:root { ... }`
 block (bare declarations also work; any non-custom-property rules are
 ignored). At export the loader re-scopes the declarations to
 `[data-ve-preset="<slug>"]`, so plain `:root` keeps the file valid,
-editor-friendly CSS while guaranteeing the tokens can never leak outside the
+editor-friendly CSS without applying the tokens outside the
 preset scope.
 
 Token values are inlined into shared HTML artifacts, so they may not contain
-`<` or control characters — the loader rejects such values loudly rather than
-inlining them (no legitimate `--ve-*` value needs them).
+`<` or control characters — the loader rejects them.
 
 Cover at least the core roles — bg / surfaces (`panel`, `panel-strong`,
 `row`) / text (`heading`, `text`, `muted`, `faint`) / `accent` (+ `-soft`,
@@ -68,35 +65,32 @@ automatically, mirroring the built-in `custom` preset.
 - `source` is provenance: where the tokens came from and how.
 - `fonts.imports` are inlined as `@import` lines ahead of the tokens. Each
   entry must be a plain http(s) URL with no quotes, angle brackets,
-  backslashes, parentheses, or whitespace (anything else is rejected loudly).
+  backslashes, parentheses, or whitespace (other entries are rejected).
   Remote fonts are a self-containment trade-off — every stack must end in a
-  system fallback so artifacts degrade gracefully offline.
+  system fallback for offline reading.
 - `notes` carry the system's hard rules (e.g. "serif reading text, sans-serif controls",
   "accent color identifies the selected series") so an agent styling with the system can
   honor them.
 
 ## Registry resolution order
 
-1. `$ARTIFACTURE_DESIGN_DIR` — explicit override, wins outright.
+1. `$ARTIFACTURE_DESIGN_DIR` — explicit override.
 2. `~/.artifacture/design-systems/` — the user-global registry (recommended
    home for your systems).
 3. `<repo>/design-systems/` — repo-local fallback, for clones that want
-   project-scoped systems. The repo itself ships NO systems here (design
+   project-scoped systems. The repo itself ships no user systems here (design
    systems are usually private brand material); only the directory README is
    tracked.
 
 First hit wins; lookup is by directory name.
 
-**Collision note:** `~/.artifacture` may itself BE a clone of this repo. In
-that case locations 2 and 3 are the *same* directory — the loader dedupes the
-search list so it is consulted exactly once (at the higher-priority slot), and
-the repo's `.gitignore` excludes `design-systems/*` so systems you learn into
-your global registry can never be committed to the repo by accident.
+If `~/.artifacture` is the repository checkout, locations 2 and 3 are the same
+directory. The loader searches it once, at the higher priority. The repo's
+`.gitignore` excludes `design-systems/*`.
 
 A directory that exists but is malformed (missing `tokens.css` or
-`manifest.json`, unparseable manifest) fails the export loudly rather than
-silently falling through to a lower-priority registry — a half-formed system
-shadowing another is a debugging trap.
+`manifest.json`, unparseable manifest) fails the export. The loader does not fall through to a
+lower-priority registry.
 
 ## Using a system
 
@@ -112,7 +106,7 @@ derived fallbacks and font imports) into the standalone HTML as a
 `<style data-ve-design-system>` block. Built-in names never consult the
 registry, so a user system named `terminal` cannot shadow the built-in.
 Unknown names warn and fall back to the default built-in tokens
-(`lieflat`) so nothing ships unstyled.
+(`lieflat`).
 
 The static/Hyperframes path (`ve:export-static`) renders compositions that
 carry their own styles and does not consult the registry.
@@ -138,13 +132,11 @@ decision, the size ramp, and required-token coverage.
 
 The heuristics are deterministic, and the eval suite in
 `evals/design-systems/` is their spec — fixture sources with golden expected
-tokens, run as the second leg of `npm run ve:eval`. Change a heuristic, and
-the evals tell you what it broke.
+tokens, run as the second leg of `npm run ve:eval`. Run those evals after changing a heuristic.
 
-### Agent-assisted refinement flow
+### Review the extracted system
 
-`ve:learn` gets you a faithful first draft; taste comes from a review pass.
-The intended loop, for a human or an agent:
+Extraction produces a draft. Compare its rendered output with the source:
 
 1. **Learn**: `npm run ve:learn -- <source> --name <slug>`.
 2. **Read the extraction report** in `manifest.json` — every token names the
@@ -153,10 +145,9 @@ The intended loop, for a human or an agent:
    queue.
 3. **Render a probe**: export an existing example with the new preset name
    (e.g. copy `examples/visual-explainer-mdx/preset-gallery.mdx`, set
-   `preset="<slug>"`) and eyeball surfaces, muted-text contrast, diagram grid,
+   `preset="<slug>"`) and inspect surfaces, muted-text contrast, diagram spacing,
    code panel.
-4. **Refine tokens.css** directly — it is the artifact, not the extractor
-   output. Run the exported probe through the verifier
+4. **Refine tokens.css** directly. Run the exported probe through the verifier
    (`npm run ve:verify -- <out.html>`) to catch contrast regressions.
 5. **Annotate the manifest**: real description, font `imports` +
    licensing note, and the system's hard rules under `notes`. Drop the
@@ -166,5 +157,4 @@ The synthetic `acme-terracotta` eval fixture
 (`evals/fixtures/design-systems/code/acme-terracotta-tokens.ts` and its golden
 under `expected/`) is the reference shape for step 1's input and output: a
 brand token module in, a full `--ve-*` set out, with every mapping decision
-recorded. Real systems produced by this flow are private by default — keep
-them in your user-global registry, not in a repo clone.
+recorded. Keep private systems in the user registry.

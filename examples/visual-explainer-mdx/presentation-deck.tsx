@@ -41,7 +41,7 @@ function ThesisSlide({ shortTitle, tone }: SlideMeta) {
   return (
     <PresentationSlide
 
-      title="A failed job needs a durable next step"
+      title="Keep failed jobs recoverable"
       shortTitle={shortTitle}
       tone={tone}
 
@@ -49,14 +49,14 @@ function ThesisSlide({ shortTitle, tone }: SlideMeta) {
     >
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 56, height: '100%', alignContent: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-          <p style={{ fontSize: 40, lineHeight: 1.35, margin: 0 }}>Retry a temporary failure. Retain the evidence when the job needs repair.</p>
-          <p style={{ fontSize: 28, lineHeight: 1.55, color: 'var(--ve-pres-muted)', margin: 0 }}>This example follows one job through claiming, processing, delayed retries, and quarantine. A timeout can hide success, so every attempt keeps the same operation identity.</p>
+          <p style={{ fontSize: 40, lineHeight: 1.35, margin: 0 }}>Retry temporary failures within a budget. Retain jobs that need repair.</p>
+          <p style={{ fontSize: 28, lineHeight: 1.55, color: 'var(--ve-pres-muted)', margin: 0 }}>Claim the job, process it, then schedule a retry or quarantine the failure. Keep the operation identity across attempts: a timeout may hide success.</p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <HairlineList
             items={[
               { head: 'Identity', body: 'A stable job key follows every attempt and replay.' },
-              { head: 'State', body: 'Queued, running, waiting, and quarantined mean different things.' },
+              { head: 'State', body: 'Record whether the job is queued, running, waiting, or quarantined.' },
               { head: 'Evidence', body: 'Retain the last error and attempt history when work cannot proceed.' },
             ]}
           />
@@ -94,7 +94,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
   return (
     <PresentationSlide
 
-      title="Separate retry from repair"
+      title="From claim to retry or repair"
       shortTitle={shortTitle}
       tone={tone}
 
@@ -116,7 +116,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
             drillId="sys-guard"
             eyebrow=""
             title="Inspect a quarantined job"
-            body="Keep the failure context beside the repair controls."
+            body="Read the stored error before replay."
             origin="left bottom"
             minHeight={132}
           >
@@ -138,7 +138,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
                   Keep for review
                 </button>
                 <a href="#sys-guard" data-fixture="link" style={{ color: 'var(--ve-pres-cta)', fontSize: 24 }}>
-                  Jump to this job record
+                  Open this job record
                 </a>
                 <input
                   aria-label="Job key"
@@ -158,7 +158,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
                   style={{ border: '1px solid var(--ve-pres-hair)', background: 'transparent', color: 'inherit', padding: '10px 12px', font: 'inherit', resize: 'none' }}
                 />
                 <span data-interactive="true" data-fixture="opt-out" style={{ fontSize: 24, color: 'var(--ve-pres-muted)' }}>
-                  Repair notes stay available while this sheet is open.
+                  These example controls do not update a queue.
                 </span>
               </div>
             </div>
@@ -185,7 +185,7 @@ function SystemSlide({ shortTitle, tone }: SlideMeta) {
             drillId="sys-tokens"
             eyebrow=""
             title="A stable replay key"
-            body="A second attempt is still the same operation."
+            body="Reuse the original operation key."
             origin="right bottom"
             minHeight={132}
           >
@@ -210,7 +210,7 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
   return (
     <PresentationSlide
 
-      title="Three contracts keep replay predictable"
+      title="Ownership, identity, and evidence"
       shortTitle={shortTitle}
       tone={tone}
 
@@ -244,7 +244,7 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
               'Keep the same operation key for every attempt.',
               'Record a completed outcome before acknowledging.',
               'Look up that outcome after an uncertain timeout.',
-              'Do not confuse a new attempt with a new operation.',
+              'Every attempt must retain the same operation identity.',
             ],
           },
           {
@@ -267,7 +267,7 @@ function LayersSlide({ shortTitle, tone }: SlideMeta) {
           {/* Light-tone primary CTA: --ve-accent remaps to the ink color on
               this surface, so the chip must flip its text to the slide
               background — pinned by the light-tone-primary-cta eval. */}
-          <DrillChip drillId="layers-tones" label="What each outcome means" variant="primary" onClick={() => setOpen(true)} />
+          <DrillChip drillId="layers-tones" label="Job outcomes" variant="primary" onClick={() => setOpen(true)} />
         </div>
       </div>
       {open ? (
@@ -298,7 +298,7 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
   return (
     <PresentationSlide
 
-      title="Choose the recovery path"
+      title="Retry, reconcile, or repair"
       shortTitle={shortTitle}
       tone={tone}
 
@@ -320,7 +320,7 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
         </div>
         <div style={{ alignSelf: 'end', display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 44 }}>
           <div>
-            <DrillChip drillId="ask-fanout" label="Where the record is used" onClick={() => setOpen(true)} />
+            <DrillChip drillId="ask-fanout" label="Record consumers" onClick={() => setOpen(true)} />
           </div>
         </div>
       </div>
@@ -346,10 +346,10 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
 
 export default function PresentationDeckDemo({ preset = 'lieflat' }: { preset?: string }) {
   return (
-    <PresentationDeck title="How a queue recovers" preset={preset}>
-      <ThesisSlide shortTitle="Recovery" tone="dark" />
+    <PresentationDeck title="Retry and repair failed jobs" preset={preset}>
+      <ThesisSlide shortTitle="Job record" tone="dark" />
       <SystemSlide shortTitle="Attempts" tone="dark" />
-      <LayersSlide shortTitle="Contracts" tone="light" />
+      <LayersSlide shortTitle="Ownership" tone="light" />
       <AskSlide shortTitle="Outcomes" tone="accent" />
     </PresentationDeck>
   );

@@ -2,17 +2,17 @@ import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-m
 
 export default function VisualLanguages() {
   const themes = [
-    { id: 'lieflat', title: 'Lieflat', text: 'Countable units, dated observations, and individual record paths tell data stories. Paper, charcoal, and open spacing support the reading.' },
-    { id: 'algebrica', title: 'Algebrica', text: 'Warm stone, serif headings, and a comfortable reading measure for definitions, proofs, and sustained explanations.' },
-    { id: 'mono-color', title: 'Mono Color', text: 'Cobalt ink on neutral paper, with a restrained second ink for one meaningful point of emphasis.' },
+    { id: 'lieflat', title: 'Lieflat', text: 'Countable units, dated observations, and individual paths on gray paper, drawn in charcoal.' },
+    { id: 'algebrica', title: 'Algebrica', text: 'Serif type on warm stone for definitions, proofs, and longer explanations.' },
+    { id: 'mono-color', title: 'Mono Color', text: 'Cobalt on neutral paper, with a second ink for emphasis.' },
   ];
   return (
-    <ExplainerShell title="Three ways to make the same idea clear" summary="Choose a visual language for the reading task. The facts, labels, and relationships stay the same." reviewTools={false}>
+    <ExplainerShell title="Compare the three themes" summary="The same source-to-HTML diagram in Lieflat, Algebrica, and Mono Color." reviewTools={false}>
       {themes.map((theme) => (
         <div key={theme.id} data-ve-preset={theme.id} style={{ background: 'var(--ve-bg)', color: 'var(--ve-text)', padding: 'clamp(20px, 4vw, 48px)' }}>
           <Section title={theme.title}>
             <p style={{ marginBottom: 28, maxWidth: '65ch', fontSize: 'var(--ve-shell-summary-size)', lineHeight: 1.6 }}>{theme.text}</p>
-            <DiagramCanvas title="Source becomes an artifact" nodes={[{ id: 'source', label: 'Source', detail: 'Editable facts and structure' }, { id: 'render', label: 'Render', detail: 'Apply the selected visual language' }, { id: 'read', label: 'Read', detail: 'Inspect the result in a browser' }]} edges={[{ from: 'source', to: 'render' }, { from: 'render', to: 'read' }]} />
+            <DiagramCanvas title="Source to HTML" nodes={[{ id: 'source', label: 'Source', detail: 'Editable content' }, { id: 'render', label: 'Render', detail: 'Apply the theme' }, { id: 'read', label: 'Read', detail: 'Inspect the result in a browser' }]} edges={[{ from: 'source', to: 'render' }, { from: 'render', to: 'read' }]} />
           </Section>
         </div>
       ))}

@@ -1,7 +1,7 @@
 import { ExplainerShell, MermaidBlock, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="A job can wait, finish, or need repair" summary="This state model separates a scheduled retry from a completed attempt and a failure that needs human attention." reviewTools={false}>
-  <Section title="Bound the retry path">
+<ExplainerShell title="Job states and retry limits" summary="Temporary failures wait for a scheduled retry. Invalid input and exhausted retry budgets go to quarantine." reviewTools={false}>
+  <Section title="From queue to completion or quarantine">
     <MermaidBlock chart={`stateDiagram-v2
   [*] --> Queued
   Queued --> Running: claim
@@ -11,6 +11,6 @@ import { ExplainerShell, MermaidBlock, Section } from '../../visual-explainer-md
   Running --> Quarantined: invalid input or exhausted budget
   Quarantined --> Queued: repair and replay
   Complete --> [*]`} />
-    <p>A delayed job has not completed. Quarantine preserves its identity and failure context. Manual replay returns to the normal queue so the same claiming and idempotency rules still apply.</p>
+    <p>Waiting leaves the job incomplete. Quarantine retains its identity and failure context. After repair, manual replay uses the normal queue, claiming rules, and idempotency checks.</p>
   </Section>
 </ExplainerShell>

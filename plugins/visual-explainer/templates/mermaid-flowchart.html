@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CI/CD Pipeline — Reference Template</title>
+<title>Release pipeline</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -115,9 +115,9 @@
 
 <div class="container">
 
-  <h1>From a passing build to production</h1>
+  <h1>Check staging before approving production</h1>
 
-  <p class="description">Checks run in parallel before a staging deployment. Production waits for a smoke test and approval. A failed smoke test rolls staging back.</p>
+  <p class="description">Lint, type checks, and tests run in parallel before the staging deployment. A passing smoke test permits approval; a failure rolls staging back.</p>
 
   <section class="diagram-shell">
     <p class="diagram-shell__hint">Drag to pan. Use the controls or Ctrl/Cmd + wheel to zoom.</p>

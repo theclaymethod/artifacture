@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Request Ledger — Mono-Industrial Slides</title>
+<title>Durable request telemetry</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -221,7 +221,7 @@
     align-self: start;
   }
 
-  .slide--section { display: flex; align-items: center; }
+  .slide--section { display: flex; justify-content: safe center; align-items: flex-start; }
 
   .slide--section .section-title {
     font-size: clamp(28px, 4vw, 44px);
@@ -423,8 +423,56 @@
   .slide--bleed { display: flex; justify-content: center; gap: 32px; }
 
   @media (max-width: 768px) {
-    .slide { padding: 24px 20px; }
-    .slide--split { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 48px; }
+    .theme-toggle { top: calc(12px + env(safe-area-inset-top)); right: 20px; }
+    .deck {
+      margin-top: calc(72px + env(safe-area-inset-top));
+      height: calc(100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+    .slide { height: 100%; padding: 32px 20px; }
+    .slide--split { grid-template-columns: 1fr; align-content: safe center; gap: 32px; }
+    .deck-dots {
+      left: 16px;
+      right: 72px;
+      top: auto;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      transform: none;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 0;
+      padding: 0;
+      min-height: 44px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .deck-dot {
+      position: relative;
+      flex: 0 1 28px;
+      min-width: 24px;
+      width: 28px;
+      height: 44px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .deck-dot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      transform: translate(-50%, -50%);
+      background: currentColor;
+    }
+    .deck-dot:hover { background: transparent; }
+    .deck-dot.active { transform: none; background: transparent; }
+    .deck-dot.active::before { width: 9px; height: 9px; }
+    .deck-counter { right: 16px; bottom: calc(26px + env(safe-area-inset-bottom)); text-shadow: none; }
+    .deck-hints { display: none; }
+    .deck-dot { color: var(--text-secondary); }
+    .deck-dot.active { color: var(--text-display); }
   }
 </style>
 </head>
@@ -464,7 +512,7 @@
 
     <div>
 
-      <div class="section-title">Why a ledger, and why now.</div>
+      <div class="section-title">Requests lost during handler failures</div>
     </div>
 
   </section>
@@ -472,11 +520,11 @@
   <section class="slide slide--layered slide--content">
 
     <div>
-      <h2 class="slide__heading">We were losing telemetry during handler failures.</h2>
+      <h2 class="slide__heading">Handler failures left gaps in telemetry.</h2>
       <p class="slide__body" style="margin-top: 16px;">
-        Whenever a handler panicked, its request/response was never logged. That blind spot
-        made incident reconstruction unreliable and billing impossible to reconcile. The fix is
-        to decouple logging from handling: write first, then route.
+        When a handler panicked, its request and response went unlogged. Missing records
+        made incident reconstruction unreliable and prevented billing reconciliation.
+        Persist each request before routing it to a handler.
       </p>
     </div>
 
@@ -485,10 +533,9 @@
   <section class="slide slide--split">
 
     <div>
-      <h2 class="slide__heading">Three rules the ledger enforces.</h2>
+      <h2 class="slide__heading">Persistence, consumption, and replay</h2>
       <p class="slide__body" style="margin-top: 16px;">
-        Every component in the system derives its behavior from these three properties.
-        Nothing downstream is allowed to violate them.
+        All components must follow these rules, including downstream consumers.
       </p>
     </div>
     <div class="split__points">
@@ -498,11 +545,11 @@
       </div>
       <div class="split__item">
 
-        <div class="split__item-text"><strong>Read from the ledger, not the stream.</strong> Downstream services subscribe by offset.</div>
+        <div class="split__item-text"><strong>Consume the persisted ledger.</strong> Downstream services subscribe by offset.</div>
       </div>
       <div class="split__item">
 
-        <div class="split__item-text"><strong>Replay is explicit.</strong> Consumers can return to a retained offset.</div>
+        <div class="split__item-text"><strong>Replay retained records.</strong> Consumers can return to a retained offset.</div>
       </div>
     </div>
 
@@ -510,7 +557,7 @@
 
   <section class="slide slide--diagram">
 
-    <h2 class="slide__subheading">The durability boundary separates who can lose data from who can't.</h2>
+    <h2 class="slide__subheading">Consumers recover from the ledger.</h2>
     <div class="mermaid-wrap">
       <div class="zoom-controls">
         <button aria-label="Zoom in" type="button" onclick="zoomDiagram(this, 1.1)" title="Zoom in">+</button>
@@ -530,11 +577,11 @@ graph LR
 
   </section>
 
-  <section class="slide slide--table"><h2 class="slide__subheading">Capacity needs a recovery margin</h2><p class="slide__body">Illustrative measurements; retain the measurement window when replacing these values.</p><div class="table-scroll"><table class="data-row"><thead><tr><th>Measure</th><th class="num">Observed</th><th>Interpretation</th></tr></thead><tbody><tr><td>Peak events per second</td><td class="num">1.2 million</td><td>Short bursts</td></tr><tr><td>Sustained events per second</td><td class="num">480,000</td><td>Continuous load</td></tr><tr><td>Headroom</td><td class="num">2.6×</td><td>Below the 3× target</td></tr></tbody></table></div></section>
+  <section class="slide slide--table"><h2 class="slide__subheading">Headroom falls below the 3× target</h2><p class="slide__body">Illustrative capacity measurements.</p><div class="table-scroll"><table class="data-row"><thead><tr><th>Measure</th><th class="num">Observed</th><th>Interpretation</th></tr></thead><tbody><tr><td>Peak events per second</td><td class="num">1.2 million</td><td>Short bursts</td></tr><tr><td>Sustained events per second</td><td class="num">480,000</td><td>Continuous load</td></tr><tr><td>Headroom</td><td class="num">2.6×</td><td>Below the 3× target</td></tr></tbody></table></div></section>
 
   <section class="slide slide--table">
 
-    <h2 class="slide__subheading">End-to-end budget is 80ms. We are on it, but one hop is over.</h2>
+    <h2 class="slide__subheading">The ledger exceeds its 40 ms allocation.</h2>
     <div class="table-scroll">
       <table class="data-row">
         <thead>
@@ -584,7 +631,7 @@ graph LR
 
   <section class="slide slide--code">
 
-    <h2 class="slide__subheading">Producers call one function. Everything else is routing.</h2>
+    <h2 class="slide__subheading">Validate and persist through writeRequest().</h2>
     <div class="code-block">
       <span class="code-filename">gateway/write.ts</span>
 <pre><span class="kw">export async function</span> writeRequest(req: Request): <span class="kw">Promise</span>&lt;LedgerAck&gt; {
@@ -600,11 +647,10 @@ graph LR
 
   <section class="slide slide--quote">
 
-    <blockquote class="quote-body">If it isn't in the ledger, it didn't happen.</blockquote>
-    <cite class="quote-cite">Design principle in this example</cite>
+    <blockquote class="quote-body">A handler failure must leave the request recoverable.</blockquote>
   </section>
 
-  <section class="slide slide--bleed"><h2 class="slide__heading">Check the failure boundary.</h2><p class="slide__body">Stop a handler, replay its records, and confirm that requests remain recoverable.</p></section>
+  <section class="slide slide--bleed"><h2 class="slide__heading">Stop a handler and verify replay.</h2><p class="slide__body">Replay the retained records and confirm that the requests remain recoverable.</p></section>
 
 </div>
 

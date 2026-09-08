@@ -1,10 +1,8 @@
 # GSAP Rules for Hyperframes Compositions
 
-GSAP powers every Hyperframes composition's animation timeline. The upstream engine has strict determinism requirements — violating them produces broken renders (hangs, nondeterministic frames, crashes). This file summarizes the rules the skill must obey.
+Hyperframes seeks a paused GSAP timeline to render each frame. Keep the timeline deterministic so seeking produces the same image every time.
 
 For general GSAP documentation see [greensock.com](https://greensock.com). This file covers only the Hyperframes-specific constraints.
-
----
 
 ## Registration
 
@@ -24,11 +22,9 @@ Required constraints:
 - One timeline per composition ID
 - Composition IDs must match the `data-composition-id` on the composition root
 
----
-
 ## Forbidden APIs and Patterns
 
-These are silent killers. They look like valid GSAP but break in Hyperframes' deterministic frame-seek model.
+These patterns conflict with deterministic frame seeking.
 
 | Pattern | Why it breaks |
 |---|---|
@@ -40,8 +36,6 @@ These are silent killers. They look like valid GSAP but break in Hyperframes' de
 | CSS `@keyframes` with `animation-iteration-count: infinite` | Same infinite-loop problem |
 | `requestAnimationFrame(...)` manual loops | Fights the engine's seek behavior |
 | `tl.play()` / `tl.seek()` from your code | Engine owns these calls |
-
----
 
 ## Allowed Randomness
 
@@ -60,8 +54,6 @@ const rand = seedRand(42);
 
 The seed value must be a literal constant — not derived from `Date.now()` or anything that changes between runs.
 
----
-
 ## Looping Patterns
 
 Instead of `repeat: -1`, compute a finite repeat count from the composition's duration:
@@ -79,8 +71,6 @@ tl.to(".dot", {
 }, 0);
 ```
 
----
-
 ## Media Element Rules
 
 Inside a Hyperframes composition:
@@ -89,8 +79,6 @@ Inside a Hyperframes composition:
 - Audio should travel as `<audio>` elements, not as the audio track of a `<video>` (even if the source file has both)
 - Never call `video.play()`, `audio.play()`, or `.currentTime = …` from your own code — the engine seeks these for you
 - `data-track-index` on media elements controls audio mixing ordering; it does NOT affect visual z-order (use CSS `z-index`)
-
----
 
 ## Entrance Animation Patterns
 
@@ -101,7 +89,7 @@ The most common GSAP patterns used in explainer videos:
 tl.from(".title", { y: 40, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.2);
 ```
 
-### Scale-in (stats, badges)
+### Scale-in (an explained focal element)
 ```js
 tl.from(".stat", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.7)" }, 0.5);
 ```
@@ -117,20 +105,7 @@ tl.from(".word", { y: 30, opacity: 0, duration: 0.4, ease: "power2.out", stagger
 tl.to(".path", { strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" }, 1.5);
 ```
 
-### Count-up (numbers)
-```js
-const counter = { val: 0 };
-tl.to(counter, {
-  val: 4200,
-  duration: 1.6,
-  ease: "power2.out",
-  onUpdate: () => {
-    document.querySelector(".count").textContent = Math.floor(counter.val).toLocaleString();
-  },
-}, 2.0);
-```
-
----
+Keep factual values visible at their actual values. Do not count them up as an entrance effect.
 
 ## Timeline Composition for Hyperframes
 

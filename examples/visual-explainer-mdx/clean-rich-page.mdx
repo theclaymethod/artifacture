@@ -1,22 +1,22 @@
 import { DecisionMatrix, DiagramCanvas, DiffBlock, ExplainerShell, JsonTree, Quiz, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="Zero can be a cache hit" summary="The data value and the result of the lookup answer different questions. A cache must preserve both." reviewTools={false}>
+<ExplainerShell title="Zero can be a cache hit" summary="A stored zero is valid data. Test whether the key is present before treating the lookup as a miss." reviewTools={false}>
   <Section title="Check for absence">
     <DiagramCanvas layout="flow" description="A lookup returns a found value, including zero, or follows the missing path."
       nodes={[{id:'lookup',label:'Read cache'},{id:'present',label:'Value present?',shape:'diamond'},{id:'return',label:'Return stored value'},{id:'origin',label:'Read origin'}]}
       edges={[{from:'lookup',to:'present'},{from:'present',to:'return',label:'yes, including zero'},{from:'present',to:'origin',label:'no'}]} />
   </Section>
-  <Section title="Change the predicate">
+  <Section title="Replace the truthiness check">
     <DiffBlock language="ts" filename="Illustrative numeric cache" before={`const value = cache.get(key);
 return { found: Boolean(value), value };`} after={`const value = cache.get(key);
 return { found: value !== undefined, value };`} />
-    <p>In this numeric map, undefined means that a key is absent. The new condition preserves zero without changing the stored value.</p>
+    <p>This map stores numbers only, so undefined identifies a missing key. Testing for it preserves a stored zero.</p>
   </Section>
-  <Section title="Keep presence separate from data">
+  <Section title="Return the value and its presence">
     <JsonTree data={{key:'balance',found:true,value:0}} />
     <DecisionMatrix rows={[{Stored:'0',Found:'true',Reason:'Zero is a number.'},{Stored:'42',Found:'true',Reason:'The key has a numeric value.'},{Stored:'No entry',Found:'false',Reason:'Map.get returns undefined.'}]} />
   </Section>
-  <Section title="Check the distinction">
+  <Section title="Why truthiness fails">
     <Quiz questions={[{q:'Why does Boolean(value) lose information?',options:[{text:'It treats zero as false.',correct:true,why:'Truthiness does not establish whether the key exists.'},{text:'It changes the stored number.',why:'The conversion produces a separate boolean; the stored number is unchanged.'}]}]} />
   </Section>
 </ExplainerShell>

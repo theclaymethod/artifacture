@@ -240,8 +240,8 @@
 
 <div class="container">
 
-  <h1>The recovery path needs a plan</h1>
-  <p class="subtitle">Illustrative gateway review: five requirements have an implementation approach. Recovery after a failed write is still unspecified.</p>
+  <h1>Write recovery remains undefined</h1>
+  <p class="subtitle">This illustrative review covers six gateway requirements. Five have an implementation approach; recovery after a failed write remains unspecified.</p>
 
 
 
@@ -253,12 +253,12 @@
 <tr><td>Avoid duplicate writes</td><td>Store the idempotency key with the request record.</td><td><span class="status status--match">Covered</span></td></tr>
 <tr><td>Limit each tenant independently</td><td>Keep rate-limit state per tenant.</td><td><span class="status status--match">Covered</span></td></tr>
 <tr><td>Measure time spent waiting</td><td>Record arrival and acknowledgement times.</td><td><span class="status status--match">Covered</span></td></tr>
-<tr><td>Recover from an interrupted write</td><td>Retry and reconciliation behavior are unspecified.</td><td><span class="status status--gap">Needs a plan</span></td></tr>
+<tr><td>Recover from an interrupted write</td><td>Retry and reconciliation behavior are unspecified.</td><td><span class="status status--gap">Unspecified</span></td></tr>
 </tbody></table>
     </div>
   </div>
 
-  <details class="collapsible"><summary>What the recovery plan must answer</summary><div class="collapsible__body"><p>Define when a client can retry, how the gateway recognizes a completed write, and how to resolve an unknown result after a timeout. Exercise that behavior before rollout.</p></div></details>
+  <details class="collapsible"><summary>Define retry and reconciliation</summary><div class="collapsible__body"><p>Specify when a client can retry and how the gateway recognizes a completed write. Define reconciliation for timeouts with unknown outcomes, then exercise recovery before rollout.</p></div></details>
 
 </div>
 

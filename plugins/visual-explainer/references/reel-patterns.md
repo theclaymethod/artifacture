@@ -1,10 +1,8 @@
-# Reel Patterns — Brain-Rot-Friendly Fast-Cut Explainer Video
+# Short explainer videos
 
-**What this is.** The fast-paced explainer format. 30–60 seconds total. Hard cuts every 1–2 seconds. Burned-in captions. TTS narration. Kinetic typography. Progressive diagram reveal. Designed to hold attention in silent-autoplay feeds.
+Use a reel for a 30–60 second explanation that remains understandable without sound. Build around one claim, supporting evidence, readable captions, and deliberate cuts.
 
-This format is a sibling of `long-form` (slide-paced dwell scenes). Pick one per render; don't mix.
-
----
+Use long-form when the reader needs more time with a diagram or qualification.
 
 ## Two aspect ratios — same format, different canvases
 
@@ -15,7 +13,7 @@ Reel is defined by **pacing and structure** (hard cuts, 7-beat narrative, kineti
 | **9:16 vertical** (default) | 1080 × 1920 | `templates/hyperframes-reel.html` | Shorts, Reels, TikTok — phone silent-autoplay feeds |
 | **16:9 landscape** | 1920 × 1080 | `templates/hyperframes-reel-landscape.html` | X/Twitter embeds, LinkedIn, YouTube-embedded, desktop Slack/Discord, conference intro stings |
 
-Pick by asking where the video will be watched. If the primary surface is a feed you'd scroll on a phone, pick `9:16`. If it's embedded in an article, posted to LinkedIn, or played on a desktop screen, pick `16:9`.
+Use the requested destination to choose the aspect ratio. If the primary surface is a feed you'd scroll on a phone, pick `9:16`. If it's embedded in an article, posted to LinkedIn, or played on a desktop screen, pick `16:9`.
 
 ### What differs between the two aspects
 
@@ -39,8 +37,6 @@ Pick by asking where the video will be watched. If the primary surface is a feed
 
 Pick aspect via the `--aspect=9:16` or `--aspect=16:9` flag on `/generate-video` when `--style=reel`. If unspecified, use the default 9:16. Ask only when supplied requirements conflict; follow [clarify.md](clarify.md).
 
----
-
 ## When to Use Reel Format
 
 Pick reel when:
@@ -55,9 +51,7 @@ Pick long-form instead when:
 - The piece is intended for a team meeting or onboarding flow
 - The narration requires nuance (multiple clauses, qualifications)
 
-If in doubt, ask the user.
-
----
+Use the request and defaults; ask only about a material unresolved choice.
 
 ## Structural Template
 
@@ -75,24 +69,20 @@ Time    Beat                     Typical content
 30.0s   CTA                      URL, handle, follow prompt — 2 seconds max
 ```
 
-This is a template, not a rule. Shorter reels collapse beats; longer ones add a second PROOF or second MECHANISM. Total duration target: 30–45s for max retention, 60s max.
-
----
+This is a template, not a rule. Shorter reels collapse beats; longer ones add a second PROOF or second MECHANISM. Target 30–45 seconds, up to 60 unless the user requests longer.
 
 ## Cut Pacing
 
-- **Hard cuts every 1.2–1.8 seconds during body beats.** The eye needs novelty to stay engaged.
-- **Slow during the mechanism.** Diagram reveals can dwell for 3–5 seconds as long as elements are actively animating in.
+- **Start with 1.2–1.8 second cuts during body beats.** Lengthen a shot when reading or comparison needs more time.
+- **Slow during the mechanism.** Let diagrams dwell for 3–5 seconds or longer when their labels need it. Motion is not required throughout the hold.
 - **Never cut mid-word of a voiceover line.** Each cut lands on a phrase boundary.
-- **No dissolve transitions inside a beat.** Dissolves read as "slideshow" — reserve them for beat-to-beat transitions only, and sparingly.
+- **No dissolve transitions inside a beat.** Reserve them for meaningful boundaries.
 
 Use shader transitions from Hyperframes registry (`flash-through-white`, `domain-warp-dissolve`, `grid-pixelate-wipe`) between major beats, not within beats.
 
----
-
 ## Typography Rules
 
-Reel typography is louder and blunter than page or long-form typography.
+Size text for the intended viewing surface and the time available to read it.
 
 | Role | Size | Weight | Treatment |
 |---|---|---|---|
@@ -105,11 +95,9 @@ Reel typography is louder and blunter than page or long-form typography.
 
 Body-copy paragraphs belong in long-form, not reel. If the content needs a paragraph, it needs long-form.
 
----
-
 ## Kinetic Typography — the Primary Motion Pattern
 
-Text animates in word-by-word or line-by-line. Rarely character-by-character (that reads as "meme font parade" unless executed carefully).
+Reveal words or lines in reading order. Use character-level animation only when the characters themselves matter.
 
 Recommended GSAP approach (uses SplitText or manual `<span>` wrapping):
 
@@ -134,9 +122,7 @@ tl.to(".hook .w", {
 }, 1.7);
 ```
 
-Word-by-word is the workhorse. Use line-by-line for longer claims that exceed 5–6 words.
-
----
+Use line reveals for claims longer than 5–6 words.
 
 ## Progressive Diagram Reveal
 
@@ -144,7 +130,7 @@ For the MECHANISM beat. An inline SVG diagram (authored per `diagrams-svg.md` ru
 
 Required authoring pattern:
 
-1. Author the final-state SVG using the SVG-primary rules. Run the Removal Test. This is the "end frame."
+1. Author the final-state SVG using the SVG-primary rules. Check that every element adds meaning. This is the "end frame."
 2. Tag each major element with a class: `.node-1`, `.node-2`, `.arrow-1`, `.label-1`, etc.
 3. In the GSAP timeline, build a staged reveal:
 
@@ -169,8 +155,6 @@ tl.from(".focal", { scale: 0.4, opacity: 0, duration: 0.5, ease: "back.out(2)" }
 
 All the shape/grid/focal rules from `diagrams-svg.md` still apply — the animation only changes *how* the final-state diagram arrives on screen, not what the final state looks like. The focal rule (≤ 2 accent uses) is non-negotiable.
 
----
-
 ## Ken Burns + Shader Transitions
 
 For still imagery (screenshots, photos, diagrams between beats):
@@ -188,17 +172,15 @@ Keep the scale delta small (1.0 → 1.08–1.15). Large deltas look seasick.
 
 One transition per beat boundary. Never stack two. Never use inside a single beat.
 
----
-
 ## TTS + Burned-in Captions
 
-Reel output defaults to silent-autoplay, so captions are not optional — they're how the viewer reads the narration.
+Reels include captions by default so the narration remains available without sound. Honor `--no-captions` when supplied.
 
 ### The verbatim-transcript rule
 
-**Captions are a transcript of the narration, not a paraphrase or summary of the visuals.** When a viewer watches with sound on, their eyes read the caption while their ears hear the narration; those two streams must match word-for-word or the mismatch is distracting. When they watch with sound off, the caption IS the narration.
+**Captions are a transcript of the narration, not a paraphrase or summary of the visuals.** Captions must match the narration word for word.
 
-Common failure mode: the author writes captions as "headlines" for each beat ("Pareto leaves are the best tradeoffs") while the narration says something slightly different ("Pareto leaves are the tradeoffs nothing else dominates"). Do not do this. Captions come out of the transcript, not out of the author's head.
+Do not substitute scene headlines for the transcript.
 
 **Workflow:** generate TTS → transcribe → build captions from the transcript. Never hand-author caption text.
 
@@ -208,7 +190,7 @@ npx hyperframes tts "Narration script here, written as a single paragraph." \
   --voice af_nova \
   --output narration.wav
 ```
-Voice choices ship with the Hyperframes install. `af_nova` is a safe neutral default. The skill can offer a small voice menu via AskUserQuestion if the user hasn't picked.
+Use the supplied voice or the `af_nova` default. Voice choices ship with Hyperframes.
 
 ### Generate word-level transcript
 ```bash
@@ -246,19 +228,15 @@ If a sentence is too long for one on-screen line (roughly > 9 words on 9:16), sp
 Caption styling: 36–44px, weight 600, high-contrast on a solid dark pill with generous horizontal padding. Keep it near the bottom of the frame without spanning full width; the caption should read like a focused overlay, not a chrome strip.
 
 ### Sync cuts to narration
-Narration script lines align with beat boundaries. Write the script first, time it with TTS, then build the visual timeline to match the sentence boundaries in the transcript. Pacing should feel rehearsed, not overdubbed.
-
----
+Narration script lines align with beat boundaries. Write the script first, time it with TTS, then build the visual timeline to match the sentence boundaries in the transcript. Keep cuts and caption timing aligned with the recorded speech.
 
 ## Reel-Specific Layout Rules
 
 - **Full-bleed everything.** No gutters, no padded frames, no visible background except the composition's own canvas.
-- **Single focal element per frame.** One stat, one headline, one diagram element pulsing. Never three cards competing.
+- **Single focal element per frame.** One claim, one figure, or one meaningful change. Keep supporting detail subordinate.
 - **Vertical hierarchy.** Primary content in the top two-thirds. Captions in the bottom third. No mixing.
-- **Safe zone.** Leave 100px of breathing room top and bottom — phone UI chrome (clock, home bar) overlaps the edges.
+- **Safe zone.** Use the aspect-specific clearance above: 100px top / 200px bottom for 9:16; 60px top / 140px bottom for 16:9.
 - **Contrast checks.** Run `npx hyperframes validate` (WCAG contrast audit) before final render.
-
----
 
 ## Verification After Render
 
@@ -267,11 +245,11 @@ Follow the verification flow from `references/hyperframes.md`:
 1. Render at `--quality draft`
 2. Extract 3 keyframes (start / mid / end) via `scripts/extract-keyframes.sh`
 3. Show the keyframes to the user via the mechanism described in `commands/generate-video.md`
-4. On approval, render at `--quality standard` for delivery
+4. After inspection and repairs, render at `--quality standard` within the session's authorization
 
 Specifically for reels, the 3 keyframes should land on:
 - The hook (≤ 2s)
 - The middle of the mechanism reveal
 - The CTA / resolution
 
-If any keyframe shows text cut off by the phone safe zone, caption illegibility, or a static dead frame, fix before final.
+If any keyframe shows text cut off by the phone safe zone, caption illegibility, or insufficient reading time, fix before final.

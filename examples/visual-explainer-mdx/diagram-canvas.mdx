@@ -2,8 +2,8 @@ import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-m
 
 export default function RequestFlow() {
   return (
-    <ExplainerShell title="A cache miss takes the longer path" summary="The API checks the cache before reading the database. On a miss, it stores the result so a later request can reuse it." reviewTools={false}>
-      <Section title="Read, then reuse">
+    <ExplainerShell title="Cache hits and misses" summary="The API checks the cache before reading the database. On a miss, it stores the result so a later request can reuse it." reviewTools={false}>
+      <Section title="Request flow">
         <DiagramCanvas title="Request handling with a cache" layout="flow"
           nodes={[
             { id: 'request', label: 'Request', detail: 'GET /items/:id' },
@@ -21,8 +21,8 @@ export default function RequestFlow() {
           ]}
         />
       </Section>
-      <Section title="What changes on a miss">
-        <p>The database read and cache write add work to this request. The next request can take the shorter path until the entry expires or is invalidated. This example describes the sequence; it does not claim a measured speedup.</p>
+      <Section title="A miss reads and stores the record">
+        <p>A miss adds a database read and a cache write. Later requests can reuse the entry until it expires or is invalidated. The diagram shows the sequence, without a measured speedup.</p>
       </Section>
     </ExplainerShell>
   );

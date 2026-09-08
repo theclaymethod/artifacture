@@ -2,7 +2,7 @@ import { DiagramWalkthrough, ExplainerShell, Section } from '../../visual-explai
 
 export default function RequestWalkthrough() {
   return (
-    <ExplainerShell title="Follow a request through the cache" summary="A cache miss reaches the database before the response can return. Play the sequence or step through each connection." reviewTools={false}>
+    <ExplainerShell title="A cache miss, step by step" summary="On a cache miss, the database supplies the record returned to the caller." reviewTools={false}>
       <DiagramWalkthrough title="Request handling on a cache miss" layout="flow" direction="horizontal"
           nodes={[
             { id: 'request', label: 'Request', detail: 'GET /items/:id' },
@@ -16,13 +16,13 @@ export default function RequestWalkthrough() {
             { id: 'return-record', from: 'database', to: 'response' },
           ]}
           steps={[
-            { edgeId: 'check-cache', caption: 'The request asks the cache for an existing result.' },
-            { edgeId: 'read-record', caption: 'The cache has no current entry, so the database reads the record.' },
-            { edgeId: 'return-record', caption: 'The record returns to the caller in the response.' },
+            { edgeId: 'check-cache', caption: 'Look up the requested record in the cache.' },
+            { edgeId: 'read-record', caption: 'No cached entry exists. Read the record from the database.' },
+            { edgeId: 'return-record', caption: 'Return the record to the caller.' },
           ]}
       />
-      <Section title="What this sequence shows">
-        <p>The moving point follows each declared connection in order. Its speed is a reading aid, not a measurement of network latency. A cache hit would take a different path; this example follows only the miss.</p>
+      <Section title="Sequence and timing">
+        <p>The point follows the cache-miss path in order. Animation timing does not represent network latency. A cache hit would follow a different path.</p>
       </Section>
     </ExplainerShell>
   );

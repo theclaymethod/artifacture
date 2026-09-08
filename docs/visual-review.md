@@ -1,6 +1,6 @@
 # Visual review
 
-The September 2026 refresh was compared in a browser against the original visual references, using screenshots at desktop and phone widths. The comparison changed the implementation, not just the color tokens.
+The September 2026 refresh was compared with the original references in a browser at desktop and phone widths.
 
 | Reference | What the comparison changed | Current preview |
 |---|---|---|
@@ -17,6 +17,6 @@ The comparisons exposed two failures that mechanical page-overflow checks alone 
 
 Reference screenshots remain review material. The repository includes screenshots of Artifacture's own output and its original illustration; it does not redistribute the upstream reference images. See [source provenance](../tools/visual-sources.json).
 
-The Lieflat follow-up compared fresh browser captures of the original Lupi, Basics, and Glance galleries. The first pass matched the palette but lacked their chart vocabulary. The replacement example follows the same 72 illustrative repair records through five views. Every aggregate and timeline reconciles to those records. Unit marks retain fractional remainders; matrix area and date spacing preserve the source values.
+Fresh captures of Lieflat’s Lupi, Basics, and Glance galleries exposed the first version’s limited chart forms. The replacement follows 72 illustrative repair records through five views. Every total and timeline reconciles to those records. Unit marks retain fractional remainders; matrix area and date spacing preserve the source values.
 
 At 390px, the four quantitative figures fit the column with labels at least 14px. Threads turn vertically when there are at most four categories per stage and the labels fit, preserving all outcomes and the selected record. Denser paths scroll with an explicit cue. Exact data tables remain available in every figure. All five JSON exports were rendered in desktop and mobile browsers; invalid inputs preserved the previous output.

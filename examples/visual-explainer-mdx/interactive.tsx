@@ -13,7 +13,7 @@ export default function InteractiveExplainer() {
   const [strategy, setStrategy] = useState<Strategy>('expiry');
   const selected = strategies[strategy];
   return (
-    <ExplainerShell title="How long should a cache remember?" summary="Choose a freshness policy to see what it guarantees and what it leaves to the application." reviewTools={false}>
+    <ExplainerShell title="Choose a cache freshness policy" summary="Compare fixed expiry, invalidation on write, and versioned keys." reviewTools={false}>
       <Section title="Choose a policy">
         <div role="group" aria-label="Freshness policy" style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           {keys.map((key) => (
@@ -29,9 +29,9 @@ export default function InteractiveExplainer() {
           <p>{selected.fit}</p>
         </div>
       </Section>
-      <Section title="The tradeoff remains visible">
+      <Section title="Compare policies">
         <DecisionMatrix rows={keys.map((key) => ({Policy:strategies[key].label,Rule:strategies[key].rule,Consequence:strategies[key].consequence}))} />
-        <p>These are policy choices, not measurements of a running system. A production design also needs a memory bound, failure behavior, and a decision about concurrent misses. The right policy follows the cost of returning stale data.</p>
+        <p>Choose according to the cost of returning stale data. Also define memory limits, failure behavior, and handling for concurrent misses. These policy examples contain no measurements.</p>
       </Section>
     </ExplainerShell>
   );

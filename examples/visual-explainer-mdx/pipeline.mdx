@@ -1,19 +1,19 @@
 import { DecisionMatrix, ExplainerShell, Pipeline, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="A failed job needs an exit" summary="Retries are useful while a failure may clear. A permanent error needs a visible destination and enough context to repair it." reviewTools={false}>
-  <Section title="From attempt to resolution">
+<ExplainerShell title="Retry temporary failures; quarantine the rest" summary="Limit repeated attempts and retain the job identity, error, and history when repair is needed." reviewTools={false}>
+  <Section title="Classify the failed attempt">
     <Pipeline steps={[
       {title:'Attempt',body:'Process one job with a stable idempotency key.'},
       {title:'Classify',body:'Separate temporary failures from invalid input.'},
       {title:'Retry or quarantine',body:'Delay temporary failures within a fixed budget; retain the rest for inspection.'}
     ]} />
   </Section>
-  <Section title="The failure decides the next step">
+  <Section title="Choose the action from the failure">
     <DecisionMatrix rows={[
       {Failure:'Temporary network error',Action:'Retry after a delay',Context:'Attempt number and last error'},
       {Failure:'Invalid input',Action:'Quarantine immediately',Context:'Field and validation reason'},
       {Failure:'Attempt budget exhausted',Action:'Quarantine for repair',Context:'Original job and attempt history'}
     ]} />
-    <p>Quarantine is a durable record, not a silent discard. A repair action should preserve the job identity so replay can avoid repeating a side effect that already succeeded.</p>
+    <p>Quarantine retains the failed job. Preserve its identity during repair so replay can recognize a side effect that already succeeded.</p>
   </Section>
 </ExplainerShell>

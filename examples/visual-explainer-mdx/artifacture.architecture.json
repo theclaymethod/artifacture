@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "From source to verified HTML",
+    "title": "Export and review an HTML artifact",
     "locale": "en",
     "visual_preset": "editorial",
     "quality_profile": "showcase",

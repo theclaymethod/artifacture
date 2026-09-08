@@ -27,7 +27,7 @@ For flow layouts, `auto` measures the container and uses a horizontal arrangemen
 
 `DiagramWalkthrough` adds ordered `steps={[{edgeId, caption, durationMs?}]}` to the same graph. Give each referenced edge a unique `id`. Playback starts paused and stops at the end; reduced-motion and mobile list views use manual stepping. See [animated-diagrams.md](animated-diagrams.md).
 
-`LieflatChart` is the default for editorial chart stories. Its `spec.kind` selects `rung-bars`, `unit-field`, `barcode`, `bubble-matrix`, or `threads`; the data contract follows that choice. Use units to make counts tangible, dates to reveal timing, matrices to compare intersections, and individual paths to follow records. See [charts.md](charts.md) for selection, complete contracts, and recipes. The same `{title, description?, source?, spec}` envelope exports directly from JSON with `ve:chart`; MDX is optional.
+`LieflatChart` is the default for editorial chart stories. Its `spec.kind` selects `rung-bars`, `unit-field`, `barcode`, `bubble-matrix`, or `threads`; the data contract follows that choice. See [charts.md](charts.md) for selection, complete contracts, and recipes. The same `{title, description?, source?, spec}` envelope exports directly from JSON with `ve:chart`; MDX is optional.
 
 `DataChart` serves quick comparisons. It accepts `{label: string, value: number | null}[]`, `kind="bar" | "line" | "dot"`, and optional `source={{label, url?}}`. Use `formatValue={(value) => ...}` for displayed units or numeric formatting. Line points are evenly spaced categories; use `LieflatChart`'s `barcode` for actual date intervals.
 
