@@ -1,6 +1,6 @@
 # External Libraries (CDN)
 
-Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include what the diagram actually needs — most diagrams need zero external JS.
+Use these libraries only when the shared components or native HTML cannot express the required behavior. Load only the dependencies the artifact uses.
 
 ## Contents
 
@@ -14,7 +14,7 @@ Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include 
 
 Use Mermaid only after [diagram-design.md](diagram-design.md) selects it, or when explicitly requested. Compact supported diagrams use `DiagramCanvas`; complex typed system maps use [Archify](archify.md).
 
-For quantitative data, follow [charts.md](charts.md); use `DataChart` for supported bar, line, and dot charts, or a semantic table for exact lookup.
+For quantitative data, start with [LieflatChart](charts.md). Use `DataChart` for quick bar, line, and dot comparisons, or a semantic table for exact lookup.
 
 **CDN:**
 ```html
@@ -111,7 +111,7 @@ graph TD
 
 ### CSS Overrides on Mermaid SVG
 
-Mermaid renders SVG. Override its classes for pixel-perfect control that `themeVariables` can't reach:
+Mermaid renders SVG. Scope CSS overrides to the diagram container when `themeVariables` cannot express the required style:
 
 ```css
 /* Container — see css-patterns.md "Mermaid Zoom Controls" for the full zoom pattern */
@@ -307,7 +307,7 @@ B->>S: POST /submit with selected indices
 
 ### Layout Direction: TD vs LR
 
-`flowchart LR` (left-to-right) spreads horizontally. With many nodes, Mermaid scales everything down to fit the width, making text unreadable. `flowchart TD` (top-down) is almost always better.
+`flowchart LR` (left-to-right) spreads horizontally. With many nodes, Mermaid scales everything down to fit the width, making text unreadable. Use `flowchart TD` when it keeps branching paths and labels readable.
 
 **When to use each:**
 
@@ -474,18 +474,18 @@ Quick-reference for choosing the right Mermaid syntax:
 
 ### Dark Mode Handling
 
-Mermaid initializes once — it can't reactively switch themes. Read the preference at load time inside your `<script type="module">`:
+Resolve the effective theme before rendering. This initialization example covers the first render:
 
 ```javascript
 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 // Use isDark to pick light or dark values in themeVariables
 ```
 
-The CSS overrides on the container (`.mermaid-wrap`) and page will still respond to `prefers-color-scheme` normally — only the Mermaid SVG internals are static.
+When the effective theme changes, rerender from the inert Mermaid source. Container CSS alone does not update colors baked into the SVG. The shared `MermaidBlock` handles this lifecycle.
 
 ## Chart.js — Data Visualizations
 
-Use for bar charts, line charts, pie/doughnut charts, radar charts, and other data-driven visualizations in dashboard-type diagrams. Overkill for static numbers — use pure SVG/CSS for simple progress bars and sparklines.
+Use Chart.js only for a chart or interaction the shared chart components do not support, such as a requested radar plot. Preserve visible labels, units, missing values, and an accessible data alternative. Follow [charts.md](charts.md) before choosing a renderer.
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -543,59 +543,13 @@ Wrap the canvas in a styled container:
 
 ## anime.js — Non-diagram animation
 
-Do not use anime.js for diagram motion. Diagram animation is static-first and may use only the reviewed, shell-owned controller described in [`diagram-design.md`](./diagram-design.md). For an explicit non-diagram animation request, anime.js remains optional when the page route approves the dependency and provides a complete reduced-motion state.
+For explicit non-diagram animation, anime.js is optional. The parent owns the dependency. Animate a meaningful change or interaction; leave initial content visible and provide complete reduced-motion output. Do not use count-ups to animate factual values.
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
-
-<script>
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!prefersReduced) {
-    anime({
-      targets: '.ve-card',
-      opacity: [0, 1],
-      translateY: [20, 0],
-      delay: anime.stagger(80, { start: 200 }),
-      easing: 'easeOutCubic',
-      duration: 500,
-    });
-
-    anime({
-      targets: '.connector path',
-      strokeDashoffset: [anime.setDashoffset, 0],
-      easing: 'easeInOutCubic',
-      duration: 800,
-      delay: anime.stagger(150, { start: 600 }),
-    });
-
-    document.querySelectorAll('[data-count]').forEach(el => {
-      anime({
-        targets: { val: 0 },
-        val: parseInt(el.dataset.count),
-        round: 1,
-        duration: 1200,
-        delay: 400,
-        easing: 'easeOutExpo',
-        update: (anim) => { el.textContent = anim.animations[0].currentValue; }
-      });
-    });
-  }
-</script>
-```
-
-When using anime.js, set initial opacity to 0 in CSS so elements don't flash before the animation:
-```css
-.ve-card { opacity: 0; }
-
-@media (prefers-reduced-motion: reduce) {
-  .ve-card { opacity: 1 !important; }
-}
-```
+Diagram motion uses the controller in [diagram-design.md](diagram-design.md), not anime.js.
 
 ## Prism.js — Syntax Highlighting
 
-Use for code blocks in HTML output. Prism is small (~6KB core + per-language grammars), configurable, and produces predictable class-named tokens that are trivial to re-theme via CSS — which matters because the default Prism themes don't match any of this skill's aesthetics and must be overridden.
+Use Prism for syntax highlighting in custom HTML. Its core is about 6KB plus language grammars. Map its token classes to the active theme; do not import a second page palette.
 
 **CDN + autoloader** (loads language grammars on demand, so you don't need to enumerate them):
 
@@ -732,57 +686,21 @@ Pair the code block with a minimal Space Mono caption for the filename when it p
 
 ## Google Fonts — Typography
 
-Always load with `display=swap` for fast rendering. Pick a distinctive pairing — body + mono at minimum, optionally a display font for the title.
-
-**FORBIDDEN as `--font-body` (AI slop signals):**
-- Inter — the single most overused AI default font
-- Roboto — generic Android/Google default
-- Arial, Helvetica — system defaults with no character
-- system-ui alone without a named font — signals zero design intent
+Load the selected preset's fonts with `display=swap`. Lieflat uses Inter; Algebrica uses EB Garamond for reading and Inter for controls and figure labels. Use a monospace face only for code, identifiers, or aligned values. Keep appropriate system fallbacks.
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 ```
 
-Define as CSS variables for easy reference:
+For raw HTML, define font roles once:
+
 ```css
 :root {
-  --font-body: 'Outfit', system-ui, sans-serif;
-  --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'SF Mono', Consolas, monospace;
 }
 ```
 
-**Font pairings** (rotate — never use the same pairing twice in a row):
-
-| Body / Headings | Mono / Labels | Feel | Use for |
-|---|---|---|---|
-| DM Sans | Fira Code | Friendly, developer | Blueprint, technical docs |
-| Instrument Serif | JetBrains Mono | Editorial, refined | Plan reviews, decision logs |
-| IBM Plex Sans | IBM Plex Mono | Reliable, readable | Architecture diagrams |
-| Bricolage Grotesque | Fragment Mono | Bold, characterful | Data tables, dashboards |
-| Plus Jakarta Sans | Azeret Mono | Rounded, approachable | Status reports, audits |
-| Outfit | Space Mono | Clean geometric, modern | Flowcharts, pipelines |
-| Sora | IBM Plex Mono | Technical, precise | ER diagrams, schemas |
-| Crimson Pro | Noto Sans Mono | Scholarly, serious | RFC reviews, specs |
-| Fraunces | Source Code Pro | Warm, distinctive | Project recaps |
-| Geist | Geist Mono | Vercel-inspired, sharp | Modern API docs |
-| Red Hat Display | Red Hat Mono | Cohesive family | System overviews |
-| Libre Franklin | Inconsolata | Classic, reliable | Data-dense tables |
-| Playfair Display | Roboto Mono | Elegant contrast | Executive summaries |
-
-The first 5 pairings are recommended for most use cases. Vary across consecutive diagrams.
-
-### Typography by Content Voice
-
-For prose-heavy pages (documentation, articles, essays), match typography to the content's voice:
-
-| Voice | Fonts | Best For |
-|-------|-------|----------|
-| **Literary / Thoughtful** | Literata, Lora, Newsreader, Merriweather | Essays, personal posts, long-form articles |
-| **Technical / Precise** | IBM Plex Sans + Mono, Geist + Geist Mono, Source family | Documentation, READMEs, API references |
-| **Bold / Contemporary** | Bricolage Grotesque, Space Grotesk, DM Sans | Product pages, feature announcements |
-| **Minimal / Focused** | Source Serif 4 + Source Sans 3, Karla + Inconsolata | Tutorials, how-tos, focused reading |
-
-**Literata** deserves special mention — it has optical sizing designed specifically for screen reading. Google's answer to Georgia, but modernized.
+Do not rotate font pairs between artifacts or select a font merely to appear distinctive. Use the requested preset, then check hierarchy, measure, line breaks, and spacing through [typography.md](typography.md). Wait for fonts to load before measuring diagrams or taking verification screenshots.

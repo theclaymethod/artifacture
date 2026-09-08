@@ -4,7 +4,7 @@
     "name": "Clayton Kim"
   },
   "metadata": {
-    "description": "Plugin distribution for visual-explainer",
+    "description": "Artifacture plugins",
     "version": "1.0.0",
     "pluginRoot": "./plugins"
   },
@@ -12,7 +12,7 @@
     {
       "name": "visual-explainer",
       "source": "./plugins/visual-explainer",
-      "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, slides, and data tables",
+      "description": "Create charts, diagrams, reviews, and presentations as standalone HTML.",
       "version": "0.8.0",
       "author": {
         "name": "Clayton Kim"

@@ -20,7 +20,7 @@ export default function VideoLongform() {
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
-        <title>Give retries a stopping point</title>
+        <title>Bound retries and retain failed jobs</title>
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           html, body { width: 100%; height: 100%; overflow: hidden; background: #f0efeb; color: #1c1c1a; font-family: Inter, system-ui, sans-serif; }
@@ -38,19 +38,19 @@ export default function VideoLongform() {
       <body>
         <div data-composition-id="ve-mdx-longform" data-duration="24" data-height="1080" data-start="0" data-width="1920" id="stage">
           <section className="scene scene1">
-            <h1 className="headline">A retry is another attempt, not a new operation.</h1>
+            <h1 className="headline">Preserve the operation identity across retries.</h1>
             <p className="body">Keep the same job identity. A timeout may have hidden a successful side effect.</p>
           </section>
           <section className="scene scene2">
-            <h2 className="headline">The failure chooses the path.</h2>
+            <h2 className="headline">Classify the failure before retrying.</h2>
             <div className="paths">
               <div className="path"><h3>Temporary failure</h3><p>Wait before retrying. Stay within a fixed attempt budget.</p></div>
               <div className="path"><h3>Permanent failure</h3><p>Retain the job and its error. Another identical attempt cannot repair invalid input.</p></div>
             </div>
           </section>
           <section className="scene scene3">
-            <h2 className="headline">Stop retrying. Keep the evidence.</h2>
-            <p className="body">Quarantine preserves the payload reference, attempt history, and reason for failure so a person can repair and replay the job deliberately.</p>
+            <h2 className="headline">Quarantine jobs that need repair.</h2>
+            <p className="body">Retain the payload reference, attempt history, and failure reason for manual repair and replay.</p>
           </section>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" />

@@ -1,16 +1,16 @@
 # Contributing
 
-## Dev setup
+## Set up the repository
 
 - Node >= 22.
 - `npm ci`
 - `npx playwright install chromium`. The verifier's browser stage uses
   `playwright-core`, which never downloads browsers itself.
-- `npm run ve:eval`. If it exits green, your environment is working.
+- `npm run ve:eval`. This checks the local eval setup.
 
 ## Adding a check
 
-`ve-verify` is a deterministic design-quality gate driven by
+`ve-verify` runs the mechanical checks in
 `plugins/visual-explainer/scripts/verify/checks.json` (a list of check
 objects with `id`, `family`, `severity`, `spec`, etc.). To add one:
 
@@ -41,9 +41,8 @@ criteria remain registered in
 
 ## Presentation deck changes
 
-The PresentationDeck engine (`visual-explainer-mdx/presentation.tsx` +
-`presentation-core.ts`) is contract-pinned by two suites; run both after any
-change there:
+Two suites check the PresentationDeck engine (`visual-explainer-mdx/presentation.tsx` and
+`presentation-core.ts`). Run both after changing it:
 
 - `npm test` — unit tests for the pure logic (scale-to-fit math, the
   click-anywhere-to-close guard, tint helpers).
@@ -60,15 +59,14 @@ change there:
 Presets are semantic-token layers in `visual-explainer-mdx/global.css`,
 selected via `data-ve-preset="<name>"` on the root. Add a new
 `[data-ve-preset="<name>"] { ... }` block that sets the same semantic
-tokens the existing presets set (mono-industrial, nothing, blueprint,
-editorial, paper-ink, terminal, custom) — don't introduce new token names.
+tokens as the existing presets. Do not introduce new token names.
 
 ## Adding or changing a design system
 
-Design systems are user-owned — usually private brand material — and live
-OUTSIDE the repo (see `docs/design-systems.md`): `$ARTIFACTURE_DESIGN_DIR` →
+Design systems may contain private brand material and live
+outside the repo (see `docs/design-systems.md`): `$ARTIFACTURE_DESIGN_DIR` →
 `~/.artifacture/design-systems/` → `<repo>/design-systems/`. The repo ships
-NO systems; the repo-local directory is gitignored (only its README is
+no user systems; the repo-local directory is gitignored (only its README is
 tracked). Never commit a real brand's tokens, and keep eval fixtures
 synthetic.
 
@@ -83,7 +81,7 @@ values against the fixture source.
 
 ## Before you open a PR
 
-- Run `npm run check`. It is the one local equivalent of CI: unit and browser
+- Run `npm run check`. It runs the local CI checks: unit and browser
   behavior, manifests, export integrity, deterministic mechanics, design-system
   cases, and PresentationDeck behavior. The checked-in runtime budget is 120
   seconds; diagnose a regression before raising it.

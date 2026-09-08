@@ -1,10 +1,10 @@
 # HTML fragment components
 
-Named, reusable patterns. Sub-agents pick from this catalog when building a section. Each component declares its **role** (which sub-agent uses it), the **HTML skeleton**, the **scoped CSS** (already prefixed under `.ve-{role}__`), and any **fonts/libraries it needs**.
+Use these patterns for independent raw HTML sections. Each names its worker role, markup, scoped CSS, and dependencies. Ordinary pages use the shared MDX/TSX components.
 
 Tokens used below come from `./tokens.md` and are published once on `:root` by the orchestrator. Sub-agents must not redefine them.
 
-For the contract that connects components → sub-agents → orchestrator, see `./section-contract.md`.
+Follow `section-contract.md` for worker output and parent integration.
 
 ---
 
@@ -36,9 +36,9 @@ The diagram source goes in a hidden inert `<pre class="ve-diagram__source">` ele
 
 **Role:** `table` · **Fonts needed:** none extra · **Libraries:** none
 
-Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right-aligned in Space Mono with `tabular-nums`. Status colors on the value only.
+Use a real `<table>` with a sticky header and a hairline above each row, without zebra striping. Right-align numeric values in the host numeric font with `tabular-nums`; apply status colors only to the values they describe.
 
-**Below 640px the table reformats as stacked rows.** Each `<tr>` becomes a vertical group; each `<td>`'s column label appears as a readable label via `::before { content: attr(data-label) }`. This honors Mono-Industrial's "no cards" rule — the rows stack with hairlines between them, like instrument-panel readouts. Sub-agents **must** emit `data-label="..."` on every `<td>` for the stack pattern to work; the value is the human-readable column name (preserve sentence case).
+**Below 640px the table reformats as stacked rows.** Each `<tr>` becomes a vertical group; each `<td>`'s column label appears as a readable label via `::before { content: attr(data-label) }`. Sub-agents **must** emit `data-label="..."` on every `<td>` for the stack pattern to work; the value is the human-readable column name (preserve sentence case).
 
 ```html
 <table class="ve-table">
@@ -68,7 +68,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   font-size: var(--size-body);
 }
 .ve-table th {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
   text-transform: none;
@@ -89,7 +89,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   text-align: right;
 }
 .ve-table__status {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--size-caption);
   letter-spacing: 0.08em;
   text-transform: none;
@@ -133,7 +133,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
   }
   .ve-table td::before {
     content: attr(data-label);
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
     font-size: var(--size-caption);
     letter-spacing: 0.08em;
     text-transform: none;
@@ -195,7 +195,7 @@ Real `<table>`. Sticky header. No zebra. Hairline above each row. Numerics right
 
 **Role:** `dashboard` · **Fonts needed:** none extra · **Libraries:** none
 
-Discrete blocks with 2px gaps. No rounded corners. Status color on overflow segments only. Lifted from the Nothing design language.
+Use discrete blocks only when units or thresholds justify the segments. Keep 2px gaps, true proportions, and labeled values. Status color belongs only to actual overflow.
 
 ```html
 <div class="ve-bar" data-filled="7" data-total="10" aria-label="{{ARIA}}">
@@ -298,4 +298,4 @@ Anything new must:
 1. Use only tokens from `./tokens.md`. No new colors, no new fonts, no new spacing values.
 2. Prefix every class with `.ve-{role}__` so it cannot collide with another sub-agent's output.
 3. Declare which `fonts_needed` and `libraries_needed` it requires (so the orchestrator can dedup imports).
-4. Pass the pre-render gate in `./mono-industrial.md` (three-layer rule, font budget, motion = 0).
+4. Follow the active preset, readable type minimums, and `verification.md`. Keep static content visible.

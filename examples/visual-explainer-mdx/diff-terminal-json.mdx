@@ -1,11 +1,11 @@
 import { DiffBlock, ExplainerShell, JsonTree, Section, TerminalBlock } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="Make a missing value explicit" summary="The same example appears as a patch, an interactive lookup, and the value a caller receives." reviewTools={false}>
+<ExplainerShell title="A cached zero should return found: true" summary="Replace the truthiness check, then inspect the result in a Node REPL." reviewTools={false}>
   <Section title="Preserve a cached zero">
     <DiffBlock language="ts" filename="Illustrative cache.ts" before={`const value = cache.get(key);
 return { found: Boolean(value), value };`} after={`const value = cache.get(key);
 return { found: value !== undefined, value };`} />
-    <p>Truthiness would label zero as missing. The revised branch tests the sentinel defined by this numeric cache's contract.</p>
+    <p>Zero is falsy. This numeric cache uses undefined for a missing entry, so the check must test for undefined.</p>
   </Section>
   <Section title="Example lookup">
     <TerminalBlock title="Node REPL" content={`> const cache = new Map([['balance', 0]])
@@ -13,8 +13,8 @@ return { found: value !== undefined, value };`} />
 > ({ found: value !== undefined, value })
 { found: true, value: 0 }`} />
   </Section>
-  <Section title="The caller receives both facts">
+  <Section title="Return presence with the value">
     <JsonTree data={{key:'balance',found:true,value:0}} />
-    <p>The presence flag describes the lookup. The value belongs to the application. Keeping them separate avoids interpreting a valid number as an error or a missing record.</p>
+    <p>The found flag distinguishes a stored zero from a missing record.</p>
   </Section>
 </ExplainerShell>

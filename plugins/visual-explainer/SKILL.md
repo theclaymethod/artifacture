@@ -10,7 +10,7 @@ metadata:
 
 # Visual Explainer
 
-Produce editable source and verified, self-contained HTML. Use Lieflat by default: visual stories shaped by observations, units, and relationships, with readable type and generous space. Prefer prose when a visual would add no understanding.
+Produce editable source and verified, self-contained HTML. Use Lieflat by default: readable type, open spacing, and marks that encode observations, units, or relationships. Prefer prose when a visual would add no understanding.
 
 Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
@@ -24,16 +24,16 @@ Set `REPO` to the Artifacture checkout before authoring:
 
 Run every `npm run ve:*` command from `REPO`. Sources may live elsewhere; pass absolute paths.
 
-## Execute the flow
+## Author, export, verify
 
-1. Select one route below and read its card. Covered flows need this file and that card only until a conditional pointer fires.
+1. Select one route below and read its card. Read additional references only when the selected route calls for them.
 2. For a standalone chart, author a `LieflatChart` JSON envelope; for a data story, compose its figures in MDX. Archify uses typed JSON. Otherwise author `.mdx` by default, or `.tsx` for local state, generated/custom SVG, or video. Import shared components from `REPO/visual-explainer-mdx/components.tsx`.
 3. Export chart JSON with `npm --prefix REPO run ve:chart -- <abs-source.json> --out <abs-output.html>`. Archify uses its validated delivery command. For MDX/TSX, use `npm --prefix REPO run ve:export -- <abs-source> --out <abs-output>`; for static video, use `ve:export-static`. Fix export failures in the source.
 4. Read [verification.md](references/verification.md), execute its routed checks, open the artifact, and report the source, HTML, report JSON, and any incomplete verification.
 
 Completion requires editable source, a successful export, and evidence for every required verification pass. Apply feedback to the source and re-export.
 
-## Route
+## Choose a route
 
 | Request | Read first | Read only when needed |
 |---|---|---|
@@ -48,7 +48,7 @@ Completion requires editable source, a successful export, and evidence for every
 
 For point-and-click annotation, read [annotate.md](commands/annotate.md). If the request lacks a material choice that cannot be inferred, read [clarify.md](references/clarify.md). For a component API not shown by the selected card, read [mdx-components.md](references/mdx-components.md). For poster, video, brand-heavy, or bespoke HTML work, read [legacy-html.md](references/legacy-html.md) and only the branch it selects.
 
-## Shared contracts
+## Authoring rules
 
 - Keep MDX/TSX, chart JSON, or Archify JSON as the source of truth; generated HTML is disposable output.
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
@@ -57,8 +57,5 @@ For point-and-click annotation, read [annotate.md](commands/annotate.md). If the
 - Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.
 - Treat facts, labels, and visual encodings as claims. Keep them traceable to the user brief or inspected sources; mark uncertainty instead of inventing rationale.
 - Preserve accessibility, responsive containment, and reduced-motion behavior. Optional metadata requires factual state, sequence, provenance, ownership, or navigation.
-
-**Bad:** “Architecture overview · 01 · Production ready” above an unexplained graph.
-**Good:** “A cache miss reads Postgres” above a graph whose edges identify the reads.
 
 Use [delegated-skills.md](references/delegated-skills.md) only when its delegated visual/prose checks are available. Use [model-routing.md](references/model-routing.md) only when dispatching visual-review passes. The main thread orchestrates those passes and consumes their evidence; a visual-capable reviewer judges screenshots.

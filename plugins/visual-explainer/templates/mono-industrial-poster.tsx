@@ -27,7 +27,7 @@ export default function MonoIndustrialPoster() {
       <link href={FONTS_HREF} rel="stylesheet" />
       <header style={{ maxWidth: 1140, marginBottom: 48 }}>
         <h1 style={{ fontSize: 64, fontWeight: 500, lineHeight: 1.06, letterSpacing: '-.025em', margin: 0, maxWidth: '24ch' }}>Write each request before handling it.</h1>
-        <p style={{ marginTop: 24, maxWidth: '65ch', fontSize: 22, lineHeight: 1.55, color: MUTED }}>An illustrative architecture: preserve the request first, then let independent consumers build indexes and serve queries.</p>
+        <p style={{ marginTop: 24, maxWidth: '65ch', fontSize: 22, lineHeight: 1.55, color: MUTED }}>An illustrative request ledger. Persist each request before consumers build indexes and serve queries.</p>
       </header>
       <section aria-label="Request flow" style={{ marginBottom: 48 }}>
         <svg viewBox="0 0 1440 154" style={{ display: 'block', width: '100%', height: 154 }} role="img" aria-labelledby="poster-flow-title poster-flow-desc">
@@ -44,7 +44,7 @@ export default function MonoIndustrialPoster() {
       <section style={{ borderTop: `1px solid ${RULE}`, paddingTop: 28, display: 'grid', gridTemplateColumns: '340px 1fr', gap: 56 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 30, fontWeight: 500, lineHeight: 1.2 }}>The write path has an 80 ms budget.</h2>
-          <p style={{ color: MUTED, fontSize: 18, lineHeight: 1.6, marginTop: 20 }}>Illustrative P99 timings. Ledger acknowledgement exceeds its allocation even though the full request remains within budget.</p>
+          <p style={{ color: MUTED, fontSize: 18, lineHeight: 1.6, marginTop: 20 }}>Illustrative P99 timings: ledger acknowledgement exceeds its allocation; the full request stays within budget.</p>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 18 }}>
           <thead><tr>{['Hop', 'Target', 'Observed'].map(label => <th key={label} style={{ textAlign: label === 'Hop' ? 'left' : 'right', padding: '0 0 14px', fontWeight: 500, color: MUTED }}>{label}</th>)}</tr></thead>

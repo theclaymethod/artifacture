@@ -1,17 +1,16 @@
-# Installation and skill-family setup
+# Install Artifacture
 
-Artifacture is usable by itself for export and deterministic verification. Full
-visual and prose review is a family-of-skills workflow:
+Artifacture exports HTML and runs mechanical checks. Visual and prose review
+use two additional skills:
 
 - Artifacture owns artifact mechanics, rendered-state evidence, and
   artifact-specific visual semantics.
 - Impeccable owns general visual craft and visual AI tells.
 - Unslop owns prose quality and AI-writing patterns.
 
-The skills stay independently installable and independently versioned.
-Artifacture routes judgment to them and does not vendor their prompts. Legacy
-deterministic craft/prose matches are candidate signals only; they do not count
-as Artifacture failures.
+The three skills install and update separately. Artifacture calls the review
+skills without copying their prompts. Mechanical errors fail verification; visual and prose judgments are reported
+separately.
 
 ## Requirements
 
@@ -31,8 +30,7 @@ npx skills add theclaymethod/unslop
 Artifacture's first generation clones the render pipeline into
 `~/.artifacture`. A full repository clone uses itself as the pipeline.
 
-The installation commands do not merge the three skills. This is intentional:
-updating Artifacture must not silently change Impeccable's design rubric or
+Updating Artifacture must not silently change Impeccable's design rubric or
 Unslop's prose rubric.
 
 ## Claude Code plugin install
@@ -84,8 +82,8 @@ not claim that a real provider/model is qualified.
 
 ## Qualify visual models
 
-Artifacture should not spend the main/frontier agent on routine screenshot
-review. Model and screenshot batch size are selected empirically per pass.
+Select the model and screenshot batch size from measured review results.
+Reserve the main agent for work that requires it.
 
 1. Read `evals/visual-model-policy/README.md`.
 2. Run human-reviewed fire/clean cases against candidate vision models and
@@ -102,12 +100,11 @@ review. Model and screenshot batch size are selected empirically per pass.
 5. Set `ARTIFACTURE_VISUAL_MODEL_POLICY` only when the policy is stored
    somewhere else.
 
-No model graduates from its name, size claim, or self-reported confidence.
 Qualification requires measured precision, recall, silence accuracy, correct
 image/region grounding, valid JSON, latency, and cost. A batch size is valid
 only for the pass/model combination that was tested.
 
-## Missing capability behavior
+## When a review tool is unavailable
 
 Artifacture records missing capabilities and uses an explicit fallback only for
 its own visual passes:
@@ -125,7 +122,7 @@ review, but it must not be described as eval-qualified.
 
 ## Updating
 
-Update each family member independently:
+Update the skills independently:
 
 ```bash
 git -C ~/.artifacture pull --ff-only

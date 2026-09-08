@@ -1,6 +1,6 @@
 {
   "name": "visual-explainer",
-  "description": "Generate beautiful HTML pages for diagrams, diff reviews, plan reviews, and data tables",
+  "description": "Create charts, diagrams, reviews, and presentations as standalone HTML.",
   "version": "0.8.0",
   "author": {
     "name": "Clayton Kim"

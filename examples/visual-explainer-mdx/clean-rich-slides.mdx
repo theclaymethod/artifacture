@@ -1,24 +1,24 @@
 import { CodeBlock, MermaidBlock, Pipeline, Slide, SlideDeck } from '../../visual-explainer-mdx/components';
 
-<SlideDeck title="A cache hit is a branch" reviewTools={false}>
-  <Slide title="Repeated reads need not repeat the work">
-    <p>This example caches immutable catalog versions. A version in the key keeps one published catalog distinct from the next.</p>
+<SlideDeck title="Caching immutable catalog versions" reviewTools={false}>
+  <Slide title="Reuse a published catalog version">
+    <p>Key each cached catalog by its immutable version. Requests for that version can reuse the same result.</p>
   </Slide>
-  <Slide title="Check, load, retain">
+  <Slide title="Look up the version before reading the origin">
     <Pipeline steps={[
       {title:'Check',body:'Look up the versioned catalog key.'},
       {title:'Load',body:'Read the origin only when absent.'},
       {title:'Retain',body:'Store the result for the next request.'}
     ]} />
   </Slide>
-  <Slide title="Presence is not truthiness">
+  <Slide title="Return only when the version is cached">
     <CodeBlock language="ts" code={`const cached = cache.get(key);
 if (cached !== undefined) return cached;
 const catalog = await readOrigin(key);
 cache.set(key, catalog);
 return catalog;`} highlightLines={[2]} />
   </Slide>
-  <Slide title="A miss has more work to do">
+  <Slide title="On a miss, read and cache the catalog">
     <MermaidBlock chart={`flowchart TD
       Request --> Lookup
       Lookup -->|hit| Return
@@ -26,7 +26,7 @@ return catalog;`} highlightLines={[2]} />
       Origin --> Store
       Store --> Return`} />
   </Slide>
-  <Slide title="Decide what this example leaves open">
-    <p>Concurrent misses can still issue duplicate reads. Memory also needs a bound. Coalescing requests and evicting old versions are separate decisions from the basic hit/miss branch.</p>
+  <Slide title="Bound memory and concurrent reads">
+    <p>Concurrent misses can issue duplicate origin reads. This cache also has no memory bound. Request coalescing and eviction need separate policies.</p>
   </Slide>
 </SlideDeck>

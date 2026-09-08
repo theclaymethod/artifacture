@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Request Ledger — Mono-Industrial Reference</title>
+<title>Durable request telemetry</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -309,15 +309,15 @@
 
   <section class="hero">
     <div>
-      <h1 class="hero__headline">A write-first ledger for request and response telemetry.</h1>
-      <p class="hero__lede">An illustrative architecture: persist each request before a handler runs, then let independent consumers replay the ledger.</p>
+      <h1 class="hero__headline">Persist requests before handling them.</h1>
+      <p class="hero__lede">An illustrative telemetry system. The gateway writes each request to a ledger that consumers can replay independently.</p>
     </div>
 
   </section>
 
   <section class="section">
 
-    <h2 class="section__title">Write path, read path, and the durability boundary.</h2>
+    <h2 class="section__title">Acknowledge writes after persistence</h2>
     <p class="section__body">The gateway acknowledges a request only after it is durable. Consumers keep their own offsets so they can recover independently.</p>
 
     <div class="diagram-shell">
@@ -354,7 +354,7 @@
 
   <section class="section">
 
-    <h2 class="section__title">Each module owns one side of the durability boundary.</h2>
+    <h2 class="section__title">Module responsibilities</h2>
 
     <div class="cluster">
       <div class="module">
@@ -385,7 +385,7 @@
 
   <section class="section">
 
-    <h2 class="section__title">Write-path budget is 80ms end-to-end.</h2>
+    <h2 class="section__title">Write latency against the 80 ms budget</h2>
 
     <table class="data-row">
       <thead>

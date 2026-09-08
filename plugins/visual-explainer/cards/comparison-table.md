@@ -1,16 +1,23 @@
-# Comparison Table Card
-Use `ExplainerShell`, `Section`, `DecisionMatrix`, optional `Callout`. Best for 4+ rows or 3+ columns. Same keys in every row.
+# Compare alternatives
+
+Use `DecisionMatrix` for comparable rows with the same keys. Put the decision criteria before the conclusion and state the scope in which the recommendation holds.
+
+Illustrative example:
+
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
-import { ExplainerShell, Section, DecisionMatrix, Callout } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Search Cache Decision" summary="Pick the smallest store that keeps imports inspectable.">
-  <Section title="SQLite is the default"><Callout>A local file provides indexed lookups without a separate service.</Callout></Section>
-  <Section title="Tradeoff matrix"><DecisionMatrix rows={[
-    {Option:'SQLite',Setup:'File',Lookup:'Indexed SQL',Failure:'File lock during bulk import',Fit:'Best'},
-    {Option:'Redis',Setup:'Service',Lookup:'Key/value',Failure:'Extra network dependency',Fit:'Fast but heavier'},
-    {Option:'JSONL',Setup:'None',Lookup:'Linear scan',Failure:'Manual recovery after partial write',Fit:'Prototype only'},
-    {Option:'Postgres',Setup:'Service',Lookup:'Indexed SQL',Failure:'Ops cost for local tool',Fit:'Later'}
-  ]} /></Section>
+{/* REPO = Artifacture checkout; see SKILL.md "Resolve the runtime" */}
+import { ExplainerShell, Section, DecisionMatrix } from 'REPO/visual-explainer-mdx/components';
+
+<ExplainerShell title="A search cache for a local import tool">
+  <Section title="Compare lookup and recovery">
+    <DecisionMatrix rows={[
+      {Option:'SQLite',Setup:'Local file',Lookup:'Indexed SQL',Constraint:'Coordinate concurrent writes'},
+      {Option:'Redis',Setup:'Separate service',Lookup:'Key/value',Constraint:'Handle network failures'},
+      {Option:'JSONL',Setup:'Local file',Lookup:'Sequential scan',Constraint:'Recover partial writes'},
+      {Option:'Postgres',Setup:'Separate service',Lookup:'Indexed SQL',Constraint:'Operate the database'}
+    ]} />
+  </Section>
 </ExplainerShell>
 ```
-Export `npm run ve:export -- source.mdx --out out.html`; verify with `ve-verify`. None fit -> `references/legacy-html.md`.
+
+Replace sample criteria with evidence from the task. Export with `npm run ve:export -- source.mdx --out out.html` and follow `references/verification.md`. Use `references/legacy-html.md` only for a limitation the shared components cannot resolve.

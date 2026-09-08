@@ -1,98 +1,53 @@
-# Share Visual Explainer Page
+# Share an artifact
 
-Share a visual explainer HTML file. Uses sharehtml when team sharing is configured; otherwise falls back to the public Vercel preview path.
-
-**Source/artifact contract.** Share generated HTML artifacts. If the user gives a `.mdx` or `.tsx` source file, export it first:
-
-```bash
-npm run ve:export -- <source.mdx|source.tsx> --out ~/.agent/diagrams/<slug>.html
-```
-
-Then share the generated `.html`. Do not deploy MDX/TSX source directly.
-
-**Clarify.** This is a Tier 2 command per `./references/clarify.md` — it operates on an existing file and has no creative choices. Do not ask questions; just deploy.
-
-## Usage
-
-```
+```text
 /share <file-path>
 ```
 
-**Arguments:**
-- `file-path` - Path to the generated HTML file to share, or an MDX/TSX source file that should be exported before sharing (required)
-
-**Examples:**
-```
-/share ~/.agent/diagrams/my-diagram.html
-/share /tmp/visual-explainer-output.html
-```
-
-## Backend Decision
-
-| Situation | Backend |
-|---|---|
-| `VE_SHAREHTML_URL` exists | sharehtml |
-| `~/.config/visual-explainer/share.json` exists | sharehtml |
-| Neither exists | Vercel fallback |
-
-Use sharehtml for private team review, stable update-in-place URLs, and comments. Use Vercel fallback for zero-setup public previews. Vercel can be partially gated only after the deployment is claimed into a Vercel project and Deployment Protection is enabled.
-
-## How It Works
-
-1. If `VE_SHAREHTML_URL` is set, or `~/.config/visual-explainer/share.json` exists, runs `sharehtml deploy <file>`.
-2. In sharehtml mode, updates the same document URL in place and keeps the page private by default behind the configured access layer.
-3. If sharehtml is not configured, copies the HTML file to a temp directory as `index.html`.
-4. Deploys via the vercel-deploy skill and returns a public, claimable Vercel preview URL.
-
-## Requirements
-
-- **sharehtml CLI** for team sharing. Install with `bun install -g sharehtml` or put your repo checkout's CLI on `PATH`.
-- **sharehtml hosting** for team-gated sharing. See `docs/TEAM-SHARING.md`: Cloudflare account, Workers Paid plan for Durable Objects, `pnpm run setup`, Cloudflare Access scoped to the team email domain, optional custom domain, then `VE_SHAREHTML_URL` or `~/.config/visual-explainer/share.json`.
-- **vercel-deploy skill** for fallback public preview sharing. If missing: `pi install npm:vercel-deploy`
-
-No Vercel account, Cloudflare account, or API keys are needed for fallback preview deployments. The fallback deployment is "claimable" — you can transfer it to your Vercel account later if you want.
-
-Team sharing is private by default when backed by sharehtml. It updates the same share URL in place and supports review on a stable document URL. See `docs/TEAM-SHARING.md`.
-
-## Script Location
+Share the requested HTML file to the authorized destination. If given MDX/TSX, export it first; do not deploy source files directly:
 
 ```bash
+npm run ve:export -- <source.mdx|source.tsx> --out ~/.agent/diagrams/<slug>.html
 bash {{skill_dir}}/scripts/share.sh <file>
 ```
 
-## Output
+Use the session's existing authorization. This command has no creative choices; resolve a missing target or destination through `references/clarify.md` only when needed.
 
-sharehtml mode prints the sharehtml CLI output and a mode hint:
-```
+## Select the backend
+
+| Configuration | Backend |
+|---|---|
+| `VE_SHAREHTML_URL` is set | sharehtml |
+| `~/.config/visual-explainer/share.json` exists | sharehtml |
+| Neither exists | Public Vercel preview |
+
+sharehtml updates a stable document URL behind the configured access layer and supports comments. Its privacy depends on that layer. The Vercel fallback creates a new public, claimable preview URL each time. Anyone with the URL can view it; gating requires claiming it into a Vercel project and enabling Deployment Protection.
+
+## Setup
+
+For sharehtml, install the CLI with `bun install -g sharehtml` or put the checkout's CLI on `PATH`. Team hosting requires a Cloudflare account, Workers Paid for Durable Objects, `pnpm run setup`, and Cloudflare Access scoped to the team. Configure `VE_SHAREHTML_URL` or `~/.config/visual-explainer/share.json`; a custom domain is optional. See `docs/TEAM-SHARING.md`.
+
+The public fallback uses the vercel-deploy skill. If absent, install it with `pi install npm:vercel-deploy`. Fallback previews need no Vercel account, Cloudflare account, or API keys. The script copies the HTML to a temporary `index.html`, deploys it, and returns a preview URL plus a claim URL for later transfer to a Vercel account.
+
+## Output and limits
+
+sharehtml prints its CLI output and a mode hint:
+
+```text
 Sharing my-diagram.html via sharehtml...
 Share mode: private team link, stable update-in-place URL
 ```
 
-Vercel fallback prints:
-```
-Sharing my-diagram.html...
+Vercel prints the public and claim URLs, plus JSON:
 
-✓ Shared successfully!
-
-Live URL:  https://skill-deploy-abc123.vercel.app
-Claim URL: https://vercel.com/claim-deployment?code=...
-```
-
-The script also outputs JSON for programmatic use:
 ```json
 {"previewUrl":"https://...","claimUrl":"https://...","deploymentId":"...","projectId":"..."}
 ```
 
-## Notes
+Unclaimed Vercel previews default to 30-day retention; the retention period is configurable. sharehtml has no TTL by default and no built-in version history. Writes are last-write-wins and websocket messages are capped at 64KB. Keep MDX/TSX as the source of truth.
 
-- Vercel fallback deployments are **public** — anyone with the URL can view.
-- Vercel preview deployments have a configurable retention period; unclaimed previews default to 30 days.
-- Each Vercel fallback share creates a new deployment with a unique URL.
-- sharehtml team shares are private to the configured access layer and update in place.
-- sharehtml limits: last-write-wins, MDX/TSX source-of-truth mitigation, 64KB websocket message cap, no TTL by default, no built-in version history.
+## Troubleshoot
 
-## Troubleshooting
-
-- Missing CLI: run `which sharehtml`; if absent, install it with `bun install -g sharehtml` or add the repo CLI to `PATH`.
-- Missing env/config: run `echo "$VE_SHAREHTML_URL"` and `cat ~/.config/visual-explainer/share.json`; if both are absent, Vercel fallback is expected.
-- Wizard failures: verify Cloudflare Workers Paid is active, Durable Objects were created, and Cloudflare Access allows your email or team domain.
+- Missing CLI: run `which sharehtml`, then install it or fix `PATH`.
+- Unexpected Vercel fallback: inspect `VE_SHAREHTML_URL` and `~/.config/visual-explainer/share.json`.
+- Team setup failure: check Workers Paid, Durable Objects, and Cloudflare Access's allowed email or domain.

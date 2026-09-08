@@ -22,7 +22,7 @@ Use CSS variables in SVG fills and strokes. A standalone figure defines its host
 |---|---|
 | `lieflat` | Paper gray, charcoal, Inter, sparse semantic color; see [charts.md](charts.md) |
 | `mono-color` | One or two inks on neutral paper; see [mono-color.md](mono-color.md) |
-| `algebrica` | Warm stone/blush, charcoal, serif titles, Inter reading text; see [algebrica.md](algebrica.md) |
+| `algebrica` | Warm stone/blush, charcoal, serif reading text, Inter figure labels; see [algebrica.md](algebrica.md) |
 | `oa-design` | Ink-derived neutrals and restrained blue; explicit compatibility, see [oa-design.md](oa-design.md) |
 | `mono-industrial` | Monochrome, Space Grotesk, status on factual values; see [mono-industrial.md](mono-industrial.md) |
 | `nothing` | Black/off-white, restrained status color, optional Doto display; see [nothing.md](nothing.md) |

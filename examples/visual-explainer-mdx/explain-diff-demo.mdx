@@ -1,13 +1,13 @@
 import { CodeBlock, DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="A cache adds an early return" summary="An example change to an immutable catalog reader: repeat requests reuse the same version instead of loading it again." reviewTools={false}>
-  <Section title="The old path always reads the origin">
+<ExplainerShell title="Skip the origin read on a cache hit" summary="This patch caches immutable catalog versions. A hit returns before readOrigin runs." reviewTools={false}>
+  <Section title="Before: every request reads the origin">
     <DiagramCanvas nodes={[{id:'request',label:'Request',shape:'oval'},{id:'read',label:'Read origin'},{id:'return',label:'Return catalog'}]} edges={[{from:'request',to:'read'},{from:'read',to:'return'}]} />
   </Section>
-  <Section title="The new path distinguishes a hit from a miss">
+  <Section title="After: only a miss reads the origin">
     <DiagramCanvas layout="flow" nodes={[{id:'request',label:'Request',shape:'oval'},{id:'lookup',label:'Version cached?',shape:'diamond'},{id:'hit',label:'Return cached catalog'},{id:'miss',label:'Read and cache catalog'}]} edges={[{from:'request',to:'lookup'},{from:'lookup',to:'hit',label:'hit'},{from:'lookup',to:'miss',label:'miss'}]} />
   </Section>
-  <Section title="The early return is the behavior change">
+  <Section title="The patch">
     <DiffBlock language="ts" filename="Illustrative catalog.ts" mode="split" before={`export async function loadCatalog(version: string) {
   return readOrigin(version);
 }`} after={`export async function loadCatalog(version: string) {
@@ -18,9 +18,9 @@ import { CodeBlock, DiagramCanvas, DiffBlock, ExplainerShell, Quiz, Section } fr
   return catalog;
 }`} />
     <CodeBlock language="ts" code={`if (cached !== undefined) return cached;`} annotations={[{line:1,note:'A hit leaves before the origin read.'}]} />
-    <p>The key contains the immutable catalog version. This avoids mixing published versions, but it does not bound memory or coalesce simultaneous misses. Those policies need separate decisions.</p>
+    <p>The version key keeps published catalogs separate. Memory limits and simultaneous misses remain unresolved; the patch adds neither eviction nor request coalescing.</p>
   </Section>
-  <Section title="Check the read path">
+  <Section title="Check hit and miss behavior">
     <Quiz questions={[{q:'What does a cache hit skip?',options:[{text:'The origin read.',correct:true,why:'The early return occurs before readOrigin.'},{text:'The cache lookup.',why:'Every request must look up its version before it can be classified as a hit.'}]},{q:'Does this patch prevent simultaneous misses from loading twice?',options:[{text:'No; both may reach readOrigin.',correct:true,why:'No in-flight request is stored or shared.'},{text:'Yes; cache.set runs eventually.',why:'An eventual value does not coordinate two earlier reads.'}]}]} />
   </Section>
 </ExplainerShell>

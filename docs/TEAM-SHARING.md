@@ -1,13 +1,13 @@
-# Team Sharing
+# Share an artifact
 
-Visual Explainer shares generated HTML artifacts through one command with two backends.
+Artifacture shares exported HTML through sharehtml or a Vercel preview.
 
 | Need | Use | Access | URL behavior | Setup |
 |---|---|---|---|---|
-| Zero setup, safe to be public | Vercel fallback | Public unless you add Vercel Deployment Protection | New claimable preview URL per share | No local account required |
+| Public preview without local setup | Vercel fallback | Public unless you add Vercel Deployment Protection | New claimable preview URL per share | No local account required |
 | Team-gated review, comments, stable link | [sharehtml](https://github.com/jonesphillip/sharehtml) | Private by default behind Cloudflare Access | Same URL updates in place | Cloudflare + sharehtml CLI |
 
-## Agent Contract
+## Sharing behavior
 
 - Share the exported `.html`, not MDX/TSX source. If given source, export it first.
 - Prefer sharehtml when `VE_SHAREHTML_URL` or `~/.config/visual-explainer/share.json` is configured.
@@ -49,13 +49,13 @@ When prompted, choose the Cloudflare account, create or select the Worker, enabl
 - Add an allow policy scoped to your team email domain, for example `@example.com`.
 - Test in a fresh browser profile before sending links to teammates.
 
-4. Optional custom domain follow-up:
+4. To use a custom domain:
 
 - Add the custom hostname in Cloudflare.
 - Point it at the Worker route.
 - Update Access to protect the custom hostname too.
 
-5. Wire Visual Explainer to sharehtml with either env or config.
+5. Configure Artifacture with an environment variable or a config file.
 
 Env:
 
@@ -103,14 +103,14 @@ which sharehtml
 bun install -g sharehtml
 ```
 
-Missing Visual Explainer share config:
+Missing Artifacture share config:
 
 ```bash
 echo "$VE_SHAREHTML_URL"
 cat ~/.config/visual-explainer/share.json
 ```
 
-If neither exists, the script correctly falls back to Vercel.
+If neither exists, the script falls back to Vercel.
 
 Wizard failures:
 

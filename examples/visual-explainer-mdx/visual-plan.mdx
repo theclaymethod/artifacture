@@ -1,14 +1,14 @@
 import { DecisionMatrix, ExplainerShell, Pipeline, RiskLedger, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="Add bounded retries to a queue" summary="An example implementation plan for retaining failed jobs, limiting repeated work, and making manual replay inspectable." reviewTools={false}>
-  <Section title="The behavior to change">
+<ExplainerShell title="Add bounded retries to a queue" summary="Persist retry state, limit attempts, and retain failed jobs for manual repair." reviewTools={false}>
+  <Section title="Current and proposed behavior">
     <DecisionMatrix rows={[
       {Case:'Temporary failure',Current:'Immediate repeated attempts',Proposed:'Scheduled retries with backoff'},
       {Case:'Invalid input',Current:'The same error repeats',Proposed:'Quarantine with the validation reason'},
       {Case:'Uncertain outcome',Current:'Replay may repeat a side effect',Proposed:'Reconcile by a stable idempotency key'}
     ]} />
   </Section>
-  <Section title="Implement the durable record first">
+  <Section title="Persist the job before adding retries">
     <Pipeline steps={[
       {title:'Persist',body:'Store job identity, attempts, next run time, and last error.'},
       {title:'Classify',body:'Route permanent failures to quarantine.'},
@@ -16,12 +16,12 @@ import { DecisionMatrix, ExplainerShell, Pipeline, RiskLedger, Section } from '.
       {title:'Replay',body:'Expose the saved context and preserve idempotency.'}
     ]} />
   </Section>
-  <Section title="Check the boundary cases">
+  <Section title="Failure cases to verify">
     <RiskLedger risks={[
       {risk:'Two workers claim one job',signal:'Claims overlap in time',mitigation:'Use an atomic claim or lease.',level:'high'},
       {risk:'A timeout hides success',signal:'No response after sending a side effect',mitigation:'Reconcile before replay using the original key.',level:'high'},
       {risk:'Quarantine loses context',signal:'Only the latest error remains',mitigation:'Retain the payload reference and attempt history.',level:'medium'}
     ]} />
-    <p>Validate with the existing queue checks and a direct runtime exercise: fail a job, observe its delayed retry, exhaust the budget, and inspect the retained record. Adapt the example to the storage and concurrency guarantees of the actual system.</p>
+    <p>Run the existing queue checks. Then fail a job, observe the delayed retry, exhaust the budget, and inspect the retained record. Adapt the plan to the system’s storage and concurrency guarantees.</p>
   </Section>
 </ExplainerShell>

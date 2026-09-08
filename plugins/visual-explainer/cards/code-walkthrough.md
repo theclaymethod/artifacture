@@ -1,27 +1,27 @@
-# Code Walkthrough Card
-Use `ExplainerShell`, `Section`, `CodeBlock`, `Pipeline`. Focused snippets, not whole files.
+# Explain a code path
+
+Use `ExplainerShell`, `Section`, `CodeBlock`, and `Pipeline`. Start with an input, follow the relevant branch, and show its result. Keep snippets focused and identify their source files.
+
+This illustrative cache example shows the structure; replace it with inspected code.
+
 ```mdx
-{/* REPO = artifacture checkout; see SKILL.md "Resolve the runtime" */}
+{/* REPO = Artifacture checkout; see SKILL.md "Resolve the runtime" */}
 import { ExplainerShell, Section, CodeBlock, Pipeline } from 'REPO/visual-explainer-mdx/components';
-<ExplainerShell title="Webhook Signature Gate" summary="Protect every billing write.">
-  <Section title="Four checks before handlers">
-    <Pipeline steps={['Read raw body','Recompute HMAC','Check timestamp','Attach verified event']} />
+
+<ExplainerShell title="A cache miss reads storage">
+  <Section title="The lookup order">
+    <Pipeline steps={['Read the cache', 'Return a hit', 'Fetch a miss from storage']} />
   </Section>
-  <Section title="Reject invalid events before billing">
-    <CodeBlock language="ts" filename="src/webhooks/verify.ts" highlightLines={[4,8]} annotations={[
-      {line:4,note:'Reject replay before JSON.'},
-      {line:8,note:'Verified events reach billing.'}
-    ]} code={`export function verifyWebhook(req) {
-  const raw = req.rawBody
-  const sentAt = Number(req.headers['x-sent-at'])
-  if (Date.now() - sentAt > 300000) return reject(408)
-  const expected = hmac(raw, process.env.WEBHOOK_SECRET)
-  if (!timingSafeEqual(expected, req.headers['x-signature']))
-    return reject(401)
-  const event = JSON.parse(raw)
-  return { event, verified: true }
+  <Section title="Only a miss calls storage">
+    <CodeBlock language="ts" filename="src/read-record.ts" highlightLines={[3]} annotations={[
+      {line:3,note:'A cached value returns before storage is called.'}
+    ]} code={`async function readRecord(key: string) {
+  const cached = await cache.get(key)
+  if (cached !== null) return cached
+  return storage.get(key)
 }`} />
   </Section>
 </ExplainerShell>
 ```
-Export `npm run ve:export -- source.mdx --out out.html`; verify.
+
+Export with `npm run ve:export -- source.mdx --out out.html`, then follow `references/verification.md`.

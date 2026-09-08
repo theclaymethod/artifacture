@@ -1,7 +1,7 @@
 import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-mdx/components';
 
-<ExplainerShell title="A cache changes the read path" summary="A hit returns a stored value. A miss reads the origin and stores the result for the next request." reviewTools={false}>
-  <Section title="Two possible outcomes">
+<ExplainerShell title="Cache-aside reads" summary="A hit returns a stored value. A miss reads the origin and stores the result for the next request." reviewTools={false}>
+  <Section title="Hit or miss">
     <DiagramCanvas layout="flow"
           direction="vertical" description="Requests check the cache. Hits return immediately; misses read the origin."
       nodes={[
@@ -18,7 +18,7 @@ import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-m
         {from:'origin',to:'store'}
       ]} />
   </Section>
-  <Section title="Freshness is a separate decision">
-    <p>This example describes cache-aside reads. It does not determine when a stored value becomes stale. A real cache needs an expiry policy, invalidation after writes, or a key that changes with the source version.</p>
+  <Section title="Define when entries expire">
+    <p>The read path needs a freshness policy: expire entries, invalidate them after writes, or change the key with the source version.</p>
   </Section>
 </ExplainerShell>

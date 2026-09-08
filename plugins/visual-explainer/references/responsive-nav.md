@@ -1,6 +1,6 @@
 # Responsive Section Navigation
 
-Navigation pattern for multi-section pages (reviews, recaps, dashboards). Provides a sticky sidebar TOC on desktop and a sticky horizontal scrollable bar on mobile.
+Use a sticky sidebar for long pages and a horizontal, locally scrolling navigation bar on mobile.
 
 ## Layout Structure
 
@@ -37,7 +37,7 @@ Key structural rules:
 - All page content goes inside `<div class="main">`
 - Every section heading gets an `id="s1"`, `id="s2"`, etc.
 - TOC links use `href="#s1"` matching those IDs
-- Keep TOC link text short (truncate long section names)
+- Use short, descriptive link text; do not truncate away distinctions between sections
 
 ## CSS
 
@@ -48,7 +48,7 @@ Key structural rules:
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 170px 1fr;
+  grid-template-columns: 170px minmax(0, 1fr);
   gap: 0 40px;
 }
 .main { min-width: 0; }
@@ -205,8 +205,8 @@ Place before `</body>`, after any Mermaid init:
 
 ## Adaptation Notes
 
-- The `.toc-title` text, link labels, accent color, and section IDs change per page. Everything else is copy-paste.
+- The `.toc-title` text, link labels, accent color, and section IDs change per page. Preserve the containment and keyboard behavior when adapting the rest.
 - For pages with fewer than 4 sections, skip the TOC entirely — it adds clutter without value.
-- The `grid-template-columns: 170px 1fr` width works for most TOCs. If section names are longer, go up to `200px`.
+- The `grid-template-columns: 170px minmax(0, 1fr)` pattern lets the main content shrink. If section names are longer, go up to `200px`.
 - The `rootMargin: '-10% 0px -80% 0px'` means a section is "active" when its heading enters the top 10-20% of the viewport. This works well with sticky headers.
 - On mobile, the horizontal bar uses `overflow-x: auto` with hidden scrollbar. The active tab auto-scrolls into the center of the bar as the user scrolls the page.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Artifacture"
-  short_description: "Build and review verified technical artifacts"
-  default_prompt: "Use $visual-explainer to turn this technical topic into an editable, verified visual artifact."
+  short_description: "Create charts, diagrams, and HTML explainers"
+  default_prompt: "Use $visual-explainer to create an editable HTML explanation, then check it in a browser."

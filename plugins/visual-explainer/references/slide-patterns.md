@@ -64,7 +64,7 @@ Follow [verification.md](verification.md), including ordered screenshot pairs fo
 
 ## PDF Export
 
-Any slide deck or magazine can be exported to a multi-page PDF via `scripts/export-slides-pdf.mjs`. The HTML remains canonical; the PDF is a secondary artifact for email, print, or offline review. Triggered by the `--pdf` flag on `/generate-slides` — run after the HTML is written and opened.
+Any slide deck or magazine can be exported to a multi-page PDF via `scripts/export-slides-pdf.mjs`. Keep MDX/TSX as the editable source. HTML is the interactive artifact; PDF is a secondary export for print or offline review. Triggered by the `--pdf` flag on `/generate-slides` — run after the HTML is written and opened.
 
 ```bash
 node <skill-dir>/scripts/export-slides-pdf.mjs <input.html> <output.pdf>
@@ -98,16 +98,9 @@ npx playwright install chromium
 
 If `playwright` isn't available, skip the PDF export with a note to the user and deliver only the HTML. Don't add it to the skill as a hard dependency — the PDF is always opt-in.
 
-### Why screenshot-and-composite, not browser Print-to-PDF
+### Why per-slide screenshots
 
-Chromium's native `page.pdf()` is the obvious first attempt. It reliably fails on scroll-snap slide decks for four reasons that interact:
-
-- **Trailing blank page.** `break-after: page` on the last slide creates an extra empty page because Chromium forces the break even without content after it. `:last-child { break-after: avoid }` misses when the slide isn't literally the last child of its parent (trailing whitespace nodes, sibling nav elements, etc.).
-- **Fixed chrome repeats.** Theme toggles and progress bars set to `position: fixed` render on *every* printed page. Hiding them via `@media print` works but requires knowing every class name in every template.
-- **Flex-centered Mermaid collapses.** `.mermaid-wrap { display: flex; justify-content: center }` computes the flex item's main-size from the SVG's intrinsic width in print layout, so diagrams that filled the slide on screen shrink to their authored Mermaid dimensions (often ~270px wide).
-- **Live zoom state leaks.** Pan/zoom controllers set `transform: translate(...)` or `style.zoom` on the diagram wrapper. That state persists into the print render.
-
-Per-slide screenshots capture the live view exactly as the author intended, so none of those failure modes apply. The tradeoff is file size — a 10-slide deck at 1920×1080 renders to ~1 MB instead of ~175 KB — which is acceptable for presentations and still small enough to email.
+Native print pagination can add trailing pages, repeat fixed controls, shrink flex-centered Mermaid diagrams, or retain live zoom transforms. Capturing each settled slide avoids those layout changes. The tradeoff is file size: a 10-slide deck at 1920×1080 is roughly 1 MB instead of 175 KB.
 
 ### Troubleshooting
 

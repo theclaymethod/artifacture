@@ -21,12 +21,13 @@ when they exist.
 - Put shared constants such as rail width, dock height, safe area, and minimum
   hit target in the shell contract. Do not repeat numeric copies in each deck.
 - When a one-off deck proves a better shell behavior, promote it into the
-  canonical module, add a verifier fixture, then migrate consumers.
+  canonical module, verify the behavior, then migrate consumers. New test files
+  or fixtures require explicit authorization.
 - A new visual treatment does not automatically belong in the shell. Share
   only repeated interface behavior or brand primitives; keep slide-specific
   diagrams and compositions local.
 
-If no reusable shell exists, create the narrowest deep interface first:
+If no reusable shell exists, define the shared interface first:
 `DeckShell({slides, chapters, index, onNavigate, copyControl, modalOpen})`.
 Keep the fixed 1920 × 1080 stage as its content slot.
 

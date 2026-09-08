@@ -120,19 +120,19 @@
 <div class="counter"><span id="counter-current">1</span> / <span id="counter-total">6</span></div>
 <main class="mag" id="mag" aria-label="Queue partitioning explainer">
   <section class="page" aria-label="Introduction">
-    <h1 class="display">A queue should preserve the right ordering.</h1>
-    <p class="body-lg">An illustrative incident review: one busy tenant delayed everyone else. Separating tenants removed the shared bottleneck.</p>
+    <h1 class="display">Separate tenant queues.</h1>
+    <p class="body-lg">In this illustrative incident, a busy tenant delayed other tenants. Partitioning the queue removed that shared bottleneck.</p>
   </section>
   <section class="page" aria-label="The bottleneck">
-    <h2 class="display">An average can hide a growing queue.</h2>
-    <p class="body-lg">Throughput alone does not show whether work is accumulating. Read it alongside queue depth and waiting time, grouped by tenant.</p>
+    <h2 class="display">Measure waiting time for each tenant.</h2>
+    <p class="body-lg">Read throughput alongside queue depth and waiting time. Group all three by tenant to see where work accumulates.</p>
   </section>
   <section class="page page--split" aria-label="Partitioning choices">
     <div><h2>A shared queue</h2><p class="body-lg">Messages from different tenants wait behind each other. A large batch can delay unrelated requests.</p></div>
     <div><h2>A queue per tenant</h2><p class="body-lg">Each tenant keeps its own ordering. Workers can process independent tenants concurrently.</p></div>
   </section>
   <section class="page" aria-label="Throughput comparison">
-    <h2>Compare the measured ceiling</h2>
+    <h2>Throughput on the same hardware</h2>
     <p class="body-lg">Illustrative load-test data, in requests per second. Both runs use the same hardware.</p>
     <figure class="chart" tabindex="0" aria-label="Throughput comparison; scroll horizontally on small screens">
       <svg viewBox="0 0 960 240" role="img" aria-labelledby="throughput-title throughput-desc">
@@ -145,12 +145,12 @@
     </figure>
   </section>
   <section class="page" aria-label="Trade-offs">
-    <h2 class="display">Isolation changes what must be measured.</h2>
+    <h2 class="display">Verify ordering and recovery.</h2>
     <ul class="reading-list"><li>Track the oldest waiting message for each tenant.</li><li>Keep ordering within the tenant where the contract requires it.</li><li>Test recovery and replay after a worker stops.</li></ul>
   </section>
   <section class="page" aria-label="Next step">
-    <h2 class="display">Test the partition key against the workload.</h2>
-    <p class="body-lg">Replay a representative burst. Compare waiting time, throughput, and recovery before committing to the change.</p>
+    <h2 class="display">Replay a representative burst.</h2>
+    <p class="body-lg">Compare waiting time, throughput, and recovery before committing to the partition key.</p>
   </section>
 </main>
 <nav class="nav-dots" aria-label="Page navigation"></nav>

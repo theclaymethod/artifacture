@@ -52,9 +52,9 @@
 <body>
 <div class="layout">
   <nav aria-label="On this page">
-    <a href="#idea" aria-current="location">The idea</a>
-    <a href="#construction">The construction</a>
-    <a href="#calculation">The calculation</a>
+    <a href="#idea" aria-current="location">Projection</a>
+    <a href="#construction">Geometry</a>
+    <a href="#calculation">Calculation</a>
     <div class="theme-toggle" role="radiogroup" aria-label="Color theme">
       <button type="button" role="radio" data-theme="light" aria-checked="false">Light</button>
       <button type="button" role="radio" data-theme="dark" aria-checked="false">Dark</button>
@@ -64,11 +64,11 @@
   <main>
     <header id="idea">
       <h1>The closest point on a line</h1>
-      <p class="lede">A projection keeps the part of a vector that points along a chosen direction.</p>
+      <p class="lede">Projecting onto a line gives the component of a vector in that direction.</p>
       <p>Start with a point <i>v</i> and a line through the origin. The shortest route from the point to the line meets it at a right angle. That meeting point is the projection of <i>v</i> onto the line.</p>
     </header>
     <section id="construction">
-      <h2>Separate the two directions</h2>
+      <h2>Split the vector into perpendicular components</h2>
       <p>The vector from the origin to <i>v</i> splits into a component along the line and a perpendicular remainder. Moving to any other point on the line makes the distance longer.</p>
       <figure>
         <svg viewBox="0 0 360 290" role="img" aria-labelledby="projection-title projection-desc">
@@ -87,7 +87,7 @@
       </figure>
     </section>
     <section id="calculation">
-      <h2>Find the amount along the line</h2>
+      <h2>Calculate the projection</h2>
       <p>For any nonzero direction vector <i>u</i>, the dot product measures how much <i>v</i> points along it. Dividing by <i>u</i> · <i>u</i> accounts for the length of the direction vector.</p>
       <p class="formula" aria-label="p equals v dot u divided by u dot u, times u">p = ((v · u) / (u · u)) u</p>
       <dl class="example">

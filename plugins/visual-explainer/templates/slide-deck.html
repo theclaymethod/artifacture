@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Gateway Redesign — Reference Slide Deck</title>
+<title>API gateway migration</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -311,8 +311,8 @@
     line-height: 1.7;
     color: var(--code-text);
   }
-  .slide__code-block .hl { color: var(--accent); }
-  .slide__code-block .cm { color: var(--text-dim); }
+  .slide__code-block .hl { color: var(--code-text); font-weight: 600; }
+  .slide__code-block .cm { color: color-mix(in srgb, var(--code-text) 72%, var(--code-bg)); }
 
   .slide--quote {
     justify-content: center;
@@ -354,9 +354,58 @@
   }
 
   @media (max-width: 768px) {
+    .deck { height: calc(100dvh - 68px - env(safe-area-inset-bottom)); }
+    .slide { height: 100%; min-height: 100%; padding: 32px 24px; }
     .slide--content .slide__inner { grid-template-columns: 1fr; }
     .slide--content .slide__aside { border-top: 1px solid var(--border); padding-top: 24px; font-size: 18px; line-height: 1.6; color: var(--text-dim); }
+    .slide--split { padding: 0; }
     .slide--split .slide__panels { grid-template-columns: 1fr; }
+    .slide--split .slide__panel { padding: 32px 24px; }
+    .slide__code-block pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .deck-dots {
+      left: 16px;
+      right: 72px;
+      top: auto;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      transform: none;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 0;
+      padding: 0;
+      min-height: 44px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .deck-dot {
+      position: relative;
+      flex: 0 1 28px;
+      min-width: 24px;
+      width: 28px;
+      height: 44px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .deck-dot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      transform: translate(-50%, -50%);
+      background: currentColor;
+    }
+    .deck-dot:hover { background: transparent; }
+    .deck-dot.active { transform: none; background: transparent; }
+    .deck-dot.active::before { width: 9px; height: 9px; }
+    .deck-counter { right: 16px; bottom: calc(26px + env(safe-area-inset-bottom)); text-shadow: none; }
+    .deck-hints { display: none; }
+    .deck-dot { color: var(--text-dim); }
+    .deck-dot::before { border-radius: 50%; }
+    .deck-dot.active { color: var(--text); }
   }
 </style>
 </head>
@@ -369,17 +418,17 @@
     <div class="reveal">
       <p class="slide__subtitle" style="margin-bottom:clamp(16px,2vh,32px);">Illustrative engineering review</p>
     </div>
-    <h1 class="slide__display reveal">API Gateway Redesign</h1>
+    <h1 class="slide__display reveal">Move the gateway to the edge</h1>
     <div class="reveal">
-      <p class="slide__subtitle" style="margin-top:clamp(16px,2vh,32px);">From monolith proxy to edge-native routing</p>
+      <p class="slide__subtitle" style="margin-top:clamp(16px,2vh,32px);">Replace the single proxy with distributed routing</p>
     </div>
   </section>
 
   <section class="slide slide--divider">
 
     <div>
-      <h2 class="slide__heading reveal">The Problem</h2>
-      <p class="slide__subtitle reveal" style="margin-top:12px;">Why the current gateway can't scale</p>
+      <h2 class="slide__heading reveal">One process handles all traffic</h2>
+      <p class="slide__subtitle reveal" style="margin-top:12px;">Rate limiting, authentication, and failure isolation share one bottleneck</p>
     </div>
   </section>
 
@@ -387,12 +436,12 @@
     <div class="slide__inner">
       <div>
 
-        <h2 class="slide__heading reveal">Single Point of Failure</h2>
+        <h2 class="slide__heading reveal">The current proxy</h2>
         <ul class="slide__bullets">
           <li class="reveal">All traffic routes through one Node.js process</li>
           <li class="reveal">Rate limiting is per-instance, not distributed</li>
           <li class="reveal">Auth validation adds 40ms per request</li>
-          <li class="reveal">No circuit breaking — cascade failures hit everything</li>
+          <li class="reveal">No circuit breakers to contain cascading failures</li>
         </ul>
       </div>
       <div class="slide__aside reveal">
@@ -400,7 +449,7 @@
           <circle cx="80" cy="80" r="60" fill="none" stroke="var(--red)" stroke-width="2" opacity="0.3" />
           <circle cx="80" cy="80" r="40" fill="none" stroke="var(--red)" stroke-width="1.5" opacity="0.2" stroke-dasharray="4 4" />
           <circle cx="80" cy="80" r="8" fill="var(--red)" opacity="0.4" />
-          <text x="80" y="130" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--text-dim)">SINGLE PROCESS</text>
+          <text x="80" y="130" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--text-dim)">One process</text>
         </svg>
       </div>
     </div>
@@ -410,7 +459,7 @@
     <div class="slide__panels">
       <div class="slide__panel slide__panel--primary">
 
-        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Monolith Proxy</h2>
+        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Current proxy</h2>
         <ul class="slide__bullets" style="margin-top:16px;">
           <li class="reveal">Express.js middleware chain</li>
           <li class="reveal">In-memory rate limit counters</li>
@@ -420,7 +469,7 @@
       </div>
       <div class="slide__panel slide__panel--secondary">
 
-        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Edge-Native</h2>
+        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Proposed edge gateway</h2>
         <ul class="slide__bullets" style="margin-top:16px;">
           <li class="reveal">Cloudflare Workers at the edge</li>
           <li class="reveal">Durable Objects for distributed state</li>
@@ -434,13 +483,13 @@
   <section class="slide slide--divider">
 
     <div>
-      <h2 class="slide__heading reveal">Architecture</h2>
-      <p class="slide__subtitle reveal" style="margin-top:12px;">How the new system works</p>
+      <h2 class="slide__heading reveal">Route requests at the edge</h2>
+      <p class="slide__subtitle reveal" style="margin-top:12px;">Check authentication and rate limits before choosing an upstream</p>
     </div>
   </section>
 
   <section class="slide slide--diagram">
-    <h2 class="slide__heading reveal">Request Flow</h2>
+    <h2 class="slide__heading reveal">Proposed request flow</h2>
     <div class="mermaid-wrap reveal">
       <div class="zoom-controls">
         <button type="button" aria-label="Zoom in" onclick="zoomDiagram(this,1.2)" title="Zoom in">+</button>
@@ -461,10 +510,10 @@ graph LR
     </div>
   </section>
 
-  <section class="slide slide--table"><h2 class="slide__heading">Compare latency and availability</h2><p class="slide__subtitle">Illustrative measurements</p><div class="table-wrap"><div class="table-scroll"><table class="data-table"><thead><tr><th>Measure</th><th class="numeric">Before</th><th class="numeric">After</th></tr></thead><tbody><tr><td>P99 latency</td><td class="numeric">142 ms</td><td class="numeric">12 ms</td></tr><tr><td>Availability</td><td class="numeric">99.2%</td><td class="numeric">99.97%</td></tr></tbody></table></div></div></section>
+  <section class="slide slide--table"><h2 class="slide__heading">Latency and availability before and after</h2><p class="slide__subtitle">Illustrative measurements</p><div class="table-wrap"><div class="table-scroll"><table class="data-table"><thead><tr><th>Measure</th><th class="numeric">Before</th><th class="numeric">After</th></tr></thead><tbody><tr><td>P99 latency</td><td class="numeric">142 ms</td><td class="numeric">12 ms</td></tr><tr><td>Availability</td><td class="numeric">99.2%</td><td class="numeric">99.97%</td></tr></tbody></table></div></div></section>
 
   <section class="slide slide--table">
-    <h2 class="slide__heading reveal">Migration Phases</h2>
+    <h2 class="slide__heading reveal">Seven-week migration</h2>
     <div class="table-wrap reveal" style="flex:1; min-height:0; margin-top:clamp(8px,1.5vh,20px);">
       <div class="table-scroll">
         <table class="data-table">
@@ -482,7 +531,7 @@ graph LR
   </section>
 
   <section class="slide slide--code">
-    <h2 class="slide__heading reveal" style="text-align:center;">Edge Worker Entry Point</h2>
+    <h2 class="slide__heading reveal" style="text-align:center;">Authenticate, limit, then route</h2>
     <div class="slide__code-block reveal" style="margin-top:clamp(12px,2vh,24px);">
       <span class="slide__code-filename">gateway.ts</span>
       <pre><code><span class="hl">export default</span> {
@@ -502,12 +551,11 @@ graph LR
   <section class="slide slide--quote">
 
     <blockquote class="reveal">
-      The fastest request is the one that never leaves the edge.
+      Compare responses before shifting production traffic.
     </blockquote>
-    <cite class="reveal">Design principle in this example</cite>
   </section>
 
-  <section class="slide slide--content"><h2 class="slide__heading">Start by mirroring traffic.</h2><p class="slide__subtitle" style="margin-top:24px">Compare responses and errors before routing real requests to the new gateway.</p></section>
+  <section class="slide slide--content"><h2 class="slide__heading">Begin with shadow traffic.</h2><p class="slide__subtitle" style="margin-top:24px">Compare responses and errors before routing real requests to the new gateway.</p></section>
 
 </div>
 

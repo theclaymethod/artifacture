@@ -9,9 +9,9 @@ Load this reference only when imagery, a code-generated graphic, or a short UI d
 | Illustrative, conceptual, photographic, or atmospheric image | Generated raster image | Installed image-generation capability |
 | Exact chart, hierarchy, or schematic | Code-driven raster graphic | Installed graphics capability or `poster` |
 | Running UI behavior or a short interaction sequence | Silent WebM/MP4 loop | Browser capture + FFmpeg |
-| Structure, topology, process, state, or data relationships | Native diagram | DiagramCanvas, Archify, DataChart, or a routed specialized renderer |
+| Structure, topology, process, state, or data relationships | Native diagram | LieflatChart, DataChart, DiagramCanvas, Archify, or a specialized renderer |
 
-Skip generic decoration. Every image or video must explain, orient, or establish a deliberate visual tone.
+Skip generic decoration. Use media to explain the subject, orient the reader, or satisfy an explicit visual brief.
 
 ## Generated illustration
 

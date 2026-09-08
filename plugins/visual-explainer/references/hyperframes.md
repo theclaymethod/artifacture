@@ -1,14 +1,12 @@
-# Hyperframes — HTML → MP4 / WebM Video Rendering
+# Render video with Hyperframes
 
-**What it is.** [Hyperframes](https://github.com/heygen-com/hyperframes) is an open-source (Apache 2.0) local video renderer from HeyGen. Compositions are authored as HTML with `data-*` timing attributes and GSAP timelines. The engine renders frames via headless Chrome and encodes with FFmpeg. No cloud account, no API keys, no HeyGen service dependency — it runs entirely on the user's machine.
+[Hyperframes](https://github.com/heygen-com/hyperframes) renders HTML compositions through headless Chrome and encodes video with FFmpeg. It runs locally without a cloud account, API key, or HeyGen service. The renderer is open source under Apache 2.0.
 
 This reference summarizes the integration contract the visual-explainer skill uses. For the full upstream specification, see the [Hyperframes docs](https://hyperframes.heygen.com/) and the LLM-optimized index at [`hyperframes.mintlify.app/llms.txt`](https://hyperframes.mintlify.app/llms.txt).
 
----
+## Delegation boundary
 
-## Delegation boundary (upstream vs us)
-
-Lean on the upstream skills where they cover the mechanics; keep our own authoring for the opinionated layers they don't know about.
+Use upstream skills for runtime mechanics. Use Artifacture's references for composition, visual defaults, and review.
 
 **Upstream `/hyperframes`, `/hyperframes-cli`, `/gsap` own:**
 - Motion / caption / transition / highlight vocab → GSAP ease mapping
@@ -18,20 +16,18 @@ Lean on the upstream skills where they cover the mechanics; keep our own authori
 - `npx hyperframes lint` + `validate` — rule + WCAG audit
 - General GSAP idiom (see `/gsap` skill)
 
-**We own:**
-- 6 recipes + entry routing (`explainer-longform`, `social-reel`, `announcement-bumper` on `/generate-video`; `deck-to-video`, `overlay-transparent`, `browser-loop` on `/render-video`)
-- Mono-industrial aesthetic enforcement (`references/mono-industrial.md`)
-- Reel grammar (HOOK → PROBLEM → CONTEXT → MECHANISM → PROOF → RESOLUTION → CTA in `references/reel-patterns.md`)
-- Clarify-first policy (`references/clarify.md`)
-- Draft-render + keyframe review gate (step 5–7 of the skill workflow)
-- `hyperframes-doctor.sh` runtime + skill probe
+**Artifacture owns:**
+- Topic-to-video and deck-to-video command routing.
+- Lieflat by default, or the requested preset.
+- Reel structure in `references/reel-patterns.md`.
+- Material-choice handling in `references/clarify.md`.
+- Draft rendering, keyframe inspection, and delivery.
+- `hyperframes-doctor.sh` runtime and skill checks.
 
 **Availability.** `hyperframes-doctor.sh` probes `~/.claude/skills/` and `~/.claude/plugins/cache/heygen-com/` for the upstream skills. Probe outcomes:
 
-- **Installed** → video commands delegate vocab + plumbing to `/hyperframes` and author recipe + aesthetic on top.
+- **Installed** → use upstream runtime guidance with Artifacture composition rules.
 - **Missing** → the doctor emits a warning and install hint (`npx skills add heygen-com/hyperframes`) and video commands fall back to authoring directly from our refs (`hyperframes.md`, `gsap-rules.md`, `reel-patterns.md`). Never fatal.
-
----
 
 ## Runtime Requirements
 
@@ -41,13 +37,11 @@ Lean on the upstream skills where they cover the mechanics; keep our own authori
 
 The skill runs `npx hyperframes doctor` at the start of any video command to verify these are present. If anything fails, the command aborts with install hints rather than attempting to render. See `scripts/hyperframes-doctor.sh`.
 
----
-
 ## Invocation
 
-Two idiomatic paths:
+Use `npx` or a global installation:
 
-**1. npx (no install).** Zero-install path. Slightly slower first run, always-current.
+**1. npx.** No global installation required. The first run may download the package.
 ```bash
 npx hyperframes init my-video
 npx hyperframes lint
@@ -62,17 +56,13 @@ hyperframes render ...
 
 The skill defaults to `npx hyperframes …` to avoid imposing a global install.
 
----
+## Composition source
 
-## Composition Shape
-
-A Hyperframes project is one HTML file (or several) + media assets. The root composition is an HTML file where the `<div id="stage">` (or any root element) carries `data-composition-id`, `data-width`, `data-height`, `data-start`, and `data-duration` attributes. Nested `<video>`, `<img>`, and `<audio>` elements each carry `data-start`, `data-duration`, and `data-track-index`.
+Keep the editable composition in TSX and generate HTML with `ve:export-static`. A Hyperframes project contains that HTML and its media assets. The root composition is an HTML file where the `<div id="stage">` (or any root element) carries `data-composition-id`, `data-width`, `data-height`, `data-start`, and `data-duration` attributes. Nested `<video>`, `<img>`, and `<audio>` elements each carry `data-start`, `data-duration`, and `data-track-index`.
 
 Animations are driven by a GSAP timeline registered on `window.__timelines["<composition-id>"]`, created with `{ paused: true }`.
 
 See the upstream docs for exact attribute reference; see our templates (`templates/hyperframes-longform.html`, `templates/hyperframes-reel.html`) for working starters.
-
----
 
 ## Hard Constraints (violating these breaks renders)
 
@@ -89,8 +79,6 @@ These rules come from the upstream project and are non-negotiable:
 
 See `references/gsap-rules.md` for the GSAP-specific version of this list.
 
----
-
 ## Render Flags
 
 The skill uses a standard set of flags:
@@ -104,26 +92,22 @@ The skill uses a standard set of flags:
 | `--workers` | `auto` | Parallel Chrome instances |
 | `--strict` | on | Lint errors fail the render |
 
----
-
 ## Skill Workflow
 
 For both `/generate-video` and `/render-video`:
 
 ```
-1. npx hyperframes doctor            # abort on missing deps
-2. Build the composition              # HTML + GSAP timeline + assets
-3. npx hyperframes lint               # abort on errors
-4. npx hyperframes validate           # WCAG contrast audit
-5. npx hyperframes render -q draft    # fast preview pass
-6. extract-keyframes.sh out.mp4       # 3 keyframes from the draft
-7. Show keyframes, ask user to approve
-8. npx hyperframes render -q standard # final pass on approval
+1. npx hyperframes doctor            # stop on missing dependencies
+2. Author TSX and export static HTML  # GSAP timeline + assets
+3. npx hyperframes lint              # stop on errors
+4. npx hyperframes validate          # WCAG contrast audit
+5. npx hyperframes render -q draft   # preview
+6. extract-keyframes.sh out.mp4      # 3 review frames
+7. Inspect keyframes and repair the source
+8. npx hyperframes render -q standard # authorized final render
 ```
 
-The draft-first gate exists because high-quality renders can take minutes per 30 seconds of video; catching layout bugs in the draft saves time.
-
----
+Inspect the draft before spending time on the final render. Honor existing authorization; rendering cost alone does not require reconfirmation.
 
 ## Output Defaults
 
@@ -132,18 +116,14 @@ The draft-first gate exists because high-quality renders can take minutes per 30
 | `long-form` | 16:9 | 1920 × 1080 | 60–180 seconds | 30 |
 | `reel` | 9:16 | 1080 × 1920 | 30–60 seconds | 30 |
 
-Longer than these ranges is allowed but requires explicit user request — AskUserQuestion should confirm before rendering.
-
----
+Honor explicitly requested durations outside these ranges. Otherwise use 60 seconds for long-form and 45 seconds for a reel; clarify a material conflict through `clarify.md` without repeating an answered question.
 
 ## Ancillary CLI Tools the Skill Uses
 
 - `npx hyperframes tts "<text>" --voice <name> --output narration.wav` — generate narration locally. Voices ship with the Hyperframes install.
 - `npx hyperframes transcribe narration.wav` — produce a caption track. The skill burns captions into reel outputs by default (silent autoplay) and offers captions as a side `.vtt` for long-form.
-- `npx hyperframes add <transition-name>` — pull shader/mask transitions from the Hyperframes registry (e.g., `flash-through-white`, `domain-warp-dissolve`). The skill uses these between slides in the long-form style.
+- `npx hyperframes add <transition-name>` — pull shader/mask transitions from the Hyperframes registry (e.g., `flash-through-white`, `domain-warp-dissolve`). Use them only at a meaningful scene boundary.
 - `npx hyperframes benchmark` — measures render wall-clock on the current machine.
-
----
 
 ## Attribution
 
