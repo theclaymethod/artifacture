@@ -68,7 +68,7 @@ export function detectProfile(filePath, html) {
   // Tailwind CSS always carries SlideDeck's snap utilities, which would
   // otherwise misclassify every presentation artifact as `slides`. They
   // verify as pages.
-  if (/data-ve-presentation/.test(authored)) {
+  if (isFixedStagePresentation(authored)) {
     return 'page';
   }
 

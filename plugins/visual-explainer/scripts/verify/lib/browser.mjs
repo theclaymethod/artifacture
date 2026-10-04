@@ -1483,9 +1483,10 @@ async function captureDeckReviewSet({
   if (!mode) return null;
 
   const stateFilter = parseReviewStateFilter(process.env.ARTIFACTURE_DECK_REVIEW_STATES);
-  const units = mode === 'presentation'
-    ? await captureReviewPresentation(page, screensDir, suffix, stateFilter)
-    : await captureReviewScrollDeck(page, screensDir, suffix, stateFilter);
+  const capture = mode === 'presentation' ? captureReviewPresentation : captureReviewScrollDeck;
+  const discovered = await capture(page, screensDir, suffix, null, { discovery: true });
+  const identities = allocateReviewIdentities(discovered, stateFilter);
+  const units = await capture(page, screensDir, suffix, stateFilter, identities);
   assertCompleteReviewFilter(stateFilter, units);
   const manifestPath = path.join(screensDir, `deck-review-${suffix}.json`);
   const reviewGroups = buildDeckReviewGroups(units);
@@ -1512,7 +1513,7 @@ function assertCompleteReviewFilter(stateFilter, units) {
   }
 }
 
-async function captureReviewPresentation(page, screensDir, suffix, stateFilter) {
+async function captureReviewPresentation(page, screensDir, suffix, stateFilter, identities) {
   await page.keyboard.press('Home');
   await waitForDeckReviewPaint(page);
   const units = [];
@@ -1529,7 +1530,7 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter) 
       title: meta.title,
       stateKind: 'base',
       stateIndex: 0,
-    }, stateFilter));
+    }, stateFilter, identities));
     await captureDeckReviewDrills(page, screensDir, suffix, units, {
       slideId,
       slideIndex: meta.index,
@@ -1538,6 +1539,8 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter) 
       includeParentState: meta.customStateCount > 1,
       drills: meta.drills,
       stateFilter,
+      identities,
+      scope: page.locator('[data-slide-index]'),
     });
 
     if (meta.customStateCount > 1) {
@@ -1556,7 +1559,7 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter) 
           stateKind: 'state',
           stateIndex,
           stateDetail: stateIndex,
-        }, stateFilter));
+        }, stateFilter, identities));
         const stateMeta = await deckReviewPresentationMeta(page);
         await captureDeckReviewDrills(page, screensDir, suffix, units, {
           slideId,
@@ -1566,6 +1569,8 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter) 
           includeParentState: true,
           drills: stateMeta?.drills || [],
           stateFilter,
+          identities,
+          scope: page.locator('[data-slide-index]'),
         });
       }
     }
@@ -1577,12 +1582,13 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter) 
       { timeout: 900 },
     ).then(() => true).catch(() => false);
     if (!changed) break;
+    if (ordinal === MAX_DECK_REVIEW_SLIDES - 1) throw new Error(`Deck review exceeds ${MAX_DECK_REVIEW_SLIDES} slides; capture is incomplete`);
     await waitForDeckReviewPaint(page);
   }
   return units;
 }
 
-async function captureReviewScrollDeck(page, screensDir, suffix, stateFilter) {
+async function captureReviewScrollDeck(page, screensDir, suffix, stateFilter, identities) {
   const selector = await page.evaluate(() => {
     if (document.querySelectorAll('section.slide').length) return 'section.slide';
     if (document.querySelectorAll('[data-ve-deck] > section').length) return '[data-ve-deck] > section';
@@ -1591,7 +1597,8 @@ async function captureReviewScrollDeck(page, screensDir, suffix, stateFilter) {
   });
   if (!selector) return [];
   const slides = page.locator(selector);
-  const count = Math.min(await slides.count(), MAX_DECK_REVIEW_SLIDES);
+  const count = await slides.count();
+  if (count > MAX_DECK_REVIEW_SLIDES) throw new Error(`Deck review exceeds ${MAX_DECK_REVIEW_SLIDES} slides; capture is incomplete`);
   const units = [];
 
   for (let index = 0; index < count; index += 1) {
@@ -1608,7 +1615,7 @@ async function captureReviewScrollDeck(page, screensDir, suffix, stateFilter) {
       title: meta.title,
       stateKind: 'base',
       stateIndex: 0,
-    }, stateFilter));
+    }, stateFilter, identities));
     const drills = await visibleDeckReviewDrills(slide);
     await captureDeckReviewDrills(page, screensDir, suffix, units, {
       slideId: meta.slideId,
@@ -1619,13 +1626,34 @@ async function captureReviewScrollDeck(page, screensDir, suffix, stateFilter) {
       drills,
       stateFilter,
       scope: slide,
+      identities,
     });
   }
   return units;
 }
 
+function eligibleDeckReviewDrills(elements) {
+  return elements.map((element, ordinal) => ({ element, ordinal }))
+    .filter(({ element }) => {
+      if (element.getAttribute('aria-pressed') === 'true' || element.closest('[hidden],[inert]') || element.disabled) return false;
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0 || rect.bottom <= 0 || rect.right <= 0 || rect.top >= innerHeight || rect.left >= innerWidth) return false;
+      for (let ancestor = element; ancestor; ancestor = ancestor.parentElement) {
+        const style = getComputedStyle(ancestor);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.pointerEvents === 'none' || Number(style.opacity) <= 0.01) return false;
+      }
+      return true;
+    })
+    .map(({ element, ordinal }) => ({
+      id: element.getAttribute('data-drill-target') || '',
+      label: (element.getAttribute('aria-label') || element.textContent || '').replace(/\s+/g, ' ').trim(),
+      ordinal,
+    }))
+    .filter((entry) => entry.id);
+}
+
 async function deckReviewPresentationMeta(page) {
-  return page.evaluate(() => {
+  const meta = await page.evaluate(() => {
     const stage = document.querySelector('[data-slide-index]');
     if (!stage) return null;
     const custom = stage.querySelector('[data-presentation-state-nav="true"]');
@@ -1636,35 +1664,84 @@ async function deckReviewPresentationMeta(page) {
       title: title.replace(/\s+/g, ' ').trim(),
       customStateIndex: Number(custom?.getAttribute('data-presentation-state-index')) || 0,
       customStateCount: Number(custom?.getAttribute('data-presentation-state-count')) || 0,
-      drills: [...stage.querySelectorAll('[data-drill-target]')]
-        .filter((element) => {
-          const rect = element.getBoundingClientRect();
-          const style = getComputedStyle(element);
-          return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
-        })
-        .map((element) => ({
-          id: element.getAttribute('data-drill-target') || '',
-          label: (element.getAttribute('aria-label') || element.textContent || '').replace(/\s+/g, ' ').trim(),
-        }))
-        .filter((entry) => entry.id),
     };
   });
+  if (meta) meta.drills = await visibleDeckReviewDrills(page.locator('[data-slide-index]'));
+  return meta;
 }
 
 async function visibleDeckReviewDrills(scope) {
-  return scope.locator('[data-drill-target]').evaluateAll((elements) =>
-    elements
-      .filter((element) => {
-        const rect = element.getBoundingClientRect();
-        const style = getComputedStyle(element);
-        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
-      })
-      .map((element) => ({
-        id: element.getAttribute('data-drill-target') || '',
-        label: (element.getAttribute('aria-label') || element.textContent || '').replace(/\s+/g, ' ').trim(),
-      }))
-      .filter((entry) => entry.id),
-  );
+  const drills = await scope.locator('[data-drill-target]').evaluateAll((elements, source) => {
+    const collect = new Function(`return (${source});`)();
+    return collect(elements);
+  }, eligibleDeckReviewDrills.toString());
+  if (new Set(drills.map((drill) => drill.id)).size !== drills.length) throw new Error('deck review requires unambiguous visible drill targets');
+  return drills;
+}
+
+function reviewIdentityKey(state) {
+  return JSON.stringify([String(state.slideId), state.stateKind, String(state.stateDetail ?? '')]);
+}
+
+function allocateReviewIdentities(discovered, stateFilter) {
+  const legacy = new Map();
+  const keys = new Set();
+  const slideIds = new Set();
+  for (const { rawState: state } of discovered) {
+    if (state.stateKind === 'base') {
+      if (slideIds.has(state.slideId)) throw new Error(`deck review requires unique authored slide ids: ${state.slideId}`);
+      slideIds.add(state.slideId);
+    }
+    const key = reviewIdentityKey(state);
+    if (keys.has(key)) throw new Error(`deck review requires unique authored state identities: ${key}`);
+    keys.add(key);
+    const id = reviewStateId(state.slideId, state.stateKind, state.stateDetail);
+    if (!legacy.has(id)) legacy.set(id, []);
+    legacy.get(id).push(key);
+  }
+  const reserved = new Set(legacy.keys());
+  const ids = new Map();
+  for (const [id, entries] of legacy) {
+    for (const key of entries) {
+      let canonical = id;
+      if (entries.length > 1) {
+        const digest = createHash('sha256').update(key).digest('hex');
+        let length = 12;
+        do {
+          canonical = `${id}--${digest.slice(0, length)}`;
+          length += 4;
+          if (length > 68) throw new Error('Unable to allocate unique deck review identity');
+        } while (reserved.has(canonical));
+      }
+      reserved.add(canonical);
+      ids.set(key, canonical);
+    }
+    if (entries.length > 1 && stateFilter?.has(id)) {
+      throw new Error(`Ambiguous legacy deck review state "${id}"; use one of: ${entries.map((key) => ids.get(key)).join(', ')}`);
+    }
+  }
+  return {
+    resolve(state) {
+      const id = ids.get(reviewIdentityKey(state));
+      if (!id) throw new Error('Deck review states changed after identity discovery');
+      return id;
+    },
+  };
+}
+
+async function deckReviewParentContext(scope) {
+  return scope.evaluate((root) => {
+    root ||= document.querySelector('[data-slide-index]') || document;
+    const custom = root.querySelector('[data-presentation-state-nav="true"]');
+    return {
+      slideId: root.getAttribute?.('data-slide-id') || '',
+      slideIndex: root.getAttribute?.('data-slide-index') || '',
+      customIndex: custom?.getAttribute('data-presentation-state-index') || '',
+      customCount: custom?.getAttribute('data-presentation-state-count') || '',
+      pressed: [...root.querySelectorAll('[data-drill-target][aria-pressed]')].map((element) => [element.getAttribute('data-drill-target'), element.getAttribute('aria-pressed')]),
+      scroll: [window.scrollX, window.scrollY, ...[...document.querySelectorAll('[data-ve-deck],.deck,.magazine')].flatMap((element) => [element.scrollLeft, element.scrollTop])],
+    };
+  });
 }
 
 async function captureDeckReviewDrills(page, screensDir, suffix, units, {
@@ -1675,15 +1752,24 @@ async function captureDeckReviewDrills(page, screensDir, suffix, units, {
   includeParentState,
   drills,
   stateFilter,
+  identities,
   scope = page,
 }) {
   for (const drill of drills) {
     const detail = includeParentState ? `state-${parentStateIndex}-${drill.id}` : drill.id;
-    const stateId = reviewStateId(slideId, 'drill', detail);
+    const stateId = identities.discovery ? null : identities.resolve({ slideId, stateKind: 'drill', stateDetail: detail });
     if (stateFilter && !stateFilter.has(stateId)) continue;
-    await scope.locator(`[data-drill-target="${cssDeckReviewString(drill.id)}"]`).first().click();
+    if (await page.locator('[data-drill-open]:visible').count()) throw new Error('Deck review drill parent is already open');
+    const parent = await deckReviewParentContext(scope);
+    const target = scope.locator('[data-drill-target]').nth(drill.ordinal);
+    if (await target.getAttribute('data-drill-target') !== drill.id) throw new Error('Deck review drill target changed after discovery');
+    await target.click();
     await page.waitForSelector('[data-drill-open]', { state: 'visible', timeout: 3000 });
     await waitForDeckReviewPaint(page);
+    const opened = await deckReviewParentContext(scope);
+    if (['slideId', 'slideIndex', 'customIndex', 'customCount'].some((key) => opened[key] !== parent[key])) throw new Error('Deck review drill left its declared parent state');
+    const pressed = await target.getAttribute('aria-pressed');
+    if (pressed !== null && pressed !== 'true') throw new Error(`Deck review drill target "${drill.id}" did not open its declared selection`);
     pushDeckReviewUnit(units, await captureDeckReviewViewport(page, screensDir, suffix, {
       slideId,
       slideIndex,
@@ -1692,13 +1778,14 @@ async function captureDeckReviewDrills(page, screensDir, suffix, units, {
       stateIndex: parentStateIndex,
       stateDetail: detail,
       stateTitle: drill.label,
-    }, stateFilter));
-    await closeDeckReviewDrill(page);
+    }, stateFilter, identities));
+    await closeDeckReviewDrill(page, scope, parent);
   }
 }
 
-async function captureDeckReviewViewport(page, screensDir, suffix, state, stateFilter) {
-  const stateId = reviewStateId(state.slideId, state.stateKind, state.stateDetail);
+async function captureDeckReviewViewport(page, screensDir, suffix, state, stateFilter, identities) {
+  if (identities.discovery) return { rawState: state };
+  const stateId = identities.resolve(state);
   if (stateFilter && !stateFilter.has(stateId)) return null;
   const screenshotPath = path.join(screensDir, `deck-review-${suffix}-${stateId}.png`);
   await page.screenshot({ path: screenshotPath });
@@ -1718,19 +1805,17 @@ function pushDeckReviewUnit(units, unit) {
   if (unit) units.push(unit);
 }
 
-async function closeDeckReviewDrill(page) {
+async function closeDeckReviewDrill(page, scope, parent) {
   const close = page.locator('[data-drill-close]').first();
   if (await close.count()) await close.click();
   else await page.keyboard.press('Escape');
-  await page.waitForSelector('[data-drill-open]', { state: 'detached', timeout: 3000 }).catch(() => {});
+  await page.waitForSelector('[data-drill-open]', { state: 'hidden', timeout: 3000 });
   await waitForDeckReviewPaint(page);
+  const restored = await deckReviewParentContext(scope);
+  if (JSON.stringify(restored) !== JSON.stringify(parent)) throw new Error('Deck review drill did not return to its captured parent state');
 }
 
 async function waitForDeckReviewPaint(page) {
   await page.waitForTimeout(DECK_REVIEW_SETTLE_MS);
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-}
-
-function cssDeckReviewString(value) {
-  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }

@@ -37,12 +37,16 @@ export async function resolveBrowserAsset(rootDirectory, relativePath) {
   return file;
 }
 
+export function browserAssetContentType(filePath) {
+  return MIME_TYPES.get(path.extname(filePath).toLowerCase()) || 'application/octet-stream';
+}
+
 export async function sendBrowserAsset(response, filePath) {
   try {
     const contents = await readFile(filePath);
     response.writeHead(200, {
       'Cache-Control': 'no-store',
-      'Content-Type': MIME_TYPES.get(path.extname(filePath).toLowerCase()) || 'application/octet-stream',
+      'Content-Type': browserAssetContentType(filePath),
     });
     response.end(contents);
   } catch (error) {

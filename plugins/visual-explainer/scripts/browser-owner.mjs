@@ -33,7 +33,6 @@ function shellFolderForPlatform() {
   const { platform, arch } = process;
   if (platform === 'darwin') return arch === 'arm64' ? 'chrome-headless-shell-mac-arm64' : 'chrome-headless-shell-mac';
   if (platform === 'win32') return 'chrome-headless-shell-win64';
-  // linux and any other POSIX platform
   return arch === 'arm64' ? 'chrome-headless-shell-linux-arm64' : 'chrome-headless-shell-linux';
 }
 
@@ -61,7 +60,6 @@ async function newestCachedHeadlessShell() {
       await access(candidate.executablePath);
       return candidate.executablePath;
     } catch {
-      // Try the next cached revision.
     }
   }
   return null;
@@ -73,27 +71,43 @@ export async function openBrowserSession({ artifact, purpose = 'artifact' } = {}
   let browser;
   try { browser = await launchChromium(); }
   catch (error) { await server?.close(); throw error; }
-  const contexts = new Set();
+  const leases = new Set();
   return {
     url: server?.url,
-    async newPage(options = {}) {
-      const context = await browser.newContext({ ...options, serviceWorkers: 'block' });
-      contexts.add(context);
+    async newPage({ artifact: pageArtifact, ...options } = {}) {
+      const pageServer = pageArtifact ? await serveBrowserArtifact(pageArtifact) : null;
+      const origin = (pageServer || server)?.origin;
+      let context;
       try {
+        context = await browser.newContext({ ...options, serviceWorkers: 'block' });
         await context.route('**/*', (route) => isAllowedBrowserRequest(route.request().url(), {
-          purpose, additionalOrigins: server ? [server.origin] : [],
+          purpose, additionalOrigins: origin ? [origin] : [],
         }) ? route.continue() : route.abort('blockedbyclient'));
         const page = await context.newPage();
-        return { page, context, close: async () => { contexts.delete(context); await context.close(); } };
+        const lease = {
+          page,
+          context,
+          url: (pageServer || server)?.url,
+          async close() {
+            if (!leases.delete(lease)) return;
+            try { await context.close(); }
+            finally { await pageServer?.close(); }
+          },
+        };
+        leases.add(lease);
+        return lease;
       } catch (error) {
-        contexts.delete(context);
-        await context.close();
+        try { await context?.close(); }
+        finally { await pageServer?.close(); }
         throw error;
       }
     },
     async close() {
-      try { await browser.close(); }
-      finally { contexts.clear(); await server?.close(); }
+      try { await Promise.all([...leases].map((lease) => lease.close())); }
+      finally {
+        try { await browser.close(); }
+        finally { await server?.close(); }
+      }
     },
   };
 }

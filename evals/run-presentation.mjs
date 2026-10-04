@@ -23,7 +23,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright';
+import { openBrowserSession, settleBrowserArtifact } from '../plugins/visual-explainer/scripts/browser-owner.mjs';
 import { RAIL_COLLAPSED_WIDTH, RAIL_EXPANDED_WIDTH, fitStage } from '../visual-explainer-mdx/presentation-core.ts';
 
 const EVAL_ROOT = dirname(fileURLToPath(import.meta.url));
@@ -82,18 +82,20 @@ function exportDemo(sourcePath, outPath) {
 }
 
 async function withPage(browser, { viewport = { width: 1440, height: 900 }, reducedMotion = 'no-preference', url }, fn) {
-  const context = await browser.newContext({ viewport, reducedMotion });
-  const page = await context.newPage();
+  const lease = await browser.newPage({ viewport, reducedMotion, artifact: { filePath: fileURLToPath(url) } });
+  const { page } = lease;
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
   });
   page.on('pageerror', (error) => consoleErrors.push(String(error)));
   try {
-    await page.goto(url, { waitUntil: 'load' });
+    await page.goto(lease.url, { waitUntil: 'load' });
+    const settlement = await settleBrowserArtifact(page);
+    if (settlement.mermaidError) throw new Error(settlement.mermaidError);
     await page.waitForSelector('[data-stage]', { timeout: 10_000 });
     return await fn(page);
   } finally {
-    await context.close();
+    await lease.close();
   }
 }
 
@@ -144,7 +146,7 @@ async function main() {
   const primaryUrl = pathToFileURL(primaryHtml).href;
   const secondUrl = pathToFileURL(secondHtml).href;
 
-  const browser = await chromium.launch();
+  const browser = await openBrowserSession({ purpose: 'artifact' });
   try {
     /* ------------------------------------------------------------ */
     /* interaction                                                   */

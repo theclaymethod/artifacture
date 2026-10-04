@@ -146,27 +146,14 @@ export async function extractFromUrlSource(
   return extractFromHtml({ html, cssTexts });
 }
 
-/**
- * Decode an image and quantize its palette using a canvas in Playwright's
- * bundled Chromium (already a repo dependency).
- */
 export async function extractFromImageSource(imagePath) {
-  const { chromium } = await import('playwright');
-  const browser = await chromium.launch();
+  const { openBrowserSession } = await import('../../plugins/visual-explainer/scripts/browser-owner.mjs');
+  const browser = await openBrowserSession({ purpose: 'image' });
   try {
-    const page = await browser.newPage();
-    // data: URL rather than file:// — Chromium refuses file:// subresources
-    // from a non-file page.
-    const MIME_TYPES = {
-      '.png': 'image/png',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.webp': 'image/webp',
-      '.gif': 'image/gif',
-      '.avif': 'image/avif',
-      '.bmp': 'image/bmp',
-    };
-    const mime = MIME_TYPES[path.extname(imagePath).toLowerCase()] ?? 'image/png';
+    const { page } = await browser.newPage();
+    const { browserAssetContentType } = await import('../../plugins/visual-explainer/scripts/browser-assets.mjs');
+    const contentType = browserAssetContentType(imagePath);
+    const mime = contentType.startsWith('image/') ? contentType : 'image/png';
     const bytes = await fs.readFile(path.resolve(imagePath));
     const imageUrl = `data:${mime};base64,${bytes.toString('base64')}`;
     await page.goto('about:blank');

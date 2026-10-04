@@ -268,3 +268,37 @@ test('browser stage can recapture one exact affected state with its base context
     fs.rmSync(screensDir, { recursive: true, force: true });
   }
 });
+
+for (const ids of [
+  ['Case', 'middle', 'case'],
+  ['punctuation.dot', 'middle', 'punctuation-dot'],
+  [`${'x'.repeat(80)}one`, 'middle', `${'x'.repeat(80)}two`],
+]) {
+  test(`distinct authored slide ids retain distinct evidence after normalization: ${ids[0].slice(0, 20)}`, async () => {
+    const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-state-ids-'));
+    const artifact = path.join(workDir, 'slides.html');
+    const colors = ['#ffc0cb', '#90ee90', '#add8e6'];
+    const html = `<!doctype html><html><head><style>html,body{margin:0}section{height:100vh}</style></head><body data-ve-deck="vertical">${ids.map((id, index) => `<section class="slide" data-slide-id="${id}" style="background:${colors[index]}"><h1>Content ${index}</h1></section>`).join('')}</body></html>`;
+    fs.writeFileSync(artifact, html);
+    try {
+      const result = await runBrowserStage({ filePath: artifact, html, profile: 'slides', flags: {} }, { screensDir: path.join(workDir, 'screens') });
+      for (const run of result.runs) {
+        const units = run.deckReview.units;
+        assert.equal(units.length, 3);
+        assert.equal(new Set(units.map((unit) => unit.state_id)).size, 3);
+        assert.equal(new Set(units.map((unit) => unit.screenshot_path)).size, 3);
+        assert.equal(new Set(units.map((unit) => fs.readFileSync(unit.screenshot_path).toString('base64'))).size, 3);
+        assert.equal(units[1].state_id, 'middle--base');
+      }
+      const legacy = `${ids[0].toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 80)}--base`;
+      const previous = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
+      try {
+        process.env.ARTIFACTURE_DECK_REVIEW_STATES = legacy;
+        await assert.rejects(runBrowserStage({ filePath: artifact, html, profile: 'slides', flags: {} }, { screensDir: path.join(workDir, 'filtered') }), /Ambiguous legacy deck review state.*use one of/);
+      } finally {
+        if (previous === undefined) delete process.env.ARTIFACTURE_DECK_REVIEW_STATES;
+        else process.env.ARTIFACTURE_DECK_REVIEW_STATES = previous;
+      }
+    } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+  });
+}
