@@ -73,7 +73,6 @@ async function newestCachedHeadlessShell() {
   return null;
 }
 
-
 function throwDisposalErrors(errors) {
   if (errors.length === 1) throw errors[0];
   if (errors.length) throw new AggregateError(errors, errors.map((error) => error.message || String(error)).join('; '));

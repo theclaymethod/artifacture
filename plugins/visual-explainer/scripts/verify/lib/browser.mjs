@@ -1516,7 +1516,7 @@ function assertCompleteReviewFilter(stateFilter, units) {
 
 async function captureReviewPresentation(page, screensDir, suffix, stateFilter, identities) {
   await page.keyboard.press('Home');
-  await page.waitForFunction(() => document.querySelector('[data-slide-index]')?.getAttribute('data-slide-index') === '0', null, { timeout: 3000 });
+  await waitForPresentationState(page, 0, null);
   let first = await deckReviewPresentationMeta(page);
   const slideCount = first.slideCount;
   for (let stateIndex = first.customStateIndex - 1; stateIndex >= 0; stateIndex -= 1) {
@@ -1525,8 +1525,9 @@ async function captureReviewPresentation(page, screensDir, suffix, stateFilter, 
     const reset = await deckReviewPresentationMeta(page);
     assertPresentationPosition(reset, 0, stateIndex, slideCount, first);
   }
+  const resetOrigin = first;
   first = await deckReviewPresentationMeta(page);
-  assertPresentationPosition(first, 0, 0, slideCount);
+  assertPresentationPosition(first, 0, 0, slideCount, resetOrigin);
   if (await page.locator('[data-drill-open]:visible').count()) throw new Error('Deck review reset left a drill open');
   await waitForDeckReviewPaint(page, identities.discovery);
   const units = [];
@@ -1658,8 +1659,24 @@ function eligibleDeckReviewDrills(elements) {
     .filter((entry) => entry.id);
 }
 
+function presentationCustomState(root) {
+  const owners = root.querySelectorAll('[data-presentation-state-nav],[data-presentation-state-index],[data-presentation-state-count]');
+  if (!owners.length) return null;
+  if (owners.length !== 1 || owners[0].getAttribute('data-presentation-state-nav') !== 'true') throw new Error('Deck review requires exactly one valid custom-state navigation owner');
+  const integer = (attribute, minimum) => {
+    const raw = owners[0].getAttribute(attribute);
+    if (!/^\d+$/.test(raw || '') || !Number.isSafeInteger(Number(raw)) || Number(raw) < minimum) throw new Error(`Deck review requires valid ${attribute} metadata`);
+    return Number(raw);
+  };
+  const index = integer('data-presentation-state-index', 0);
+  const count = integer('data-presentation-state-count', 1);
+  if (index >= count) throw new Error('Deck review custom-state metadata is outside its declared range');
+  return { index, count };
+}
+
 async function deckReviewPresentationMeta(page) {
-  const meta = await page.evaluate(() => {
+  const meta = await page.evaluate((source) => {
+    const readCustomState = new Function(`return (${source});`)();
     const roots = document.querySelectorAll('[data-ve-presentation="true"]');
     const stages = roots[0]?.querySelectorAll('[data-slide-index]');
     if (roots.length !== 1 || stages?.length !== 1) throw new Error('Deck review requires exactly one presentation root and stage');
@@ -1669,36 +1686,38 @@ async function deckReviewPresentationMeta(page) {
       if (!/^\d+$/.test(raw || '') || !Number.isSafeInteger(Number(raw)) || Number(raw) < minimum) throw new Error(`Deck review requires valid ${attribute} metadata`);
       return Number(raw);
     };
-    const custom = stage.querySelector('[data-presentation-state-nav="true"]');
-    if (stage.querySelectorAll('[data-presentation-state-nav="true"]').length > 1) throw new Error('Deck review requires exactly one custom-state navigation owner');
+    const custom = readCustomState(stage);
     const title = stage.querySelector('h1,h2,h3,[data-slide-title]')?.textContent || '';
     return {
       slideCount: integer(roots[0], 'data-presentation-slide-count', 1),
       index: integer(stage, 'data-slide-index', 0),
       slideId: stage.getAttribute('data-slide-id') || window.location.hash.replace(/^#/, ''),
       title: title.replace(/\s+/g, ' ').trim(),
-      customStateIndex: custom ? integer(custom, 'data-presentation-state-index', 0) : 0,
-      customStateCount: custom ? integer(custom, 'data-presentation-state-count', 1) : 1,
+      customOwner: Boolean(custom),
+      customStateIndex: custom?.index ?? 0,
+      customStateCount: custom?.count ?? 1,
     };
-  });
+  }, presentationCustomState.toString());
   if (meta.slideCount > MAX_DECK_REVIEW_SLIDES) throw new Error(`Deck review exceeds ${MAX_DECK_REVIEW_SLIDES} slides; capture is incomplete`);
-  if (meta.index >= meta.slideCount || meta.customStateIndex >= meta.customStateCount) throw new Error('Deck review presentation metadata is outside its declared range');
+  if (meta.index >= meta.slideCount) throw new Error('Deck review presentation metadata is outside its declared range');
   meta.drills = await visibleDeckReviewDrills(page.locator('[data-slide-index]'));
   return meta;
 }
 
 async function waitForPresentationState(page, slideIndex, stateIndex) {
-  await page.waitForFunction(({ slideIndex, stateIndex }) => {
+  await page.waitForFunction(({ slideIndex, stateIndex, source }) => {
     const stage = document.querySelector('[data-slide-index]');
-    const custom = stage?.querySelector('[data-presentation-state-nav="true"]');
-    return stage?.getAttribute('data-slide-index') === String(slideIndex)
-      && (custom ? custom.getAttribute('data-presentation-state-index') === String(stateIndex) : stateIndex === 0);
-  }, { slideIndex, stateIndex }, { timeout: 3000 });
+    if (!stage) throw new Error('Deck review requires a presentation stage');
+    const readCustomState = new Function(`return (${source});`)();
+    const custom = readCustomState(stage);
+    return stage.getAttribute('data-slide-index') === String(slideIndex)
+      && (stateIndex === null || (custom?.index ?? 0) === stateIndex);
+  }, { slideIndex, stateIndex, source: presentationCustomState.toString() }, { timeout: 3000 });
 }
 
 function assertPresentationPosition(meta, slideIndex, stateIndex, slideCount, parent) {
   if (meta.index !== slideIndex || meta.customStateIndex !== stateIndex || meta.slideCount !== slideCount
-    || (parent && (meta.slideId !== parent.slideId || meta.customStateCount !== parent.customStateCount))) {
+    || (parent && (meta.slideId !== parent.slideId || meta.customStateCount !== parent.customStateCount || meta.customOwner !== parent.customOwner))) {
     throw new Error(`Deck review presentation did not reach declared slide ${slideIndex}, state ${stateIndex}`);
   }
 }
@@ -1768,18 +1787,19 @@ function allocateReviewIdentities(discovered, stateFilter) {
 }
 
 async function deckReviewParentContext(scope) {
-  return scope.evaluate((root) => {
-    root ||= document.querySelector('[data-slide-index]') || document;
-    const custom = root.querySelector('[data-presentation-state-nav="true"]');
+  return scope.evaluate((root, source) => {
+    const readCustomState = new Function(`return (${source});`)();
+    const custom = readCustomState(root);
     return {
-      slideId: root.getAttribute?.('data-slide-id') || '',
-      slideIndex: root.getAttribute?.('data-slide-index') || '',
-      customIndex: custom?.getAttribute('data-presentation-state-index') || '',
-      customCount: custom?.getAttribute('data-presentation-state-count') || '',
+      slideId: root.getAttribute('data-slide-id') || '',
+      slideIndex: root.getAttribute('data-slide-index') || '',
+      customOwner: Boolean(custom),
+      customIndex: custom ? String(custom.index) : '',
+      customCount: custom ? String(custom.count) : '',
       pressed: [...root.querySelectorAll('[data-drill-target][aria-pressed]')].map((element) => [element.getAttribute('data-drill-target'), element.getAttribute('aria-pressed')]),
       scroll: [window.scrollX, window.scrollY, ...[...document.querySelectorAll('[data-ve-deck],.deck,.magazine')].flatMap((element) => [element.scrollLeft, element.scrollTop])],
     };
-  });
+  }, presentationCustomState.toString());
 }
 
 async function captureDeckReviewDrills(page, screensDir, suffix, units, {
@@ -1791,7 +1811,7 @@ async function captureDeckReviewDrills(page, screensDir, suffix, units, {
   drills,
   stateFilter,
   identities,
-  scope = page,
+  scope,
 }) {
   for (const drill of drills) {
     const detail = includeParentState ? `state-${parentStateIndex}-${drill.id}` : drill.id;
@@ -1809,7 +1829,7 @@ async function captureDeckReviewDrills(page, screensDir, suffix, units, {
     await page.waitForSelector('[data-drill-open]', { state: 'visible', timeout: 3000 });
     await waitForDeckReviewPaint(page);
     const opened = await deckReviewParentContext(scope);
-    if (['slideId', 'slideIndex', 'customIndex', 'customCount'].some((key) => opened[key] !== parent[key])) throw new Error('Deck review drill left its declared parent state');
+    if (['slideId', 'slideIndex', 'customOwner', 'customIndex', 'customCount'].some((key) => opened[key] !== parent[key])) throw new Error('Deck review drill left its declared parent state');
     const pressed = await target.getAttribute('aria-pressed');
     if (pressed !== null && pressed !== 'true') throw new Error(`Deck review drill target "${drill.id}" did not open its declared selection`);
     pushDeckReviewUnit(units, await captureDeckReviewViewport(page, screensDir, suffix, {
