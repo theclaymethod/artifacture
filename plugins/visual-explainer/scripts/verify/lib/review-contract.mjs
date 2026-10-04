@@ -63,6 +63,55 @@ function readOwned(filePath, root) {
   return readFileSync(ownedFile(filePath, root));
 }
 
+export function sanitizeReviewId(value) {
+  const sanitized = String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+  return sanitized || 'untitled';
+}
+
+export function buildDeckReviewGroups(units) {
+  if (!units.length) throw new Error('deck review requires captured states');
+  const bySlide = new Map();
+  for (const unit of units) {
+    const slideUnits = bySlide.get(unit.slide_id) || [];
+    slideUnits.push(unit);
+    bySlide.set(unit.slide_id, slideUnits);
+  }
+  const groups = [];
+  const bases = units.filter((unit) => unit.state_kind === 'base');
+  const slideIndices = new Set();
+  for (const [slideId, slideUnits] of bySlide) {
+    const slideBases = slideUnits.filter((unit) => unit.state_kind === 'base');
+    if (!slideBases.length) throw new Error(`deck review requires two distinct states in every group: missing base for ${slideId}`);
+    if (slideBases.length !== 1) throw new Error(`deck review requires one base per slide: ${slideId}`);
+    const base = slideBases[0];
+    if (slideIndices.has(base.slide_index) || slideUnits.some((unit) => unit.slide_index !== base.slide_index)) throw new Error(`deck review states require consistent slide context: ${slideId}`);
+    slideIndices.add(base.slide_index);
+    for (const variant of slideUnits.filter((unit) => unit !== base)) {
+      groups.push({
+        group_id: `${sanitizeReviewId(slideId)}--${sanitizeReviewId(variant.state_id)}-context`,
+        purpose: 'state-continuity',
+        state_ids: [base.state_id, variant.state_id],
+      });
+    }
+  }
+  for (let index = 0; index < bases.length - 1; index += 1) {
+    groups.push({
+      group_id: `${sanitizeReviewId(bases[index].slide_id)}--${sanitizeReviewId(bases[index + 1].slide_id)}--sequence`,
+      purpose: 'adjacent-slide-variety',
+      state_ids: [bases[index].state_id, bases[index + 1].state_id],
+    });
+  }
+  const grouped = new Set(groups.flatMap((group) => group.state_ids));
+  const unpaired = units.filter((unit) => !grouped.has(unit.state_id)).map((unit) => unit.state_id);
+  if (unpaired.length) throw new Error(`deck review requires paired evidence for states: ${unpaired.join(', ')}`);
+  return groups;
+}
+
 export function parseDeckManifest(manifest) {
   if (manifest?.schema_version !== 1 || manifest.kind !== 'deck-review-set') throw new Error('unsupported deck review manifest schema');
   if (!['presentation', 'scroll-deck'].includes(manifest.mode)) throw new Error('invalid deck review manifest mode');
@@ -74,14 +123,14 @@ export function parseDeckManifest(manifest) {
     ids.add(unit.state_id);
     if (typeof unit.slide_id !== 'string' || !unit.slide_id || !Number.isInteger(unit.slide_index) || unit.slide_index < 0 || !['base', 'state', 'drill'].includes(unit.state_kind) || typeof unit.screenshot_path !== 'string' || !/\.png$/i.test(unit.screenshot_path)) throw new Error('invalid deck review state');
   }
-  const grouped = new Set();
+  const expectedPairs = new Set(buildDeckReviewGroups(manifest.units).map((group) => JSON.stringify([group.purpose, ...group.state_ids])));
   const groupIds = new Set();
   for (const group of manifest.review_groups) {
     if (typeof group.group_id !== 'string' || !group.group_id || groupIds.has(group.group_id) || !['state-continuity', 'adjacent-slide-variety'].includes(group.purpose) || !Array.isArray(group.state_ids) || group.state_ids.length !== 2 || new Set(group.state_ids).size !== 2 || group.state_ids.some((id) => !ids.has(id))) throw new Error('invalid deck review group');
     groupIds.add(group.group_id);
-    group.state_ids.forEach((id) => grouped.add(id));
+    if (!expectedPairs.delete(JSON.stringify([group.purpose, ...group.state_ids]))) throw new Error('deck review group does not match base-state or adjacent-base context');
   }
-  if ([...ids].some((id) => !grouped.has(id))) throw new Error('deck review states require paired evidence');
+  if (expectedPairs.size) throw new Error('deck review groups require every base-state and adjacent-base pair');
   if (manifest.state_filter !== null && (!Array.isArray(manifest.state_filter) || !manifest.state_filter.length || new Set(manifest.state_filter).size !== manifest.state_filter.length || manifest.state_filter.some((id) => !ids.has(id)) || manifest.state_filter.length !== ids.size)) throw new Error('invalid deck review state filter');
   return manifest;
 }

@@ -29,7 +29,6 @@ test('default browser evidence directories are unique across verification runs',
   const evidenceDirs = [];
   const makeContext = () => ({
     filePath: artifact,
-    html: fs.readFileSync(artifact, 'utf8'),
     profile: 'poster',
     preset: 'custom',
     flags: { hasAnimations: false, hasMermaid: false },
@@ -37,11 +36,13 @@ test('default browser evidence directories are unique across verification runs',
 
   try {
     const first = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    assert.deepEqual(first.runs[0].renderedInventory, [{ role: 'h1', text: 'Poster' }]);
     const firstPath = first.runs[0].screenshotPath;
     evidenceDirs.push(path.dirname(firstPath));
     const firstEvidence = fs.readFileSync(firstPath);
 
     const second = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    assert.deepEqual(second.runs[0].renderedInventory, [{ role: 'h1', text: 'Poster' }]);
     const secondPath = second.runs[0].screenshotPath;
     evidenceDirs.push(path.dirname(secondPath));
 

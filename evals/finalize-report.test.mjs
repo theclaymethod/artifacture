@@ -223,3 +223,26 @@ test('legacy review receipts cannot silently certify newly hashed evidence', asy
   assert.equal(result.status, 2);
   assert.match(result.stderr, /legacy reports require a new capture/);
 });
+
+for (const [name, kinds, purpose] of [
+  ['orphan drills', ['drill', 'drill'], 'state-continuity'],
+  ['cross-slide continuity', ['base', 'base'], 'state-continuity'],
+  ['drills used for slide variety', ['drill', 'drill'], 'adjacent-slide-variety'],
+]) {
+  test(`normal review construction rejects ${name}`, async (t) => {
+    const { ctx, screenshot } = await fixture(t);
+    const manifestPath = join(ctx.captureDirectory, 'deck-review.json');
+    const units = kinds.map((state_kind, slide_index) => {
+      const screenshot_path = join(ctx.captureDirectory, `state-${slide_index}.png`);
+      writeFileSync(screenshot_path, `state ${slide_index} pixels`);
+      return { state_id: `state-${slide_index}`, slide_id: `slide-${slide_index}`, slide_index, state_kind, screenshot_path };
+    });
+    writeFileSync(manifestPath, JSON.stringify({
+      schema_version: 1, kind: 'deck-review-set', mode: 'presentation',
+      viewport: { width: 1440, height: 900 }, scheme: 'light', state_filter: null, units,
+      review_groups: [{ group_id: 'pair', purpose, state_ids: units.map((unit) => unit.state_id) }],
+    }));
+    ctx.browser = { runs: [{ deckReview: { manifestPath } }] };
+    assert.throws(() => buildReport(ctx, [], [screenshot]), /deck review/);
+  });
+}

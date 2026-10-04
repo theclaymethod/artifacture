@@ -124,3 +124,43 @@ test('the public verifier binds review verdicts to artifact, truth, inventory, a
     rmSync(workDir, { recursive: true, force: true });
   }
 });
+
+for (const [name, marker, profile] of [
+  ['slides without recognized slides', '', 'slides'],
+  ['presentation without an active stage', ' data-ve-presentation="true"', 'page'],
+]) {
+  test(`an empty capture keeps mechanics JSON for ${name}`, () => {
+    const workDir = mkdtempSync(join(tmpdir(), 'artifacture-empty-deck-'));
+    try {
+      const artifact = join(workDir, 'artifact.html');
+      const truth = join(workDir, 'brief.md');
+      const reportPath = join(workDir, 'report.json');
+      const verdictsPath = join(workDir, 'verdicts.json');
+      const outPath = join(workDir, 'final.json');
+      writeFileSync(artifact, `<!doctype html><html><body><main${marker}><h1>Empty deck</h1><p>Grounded fact.</p></main></body></html>`);
+      writeFileSync(truth, '# Brief\nGrounded fact.\n');
+      const result = spawnSync(process.execPath, [
+        CLI, artifact, '--truth', truth, '--profile', profile, '--json', reportPath,
+        '--screens', join(workDir, 'screens'), '--quiet',
+      ], { cwd: REPO_ROOT, encoding: 'utf8' });
+      assert.notEqual(result.status, 2, result.stderr);
+      const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+      assert.equal(report.checks.length, 153);
+      assert.equal(report.review_contract.complete, false);
+      assert.ok(report.review_contract.missing.includes('paired-deck-manifest'));
+      assert.ok(report.review_contract.missing.some((item) => item.startsWith('capture-incomplete: ')));
+      assert.equal(readdirSync(report.review_contract.capture_root).some((file) => file.startsWith('deck-review-')), false);
+      writeFileSync(verdictsPath, JSON.stringify({
+        schema_version: 1, review_contract_sha256: report.review_contract.sha256,
+        passes: report.llm_passes_required.map((pass) => ({ pass, status: 'pass', findings: [] })),
+      }));
+      const finalized = spawnSync(process.execPath, [
+        FINALIZER, '--report', reportPath, '--verdicts', verdictsPath, '--out', outPath,
+      ], { cwd: REPO_ROOT, encoding: 'utf8' });
+      assert.equal(finalized.status, 1, finalized.stderr);
+      assert.notEqual(JSON.parse(readFileSync(outPath, 'utf8')).verification.status, 'verified');
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
+  });
+}
