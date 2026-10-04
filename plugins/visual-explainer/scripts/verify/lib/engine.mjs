@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildContext } from './context.mjs';
+import { buildContext, prepareCapture } from './context.mjs';
 import { buildReport } from './report.mjs';
 import { checks as staticTextChecks } from './checks/static-text.mjs';
 import { checks as staticDomChecks } from './checks/static-dom.mjs';
@@ -11,14 +11,16 @@ const VERIFY_ROOT = path.resolve(__dirname, '..');
 
 export async function runVerify(filePath, options = {}) {
   const ctx = await buildContext(filePath, options);
+  await prepareCapture(ctx, options.screens);
   const catalog = await loadCatalog();
   const browserStage = options.staticOnly ? null : await loadOptionalBrowserStage();
   const browserRegistry = browserStage?.checks || null;
   if (browserStage && hasApplicableBrowserChecks(catalog, ctx, browserRegistry)) {
     await browserStage.runBrowserStage(ctx, {
-      screensDir: options.screens,
+      screensDir: ctx.captureDirectory,
       profile: ctx.profile,
       captureDeckReview: !options.mechanicsOnly,
+      retainCaptureErrors: true,
     });
   }
 

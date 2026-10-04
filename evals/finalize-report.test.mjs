@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { buildContext } from '../plugins/visual-explainer/scripts/verify/lib/context.mjs';
+import { buildContext, prepareCapture } from '../plugins/visual-explainer/scripts/verify/lib/context.mjs';
 import { buildReport } from '../plugins/visual-explainer/scripts/verify/lib/report.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..');
@@ -16,14 +16,16 @@ async function fixture(t) {
   t.after(() => rmSync(workDir, { recursive: true, force: true }));
   const artifact = join(workDir, 'artifact.html');
   const truth = join(workDir, 'brief.md');
-  const screenshot = join(workDir, '1440x900.png');
+  let screenshot;
   const reportPath = join(workDir, 'report.json');
   const verdictsPath = join(workDir, 'verdicts.json');
   const outPath = join(workDir, 'final.json');
   writeFileSync(artifact, '<!doctype html><html><body><main><h1>Artifact</h1><p>Grounded fact.</p></main></body></html>');
   writeFileSync(truth, '# Brief\nGrounded fact.\n');
-  writeFileSync(screenshot, 'pixels');
   const ctx = await buildContext(artifact, { truth });
+  await prepareCapture(ctx, workDir);
+  screenshot = join(ctx.captureDirectory, '1440x900.png');
+  writeFileSync(screenshot, 'pixels');
   const report = buildReport(ctx, [], [screenshot]);
   writeFileSync(reportPath, JSON.stringify(report));
   const run = (passes, contractSha = report.review_contract.sha256) => {
@@ -108,11 +110,14 @@ test('an empty heading-only truth file cannot complete a review contract', async
   t.after(() => rmSync(workDir, { recursive: true, force: true }));
   const artifact = join(workDir, 'artifact.html');
   const truth = join(workDir, 'brief.md');
-  const screenshot = join(workDir, '1440x900.png');
+  let screenshot;
   writeFileSync(artifact, '<main><h1>Artifact</h1><p>Claim</p></main>');
   writeFileSync(truth, '# Empty brief\n\n');
+  const ctx = await buildContext(artifact, { truth });
+  await prepareCapture(ctx, workDir);
+  screenshot = join(ctx.captureDirectory, '1440x900.png');
   writeFileSync(screenshot, 'pixels');
-  const report = buildReport(await buildContext(artifact, { truth }), [], [screenshot]);
+  const report = buildReport(ctx, [], [screenshot]);
   assert.equal(report.review_contract.complete, false);
   assert.deepEqual(report.review_contract.missing, ['truth-brief']);
 });
@@ -122,16 +127,32 @@ test('a fixed-stage deck finalizes with page mechanics and slides review semanti
   t.after(() => rmSync(workDir, { recursive: true, force: true }));
   const artifact = join(workDir, 'deck.html');
   const truth = join(workDir, 'brief.md');
-  const screenshot = join(workDir, 'deck.png');
-  const manifest = join(workDir, 'deck-review.json');
+  let screenshot;
+  let manifest;
   const reportPath = join(workDir, 'report.json');
   const verifierReportPath = join(workDir, 'verifier-report.json');
   const verdictsPath = join(workDir, 'verdicts.json');
   const outPath = join(workDir, 'final.json');
   writeFileSync(artifact, '<!doctype html><html><body><main data-ve-presentation="true"><h1>Deck</h1><p>Grounded fact.</p></main></body></html>');
   writeFileSync(truth, '# Brief\nGrounded fact.\n');
+  const ctx = await buildContext(artifact, { truth });
+  await prepareCapture(ctx, workDir);
+  screenshot = join(ctx.captureDirectory, 'deck.png');
+  manifest = join(ctx.captureDirectory, 'deck-review.json');
   writeFileSync(screenshot, 'pixels');
-  writeFileSync(manifest, '{}');
+  const firstState = join(ctx.captureDirectory, 'first.png');
+  const secondState = join(ctx.captureDirectory, 'second.png');
+  writeFileSync(firstState, 'first pixels');
+  writeFileSync(secondState, 'second pixels');
+  writeFileSync(manifest, JSON.stringify({
+    schema_version: 1, kind: 'deck-review-set', mode: 'presentation',
+    viewport: { width: 1440, height: 900 }, scheme: 'light', state_filter: null,
+    units: [
+      { state_id: 'first', slide_id: 'first', slide_index: 0, state_kind: 'base', screenshot_path: firstState },
+      { state_id: 'second', slide_id: 'second', slide_index: 1, state_kind: 'base', screenshot_path: secondState },
+    ],
+    review_groups: [{ group_id: 'sequence', purpose: 'adjacent-slide-variety', state_ids: ['first', 'second'] }],
+  }));
 
   const verifyResult = spawnSync(process.execPath, [
     VERIFY_CLI, artifact, '--truth', truth, '--json', verifierReportPath, '--static-only', '--quiet',
@@ -143,7 +164,6 @@ test('a fixed-stage deck finalizes with page mechanics and slides review semanti
   assert.equal(verifierReport.review_profile, 'slides');
   assert.deepEqual(verifierReport.llm_passes_required, ['artifact-review:slides']);
 
-  const ctx = await buildContext(artifact, { truth });
   ctx.browser = { runs: [{ deckReview: { manifestPath: manifest } }] };
   const report = buildReport(ctx, [], [screenshot]);
   assert.equal(report.profile, 'page');

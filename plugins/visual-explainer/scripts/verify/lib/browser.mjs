@@ -26,6 +26,7 @@ export async function runBrowserStage(ctx, options = {}) {
       const result = await executeWithRetry(browser, ctx, runMeta, screensDir, {
         captureDeckReview,
         mermaidTimeoutMs: options.mermaidTimeoutMs,
+        retainCaptureErrors: options.retainCaptureErrors,
       });
       runs.push(result);
     }
@@ -218,6 +219,9 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
   const page = await context.newPage();
   await page.route('**/*', (route) => {
     const url = route.request().url();
+    if (url === pathToFileURL(ctx.filePath).href && route.request().isNavigationRequest()) {
+      return route.fulfill({ contentType: 'text/html', body: ctx.html });
+    }
     return isAllowedBrowserRequest(url) ? route.continue() : route.abort('blockedbyclient');
   });
   const consoleErrors = [];
@@ -292,15 +296,15 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
       const last = tags[tags.length - 1];
       if (last && last.textContent && last.textContent.includes('.ve-review-panel { visibility: hidden')) last.remove();
     });
-    const deckReview = options.captureDeckReview
-      ? await captureDeckReviewSet({
-        page,
-        ctx,
-        runMeta,
-        screensDir,
-        suffix,
-      })
-      : null;
+    let deckReview = null;
+    if (options.captureDeckReview) {
+      try {
+        deckReview = await captureDeckReviewSet({ page, ctx, runMeta, screensDir, suffix });
+      } catch (error) {
+        if (!options.retainCaptureErrors) throw error;
+        ctx.captureError = error.message || String(error);
+      }
+    }
 
     return {
       viewport: runMeta.viewport,
