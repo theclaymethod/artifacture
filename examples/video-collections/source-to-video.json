@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "id": "source-to-video",
+  "title": "How one explanation becomes a video",
+  "question": "How do source, composition, and rendering work together?",
+  "audience": {
+    "who": "People authoring and reviewing explainer videos",
+    "knows": [
+      "A video contains a sequence of pictures."
+    ],
+    "goal": "Know where to revise an explanation and how it becomes a reproducible video."
+  },
+  "theme": {
+    "preset": "hairline",
+    "appearance": "light"
+  },
+  "format": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "narration": "authored-script"
+  },
+  "terms": [
+    {
+      "id": "composition",
+      "name": "Composition",
+      "definition": "The exported HTML document that contains the visual content and authored timeline.",
+      "aliases": []
+    }
+  ],
+  "subjects": [
+    {
+      "id": "source",
+      "name": "Editable source",
+      "meaning": "The authored TSX composition.",
+      "visualRole": "input"
+    },
+    {
+      "id": "composition",
+      "name": "HTML composition",
+      "meaning": "The exported document and registered timeline.",
+      "visualRole": "intermediate"
+    },
+    {
+      "id": "renderer",
+      "name": "Video renderer",
+      "meaning": "HyperFrames captures authored times and encodes frames.",
+      "visualRole": "output"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "static-export",
+      "kind": "git-file",
+      "repository": ".",
+      "commit": "e5e131eae83b068eb158a1ee67c4b4f70d1b0b34",
+      "path": "scripts/ve-mdx/export-static.mjs",
+      "firstLine": 31,
+      "lastLine": 59,
+      "excerptSha256": "895c78caa683989e802540c2f84d1d0a57e8e4e4c05667518e0cb0429747da04"
+    },
+    {
+      "id": "renderer-contract",
+      "kind": "git-file",
+      "repository": ".",
+      "commit": "e5e131eae83b068eb158a1ee67c4b4f70d1b0b34",
+      "path": "plugins/visual-explainer/references/hyperframes.md",
+      "firstLine": 63,
+      "lastLine": 82,
+      "excerptSha256": "dfc10802faed20a850dbfebe3f40d5637b1ddfb48b9a13d82f1f25b14b00eca5"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "export-route",
+      "title": "How editable source becomes video",
+      "description": "Editable source exports an HTML composition. HyperFrames renders that composition into video.",
+      "direction": "horizontal",
+      "nodes": [
+        {
+          "subject": "source",
+          "glyph": "rect"
+        },
+        {
+          "subject": "composition",
+          "glyph": "rect"
+        },
+        {
+          "subject": "renderer",
+          "glyph": "rect"
+        }
+      ],
+      "edges": [
+        {
+          "id": "export",
+          "from": "source",
+          "to": "composition",
+          "label": "export"
+        },
+        {
+          "id": "capture",
+          "from": "composition",
+          "to": "renderer",
+          "label": "capture authored time"
+        }
+      ]
+    }
+  ],
+  "episodes": [
+    {
+      "id": "source-to-video",
+      "title": "Follow one composition into video",
+      "mode": "system-walkthrough",
+      "requires": [],
+      "introduces": [
+        "composition"
+      ],
+      "terms": [
+        "composition"
+      ],
+      "uses": [
+        "source",
+        "composition",
+        "renderer"
+      ],
+      "question": "Where does a video get its shapes and timing?",
+      "outcome": "Distinguish editable source, exported HTML, and the renderer clock.",
+      "handoff": "The next episode explains the same route using a sheet-music analogy.",
+      "durationSeconds": 18,
+      "engine": "hyperframes",
+      "claims": [
+        {
+          "id": "route",
+          "text": "The static exporter loads a default React component and writes HTML; HyperFrames renders an HTML composition using its registered paused timeline.",
+          "evidence": [
+            "static-export",
+            "renderer-contract"
+          ],
+          "limitation": "The static exporter does not bundle animation code. A composition must supply the browser runtime, or use the new bundled graphic-video exporter."
+        }
+      ],
+      "brief": {
+        "input": "A TSX module with a default React component.",
+        "boundaries": [
+          "Vite loads the source module.",
+          "React renders static markup.",
+          "The exporter writes an HTML document.",
+          "HyperFrames seeks the composition timeline and encodes video."
+        ],
+        "ownership": "The TSX author owns content. The exporter owns generated HTML. HyperFrames owns playback and capture timing.",
+        "failure": "Static markup alone does not execute client animation. Missing a registered timeline leaves the renderer without authored motion.",
+        "output": "An HTML composition ready for runtime validation and video rendering."
+      },
+      "beats": [
+        {
+          "title": "The source owns the explanation",
+          "explanation": "Author the shapes, labels, and visual relationships in editable source.",
+          "narration": "A video begins as editable source. This is where the author chooses the shapes, labels, and relationships that explain the idea.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "route"
+          ],
+          "focus": [
+            "source"
+          ]
+        },
+        {
+          "title": "Export the composition",
+          "explanation": "The static exporter writes the rendered component into an HTML document.",
+          "narration": "Export turns the component into an HTML composition. That document still needs its browser animation code and a registered timeline.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "route"
+          ],
+          "focus": [
+            "composition"
+          ]
+        },
+        {
+          "title": "The renderer owns time",
+          "explanation": "HyperFrames samples the paused timeline at authored times and encodes the captured frames.",
+          "narration": "HyperFrames then samples the paused timeline at authored times and encodes the frames. The renderer drives time, so seeking can revisit the same visual state.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "route"
+          ],
+          "focus": [
+            "renderer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "same-route-in-plain-language",
+      "title": "A composition is like a score",
+      "mode": "nontechnical",
+      "requires": [
+        "source-to-video"
+      ],
+      "introduces": [],
+      "terms": [
+        "composition"
+      ],
+      "uses": [
+        "source",
+        "composition",
+        "renderer"
+      ],
+      "question": "Why keep the editable source after making the video?",
+      "outcome": "Explain why editing the source preserves one explanation across rerenders.",
+      "handoff": "Use the source when revising the explanation, then regenerate and review the video.",
+      "durationSeconds": 18,
+      "engine": "hyperframes",
+      "claims": [
+        {
+          "id": "same-route",
+          "text": "The static exporter loads a default React component and writes HTML; HyperFrames renders an HTML composition using its registered paused timeline.",
+          "evidence": [
+            "static-export",
+            "renderer-contract"
+          ],
+          "limitation": "The static exporter does not bundle animation code. A composition must supply the browser runtime, or use the new bundled graphic-video exporter."
+        }
+      ],
+      "brief": {
+        "familiarExperience": "A musician reads a score to perform a piece.",
+        "goal": "Understand which part to edit when the explanation changes.",
+        "correspondence": [
+          {
+            "familiar": "The editable score",
+            "subject": "source",
+            "meaning": "The author changes the source to revise the explanation."
+          },
+          {
+            "familiar": "A printed performance copy",
+            "subject": "composition",
+            "meaning": "The export is a generated copy used by the renderer."
+          },
+          {
+            "familiar": "The performer following the score",
+            "subject": "renderer",
+            "meaning": "The renderer follows authored timing to produce the recording."
+          }
+        ],
+        "analogyBreaks": "A musician can improvise. Deterministic video rendering follows explicit authored timing instead.",
+        "consequence": "Revise the editable source, regenerate the composition, and inspect the new rendered states."
+      },
+      "beats": [
+        {
+          "title": "Keep the score",
+          "explanation": "Editable source remains the place to revise the explanation.",
+          "narration": "Think of the editable source as a score. If the explanation changes, change the score so the next performance follows the same revision.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "same-route"
+          ],
+          "focus": [
+            "source"
+          ]
+        },
+        {
+          "title": "Make a performance copy",
+          "explanation": "Export produces the HTML composition used for rendering.",
+          "narration": "The HTML composition is the performance copy. It is generated from the source and carries the visual instructions into the browser.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "same-route"
+          ],
+          "focus": [
+            "composition"
+          ]
+        },
+        {
+          "title": "Follow the authored timing",
+          "explanation": "The renderer produces frames from the composition at specific times.",
+          "narration": "The renderer performs that composition at specific times. Unlike a musician, it should not improvise. When we revisit a time, we need the same picture.",
+          "scene": "export-route",
+          "durationSeconds": 6,
+          "claims": [
+            "same-route"
+          ],
+          "focus": [
+            "renderer"
+          ]
+        }
+      ]
+    }
+  ]
+}

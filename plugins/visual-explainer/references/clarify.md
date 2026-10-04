@@ -1,6 +1,6 @@
 # Clarify material choices
 
-Proceed when the request and available context establish a useful brief. Default to the Lieflat-inspired preset, a responsive page, and the depth needed to answer the user's question. Do not ask the user to choose components, layout algorithms, templates, or routine styling.
+Proceed when the request and available context establish a useful brief. Use the composed default explainer theme, a responsive page, and the depth needed to answer the user's question. Do not ask the user to choose components, layout algorithms, templates, or routine styling.
 
 Ask only when an unresolved choice would materially change the result, or when a required input is absent. Use the host's available question tool; do not assume `AskUserQuestion` exists. Ask one concise question and continue independent work while awaiting its answer when supported.
 
@@ -12,7 +12,7 @@ Ask only when an unresolved choice would materially change the result, or when a
 | Slides | Topic and source material | Vertical deck; length follows the argument |
 | Magazine | Topic and source material | Horizontal pages; length follows the argument |
 | Poster | Topic and factual focal content | Canvas and export defaults from `poster.md` |
-| Video | Topic; any conflicting format, duration, or narration request | Long-form 16:9, 60 seconds, TTS, Lieflat |
+| Video | Topic; any conflicting format, duration, or narration request | Long-form 16:9, 60 seconds, TTS, Hairline motion baseline; mode follows the viewer's task |
 | Fact check | Target file | Verify against the stated source scope |
 | Share | Target file and authorized destination | Existing command defaults |
 

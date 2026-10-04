@@ -40,6 +40,8 @@ Completion requires editable source, a successful export, and evidence for every
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
+| interactive Hairline figure | [vendored Hairline skill](vendor/hairline-create/SKILL.md) | Use its unchanged kernel, bench, build, and validation workflow. |
+| motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
 | code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |
 | explain a diff | [explain-diff.md](cards/explain-diff.md) | — |
 | project recap | [project-recap.md](cards/project-recap.md) | — |
