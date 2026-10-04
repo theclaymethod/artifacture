@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Use when explaining systems, code changes, plans, or data with diagrams, charts, comparison tables, HTML pages, or slides.
+description: Use when explaining systems, code changes, plans, or data with diagrams, charts, comparison tables, HTML pages, slides, or videos.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -10,17 +10,15 @@ metadata:
 
 # Visual Explainer
 
-Produce editable source and verified, self-contained HTML. Use Lieflat by default: readable type, open spacing, and marks that encode observations, units, or relationships. Prefer prose when a visual would add no understanding.
+Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the Hairline preset across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
 
 Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
 ## Resolve the runtime
 
-Set `REPO` to the Artifacture checkout before authoring:
+Require Node 22 or newer. Set `SKILL_DIR` to the absolute directory containing this file, then run `REPO=$(node "$SKILL_DIR/scripts/resolve-runtime.mjs")` before authoring. The resolver follows installation symlinks, prefers a valid `ARTIFACTURE_REPO` override, then the owning checkout, then an existing `~/.artifacture` runtime. An invalid override fails.
 
-1. If `../../visual-explainer-mdx/components.tsx` exists relative to this file, use the repository two directories above this file.
-2. Otherwise, use `~/.artifacture` when it contains `visual-explainer-mdx/components.tsx` and `package.json`.
-3. If neither exists, clone `https://github.com/theclaymethod/artifacture` to `~/.artifacture` and run `npm install --prefix ~/.artifacture`, then resume. Require Node 22 or newer. Do not update an existing runtime as a side effect of generation.
+Only if the resolver exits with code 2 and `~/.artifacture` does not exist, clone `https://github.com/theclaymethod/artifacture` there and run `npm install --prefix ~/.artifacture`, then resolve again. Preserve an existing directory and its private brands. If it lacks a runtime, clone elsewhere and set `ARTIFACTURE_REPO`. Resolution never installs or updates files.
 
 Run every `npm run ve:*` command from `REPO`. Sources may live elsewhere; pass absolute paths.
 
@@ -52,6 +50,7 @@ For point-and-click annotation, read [annotate.md](commands/annotate.md). If the
 
 - Keep MDX/TSX, chart JSON, or Archify JSON as the source of truth; generated HTML is disposable output.
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
+- For illustrations, read [default-explainer-theme.md](references/default-explainer-theme.md). Reuse shared geometry across formats; isolate strict Hairline pointer figures from seekable video scenes.
 - Use `LieflatChart` for editorial data stories and `DataChart` for quick bar, line, or dot comparisons. Marks must encode evidence; never invent records or quantities to fill a pattern.
 - When adjusting type, read [typography.md](references/typography.md). Compose readable text blocks through measure, grouping, weight, and spacing.
 - Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.

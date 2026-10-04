@@ -17,6 +17,7 @@ export default defineConfig({
     ".windsurf/**",
     "dist/**",
     "node_modules/**",
+    "plugins/visual-explainer/vendor/hairline-create/**",
     "tools/oxlint/anti-slop/**",
   ],
   jsPlugins: [

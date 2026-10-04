@@ -28,6 +28,17 @@
     "license": "MIT",
     "integration": "Reference for ordered data-flow motion. Original Artifacture walkthrough controller; no upstream app, posting workflow, or renderer source bundled."
   },
+  "hairline": {
+    "repository": "https://github.com/lucasmarkes/hairline",
+    "revision": "c3692e0c797956268847d843949f79714b6f7a41",
+    "license": "MIT",
+    "integration": "Complete unchanged skill and interactive runtime bundled in plugins/visual-explainer/vendor/hairline-create, including upstream examples, build/look/validation guidance, and MIT LICENSE. File hashes are recorded in vendor/hairline-create/provenance.json. Hairline illustration grammar composes with the default Lieflat host across formats. The rotating-point video remains original Artifacture geometry and animation and does not include the upstream pointer engine or figure code."
+  },
+  "3blue1brown": {
+    "url": "https://www.3blue1brown.com/",
+    "repository": "https://github.com/3b1b/manim",
+    "integration": "Requested reference for mathematical visual explanation, continuous object identity, and coupled geometric motion. No upstream code, channel assets, footage, or music bundled."
+  },
   "typography": {
     "url": "https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography",
     "author": "Pierrick Calvez",

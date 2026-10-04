@@ -40,6 +40,7 @@ type MermaidConfiguration = {
 // design-system registry (see docs/design-systems.md). `(string & {})` keeps
 // literal autocompletion for the built-ins while admitting registry names.
 export type VisualPreset =
+  | 'hairline'
   | 'lieflat'
   | 'mono-color'
   | 'algebrica'
@@ -232,7 +233,7 @@ type Annotation = {
 export function ExplainerShell({
   title,
   summary,
-  preset = 'lieflat',
+  preset = 'hairline',
   reviewTools = true,
   children,
 }: ShellProps) {
@@ -1067,7 +1068,7 @@ export function SlideDeck({
   eyebrow,
   children,
   orientation = 'vertical',
-  preset = 'lieflat',
+  preset = 'hairline',
   reviewTools = true,
 }: SlideDeckProps) {
   const isHorizontal = orientation === 'horizontal';
@@ -1118,7 +1119,7 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
   );
 }
 
-export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'lieflat', reviewTools = true, children }: PosterCanvasProps) {
+export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'hairline', reviewTools = true, children }: PosterCanvasProps) {
   return (
     <main className="min-h-screen bg-[var(--ve-bg)] p-4 text-[var(--ve-text)] sm:p-8 [font-family:var(--ve-font-body)]" data-ve-preset={preset}>
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] items-center justify-center sm:min-h-[calc(100vh-4rem)]">
