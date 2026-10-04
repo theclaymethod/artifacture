@@ -254,12 +254,6 @@ try {
     throw new Error(`Canvas preparation failed; PDF was not exported (${canvasFailure}).`);
   }
 
-  // ---------- Print-time DOM surgery ----------
-  // CSS-only pagination is brittle: :last-child selectors miss because of
-  // trailing whitespace nodes, flex-centered Mermaid wrappers collapse to the
-  // SVG's intrinsic size instead of the slide width, and fixed chrome leaks
-  // onto the trailing page Chromium inserts after the last break-after.
-  // Handle all three explicitly in the live DOM before the PDF snapshot.
   if (mode !== 'scroll') {
     await page.evaluate(({ selector, pageWidth, pageHeight }) => {
       const slides = Array.from(document.querySelectorAll(selector));
