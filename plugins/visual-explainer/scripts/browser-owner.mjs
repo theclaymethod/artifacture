@@ -20,16 +20,21 @@ export async function launchChromium() {
 function cacheDirForPlatform() {
   const configured = process.env.PLAYWRIGHT_BROWSERS_PATH;
   if (configured === '0') return path.join(path.dirname(fileURLToPath(import.meta.resolve('playwright-core/package.json'))), '.local-browsers');
-  if (configured) return path.resolve(process.env.INIT_CWD || process.cwd(), configured);
-  const home = homedir();
-  switch (process.platform) {
-    case 'darwin':
-      return path.join(home, 'Library', 'Caches', 'ms-playwright');
-    case 'win32':
-      return path.join(home, 'AppData', 'Local', 'ms-playwright');
-    default:
-      return path.join(home, '.cache', 'ms-playwright');
+  let directory = configured;
+  if (!directory) {
+    const home = homedir();
+    switch (process.platform) {
+      case 'darwin':
+        directory = path.join(home, 'Library', 'Caches', 'ms-playwright');
+        break;
+      case 'win32':
+        directory = path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'ms-playwright');
+        break;
+      default:
+        directory = path.join(process.env.XDG_CACHE_HOME || path.join(home, '.cache'), 'ms-playwright');
+    }
   }
+  return path.resolve(process.env.INIT_CWD || process.cwd(), directory);
 }
 
 function shellFolderForPlatform() {
@@ -69,48 +74,82 @@ async function newestCachedHeadlessShell() {
 }
 
 
+function throwDisposalErrors(errors) {
+  if (errors.length === 1) throw errors[0];
+  if (errors.length) throw new AggregateError(errors, errors.map((error) => error.message || String(error)).join('; '));
+}
+
+async function disposeResources(actions) {
+  const errors = [];
+  for (const action of actions) {
+    try { await action(); }
+    catch (error) { errors.push(error); }
+  }
+  throwDisposalErrors(errors);
+}
+
 export async function openBrowserSession({ artifact, purpose = 'artifact' } = {}) {
   const server = artifact ? await serveBrowserArtifact(artifact) : null;
   let browser;
   try { browser = await launchChromium(); }
-  catch (error) { await server?.close(); throw error; }
-  const leases = new Set();
+  catch (error) {
+    try { await server?.close(); }
+    catch (cleanupError) { throwDisposalErrors([error, cleanupError]); }
+    throw error;
+  }
+  const allocations = new Set();
+  let closing = false;
+  let closePromise;
   return {
     url: server?.url,
     async newPage({ artifact: pageArtifact, ...options } = {}) {
-      const pageServer = pageArtifact ? await serveBrowserArtifact(pageArtifact) : null;
-      const origin = (pageServer || server)?.origin;
-      let context;
+      if (closing) throw new Error('Browser session is closing; cannot allocate a page.');
+      let finishAllocation;
+      const allocationDone = new Promise((resolve) => { finishAllocation = resolve; });
+      const record = {
+        context: null,
+        server: null,
+        closePromise: null,
+        close() {
+          if (!record.closePromise) record.closePromise = (async () => {
+            await allocationDone;
+            await disposeResources([() => record.context?.close(), () => record.server?.close()]);
+            allocations.delete(record);
+          })();
+          return record.closePromise;
+        },
+      };
+      allocations.add(record);
       try {
-        context = await browser.newContext({ ...options, serviceWorkers: 'block' });
-        await context.route('**/*', (route) => isAllowedBrowserRequest(route.request().url(), {
+        record.server = pageArtifact ? await serveBrowserArtifact(pageArtifact) : null;
+        const origin = (record.server || server)?.origin;
+        record.context = await browser.newContext({ ...options, serviceWorkers: 'block' });
+        await record.context.route('**/*', (route) => isAllowedBrowserRequest(route.request().url(), {
           purpose, additionalOrigins: origin ? [origin] : [],
         }) ? route.continue() : route.abort('blockedbyclient'));
-        const page = await context.newPage();
-        const lease = {
-          page,
-          context,
-          url: (pageServer || server)?.url,
-          async close() {
-            if (!leases.delete(lease)) return;
-            try { await context.close(); }
-            finally { await pageServer?.close(); }
-          },
-        };
-        leases.add(lease);
-        return lease;
+        const page = await record.context.newPage();
+        if (closing) throw new Error('Browser session closed during page allocation.');
+        finishAllocation();
+        return { page, context: record.context, url: (record.server || server)?.url, close: () => record.close() };
       } catch (error) {
-        try { await context?.close(); }
-        finally { await pageServer?.close(); }
+        finishAllocation();
+        try { await record.close(); }
+        catch (cleanupError) { throwDisposalErrors([error, cleanupError]); }
         throw error;
       }
     },
-    async close() {
-      try { await Promise.all([...leases].map((lease) => lease.close())); }
-      finally {
-        try { await browser.close(); }
-        finally { await server?.close(); }
+    close() {
+      if (!closePromise) {
+        closing = true;
+        closePromise = (async () => {
+          const results = await Promise.allSettled([...allocations].map((record) => record.close()));
+          const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+          try { await disposeResources([() => browser.close(), () => server?.close()]); }
+          catch (error) { errors.push(error); }
+          throwDisposalErrors(errors);
+        })();
       }
+      return closePromise;
     },
   };
 }

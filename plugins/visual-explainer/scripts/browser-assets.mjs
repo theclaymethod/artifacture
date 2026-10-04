@@ -87,12 +87,16 @@ export async function serveBrowserArtifact({ filePath, html }) {
     throw error;
   }
   const origin = `http://127.0.0.1:${server.address().port}`;
+  let closePromise;
   return {
     origin,
     url: `${origin}${entry}`,
-    close: () => new Promise((resolve, reject) => {
-      server.close((error) => error ? reject(error) : resolve());
-      server.closeAllConnections();
-    }),
+    close() {
+      if (!closePromise) closePromise = new Promise((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve());
+        server.closeAllConnections();
+      });
+      return closePromise;
+    },
   };
 }
