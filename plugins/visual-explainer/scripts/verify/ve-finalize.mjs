@@ -6,8 +6,8 @@ import { parseReviewReport, parseVerdicts } from './lib/review-contract.mjs';
 export function finalizeReport(report, verdictBundle) {
   report = parseReviewReport(report);
   verdictBundle = parseVerdicts(verdictBundle, report);
-  const requiredPasses = report.llm_passes_required || [];
-  const passes = verdictBundle.passes || [];
+  const requiredPasses = report.llm_passes_required;
+  const passes = verdictBundle.passes;
   const completedPasses = passes
     .filter((entry) => entry.status === 'pass' || entry.status === 'fail')
     .map((entry) => entry.pass);
@@ -15,8 +15,8 @@ export function finalizeReport(report, verdictBundle) {
   const missingPasses = requiredPasses.filter((pass) => !completedSet.has(pass));
   const findings = passes.flatMap((entry) => entry.findings || []);
   const failedPass = passes.some((entry) => entry.status === 'fail');
-  const mechanicsFailed = Number(report.summary?.errors || 0) > 0;
-  const evidenceMissing = report.review_contract.missing || [];
+  const mechanicsFailed = report.summary.errors > 0;
+  const evidenceMissing = report.review_contract.missing;
   const status = mechanicsFailed || failedPass || findings.length
     ? 'failed'
     : missingPasses.length || !report.review_contract.complete ? 'incomplete' : 'verified';

@@ -7,7 +7,8 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { evaluateBenchmark } from './check.mjs';
 import { buildReport } from '../../plugins/visual-explainer/scripts/verify/lib/report.mjs';
-import { buildRenderedInventory, buildTruthRecord, parseHtmlDocument } from '../../plugins/visual-explainer/scripts/verify/lib/context.mjs';
+import { parseHtmlDocument } from '../../plugins/visual-explainer/scripts/verify/lib/context.mjs';
+import { buildRenderedInventory, buildTruthRecord } from '../../plugins/visual-explainer/scripts/verify/lib/review-contract.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 const CLI = resolve(import.meta.dirname, 'check.mjs');

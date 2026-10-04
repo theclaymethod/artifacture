@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { buildRenderedInventory, buildTruthRecord } from './review-contract.mjs';
-export { buildRenderedInventory, buildTruthRecord } from './review-contract.mjs';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import {

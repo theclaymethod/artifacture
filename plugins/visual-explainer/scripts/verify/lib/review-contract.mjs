@@ -166,6 +166,7 @@ export function parseReviewReport(report) {
   if (mechanics.sha256 !== contract.mechanics_sha256) throw new Error('mechanics rows changed after review capture');
   if (!report.summary || Object.keys(report.summary).length !== 4 || Object.entries(mechanics.summary).some(([key, count]) => report.summary[key] !== count)) throw new Error('report mechanics summary does not match parsed rows');
   if (!Array.isArray(contract.required_passes) || contract.required_passes.some((pass) => typeof pass !== 'string' || !pass) || new Set(contract.required_passes).size !== contract.required_passes.length) throw new Error('invalid required review passes');
+  if (typeof contract.preset !== 'string' || !contract.preset) throw new Error('review contract requires preset name');
   if (JSON.stringify(contract.required_passes) !== JSON.stringify(report.llm_passes_required) || report.preset !== contract.preset) throw new Error('report metadata does not match review_contract');
   if (!Array.isArray(contract.missing) || contract.missing.some((item) => typeof item !== 'string') || typeof contract.complete !== 'boolean' || contract.complete !== (contract.missing.length === 0)) throw new Error('review contract completeness is inconsistent');
   if (!Array.isArray(contract.evidence) || JSON.stringify(contract.evidence.map((entry) => entry.sha256)) !== JSON.stringify(contract.evidence_sha256)) throw new Error('review evidence identity is invalid');
