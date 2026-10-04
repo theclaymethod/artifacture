@@ -1,10 +1,9 @@
-import { access, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { chromium } from 'playwright-core';
-import { isAllowedBrowserRequest } from '../../network-policy.mjs';
+import { openBrowserSession, settleBrowserArtifact } from '../../browser-owner.mjs';
+import { isFixedStagePresentation } from './profile.mjs';
 import { buildDeckReviewGroups, parseDeckManifest, sanitizeReviewId } from './review-contract.mjs';
 
 const DEFAULT_SCREENS_PREFIX = path.join(tmpdir(), 've-verify-screens-');
@@ -20,7 +19,7 @@ export async function runBrowserStage(ctx, options = {}) {
   const html = ctx.html ?? await readFile(ctx.filePath, 'utf8');
   ctx.html = html;
   const matrix = buildMatrix({ ...ctx, html, profile });
-  const browser = await launchChromium();
+  const browser = await openBrowserSession({ artifact: { filePath: ctx.filePath, html }, purpose: 'artifact' });
   const runs = [];
 
   try {
@@ -47,68 +46,6 @@ export async function runBrowserStage(ctx, options = {}) {
     };
   }
   return ctx.browser;
-}
-
-async function launchChromium() {
-  try {
-    return await chromium.launch({ headless: true });
-  } catch (error) {
-    if (!/Executable doesn't exist/i.test(error.message || '')) throw error;
-    const executablePath = await newestCachedHeadlessShell();
-    if (!executablePath) throw error;
-    return chromium.launch({ headless: true, executablePath });
-  }
-}
-
-function cacheDirForPlatform() {
-  if (process.env.PLAYWRIGHT_BROWSERS_PATH) return process.env.PLAYWRIGHT_BROWSERS_PATH;
-  const home = homedir();
-  switch (process.platform) {
-    case 'darwin':
-      return path.join(home, 'Library', 'Caches', 'ms-playwright');
-    case 'win32':
-      return path.join(home, 'AppData', 'Local', 'ms-playwright');
-    default:
-      return path.join(home, '.cache', 'ms-playwright');
-  }
-}
-
-function shellFolderForPlatform() {
-  const { platform, arch } = process;
-  if (platform === 'darwin') return arch === 'arm64' ? 'chrome-headless-shell-mac-arm64' : 'chrome-headless-shell-mac';
-  if (platform === 'win32') return 'chrome-headless-shell-win64';
-  // linux and any other POSIX platform
-  return arch === 'arm64' ? 'chrome-headless-shell-linux-arm64' : 'chrome-headless-shell-linux';
-}
-
-async function newestCachedHeadlessShell() {
-  const cacheDir = cacheDirForPlatform();
-  const shellFolder = shellFolderForPlatform();
-  const executableName = process.platform === 'win32' ? 'chrome-headless-shell.exe' : 'chrome-headless-shell';
-  let entries = [];
-  try {
-    entries = await readdir(cacheDir, { withFileTypes: true });
-  } catch {
-    return null;
-  }
-  const candidates = entries
-    .filter((entry) => entry.isDirectory() && /^chromium_headless_shell-\d+$/.test(entry.name))
-    .map((entry) => ({
-      name: entry.name,
-      revision: Number(entry.name.match(/(\d+)$/)?.[1] || 0),
-      executablePath: path.join(cacheDir, entry.name, shellFolder, executableName)
-    }))
-    .sort((a, b) => b.revision - a.revision);
-
-  for (const candidate of candidates) {
-    try {
-      await access(candidate.executablePath);
-      return candidate.executablePath;
-    } catch {
-      // Try the next cached revision.
-    }
-  }
-  return null;
 }
 
 function buildMatrix(ctx) {
@@ -213,20 +150,13 @@ export function looksLikeNetworkFlake(run) {
 }
 
 async function executeRun(browser, ctx, runMeta, screensDir, options) {
-  const context = await browser.newContext({
+  const lease = await browser.newPage({
     viewport: { width: runMeta.width, height: runMeta.height },
     deviceScaleFactor: 1,
     colorScheme: runMeta.scheme,
     reducedMotion: runMeta.reducedMotion ? 'reduce' : 'no-preference'
   });
-  const page = await context.newPage();
-  await page.route('**/*', (route) => {
-    const url = route.request().url();
-    if (url === pathToFileURL(ctx.filePath).href && route.request().isNavigationRequest()) {
-      return route.fulfill({ contentType: 'text/html', body: options.html });
-    }
-    return isAllowedBrowserRequest(url) ? route.continue() : route.abort('blockedbyclient');
-  });
+  const { page } = lease;
   const consoleErrors = [];
   const pageErrors = [];
   const failedRequests = [];
@@ -259,7 +189,7 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
 
   try {
     await page.emulateMedia({ colorScheme: runMeta.scheme, reducedMotion: runMeta.reducedMotion ? 'reduce' : 'no-preference' });
-    await page.goto(pathToFileURL(ctx.filePath).href, { waitUntil: 'load', timeout: 30000 });
+    await page.goto(browser.url, { waitUntil: 'load', timeout: 30000 });
     const settlement = await waitForPageSettled(page, ctx, options);
 
     const metrics = await page.evaluate(({ meta, source }) => {
@@ -326,30 +256,12 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
       deckReview,
     };
   } finally {
-    await context.close();
+    await lease.close();
   }
 }
 
 async function waitForPageSettled(page, ctx, options = {}) {
-  let mermaidError = null;
-  await page.evaluate(async () => {
-    if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
-  });
-
-  const hasMermaid = await page.locator('.mermaid, pre.mermaid, [data-ve-mermaid-shell]').count() > 0;
-  if (hasMermaid) {
-    const timeout = Number.isFinite(options.mermaidTimeoutMs) && options.mermaidTimeoutMs > 0
-      ? options.mermaidTimeoutMs
-      : 8000;
-    try {
-      await page.waitForFunction(() => {
-        const mermaids = [...document.querySelectorAll('.mermaid, pre.mermaid, [data-ve-mermaid-shell]')];
-        return mermaids.length > 0 && mermaids.every((el) => el.matches('svg') || el.querySelector('svg'));
-      }, null, { timeout });
-    } catch {
-      mermaidError = `Mermaid rendering did not complete within ${timeout}ms; every Mermaid container must contain an SVG`;
-    }
-  }
+  const { mermaidError } = await settleBrowserArtifact(page, options);
 
   await page.evaluate(async () => {
     document.querySelectorAll('details').forEach((details) => { details.open = true; });
@@ -1534,7 +1446,7 @@ function deckReviewCaptureMode({
   reducedMotion = false,
 } = {}) {
   if (reducedMotion || width < 1000) return null;
-  if (/data-ve-presentation/i.test(html)) return 'presentation';
+  if (isFixedStagePresentation(html)) return 'presentation';
   if (profile === 'slides') return 'scroll-deck';
   return null;
 }
