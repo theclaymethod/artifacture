@@ -27,10 +27,7 @@ function context(profile, html = '<main><p>Useful prose.</p></main>') {
 }
 
 test('many visual criteria collapse into one profile-aware artifact review', () => {
-  const report = buildReport(context('slides'), [
-    { id: 'hierarchy-squint-test', stage: 'llm-pass', status: 'llm-required', severity: 'error' },
-    { id: 'deck-content-completeness', stage: 'llm-pass', status: 'llm-required', severity: 'error' },
-  ]);
+  const report = buildReport(context('slides'), []);
 
   assert.deepEqual(report.llm_passes_required, ['artifact-review:slides']);
 });

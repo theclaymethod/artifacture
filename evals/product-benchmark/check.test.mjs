@@ -6,7 +6,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { evaluateBenchmark } from './check.mjs';
-import { reviewContractSha256 } from '../../plugins/visual-explainer/scripts/verify/lib/report.mjs';
+import { buildReport } from '../../plugins/visual-explainer/scripts/verify/lib/report.mjs';
+import { parseHtmlDocument } from '../../plugins/visual-explainer/scripts/verify/lib/context.mjs';
+import { buildRenderedInventory, buildTruthRecord } from '../../plugins/visual-explainer/scripts/verify/lib/review-contract.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 const CLI = resolve(import.meta.dirname, 'check.mjs');
@@ -26,30 +28,18 @@ function bindRun(workDir, benchmark, role, runId) {
     writeFileSync(artifact, `<h1>${role} ${benchmarkCase.id}</h1>`);
     writeFileSync(screenshot, `${role}-pixels`);
     writeFileSync(truth, `# Brief\nTruth for ${benchmarkCase.id}.\n`);
-    const contract = {
-      schema_version: 1,
-      artifact_sha256: digest(artifact),
-      profile: benchmarkCase.profile,
-      preset: 'custom',
-      truth_sha256: digest(truth),
-      inventory_sha256: 'c'.repeat(64),
-      evidence_sha256: [digest(screenshot)],
-      required_passes: [`artifact-review:${benchmarkCase.profile}`],
-      complete: true,
-      missing: [],
-      truth: { path: truth, sha256: digest(truth), claims: [`Truth for ${benchmarkCase.id}.`] },
-      inventory: { sha256: 'c'.repeat(64), items: [{ role: 'h1', text: benchmarkCase.id }] },
-      evidence: [{ path: screenshot, sha256: digest(screenshot) }],
-    };
-    contract.sha256 = reviewContractSha256(contract);
-    writeFileSync(report, JSON.stringify({
-      file: artifact,
-      profile: benchmarkCase.profile,
-      preset: 'custom',
-      summary: { errors: 0 },
-      llm_passes_required: contract.required_passes,
-      review_contract: contract,
-    }));
+    const truthSnapshot = join(caseRoot, 'truth.md');
+    writeFileSync(truthSnapshot, readFileSync(truth));
+    const html = readFileSync(artifact, 'utf8');
+    const reportData = buildReport({
+      filePath: artifact, html,
+      profile: benchmarkCase.profile, preset: 'custom',
+      captureDirectory: caseRoot, artifactSnapshot: artifact,
+      renderedInventory: buildRenderedInventory(parseHtmlDocument(html).document),
+      truth: { ...buildTruthRecord(truthSnapshot, readFileSync(truthSnapshot, 'utf8')), source_path: truth },
+    }, [], [screenshot]);
+    const contract = reportData.review_contract;
+    writeFileSync(report, JSON.stringify(reportData));
     const ref = (path) => ({ path: path.slice(workDir.length + 1), sha256: digest(path) });
     return {
       case_id: benchmarkCase.id,

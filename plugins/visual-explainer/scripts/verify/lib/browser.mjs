@@ -5,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 import { isAllowedBrowserRequest } from '../../network-policy.mjs';
+import { buildDeckReviewGroups, parseDeckManifest, sanitizeReviewId } from './review-contract.mjs';
 
 const DEFAULT_SCREENS_PREFIX = path.join(tmpdir(), 've-verify-screens-');
 const MAX_DECK_REVIEW_SLIDES = 200;
@@ -17,6 +18,7 @@ export async function runBrowserStage(ctx, options = {}) {
   await mkdir(screensDir, { recursive: true });
 
   const html = ctx.html ?? await readFile(ctx.filePath, 'utf8');
+  ctx.html = html;
   const matrix = buildMatrix({ ...ctx, html, profile });
   const browser = await launchChromium();
   const runs = [];
@@ -24,8 +26,10 @@ export async function runBrowserStage(ctx, options = {}) {
   try {
     for (const runMeta of matrix) {
       const result = await executeWithRetry(browser, ctx, runMeta, screensDir, {
+        html,
         captureDeckReview,
         mermaidTimeoutMs: options.mermaidTimeoutMs,
+        retainCaptureErrors: options.retainCaptureErrors,
       });
       runs.push(result);
     }
@@ -218,6 +222,9 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
   const page = await context.newPage();
   await page.route('**/*', (route) => {
     const url = route.request().url();
+    if (url === pathToFileURL(ctx.filePath).href && route.request().isNavigationRequest()) {
+      return route.fulfill({ contentType: 'text/html', body: options.html });
+    }
     return isAllowedBrowserRequest(url) ? route.continue() : route.abort('blockedbyclient');
   });
   const consoleErrors = [];
@@ -292,15 +299,15 @@ async function executeRun(browser, ctx, runMeta, screensDir, options) {
       const last = tags[tags.length - 1];
       if (last && last.textContent && last.textContent.includes('.ve-review-panel { visibility: hidden')) last.remove();
     });
-    const deckReview = options.captureDeckReview
-      ? await captureDeckReviewSet({
-        page,
-        ctx,
-        runMeta,
-        screensDir,
-        suffix,
-      })
-      : null;
+    let deckReview = null;
+    if (options.captureDeckReview) {
+      try {
+        deckReview = await captureDeckReviewSet({ page, html: options.html, runMeta, screensDir, suffix });
+      } catch (error) {
+        if (!options.retainCaptureErrors) throw error;
+        ctx.captureError = error.message || String(error);
+      }
+    }
 
     return {
       viewport: runMeta.viewport,
@@ -1532,16 +1539,6 @@ function deckReviewCaptureMode({
   return null;
 }
 
-function sanitizeReviewId(value) {
-  const sanitized = String(value ?? '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
-  return sanitized || 'untitled';
-}
-
 function reviewStateId(slideId, kind, detail) {
   const parts = [sanitizeReviewId(slideId), sanitizeReviewId(kind)];
   if (detail !== undefined && detail !== null && detail !== '') {
@@ -1560,13 +1557,13 @@ function parseReviewStateFilter(value = '') {
 
 async function captureDeckReviewSet({
   page,
-  ctx,
+  html,
   runMeta,
   screensDir,
   suffix,
 }) {
   const mode = deckReviewCaptureMode({
-    html: ctx.html,
+    html,
     profile: runMeta.profile,
     width: runMeta.width,
     reducedMotion: runMeta.reducedMotion,
@@ -1580,8 +1577,7 @@ async function captureDeckReviewSet({
   assertCompleteReviewFilter(stateFilter, units);
   const manifestPath = path.join(screensDir, `deck-review-${suffix}.json`);
   const reviewGroups = buildDeckReviewGroups(units);
-  assertCompleteDeckReviewGroups(units, reviewGroups);
-  const manifest = {
+  const manifest = parseDeckManifest({
     schema_version: 1,
     kind: 'deck-review-set',
     mode,
@@ -1590,7 +1586,7 @@ async function captureDeckReviewSet({
     state_filter: stateFilter ? [...stateFilter] : null,
     units,
     review_groups: reviewGroups,
-  };
+  });
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   return { manifestPath, mode, units };
 }
@@ -1601,50 +1597,6 @@ function assertCompleteReviewFilter(stateFilter, units) {
   const missing = [...stateFilter].filter((stateId) => !captured.has(stateId));
   if (missing.length) {
     throw new Error(`deck review did not capture requested states: ${missing.join(', ')}`);
-  }
-}
-
-function buildDeckReviewGroups(units) {
-  const bySlide = new Map();
-  for (const unit of units) {
-    const group = bySlide.get(unit.slide_id) || [];
-    group.push(unit);
-    bySlide.set(unit.slide_id, group);
-  }
-  const groups = [];
-  const bases = [];
-  for (const [slideId, slideUnits] of bySlide) {
-    const base = slideUnits.find((unit) => unit.state_kind === 'base');
-    if (base) bases.push(base);
-    const variants = slideUnits.filter((unit) => unit !== base);
-    for (const variant of variants) {
-      groups.push({
-        group_id: `${sanitizeReviewId(slideId)}--${sanitizeReviewId(variant.state_id)}-context`,
-        purpose: 'state-continuity',
-        state_ids: base ? [base.state_id, variant.state_id] : [variant.state_id],
-      });
-    }
-  }
-  for (let index = 0; index < bases.length - 1; index += 1) {
-    groups.push({
-      group_id: `${sanitizeReviewId(bases[index].slide_id)}--${sanitizeReviewId(bases[index + 1].slide_id)}--sequence`,
-      purpose: 'adjacent-slide-variety',
-      state_ids: [bases[index].state_id, bases[index + 1].state_id],
-    });
-  }
-  return groups;
-}
-
-function assertCompleteDeckReviewGroups(units, groups) {
-  const malformed = groups.filter((group) =>
-    group.state_ids.length !== 2 || new Set(group.state_ids).size !== 2);
-  if (malformed.length) {
-    throw new Error(`deck review requires two distinct states in every group: ${malformed.map((group) => group.group_id).join(', ')}`);
-  }
-  const grouped = new Set(groups.flatMap((group) => group.state_ids));
-  const unpaired = units.filter((unit) => !grouped.has(unit.state_id)).map((unit) => unit.state_id);
-  if (unpaired.length) {
-    throw new Error(`deck review requires paired evidence for states: ${unpaired.join(', ')}`);
   }
 }
 

@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
-import crypto from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { buildRenderedInventory, buildTruthRecord } from './review-contract.mjs';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import {
@@ -45,8 +46,6 @@ export async function buildContext(filePath, options = {}) {
     inlineStyles,
     text,
     dom,
-    // `profile` remains the mechanics alias for existing check registries and
-    // browser callers. New report consumers should use the explicit fields.
     profile: mechanicsProfile,
     mechanicsProfile,
     reviewProfile,
@@ -55,6 +54,7 @@ export async function buildContext(filePath, options = {}) {
     presetHint,
     flags,
     browser: null,
+    truthText,
     truth: truthText == null ? null : buildTruthRecord(truthPath, truthText),
     renderedInventory,
   };
@@ -73,32 +73,17 @@ export function parseHtmlDocument(html) {
   }
 }
 
-export function buildRenderedInventory(dom) {
-  if (!dom) return { sha256: sha256('[]'), items: [], provenance: 'static' };
-  const selectors = 'h1,h2,h3,h4,h5,h6,p,li,th,td,figcaption,blockquote,summary';
-  const items = Array.from(dom.querySelectorAll(selectors))
-    .map((element) => ({
-      role: element.tagName.toLowerCase(),
-      text: (element.textContent || '').replace(/\s+/g, ' ').trim(),
-    }))
-    .filter((item) => item.text);
-  return { sha256: sha256(JSON.stringify(items)), items, provenance: 'static' };
-}
-
-export function buildTruthRecord(truthPath, truthText) {
-  const claims = truthText.split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !/^#{1,6}\s/.test(line));
-  return {
-    path: truthPath,
-    sha256: sha256(truthText),
-    bytes: Buffer.byteLength(truthText),
-    claims,
-  };
-}
-
-function sha256(value) {
-  return crypto.createHash('sha256').update(value).digest('hex');
+export async function prepareCapture(ctx, screensRoot) {
+  const root = screensRoot ? path.resolve(screensRoot) : tmpdir();
+  await fs.mkdir(root, { recursive: true });
+  ctx.captureDirectory = await fs.mkdtemp(path.join(root, 've-capture-'));
+  ctx.artifactSnapshot = path.join(ctx.captureDirectory, 'artifact.html');
+  await fs.writeFile(ctx.artifactSnapshot, ctx.html, { flag: 'wx' });
+  if (ctx.truth) {
+    const truthPath = path.join(ctx.captureDirectory, 'truth.md');
+    await fs.writeFile(truthPath, ctx.truthText, { flag: 'wx' });
+    ctx.truth = { ...ctx.truth, source_path: ctx.truth.path, path: truthPath };
+  }
 }
 
 export function extractTagBodies(html, tag) {

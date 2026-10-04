@@ -29,7 +29,6 @@ test('default browser evidence directories are unique across verification runs',
   const evidenceDirs = [];
   const makeContext = () => ({
     filePath: artifact,
-    html: fs.readFileSync(artifact, 'utf8'),
     profile: 'poster',
     preset: 'custom',
     flags: { hasAnimations: false, hasMermaid: false },
@@ -37,11 +36,13 @@ test('default browser evidence directories are unique across verification runs',
 
   try {
     const first = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    assert.deepEqual(first.runs[0].renderedInventory, [{ role: 'h1', text: 'Poster' }]);
     const firstPath = first.runs[0].screenshotPath;
     evidenceDirs.push(path.dirname(firstPath));
     const firstEvidence = fs.readFileSync(firstPath);
 
     const second = await runBrowserStage(makeContext(), { profile: 'poster', captureDeckReview: false });
+    assert.deepEqual(second.runs[0].renderedInventory, [{ role: 'h1', text: 'Poster' }]);
     const secondPath = second.runs[0].screenshotPath;
     evidenceDirs.push(path.dirname(secondPath));
 
@@ -110,52 +111,56 @@ test('browser verification recognizes the component-backed Mermaid shell', async
   }
 });
 
-test('browser stage captures every presentation base, drill, and progressive state', async () => {
-  const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));
-  const html = fs.readFileSync(FIXTURE, 'utf8');
-  const ctx = {
-    filePath: FIXTURE,
-    html,
-    profile: 'page',
-    preset: 'custom',
-    flags: { hasAnimations: false, hasMermaid: false },
-  };
+for (const slideId of ['slide-two', 'a'.repeat(80)]) {
+  test(`browser stage captures every presentation base, drill, and progressive state with a ${slideId.length}-character slide id`, async () => {
+    const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));
+    const html = fs.readFileSync(FIXTURE, 'utf8').replaceAll('slide-two', slideId);
+    const ctx = {
+      filePath: FIXTURE,
+      html,
+      profile: 'page',
+      preset: 'custom',
+      flags: { hasAnimations: false, hasMermaid: false },
+    };
 
-  try {
-    const browser = await runBrowserStage(ctx, { screensDir, profile: 'page' });
-    assert.equal(browser.runs.length, 4, 'the frozen page browser matrix remains unchanged');
-    const reviewSets = fs.readdirSync(screensDir)
-      .filter((name) => /^deck-review-.*\.json$/.test(name))
-      .sort()
-      .map((name) => JSON.parse(fs.readFileSync(path.join(screensDir, name), 'utf8')));
-    assert.equal(reviewSets.length, 2, 'light and dark desktop runs receive sidecar review sets');
-    for (const reviewSet of reviewSets) {
-      assert.deepEqual(
-        reviewSet.units.map((unit) => unit.state_id),
-        [
-          'slide-one--base',
-          'slide-one--drill--evidence',
-          'slide-two--base',
-          'slide-two--state--1',
-          'slide-two--drill--state-1-progressive-evidence',
-        ],
-      );
-      assert.ok(reviewSet.units.every((unit) => fs.existsSync(unit.screenshot_path)));
-      assert.deepEqual(reviewSet.viewport, { width: 1440, height: 900 });
-      assert.deepEqual(
-        reviewSet.review_groups.map((group) => [group.purpose, group.state_ids]),
-        [
-          ['state-continuity', ['slide-one--base', 'slide-one--drill--evidence']],
-          ['state-continuity', ['slide-two--base', 'slide-two--state--1']],
-          ['state-continuity', ['slide-two--base', 'slide-two--drill--state-1-progressive-evidence']],
-          ['adjacent-slide-variety', ['slide-one--base', 'slide-two--base']],
-        ],
-      );
+    try {
+      const browser = await runBrowserStage(ctx, { screensDir, profile: 'page' });
+      assert.equal(browser.runs.length, 4, 'the frozen page browser matrix remains unchanged');
+      const reviewSets = fs.readdirSync(screensDir)
+        .filter((name) => /^deck-review-.*\.json$/.test(name))
+        .sort()
+        .map((name) => JSON.parse(fs.readFileSync(path.join(screensDir, name), 'utf8')));
+      assert.equal(reviewSets.length, 2, 'light and dark desktop runs receive sidecar review sets');
+      for (const reviewSet of reviewSets) {
+        assert.deepEqual(
+          reviewSet.units.map((unit) => unit.state_id),
+          [
+            'slide-one--base',
+            'slide-one--drill--evidence',
+            `${slideId}--base`,
+            `${slideId}--state--1`,
+            `${slideId}--drill--state-1-progressive-evidence`,
+          ],
+        );
+        assert.ok(reviewSet.units.every((unit) => fs.existsSync(unit.screenshot_path)));
+        assert.equal(new Set(reviewSet.review_groups.map((group) => group.group_id)).size, reviewSet.review_groups.length);
+        assert.deepEqual(reviewSet.viewport, { width: 1440, height: 900 });
+        assert.deepEqual(
+          reviewSet.review_groups.map((group) => [group.purpose, group.state_ids]),
+          [
+            ['state-continuity', ['slide-one--base', 'slide-one--drill--evidence']],
+            ['state-continuity', [`${slideId}--base`, `${slideId}--state--1`]],
+            ['state-continuity', [`${slideId}--base`, `${slideId}--drill--state-1-progressive-evidence`]],
+            ['adjacent-slide-variety', ['slide-one--base', `${slideId}--base`]],
+          ],
+        );
+      }
+      assert.deepEqual(reviewSets[0].review_groups, reviewSets[1].review_groups);
+    } finally {
+      fs.rmSync(screensDir, { recursive: true, force: true });
     }
-  } finally {
-    fs.rmSync(screensDir, { recursive: true, force: true });
-  }
-});
+  });
+}
 
 test('bounded recapture fails when any requested state id is stale or missing', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-missing-'));
