@@ -73,7 +73,7 @@ async function boundedPath(root, relative, where) {
   if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) fail(where, 'path resolves outside repository root');
   return resolved;
 }
-function git(repository, args) { return execFileSync('git', ['-C', repository, ...args], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }); }
+function git(repository, args) { return execFileSync('git', ['--literal-pathspecs', '-C', repository, ...args], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }); }
 async function resolveEvidence(entry, root) {
   if (entry.kind === 'document') {
     if (sha(entry.excerpt) !== entry.excerptSha256) fail(`evidence.${entry.id}`, 'excerpt digest mismatch');

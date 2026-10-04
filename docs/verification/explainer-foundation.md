@@ -20,6 +20,8 @@ The two collection drafts were sampled twenty times. Subject labels and route pa
 
 Publication requires the original frozen validation record and rechecks its complete manifest and evidence before creating output. Eight altered, copied, or forged records rejected before the output parent existed. An authentic record and an explicitly rechecked edited manifest both produced draft packages with matching completion digests. The initial review reproduced acceptance of an altered copied record; this boundary check corrects that defect.
 
+The final contract review also reproduced a Git path ambiguity: a diff for `story[1].md` matched a different changed file while the excerpt read the literal filename. Diff evidence uses literal pathspecs. Direct Git probes cover unchanged literal filenames with changed glob matches, and filenames that actually changed.
+
 ## Reproduce and interpret the checks
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run check:manifests`, and `npm run ve:check`. Follow [the export commands and sampling procedure](../graphics-and-video.md) for the shared-scene examples. Check and scaffold [the collection example](../video-collections.md) in a new output directory.
