@@ -93,7 +93,7 @@ export function buildDeckReviewGroups(units) {
     slideIndices.add(base.slide_index);
     for (const variant of slideUnits.filter((unit) => unit !== base)) {
       groups.push({
-        group_id: `${sanitizeReviewId(slideId)}--${sanitizeReviewId(variant.state_id)}-context`,
+        group_id: JSON.stringify(['state-continuity', base.state_id, variant.state_id]),
         purpose: 'state-continuity',
         state_ids: [base.state_id, variant.state_id],
       });
@@ -101,7 +101,7 @@ export function buildDeckReviewGroups(units) {
   }
   for (let index = 0; index < bases.length - 1; index += 1) {
     groups.push({
-      group_id: `${sanitizeReviewId(bases[index].slide_id)}--${sanitizeReviewId(bases[index + 1].slide_id)}--sequence`,
+      group_id: JSON.stringify(['adjacent-slide-variety', bases[index].state_id, bases[index + 1].state_id]),
       purpose: 'adjacent-slide-variety',
       state_ids: [bases[index].state_id, bases[index + 1].state_id],
     });
