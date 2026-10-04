@@ -68,7 +68,7 @@ test('mechanics-only reaches a seeded deck check without running complete-deck r
       'fail',
     );
     assert.equal(
-      readdirSync(screensDir).some((name) => name.startsWith('deck-review-')),
+      readdirSync(report.review_contract.capture_root).some((name) => name.startsWith('deck-review-')),
       false,
     );
   } finally {

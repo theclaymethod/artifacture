@@ -47,8 +47,6 @@ export async function buildContext(filePath, options = {}) {
     inlineStyles,
     text,
     dom,
-    // `profile` remains the mechanics alias for existing check registries and
-    // browser callers. New report consumers should use the explicit fields.
     profile: mechanicsProfile,
     mechanicsProfile,
     reviewProfile,

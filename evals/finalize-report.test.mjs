@@ -38,7 +38,7 @@ async function fixture(t) {
       CLI, '--report', reportPath, '--verdicts', verdictsPath, '--out', outPath,
     ], { cwd: REPO_ROOT, encoding: 'utf8' });
   };
-  return { artifact, truth, screenshot, report, reportPath, outPath, run };
+  return { ctx, artifact, truth, screenshot, report, reportPath, outPath, run };
 }
 
 test('a mechanics-clean report cannot become verified while its visual pass is missing', async (t) => {
@@ -186,4 +186,40 @@ test('a fixed-stage deck finalizes with page mechanics and slides review semanti
   ], { cwd: REPO_ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(readFileSync(outPath, 'utf8')).verification.status, 'verified');
+
+  for (const state of [firstState, secondState]) {
+    writeFileSync(state, 'changed state pixels');
+    const changed = spawnSync(process.execPath, [
+      CLI, '--report', reportPath, '--verdicts', verdictsPath, '--out', outPath,
+    ], { cwd: REPO_ROOT, encoding: 'utf8' });
+    assert.equal(changed.status, 2);
+    assert.match(changed.stderr, /review evidence changed after capture/);
+    writeFileSync(state, state === firstState ? 'first pixels' : 'second pixels');
+  }
+
+});
+
+
+test('mechanics failures cannot disappear through a zeroed report summary', async (t) => {
+  const { ctx, screenshot, reportPath, outPath, run } = await fixture(t);
+  const report = buildReport(ctx, [{ id: 'failed-check', stage: 'browser', severity: 'error', status: 'fail' }], [screenshot]);
+  writeFileSync(reportPath, JSON.stringify(report));
+  const passes = report.llm_passes_required.map((pass) => ({ pass, status: 'pass', findings: [] }));
+  const failed = run(passes, report.review_contract.sha256);
+  assert.equal(failed.status, 1, failed.stderr);
+  assert.equal(JSON.parse(readFileSync(outPath, 'utf8')).verification.status, 'failed');
+  report.summary.errors = 0;
+  writeFileSync(reportPath, JSON.stringify(report));
+  const zeroed = run(passes, report.review_contract.sha256);
+  assert.equal(zeroed.status, 2);
+  assert.match(zeroed.stderr, /summary does not match parsed rows/);
+});
+
+test('legacy review receipts cannot silently certify newly hashed evidence', async (t) => {
+  const { report, reportPath, run } = await fixture(t);
+  report.review_contract.schema_version = 1;
+  writeFileSync(reportPath, JSON.stringify(report));
+  const result = run(report.llm_passes_required.map((pass) => ({ pass, status: 'pass', findings: [] })));
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /legacy reports require a new capture/);
 });

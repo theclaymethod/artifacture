@@ -72,7 +72,7 @@ export function parseDeckManifest(manifest) {
   for (const unit of manifest.units) {
     if (!unit || typeof unit.state_id !== 'string' || !unit.state_id || ids.has(unit.state_id)) throw new Error('deck review states require unique ids');
     ids.add(unit.state_id);
-    if (typeof unit.slide_id !== 'string' || !unit.slide_id || !Number.isInteger(unit.slide_index) || unit.slide_index < 0 || !['base', 'step', 'tab', 'drill'].includes(unit.state_kind) || typeof unit.screenshot_path !== 'string' || !/\.png$/i.test(unit.screenshot_path)) throw new Error('invalid deck review state');
+    if (typeof unit.slide_id !== 'string' || !unit.slide_id || !Number.isInteger(unit.slide_index) || unit.slide_index < 0 || !['base', 'state', 'drill'].includes(unit.state_kind) || typeof unit.screenshot_path !== 'string' || !/\.png$/i.test(unit.screenshot_path)) throw new Error('invalid deck review state');
   }
   const grouped = new Set();
   const groupIds = new Set();
@@ -82,7 +82,7 @@ export function parseDeckManifest(manifest) {
     group.state_ids.forEach((id) => grouped.add(id));
   }
   if ([...ids].some((id) => !grouped.has(id))) throw new Error('deck review states require paired evidence');
-  if (manifest.state_filter !== null) throw new Error('filtered deck capture cannot certify a complete review');
+  if (manifest.state_filter !== null && (!Array.isArray(manifest.state_filter) || !manifest.state_filter.length || new Set(manifest.state_filter).size !== manifest.state_filter.length || manifest.state_filter.some((id) => !ids.has(id)) || manifest.state_filter.length !== ids.size)) throw new Error('invalid deck review state filter');
   return manifest;
 }
 
@@ -120,6 +120,7 @@ export function buildReviewContract(ctx, checks, screenshots, requiredPasses) {
   if (ctx.captureError) missing.push(`capture-incomplete: ${ctx.captureError}`);
   if (!ctx.artifactSnapshot) missing.push('capture-inputs');
   const evidence = ctx.captureDirectory ? collectEvidence(screenshots, manifests, ctx.captureDirectory) : [];
+  if (manifests.some((filePath) => JSON.parse(readOwned(filePath, ctx.captureDirectory)).state_filter !== null)) missing.push('filtered-deck-manifest');
   const contract = {
     schema_version: REVIEW_CONTRACT_VERSION,
     artifact_sha256: sha256(ctx.html || ''),
@@ -163,7 +164,7 @@ export function parseReviewReport(report) {
   if (!/^[a-f0-9]{64}$/.test(contract.sha256 || '') || reviewContractSha256(contract) !== contract.sha256) throw new Error('report review_contract identity is invalid');
   const mechanics = parseMechanics(report.checks);
   if (mechanics.sha256 !== contract.mechanics_sha256) throw new Error('mechanics rows changed after review capture');
-  if (JSON.stringify(mechanics.summary) !== JSON.stringify(report.summary)) throw new Error('report mechanics summary does not match parsed rows');
+  if (!report.summary || Object.keys(report.summary).length !== 4 || Object.entries(mechanics.summary).some(([key, count]) => report.summary[key] !== count)) throw new Error('report mechanics summary does not match parsed rows');
   if (!Array.isArray(contract.required_passes) || contract.required_passes.some((pass) => typeof pass !== 'string' || !pass) || new Set(contract.required_passes).size !== contract.required_passes.length) throw new Error('invalid required review passes');
   if (JSON.stringify(contract.required_passes) !== JSON.stringify(report.llm_passes_required) || report.preset !== contract.preset) throw new Error('report metadata does not match review_contract');
   if (!Array.isArray(contract.missing) || contract.missing.some((item) => typeof item !== 'string') || typeof contract.complete !== 'boolean' || contract.complete !== (contract.missing.length === 0)) throw new Error('review contract completeness is inconsistent');
@@ -203,6 +204,7 @@ export function parseReviewReport(report) {
   if (!screenshots.length) expectedMissing.push('screenshots');
   if (contract.review_profile === 'slides' && !manifests.length) expectedMissing.push('paired-deck-manifest');
   if (!contract.artifact_snapshot) expectedMissing.push('capture-inputs');
+  if (manifests.some((filePath) => JSON.parse(readOwned(filePath, contract.capture_root)).state_filter !== null)) expectedMissing.push('filtered-deck-manifest');
   const captureErrors = contract.missing.filter((item) => item.startsWith('capture-incomplete: '));
   if (JSON.stringify([...expectedMissing, ...captureErrors].sort()) !== JSON.stringify([...contract.missing].sort())) throw new Error('review contract completeness is inconsistent');
   return { ...report, checks: mechanics.rows, summary: mechanics.summary };
