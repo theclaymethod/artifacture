@@ -40,6 +40,11 @@ Optional `kicker`, `eyebrow`, `stat`, and label props are compatibility APIs, no
 - `SlideDeck(title, orientation?, preset?, reviewTools?)`
 - `Slide(title, kicker?, tone?)`
 - `PosterCanvas(eyebrow?, title, stat?, footer?, preset?, reviewTools?)`
+- `GraphicCanvas(scene)` draws immutable primitives from `createDiagramScene` or `createGraphicScene`.
+- `GraphicSlide(slide)` places a shared graphic in a fixed frame created by `createSlideScene`.
+- `GraphicVideo(sequence, authoredSeconds?)` samples finite motion from `sequenceSlides`; use `ve:graphic-video` for a seekable browser export.
+
+Read [graphics-and-video.md](../../../docs/graphics-and-video.md) for shared scene authoring, supported motion, and export limits.
 
 Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentation with navigation, drill-downs, or reusable stage chrome, read `deck-navigation-shell.md` before using:
 
@@ -52,4 +57,4 @@ Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentati
 
 ## Presets
 
-Built-in presets are `lieflat` (default), `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Other names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` only when learning or using an external design system.
+Built-in presets are `hairline` (default), `lieflat`, `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Other names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` only when learning or using an external design system.

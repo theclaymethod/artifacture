@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { createServer } from "vite";
+import react from "@vitejs/plugin-react";
+import { parseHTML } from "linkedom";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -132,12 +139,37 @@ test("every advertised section role maps to an available worker", async () => {
 
 test("computed and Mermaid diagrams use accessible, strict SVG contracts", async () => {
   const components = await read("../../visual-explainer-mdx/components.tsx");
-  const canvas = components.slice(components.indexOf("export function DiagramCanvas"), components.indexOf("function MobileSwimlaneVariant"));
   const mermaid = components.slice(components.indexOf("export function MermaidBlock"), components.indexOf("function DiagramNodeShape"));
 
-  assert.match(canvas, /aria-labelledby=/);
-  assert.ok(canvas.indexOf("<title id=") < canvas.indexOf("<desc id="));
-  assert.ok(canvas.indexOf("<desc id=") < canvas.indexOf("<defs>"));
+  const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
+  const server = await createServer({
+    root: repoRoot, appType: "custom", logLevel: "silent", plugins: [react()],
+    optimizeDeps: { noDiscovery: true, include: [] },
+    server: { middlewareMode: true, hmr: false, ws: false },
+  });
+  try {
+    const { DiagramCanvas } = await server.ssrLoadModule(path.join(repoRoot, "visual-explainer-mdx/components.tsx"));
+    const props = { nodes: [{ id: "source", label: "Source" }, { id: "output", label: "Output" }], edges: [{ id: "build", from: "source", to: "output" }], title: "Source produces output", description: "A source connects to an output." };
+    const markup = renderToStaticMarkup(React.createElement(React.Fragment, null, React.createElement(DiagramCanvas, props), React.createElement(DiagramCanvas, props)));
+    const { document } = parseHTML(markup);
+    const svgs = [...document.querySelectorAll('svg[role="img"]')];
+    assert.equal(svgs.length, 2);
+    const instanceIds = svgs.map((svg) => new Set([...svg.querySelectorAll("[id]")].map((element) => element.id)));
+    assert.ok([...instanceIds[0]].every((id) => !instanceIds[1].has(id)));
+    for (const svg of svgs) {
+      const references = svg.getAttribute("aria-labelledby").split(/\s+/).map((id) => document.getElementById(id));
+      assert.equal(references.length, 2);
+      assert.equal(references[0]?.localName, "title");
+      assert.equal(references[0]?.textContent, props.title);
+      assert.equal(references[1]?.localName, "desc");
+      assert.equal(references[1]?.textContent, props.description);
+      const arrow = svg.querySelector('[data-diagram-role="arrow"]');
+      const markerId = arrow.getAttribute("marker-end").slice(5, -1);
+      assert.ok(instanceIds[svgs.indexOf(svg)].has(markerId));
+    }
+  } finally {
+    await server.close();
+  }
   assert.match(mermaid, /securityLevel: 'strict'/);
   assert.match(mermaid, /replaceChildren\(parseMermaidSvg/);
   assert.doesNotMatch(mermaid, /innerHTML/);
