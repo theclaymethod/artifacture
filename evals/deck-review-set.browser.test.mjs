@@ -114,7 +114,7 @@ test('browser verification recognizes the component-backed Mermaid shell', async
 for (const slideId of ['slide-two', 'a'.repeat(80)]) {
   test(`browser stage captures every presentation base, drill, and progressive state with a ${slideId.length}-character slide id`, async () => {
     const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));
-    const html = fs.readFileSync(FIXTURE, 'utf8').replaceAll('slide-two', slideId);
+    const html = fs.readFileSync(FIXTURE, 'utf8').replace('data-ve-presentation="true"', 'data-ve-presentation="true" data-presentation-slide-count="2"').replaceAll('slide-two', slideId);
     const ctx = {
       filePath: FIXTURE,
       html,
@@ -164,7 +164,7 @@ for (const slideId of ['slide-two', 'a'.repeat(80)]) {
 
 test('bounded recapture fails when any requested state id is stale or missing', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-missing-'));
-  const html = fs.readFileSync(FIXTURE, 'utf8');
+  const html = fs.readFileSync(FIXTURE, 'utf8').replace('data-ve-presentation="true"', 'data-ve-presentation="true" data-presentation-slide-count="2"');
   const priorFilter = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
   process.env.ARTIFACTURE_DECK_REVIEW_STATES = 'slide-two--base,missing--state';
   const ctx = {
@@ -189,7 +189,7 @@ test('bounded recapture fails when any requested state id is stale or missing', 
 
 test('bounded recapture fails closed when a requested state has no paired context', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-unpaired-'));
-  const html = fs.readFileSync(FIXTURE, 'utf8');
+  const html = fs.readFileSync(FIXTURE, 'utf8').replace('data-ve-presentation="true"', 'data-ve-presentation="true" data-presentation-slide-count="2"');
   const priorFilter = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
   process.env.ARTIFACTURE_DECK_REVIEW_STATES = 'slide-two--base';
   const ctx = {
@@ -214,7 +214,7 @@ test('bounded recapture fails closed when a requested state has no paired contex
 
 test('bounded recapture rejects a drill or progressive state without its base', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-orphan-'));
-  const html = fs.readFileSync(FIXTURE, 'utf8');
+  const html = fs.readFileSync(FIXTURE, 'utf8').replace('data-ve-presentation="true"', 'data-ve-presentation="true" data-presentation-slide-count="2"');
   const priorFilter = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
   process.env.ARTIFACTURE_DECK_REVIEW_STATES = 'slide-two--drill--state-1-progressive-evidence';
   const ctx = {
@@ -239,7 +239,7 @@ test('bounded recapture rejects a drill or progressive state without its base', 
 
 test('browser stage can recapture one exact affected state with its base context', async () => {
   const screensDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-filter-'));
-  const html = fs.readFileSync(FIXTURE, 'utf8');
+  const html = fs.readFileSync(FIXTURE, 'utf8').replace('data-ve-presentation="true"', 'data-ve-presentation="true" data-presentation-slide-count="2"');
   const priorFilter = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
   process.env.ARTIFACTURE_DECK_REVIEW_STATES = 'slide-two--base,slide-two--drill--state-1-progressive-evidence';
   const ctx = {

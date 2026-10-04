@@ -1,6 +1,7 @@
 import { access, readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import { isAllowedBrowserRequest } from './network-policy.mjs';
 import { serveBrowserArtifact } from './browser-assets.mjs';
@@ -17,7 +18,9 @@ export async function launchChromium() {
 }
 
 function cacheDirForPlatform() {
-  if (process.env.PLAYWRIGHT_BROWSERS_PATH) return process.env.PLAYWRIGHT_BROWSERS_PATH;
+  const configured = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (configured === '0') return path.join(path.dirname(fileURLToPath(import.meta.resolve('playwright-core/package.json'))), '.local-browsers');
+  if (configured) return path.resolve(process.env.INIT_CWD || process.cwd(), configured);
   const home = homedir();
   switch (process.platform) {
     case 'darwin':
