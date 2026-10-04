@@ -1743,7 +1743,7 @@ function requestPresentationVerticalNavigation(
 export function PresentationDeck({
   title,
   eyebrow,
-  preset = 'lieflat',
+  preset = 'hairline',
   stageWidth = 1920,
   stageHeight = 1080,
   railAutoCollapseMs = 900,

@@ -22,6 +22,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 export const BUILTIN_PRESETS = new Set([
+  'hairline',
   'lieflat',
   'mono-color',
   'algebrica',
@@ -234,9 +235,6 @@ export function scopeTokensCss(css, name) {
   return `[data-ve-preset="${name}"] {\n${body}\n}`;
 }
 
-// Derived diagram fallbacks mirroring global.css's built-in
-// [data-ve-preset="custom"] block, emitted BEFORE the user tokens so an
-// explicit token in tokens.css always wins.
 const DERIVED_FALLBACKS = [
   '--ve-diagram-ink: var(--ve-heading)',
   '--ve-diagram-muted: var(--ve-muted)',
@@ -386,8 +384,9 @@ export function resolvePresetCssForExport(sourceCode, opts = {}) {
         `(searched: ${searched}${available.length ? `; available: ${available.join(', ')}` : ''}). ` +
         `Falling back to built-in "${DEFAULT_FALLBACK_PRESET}" tokens.`,
     );
-    const globalCss = fs.readFileSync(globalCssPath, 'utf8');
-    styles.push(builtinFallbackCss(name, globalCss));
+    const themesCssPath = path.join(path.dirname(globalCssPath), 'themes.css');
+    const fallbackCss = fs.readFileSync(fs.existsSync(themesCssPath) ? themesCssPath : globalCssPath, 'utf8');
+    styles.push(builtinFallbackCss(name, fallbackCss));
   }
   return { css: styles.length ? styles.join('\n') : null, warnings };
 }

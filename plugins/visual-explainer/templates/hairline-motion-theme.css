@@ -1,0 +1,71 @@
+/* Load visual-explainer-mdx/themes.css first. These aliases describe the same
+   roles; resolve them again at each owner so nested presets and brand tokens
+   do not retain an ancestor's already-computed custom properties. */
+:root,
+[data-ve-preset],
+[data-ve-appearance],
+[data-motion-theme],
+[data-ve-tone],
+.motion-stage {
+  --motion-paper: var(--ve-diagram-bg);
+  --motion-ink: var(--ve-diagram-ink);
+  --motion-secondary: var(--ve-diagram-muted);
+  --motion-guide: var(--ve-diagram-frame);
+  --motion-accent: var(--ve-accent);
+  --motion-display: var(--ve-font-display);
+  --motion-body: var(--ve-font-body);
+  --motion-stroke: var(--ve-illustration-stroke);
+  --motion-crease: var(--ve-illustration-detail-stroke);
+  --motion-active-stroke: var(--ve-illustration-active-stroke);
+}
+
+.motion-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--motion-paper);
+  color: var(--motion-ink);
+  font-family: var(--motion-body);
+}
+
+.motion-stage h1 {
+  margin: 0;
+  font-family: var(--motion-display);
+  font-weight: var(--ve-display-weight);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.motion-figure {
+  fill: none;
+  stroke: var(--motion-ink);
+  stroke-width: var(--motion-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.motion-solid {
+  fill: var(--motion-paper);
+}
+
+.motion-crease {
+  stroke: var(--motion-secondary);
+  stroke-width: var(--motion-crease);
+}
+
+.motion-guide {
+  stroke: var(--motion-guide);
+  stroke-width: var(--motion-crease);
+}
+
+.motion-active {
+  stroke: var(--motion-accent);
+  stroke-width: var(--motion-active-stroke);
+}
+
+.motion-dot {
+  fill: var(--motion-accent);
+  stroke: var(--motion-paper);
+  stroke-width: 3;
+}

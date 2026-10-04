@@ -1,6 +1,6 @@
 ---
 description: Generate an explainer video (MP4) via Hyperframes. Long-form or reel.
-argument-hint: "<topic or outline> [--style=long-form|reel] [--duration=Ns] [--voice=<name>] [--no-ask]"
+argument-hint: "<topic or outline> [--mode=<instructional-mode>] [--collection=<manifest.json> --episode=<id>] [--style=long-form|reel] [--duration=Ns] [--voice=<name>] [--no-ask]"
 ---
 
 # /generate-video
@@ -13,11 +13,27 @@ Rendering typically takes 30 seconds to 5 minutes, depending on duration and qua
 
 Write the composition in TSX, register a paused GSAP timeline synchronously on `window.__timelines["<id>"]`, and export static HTML:
 
+Use the [Hairline motion baseline](../references/motion-video-baseline.md) by default. Illustrations carry the explanation, with fine-line objects, consistent visual correspondence, and purposeful transformations. An explicit brand or requested look takes precedence. The templates below supply runtime mechanics; use the baseline for visual treatment.
+
 ```bash
 npm run ve:export-static -- <composition.tsx> --out ~/.agent/videos/<slug>/index.html
 ```
 
 Hyperframes renders `index.html`; revisions belong in TSX. Re-export before linting, validating, or rendering. Use `templates/hyperframes-*.html` for timing and GSAP examples. Hand-write final HTML only if React static export is blocked, and report the fallback.
+
+## Instructional modes and collections
+
+Mode describes the viewer's task. Style describes delivery format. Print the canonical purposes, required mode fields, and review questions with `npm run ve:video-collection -- modes`. Honor `--mode`; otherwise infer it from the request. Read [video-collections.md](../references/video-collections.md) for a multi-episode collection or any mode-specific brief.
+
+For `--collection`, validate the supplied manifest and select `--episode` by its semantic ID. Use its audience, terms, subjects, pinned claims, narration draft, and handoff. Review `SCRIPT.md` as a draft before committing to the story. Manifest validation does not approve a script or complete a video.
+
+Prefer the shared graphics route for new source-driven work: primitives support diagrams and posters, diagram scenes compose into slides, and complete slide scenes sequence into video. Generated collection compositions use `GraphicVideo` and require the bundled exporter:
+
+```bash
+npm run ve:graphic-video -- <composition.tsx> --out <video-project>/index.html
+```
+
+Use `ve:export-static` for legacy TSX compositions that already contain a self-contained browser timeline. It does not bundle the shared `GraphicVideo` runtime.
 
 ## Styles
 
@@ -30,7 +46,7 @@ Honor `--style` or the request; otherwise use long-form.
 - **Pacing:** Slide-paced, 10s average dwell per scene, 6–12 scenes
 - **Audience:** Team meetings, onboarding, LinkedIn, docs embeds
 - **Reference template:** `templates/hyperframes-longform.html`
-- **Animations:** Fade-ups, count-ups, cross-fades between scenes, optional shader transitions at major beat boundaries
+- **Animations:** Progressive illustration, coupled transformations, and deliberate holds. Preserve object identity across beats; follow installed motion-doctrine guidance at scene boundaries.
 - **Audio:** TTS narration over dwell scenes; optional soft bed
 
 ### `reel`
@@ -158,7 +174,10 @@ Report:
 |---|---|---|
 | `--style=<long-form\|reel>` | long-form | Honor an explicit reel request |
 | `--aspect=<9:16\|16:9>` | 16:9 (long-form), 9:16 (reel) | Only meaningful for `--style=reel` (long-form is always 16:9) |
-| `--duration=<Ns>` | 60 (long-form), 45 (reel) | Enforced ranges 30–180s |
+| `--duration=<Ns>` | 60 (long-form), 45 (reel) | Honor an explicit positive duration; typical ranges are guidance |
+| `--mode=<id>` | inferred from task | Registry and contract from `ve:video-collection -- modes` |
+| `--collection=<manifest.json>` | none | Validated collection knowledge and episode briefs |
+| `--episode=<id>` | none | Required when selecting an episode from a collection |
 | `--voice=<name>` | `af_nova` | Hyperframes TTS voice |
 | `--no-narration` | off | Skip TTS; silent video |
 | `--no-captions` | off | Reel only; default is captions on |
