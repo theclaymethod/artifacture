@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFile, readdir, mkdir, writeFile, lstat } from 'node:fs/promises';
 import path from 'node:path';
-import { gzipSync } from 'node:zlib';
+import { gzipSync, gunzipSync } from 'node:zlib';
 
 const root = path.resolve(import.meta.dirname, '..');
 const output = 'plugins/visual-explainer/assets/runtime.json.gz';
@@ -35,10 +35,11 @@ if (process.argv.slice(2).some(argument => argument !== '--check') || process.ar
 for (const relative of roots) await collect(relative);
 for (const entry of (await readdir(path.join(root, 'docs'))).sort()) if (entry.endsWith('.md')) await collect(`docs/${entry}`);
 files.sort((a, b) => a.path.localeCompare(b.path, 'en'));
-const archive = gzipSync(JSON.stringify({ version: 1, files }), { level: 9 });
+const payload = Buffer.from(JSON.stringify({ version: 1, files }));
+const archive = gzipSync(payload, { level: 9 });
 if (process.argv.includes('--check')) {
   const current = await readFile(path.join(root, output)).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
-  if (!current?.equals(archive)) throw new Error('The bundled skill runtime is stale. Run npm run build:skill-runtime after editing runtime sources.');
+  if (!current || !gunzipSync(current).equals(payload)) throw new Error('The bundled skill runtime is stale. Run npm run build:skill-runtime after editing runtime sources.');
 } else {
   await mkdir(path.dirname(path.join(root, output)), { recursive: true });
   await writeFile(path.join(root, output), archive);
