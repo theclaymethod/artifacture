@@ -20,6 +20,7 @@
  * Run: npm run ve:eval-presentation   (CI: evals job, after ve:eval)
  */
 import { spawnSync } from 'node:child_process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -33,16 +34,46 @@ const SECOND_PRESET = 'terminal';
 
 const results = [];
 const consoleErrors = [];
+const cases = [];
+const caseErrors = new AsyncLocalStorage();
 
 function record(group, id, run) {
-  return (async () => {
+  cases.push({ group, id, run });
+}
+
+function errorDetail(error) {
+  return error instanceof AggregateError
+    ? error.errors.map(errorDetail).join('; ')
+    : error instanceof Error ? error.message : String(error);
+}
+
+async function executeCase(index) {
+  const { group, id, run } = cases[index];
+  const errors = [];
+  await caseErrors.run(errors, async () => {
     try {
       await run();
-      results.push({ group, id, status: 'pass' });
+      results[index] = { group, id, status: 'pass' };
     } catch (error) {
-      results.push({ group, id, status: 'fail', detail: error instanceof Error ? error.message : String(error) });
+      results[index] = { group, id, status: 'fail', detail: errorDetail(error) };
     }
-  })();
+  });
+  return errors;
+}
+
+async function runCases() {
+  const terminal = cases.length - 1;
+  const errors = [];
+  let next = 0;
+  async function worker() {
+    while (next < terminal) {
+      const index = next++;
+      errors[index] = await executeCase(index);
+    }
+  }
+  await Promise.all([worker(), worker()]);
+  consoleErrors.push(...errors.flat());
+  await executeCase(terminal);
 }
 
 function assert(condition, message) {
@@ -82,20 +113,29 @@ function exportDemo(sourcePath, outPath) {
 }
 
 async function withPage(browser, { viewport = { width: 1440, height: 900 }, reducedMotion = 'no-preference', url }, fn) {
+  const errors = caseErrors.getStore() || consoleErrors;
   const lease = await browser.newPage({ viewport, reducedMotion, artifact: { filePath: fileURLToPath(url) } });
   const { page } = lease;
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error') errors.push(message.text());
   });
-  page.on('pageerror', (error) => consoleErrors.push(String(error)));
+  page.on('pageerror', (error) => errors.push(String(error)));
+  let callbackError;
   try {
     await page.goto(lease.url, { waitUntil: 'load' });
     const settlement = await settleBrowserArtifact(page);
     if (settlement.mermaidError) throw new Error(settlement.mermaidError);
     await page.waitForSelector('[data-stage]', { timeout: 10_000 });
     return await fn(page);
+  } catch (error) {
+    callbackError = error;
+    throw error;
   } finally {
-    await lease.close();
+    try { await lease.close(); }
+    catch (cleanupError) {
+      if (callbackError) throw new AggregateError([callbackError, cleanupError]);
+      throw cleanupError;
+    }
   }
 }
 
@@ -665,9 +705,15 @@ async function main() {
     await record('interaction', 'no-console-errors', async () => {
       assert(consoleErrors.length === 0, `console errors during evals:\n${consoleErrors.join('\n')}`);
     });
+    await runCases();
   } finally {
-    await browser.close();
-    rmSync(workDir, { recursive: true, force: true });
+    try { await browser.close(); }
+    catch (cleanupError) {
+      const failures = results.filter((row) => row.status !== 'pass').map((row) => new Error(`${row.group}/${row.id}: ${row.detail}`));
+      throw new AggregateError([...failures, cleanupError], [...failures, cleanupError].map(errorDetail).join('; '));
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
   }
 
   console.log('eval_id,group,status');
