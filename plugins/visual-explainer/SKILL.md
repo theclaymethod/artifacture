@@ -5,7 +5,7 @@ license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
   maintainer: Clayton Kim
-  version: "0.8.0"
+  version: "0.8.1"
 ---
 
 # Visual Explainer
