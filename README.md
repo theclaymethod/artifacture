@@ -6,7 +6,7 @@ Artifacture gives coding agents a shared library for pages, slide decks, magazin
 
 The agent spends tokens on your explanation and data. Repeated HTML, CSS, chart geometry, and presentation controls live in the library.
 
-![A repair story told through countable units and rung bars](docs/img/examples/charts.png)
+![A repair story told through countable units and rung bars](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/charts.png)
 
 ## One library, several formats
 
@@ -14,15 +14,15 @@ Compose charts, diagrams, code, and text inside the format your reader needs. Th
 
 | Reading page | Slide deck |
 |---|---|
-| [![A long-form reading page with diagrams and supporting detail](docs/img/examples/page.png)](docs/img/examples/page.png) | [![A slide deck with large type and a focused argument](docs/img/examples/deck.png)](docs/img/examples/deck.png) |
+| [![A long-form reading page with diagrams and supporting detail](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/page.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/page.png) | [![A slide deck with large type and a focused argument](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/deck.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/deck.png) |
 
 | Horizontal magazine | Presentation with drill-down details |
 |---|---|
-| [![An editorial magazine spread](docs/img/examples/magazine.png)](docs/img/examples/magazine.png) | [![A fixed-stage presentation with supporting detail](docs/img/examples/presentation-deck.png)](docs/img/examples/presentation-deck.png) |
+| [![An editorial magazine spread](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/magazine.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/magazine.png) | [![A fixed-stage presentation with supporting detail](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/presentation-deck.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/presentation-deck.png) |
 
 | Poster | Interactive explanation |
 |---|---|
-| [![A typographic poster](docs/img/examples/poster.png)](docs/img/examples/poster.png) | [![An interactive explanation with answer controls](docs/img/examples/quiz.png)](docs/img/examples/quiz.png) |
+| [![A typographic poster](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/poster.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/poster.png) | [![An interactive explanation with answer controls](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/quiz.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/quiz.png) |
 
 <a id="start"></a>
 
@@ -61,7 +61,7 @@ cd my-explainer
 npm run dev
 ```
 
-Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](docs/workspaces.md) for the source ownership model and [installation](docs/installation.md) for other agent harnesses.
+Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](https://github.com/theclaymethod/artifacture/blob/main/docs/workspaces.md) for the source ownership model and [installation](https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md) for other agent harnesses.
 
 Discover available blocks before authoring:
 
@@ -71,15 +71,15 @@ npx artifacture list --query focus --json
 
 The machine-readable index includes public imports, capabilities, supported
 formats, supported variants, constraints, examples, dependencies, and copy commands. It comes from
-the same registry that owns `add`. The copied code belongs to the workspace. The [component catalog](docs/component-catalog.md)
+the same registry that owns `add`. The copied code belongs to the workspace. The [component catalog](https://github.com/theclaymethod/artifacture/blob/main/docs/component-catalog.md)
 covers 50 copyable blocks and links the interactive preview source.
-[Component references](docs/component-references.md) guide further math, code,
-diagram, and chart blocks; [candidate research](docs/research/primitive-candidates-2026-10-04.md)
+[Component references](https://github.com/theclaymethod/artifacture/blob/main/docs/component-references.md) guide further math, code,
+diagram, and chart blocks; [candidate research](https://github.com/theclaymethod/artifacture/blob/main/docs/research/primitive-candidates-2026-10-04.md)
 records additions that still need prototypes.
 
-Copy the [dependency DAG](docs/dag.md) with `npx artifacture add dag`. Its compact graph supports parent/child and full-lineage focus, keyboard navigation, and the same scene geometry for posters, slides and authored animation.
+Copy the [dependency DAG](https://github.com/theclaymethod/artifacture/blob/main/docs/dag.md) with `npx artifacture add dag`. Its compact graph supports parent/child and full-lineage focus, keyboard navigation, and the same scene geometry for posters, slides and authored animation.
 
-[Manim and Psychopomp](docs/native-engines.md) are optional native engines:
+[Manim and Psychopomp](https://github.com/theclaymethod/artifacture/blob/main/docs/native-engines.md) are optional native engines:
 
 ```bash
 npx artifacture engine setup manim
@@ -109,7 +109,7 @@ A chart is a title and a data specification:
 }
 ```
 
-The renderer supplies the marks, labels, responsive layout, and exact-data table. Export the [example JSON](examples/visual-explainer-mdx/lieflat-chart.json):
+The renderer supplies the marks, labels, responsive layout, and exact-data table. Export the [example JSON](https://github.com/theclaymethod/artifacture/blob/main/examples/visual-explainer-mdx/lieflat-chart.json):
 
 ```bash
 npm run ve:chart -- examples/visual-explainer-mdx/lieflat-chart.json --out dist/chart.html
@@ -136,15 +136,15 @@ Token efficiency comes from this division of work and task-specific guidance. Ex
 
 ### Data stories
 
-Lieflat is the default chart language. Its five forms—`unit-field`, `rung-bars`, `barcode`, `bubble-matrix`, and `threads`—show counts, comparisons, dates, intersections, and individual paths. All five views in the [repair story](examples/visual-explainer-mdx/data-charts.mdx) use the same 72 explicitly illustrative records.
+Lieflat is the default chart language. Its five forms—`unit-field`, `rung-bars`, `barcode`, `bubble-matrix`, and `threads`—show counts, comparisons, dates, intersections, and individual paths. All five views in the [repair story](https://github.com/theclaymethod/artifacture/blob/main/examples/visual-explainer-mdx/data-charts.mdx) use the same 72 explicitly illustrative records.
 
-![Daily arrivals in June, plotted by date with the busiest day annotated](docs/img/examples/chart-barcode.png)
+![Daily arrivals in June, plotted by date with the busiest day annotated](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/chart-barcode.png)
 
-![A bubble matrix compares cable, switch, battery, and circuit faults across four device types](docs/img/examples/chart-bubble-matrix.png)
+![A bubble matrix compares cable, switch, battery, and circuit faults across four device types](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/chart-bubble-matrix.png)
 
-![Individual threads connect each device to its fault and repair outcome](docs/img/examples/chart-threads.png)
+![Individual threads connect each device to its fault and repair outcome](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/chart-threads.png)
 
-Use the [chart guide](plugins/visual-explainer/references/charts.md) for data contracts and authoring examples.
+Use the [chart guide](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/charts.md) for data contracts and authoring examples.
 
 ### Diagrams and walkthroughs
 
@@ -152,15 +152,15 @@ Use the [chart guide](plugins/visual-explainer/references/charts.md) for data co
 
 `DiagramWalkthrough` reveals authored steps along the graph’s routes. Playback starts paused, with manual stepping available on mobile and with reduced motion.
 
-![A cache-miss walkthrough with playback and step controls](docs/img/examples/animated-diagram.png)
+![A cache-miss walkthrough with playback and step controls](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/animated-diagram.png)
 
-[Walkthrough source](examples/visual-explainer-mdx/animated-diagram.mdx) · [Walkthrough API](plugins/visual-explainer/references/animated-diagrams.md)
+[Walkthrough source](https://github.com/theclaymethod/artifacture/blob/main/examples/visual-explainer-mdx/animated-diagram.mdx) · [Walkthrough API](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/animated-diagrams.md)
 
 <a id="archify"></a>
 
 For larger system maps, Artifacture integrates a pinned Archify runtime with typed schemas and validation.
 
-![Artifacture’s export pipeline rendered as an Archify architecture diagram](docs/img/examples/archify.png)
+![Artifacture’s export pipeline rendered as an Archify architecture diagram](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/archify.png)
 
 ```bash
 npm run ve:archify -- setup
@@ -173,21 +173,21 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 ## Shared visual defaults
 
-The [default explainer theme](plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
+The [default explainer theme](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
 
-Typography, spacing, and colors come from [shared theme tokens](docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
+Typography, spacing, and colors come from [shared theme tokens](https://github.com/theclaymethod/artifacture/blob/main/docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
 
 | Algebrica | Mono Color |
 |---|---|
-| [![Algebrica uses serif text and geometry to explain vector projection](docs/img/examples/algebrica.png)](docs/img/examples/algebrica.png) | [![Mono Color combines an opened mouse photograph with asymmetric typography](docs/img/examples/mono-color.png)](docs/img/examples/mono-color.png) |
+| [![Algebrica uses serif text and geometry to explain vector projection](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/algebrica.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/algebrica.png) | [![Mono Color combines an opened mouse photograph with asymmetric typography](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/mono-color.png)](https://raw.githubusercontent.com/theclaymethod/artifacture/main/docs/img/examples/mono-color.png) |
 
-Set `preset` on `ExplainerShell`, `SlideDeck`, `PresentationDeck`, or `PosterCanvas`. You can also [supply a design system](docs/design-systems.md).
+Set `preset` on `ExplainerShell`, `SlideDeck`, `PresentationDeck`, or `PosterCanvas`. You can also [supply a design system](https://github.com/theclaymethod/artifacture/blob/main/docs/design-systems.md).
 
-The complete pinned [Hairline skill and interactive runtime](plugins/visual-explainer/vendor/hairline-create/SKILL.md) are bundled unchanged with the upstream MIT license. Strict pointer figures keep the fixed kernel and bench. Reusable video scenes use deterministic authored time and [motion choreography inspired by 3Blue1Brown](plugins/visual-explainer/references/motion-video-baseline.md). The [editable reference composition](examples/visual-explainer-mdx/hairline-motion-baseline.tsx) traces a sine wave from a rotating point with original geometry and animation.
+The complete pinned [Hairline skill and interactive runtime](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/vendor/hairline-create/SKILL.md) are bundled unchanged with the upstream MIT license. Strict pointer figures keep the fixed kernel and bench. Reusable video scenes use deterministic authored time and [motion choreography inspired by 3Blue1Brown](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/motion-video-baseline.md). The [editable reference composition](https://github.com/theclaymethod/artifacture/blob/main/examples/visual-explainer-mdx/hairline-motion-baseline.tsx) traces a sine wave from a rotating point with original geometry and animation.
 
 ### Videos that work together
 
-The [shared graphics architecture](docs/graphics-and-video.md) supports diagrams and posters. Diagram scenes compose into slides, and complete slide scenes sequence into video. Collections add instructional modes, canonical subjects and terms, pinned evidence, and episode handoffs. Start with the [collection guide](docs/video-collections.md), then [iterate on the script and storyboard](docs/video-script-iteration.md). Compare [animation engine options](docs/animation-engines.md) before choosing a native renderer.
+The [shared graphics architecture](https://github.com/theclaymethod/artifacture/blob/main/docs/graphics-and-video.md) supports diagrams and posters. Diagram scenes compose into slides, and complete slide scenes sequence into video. Collections add instructional modes, canonical subjects and terms, pinned evidence, and episode handoffs. Start with the [collection guide](https://github.com/theclaymethod/artifacture/blob/main/docs/video-collections.md), then [iterate on the script and storyboard](https://github.com/theclaymethod/artifacture/blob/main/docs/video-script-iteration.md). Compare [animation engine options](https://github.com/theclaymethod/artifacture/blob/main/docs/animation-engines.md) before choosing a native renderer.
 
 `ve:graphic-video` exports HTML plus a local runtime JavaScript file. Keep them together. Canonical web fonts require network access in the raw preview; HyperFrames compile caches and embeds them. Collection scaffolding produces an authoring package. Rendered checks and narrative review determine whether a video is complete.
 
@@ -199,17 +199,17 @@ Keep the MDX, TSX, or JSON as the editable source. Share the exported HTML. Brow
 npm run ve:verify -- dist/charts.html --json dist/charts.report.json --screens dist/charts-screens
 ```
 
-Both required review stages must pass before an artifact is verified. Make revisions in the source and export again. See [Verification](plugins/visual-explainer/references/verification.md) for the full process.
+Both required review stages must pass before an artifact is verified. Make revisions in the source and export again. See [Verification](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/verification.md) for the full process.
 
 <a id="examples"></a>
 
-[Editable examples](examples/README.md) · [Templates](plugins/visual-explainer/templates/README.md) · [Presentation guide](docs/presentation-deck.md) · [Contributing](CONTRIBUTING.md)
+[Editable examples](https://github.com/theclaymethod/artifacture/blob/main/examples/README.md) · [Templates](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/templates/README.md) · [Presentation guide](https://github.com/theclaymethod/artifacture/blob/main/docs/presentation-deck.md) · [Contributing](https://github.com/theclaymethod/artifacture/blob/main/CONTRIBUTING.md)
 
 ## Credits and license
 
 MIT. Artifacture began as a fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer).
 
-Visual references include [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), [Mono Color](https://github.com/yanliudesign/mono-color-skill), [PR Lens](https://github.com/coldteadotai/pr-lens), [3Blue1Brown](https://www.3blue1brown.com/), and [Pierrick Calvez's typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). [Hairline](https://github.com/lucasmarkes/hairline) is a bundled, unchanged MIT skill and interactive runtime. [Archify](https://github.com/tt-a1i/archify) is an integrated external runtime. Reference images and noncommercial source implementations are not bundled. See [provenance and licenses](tools/visual-sources.json).
+Visual references include [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), [Mono Color](https://github.com/yanliudesign/mono-color-skill), [PR Lens](https://github.com/coldteadotai/pr-lens), [3Blue1Brown](https://www.3blue1brown.com/), and [Pierrick Calvez's typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). [Hairline](https://github.com/lucasmarkes/hairline) is a bundled, unchanged MIT skill and interactive runtime. [Archify](https://github.com/tt-a1i/archify) is an integrated external runtime. Reference images and noncommercial source implementations are not bundled. See [provenance and licenses](https://github.com/theclaymethod/artifacture/blob/main/tools/visual-sources.json).
 
 ## Verify changes
 
