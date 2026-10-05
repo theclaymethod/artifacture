@@ -1,6 +1,6 @@
 {
   "name": "artifacture",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "Charts, diagrams, and presentations from editable source, exported as standalone HTML.",
   "keywords": [
@@ -74,5 +74,9 @@
     "@types/three": "0.186.0",
     "oxlint": "^1.79.0",
     "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theclaymethod/artifacture.git"
   }
 }

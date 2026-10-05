@@ -13,7 +13,7 @@
       "name": "visual-explainer",
       "source": "./plugins/visual-explainer",
       "description": "Create charts, diagrams, reviews, and presentations as standalone HTML.",
-      "version": "0.8.0",
+      "version": "0.8.1",
       "author": {
         "name": "Clayton Kim"
       },
