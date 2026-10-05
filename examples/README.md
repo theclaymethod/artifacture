@@ -35,14 +35,50 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 | Source | What to learn |
 |---|---|
-| [preset-gallery.mdx](visual-explainer-mdx/preset-gallery.mdx) | Compare Lieflat, Algebrica, and Mono Color |
+| [preset-gallery.mdx](visual-explainer-mdx/preset-gallery.mdx) | Compare Hairline, 3b1b, Algebrica, and Mono Color |
+| [showcase.tsx](visual-explainer-mdx/showcase.tsx) | Explore an agent workflow, calculated attention, a zero-value code fix, and a circle generating a wave |
 | [preset-artifact.tsx](visual-explainer-mdx/preset-artifact.tsx) | Theme one queue explanation with `?preset=algebrica` |
 | [presentation-deck.tsx](visual-explainer-mdx/presentation-deck.tsx) | Use a fixed stage with supporting detail |
 | [slide-deck.mdx](visual-explainer-mdx/slide-deck.mdx) | Build a responsive reader deck |
 | [magazine-deck.mdx](visual-explainer-mdx/magazine-deck.mdx) | Arrange a horizontal reading sequence |
 | [poster-card.tsx](visual-explainer-mdx/poster-card.tsx) | Stack a Mono Color poster on narrow screens |
-| [video-longform.tsx](visual-explainer-mdx/video-longform.tsx) | Export a static video composition from React |
+| [video-longform.tsx](visual-explainer-mdx/video-longform.tsx) | Reuse three semantic diagrams in a 24-second shared video sequence |
 
 [Request diagram](../docs/img/examples/diagram.png) · [Walkthrough](../docs/img/examples/animated-diagram.png) · [Themes](../docs/img/examples/presets.png) · [Poster](../docs/img/examples/poster.png) · [Presentation](../docs/img/examples/presentation-deck.png) · [Archify](../docs/img/examples/archify.png) · [Algebrica](../docs/img/examples/algebrica.png) · [Mono Color](../docs/img/examples/mono-color.png)
 
+Export shared video sequences with the bundled runtime:
+
+```bash
+npm run ve:graphic-video -- examples/visual-explainer-mdx/video-longform.tsx --out dist/video/index.html
+```
+
+Keep `index.html` beside its content-hashed JavaScript asset. The example holds each beat for eight seconds and uses hard cuts at 8s and 16s instead of its earlier 0.3s fades. `ve:export-static` remains useful for SSR content checks and source-owned documents; it renders this example's first pose without playback.
+
 For standalone HTML, use the [template guide](../plugins/visual-explainer/templates/README.md). Complete [verification](../plugins/visual-explainer/references/verification.md) before sharing.
+
+## Component catalog
+
+[component-catalog.tsx](visual-explainer-mdx/component-catalog.tsx) previews the actual
+copyable diagrams, scene builders, charts, code views, and interactions. Switch
+Hairline, 3b1b, Mono Color, and Algebrica; seek authored time directly.
+
+```bash
+npm run ve:export -- examples/visual-explainer-mdx/component-catalog.tsx --out dist/components.html
+```
+
+For composed examples, export [showcase.tsx](visual-explainer-mdx/showcase.tsx).
+[showcase-scenes.ts](visual-explainer-mdx/showcase-scenes.ts) combines the existing
+graphics, Hairline, sequence, grid, plot, authored-value, and motion APIs. Each
+example samples explicit time, supports direct seeking, and holds its final pose.
+The attention example calculates a toy softmax; it does not capture a trained
+model's attention.
+
+```bash
+npm run ve:export -- examples/visual-explainer-mdx/showcase.tsx --out dist/showcase/index.html
+```
+
+The optional video gallery reads `clips/clips.json` beside the exported page.
+Supply an array with `id`, `title`, `description`, `file`, `poster`, `captions`, and
+`duration` fields; media paths are relative to its `clips/` directory. The public preview uses
+four narrated excerpts from the rendered Artifacture films. Those media outputs
+are separate from the reusable source examples.

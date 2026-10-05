@@ -13,22 +13,22 @@
     color-scheme: light dark;
     --font-body: 'Inter', system-ui, sans-serif;
     --font-mono: 'Geist Mono', ui-monospace, monospace;
-    --bg: #F0EFEB; --surface: #F8F7F3; --surface2: #E8E7E1; --surface-elevated: #F8F7F3;
-    --text: #1C1C1A; --text-dim: #62615C; --border: #CECDC6; --border-bright: #AAA9A2;
-    --accent: #1C1C1A; --accent-dim: #E6E5DE; --primary: #1C1C1A; --primary-dim: #E6E5DE;
-    --secondary: #62615C; --tertiary: #62615C; --danger: #a33428;
-    --green: #356343; --green-dim: #E6E5DE; --red: #a33428; --red-dim: #E6E5DE;
-    --orange: #80591b; --orange-dim: #E6E5DE; --blue: #1C1C1A; --blue-dim: #E6E5DE;
-    --code-bg: #1C1C1A; --code-text: #F0EFEB;
+    --bg: #ffffff; --surface: #ffffff; --surface2: #f5f5f5; --surface-elevated: #ffffff;
+    --text: #202127; --text-dim: #5f626a; --border: #d7d9df; --border-bright: #b7b9c3;
+    --accent: #079fba; --accent-dim: #ecf7f9; --primary: #079fba; --primary-dim: #ecf7f9;
+    --secondary: #5f626a; --tertiary: #5f626a; --danger: #202127;
+    --green: #202127; --green-dim: #ecf7f9; --red: #202127; --red-dim: #ecf7f9;
+    --orange: #202127; --orange-dim: #ecf7f9; --blue: #079fba; --blue-dim: #ecf7f9;
+    --code-bg: #202127; --code-text: #ffffff;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1C1C1A; --surface: #252522; --surface2: #30302C; --surface-elevated: #252522;
-      --text: #F0EFEB; --text-dim: #BCBBB3; --border: #54544D; --border-bright: #8F8E88;
-      --accent: #F0EFEB; --accent-dim: #33332F; --primary: #F0EFEB; --primary-dim: #33332F;
-      --secondary: #BCBBB3; --tertiary: #BCBBB3; --danger: #ef9f92;
-      --green: #9cc9a6; --red: #ef9f92; --orange: #dfbd81; --blue: #F0EFEB;
-      --green-dim: #33332F; --red-dim: #33332F; --orange-dim: #33332F; --blue-dim: #33332F;
+      --bg: #000000; --surface: #000000; --surface2: #101114; --surface-elevated: #000000;
+      --text: #ffffff; --text-dim: #b6bac4; --border: #747884; --border-bright: #747884;
+      --accent: #079fba; --accent-dim: #101e22; --primary: #079fba; --primary-dim: #101e22;
+      --secondary: #b6bac4; --tertiary: #b6bac4; --danger: #ffffff;
+      --green: #ffffff; --red: #ffffff; --orange: #ffffff; --blue: #079fba;
+      --green-dim: #101e22; --red-dim: #101e22; --orange-dim: #101e22; --blue-dim: #101e22;
     }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -142,7 +142,7 @@
 
   }
 
-  .slide--title .slide__display { color: var(--accent); }
+  .slide--title .slide__display { color: var(--text); }
 
   .slide--divider { display: flex; justify-content: center; }
 
@@ -241,8 +241,8 @@
   }
   .slide--diagram .mermaid .node rect,
   .slide--diagram .mermaid .node circle,
-  .slide--diagram .mermaid .node polygon { stroke-width: 2px; }
-  .slide--diagram .mermaid .edge-pattern-solid { stroke-width: 2px; }
+  .slide--diagram .mermaid .node polygon { stroke-width: 0.85px; }
+  .slide--diagram .mermaid .edge-pattern-solid { stroke-width: 0.85px; }
 
   .slide--table { padding: clamp(24px, 4vh, 48px) clamp(24px, 4vw, 60px); }
 
@@ -301,7 +301,7 @@
     font-family: var(--font-mono);
     font-size: 14px; font-weight: 600;
     padding: 4px 12px; border-radius: 4px;
-    background: var(--accent); color: var(--bg);
+    background: var(--accent); color: #07191d;
   }
 
   .slide__code-block pre { margin: 0; overflow-x: auto; }
@@ -572,9 +572,9 @@ graph LR
       flowchart: { useMaxWidth: false, htmlLabels: false, nodeSpacing: 48, rankSpacing: 64, padding: 20 },
     themeVariables: {
       fontFamily: "'Inter', system-ui, sans-serif", fontSize: '20px',
-      primaryColor: isDark ? '#252522' : '#F8F7F3', primaryTextColor: isDark ? '#F0EFEB' : '#1C1C1A',
-      primaryBorderColor: isDark ? '#8F8E88' : '#62615C', lineColor: isDark ? '#BCBBB3' : '#62615C',
-      secondaryColor: isDark ? '#252522' : '#F8F7F3', tertiaryColor: isDark ? '#30302C' : '#E8E7E1'
+      primaryColor: isDark ? '#000000' : '#ffffff', primaryTextColor: isDark ? '#ffffff' : '#202127',
+      primaryBorderColor: isDark ? '#747884' : '#5f626a', lineColor: isDark ? '#b6bac4' : '#5f626a',
+      secondaryColor: isDark ? '#000000' : '#ffffff', tertiaryColor: isDark ? '#101114' : '#f5f5f5'
     }
   });
 

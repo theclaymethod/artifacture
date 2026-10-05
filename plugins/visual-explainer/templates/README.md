@@ -1,6 +1,6 @@
 # Templates
 
-Use the MDX pipeline for new pages, chart JSON for standalone charts, and these starters for custom HTML. They show layout and export mechanics; replace the subject, copy, and illustrative data together. Lieflat is the default: Inter, paper gray, charcoal, and readable data marks.
+Use the MDX pipeline for new pages, chart JSON for standalone charts, and these starters for custom HTML. They show layout and export mechanics; replace the subject, copy, and illustrative data together. Hairline is the default, with 3b1b for mathematical mechanisms. Both use Lieflat data encodings and one contrasting accent. Read [the default explainer theme](../references/default-explainer-theme.md) for the visual contract; these older starters do not redefine it.
 
 | Starter | Use |
 | --- | --- |
@@ -8,13 +8,12 @@ Use the MDX pipeline for new pages, chart JSON for standalone charts, and these 
 | [svg-diagram-starter.html](svg-diagram-starter.html) | Explicit SVG geometry, readable labels, and accessible descriptions |
 | [mermaid-flowchart.html](mermaid-flowchart.html) | ELK layout with pan, zoom, and a readable initial scale |
 | [data-table.html](data-table.html) | Requirement comparisons with a locally scrolling table |
-| [slide-deck.html](slide-deck.html) | Paper-and-charcoal slides with keyboard navigation |
+| [slide-deck.html](slide-deck.html) | Hairline slides with keyboard navigation |
 | [algebrica.html](algebrica.html) | Warm mathematical reading layout, serif headings, and precise SVG |
 | [mono-color.html](mono-color.html) | Image-led two-ink editorial composition with editable type |
 | [mono-industrial.html](mono-industrial.html) | Optional restrained technical report |
 | [mono-industrial-slides.html](mono-industrial-slides.html) | Optional technical slides |
 | [mono-industrial-magazine.html](mono-industrial-magazine.html) | Optional horizontally paged technical story |
-| [nothing-magazine.html](nothing-magazine.html) | Optional cool monochrome magazine |
 | [mono-industrial-poster.tsx](mono-industrial-poster.tsx) | Fixed 1600 × 1000 poster source |
 | [hyperframes-longform.html](hyperframes-longform.html) | 1920 × 1080, 60-second narrated explainer |
 | [hyperframes-reel-landscape.html](hyperframes-reel-landscape.html) | 1920 × 1080, 32-second video |

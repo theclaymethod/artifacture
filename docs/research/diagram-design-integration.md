@@ -1,6 +1,11 @@
 # Diagram Design integration receipt
 
-Research snapshot only; no integration is implemented here.
+This receipt records the historical 2026-08-14 research snapshot. The 2026-10-04
+[component catalog](../component-catalog.md) adds original sequence, state, and
+containment scene builders after inspecting the newer 42-reference source pin;
+it does not import the upstream renderer or skins.
+
+The palette recommendations below are historical. As of 2026-10-04, Hairline is the default; 3b1b, Mono Color, and Algebrica are the primary alternatives. Editorial is retired. Follow [shared themes](../shared-themes.md) when integrating geometry or motion from this research, rather than importing an upstream skin.
 
 ## Source pin and confidence
 

@@ -74,10 +74,10 @@ export function DataChart({ data, title, kind = 'bar', description, valueLabel, 
             <desc id={`${id}-description`}>{summary}</desc>
             {isLine ? (
               <>
-                <line stroke={rule} x1={plotLeft} x2={plotRight} y1={zero} y2={zero} />
+                <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1={plotLeft} x2={plotRight} y1={zero} y2={zero} />
                 <text fill={muted} fontSize="14" textAnchor="end" x={plotLeft - 12} y={zero + 5}>0</text>
                 {valueLabel ? <text fill={muted} fontSize="14" x={plotLeft} y="20">{valueLabel}</text> : null}
-                {paths.map((path, index) => <path d={path} fill="none" key={index} stroke={ink} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />)}
+                {paths.map((path, index) => <path d={path} fill="none" key={index} stroke={ink} strokeLinecap="round" strokeLinejoin="round" strokeWidth="var(--ve-chart-stroke)" />)}
                 {measured.map((datum, index) => (
                   <g key={index}>
                     <title>{`${datum.label}: ${datum.display}`}</title>
@@ -91,7 +91,7 @@ export function DataChart({ data, title, kind = 'bar', description, valueLabel, 
               </>
             ) : (
               <>
-                <line stroke={rule} x1={zero} x2={zero} y1="32" y2={height - 20} />
+                <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1={zero} x2={zero} y1="32" y2={height - 20} />
                 <text fill={muted} fontSize="14" textAnchor="middle" x={zero} y="20">0</text>
                 {valueLabel ? <text fill={muted} fontSize="14" textAnchor="end" x={width - 8} y="20">{valueLabel}</text> : null}
                 {measured.map((datum, index) => {
@@ -106,7 +106,7 @@ export function DataChart({ data, title, kind = 'bar', description, valueLabel, 
                       {datum.numeric !== null ? kind === 'dot' ? (
                         <circle cx={valueX} cy={cy} fill={ink} r="5" />
                       ) : datum.numeric === 0 ? (
-                        <line stroke={ink} strokeWidth="2" x1={zero} x2={zero} y1={cy - 6} y2={cy + 6} />
+                        <line stroke={ink} strokeWidth="var(--ve-chart-stroke)" x1={zero} x2={zero} y1={cy - 6} y2={cy + 6} />
                       ) : <rect fill={ink} height="12" width={Math.abs(valueX - zero)} x={Math.min(zero, valueX)} y={cy - 6} /> : null}
                       <text fill={datum.numeric === null ? muted : ink} fontSize="14" style={{ fontVariantNumeric: 'tabular-nums' }} textAnchor="end" x={width - 8} y={cy + 5}>{datum.display}</text>
                     </g>
@@ -154,8 +154,8 @@ function NarrowChart({ measured, kind, fraction, id, summary, valueLabel }: {
             <span aria-hidden="true" className="ve-chart-line-zero" style={{ top: `${lineY(0) / 212 * 100}%` }}>0</span>
             <svg aria-describedby={`${id}-narrow-description`} aria-labelledby={`${id}-title`} role="img" viewBox="0 0 320 212" xmlns="http://www.w3.org/2000/svg">
               <desc id={`${id}-narrow-description`}>{summary} Categories run left to right in the order listed below.</desc>
-              <line stroke={rule} x1="32" x2="304" y1={lineY(0)} y2={lineY(0)} />
-              {paths.map((segment, index) => <path d={segment} fill="none" key={index} stroke={ink} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />)}
+              <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1="32" x2="304" y1={lineY(0)} y2={lineY(0)} />
+              {paths.map((segment, index) => <path d={segment} fill="none" key={index} stroke={ink} strokeLinecap="round" strokeLinejoin="round" strokeWidth="var(--ve-chart-stroke)" />)}
               {measured.map((datum, index) => datum.numeric === null ? null : <circle cx={lineX(index)} cy={lineY(datum.numeric)} fill={ink} key={index} r="4"><title>{`${datum.label}: ${datum.display}`}</title></circle>)}
             </svg>
           </div>

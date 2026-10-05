@@ -12,25 +12,25 @@
 <style>
   :root {
     color-scheme: light dark;
-    --paper: #F0EFEB;
-    --surface: #F8F7F3;
-    --ink: #1C1C1A;
-    --muted: #62615C;
-    --rule: #AAA9A2;
-    --accent: #1C1C1A;
-    --accent-tint: #E6E5DE;
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --ink: #202127;
+    --muted: #5f626a;
+    --rule: #b7b9c3;
+    --accent: #079fba;
+    --accent-tint: #ecf7f9;
     --font-body: "Inter", system-ui, sans-serif;
     --font-display: "Inter", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #1C1C1A;
-      --surface: #252522;
-      --ink: #F0EFEB;
-      --muted: #BCBBB3;
-      --rule: #8F8E88;
-      --accent: #F0EFEB;
-      --accent-tint: #33332F;
+      --paper: #000000;
+      --surface: #000000;
+      --ink: #ffffff;
+      --muted: #b6bac4;
+      --rule: #747884;
+      --accent: #079fba;
+      --accent-tint: #101e22;
     }
   }
   * { box-sizing: border-box; }
@@ -40,9 +40,9 @@
   p { max-width: 68ch; color: var(--muted); }
   .diagram-frame { margin: 40px 0 0; overflow-x: auto; padding: 12px 0; scrollbar-color: var(--rule) transparent; }
   .diagram { display: block; width: 100%; min-width: 880px; height: auto; }
-  .diagram-node { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+  .diagram-node { fill: var(--surface); stroke: var(--rule); stroke-width: 0.85; }
   .diagram-node--focal { fill: var(--accent-tint); stroke: var(--accent); }
-  .connector { fill: none; stroke: var(--muted); stroke-width: 1.75; }
+  .connector { fill: none; stroke: var(--muted); stroke-width: 0.85; }
   .connector--focal { stroke: var(--accent); }
   .node-name { fill: var(--ink); font: 500 20px var(--font-body); }
   .node-detail, .edge-label { fill: var(--muted); font: 400 17px var(--font-body); }

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { reviewContractSha256 } from '../../plugins/visual-explainer/scripts/verify/lib/report.mjs';
+import { parseReviewReport } from '../../plugins/visual-explainer/scripts/verify/lib/review-contract.mjs';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 
@@ -26,9 +26,8 @@ export function buildRunManifest({ benchmark, benchmarkRoot = ROOT, runDir, mode
       if (!existsSync(required)) throw new Error(`Missing benchmark run file: ${required}`);
     }
     const meta = JSON.parse(readFileSync(metaPath, 'utf8'));
-    const reportData = JSON.parse(readFileSync(report, 'utf8'));
+    const reportData = parseReviewReport(JSON.parse(readFileSync(report, 'utf8')));
     const contract = reportData.review_contract;
-    if (!contract || reviewContractSha256(contract) !== contract.sha256) throw new Error(`Invalid review contract for ${benchmarkCase.id}`);
     if (!contract.complete) throw new Error(`Incomplete review contract for ${benchmarkCase.id}`);
     if (contract.artifact_sha256 !== sha256(artifact)) throw new Error(`Report is not bound to artifact for ${benchmarkCase.id}`);
     const truthPath = resolve(benchmarkRoot, benchmarkCase.task);
@@ -51,7 +50,7 @@ export function buildRunManifest({ benchmark, benchmarkRoot = ROOT, runDir, mode
       prompt_sha256: meta.prompt?.sha256 ?? null,
       truth_sha256: contract.truth_sha256,
       review_contract_sha256: contract.sha256,
-      mechanics_errors: Number(reportData.summary?.errors || 0),
+      mechanics_errors: reportData.summary.errors,
       artifact: fileRef(artifact, output),
       report: fileRef(report, output),
       evidence,

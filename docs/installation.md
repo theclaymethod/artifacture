@@ -1,37 +1,53 @@
 # Install Artifacture
 
-Artifacture exports HTML and runs mechanical checks. Visual and prose review
-use two additional skills:
+Use Node.js 22.12 or newer. Choose the skill for a coding agent, or the npm CLI for a React project.
 
-- Artifacture owns artifact mechanics, rendered-state evidence, and
-  artifact-specific visual semantics.
-- Impeccable owns general visual craft and visual AI tells.
-- Unslop owns prose quality and AI-writing patterns.
-
-The three skills install and update separately. Artifacture calls the review
-skills without copying their prompts. Mechanical errors fail verification; visual and prose judgments are reported
-separately.
-
-## Requirements
-
-- Node.js 22 or newer
-- a browser available to Playwright for rendered verification
-- a skills-capable harness
-- optional provider credentials for direct small-model visual evals
-
-## Recommended install
+## Install the skill
 
 ```bash
-npx skills add theclaymethod/artifacture
+npx skills add theclaymethod/artifacture --skill visual-explainer
+```
+
+Then ask your agent to build an explanation, chart, slide deck, or video. The skill includes the component library, motion, themes, examples, renderer, and verification tools. Runtime packages and the verification browser are prepared automatically when needed.
+
+## Use npm
+
+```bash
+npm install artifacture
+npx artifacture add charts video
+```
+
+`add` copies editable components, installs missing dependencies, and imports their styles in your app entry. Import the named component from its local module and use it in your React app.
+
+For a new project:
+
+```bash
+npx artifacture init my-explainer
+cd my-explainer
+npm run dev
+```
+
+The starter includes React, TypeScript, Vite, a responsive Hairline composition, and finite motion with direct seeking. Dependencies are installed by `init`.
+
+Discover blocks with `npx artifacture list`. Export and verify with the same CLI:
+
+```bash
+npx artifacture export explanation.mdx --out explanation.html
+npx artifacture verify explanation.html --json report.json
+```
+
+See [workspaces](workspaces.md) for local source ownership and custom app entries. Runtime overrides and cache details are in the [skill troubleshooting reference](../plugins/visual-explainer/references/installation.md).
+
+## Optional review skills
+
+Impeccable reviews visual craft; Unslop reviews prose. Install them when you want those additional passes:
+
+```bash
 npx impeccable skills install
 npx skills add theclaymethod/unslop
 ```
 
-Artifacture's first generation clones the render pipeline into
-`~/.artifacture`. A full repository clone uses itself as the pipeline.
-
-Updating Artifacture must not silently change Impeccable's design rubric or
-Unslop's prose rubric.
+Artifacture exports and runs mechanical checks independently. Missing optional review skills are disclosed in the report.
 
 ## Claude Code plugin install
 
@@ -69,16 +85,21 @@ silently install the companion skills.
 
 ## Verify the core
 
-From the Artifacture repository:
+For contributors, from the Artifacture repository:
 
 ```bash
 npm install
 npm run ve:check
-npm run ve:eval-visual-model-policy
+npx playwright install chromium
+npm run test:e2e
+npm run ve:eval-presentation
 ```
 
-The last command verifies policy selection and cache-prefix identity. It does
-not claim that a real provider/model is qualified.
+The end-to-end suite exercises exported artifacts, copied consumer workspaces,
+preview edits, verification reports, and PDF output. The presentation runner
+checks real browser navigation and layout. Browser-backed checks require
+Chromium; they fail when it is unavailable. Visual model qualification remains
+a separate measured workflow.
 
 ## Qualify visual models
 
@@ -125,11 +146,17 @@ review, but it must not be described as eval-qualified.
 Update the skills independently:
 
 ```bash
-git -C ~/.artifacture pull --ff-only
-npm install --prefix ~/.artifacture
+npx skills add theclaymethod/artifacture --skill visual-explainer
 npx impeccable skills install
 npx skills add theclaymethod/unslop
 ```
+
+For a development checkout, use `git pull --ff-only` and `npm ci` in that
+checkout. Rebuild the bundled install with `npm run build:skill-runtime` after
+changing shipped source, examples, or guidance. Commit the generated
+`plugins/visual-explainer/assets/runtime.json.gz` with its source changes.
+`npm run check:skill-runtime` compares the snapshot byte-for-byte against the
+canonical source; CI's fast check rejects a stale bundle; npm packaging rebuilds it automatically.
 
 After changing models, prompts, image detail, rubrics, or batching, rerun the
 visual evals before replacing the generated policy.

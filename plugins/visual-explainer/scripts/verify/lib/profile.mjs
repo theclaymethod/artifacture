@@ -8,7 +8,10 @@ export const PROFILES = Object.freeze([
   'video-comp',
 ]);
 
+// Review detection includes historical exports; generation uses preset-policy.mjs.
 const PRESETS = [
+  'hairline',
+  '3b1b',
   'lieflat',
   'algebrica',
   'mono-color',
@@ -148,7 +151,7 @@ function stripStyleBlocks(html) {
 function removePresetScopedCss(html) {
   return html
     .replace(/\[data-ve-preset=[^\]]+\][^{]*\{[^}]*\}/gi, '')
-    .replace(/\.ve-output--(?:lieflat|algebrica|mono-color|oa-design|mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide)\b[^{]*\{[^}]*\}/gi, '');
+    .replace(/\.ve-output--(?:hairline|3b1b|lieflat|algebrica|mono-color|oa-design|mono-industrial|nothing|blueprint|editorial|paper-ink|terminal|ide)\b[^{]*\{[^}]*\}/gi, '');
 }
 
 function detectEmittedRuntimePreset(filePath, html) {

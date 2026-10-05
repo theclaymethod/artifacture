@@ -1,0 +1,29 @@
+.component-catalog { min-height:100vh; color:var(--ve-text); background:var(--ve-bg); font-family:var(--ve-font-body); padding:72px max(24px,calc((100vw - 1240px)/2)); }
+.component-catalog h1,.component-catalog h2,.component-catalog h3 { color:var(--ve-heading); font-family:var(--ve-font-display); font-weight:var(--ve-heading-weight); line-height:1.2; letter-spacing:-.025em; }
+.component-catalog h1 { font-size:clamp(36px,5vw,64px); margin:0 0 24px; max-width:850px; }
+.component-catalog h2 { font-size:32px; margin:0 0 16px; }
+.component-catalog h3 { font-size:23px; margin:0 0 12px; }
+.component-catalog p { font-size:16px; line-height:1.7; max-width:760px; color:var(--ve-muted); margin:0 0 24px; }
+.component-catalog header>p { font-size:19px; }
+.component-catalog section { padding-top:64px; scroll-margin-top:32px; }
+.component-catalog nav { display:flex; flex-wrap:wrap; gap:16px 28px; margin-top:28px; padding-bottom:28px; border-bottom:1px solid var(--ve-rule); }
+.component-catalog a { color:var(--ve-text); text-underline-offset:5px; }
+.catalog-controls { display:flex; flex-wrap:wrap; gap:24px 40px; padding:24px 0 0; }
+.catalog-controls label { display:flex; align-items:center; gap:12px; font-size:16px; }
+.catalog-controls select { font:inherit; color:inherit; background:var(--ve-bg); border:1px solid var(--ve-rule); border-radius:6px; padding:10px; }
+.catalog-controls input { width:200px; accent-color:var(--ve-accent); }
+.catalog-controls output { font-variant-numeric:tabular-nums; min-width:60px; }
+.catalog-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:48px 36px; }
+.catalog-example { min-width:0; margin:24px 0; }
+.catalog-example>p { font-size:15px; margin-bottom:20px; }
+.catalog-preview { min-width:0; padding:20px 0; }
+.catalog-preview>svg { width:100%; height:auto; display:block; max-height:440px; }
+.loop-frame-previews { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; max-width:700px; }
+.loop-frame-previews figure { min-width:0; margin:0; }
+.loop-frame-previews svg { width:100%; height:auto; }
+.loop-frame-previews figcaption { font-size:14px; line-height:1.5; margin-top:8px; }
+.component-catalog details { border-top:1px solid var(--ve-rule); margin-top:24px; padding-top:16px; }
+.component-catalog summary { cursor:pointer; color:var(--ve-text); padding:8px 0; }
+.component-catalog pre { font-size:13px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ve-text); background:var(--ve-panel); padding:16px; }
+.component-catalog :focus-visible { outline:2px solid var(--ve-accent); outline-offset:4px; }
+@media(max-width:800px) { .component-catalog { padding-top:36px; } .catalog-grid { grid-template-columns:1fr; gap:28px; } .catalog-controls { gap:16px; } .catalog-controls label { flex-wrap:wrap; } .catalog-controls input { width:150px; } }

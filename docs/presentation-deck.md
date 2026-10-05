@@ -32,7 +32,7 @@ import { PresentationDeck, PresentationSlide, DrillCard, HairlineList } from 'vi
 
 export default function Deck() {
   return (
-    <PresentationDeck title="How a queue recovers" preset="lieflat">
+    <PresentationDeck title="How a queue recovers" preset="hairline">
       <PresentationSlide title="A timeout can hide success" shortTitle="Uncertainty">
         <HairlineList items={[
           { head: 'Preserve identity', body: 'Every attempt uses the same operation key.' },
@@ -63,7 +63,7 @@ Notes:
   pixels. Shared labels use at least 24px and body recipes use 26–28px;
   custom text should follow that floor. Inspect the exported deck at its
   intended viewport, with the rail open. Reduce content before reducing type.
-- **Visual language** defaults to `lieflat`. Choose `algebrica` for scholarly
+- **Visual language** defaults to `hairline`, with `3b1b` for mathematical mechanisms. Choose `algebrica` for scholarly
   reading or `mono-color` for one or two inks. Use tone changes to explain a
   change in content; omit decorative kickers, counts, badges, and hover effects.
 
@@ -135,11 +135,13 @@ rendering.
 
 ## Check deck behavior
 
-The engine's behavior is checked by `evals/run-presentation.mjs`
-(`npm run ve:eval-presentation`, runs in CI): the click-anywhere-to-close
-guard matrix, two-axis keyboard-nav matrix, drill CTA contract (click + Enter + Space;
-primary vs secondary computed styles), reduced-motion, scale-to-fit geometry
-across viewports, rail collapse/expand widths, and preset re-skinning. A source
-scan checks that fonts and colors come from theme tokens. Unit tests for the pure logic live in
-`visual-explainer-mdx/presentation-core.test.mjs` (`npm test`). Change the
-engine, run both.
+Run `npm run ve:eval-presentation` after changing deck behavior. The runner
+exports actual decks and checks navigation, drill dismissal, CTA clicks and
+keyboard activation, reduced motion, stage containment and centering across
+viewports, rail interactions, and computed theme changes in Chromium. It runs
+in CI and requires a working browser.
+
+`npm test` runs the retained end-to-end suite, including exported pages,
+source-copy workspaces, preview editing, verification reports, and PDF output.
+Checks exercise observable results; they do not assert source strings or
+recalculate expectations with the implementation's internal helpers.

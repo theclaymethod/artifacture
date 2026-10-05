@@ -1,6 +1,6 @@
 # Shared tokens
 
-The orchestrator publishes the active preset once; fragments inherit it. Runtime values are defined in `REPO/visual-explainer-mdx/global.css`. Use `lieflat` by default and load only fonts used by the selected preset.
+The orchestrator publishes the active preset once; fragments inherit it. Runtime values are defined in `REPO/visual-explainer-mdx/themes.css`. Use `hairline` by default and load only fonts used by the selected preset.
 
 For MDX/TSX, use shared components and `--ve-*` variables directly. For raw HTML fragments, the orchestrator maps these compatibility roles to the active preset:
 

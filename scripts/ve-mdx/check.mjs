@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { spawn } from 'node:child_process';
 import { parseHTML } from 'linkedom';
+import { checkComponentRegistry } from '../components/check.mjs';
 import { sharedComponents } from './integrity.mjs';
 
 const repoRoot = process.cwd();
@@ -28,28 +29,15 @@ const outputs = [
   ['examples/visual-explainer-mdx/presentation-deck.tsx', 'dist/visual-explainer-mdx/presentation-deck.html'],
 ];
 
-function run(args) {
+function run(args, exporter = 'export') {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['scripts/ve-mdx/export.mjs', ...args], {
+    const child = spawn(process.execPath, [`scripts/ve-mdx/${exporter}.mjs`, ...args], {
       cwd: repoRoot,
       stdio: 'inherit',
     });
     child.on('exit', (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`export failed with exit code ${code}`));
-    });
-  });
-}
-
-function runStatic(args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['scripts/ve-mdx/export-static.mjs', ...args], {
-      cwd: repoRoot,
-      stdio: 'inherit',
-    });
-    child.on('exit', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`static export failed with exit code ${code}`));
+      else reject(new Error(`${exporter} failed with exit code ${code}`));
     });
   });
 }
@@ -94,7 +82,7 @@ async function assertSourceRendersContent(sourcePath) {
   const tempOut = path.join(repoRoot, '.ve-mdx-tmp', `content-probe-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.html`);
   await fs.mkdir(path.dirname(tempOut), { recursive: true });
   try {
-    await runStatic([sourcePath, '--out', tempOut]);
+    await run([sourcePath, '--out', tempOut], 'export-static');
     const html = await fs.readFile(tempOut, 'utf8');
     const textLength = documentTextLength(html);
     if (textLength <= MIN_BODY_TEXT_LENGTH) {
@@ -111,13 +99,25 @@ async function assertSourceRendersContent(sourcePath) {
 // contract (plugins/visual-explainer/references/hyperframes.md) is a
 // Hyperframes composition root carrying data-composition-id, so that
 // attribute is this leg's equivalent of assertGenerated's id="root" check.
-async function assertStaticGenerated(filePath) {
+async function assertStaticGenerated(filePath, bundled = false) {
   const html = await fs.readFile(path.resolve(repoRoot, filePath), 'utf8');
   const failures = [];
   if (!html.includes('<style>')) failures.push('CSS was not inlined');
   if (!/\sdata-composition-id\s*=/.test(html)) failures.push('missing Hyperframes composition root (data-composition-id)');
   if (/<script[^>]+src=["']\.?\/assets\//.test(html) || /<link[^>]+href=["']\.?\/assets\//.test(html)) {
     failures.push('external build asset reference remains');
+  }
+  if (bundled) {
+    const { document } = parseHTML(html);
+    const scripts = [...document.querySelectorAll('script[src]')];
+    const runtime = scripts[0]?.getAttribute('src');
+    if (scripts.length !== 1 || !/^\.\/graphic-runtime-[a-f0-9]{12}\.js$/.test(runtime ?? '')) {
+      failures.push('missing local content-hashed graphic runtime');
+    } else {
+      const code = await fs.readFile(path.resolve(repoRoot, path.dirname(filePath), runtime), 'utf8');
+      if (!code.trim()) failures.push('graphic runtime is empty');
+    }
+    if (!html.includes('window.__timelines')) failures.push('missing graphic timeline registration');
   }
   const textLength = documentTextLength(html);
   if (textLength <= MIN_BODY_TEXT_LENGTH) {
@@ -176,6 +176,8 @@ async function assertRosterInSync() {
   }
 }
 
+await checkComponentRegistry();
+console.log('component copy closures in sync');
 await assertRosterInSync();
 console.log('component roster in sync');
 
@@ -189,9 +191,19 @@ const staticExample = [
   'examples/visual-explainer-mdx/video-longform.tsx',
   'dist/visual-explainer-mdx/video-longform-static.html',
 ];
-await runStatic([staticExample[0], '--out', staticExample[1]]);
+await run([staticExample[0], '--out', staticExample[1]], 'export-static');
 await assertStaticGenerated(staticExample[1]);
 console.log('static export ok');
+
+const graphicVideoOut = 'dist/visual-explainer-mdx/video-longform/index.html';
+await run([staticExample[0], '--out', graphicVideoOut], 'graphic-video');
+await assertStaticGenerated(graphicVideoOut, true);
+console.log('bundled graphic video export ok');
+
+const mathVideoOut = 'dist/visual-explainer-mdx/math-activation/index.html';
+await run(['examples/visual-explainer-mdx/math-activation.tsx', '--out', mathVideoOut], 'graphic-video');
+await assertStaticGenerated(mathVideoOut, true);
+console.log('mathematical graphic video export ok');
 
 await new Promise((resolve, reject) => {
   const child = spawn(process.execPath, ['scripts/ve-mdx/check-integrity.mjs'], {

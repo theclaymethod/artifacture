@@ -40,6 +40,14 @@ Optional `kicker`, `eyebrow`, `stat`, and label props are compatibility APIs, no
 - `SlideDeck(title, orientation?, preset?, reviewTools?)`
 - `Slide(title, kicker?, tone?)`
 - `PosterCanvas(eyebrow?, title, stat?, footer?, preset?, reviewTools?)`
+- `GraphicCanvas(scene)` draws immutable primitives from `createDiagramScene` or `createGraphicScene`.
+- `composeGraphics` places complete scene blocks, scopes their identities and motion, and returns one scene/motion pair for the same canvas, poster, slide, or video. Declare destination frames and clipping; avoid concatenating scene objects. Read `docs/graphics-and-video.md` from `REPO` for the composition contract.
+- `GraphicSlide(slide)` places a shared graphic in a fixed frame created by `createSlideScene`.
+- `GraphicVideo(sequence, authoredSeconds?)` samples finite motion from `sequenceSlides`; use `ve:graphic-video` for a seekable browser export.
+- `NativeClip(asset, baseUrl, placement?)` embeds a native Manim or Psychopomp clip. A finite `placement` declares HyperFrames timing; otherwise it provides a normal review player.
+- `NativeStill(asset, baseUrl, at?)` reuses the poster or an exact selected encoded frame in a document, poster, or slide. Read `docs/native-engines.md` for source scaffolding, optional engine setup, and the shared asset contract.
+
+Read [graphics-and-video.md](../../../docs/graphics-and-video.md) for shared scene authoring, supported motion, and export limits.
 
 Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentation with navigation, drill-downs, or reusable stage chrome, read `deck-navigation-shell.md` before using:
 
@@ -52,4 +60,18 @@ Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentati
 
 ## Presets
 
-Built-in presets are `lieflat` (default), `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Other names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` only when learning or using an external design system.
+Primary explainer presets are `hairline` (default isometric illustrations) and `3b1b` (mathematical mechanisms on black). Lieflat charts use either host's tokens. Retained alternatives are `mono-color` and `algebrica`, with `mono-industrial` optional and `custom` for local tokens. The former `lieflat` palette and `oa-design`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal` fail with migration guidance. New external brand names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` when learning or using an external design system.
+
+- `DagCanvas`: compact dependency graph with parent/child or full-lineage focus, keyboard navigation, and shared themed scene geometry. Copy with `artifacture add dag`; see `docs/dag.md` in the runtime.
+
+- `AsciiImage`: media-to-glyph frame; explicit redraw seconds, palette, contrast and cell size.
+- `AsciiSweep`: two media inputs, controlled progress 0–1, seeded glyph band, four directions.
+- `AsciiObject`: prepared geometry or uncompressed glTF/GLB; explicit seconds, glyph/shaded output, shared palette.
+- `VhsEffect`: media texture with authored-time grain, row drift, scanlines and RGB separation.
+- `ModelView`: one factory, GLB or decoded image as shaded geometry, measured six-region ASCII, luminance ASCII or circular points; explicit seconds and awaitable capture controller.
+- `OrbitalText`: controlled SVG phrase rings, alternating rotation and one accented ring.
+- `TracePath`: normalized SVG path reveal from progress, with exact zero/full endpoints.
+
+Copy selected model/vector blocks with `artifacture add shape-ascii particle-object living-forms procedural-props orbital-text trace-path`. Use `modelAsset` to bridge a reviewed img2threejs factory. Read `docs/model-visuals.md` and copied `MODEL-AUTHORING.md` for readiness, ownership, supported geometry and source closure.
+
+Copy these with `artifacture add ascii-image ascii-sweep ascii-object vhs`. See `docs/media-effects.md` for the source contracts, video decoding ownership, CORS/WebGL constraints, and Blender authoring/export instructions. Keep teaching text after the effect.

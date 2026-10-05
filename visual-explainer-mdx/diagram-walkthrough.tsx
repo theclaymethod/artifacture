@@ -1,7 +1,6 @@
-/// <reference types="vite/client" />
 import React, { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DiagramCanvas } from './components';
+import { DiagramCanvas } from './diagram-canvas';
 import type { DiagramCanvasProps, DiagramEdge, DiagramNode } from './diagram-types';
 import './diagram-walkthrough.css';
 

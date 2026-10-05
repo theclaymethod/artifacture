@@ -136,7 +136,7 @@ export const checks = Object.fromEntries([
     return /document\.fonts\.(?:ready|load)\b/.test(before) ? [] : [warn('prepareWithSegments called before fonts readiness', 'prepareWithSegments')];
   })],
   ['diagram-no-hardcoded-hex', scoped(hasAuthoredSvg, (ctx) => {
-    const svgBodies = Array.from(ctx.html.matchAll(/<svg\b[\s\S]*?<\/svg>/gi), (m) => m[0]);
+    const svgBodies = Array.from(authoredSvgMarkup(ctx).matchAll(/<svg\b[\s\S]*?<\/svg>/gi), (m) => m[0]);
     const allowed = /#(?:f6d242|3a66ff|ff7a2a|7ee787)\b/i;
     for (const svg of svgBodies) {
       for (const match of svg.matchAll(/\b(?:fill|stroke|style)\s*=\s*(["'])([^"']*(?:#[0-9a-f]{3,8}|rgba?\()[^"']*)\1/gi)) {
@@ -147,13 +147,13 @@ export const checks = Object.fromEntries([
     return [];
   })],
   ['diagram-forbidden-fx', scoped(hasAuthoredSvg, (ctx) => {
-    const svg = Array.from(ctx.html.matchAll(/<svg\b[\s\S]*?<\/svg>/gi), (m) => m[0]).join('\n');
+    const svg = authoredSvgMarkup(ctx);
     if (/(?:filter\s*=|<filter\b|drop-shadow|box-shadow|blur\(|rounded-2xl|rx\s*=\s*["']16|ry\s*=\s*["']16)/i.test(svg)) return [fail('diagram uses forbidden effects/filter/oversized radius', '<svg>')];
     return [];
   })],
   ['diagram-jetbrains-mono-forbidden', scoped(hasAuthoredSvg, (ctx) => /jetbrains mono/i.test(ctx.html) && !/dracula|nord|catppuccin|solarized|gruvbox|one dark|rose pine/i.test(ctx.html) ? [fail('JetBrains Mono used outside IDE-inspired aesthetic', 'font-family')] : [])],
   ['diagram-4px-grid', scoped(hasAuthoredSvg, (ctx) => {
-    const attrs = Array.from(ctx.html.matchAll(/\b(?:x|y|cx|cy|x1|x2|y1|y2|width|height|font-size|gap)\s*=\s*["'](-?\d+(?:\.\d+)?)["']/gi));
+    const attrs = Array.from(authoredSvgMarkup(ctx).matchAll(/\b(?:x|y|cx|cy|x1|x2|y1|y2|width|height|font-size|gap)\s*=\s*["'](-?\d+(?:\.\d+)?)["']/gi));
     const bad = attrs.find((m) => Math.abs(Number(m[1])) > 2 && Math.abs(Number(m[1]) % 4) > 0.001);
     return bad ? [fail(`diagram coordinate/size not on 4px grid: ${bad[0]}`, '<svg>')] : [];
   })],
@@ -394,7 +394,13 @@ function hasMotion(styles) {
 }
 
 function hasAuthoredSvg(ctx) {
-  return /<svg\b/i.test(ctx.html) && (/data-diagram-role|var\(--/i.test(ctx.html) || ctx.flags.hasInlineSvgDiagram);
+  return authoredSvgMarkup(ctx).length > 0 && (/data-diagram-role|var\(--/i.test(ctx.html) || ctx.flags.hasInlineSvgDiagram);
+}
+
+function authoredSvgMarkup(ctx) {
+  // Shared scenes own validated geometry; the raw SVG style contract is separate.
+  return Array.from(ctx.html.matchAll(/<svg\b[\s\S]*?<\/svg>/gi), match => match[0])
+    .filter(svg => !/^<svg\b[^>]*\bdata-graphic-scene\s*=/i.test(svg)).join('\n');
 }
 
 function isMono(ctx) {

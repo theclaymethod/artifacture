@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Use when explaining systems, code changes, plans, or data with diagrams, charts, comparison tables, HTML pages, or slides.
+description: Use when explaining systems, code changes, plans, or data with diagrams, charts, HTML pages, slides, videos, or reusable React graphics and motion.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -10,25 +10,21 @@ metadata:
 
 # Visual Explainer
 
-Produce editable source and verified, self-contained HTML. Use Lieflat by default: readable type, open spacing, and marks that encode observations, units, or relationships. Prefer prose when a visual would add no understanding.
+Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the Hairline preset across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
 
 Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
-## Resolve the runtime
+## Use the installed CLI
 
-Set `REPO` to the Artifacture checkout before authoring:
+Require Node 22.12 or newer. Set `SKILL_DIR` internally to the absolute directory containing this file. Use `node "$SKILL_DIR/scripts/artifacture.mjs"` for `init`, `add`, `list`, `export`, `video`, `engine`, and `verify`. The CLI handles runtime setup, required npm packages, and workspace stylesheet imports. The user only installs the skill and asks for an artifact; do not ask them to configure paths, caches, or a second checkout.
 
-1. If `../../visual-explainer-mdx/components.tsx` exists relative to this file, use the repository two directories above this file.
-2. Otherwise, use `~/.artifacture` when it contains `visual-explainer-mdx/components.tsx` and `package.json`.
-3. If neither exists, clone `https://github.com/theclaymethod/artifacture` to `~/.artifacture` and run `npm install --prefix ~/.artifacture`, then resume. Require Node 22 or newer. Do not update an existing runtime as a side effect of generation.
-
-Run every `npm run ve:*` command from `REPO`. Sources may live elsewhere; pass absolute paths.
+When authoring imports or following a reference that uses `npm --prefix REPO`, obtain the ready runtime with `REPO=$(node "$SKILL_DIR/scripts/artifacture.mjs" path)`. Pass absolute source and output paths. Private brands and copied consumer edits remain user-owned. See [installation.md](references/installation.md) only for development overrides or troubleshooting.
 
 ## Author, export, verify
 
 1. Select one route below and read its card. Read additional references only when the selected route calls for them.
 2. For a standalone chart, author a `LieflatChart` JSON envelope; for a data story, compose its figures in MDX. Archify uses typed JSON. Otherwise author `.mdx` by default, or `.tsx` for local state, generated/custom SVG, or video. Import shared components from `REPO/visual-explainer-mdx/components.tsx`.
-3. Export chart JSON with `npm --prefix REPO run ve:chart -- <abs-source.json> --out <abs-output.html>`. Archify uses its validated delivery command. For MDX/TSX, use `npm --prefix REPO run ve:export -- <abs-source> --out <abs-output>`; for static video, use `ve:export-static`. Fix export failures in the source.
+3. Export chart JSON with `node "$SKILL_DIR/scripts/artifacture.mjs" chart <abs-source.json> --out <abs-output.html>`. Archify uses its validated delivery command. For MDX/TSX, use `node "$SKILL_DIR/scripts/artifacture.mjs" export <abs-source> --out <abs-output>`; for static HTML, use `export-static`. Fix export failures in the source.
 4. Read [verification.md](references/verification.md), execute its routed checks, open the artifact, and report the source, HTML, report JSON, and any incomplete verification.
 
 Completion requires editable source, a successful export, and evidence for every required verification pass. Apply feedback to the source and re-export.
@@ -37,11 +33,17 @@ Completion requires editable source, a successful export, and evidence for every
 
 | Request | Read first | Read only when needed |
 |---|---|---|
+| React workspace, reusable components, or seekable scene motion | [react-workspaces.md](references/react-workspaces.md) | Discover actual APIs with the component CLI; copy local leaf modules instead of importing the full renderer into an app. |
 | chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
 | diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
+| interactive Hairline figure | [vendored Hairline skill](vendor/hairline-create/SKILL.md) | Use its unchanged kernel, bench, build, and validation workflow. |
+| motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
+| native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |
+| ASCII, texture treatments, or 3D model media | [media-effects.md](references/media-effects.md) | Copy controlled effects and preserve media decoding ownership. |
+| reference image to low-detail procedural 3D | [procedural-models.md](references/procedural-models.md) | Use the installed img2threejs skill and reuse its reviewed factory across outputs. |
 | code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |
 | explain a diff | [explain-diff.md](cards/explain-diff.md) | — |
 | project recap | [project-recap.md](cards/project-recap.md) | — |
@@ -52,9 +54,12 @@ For point-and-click annotation, read [annotate.md](commands/annotate.md). If the
 
 - Keep MDX/TSX, chart JSON, or Archify JSON as the source of truth; generated HTML is disposable output.
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
+- For illustrations, read [default-explainer-theme.md](references/default-explainer-theme.md). Reuse shared geometry across formats; isolate strict Hairline pointer figures from seekable video scenes.
+- For reusable React work, keep the scene → composition → slide → video boundary. Sample explicit time, author narrow layouts separately, and call `disposeGraphicVideo` when a registered host leaves.
 - Use `LieflatChart` for editorial data stories and `DataChart` for quick bar, line, or dot comparisons. Marks must encode evidence; never invent records or quantities to fill a pattern.
 - When adjusting type, read [typography.md](references/typography.md). Compose readable text blocks through measure, grouping, weight, and spacing.
 - Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.
+- Discover `dag` for compact multi-parent dependencies, keyboard focus and lineage tracing. Its labeled scene and authored reveal reuse the existing graphics, slides and video pipeline; the interactive list remains a page control.
 - Treat facts, labels, and visual encodings as claims. Keep them traceable to the user brief or inspected sources; mark uncertainty instead of inventing rationale.
 - Preserve accessibility, responsive containment, and reduced-motion behavior. Optional metadata requires factual state, sequence, provenance, ownership, or navigation.
 

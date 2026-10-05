@@ -2,7 +2,7 @@
 
 Multiple visual formats from token-efficient source.
 
-Artifacture gives coding agents a shared library for pages, slide decks, magazines, posters, and interactive explanations. Write the content in MDX, use TSX for custom behavior, or describe a chart in JSON. Components supply the layout, styling, and interaction; exporters produce standalone HTML.
+Artifacture gives coding agents a shared library for pages, slide decks, magazines, posters, interactive explanations, and videos. Write the content in MDX, use TSX for custom behavior, or describe a chart in JSON. Components supply the layout, styling, and interaction; exporters produce HTML.
 
 The agent spends tokens on your explanation and data. Repeated HTML, CSS, chart geometry, and presentation controls live in the library.
 
@@ -42,14 +42,52 @@ Turn this migration plan into a slide deck with supporting detail on demand.
 
 The skill loads the task-specific guidance it needs. It authors editable source, exports the result, and checks it in a browser.
 
-For local development, use Node 22 or newer and run these commands from the checkout:
+The skill includes the renderer, editable components, motion, themes, and examples. Your agent handles setup and verification automatically.
+
+## Use in a React project
 
 ```bash
-npm install
-npm run ve:export -- examples/visual-explainer-mdx/data-charts.mdx --out dist/charts.html
+npm install artifacture
+npx artifacture add charts video
 ```
 
-## Compact source, complete output
+The CLI copies editable components, installs required packages, and imports their styles. Use the local named exports in your app.
+
+For a new React, TypeScript, and Vite project:
+
+```bash
+npx artifacture init my-explainer
+cd my-explainer
+npm run dev
+```
+
+Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](docs/workspaces.md) for the source ownership model and [installation](docs/installation.md) for other agent harnesses.
+
+Discover available blocks before authoring:
+
+```bash
+npx artifacture list --query focus --json
+```
+
+The machine-readable index includes public imports, capabilities, supported
+formats, supported variants, constraints, examples, dependencies, and copy commands. It comes from
+the same registry that owns `add`. The copied code belongs to the workspace. The [component catalog](docs/component-catalog.md)
+covers 50 copyable blocks and links the interactive preview source.
+[Component references](docs/component-references.md) guide further math, code,
+diagram, and chart blocks; [candidate research](docs/research/primitive-candidates-2026-10-04.md)
+records additions that still need prototypes.
+
+Copy the [dependency DAG](docs/dag.md) with `npx artifacture add dag`. Its compact graph supports parent/child and full-lineage focus, keyboard navigation, and the same scene geometry for posters, slides and authored animation.
+
+[Manim and Psychopomp](docs/native-engines.md) are optional native engines:
+
+```bash
+npx artifacture engine setup manim
+npx artifacture engine scaffold manim ./math --theme 3b1b
+npx artifacture engine render ./math/manim.job.json --out ./math/render
+```
+
+Use `psychopomp` for a physical diagram scene. Each render retains editable source, a playable clip, selected stills and provenance; `NativeClip` and `NativeStill` reuse those assets across the existing output formats.
 
 A chart is a title and a data specification:
 
@@ -135,13 +173,23 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 ## Shared visual defaults
 
-Typography, spacing, and colors come from presets shared across formats. Lieflat defaults to paper gray, charcoal, and direct labels. Algebrica adds serif reading text; Mono Color uses restrained color and asymmetric composition.
+The [default explainer theme](plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
+
+Typography, spacing, and colors come from [shared theme tokens](docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
 
 | Algebrica | Mono Color |
 |---|---|
 | [![Algebrica uses serif text and geometry to explain vector projection](docs/img/examples/algebrica.png)](docs/img/examples/algebrica.png) | [![Mono Color combines an opened mouse photograph with asymmetric typography](docs/img/examples/mono-color.png)](docs/img/examples/mono-color.png) |
 
 Set `preset` on `ExplainerShell`, `SlideDeck`, `PresentationDeck`, or `PosterCanvas`. You can also [supply a design system](docs/design-systems.md).
+
+The complete pinned [Hairline skill and interactive runtime](plugins/visual-explainer/vendor/hairline-create/SKILL.md) are bundled unchanged with the upstream MIT license. Strict pointer figures keep the fixed kernel and bench. Reusable video scenes use deterministic authored time and [motion choreography inspired by 3Blue1Brown](plugins/visual-explainer/references/motion-video-baseline.md). The [editable reference composition](examples/visual-explainer-mdx/hairline-motion-baseline.tsx) traces a sine wave from a rotating point with original geometry and animation.
+
+### Videos that work together
+
+The [shared graphics architecture](docs/graphics-and-video.md) supports diagrams and posters. Diagram scenes compose into slides, and complete slide scenes sequence into video. Collections add instructional modes, canonical subjects and terms, pinned evidence, and episode handoffs. Start with the [collection guide](docs/video-collections.md), then [iterate on the script and storyboard](docs/video-script-iteration.md). Compare [animation engine options](docs/animation-engines.md) before choosing a native renderer.
+
+`ve:graphic-video` exports HTML plus a local runtime JavaScript file. Keep them together. Canonical web fonts require network access in the raw preview; HyperFrames compile caches and embeds them. Collection scaffolding produces an authoring package. Rendered checks and narrative review determine whether a video is complete.
 
 ## Export, check, revise
 
@@ -161,4 +209,19 @@ Both required review stages must pass before an artifact is verified. Make revis
 
 MIT. Artifacture began as a fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer).
 
-Visual references include [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), [Mono Color](https://github.com/yanliudesign/mono-color-skill), [PR Lens](https://github.com/coldteadotai/pr-lens), and [Pierrick Calvez’s typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). [Archify](https://github.com/tt-a1i/archify) is an integrated external runtime. Reference images and noncommercial source implementations are not bundled. See [provenance and licenses](tools/visual-sources.json).
+Visual references include [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), [Mono Color](https://github.com/yanliudesign/mono-color-skill), [PR Lens](https://github.com/coldteadotai/pr-lens), [3Blue1Brown](https://www.3blue1brown.com/), and [Pierrick Calvez's typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). [Hairline](https://github.com/lucasmarkes/hairline) is a bundled, unchanged MIT skill and interactive runtime. [Archify](https://github.com/tt-a1i/archify) is an integrated external runtime. Reference images and noncommercial source implementations are not bundled. See [provenance and licenses](tools/visual-sources.json).
+
+## Verify changes
+
+```bash
+npx playwright install chromium
+npm test
+npm run ve:eval-presentation
+```
+
+`npm test` runs the retained end-to-end suite through real commands, exported
+pages, copied workspaces, preview edits, verification reports, and PDF output.
+The presentation runner checks browser layout and interaction. Chromium is
+required. Run `npm run check` for these flows plus types, manifests, seeded
+verifier cases, and export/release guards. New test files remain opt-in; extend
+existing observable flows or use direct runtime checks.

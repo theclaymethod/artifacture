@@ -1,0 +1,479 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&family=STIX+Two+Math&display=swap");
+
+@layer base {
+  :root,
+  [data-ve-preset] {
+    --ve-shell-title-size: clamp(2.25rem, 9.6vw, 4.5rem);
+    --ve-shell-summary-size: 1.125rem;
+    --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 500;
+    --ve-heading-weight: 500;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 12px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #ffffff;
+    --ve-bg-alt: #000000;
+    --ve-panel: #ffffff;
+    --ve-panel-strong: #ffffff;
+    --ve-row: color-mix(in srgb, #202127 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #000000;
+    --ve-rule: color-mix(in srgb, #202127 12%, transparent);
+    --ve-heading: #202127;
+    --ve-text: #202127;
+    --ve-muted: #5f626a;
+    --ve-faint: #5f626a;
+    --ve-accent: #079fba;
+    --ve-accent-soft: color-mix(in srgb, var(--ve-accent) 8%, var(--ve-bg));
+    --ve-accent-contrast: #07191d;
+    --ve-info: var(--ve-text);
+    --ve-warn: var(--ve-text);
+    --ve-danger: var(--ve-text);
+    --ve-ok: var(--ve-text);
+    --ve-err: var(--ve-text);
+    --ve-diagram-bg: #ffffff;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #ffffff;
+    --ve-node-stroke: var(--ve-text);
+    --ve-diagram-ink: #202127;
+    --ve-diagram-muted: #5f626a;
+    --ve-diagram-frame: #b7b9c3;
+    --ve-diagram-accent-fill: var(--ve-accent-soft);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 8;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #000000;
+    --ve-code-text: #f5f5f5;
+    --ve-code-muted: #b6bac4;
+    --ve-code-rule: color-mix(in srgb, #ffffff 14%, transparent);
+    --ve-code-accent: var(--ve-accent);
+    --ve-poster-bg: #ffffff;
+    --ve-poster-text: #202127;
+    --ve-poster-muted: #5f626a;
+    --ve-poster-rule: color-mix(in srgb, #202127 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #ffffff;
+    --ve-slide-text: #202127;
+    --ve-slide-muted: #5f626a;
+    --ve-slide-rule: color-mix(in srgb, #202127 12%, transparent);
+  }
+
+  [data-ve-preset="mono-color"] {
+    --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 700;
+    --ve-heading-weight: 600;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 0px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #fafaf7;
+    --ve-bg-alt: #2148b8;
+    --ve-panel: #f4f4ee;
+    --ve-panel-strong: #fafaf7;
+    --ve-row: color-mix(in srgb, #2148b8 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-heading: #2148b8;
+    --ve-text: #2148b8;
+    --ve-muted: #415b99;
+    --ve-faint: #415b99;
+    --ve-accent: #a94c2b;
+    --ve-accent-soft: color-mix(in srgb, #2148b8 7%, transparent);
+    --ve-accent-contrast: #fafaf7;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #fafaf7;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #f4f4ee;
+    --ve-node-stroke: color-mix(in srgb, #2148b8 14%, transparent);
+    --ve-diagram-ink: #2148b8;
+    --ve-diagram-muted: #415b99;
+    --ve-diagram-frame: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #2148b8 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 4;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #2148b8;
+    --ve-code-text: #fafaf7;
+    --ve-code-muted: #d5d3cc;
+    --ve-code-rule: color-mix(in srgb, #fafaf7 14%, transparent);
+    --ve-code-accent: #d5d3cc;
+    --ve-poster-bg: #fafaf7;
+    --ve-poster-text: #2148b8;
+    --ve-poster-muted: #415b99;
+    --ve-poster-rule: color-mix(in srgb, #2148b8 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #fafaf7;
+    --ve-slide-text: #2148b8;
+    --ve-slide-muted: #415b99;
+    --ve-slide-rule: color-mix(in srgb, #2148b8 12%, transparent);
+  }
+
+  [data-ve-preset="algebrica"] {
+    --ve-shell-title-size: clamp(2.25rem, 4.5vw, 3.5rem);
+    --ve-shell-title-measure: 24ch;
+    --ve-shell-summary-size: 1.25rem;
+    --ve-font-display: "EB Garamond", Georgia, serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 400;
+    --ve-heading-weight: 500;
+    --ve-page-max: 76rem;
+    --ve-section-gap: 3rem;
+    --ve-radius: 8px;
+    --ve-poster-radius: 12px;
+    --ve-bg: #f4f0ef;
+    --ve-bg-alt: #312f2f;
+    --ve-panel: #faf7f6;
+    --ve-panel-strong: #f4f0ef;
+    --ve-row: color-mix(in srgb, #312f2f 4%, transparent);
+    --ve-nav-bg: rgb(255 255 255 / 0.96);
+    --ve-review-bg: rgb(255 255 255 / 0.98);
+    --ve-deck-letterbox: #e9e9e9;
+    --ve-rule: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-heading: #312f2f;
+    --ve-text: #312f2f;
+    --ve-muted: #68615f;
+    --ve-faint: #68615f;
+    --ve-accent: #784c3a;
+    --ve-accent-soft: color-mix(in srgb, #312f2f 7%, transparent);
+    --ve-accent-contrast: #f4f0ef;
+    --ve-info: #1d4ed8;
+    --ve-warn: #a16207;
+    --ve-danger: #b91c1c;
+    --ve-ok: #047857;
+    --ve-err: #b91c1c;
+    --ve-diagram-bg: #f4f0ef;
+    --ve-grid-line: transparent;
+    --ve-node-bg: #faf7f6;
+    --ve-node-stroke: color-mix(in srgb, #312f2f 14%, transparent);
+    --ve-diagram-ink: #312f2f;
+    --ve-diagram-muted: #68615f;
+    --ve-diagram-frame: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-diagram-accent-fill: color-mix(in srgb, #312f2f 7%, transparent);
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 4;
+    --ve-chip-radius: 4;
+    --ve-code-bg: #312f2f;
+    --ve-code-text: #f4f0ef;
+    --ve-code-muted: #b5b3aa;
+    --ve-code-rule: color-mix(in srgb, #f4f0ef 14%, transparent);
+    --ve-code-accent: #d5d3cc;
+    --ve-poster-bg: #f4f0ef;
+    --ve-poster-text: #312f2f;
+    --ve-poster-muted: #68615f;
+    --ve-poster-rule: color-mix(in srgb, #312f2f 12%, transparent);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: #f4f0ef;
+    --ve-slide-text: #312f2f;
+    --ve-slide-muted: #68615f;
+    --ve-slide-rule: color-mix(in srgb, #312f2f 12%, transparent);
+  }
+
+  [data-ve-preset="mono-industrial"] {
+    --ve-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ve-display-weight: 650;
+    --ve-heading-weight: 650;
+    --ve-page-max: 80rem;
+    --ve-section-gap: 2.5rem;
+    --ve-radius: 0px;
+    --ve-poster-radius: 0px;
+    --ve-bg: #09090b;
+    --ve-bg-alt: #f4f1ea;
+    --ve-panel: rgb(9 9 11 / 0.04);
+    --ve-panel-strong: rgb(24 24 27 / 0.12);
+    --ve-row: rgb(24 24 27 / 0.08);
+    --ve-nav-bg: rgb(9 9 11 / 0.92);
+    --ve-review-bg: rgb(9 9 11 / 0.96);
+    --ve-deck-letterbox: #161616;
+    --ve-rule: rgb(255 255 255 / 0.15);
+    --ve-heading: #fafafa;
+    --ve-text: #f4f4f5;
+    --ve-muted: #c3c7d1;
+    --ve-faint: #c3c7d1;
+    --ve-accent: #5eead4;
+    --ve-accent-soft: rgb(9 9 11 / 0.12);
+    --ve-accent-contrast: #09090b;
+    --ve-info: #93c5fd;
+    --ve-warn: #fbbf24;
+    --ve-danger: #f87171;
+    --ve-ok: #86efac;
+    --ve-err: #f87171;
+    --ve-diagram-bg: #09090b;
+    --ve-grid-line: #27272a;
+    --ve-node-bg: #18181b;
+    --ve-node-stroke: #71717a;
+    --ve-diagram-ink: #fafafa;
+    --ve-diagram-muted: #a1a1aa;
+    --ve-diagram-frame: rgb(255 255 255 / 0.16);
+    --ve-diagram-accent-fill: rgb(94 234 212 / 0.12);
+    --ve-diagram-grid-size: 22;
+    --ve-grid-dot-r: 0.9;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-node-radius: 6;
+    --ve-chip-radius: 0;
+    --ve-code-bg: #0a0a0a;
+    --ve-code-text: #f4f4f5;
+    --ve-code-muted: #a1a1aa;
+    --ve-code-rule: rgb(255 255 255 / 0.16);
+    --ve-code-accent: #5eead4;
+    --ve-poster-bg: #f4f1ea;
+    --ve-poster-text: #16130f;
+    --ve-poster-muted: rgb(22 19 15 / 0.62);
+    --ve-poster-rule: rgb(22 19 15 / 0.2);
+    --ve-poster-grid: rgb(22 19 15 / 0.08);
+  }
+
+  [data-ve-preset="custom"] {
+    --ve-diagram-ink: var(--ve-heading);
+    --ve-diagram-muted: var(--ve-muted);
+    --ve-diagram-frame: var(--ve-rule);
+    --ve-diagram-accent-fill: color-mix(in srgb, var(--ve-accent) 14%, transparent);
+  }
+
+  :root,
+  [data-ve-preset] {
+    --ve-graphic-stroke: 1.5;
+    --ve-graphic-detail-stroke: 1;
+    --ve-graphic-active-stroke: 2.2;
+    --ve-font-math: "STIX Two Math", "Cambria Math", serif;
+    --ve-illustration-ink: var(--ve-diagram-ink);
+    --ve-illustration-muted: var(--ve-diagram-muted);
+    --ve-illustration-stroke: 1.5;
+    --ve-illustration-detail-stroke: 0.8;
+    --ve-illustration-active-stroke: 1.5;
+    --ve-chart-stroke: 1.2;
+    --ve-chart-detail-stroke: 0.75;
+    --ve-chart-active-stroke: 1.8;
+  }
+
+  :root:not([data-ve-preset]),
+  [data-ve-preset="hairline"],
+  [data-ve-preset="3b1b"] {
+    --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ve-display-weight: 500;
+    --ve-heading-weight: 500;
+    --ve-bg: #ffffff;
+    --ve-bg-alt: #000000;
+    --ve-text: #202127;
+    --ve-muted: #5f626a;
+    --ve-accent: #079fba;
+    --ve-illustration-ink: #8a8d98;
+    --ve-illustration-muted: #b7b9c3;
+    --ve-diagram-frame: #b7b9c3;
+    --ve-heading: var(--ve-text);
+    --ve-faint: var(--ve-muted);
+    --ve-panel: var(--ve-bg);
+    --ve-panel-strong: var(--ve-bg);
+    --ve-row: color-mix(in srgb, var(--ve-text) 4%, transparent);
+    --ve-rule: color-mix(in srgb, var(--ve-text) 18%, transparent);
+    --ve-nav-bg: var(--ve-bg);
+    --ve-review-bg: var(--ve-bg);
+    --ve-deck-letterbox: var(--ve-bg-alt);
+    --ve-accent-soft: color-mix(in srgb, var(--ve-accent) 8%, var(--ve-bg));
+    --ve-accent-contrast: #07191d;
+    --ve-info: var(--ve-text);
+    --ve-warn: var(--ve-text);
+    --ve-danger: var(--ve-text);
+    --ve-ok: var(--ve-text);
+    --ve-err: var(--ve-text);
+    --ve-diagram-bg: var(--ve-bg);
+    --ve-diagram-ink: var(--ve-text);
+    --ve-diagram-muted: var(--ve-muted);
+    --ve-node-bg: var(--ve-bg);
+    --ve-node-stroke: var(--ve-text);
+    --ve-diagram-accent-fill: var(--ve-accent-soft);
+    --ve-grid-line: transparent;
+    --ve-diagram-grid-size: 0;
+    --ve-grid-dot-r: 0;
+    --ve-grid-dot-opacity: 0;
+    --ve-grid-line-opacity: 0;
+    --ve-grid-scanline-opacity: 0;
+    --ve-code-bg: var(--ve-bg-alt);
+    --ve-code-text: #f5f5f5;
+    --ve-code-muted: #b6bac4;
+    --ve-code-rule: color-mix(in srgb, var(--ve-code-text) 18%, transparent);
+    --ve-code-accent: var(--ve-accent);
+    --ve-poster-bg: var(--ve-bg);
+    --ve-poster-text: var(--ve-text);
+    --ve-poster-muted: var(--ve-muted);
+    --ve-poster-rule: var(--ve-rule);
+    --ve-poster-grid: transparent;
+    --ve-slide-bg: var(--ve-bg);
+    --ve-slide-text: var(--ve-text);
+    --ve-slide-muted: var(--ve-muted);
+    --ve-slide-rule: var(--ve-rule);
+  }
+
+  :root:not([data-ve-preset]),
+  [data-ve-preset="hairline"] {
+    --ve-graphic-stroke: 0.85;
+    --ve-graphic-detail-stroke: 0.6;
+    --ve-graphic-active-stroke: 1.15;
+    --ve-illustration-stroke: 1.2;
+    --ve-illustration-detail-stroke: 0.65;
+    --ve-illustration-active-stroke: 1.2;
+    --ve-chart-stroke: 0.85;
+    --ve-chart-detail-stroke: 0.55;
+    --ve-chart-active-stroke: 1.3;
+    --ve-node-stroke: var(--ve-illustration-ink);
+  }
+
+  :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="hairline"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  .motion-stage:is([data-ve-appearance="dark"], [data-motion-theme="dark"]):not([data-ve-preset]) {
+    --ve-bg: #000000;
+    --ve-bg-alt: #ffffff;
+    --ve-text: #f5f5f5;
+    --ve-muted: #b6bac4;
+    --ve-accent: #079fba;
+    --ve-illustration-ink: #b6bac4;
+    --ve-illustration-muted: #747884;
+    --ve-diagram-frame: #747884;
+    --ve-heading: var(--ve-text);
+    --ve-faint: var(--ve-muted);
+    --ve-panel: var(--ve-bg);
+    --ve-panel-strong: var(--ve-bg);
+    --ve-row: color-mix(in srgb, var(--ve-text) 4%, transparent);
+    --ve-rule: color-mix(in srgb, var(--ve-text) 18%, transparent);
+    --ve-nav-bg: var(--ve-bg);
+    --ve-review-bg: var(--ve-bg);
+    --ve-deck-letterbox: var(--ve-bg);
+    --ve-accent-soft: color-mix(in srgb, var(--ve-accent) 8%, var(--ve-bg));
+    --ve-accent-contrast: #07191d;
+    --ve-diagram-bg: var(--ve-bg);
+    --ve-diagram-ink: var(--ve-text);
+    --ve-diagram-muted: var(--ve-muted);
+    --ve-node-bg: var(--ve-bg);
+    --ve-node-stroke: var(--ve-illustration-ink);
+    --ve-diagram-accent-fill: var(--ve-accent-soft);
+    --ve-poster-bg: var(--ve-bg);
+    --ve-poster-text: var(--ve-text);
+    --ve-poster-muted: var(--ve-muted);
+    --ve-poster-rule: var(--ve-rule);
+    --ve-slide-bg: var(--ve-bg);
+    --ve-slide-text: var(--ve-text);
+    --ve-slide-muted: var(--ve-muted);
+    --ve-slide-rule: var(--ve-rule);
+  }
+
+  [data-ve-preset="3b1b"] {
+    --ve-font-display: "EB Garamond", Georgia, serif;
+    --ve-display-weight: 400;
+    --ve-heading-weight: 400;
+    --ve-bg: #000000;
+    --ve-bg-alt: #ffffff;
+    --ve-text: #f5f5f5;
+    --ve-muted: #b6bac4;
+    --ve-illustration-ink: #f5f5f5;
+    --ve-illustration-muted: #747884;
+    --ve-diagram-frame: #747884;
+    --ve-graphic-stroke: 2;
+    --ve-graphic-detail-stroke: 0.8;
+    --ve-graphic-active-stroke: 2.6;
+    --ve-illustration-stroke: 2;
+    --ve-illustration-detail-stroke: 0.8;
+    --ve-illustration-active-stroke: 2.6;
+    --ve-chart-stroke: 1.5;
+    --ve-chart-detail-stroke: 0.75;
+    --ve-chart-active-stroke: 2.2;
+    --ve-deck-letterbox: var(--ve-bg);
+  }
+
+  [data-ve-tone="dark"] {
+    --ve-slide-bg: var(--ve-bg);
+    --ve-slide-text: var(--ve-text);
+    --ve-slide-muted: var(--ve-muted);
+    --ve-slide-rule: var(--ve-rule);
+  }
+
+  /* Resolve these on the preset before an inverse surface remaps its ink. */
+  :root, [data-ve-preset], .motion-stage[data-motion-theme]:not([data-ve-preset]) {
+    --ve-inverse-bg: var(--ve-bg-alt);
+    --ve-inverse-ink: var(--ve-bg);
+    --ve-accent-bg: var(--ve-accent);
+    --ve-accent-ink: var(--ve-accent-contrast);
+  }
+
+  [data-ve-tone="light"] {
+    --ve-surface: var(--ve-inverse-bg);
+    --ve-surface-ink: var(--ve-inverse-ink);
+  }
+
+  [data-ve-tone="accent"] {
+    --ve-surface: var(--ve-accent-bg);
+    --ve-surface-ink: var(--ve-accent-ink);
+  }
+
+  :is([data-ve-tone="light"], [data-ve-tone="accent"]) {
+    --ve-slide-bg: var(--ve-surface);
+    --ve-slide-text: var(--ve-surface-ink);
+    --ve-slide-muted: var(--ve-surface-ink);
+    --ve-slide-rule: color-mix(in srgb, var(--ve-surface-ink) 25%, transparent);
+    --ve-heading: var(--ve-surface-ink);
+    --ve-text: var(--ve-surface-ink);
+    --ve-muted: var(--ve-surface-ink);
+    --ve-faint: var(--ve-surface-ink);
+    --ve-panel: var(--ve-surface);
+    --ve-panel-strong: var(--ve-surface);
+    --ve-row: color-mix(in srgb, var(--ve-surface-ink) 5%, transparent);
+    --ve-rule: var(--ve-slide-rule);
+    --ve-accent: var(--ve-surface-ink);
+    --ve-accent-contrast: var(--ve-surface);
+    --ve-accent-soft: color-mix(in srgb, var(--ve-surface-ink) 8%, transparent);
+    --ve-diagram-bg: var(--ve-surface);
+    --ve-node-bg: var(--ve-surface);
+    --ve-node-stroke: color-mix(in srgb, var(--ve-surface-ink) 35%, transparent);
+    --ve-diagram-ink: var(--ve-surface-ink);
+    --ve-diagram-muted: var(--ve-surface-ink);
+    --ve-diagram-frame: var(--ve-slide-rule);
+    --ve-diagram-accent-fill: var(--ve-accent-soft);
+  }
+
+  @scope ([data-ve-preset="hairline"], [data-ve-preset="3b1b"]) to ([data-ve-preset]) {
+    :scope a,
+    :scope:is(a) {
+      color: var(--ve-text);
+    }
+
+    :scope:is([data-ve-tone="light"], [data-ve-tone="accent"]),
+    :is([data-ve-tone="light"], [data-ve-tone="accent"]) {
+      --ve-info: var(--ve-surface-ink);
+      --ve-warn: var(--ve-surface-ink);
+      --ve-danger: var(--ve-surface-ink);
+      --ve-ok: var(--ve-surface-ink);
+      --ve-err: var(--ve-surface-ink);
+      --ve-illustration-ink: var(--ve-surface-ink);
+      --ve-illustration-muted: color-mix(in srgb, var(--ve-surface-ink) 60%, var(--ve-surface));
+    }
+  }
+
+}

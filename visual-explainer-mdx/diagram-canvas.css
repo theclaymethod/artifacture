@@ -1,0 +1,108 @@
+.ve-diagram-shell,
+.ve-diagram-shell * {
+  box-sizing: border-box;
+}
+
+.ve-diagram-shell {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--ve-font-body);
+  background: var(--ve-diagram-bg);
+}
+
+.ve-diagram-shell .ve-diagram-variant-desktop {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-color: var(--ve-diagram-muted) var(--ve-diagram-bg);
+}
+
+.ve-diagram-shell .ve-diagram-variant-desktop:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 4px;
+}
+
+.ve-diagram-shell .ve-diagram-variant-desktop svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ve-diagram-shell .ve-diagram-variant-mobile {
+  display: none;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-list {
+  display: grid;
+  min-width: 0;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-node {
+  min-width: 0;
+  padding: 1.25rem 0;
+  color: var(--ve-diagram-ink);
+  overflow-wrap: anywhere;
+  scroll-margin-top: 1rem;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-node + .ve-diagram-mobile-node {
+  border-top: 1px solid var(--ve-diagram-frame);
+}
+
+.ve-diagram-shell .ve-diagram-mobile-lane {
+  margin: 0 0 0.4rem;
+  color: var(--ve-diagram-muted);
+  font-family: var(--ve-font-body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-node h3 {
+  margin: 0;
+  color: var(--ve-diagram-ink);
+  font-family: var(--ve-font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-node p:not(.ve-diagram-mobile-lane) {
+  margin: 0.4rem 0 0;
+  color: var(--ve-diagram-muted);
+  font-family: var(--ve-font-body);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-connections {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-connections a {
+  display: inline-block;
+  padding-block: 0.4rem;
+  color: var(--ve-diagram-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.ve-diagram-shell .ve-diagram-mobile-connections a:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .ve-diagram-shell.ve-diagram-has-mobile .ve-diagram-variant-desktop {
+    display: none;
+  }
+
+  .ve-diagram-shell.ve-diagram-has-mobile .ve-diagram-variant-mobile {
+    display: block;
+  }
+}

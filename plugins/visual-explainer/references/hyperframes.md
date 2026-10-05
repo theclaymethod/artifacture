@@ -18,7 +18,7 @@ Use upstream skills for runtime mechanics. Use Artifacture's references for comp
 
 **Artifacture owns:**
 - Topic-to-video and deck-to-video command routing.
-- Lieflat by default, or the requested preset.
+- The [default explainer theme](default-explainer-theme.md) across formats and its [motion choreography](motion-video-baseline.md), or the requested visual identity.
 - Reel structure in `references/reel-patterns.md`.
 - Material-choice handling in `references/clarify.md`.
 - Draft rendering, keyframe inspection, and delivery.
@@ -57,6 +57,8 @@ hyperframes render ...
 The skill defaults to `npx hyperframes …` to avoid imposing a global install.
 
 ## Composition source
+
+Read [default-explainer-theme.md](default-explainer-theme.md) and [motion-video-baseline.md](motion-video-baseline.md) before authoring a new video without a supplied design spec. Reuse the shared scene geometry, host theme roles, and illustration rules. Existing templates demonstrate runtime mechanics; their visual treatment does not override the default theme.
 
 Keep the editable composition in TSX and generate HTML with `ve:export-static`. A Hyperframes project contains that HTML and its media assets. The root composition is an HTML file where the `<div id="stage">` (or any root element) carries `data-composition-id`, `data-width`, `data-height`, `data-start`, and `data-duration` attributes. Nested `<video>`, `<img>`, and `<audio>` elements each carry `data-start`, `data-duration`, and `data-track-index`.
 

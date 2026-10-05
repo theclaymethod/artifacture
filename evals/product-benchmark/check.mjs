@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { sha256 } from './run-manifest.mjs';
-import { reviewContractSha256 } from '../../plugins/visual-explainer/scripts/verify/lib/report.mjs';
+import { parseReviewReport } from '../../plugins/visual-explainer/scripts/verify/lib/review-contract.mjs';
 
 const BENCHMARK_ROOT = fileURLToPath(new URL('.', import.meta.url));
 
@@ -118,9 +118,8 @@ export function validateBoundRuns(benchmark, judgments, judgmentsPath, benchmark
       validateFileRef(item.report, manifestPath, `${role}/${benchmarkCase.id} report`, problems);
       const reportPath = resolve(dirname(manifestPath), item.report?.path || '');
       let reportData = null;
-      try { reportData = JSON.parse(readFileSync(reportPath, 'utf8')); } catch { problems.push(`${role}/${benchmarkCase.id} report is invalid JSON`); }
+      try { reportData = parseReviewReport(JSON.parse(readFileSync(reportPath, 'utf8'))); } catch (error) { problems.push(`${role}/${benchmarkCase.id} report review contract is invalid: ${error.message}`); }
       const contract = reportData?.review_contract;
-      if (!contract || reviewContractSha256(contract) !== contract.sha256) problems.push(`${role}/${benchmarkCase.id} report review contract is invalid`);
       if (!contract?.complete) problems.push(`${role}/${benchmarkCase.id} report review contract is incomplete`);
       if (contract?.sha256 !== item.review_contract_sha256) problems.push(`${role}/${benchmarkCase.id} manifest does not bind report review contract`);
       if (contract?.artifact_sha256 !== item.artifact?.sha256) problems.push(`${role}/${benchmarkCase.id} report is not bound to artifact`);
@@ -128,7 +127,8 @@ export function validateBoundRuns(benchmark, judgments, judgmentsPath, benchmark
       if (!existsSync(taskPath) || contract?.truth_sha256 !== sha256(taskPath) || item.truth_sha256 !== contract?.truth_sha256) {
         problems.push(`${role}/${benchmarkCase.id} report is not bound to benchmark truth`);
       }
-      if (role === 'candidate' && Number(item.mechanics_errors) > 0) problems.push(`candidate/${benchmarkCase.id} has mechanics errors`);
+      if (reportData && item.mechanics_errors !== reportData.summary.errors) problems.push(`${role}/${benchmarkCase.id} mechanics errors do not match parsed report`);
+      if (role === 'candidate' && reportData?.summary.errors > 0) problems.push(`candidate/${benchmarkCase.id} has mechanics errors`);
       if (!Array.isArray(item.evidence) || JSON.stringify(item.evidence.map((entry) => entry.sha256)) !== JSON.stringify(contract?.evidence_sha256)) {
         problems.push(`${role}/${benchmarkCase.id} manifest evidence does not match report contract`);
       } else item.evidence.forEach((ref, index) => validateFileRef(ref, manifestPath, `${role}/${benchmarkCase.id} evidence ${index + 1}`, problems));

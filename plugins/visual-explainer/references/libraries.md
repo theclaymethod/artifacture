@@ -107,7 +107,7 @@ graph TD
 
 **Node-label fonts.** Space Grotesk at 15px (docs) or 20px (slide decks).
 
-**When to use this theme:** only for an explicit Mono-Industrial request. Default output inherits the `lieflat` preset.
+**When to use this theme:** only for an explicit Mono-Industrial request. Default output inherits the `hairline` preset.
 
 ### CSS Overrides on Mermaid SVG
 
@@ -686,7 +686,7 @@ Pair the code block with a minimal Space Mono caption for the filename when it p
 
 ## Google Fonts — Typography
 
-Load the selected preset's fonts with `display=swap`. Lieflat uses Inter; Algebrica uses EB Garamond for reading and Inter for controls and figure labels. Use a monospace face only for code, identifiers, or aligned values. Keep appropriate system fallbacks.
+Load the selected preset's fonts with `display=swap`. Hairline uses Inter; 3b1b uses mathematical serif text; Algebrica uses EB Garamond for reading and Inter for controls and figure labels. Use a monospace face only for code, identifiers, or aligned values. Keep appropriate system fallbacks.
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">

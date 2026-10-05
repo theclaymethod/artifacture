@@ -36,6 +36,7 @@ import React, {
   type ReactElement,
   type ReactNode,
 } from 'react';
+import { assertSupportedPreset } from './preset-policy.mjs';
 import {
   RAIL_COLLAPSED_WIDTH,
   RAIL_EXPANDED_WIDTH,
@@ -1743,12 +1744,13 @@ function requestPresentationVerticalNavigation(
 export function PresentationDeck({
   title,
   eyebrow,
-  preset = 'lieflat',
+  preset = 'hairline',
   stageWidth = 1920,
   stageHeight = 1080,
   railAutoCollapseMs = 900,
   children,
 }: PresentationDeckProps) {
+  assertSupportedPreset(preset);
   const slides = React.Children.toArray(children).filter((child): child is ReactElement<PresentationSlideProps> =>
     isValidElement(child),
   );

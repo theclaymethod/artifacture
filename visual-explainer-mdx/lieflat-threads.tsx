@@ -88,7 +88,7 @@ export function ThreadPlot({ spec }: { spec: ThreadsSpec }) {
           <svg role="img" aria-labelledby={`${id}-title ${id}-description`} width={width} height={height} viewBox={`0 0 ${width} ${height}`} data-ve-thread-plot>
             <title id={`${id}-title`}>{`${spec.records.length} ${spec.unitLabel} paths through ${spec.stages.join(', ')}`}</title>
             <desc id={`${id}-description`}>Each fine line is one record. The data table lists every path. {active ? `Selected: ${active.id}, ${active.path.join(', ')}.` : ''}</desc>
-            {[...spec.records.filter((record) => record.id !== active?.id), ...(active ? [active] : [])].map((record) => <path key={record.id} data-ve-thread={record.id} d={path(record.id)} fill="none" stroke="currentColor" strokeWidth={active?.id === record.id ? 1.8 : 0.85} opacity={active ? active.id === record.id ? 1 : 0.08 : 0.23} />)}
+            {[...spec.records.filter((record) => record.id !== active?.id), ...(active ? [active] : [])].map((record) => <path key={record.id} data-ve-thread={record.id} d={path(record.id)} fill="none" stroke="currentColor" strokeWidth={active?.id === record.id ? 'var(--ve-chart-active-stroke)' : 'var(--ve-chart-stroke)'} opacity={active ? active.id === record.id ? 1 : 0.08 : 0.23} />)}
             {positions.map((position, stage) => <g key={spec.stages[stage]}>
               {position.labels.map((group) => <text className="ve-thread-label" key={group.label} x={x(stage)} y={group.y} fontSize="14">{wrap(`${group.label} · ${group.count}`).map((line, index) => <tspan key={index} x={x(stage)} dy={index ? 18 : 0}>{line}</tspan>)}</text>)}
               {spec.records.map((record) => <circle key={record.id} cx={x(stage)} cy={position.points.get(record.id)} r={active?.id === record.id ? 3.2 : 1.5} fill="currentColor" opacity={active && active.id !== record.id ? 0.2 : 0.85}><title>{`${record.id}: ${record.path[stage]}`}</title></circle>)}
@@ -133,7 +133,7 @@ function PortraitThreads({ spec, width, activeId }: { spec: ThreadsSpec; width: 
   }).join(' ');
   return <svg className="ve-thread-portrait" data-ve-thread-plot data-ve-thread-mode="vertical" role="img" aria-labelledby={`${id}-title`} viewBox={`0 0 ${width} ${stages.at(-1)!.y + 8}`} width={width} height={stages.at(-1)!.y + 8}>
     <title id={`${id}-title`}>{`${spec.records.length} record paths, read from top to bottom: ${spec.stages.join(', ')}`}</title>
-    {ordered.map((record) => <path key={record.id} data-ve-thread={record.id} d={path(record.id)} fill="none" stroke="currentColor" strokeWidth={record.id === activeId ? 1.8 : 0.8} opacity={activeId ? record.id === activeId ? 1 : 0.08 : 0.3} />)}
+    {ordered.map((record) => <path key={record.id} data-ve-thread={record.id} d={path(record.id)} fill="none" stroke="currentColor" strokeWidth={record.id === activeId ? 'var(--ve-chart-active-stroke)' : 'var(--ve-chart-stroke)'} opacity={activeId ? record.id === activeId ? 1 : 0.08 : 0.3} />)}
     {stages.map((stage, index) => <g key={stage.name}>
       <text className="ve-thread-label" x="0" y={stage.y - 72} fontSize="16" fontWeight="600">{stage.name}</text>
       {stage.groups.map((group) => <g key={group.category}>

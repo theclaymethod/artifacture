@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "secant-to-tangent",
+  "title": "Two points approach one tangent",
+  "engine": "manim",
+  "source": "secant-to-tangent.py",
+  "scene": "SecantToTangent",
+  "theme": "hairline",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "stills": [4, 9.8, 13]
+}
