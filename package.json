@@ -9,12 +9,17 @@
   ],
   "license": "MIT",
   "bin": {
+    "artifacture": "scripts/artifacture.mjs",
     "artifacture-preview": "plugins/visual-explainer/scripts/preview.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "scripts": {
+    "components": "node scripts/artifacture.mjs",
+    "build:skill-runtime": "node scripts/build-skill-runtime.mjs",
+    "check:skill-runtime": "node scripts/build-skill-runtime.mjs --check",
+    "prepack": "node scripts/components/check.mjs && npm run build:skill-runtime",
     "lint": "oxlint .",
     "ve:export": "node scripts/ve-mdx/export.mjs",
     "ve:export-static": "node scripts/ve-mdx/export-static.mjs",
@@ -22,13 +27,12 @@
     "ve:check-integrity": "node scripts/ve-mdx/check-integrity.mjs",
     "ve:verify": "node plugins/visual-explainer/scripts/verify/ve-verify.mjs",
     "ve:finalize": "node plugins/visual-explainer/scripts/verify/ve-finalize.mjs",
-    "ve:eval": "node evals/run.mjs && node evals/design-systems/run.mjs",
+    "ve:eval": "node evals/run.mjs",
     "ve:eval-product": "node evals/product-benchmark/check.mjs --json",
     "ve:manifest-product-run": "node evals/product-benchmark/run-manifest.mjs",
     "ve:prepare-product-review": "node evals/product-benchmark/prepare-review.mjs",
     "ve:generate-product-benchmark": "node evals/model-matrix/run-matrix.mjs --models codex --tasks arch-diagram,code-walkthrough,comparison-table,explain-diff,slide-deck,project-recap",
     "ve:eval-presentation": "node evals/run-presentation.mjs",
-    "ve:eval-visual-model-policy": "node --test evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs",
     "ve:render-visual-model-corpus": "node evals/visual-model-policy/render-corpus.mjs",
     "ve:run-visual-model-eval": "node evals/visual-model-policy/run.mjs",
     "ve:aggregate-visual-model-eval": "node evals/visual-model-policy/aggregate.mjs",
@@ -36,35 +40,39 @@
     "ve:select-visual-model-policy": "node evals/visual-model-policy/select.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
     "typecheck": "tsc --noEmit",
-    "check:fast": "npm test && npm run typecheck && npm run check:manifests && npm run ve:check",
+    "check:fast": "npm run check:skill-runtime && npm test && npm run typecheck && npm run check:manifests && npm run ve:check",
     "check": "node evals/check-with-budget.mjs",
     "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
-    "test": "node --test visual-explainer-mdx/diagram-layout.test.mjs visual-explainer-mdx/presentation-core.test.mjs scripts/ve-mdx/design-systems.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs scripts/ve-mdx/learn-extractors.test.mjs evals/budgets.test.mjs evals/finalize-report.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/product-benchmark/prepare-review.test.mjs evals/review-routing.test.mjs evals/visual-model-policy/corpus.test.mjs evals/visual-model-policy/run.test.mjs evals/visual-model-policy/aggregate.test.mjs evals/visual-model-policy/merge.test.mjs evals/visual-model-policy/select.test.mjs evals/visual-cache/prefix.test.mjs plugins/visual-explainer/scripts/diagram-contract.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/network-policy.test.mjs plugins/visual-explainer/scripts/preview.test.mjs plugins/visual-explainer/scripts/verify/lib/model-policy.test.mjs plugins/visual-explainer/scripts/verify/lib/profile.test.mjs",
+    "test": "npm run test:e2e",
     "ve:archify": "node scripts/archify.mjs",
     "ve:chart": "node scripts/lieflat-chart.mjs",
     "ve:video-collection": "node plugins/visual-explainer/scripts/video-collection.mjs",
-    "ve:graphic-video": "node scripts/ve-mdx/graphic-video.mjs"
+    "ve:graphic-video": "node scripts/ve-mdx/graphic-video.mjs",
+    "test:e2e": "node --test scripts/ve-mdx/export-react-singleton.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/deck-review-set.browser.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/preview.test.mjs"
   },
   "dependencies": {
     "@mdx-js/rollup": "^3.1.1",
     "@tailwindcss/vite": "^4.3.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "d3-dag": "1.2.2",
     "gsap": "3.14.2",
+    "linkedom": "0.18.12",
+    "playwright": "1.60.0",
+    "playwright-core": "1.60.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "shiki": "4.3.1",
     "tailwindcss": "^4.3.0",
+    "three": "0.186.1",
     "vite": "^8.0.12"
   },
   "devDependencies": {
     "@oxlint/plugins": "^1.79.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "linkedom": "0.18.12",
+    "@types/three": "0.186.0",
     "oxlint": "^1.79.0",
-    "playwright": "1.60.0",
-    "playwright-core": "1.60.0",
-    "shiki": "4.3.1",
     "typescript": "^6.0.3"
   }
 }

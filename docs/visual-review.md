@@ -7,7 +7,7 @@ The September 2026 refresh was compared with the original references in a browse
 | [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts) | Countable unit fields and rungs, observations spaced by date, area-scaled matrices, and individual record threads; these five families can be authored from JSON or MDX | [Repair story](img/examples/charts.png) |
 | [Algebrica](https://algebrica.org/vectors/) | EB Garamond reading text, a calmer title scale, and a complete projection figure on mobile | [Mathematical explainer](img/examples/algebrica.png) |
 | [Mono Color](https://github.com/yanliudesign/mono-color-skill) | Larger type, an offset image, visible paper, and an original two-ink repair illustration | [Editorial page](img/examples/mono-color.png) |
-| [Archify](https://github.com/tt-a1i/archify) | Deterministic geometry and interactive controls, with the paper-and-charcoal editorial treatment | [System map](img/examples/archify.png) |
+| [Archify](https://github.com/tt-a1i/archify) | Deterministic geometry and interactive controls, adapted to Hairline with thin strokes and one cyan accent | [System map](img/examples/archify.png) |
 | [PR Lens](https://github.com/coldteadotai/pr-lens) | One moving signal on the actual route, nearby authored captions, and explicit playback controls | [Walkthrough](img/examples/animated-diagram.png) |
 | [Pierrick Calvez](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography) | Shorter measures, grouped phrases, optical spacing, and aligned numeric columns | [Poster](img/examples/poster.png) |
 

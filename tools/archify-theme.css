@@ -1,43 +1,53 @@
-/* Artifacture's reader treatment. Geometry and viewer controls stay upstream. */
-[data-preset="editorial"][data-theme="light"] {
-  --bg: #f0efeb; --text: #1c1c1a; --text-muted: #65645f; --text-dim: #65645f;
-  --text-faint: #65645f; --grid: transparent; --panel: #f7f6f2;
-  --panel-border: #ceccc4; --mask: #f7f6f2; --lane-fill: #e9e7e0; --lane-stroke: #8c8980;
-  --arrow: #65645f; --arrow-emphasis: #1c1c1a;
-  --frontend-fill: #f7f6f2; --frontend-stroke: #77746c;
-  --backend-fill: #f7f6f2; --backend-stroke: #77746c;
-  --database-fill: #f7f6f2; --database-stroke: #77746c;
-  --cloud-fill: #f7f6f2; --cloud-stroke: #77746c;
-  --security-fill: #f7f6f2; --security-stroke: #77746c;
-  --messagebus-fill: #f7f6f2; --messagebus-stroke: #77746c;
-  --external-fill: #f7f6f2; --external-stroke: #77746c;
-  --toolbar-bg: #f7f6f2; --toolbar-border: #ceccc4; --toolbar-text: #1c1c1a;
-  --toolbar-hover: #e9e7e0; --toolbar-menu-bg: #f7f6f2;
+/* Hairline treatment of Archify's schema-compatible Classic preset. */
+[data-preset="classic"][data-theme="light"] {
+  --bg: #fff; --text: #202127; --text-muted: #5f626a; --text-dim: #5f626a;
+  --text-faint: #5f626a; --grid: transparent; --panel: #fff;
+  --panel-border: #e6e7eb; --mask: #fff; --lane-fill: #fafafb; --lane-stroke: #b7b9c3;
+  --arrow: #8a8d98; --arrow-emphasis: #079fba;
+  --frontend-fill: #fff; --frontend-stroke: #8a8d98;
+  --backend-fill: #fff; --backend-stroke: #8a8d98;
+  --database-fill: #fff; --database-stroke: #8a8d98;
+  --cloud-fill: #fff; --cloud-stroke: #8a8d98;
+  --security-fill: #fff; --security-stroke: #8a8d98;
+  --messagebus-fill: #fff; --messagebus-stroke: #8a8d98;
+  --external-fill: #fff; --external-stroke: #8a8d98;
+  --toolbar-bg: #fff; --toolbar-border: #e6e7eb; --toolbar-text: #202127;
+  --toolbar-hover: #fafafb; --toolbar-menu-bg: #fff;
 }
-[data-preset="editorial"][data-theme="dark"] {
-  --bg: #1c1c1a; --text: #f0efeb; --text-muted: #c2c0b8; --text-dim: #c2c0b8;
-  --text-faint: #c2c0b8; --grid: transparent; --panel: #242421;
-  --panel-border: #55544d; --mask: #242421; --lane-fill: #2e2e29; --lane-stroke: #8c8980;
-  --arrow: #b5b3aa; --arrow-emphasis: #f0efeb;
-  --frontend-fill: #242421; --frontend-stroke: #9d9b92;
-  --backend-fill: #242421; --backend-stroke: #9d9b92;
-  --database-fill: #242421; --database-stroke: #9d9b92;
-  --cloud-fill: #242421; --cloud-stroke: #9d9b92;
-  --security-fill: #242421; --security-stroke: #9d9b92;
-  --messagebus-fill: #242421; --messagebus-stroke: #9d9b92;
-  --external-fill: #242421; --external-stroke: #9d9b92;
-  --toolbar-bg: #242421; --toolbar-border: #55544d; --toolbar-text: #f0efeb;
-  --toolbar-hover: #35352f; --toolbar-menu-bg: #242421;
+[data-preset="classic"][data-theme="dark"] {
+  --bg: #111216; --text: #f5f5f5; --text-muted: #b6bac4; --text-dim: #b6bac4;
+  --text-faint: #b6bac4; --grid: transparent; --panel: #181a1f;
+  --panel-border: #454953; --mask: #181a1f; --lane-fill: #20232a; --lane-stroke: #747884;
+  --arrow: #b7b9c3; --arrow-emphasis: #079fba;
+  --frontend-fill: #181a1f; --frontend-stroke: #b7b9c3;
+  --backend-fill: #181a1f; --backend-stroke: #b7b9c3;
+  --database-fill: #181a1f; --database-stroke: #b7b9c3;
+  --cloud-fill: #181a1f; --cloud-stroke: #b7b9c3;
+  --security-fill: #181a1f; --security-stroke: #b7b9c3;
+  --messagebus-fill: #181a1f; --messagebus-stroke: #b7b9c3;
+  --external-fill: #181a1f; --external-stroke: #b7b9c3;
+  --toolbar-bg: #181a1f; --toolbar-border: #454953; --toolbar-text: #f5f5f5;
+  --toolbar-hover: #20232a; --toolbar-menu-bg: #181a1f;
 }
-html[data-preset="editorial"] body { background-image: none; font-family: Inter, Arial, sans-serif; }
-html[data-preset="editorial"] h1, html[data-preset="editorial"] .card h3 { font-family: Inter, Arial, sans-serif; font-weight: 600; }
-html[data-preset="editorial"] .header-row::after,
-html[data-preset="editorial"] .diagram-container::before,
-html[data-preset="editorial"] .diagram-container::after,
-html[data-preset="editorial"] .pulse-dot { display: none; }
-html[data-preset="editorial"] .diagram-container { background: var(--panel); box-shadow: none; border-radius: 12px; }
-html[data-preset="editorial"] .header { margin-bottom: 24px; }
-html[data-preset="editorial"] .header-subtitle { margin-left: 0; }
-svg[data-preset="editorial"], svg[data-preset="editorial"] text { font-family: Inter, Arial, sans-serif; }
-html[data-preset="editorial"] .toolbar { font-family: Inter, Arial, sans-serif; }
-html[data-preset="editorial"] :focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+html[data-preset="classic"] body { background-image: none; font-family: Inter, Arial, sans-serif; }
+html[data-preset="classic"] h1, html[data-preset="classic"] .card h3 { font-family: Inter, Arial, sans-serif; font-weight: 600; }
+html[data-preset="classic"] .header-row::after,
+html[data-preset="classic"] .diagram-container::before,
+html[data-preset="classic"] .diagram-container::after,
+html[data-preset="classic"] .pulse-dot { display: none; }
+html[data-preset="classic"] .diagram-container { background: var(--panel); box-shadow: none; border-radius: 12px; }
+html[data-preset="classic"] .header { margin-bottom: 24px; }
+html[data-preset="classic"] .header-subtitle { margin-left: 0; }
+svg[data-preset="classic"], svg[data-preset="classic"] text { font-family: Inter, Arial, sans-serif; }
+svg[data-preset="classic"] :is(.c-frontend, .c-backend, .c-database, .c-cloud, .c-security, .c-messagebus, .c-external, .c-security-group, .c-region, .c-lane) { stroke-width: 0.8; }
+svg[data-preset="classic"] :is(.a-default, .a-security, .a-dashed) { stroke-width: 0.8; }
+svg[data-preset="classic"] .a-emphasis { stroke-width: 1.2; }
+svg[data-preset="classic"] .c-region { fill: var(--lane-fill); }
+svg[data-preset="classic"] .semantic-sigil { stroke-width: 0.8; }
+svg[data-preset="classic"] :is(.t-frontend, .t-backend, .t-database, .t-cloud, .t-security, .t-messagebus, .t-external) { fill: var(--text-muted); }
+svg[data-preset="classic"] :is(.relationship-flow-pulse, .semantic-lens-flow, .intent-trace-flow, .route-probe-flow, .route-journey-flow, .story-trail-flow) { stroke: var(--arrow-emphasis); stroke-width: 1.2; filter: none; }
+html[data-preset="classic"] .toolbar { font-family: Inter, Arial, sans-serif; }
+html[data-preset="classic"] :focus-visible { outline: 2px solid var(--arrow-emphasis); outline-offset: 3px; }
+@media (max-width: 720px) {
+  .toolbar { inset: auto; width: 100%; flex-wrap: wrap; justify-content: flex-start; }
+}

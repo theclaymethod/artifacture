@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { gsap } from 'gsap';
 import { GraphicSlide, sampleSlideSequence, sequenceSlides, type GraphicSlideSequence } from './graphic-slides';
@@ -9,6 +9,16 @@ declare global {
     __timelines?: Record<string, gsap.core.Timeline>;
     gsap?: typeof gsap;
   }
+}
+
+const roots = new WeakMap<gsap.core.Timeline, Root>();
+
+export function disposeGraphicVideo(timeline: gsap.core.Timeline) {
+  timeline.kill();
+  const root = roots.get(timeline);
+  roots.delete(timeline);
+  // A host can leave during its parent React commit. Unmount after that commit.
+  queueMicrotask(() => root?.unmount());
 }
 
 export function registerGraphicVideo(sequence: GraphicSlideSequence) {
@@ -21,6 +31,7 @@ export function registerGraphicVideo(sequence: GraphicSlideSequence) {
   draw();
   const timeline = gsap.timeline({ paused: true });
   timeline.fromTo(clock, { seconds: 0 }, { seconds: checked.duration, duration: checked.duration, ease: 'none', onUpdate: draw }, 0);
+  roots.set(timeline, root);
   window.gsap = gsap;
   return timeline;
 }

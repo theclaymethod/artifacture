@@ -11,15 +11,17 @@ Turn a topic, outline, or source document into an MP4 with Hyperframes.
 **Output:** one MP4 in `~/.agent/videos/<slug>.mp4` plus 3 keyframe PNGs for review.
 Rendering typically takes 30 seconds to 5 minutes, depending on duration and quality.
 
-Write the composition in TSX, register a paused GSAP timeline synchronously on `window.__timelines["<id>"]`, and export static HTML:
+Write reusable graphic scenes in TSX, compose them with `createSlideScene` and `sequenceSlides`, and export `sequence`. Render the first pose with `GraphicVideo`; the bundled exporter supplies its paused GSAP clock and registers it synchronously on `window.__timelines["<id>"]`.
 
-Use the [Hairline motion baseline](../references/motion-video-baseline.md) by default. Illustrations carry the explanation, with fine-line objects, consistent visual correspondence, and purposeful transformations. An explicit brand or requested look takes precedence. The templates below supply runtime mechanics; use the baseline for visual treatment.
+Use the [Hairline motion baseline](../references/motion-video-baseline.md) by default. Illustrations carry the explanation, with fine-line objects, consistent visual correspondence, and purposeful transformations. An explicit brand or requested look takes precedence. Use the baseline for visual treatment in either supported composition route.
 
 ```bash
-npm run ve:export-static -- <composition.tsx> --out ~/.agent/videos/<slug>/index.html
+npm run ve:graphic-video -- <composition.tsx> --out ~/.agent/videos/<slug>/index.html
 ```
 
-Hyperframes renders `index.html`; revisions belong in TSX. Re-export before linting, validating, or rendering. Use `templates/hyperframes-*.html` for timing and GSAP examples. Hand-write final HTML only if React static export is blocked, and report the fallback.
+Hyperframes renders `index.html`; revisions belong in TSX. Keep the HTML beside its local content-hashed runtime asset, and re-export before linting, validating, or rendering. Use [the shared graphics guide](../../../docs/graphics-and-video.md) and [the long-form example](../../../examples/visual-explainer-mdx/video-longform.tsx) for source authoring. The shared sequence supports finite graphic motion and hard cuts between beats.
+
+`ve:export-static` keeps its distinct SSR content and document contract. Use it for a source-owned complete composition that already includes a self-contained browser timeline, including delivery layers beyond shared graphics such as narration or captions. It does not bundle the `GraphicVideo` runtime. The `templates/hyperframes-*.html` files remain references for that contract. Hand-write final HTML only if the appropriate TSX exporter is blocked, and report the fallback.
 
 ## Instructional modes and collections
 
@@ -27,13 +29,7 @@ Mode describes the viewer's task. Style describes delivery format. Print the can
 
 For `--collection`, validate the supplied manifest and select `--episode` by its semantic ID. Use its audience, terms, subjects, pinned claims, narration draft, and handoff. Review `SCRIPT.md` as a draft before committing to the story. Manifest validation does not approve a script or complete a video.
 
-Prefer the shared graphics route for new source-driven work: primitives support diagrams and posters, diagram scenes compose into slides, and complete slide scenes sequence into video. Generated collection compositions use `GraphicVideo` and require the bundled exporter:
-
-```bash
-npm run ve:graphic-video -- <composition.tsx> --out <video-project>/index.html
-```
-
-Use `ve:export-static` for legacy TSX compositions that already contain a self-contained browser timeline. It does not bundle the shared `GraphicVideo` runtime.
+Generated collection compositions use the same shared graphics route and bundled exporter. Primitives support diagrams and posters, diagram scenes compose into slides, and complete slide scenes sequence into video.
 
 ## Styles
 
@@ -45,8 +41,8 @@ Honor `--style` or the request; otherwise use long-form.
 - **Duration:** 60–180 seconds
 - **Pacing:** Slide-paced, 10s average dwell per scene, 6–12 scenes
 - **Audience:** Team meetings, onboarding, LinkedIn, docs embeds
-- **Reference template:** `templates/hyperframes-longform.html`
-- **Animations:** Progressive illustration, coupled transformations, and deliberate holds. Preserve object identity across beats; follow installed motion-doctrine guidance at scene boundaries.
+- **Source example:** `examples/visual-explainer-mdx/video-longform.tsx`; `templates/hyperframes-longform.html` covers source-owned delivery layers
+- **Animations:** Progressive illustration, coupled transformations, and deliberate holds. Preserve object identity across beats; shared sequences use hard cuts at scene boundaries. The long-form source example replaces its earlier 0.3s fades with those supported cuts.
 - **Audio:** TTS narration over dwell scenes; optional soft bed
 
 ### `reel`
@@ -83,20 +79,22 @@ Missing upstream skills produce non-fatal warnings. When available, use `/hyperf
 
 Use the upstream `/hyperframes` guidance for easing, captions, transitions, voices, and `class="clip"` timing when installed. Artifacture's references define the composition and reel structure.
 
-- **Long-form:** Author a TSX composition using `templates/hyperframes-longform.html` as reference material. Build one scene per major beat from the outline. Edit the script before placing it in the composition; use Unslop when requested and available.
-- **Reel:** Author a TSX composition using `templates/hyperframes-reel.html` or `templates/hyperframes-reel-landscape.html` as reference material. Compress the outline to HOOK → PROBLEM → CONTEXT → MECHANISM → PROOF → RESOLUTION → CTA. Every scene is a single claim.
+- **Long-form:** Author reusable graphic scenes and one `createSlideScene` per major beat. Compose their finite durations with `sequenceSlides` and export `sequence`. Edit the script before placing it in the composition; use Unslop when requested and available.
+- **Reel:** Use the same shared scene API with frame dimensions for the requested aspect ratio. Compress the outline to HOOK → PROBLEM → CONTEXT → MECHANISM → PROOF → RESOLUTION → CTA. Every scene is a single claim. Use the source-owned reel templates when caption or other delivery layers require their complete document contract.
 
-Follow the hard rules in `references/gsap-rules.md`:
+The shared exporter owns the timeline; keep authored motion finite and deterministic. For a source-owned browser timeline, follow the hard rules in `references/gsap-rules.md`:
 - Timeline is `{ paused: true }` and registered on `window.__timelines["<id>"]` synchronously
 - No `Math.random`, `Date.now`, `repeat: -1`, `setTimeout` in the timeline builder
 - `<video>` elements have `muted playsinline` (none in default templates)
 - `<audio>` lives in separate elements, not video tracks
 
-Export the static generated HTML before continuing:
+Export the bundled shared video before continuing:
 
 ```bash
-npm run ve:export-static -- ~/.agent/videos/<slug>/<slug>.tsx --out ~/.agent/videos/<slug>/index.html
+npm run ve:graphic-video -- ~/.agent/videos/<slug>/<slug>.tsx --out ~/.agent/videos/<slug>/index.html
 ```
+
+Use `ve:export-static` at this step only for the source-owned complete composition contract described above.
 
 ### 4. Narration
 
@@ -191,4 +189,5 @@ Report:
 - `references/gsap-rules.md` — GSAP constraints for Hyperframes
 - `references/reel-patterns.md` — reel format rules (authoritative for reel style)
 - `references/clarify.md` — when a choice needs clarification
-- `templates/hyperframes-longform.html`, `templates/hyperframes-reel.html` — starter compositions
+- `docs/graphics-and-video.md`, `examples/visual-explainer-mdx/video-longform.tsx` — shared source and bundled export
+- `templates/hyperframes-longform.html`, `templates/hyperframes-reel.html` — source-owned complete composition references

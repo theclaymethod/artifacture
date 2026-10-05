@@ -8,12 +8,12 @@ html, body { margin: 0; width: 100%; height: 100%; }
 .clip { position: absolute; inset: 0; }
 .statement { position: absolute; left: 128px; top: 92px; }
 .statement h1 { font-size: 88px; }
-.statement p { margin: 24px 0 0; font-size: 30px; color: var(--motion-secondary); }
+.statement p { margin: 24px 0 0; font-size: 30px; color: var(--ve-muted); }
 .drawing { position: absolute; inset: 0; width: 100%; height: 100%; }
 .relationship { position: absolute; left: 128px; bottom: 84px; font-size: 34px; }
 .relationship p { margin: 0; }
 .relationship .equation { font-family: var(--motion-display); font-size: 50px; margin-top: 12px; }
-.figure-label { fill: var(--motion-secondary); stroke: none; font-size: 28px; font-family: var(--motion-body); }
+.figure-label { fill: var(--ve-muted); stroke: none; font-size: 28px; font-family: var(--motion-body); }
 `;
 
 const animation = `

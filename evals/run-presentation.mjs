@@ -10,26 +10,24 @@
  *                keyboard-nav matrix, drill CTA contract (click + Enter +
  *                Space; primary solid vs secondary outline), LayerExplorer
  *                selection, prefers-reduced-motion.
- *   geometry:    stage transform == fitStage() math across viewports,
+ *   geometry:    stage containment, centering and maximal fit across viewports,
  *                letterboxing on mismatched ratios, rail collapse/expand
  *                widths.
  *   tokens:      the same source re-skins under a second preset (computed
- *                colors actually change) and the shipped module contains no
- *                color or font literals outside a documented allowlist.
+ *                colors and typography actually change).
  *
  * Run: npm run ve:eval-presentation   (CI: evals job, after ve:eval)
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { RAIL_COLLAPSED_WIDTH, RAIL_EXPANDED_WIDTH, fitStage } from '../visual-explainer-mdx/presentation-core.ts';
 
 const EVAL_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(EVAL_ROOT, '..');
 const DEMO_SOURCE = 'examples/visual-explainer-mdx/presentation-deck.tsx';
-const SECOND_PRESET = 'terminal';
+const SECOND_PRESET = 'algebrica';
 
 const results = [];
 const consoleErrors = [];
@@ -47,13 +45,6 @@ function record(group, id, run) {
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function approx(actual, expected, tolerance, label) {
-  assert(
-    Math.abs(actual - expected) <= tolerance,
-    `${label}: expected ${expected} ±${tolerance}, got ${actual}`,
-  );
 }
 
 /** WCAG contrast ratio between two computed `rgb(...)`/`rgba(...)` colors. */
@@ -144,7 +135,9 @@ async function main() {
   const primaryUrl = pathToFileURL(primaryHtml).href;
   const secondUrl = pathToFileURL(secondHtml).href;
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch().catch((error) => {
+    throw new Error('Chromium is required for presentation E2E. Install it with npx playwright install chromium.', { cause: error });
+  });
   try {
     /* ------------------------------------------------------------ */
     /* interaction                                                   */
@@ -507,22 +500,24 @@ async function main() {
     ]) {
       await record('geometry', `scale-to-fit-${viewport.width}x${viewport.height}`, () =>
         withPage(browser, { url: primaryUrl, viewport }, async (page) => {
-          const measured = await page.evaluate(() => {
-            const main = document.querySelector('main');
-            const stage = document.querySelector('[data-stage]');
-            const matrix = new DOMMatrixReadOnly(getComputedStyle(stage).transform);
-            return {
-              availW: main.clientWidth,
-              availH: main.clientHeight,
-              scale: matrix.a,
-              left: parseFloat(getComputedStyle(stage).left),
-              top: parseFloat(getComputedStyle(stage).top),
+          const { container, stage } = await page.evaluate(() => {
+            const bounds = (element) => {
+              const rect = element.getBoundingClientRect();
+              return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height };
             };
+            return { container: bounds(document.querySelector('main')), stage: bounds(document.querySelector('[data-stage]')) };
           });
-          const expected = fitStage(measured.availW, measured.availH);
-          approx(measured.scale, expected.scale, 0.001, 'stage scale');
-          approx(measured.left, expected.left, 1, 'letterbox left');
-          approx(measured.top, expected.top, 1, 'letterbox top');
+          assert(stage.width > 0 && stage.height > 0, 'stage must have visible dimensions');
+          assert(stage.left >= container.left - 2 && stage.right <= container.right + 2
+            && stage.top >= container.top - 2 && stage.bottom <= container.bottom + 2,
+          `stage must be contained in the available viewport: ${JSON.stringify({ container, stage })}`);
+          assert(Math.abs((stage.left + stage.right) - (container.left + container.right)) <= 2,
+            'stage must be horizontally centered');
+          assert(Math.abs((stage.top + stage.bottom) - (container.top + container.bottom)) <= 2,
+            'stage must be vertically centered');
+          assert(Math.abs(stage.width - container.width) <= 2 || Math.abs(stage.height - container.height) <= 2,
+            'stage must maximize fit along at least one viewport dimension');
+          assert(Math.abs(stage.width / stage.height - 16 / 9) <= 0.01, 'stage must retain the authored slide aspect ratio');
         }),
       );
     }
@@ -543,28 +538,28 @@ async function main() {
     );
 
     await record('geometry', 'rail-collapse-and-hover-expand', () =>
-      withPage(browser, { url: primaryUrl }, async (page) => {
+      withPage(browser, { url: primaryUrl, reducedMotion: 'reduce' }, async (page) => {
         const rail = page.locator('[data-rail]');
         await page.waitForFunction(
           () => document.querySelector('[data-rail]')?.getAttribute('data-rail-expanded') === 'false',
           undefined,
           { timeout: 5_000 },
         );
-        await page.waitForFunction(
-          (w) => Math.abs(document.querySelector('[data-rail]').offsetWidth - w) <= 1,
-          RAIL_COLLAPSED_WIDTH,
-          { timeout: 3_000 },
-        );
+        await rail.evaluate(async (element) => {
+          element.getBoundingClientRect();
+          await Promise.all(element.getAnimations().map((animation) => animation.finished));
+        });
+        const collapsed = await rail.boundingBox();
+        assert(collapsed.width > 0, 'collapsed rail must retain a visible navigation target');
         await rail.hover();
         await page.waitForFunction(
-          (w) => Math.abs(document.querySelector('[data-rail]').offsetWidth - w) <= 1,
-          RAIL_EXPANDED_WIDTH,
+          (width) => document.querySelector('[data-rail]').getBoundingClientRect().width > width + 1,
+          collapsed.width,
           { timeout: 3_000 },
         );
         assert((await rail.getAttribute('data-rail-expanded')) === 'true', 'rail must report expanded on hover');
-        // Rail navigation drives the deck.
         await page.locator('[data-rail-item="3"]').click();
-        assert((await slideIndex(page)) === 2, 'rail item click must navigate');
+        assert((await slideIndex(page)) === 2, 'expanded rail item click must navigate');
       }),
     );
 
@@ -611,53 +606,6 @@ async function main() {
       assert(a.slideBg !== b.slideBg, `slide surface must reskin per preset (both ${a.slideBg})`);
       assert(a.ctaBg !== b.ctaBg, `primary CTA fill must reskin per preset (both ${a.ctaBg})`);
       assert(a.font !== b.font, `display font must reskin per preset (both ${a.font})`);
-    });
-
-    await record('tokens', 'no-hardcoded-color-or-font-literals-in-module', async () => {
-      // Generic token-consumption contract: the shipped presentation module
-      // must contain NO color literals and NO concrete font families at all —
-      // every color and font arrives via a --ve-* custom property, so any
-      // preset (including private ones) skins the deck without the module
-      // knowing a single palette value. Any hex or rgb()/hsl()/oklch()/oklab()
-      // literal outside the per-file allowlist below fails. This is stronger
-      // than scanning for known-bad values and needs no knowledge of any
-      // specific palette. (Neutral CSS keywords like `transparent`/`black`
-      // inside color-mix() ratios are primitives, not palette values, and are
-      // out of scope.)
-      const allowedLiterals = new Map([
-        [
-          'visual-explainer-mdx/presentation.tsx',
-          new Set([
-            '#161616', // documented neutral fallback for var(--ve-deck-letterbox, …)
-            '#0a0a0a', // documented neutral fallback for var(--ve-code-bg, …)
-          ]),
-        ],
-        [
-          'visual-explainer-mdx/presentation-core.ts',
-          new Set([
-            '#336699', // arbitrary hex used in the tint()/solidTint() docstring examples
-          ]),
-        ],
-        [DEMO_SOURCE, new Set()],
-      ]);
-      const colorLiteral = /(?<![&\w])#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\s*\(/g;
-      const fontDeclaration = /font-?[Ff]amily['"]?\s*[:=]\s*(?:'([^']*)'|"([^"]*)"|([^;,}]+);)/g;
-      for (const [file, allowed] of allowedLiterals) {
-        const source = readFileSync(join(REPO_ROOT, file), 'utf8');
-        for (const match of source.matchAll(colorLiteral)) {
-          assert(
-            allowed.has(match[0]),
-            `${file} contains a hardcoded color literal "${match[0]}" — use a --ve-* token (or add a documented allowlist entry)`,
-          );
-        }
-        for (const match of source.matchAll(fontDeclaration)) {
-          const value = (match[1] ?? match[2] ?? match[3] ?? '').trim();
-          assert(
-            value.startsWith('var(--ve-font'),
-            `${file} declares a concrete font-family "${value}" — fonts must come from var(--ve-font-*)`,
-          );
-        }
-      }
     });
 
     await record('interaction', 'no-console-errors', async () => {

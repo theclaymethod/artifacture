@@ -1,6 +1,6 @@
 # Diagram tokens
 
-Inherit the host page's preset. The default is `lieflat`; use a named alternative only when requested. Runtime values live in `REPO/visual-explainer-mdx/global.css`. Do not embed a second palette or force a diagram into a different aesthetic.
+Inherit the host page's preset. The default is `hairline`, with `3b1b` for mathematical mechanisms; use another named palette only when requested. Runtime values live in `REPO/visual-explainer-mdx/themes.css`. Lieflat data encodings reuse those same paints. Do not embed a second palette or force a diagram into a different aesthetic.
 
 | Diagram role | Host role |
 |---|---|
@@ -20,15 +20,13 @@ Use CSS variables in SVG fills and strokes. A standalone figure defines its host
 
 | Preset | Treatment |
 |---|---|
-| `lieflat` | Paper gray, charcoal, Inter, sparse semantic color; see [charts.md](charts.md) |
+| `hairline` | White, Inter, native rounded isometric figures, fine neutral lines, one contrasting accent |
+| `3b1b` | Black, readable mathematical type, sequential geometry, the same single accent |
 | `mono-color` | One or two inks on neutral paper; see [mono-color.md](mono-color.md) |
 | `algebrica` | Warm stone/blush, charcoal, serif reading text, Inter figure labels; see [algebrica.md](algebrica.md) |
-| `oa-design` | Ink-derived neutrals and restrained blue; explicit compatibility, see [oa-design.md](oa-design.md) |
 | `mono-industrial` | Monochrome, Space Grotesk, status on factual values; see [mono-industrial.md](mono-industrial.md) |
-| `nothing` | Black/off-white, restrained status color, optional Doto display; see [nothing.md](nothing.md) |
-| `blueprint` | Slate and cyan with flat backgrounds and precise rules |
-| `editorial`, `paper-ink` | Warm paper and serif headings; labels stay clear sans |
-| `terminal` | Dark field and mono where explicitly requested |
+
+Hairline replaces the former Lieflat palette; its chart encodings remain available. Retired palette slugs fail with migration guidance.
 
 Preserve user-requested external presets through the design-system registry rather than approximating their palettes. Semantic colors need text, shape, or line-style companions. Do not color every node merely to distinguish it.
 

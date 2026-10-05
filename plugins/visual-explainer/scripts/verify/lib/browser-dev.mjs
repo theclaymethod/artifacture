@@ -84,6 +84,8 @@ function detectProfile(html, filePath) {
 }
 
 function detectPreset(html) {
+  const declared = html.match(/data-ve-preset=["'](hairline|3b1b|mono-color|algebrica)["']/i);
+  if (declared) return declared[1].toLowerCase();
   if (/font-family\s*:[^;{}]*Doto|--font-[\w-]+\s*:[^;{}]*Doto|data-preset=["']nothing["']/i.test(html)) return 'nothing';
   if (/mono-industrial|data-preset=["']mono-industrial["']|--mono-/i.test(html)) return 'mono-industrial';
   if (/blueprint/i.test(html)) return 'blueprint';

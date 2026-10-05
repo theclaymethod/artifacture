@@ -42,16 +42,52 @@ Turn this migration plan into a slide deck with supporting detail on demand.
 
 The skill loads the task-specific guidance it needs. It authors editable source, exports the result, and checks it in a browser.
 
-A globally linked skill resolves its owning checkout through filesystem symlinks, so you can author from another repository. Set `ARTIFACTURE_REPO` to select a different checkout. A standalone skill installation uses an existing valid `~/.artifacture` runtime, or reports bootstrap instructions. Resolution does not overwrite an existing runtime or private brands. See [runtime resolution](plugins/visual-explainer/SKILL.md#resolve-the-runtime).
+The skill includes the renderer, editable components, motion, themes, and examples. Your agent handles setup and verification automatically.
 
-For local development, use Node 22 or newer and run these commands from the checkout:
+## Use in a React project
 
 ```bash
-npm install
-npm run ve:export -- examples/visual-explainer-mdx/data-charts.mdx --out dist/charts.html
+npm install artifacture
+npx artifacture add charts video
 ```
 
-## Compact source, complete output
+The CLI copies editable components, installs required packages, and imports their styles. Use the local named exports in your app.
+
+For a new React, TypeScript, and Vite project:
+
+```bash
+npx artifacture init my-explainer
+cd my-explainer
+npm run dev
+```
+
+Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](docs/workspaces.md) for the source ownership model and [installation](docs/installation.md) for other agent harnesses.
+
+Discover available blocks before authoring:
+
+```bash
+npx artifacture list --query focus --json
+```
+
+The machine-readable index includes public imports, capabilities, supported
+formats, supported variants, constraints, examples, dependencies, and copy commands. It comes from
+the same registry that owns `add`. The copied code belongs to the workspace. The [component catalog](docs/component-catalog.md)
+covers 50 copyable blocks and links the interactive preview source.
+[Component references](docs/component-references.md) guide further math, code,
+diagram, and chart blocks; [candidate research](docs/research/primitive-candidates-2026-10-04.md)
+records additions that still need prototypes.
+
+Copy the [dependency DAG](docs/dag.md) with `npx artifacture add dag`. Its compact graph supports parent/child and full-lineage focus, keyboard navigation, and the same scene geometry for posters, slides and authored animation.
+
+[Manim and Psychopomp](docs/native-engines.md) are optional native engines:
+
+```bash
+npx artifacture engine setup manim
+npx artifacture engine scaffold manim ./math --theme 3b1b
+npx artifacture engine render ./math/manim.job.json --out ./math/render
+```
+
+Use `psychopomp` for a physical diagram scene. Each render retains editable source, a playable clip, selected stills and provenance; `NativeClip` and `NativeStill` reuse those assets across the existing output formats.
 
 A chart is a title and a data specification:
 
@@ -137,9 +173,9 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 ## Shared visual defaults
 
-The [default explainer theme](plugins/visual-explainer/references/default-explainer-theme.md) uses the Hairline preset across posters, diagrams, slides, and videos. EB Garamond headings, Montserrat body text, fine-line objects, and semantic color stay consistent across formats. An explicit brand or requested look takes precedence.
+The [default explainer theme](plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
 
-Typography, spacing, and colors come from [shared theme tokens](docs/shared-themes.md). Explicit Lieflat, Algebrica, Mono Color, and existing custom design systems remain available.
+Typography, spacing, and colors come from [shared theme tokens](docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
 
 | Algebrica | Mono Color |
 |---|---|
@@ -174,3 +210,18 @@ Both required review stages must pass before an artifact is verified. Make revis
 MIT. Artifacture began as a fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer).
 
 Visual references include [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts), [Algebrica](https://github.com/antoniolupetti/algebrica), [Mono Color](https://github.com/yanliudesign/mono-color-skill), [PR Lens](https://github.com/coldteadotai/pr-lens), [3Blue1Brown](https://www.3blue1brown.com/), and [Pierrick Calvez's typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). [Hairline](https://github.com/lucasmarkes/hairline) is a bundled, unchanged MIT skill and interactive runtime. [Archify](https://github.com/tt-a1i/archify) is an integrated external runtime. Reference images and noncommercial source implementations are not bundled. See [provenance and licenses](tools/visual-sources.json).
+
+## Verify changes
+
+```bash
+npx playwright install chromium
+npm test
+npm run ve:eval-presentation
+```
+
+`npm test` runs the retained end-to-end suite through real commands, exported
+pages, copied workspaces, preview edits, verification reports, and PDF output.
+The presentation runner checks browser layout and interaction. Chromium is
+required. Run `npm run check` for these flows plus types, manifests, seeded
+verifier cases, and export/release guards. New test files remain opt-in; extend
+existing observable flows or use direct runtime checks.

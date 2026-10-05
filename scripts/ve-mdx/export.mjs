@@ -10,7 +10,6 @@ import { preflightSource } from './integrity.mjs';
 import { injectDesignSystemCss, resolvePresetCssForExport } from './design-systems.mjs';
 
 const repoRoot = process.cwd();
-const fontStylesheet = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap';
 
 function parseArgs(argv) {
   const args = [...argv];
@@ -84,7 +83,7 @@ async function main() {
 
     await fs.writeFile(
       path.join(tmp, 'index.html'),
-      `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Visual Explainer</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${fontStylesheet}"></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>`,
+      `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Visual Explainer</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>`,
     );
 
     await fs.writeFile(

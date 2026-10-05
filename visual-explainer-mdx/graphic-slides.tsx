@@ -3,6 +3,7 @@ import { GraphicCanvas } from './graphics';
 import { createGraphicScene } from './graphics-types';
 import type { GraphicScene } from './graphics-types';
 import { defineGraphicMotion, sampleScene, type GraphicMotion } from './graphic-motion';
+import { assertSupportedPreset } from './preset-policy.mjs';
 
 export type GraphicSlideScene = Readonly<{ id: string; title: string; explanation: string; graphic: GraphicScene; width: number; height: number; preset: string; appearance: 'light' | 'dark' }>;
 export type GraphicSlideSequence = Readonly<{ id: string; width: number; height: number; duration: number; slides: readonly Readonly<{ slide: GraphicSlideScene; motion: GraphicMotion; start: number; duration: number }>[] }>;
@@ -10,7 +11,7 @@ export type GraphicSlideSequence = Readonly<{ id: string; width: number; height:
 export function createSlideScene(input: Omit<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'> & Partial<Pick<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'>>): GraphicSlideScene {
   const slide = { ...input, graphic: createGraphicScene(input.graphic), width: input.width ?? 1920, height: input.height ?? 1080, preset: input.preset ?? 'hairline', appearance: input.appearance ?? 'light' };
   if (slide.appearance !== 'light' && slide.appearance !== 'dark') throw new Error('Unsupported slide appearance.');
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(slide.preset)) throw new Error('Slide preset must be a design-system slug.');
+  assertSupportedPreset(slide.preset);
   if ([slide.id, slide.title, slide.explanation].some((value) => value !== String(value) || !value.trim()) || !Number.isFinite(slide.width) || !Number.isFinite(slide.height) || slide.width <= 0 || slide.height <= 0) throw new Error('Slides need meaning, a stable ID, and finite positive dimensions.');
   return Object.freeze(slide);
 }
@@ -46,7 +47,7 @@ export function sampleSlideSequence(sequence: GraphicSlideSequence, authoredSeco
 export function GraphicSlide({ slide }: { slide: GraphicSlideScene }) {
   return <article data-graphic-slide={slide.id} data-ve-preset={slide.preset} data-ve-appearance={slide.appearance} data-motion-theme={slide.appearance} className="motion-stage" style={{ boxSizing: 'border-box', width: '100%', height: '100%', padding: `${slide.height * 0.072}px ${slide.width * 0.066}px`, display: 'flex', flexDirection: 'column', gap: slide.height * 0.033 }}>
     <h1 style={{ fontSize: slide.width * 0.045, maxWidth: '100%' }}>{slide.title}</h1>
-    <p style={{ margin: 0, maxWidth: slide.width * 0.78, fontSize: slide.width * 0.021, lineHeight: 1.4, color: 'var(--motion-secondary)' }}>{slide.explanation}</p>
+    <p style={{ margin: 0, maxWidth: slide.width * 0.78, fontSize: slide.width * 0.021, lineHeight: 1.4, color: 'var(--ve-muted)' }}>{slide.explanation}</p>
     <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center' }}><GraphicCanvas scene={slide.graphic} style={{ width: '100%', height: '100%' }} /></div>
   </article>;
 }

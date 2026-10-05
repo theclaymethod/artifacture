@@ -1,0 +1,151 @@
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger),
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger) * {
+  box-sizing: border-box;
+}
+
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger) {
+  min-width: 0;
+  font-family: var(--ve-font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ve-pipeline {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-risk-ledger {
+  display: grid;
+  gap: 1rem;
+}
+
+.ve-pipeline .ve-pipeline-item,
+.ve-risk-ledger .ve-risk-card {
+  min-width: 0;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 1.25rem;
+}
+
+.ve-pipeline .ve-pipeline-position {
+  color: var(--ve-accent);
+  font: 0.875rem/1.5 var(--ve-font-mono);
+}
+
+.ve-pipeline .ve-pipeline-title,
+.ve-risk-ledger .ve-risk-title {
+  margin: 1rem 0 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: 1.25rem;
+  font-weight: var(--ve-heading-weight);
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.ve-risk-ledger .ve-risk-title {
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+}
+
+.ve-pipeline .ve-content-detail,
+.ve-risk-ledger .ve-content-detail {
+  margin: 0.75rem 0 0;
+  color: var(--ve-muted);
+  line-height: 1.5;
+}
+
+.ve-risk-ledger .ve-risk-mitigation {
+  margin-top: 0.5rem;
+}
+
+.ve-risk-ledger .ve-risk-level {
+  margin: 0;
+  color: var(--ve-faint);
+  font-size: 0.875rem;
+}
+
+.ve-risk-ledger .ve-content-label {
+  color: var(--ve-text);
+}
+
+.ve-decision-matrix {
+  overflow-x: auto;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+}
+
+.ve-decision-matrix .ve-decision-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.ve-decision-matrix .ve-decision-head {
+  background: var(--ve-panel-strong);
+  color: var(--ve-muted);
+}
+
+.ve-decision-matrix .ve-decision-heading {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 0.75rem 1rem;
+  text-align: inherit;
+  font-weight: 500;
+}
+
+.ve-decision-matrix .ve-decision-row:nth-child(odd) {
+  background: var(--ve-row);
+}
+
+.ve-decision-matrix .ve-decision-cell {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 1rem;
+  vertical-align: top;
+  color: var(--ve-muted);
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline, .ve-risk-ledger) {
+  gap: 0;
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline .ve-pipeline-item, .ve-risk-ledger .ve-risk-card) {
+  border: 0;
+  border-top: 1px solid var(--ve-rule);
+  border-radius: 0;
+  background: transparent;
+  padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline .ve-pipeline-position {
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="low"] .ve-risk-level {
+  color: var(--ve-ok);
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="medium"] .ve-risk-level {
+  color: var(--ve-warn);
+}
+
+:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="high"] .ve-risk-level {
+  color: var(--ve-danger);
+}
+
+@media (min-width: 768px) {
+  .ve-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ve-risk-ledger { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
+  .ve-pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

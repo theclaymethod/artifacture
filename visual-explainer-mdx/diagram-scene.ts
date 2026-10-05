@@ -14,9 +14,9 @@ export function diagramSceneFromLayout(diagram: ReturnType<typeof layoutDiagram>
     const x = lane.orientation === 'vertical' ? lane.x + lane.width / 2 : lane.x + 16;
     const primitives: GraphicPrimitive[] = [];
     if (lane.orientation === 'vertical') {
-      if (lane.divider) primitives.push({ kind: 'line', x1: lane.x + lane.width, x2: lane.x + lane.width, y1: lane.y, y2: lane.y + lane.height, stroke: 'frame' });
-      primitives.push({ kind: 'line', x1: lane.x + 16, x2: lane.x + lane.width - 16, y1: lane.y + lane.lines.length * 20 + 20, y2: lane.y + lane.lines.length * 20 + 20, stroke: 'frame' });
-    } else primitives.push({ kind: 'line', x1: lane.x, x2: lane.x + lane.width, y1: lane.y, y2: lane.y, stroke: 'frame' });
+      if (lane.divider) primitives.push({ kind: 'line', x1: lane.x + lane.width, x2: lane.x + lane.width, y1: lane.y, y2: lane.y + lane.height, stroke: 'frame', strokeRole: 'guide' });
+      primitives.push({ kind: 'line', x1: lane.x + 16, x2: lane.x + lane.width - 16, y1: lane.y + lane.lines.length * 20 + 20, y2: lane.y + lane.lines.length * 20 + 20, stroke: 'frame', strokeRole: 'guide' });
+    } else primitives.push({ kind: 'line', x1: lane.x, x2: lane.x + lane.width, y1: lane.y, y2: lane.y, stroke: 'frame', strokeRole: 'guide' });
     primitives.push({ kind: 'text', x, y: lane.y + 24, lines: lane.lines, leading: 20, size: 14, weight: 600, anchor: lane.orientation === 'vertical' ? 'middle' : 'start', fill: 'ink' });
     objects.push({ id: `lane:${lane.id}`, kind: 'lane', meaning: lane.label, primitives });
   }
@@ -25,12 +25,12 @@ export function diagramSceneFromLayout(diagram: ReturnType<typeof layoutDiagram>
   diagram.edges.forEach(({ edge, from, to, path }, index) => objects.push({
     id: edgeIds[index], kind: 'edge', meaning: edge.label,
     edge: { id: edge.id, fromOrder: from.order, toOrder: to.order, sourceAnchor: nodeAnchor(from, path[0]), targetAnchor: nodeAnchor(to, path.at(-1)) },
-    primitives: [{ kind: 'path', d: edgePath(path), fill: 'none', stroke: from.isAccented || to.isAccented ? 'accent' : 'muted', strokeWidth: 1.5, dash: edge.style === 'dashed' ? '6 5' : undefined, arrow: edge.style === 'bidirectional' ? 'both' : 'end' }],
+    primitives: [{ kind: 'path', d: edgePath(path), fill: 'none', stroke: from.isAccented || to.isAccented ? 'accent' : 'muted', strokeRole: from.isAccented || to.isAccented ? 'active' : 'structure', dash: edge.style === 'dashed' ? '6 5' : undefined, arrow: edge.style === 'bidirectional' ? 'both' : 'end' }],
   }));
   diagram.edges.forEach(({ label }, index) => {
     if (!label) return;
     const primitives: GraphicPrimitive[] = [];
-    if (label.leader) { const end = labelLeaderEndpoint(label); primitives.push({ kind: 'line', x1: label.anchor.x, x2: end.x, y1: label.anchor.y, y2: end.y, stroke: 'muted', strokeWidth: 1 }); }
+    if (label.leader) { const end = labelLeaderEndpoint(label); primitives.push({ kind: 'line', x1: label.anchor.x, x2: end.x, y1: label.anchor.y, y2: end.y, stroke: 'muted', strokeRole: 'detail' }); }
     primitives.push({ kind: 'rect', x: label.x - label.width / 2, y: label.y - label.height / 2, width: label.width, height: label.height, fill: 'background', role: 'arrow-label-mask' });
     primitives.push({ kind: 'text', x: label.x, y: label.y - (label.lines.length - 1) * type.edgeLeading / 2 + 5, lines: label.lines, leading: type.edgeLeading, size: type.edgeSize, anchor: 'middle', fill: 'ink' });
     objects.push({ id: `${edgeIds[index]}:label`, kind: 'edge-label', primitives });
@@ -51,9 +51,9 @@ function nodePrimitives(item: LaidOutNode): GraphicPrimitive[] {
   const top = glyph === 'dot' ? item.y + 40 : item.y + (item.height - item.textHeight) / 2;
   const stroke = item.isAccented ? 'accent' : 'node-stroke';
   const fill = item.isAccented ? 'accent-background' : 'node-background';
-  const outline: GraphicPrimitive = glyph === 'diamond' ? { kind: 'polygon', points: [{ x: item.x + item.width / 2, y: item.y }, { x: item.x + item.width, y: item.y + item.height / 2 }, { x: item.x + item.width / 2, y: item.y + item.height }, { x: item.x, y: item.y + item.height / 2 }], fill, stroke, strokeWidth: 1.5, role: 'node' }
+  const outline: GraphicPrimitive = glyph === 'diamond' ? { kind: 'polygon', points: [{ x: item.x + item.width / 2, y: item.y }, { x: item.x + item.width, y: item.y + item.height / 2 }, { x: item.x + item.width / 2, y: item.y + item.height }, { x: item.x, y: item.y + item.height / 2 }], fill, stroke, strokeRole: item.isAccented ? 'active' : 'structure', role: 'node' }
     : glyph === 'dot' ? { kind: 'circle', x: item.x + item.width / 2, y: item.y + 12, radius: 12, fill: stroke, role: 'node' }
-      : { kind: 'rect', x: item.x, y: item.y, width: item.width, height: item.height, radius: glyph === 'oval' ? item.height / 2 : 'node', fill, stroke, strokeWidth: 1.5, role: 'node' };
+      : { kind: 'rect', x: item.x, y: item.y, width: item.width, height: item.height, radius: glyph === 'oval' ? item.height / 2 : 'node', fill, stroke, strokeRole: item.isAccented ? 'active' : 'structure', role: 'node' };
   return [outline,
     { kind: 'text', x, y: top + 16, lines: item.labelLines, leading: type.labelLeading, size: type.labelSize, weight: 600, anchor: centered ? 'middle' : 'start', fill: 'ink', label: true },
     ...(item.detailLines.length ? [{ kind: 'text' as const, x, y: top + item.labelLines.length * type.labelLeading + 8 + 14, lines: item.detailLines, leading: type.detailLeading, size: type.detailSize, anchor: centered ? 'middle' as const : 'start' as const, fill: 'muted' as const }] : []),

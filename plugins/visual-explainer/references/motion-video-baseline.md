@@ -2,24 +2,25 @@
 
 Use the [default explainer theme](default-explainer-theme.md) across formats. This reference adds motion choreography and documents the original rotating-point specimen. An explicit brand, design spec, or requested look takes precedence. Deck-to-video work retains the source's meaningful visual encodings.
 
-The default combines Hairline's fine-line objects with the explanatory approach requested from 3Blue1Brown. A physical or geometric illustration carries the explanation. Motion exposes a relationship, preserves the identity of the subject, and leaves a complete, readable result.
+The primary languages are Hairline isometric mechanisms on white and explicit `3b1b` mathematical mechanisms on black. Both combine Lieflat's data encodings with one cyan causal accent. A physical object or a mathematical relationship carries the explanation; motion shows how it works and preserves its identity.
 
 ## Visual language
 
-New reusable illustrations follow the host roles in [default-explainer-theme.md](default-explainer-theme.md). The original specimen's tokens and SVG classes live in [hairline-motion-theme.css](../templates/hairline-motion-theme.css). Inline [themes.css](../../../visual-explainer-mdx/themes.css) first, then the motion stylesheet. Set `data-ve-preset="hairline"` and `data-ve-appearance="dark"` on the composition root for the dark alternative. `data-motion-theme` remains an appearance compatibility attribute. These specimen values do not override an explicit theme or the shared `--ve-*` roles.
+New illustrations follow [default-explainer-theme.md](default-explainer-theme.md). Inline [themes.css](../../../visual-explainer-mdx/themes.css) before [hairline-motion-theme.css](../templates/hairline-motion-theme.css). Set `data-ve-preset="hairline"` for physical mechanisms, or `data-ve-preset="3b1b"` for mathematical mechanisms. A dark Hairline appearance remains available; selecting black alone does not construct a mathematical explanation. `data-motion-theme` remains an appearance compatibility attribute.
 
-| Role | Specimen |
+| Role | Hairline / 3b1b |
 |---|---|
-| Canvas | Warm paper `#f5f3ed`; flat, without decorative texture |
-| Outline | Charcoal `#252a2c`; rounded caps and joins |
-| Inner crease | Muted `#60696d`; thinner than the silhouette |
-| Construction | `#b3b8b6`; subordinate to the object |
-| Active relationship | Blue `#286b8b`; consistent meaning throughout |
-| Statement | EB Garamond, regular; 72–96px at 1920 × 1080 |
-| Supporting text | Montserrat, regular; 28–36px at 1920 × 1080 |
-| Strokes | Silhouette 2.8px, crease 1.6px, active 3.8px at 1920 × 1080 |
+| Canvas | White / black; flat, without decorative texture |
+| Illustration outline | Neutral gray `#8a8d98` / white `#f5f5f5`; rounded caps and joins |
+| Inner crease | Dim gray `#b7b9c3` / `#747884`; thinner than the silhouette |
+| Text | Readable neutral ink, separate from illustration lines |
+| Active relationship | Cyan `#079fba`; the same causal meaning throughout |
+| Statement | Inter / EB Garamond; 64–96px at 1920 × 1080 |
+| Supporting text | Inter; 28–36px at 1920 × 1080 |
+| Math | Serif notation through `--ve-font-math` |
+| Hairline strokes | Silhouette 1.5, crease 0.8, active 1.5 in the engine's 400 × 320 frame |
 
-Let the illustration occupy most of the frame. Use a small number of meaningful objects, rounded solids, honest occlusion, and a stronger outer silhouette than inner construction. Begin with a composed resting pose. Preserve recognizable object features rather than substituting generic boxes. Inspect at the intended playback size; increase stroke weight when compression or a smaller viewport obscures the relationship.
+Let the illustration occupy most of the frame. Use meaningful object features, rounded solids, honest occlusion, and a stronger silhouette than crease. Use the unchanged Hairline engine's public projection and rounded-solid functions. Keep physical labels outside its SVG and anchor them to projected features. For mathematics, use real functions, geometry transformations, arrowheads, and notation. Keep Lieflat mark size tied to declared units or actual records. Inspect the compressed result at playback size.
 
 Keep statements and mathematical labels outside the physical illustration. Direct labels may identify variables or relationships when needed. Do not add ornamental labels, badges, numbering, fake measurements, status chips, or decorative captions.
 
@@ -37,9 +38,9 @@ Keep statements and mathematical labels outside the physical illustration. Direc
 
 Strict interactive Hairline figures use the [vendored skill](../vendor/hairline-create/SKILL.md), its unmodified kernel and bench, single highlight, pointer behavior, fixed camera, and validation workflow. Mathematical videos may need planar geometry and meaningful labels outside the physical object. Those adaptations serve the explanation and are reviewed as video scenes, not as strict interactive figures.
 
-## Reference composition
+## Earlier reference composition
 
-[hairline-motion-baseline.tsx](../../../examples/visual-explainer-mdx/hairline-motion-baseline.tsx) demonstrates a point rotating on a fine-line instrument, a change from oblique to planar view, and the point's height traced over time. The same phase drives the rotating point, projection line, trace head, and wave. The continuous drawing stays in one scene for 16 seconds.
+[hairline-motion-baseline.tsx](../../../examples/visual-explainer-mdx/hairline-motion-baseline.tsx) is an earlier rotating-point specimen, retained as an authored-time example. It is not the acceptance reference for native Hairline solids. The same phase drives its rotating point, projection line, trace head, and wave over 16 seconds.
 
 ```bash
 npm run ve:export-static -- examples/visual-explainer-mdx/hairline-motion-baseline.tsx --out ~/.agent/videos/hairline-motion-baseline/index.html

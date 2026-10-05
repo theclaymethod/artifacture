@@ -1,0 +1,9 @@
+.effects-gallery { max-width:none; }
+.effect-stage { max-width:960px; border:1px solid var(--ve-rule); margin-top:28px; overflow:hidden; }
+.effect-controls { position:sticky; top:0; background:var(--ve-bg); z-index:2; padding:16px 0; border-bottom:1px solid var(--ve-rule); }
+.effects-gallery button { background:var(--ve-bg); color:var(--ve-text); border:1px solid var(--ve-rule); border-radius:6px; min-height:44px; padding:8px 16px; font:inherit; cursor:pointer; }
+.effects-gallery input[type=checkbox] { width:18px; height:18px; }
+.model-form { display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:24px; }
+.model-form label { display:flex; align-items:center; gap:12px; flex:1; }
+.model-form input { min-width:180px; width:100%; font:inherit; padding:12px; border:1px solid var(--ve-rule); background:var(--ve-bg); color:var(--ve-text); border-radius:6px; }
+@media(max-width:600px) { .component-catalog.effects-gallery { padding:36px 20px; } .effect-controls { position:static; } .effects-gallery section { padding-top:40px; } .catalog-controls input { width:140px; } }

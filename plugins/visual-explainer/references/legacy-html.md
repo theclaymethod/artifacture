@@ -15,7 +15,6 @@ Use this reference for posters, video, a named aesthetic, or a concrete limitati
 | Requested Algebrica | [algebrica.md](algebrica.md) |
 | Requested Mono Color | [mono-color.md](mono-color.md) |
 | Requested Mono-Industrial | [mono-industrial.md](mono-industrial.md) |
-| Requested Nothing | [nothing.md](nothing.md) |
 | Specialized diagram | [diagram-design.md](diagram-design.md) |
 | Custom SVG geometry | [diagrams-svg.md](diagrams-svg.md) |
 | Wrapped SVG text | [pretext-layout.md](pretext-layout.md) |
@@ -37,9 +36,9 @@ npm --prefix REPO run ve:export -- <source.mdx|source.tsx> --out <artifact.html>
 npm --prefix REPO run ve:export-static -- <composition.tsx> --out <index.html>
 ```
 
-Use static export for Hyperframes compositions. Edit the source and re-export after feedback. When a concrete runtime limitation requires authored HTML, report that fallback and retain the editable HTML source.
+Use `ve:graphic-video` for shared `GraphicVideo` sequences; its exporter supplies the bundled browser clock. Use static export for source-owned HyperFrames documents with their own complete timeline and delivery layers. Edit the source and re-export after feedback. When a concrete runtime limitation requires authored HTML, report that fallback and retain the editable HTML source.
 
-Presets are `lieflat` (default), `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`, `editorial`, `paper-ink`, `terminal`, and `custom`. Shared tokens live in `REPO/visual-explainer-mdx/global.css`. Named alternatives change typography and palette; they do not justify decorative metadata or unreadable labels.
+Primary presets are `hairline` (default) and `3b1b`. Lieflat data encodings use either host's paints. Retained alternatives are `algebrica` and `mono-color`, with `mono-industrial` optional and `custom` for local tokens. The `lieflat` palette is replaced by Hairline. OA Design, Nothing, Blueprint, Editorial, Paper & Ink, and Terminal are retired and must migrate to a kept theme. Shared tokens live in `REPO/visual-explainer-mdx/themes.css`. Named alternatives change typography and palette; they do not justify decorative metadata or unreadable labels.
 
 ## Composition
 

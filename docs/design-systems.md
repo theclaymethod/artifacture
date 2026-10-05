@@ -1,12 +1,10 @@
 # External design systems
 
-Artifacture's built-in presets (`lieflat`, `algebrica`, `mono-color`, `oa-design`, `mono-industrial`, `nothing`, `blueprint`,
-`editorial`, `paper-ink`, `terminal`, `custom`) live in
-`visual-explainer-mdx/global.css`. Other preset names resolve to user design systems in an external registry.
+Artifacture's primary explainer presets are `hairline` and `3b1b`, with `mono-color` and `algebrica` as retained alternatives. `mono-industrial` remains optional, and `custom` supports local token overrides. Lieflat's five data encodings work in every host; Hairline replaces its former palette. Preset tokens live in `visual-explainer-mdx/themes.css`. New brand slugs resolve to user design systems in an external registry.
 Skill updates leave that registry alone.
 
-Lieflat combines editorial chart storytelling with Inter and open layouts. Its
-`LieflatChart` renderer provides five families for units, dates, categorical
+Hairline uses Inter, white space, fine neutral geometry, and one contrasting accent.
+The `LieflatChart` renderer provides five families for units, dates, categorical
 intersections, and individual paths; changing palette alone does not author
 those encodings. See the [chart guide](../plugins/visual-explainer/references/charts.md)
 for JSON and MDX recipes. Algebrica uses EB Garamond for headings and
@@ -104,9 +102,14 @@ Reference its slug anywhere a preset name goes:
 non-built-in names against the registry, and inlines the tokens (scoped, with
 derived fallbacks and font imports) into the standalone HTML as a
 `<style data-ve-design-system>` block. Built-in names never consult the
-registry, so a user system named `terminal` cannot shadow the built-in.
-Unknown names warn and fall back to the default built-in tokens
-(`lieflat`).
+registry, so a user system named `hairline` cannot shadow the built-in.
+The retired palette slugs `lieflat`, `oa-design`, `nothing`, `blueprint`,
+`editorial`, `paper-ink`, and `terminal` fail with a migration message before
+registry lookup. Update their authored preset to a kept theme; this does not
+remove Lieflat chart encodings or command/output blocks. The browser components
+and shared slide scenes use the same policy as the exporter. Historical HTML
+remains inspectable by the verifier. Unknown new names warn and fall back to the default built-in tokens
+(`hairline`).
 
 The static/Hyperframes path (`ve:export-static`) renders compositions that
 carry their own styles and does not consult the registry.

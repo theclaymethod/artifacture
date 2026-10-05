@@ -80,7 +80,7 @@ function RungPlot({ spec, id, width }: { spec: RungBarsSpec; id: string; width: 
       <PlotScroll id={id}>
         <div className="ve-lieflat-rungs" style={{ width: plotWidth }}>
           <svg aria-labelledby={`${id}-title ${id}-encoding`} height={height} role="img" viewBox={`0 0 ${plotWidth} ${height}`} width={plotWidth}>
-            <line stroke={rule} x1="12" x2={plotWidth - 12} y1={baseline} y2={baseline} />
+            <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1="12" x2={plotWidth - 12} y1={baseline} y2={baseline} />
             {spec.data.map((datum, column) => {
               const units = datum.value === null ? 0 : datum.value / spec.unit;
               const full = Math.floor(units);
@@ -88,7 +88,7 @@ function RungPlot({ spec, id, width }: { spec: RungBarsSpec; id: string; width: 
               const cx = (column + 0.5) * columnWidth;
               return <g key={datum.label}><title>{`${datum.label}: ${datum.value ?? 'No data'}`}</title>{Array.from({ length: Math.ceil(units) }, (_, index) => {
                 const fraction = index < full ? 1 : remainder;
-                return <line data-lieflat-unit-fraction={fraction} key={index} stroke={ink} strokeWidth="1.2" x1={cx - rungWidth / 2} x2={cx - rungWidth / 2 + rungWidth * fraction} y1={baseline - (index + 1) * 7} y2={baseline - (index + 1) * 7} />;
+                return <line data-lieflat-unit-fraction={fraction} key={index} stroke={ink} strokeWidth="var(--ve-chart-stroke)" x1={cx - rungWidth / 2} x2={cx - rungWidth / 2 + rungWidth * fraction} y1={baseline - (index + 1) * 7} y2={baseline - (index + 1) * 7} />;
               })}</g>;
             })}
           </svg>
@@ -162,14 +162,14 @@ function BarcodePlot({ spec, id, width }: { spec: BarcodeSpec; id: string; width
       <PlotScroll id={id}>
         <div className="ve-lieflat-barcode" style={{ width: plotWidth }}>
           <svg aria-labelledby={`${id}-title ${id}-encoding`} height={height} role="img" viewBox={`0 0 ${plotWidth} ${height}`} width={plotWidth}>
-            <line stroke={rule} x1={left} x2={right} y1={y(0)} y2={y(0)} />
+            <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1={left} x2={right} y1={y(0)} y2={y(0)} />
             {data.map((datum) => <g key={datum.date}>
               <title>{`${datum.date}: ${datum.value ?? 'No data'} ${spec.valueLabel}${datum.note ? `. ${datum.note}` : ''}`}</title>
-              <line stroke={rule} strokeWidth="0.75" x1={x(datum.date)} x2={x(datum.date)} y1="24" y2="288" />
+              <line stroke={rule} strokeWidth="var(--ve-chart-detail-stroke)" x1={x(datum.date)} x2={x(datum.date)} y1="24" y2="288" />
               {datum.value !== null ? <>
-                <line stroke={muted} strokeWidth="1" x1={x(datum.date)} x2={x(datum.date)} y1={y(0)} y2={y(datum.value)} />
+                <line stroke={muted} strokeWidth="var(--ve-chart-stroke)" x1={x(datum.date)} x2={x(datum.date)} y1={y(0)} y2={y(datum.value)} />
                 <circle cx={x(datum.date)} cy={y(datum.value)} fill={ink} r="2.7" />
-                {datum.note?.trim() ? <circle cx={x(datum.date)} cy={y(datum.value)} fill="none" r="6" stroke={ink} strokeWidth="1.2" /> : null}
+                {datum.note?.trim() ? <circle cx={x(datum.date)} cy={y(datum.value)} fill="none" r="6" stroke={ink} strokeWidth="var(--ve-chart-stroke)" /> : null}
               </> : null}
             </g>)}
           </svg>

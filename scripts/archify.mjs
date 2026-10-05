@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { access, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { archify } = JSON.parse(await readFile(path.join(root, 'tools/visual-sources.json'), 'utf8'));
@@ -11,6 +12,12 @@ const checkout = path.join(cache, archify.revision);
 const runtime = path.join(checkout, 'archify');
 const cli = path.join(runtime, 'bin/archify.mjs');
 const [command, ...args] = process.argv.slice(2);
+const execute = promisify(execFile);
+
+function replaceOnce(source, fragment, replacement) {
+  if (source.split(fragment).length !== 2) throw new Error('Pinned Archify template does not match the Hairline adapter.');
+  return source.replace(fragment, replacement);
+}
 
 async function run(executable, argv, options = {}) {
   return new Promise((resolve, reject) => {
@@ -27,13 +34,65 @@ async function exists(file) {
 async function applyTheme() {
   const target = path.join(runtime, 'assets/template.html');
   const css = await readFile(path.join(root, 'tools/archify-theme.css'), 'utf8');
-  const original = (await readFile(target, 'utf8'))
-    .replace(/\n\/\* artifacture-theme:start \*\/[\s\S]*?\/\* artifacture-theme:end \*\/\n/g, '')
-    .replace('family=JetBrains+Mono', 'family=Inter:wght@400;500;600;700&family=JetBrains+Mono')
-    .replace(/(?:family=Inter:wght@400;500;600;700&){2,}/g, 'family=Inter:wght@400;500;600;700&');
-  if (!original.includes('</style>')) throw new Error('Archify template has no style boundary.');
-  const themed = original.replace('</style>', () => `\n/* artifacture-theme:start */\n${css}/* artifacture-theme:end */\n</style>`);
-  await writeFile(target, themed);
+  // Start from the pinned source every time, including ordinary renders. Cache
+  // edits and prior adapter output cannot accumulate or bypass these guards.
+  const { stdout } = await execute('git', ['-C', checkout, 'show', `${archify.revision}:archify/assets/template.html`], { maxBuffer: 2 * 1024 * 1024 });
+  let template = replaceOnce(stdout,
+    "var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];",
+    "var PRESETS = ['classic', 'signal-flow'];");
+  template = replaceOnce(template,
+    `var LABELS = {
+        classic: viewerText('viewer.preset.classic.short'),
+        'signal-flow': viewerText('viewer.preset.flow.short'),
+        blueprint: viewerText('viewer.preset.blueprint'),
+        editorial: viewerText('viewer.preset.editorial')
+      };`,
+    `var LABELS = {
+        classic: 'Hairline',
+        'signal-flow': viewerText('viewer.preset.flow.short')
+      };`);
+  template = replaceOnce(template, '{{i18n:viewer.preset.classic}}', 'Hairline');
+  template = replaceOnce(template, '{{i18n:viewer.preset.classic.hint}}', 'Fine gray strokes on white');
+  for (const preset of ['blueprint', 'editorial']) {
+    const option = new RegExp(`        <button class="preset-option" data-preset-value="${preset}"[\\s\\S]*?</button>\\n`, 'g');
+    if ([...template.matchAll(option)].length !== 1) throw new Error(`Pinned Archify template has no unique ${preset} option.`);
+    template = template.replace(option, '');
+  }
+  template = replaceOnce(template,
+    '        <div class="preset-menu-heading" role="presentation"><span>{{i18n:viewer.preset.identity}}</span><span>{{i18n:viewer.preset.cycles}}</span></div>\n', '');
+  template = replaceOnce(template,
+    "theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';",
+    "theme = document.documentElement.getAttribute('data-preset') === 'classic' ? 'light' : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');");
+  template = replaceOnce(template,
+    "return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';",
+    "return html.getAttribute('data-preset') === 'classic' ? 'light' : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');");
+  template = replaceOnce(template,
+    "if (urlOverride() || saved === 'light' || saved === 'dark') return;",
+    "if (html.getAttribute('data-preset') === 'classic' || urlOverride() || saved === 'light' || saved === 'dark') return;");
+  template = template.replaceAll('family=JetBrains+Mono', 'family=Inter:wght@400;500;600;700&family=JetBrains+Mono');
+  template = replaceOnce(template, '</style>', `\n/* artifacture-theme:start */\n${css}/* artifacture-theme:end */\n</style>`);
+  if (await readFile(target, 'utf8') !== template) {
+    const candidateDirectory = await mkdtemp(path.join(path.dirname(target), '.artifacture-theme-'));
+    try {
+      const candidate = path.join(candidateDirectory, 'template.html');
+      await writeFile(candidate, template);
+      await rename(candidate, target);
+    } finally {
+      await rm(candidateDirectory, { recursive: true, force: true });
+    }
+  }
+}
+
+async function rejectRetiredSources() {
+  const inputPaths = command === 'compare' ? args.slice(1, 3) : args.slice(1, 2);
+  for (const input of inputPaths) {
+    let source;
+    // Leave malformed input and path diagnostics to the upstream CLI.
+    try { source = JSON.parse(await readFile(input, 'utf8')); } catch { continue; }
+    if (['blueprint', 'editorial'].includes(source?.meta?.visual_preset)) {
+      throw new Error(`Archify preset "${source.meta.visual_preset}" is retired. Set meta.visual_preset to "classic" for Hairline or "signal-flow".`);
+    }
+  }
 }
 
 async function setup() {
@@ -82,6 +141,10 @@ try {
     } else {
       const qualityCommands = ['render', 'validate', 'deliver', 'preview', 'compare'];
       const forwarded = [command, ...args];
+      if (qualityCommands.includes(command)) {
+        await rejectRetiredSources();
+        await applyTheme();
+      }
       if (qualityCommands.includes(command) && !args.some((arg) => arg === '--quality' || arg.startsWith('--quality='))) {
         forwarded.push('--quality', 'showcase');
       }

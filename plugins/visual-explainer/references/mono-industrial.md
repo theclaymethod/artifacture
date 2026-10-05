@@ -1,6 +1,6 @@
 # Mono-Industrial
 
-Use this named alternative only when requested. Artifacture's default is the Lieflat-inspired `lieflat` preset. Shared preset tokens live in `REPO/visual-explainer-mdx/global.css`; standalone mechanics are illustrated by [mono-industrial.html](../templates/mono-industrial.html) and [mono-industrial-slides.html](../templates/mono-industrial-slides.html).
+Use this named alternative only when requested. Artifacture defaults to `hairline`, with `3b1b` for mathematical mechanisms; both retain Lieflat data encodings. Shared preset tokens live in `REPO/visual-explainer-mdx/themes.css`; standalone mechanics are illustrated by [mono-industrial.html](../templates/mono-industrial.html) and [mono-industrial-slides.html](../templates/mono-industrial-slides.html).
 
 ## Typography and composition
 
