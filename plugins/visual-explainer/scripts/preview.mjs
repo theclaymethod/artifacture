@@ -7,6 +7,7 @@ import {
   chmod,
   readdir,
   readFile,
+  realpath,
   rename,
   stat,
   unlink,
@@ -14,9 +15,10 @@ import {
 } from "node:fs/promises";
 import { createServer } from "node:http";
 import { homedir } from "node:os";
-import { delimiter, dirname, extname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
+import { delimiter, dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawn } from "node:child_process";
+import { resolveBrowserAsset, sendBrowserAsset as sendFile } from "./browser-assets.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const MAX_BODY_BYTES = 1_000_000;
@@ -24,24 +26,6 @@ const PREVIEW_SESSION_COOKIE = "__ve_preview_session";
 const ANSI_STYLE_PATTERN = new RegExp(`${String.fromCodePoint(0x1b)}\\[[0-9;]*m`, "g");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".mdx", ".ts", ".tsx"]);
 const SOURCE_IGNORED_DIRECTORIES = new Set([".git", ".next", "build", "dist", "node_modules", "published"]);
-const MIME_TYPES = new Map([
-  [".css", "text/css; charset=utf-8"],
-  [".gif", "image/gif"],
-  [".html", "text/html; charset=utf-8"],
-  [".jpeg", "image/jpeg"],
-  [".jpg", "image/jpeg"],
-  [".js", "text/javascript; charset=utf-8"],
-  [".json", "application/json; charset=utf-8"],
-  [".mjs", "text/javascript; charset=utf-8"],
-  [".mp4", "video/mp4"],
-  [".png", "image/png"],
-  [".svg", "image/svg+xml"],
-  [".webm", "video/webm"],
-  [".webp", "image/webp"],
-  [".woff", "font/woff"],
-  [".woff2", "font/woff2"],
-]);
-
 export function hashSource(source) {
   return createHash("sha256").update(source).digest("hex");
 }
@@ -446,9 +430,9 @@ export async function startPreviewServer({ filePath, port = 0, openBrowser = tru
       }
       if (request.method === "GET" && url.pathname.startsWith("/file/")) {
         const relativePath = decodeURIComponent(url.pathname.slice("/file/".length));
-        const assetPath = safeResolve(targetDirectory, relativePath);
-        if (assetPath === targetPath) {
-          const source = await readFile(targetPath, "utf8");
+        const assetPath = await resolveBrowserAsset(targetDirectory, relativePath);
+        if (assetPath === await realpath(targetPath)) {
+          const source = await readFile(assetPath, "utf8");
           response.writeHead(200, {
             "Cache-Control": "no-store",
             "Content-Type": "text/html; charset=utf-8",
@@ -808,16 +792,6 @@ function cleanBlock(value) {
   return String(value).replace(/\r\n/g, "\n").trim().slice(0, 20_000);
 }
 
-function safeResolve(rootDirectory, relativePath) {
-  const normalizedRelative = normalize(relativePath).replace(/^([/\\])+/, "");
-  const resolvedPath = resolve(rootDirectory, normalizedRelative);
-  const rootPrefix = `${resolve(rootDirectory)}${sep}`;
-  if (resolvedPath !== resolve(rootDirectory) && !resolvedPath.startsWith(rootPrefix)) {
-    throw createHttpError(403, "Asset path escapes the artifact directory.");
-  }
-  return resolvedPath;
-}
-
 async function atomicWrite(filePath, contents) {
   let fileStat;
   try {
@@ -998,20 +972,6 @@ function setSecurityHeaders(response) {
   response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   response.setHeader("Referrer-Policy", "no-referrer");
   response.setHeader("X-Content-Type-Options", "nosniff");
-}
-
-async function sendFile(response, filePath) {
-  try {
-    const contents = await readFile(filePath);
-    response.writeHead(200, {
-      "Cache-Control": "no-store",
-      "Content-Type": MIME_TYPES.get(extname(filePath).toLowerCase()) || "application/octet-stream",
-    });
-    response.end(contents);
-  } catch (error) {
-    if (error?.code === "ENOENT") throw createHttpError(404, "File not found.");
-    throw error;
-  }
 }
 
 function sendJson(response, statusCode, body) {

@@ -101,7 +101,7 @@ async function loadOptionalBrowserStage() {
       checks: checksMod.checks || {},
     };
   } catch (error) {
-    if (error.code === 'ERR_MODULE_NOT_FOUND' || /Cannot find module/.test(error.message)) return null;
+    if (error.code === 'ERR_MODULE_NOT_FOUND' && /Cannot find package ['"]playwright-core['"]/.test(error.message)) return null;
     throw error;
   }
 }
