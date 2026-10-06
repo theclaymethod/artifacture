@@ -35,6 +35,7 @@ Use `list --query <capability-or-API> --json` before choosing a block. The index
 | dag | Multi-parent dependency minimap, lineage focus and a shared-scene reveal |
 | native-clip, manim-clip, psychopomp-clip | Validated rendered clips and selected frames, with optional native source starters |
 | hairline | Prepared `HL.prism` silhouette and crease pairs; native kernel stays separate |
+| axonometric-plan, exploded-axonometric | Model-coordinate plans, rounded physical parts, tray occlusion and finite phase/lift motion; read [axonometric.md](axonometric.md) |
 | charts | Lieflat rung bars, unit fields, barcode, bubble matrix, and record threads |
 | motion | Finite opacity, path reveal, highlight, and illustration translation |
 | composition | Fit complete scene instances into frames; scope identities and share time |
@@ -55,7 +56,7 @@ Search an API such as `CodeBlock`, `createSequenceScene`, or `focusInOrder` to
 obtain its actual copy boundary and variants. Use the live catalog as the
 complete inventory.
 
-There are 50 copyable entries in the same registry; supported variants are searchable.
+There are 52 copyable entries in the same registry; supported variants are searchable.
 The broad MDX API contains additional presentation components and icons that have
 not all been extracted as copyable leaves. Do not count referenced upstream types
 as installed components. Read `REPO/docs/component-catalog.md` and the real

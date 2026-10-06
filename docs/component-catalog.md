@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **50 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **52 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -29,6 +29,8 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | native-clip | `NativeClip`, `NativeStill`, `validateNativeClipAsset` | Validated rendered assets, selected frames, finite HyperFrames placement |
 | manim-clip | Native source and job; `NativeClip`, `NativeStill` | Pinned Manim mathematical source, Typst formulas, secant-to-tangent recipe |
 | psychopomp-clip | Native source and job; `NativeClip`, `NativeStill` | Pinned Rust Scene Program, bowed connections, springs and travelling packets |
+| axonometric-plan | `createAxonometricPlan`, `createAxonometricPlanMotion` | Rounded floor/site geometry, topological occlusion, horizontal roof/floor names and phased reveal |
+| exploded-axonometric | `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
 | hairline | `createHairlineScene` | Caller-prepared silhouette and crease paths; preserved depth order |
 | data-chart | `DataChart` | Bar, line, dot; signed values, missing measurements, exact narrow-screen views |
 | charts | `LieflatChart` | Rung bars, unit field, barcode, bubble matrix, threads; exact values and encoding explanations |
@@ -94,3 +96,5 @@ Reactive charts and the interactive walkthrough have browser layout/control beha
 [Dependency graphs](dag.md) documents DAG reuse. [Native engines](native-engines.md) documents optional Manim and Psychopomp setup and the source-to-clip contract. Native pixels remain rendered media; their source and provenance travel with each output.
 
 [Media effects](media-effects.md) documents the independent ASCII/sweep/VHS blocks and optional Blender source workflow. The [gallery source](../examples/visual-explainer-mdx/media-effects.tsx) exposes four themes, seeking and PNG frame export. [Selected model visuals](model-visuals.md) documents the imported shape matcher, factories, points and SVG leaves. The [selected gallery source](../examples/visual-explainer-mdx/selected-visuals.tsx) compares their live output.
+
+[Axonometric plans and exploded views](../plugins/visual-explainer/references/axonometric.md) adapt the MIT diagram-design grammar at `19f79daa`. The [gallery](../examples/visual-explainer-mdx/axonometric.tsx) contains campus, office, device and unboxing examples, four themes and seeking; it renders the completed base scenes for print.

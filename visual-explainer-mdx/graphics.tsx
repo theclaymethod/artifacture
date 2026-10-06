@@ -7,6 +7,8 @@ const paints = {
   frame: 'var(--ve-diagram-frame)', 'node-background': 'var(--ve-node-bg)', 'node-stroke': 'var(--ve-node-stroke)',
   'illustration-ink': 'var(--ve-illustration-ink)', 'illustration-muted': 'var(--ve-illustration-muted)',
   accent: 'var(--ve-accent)', 'accent-background': 'var(--ve-diagram-accent-fill)',
+  'solid-lit': 'color-mix(in srgb, var(--ve-diagram-ink) 7%, var(--ve-diagram-bg))',
+  'solid-shade': 'color-mix(in srgb, var(--ve-diagram-ink) 15%, var(--ve-diagram-bg))',
 } satisfies Record<GraphicPaint, string>;
 
 const fonts = {

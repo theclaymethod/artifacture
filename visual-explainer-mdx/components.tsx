@@ -23,6 +23,8 @@ export { Pipeline, DecisionMatrix, RiskLedger } from './content-blocks';
 export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
+export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
+export type { AxonometricRect, AxonometricBox, AxonometricMark, AxonometricPlanInput, ExplodedPart, ExplodedSceneInput } from './axonometric-scene';
 export type { GraphicScene, GraphicObject, GraphicPrimitive, GraphicBounds, GraphicPaint, GraphicPlacement, GraphicClip, GraphicFont, GraphicStrokeRole } from './graphics-types';
 export { composeGraphics } from './graphics-composition';
 export type { GraphicInstance, GraphicCompositionInput, GraphicComposition } from './graphics-composition';

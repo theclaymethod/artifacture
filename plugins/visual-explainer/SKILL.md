@@ -5,7 +5,7 @@ license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
   maintainer: Clayton Kim
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Visual Explainer
@@ -36,6 +36,7 @@ Completion requires editable source, a successful export, and evidence for every
 | React workspace, reusable components, or seekable scene motion | [react-workspaces.md](references/react-workspaces.md) | Discover actual APIs with the component CLI; copy local leaf modules instead of importing the full renderer into an app. |
 | chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
 | diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
+| axonometric floor/site plan, exploded object or physical assembly | [axonometric.md](references/axonometric.md) | Editable projected SVG, tray occlusion, shared part levels and finite motion. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
