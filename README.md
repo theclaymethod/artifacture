@@ -72,7 +72,12 @@ npx artifacture list --query focus --json
 The machine-readable index includes public imports, capabilities, supported
 formats, supported variants, constraints, examples, dependencies, and copy commands. It comes from
 the same registry that owns `add`. The copied code belongs to the workspace. The [component catalog](https://github.com/theclaymethod/artifacture/blob/main/docs/component-catalog.md)
-covers 50 copyable blocks and links the interactive preview source.
+covers 52 copyable blocks and links the interactive preview source.
+
+For physical layouts and assemblies, install `axonometric-plan` and
+`exploded-axonometric`. They include rounded projected SVG, tray occlusion,
+shared part levels, and finite motion. Read the [authoring guide](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/axonometric.md)
+and [editable gallery](https://github.com/theclaymethod/artifacture/blob/main/examples/visual-explainer-mdx/axonometric.tsx).
 [Component references](https://github.com/theclaymethod/artifacture/blob/main/docs/component-references.md) guide further math, code,
 diagram, and chart blocks; [candidate research](https://github.com/theclaymethod/artifacture/blob/main/docs/research/primitive-candidates-2026-10-04.md)
 records additions that still need prototypes.

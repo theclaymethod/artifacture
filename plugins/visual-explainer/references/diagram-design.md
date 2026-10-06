@@ -1,5 +1,7 @@
 # Diagram design routing
 
+For physical floor/site plans and exploded assemblies, use the installed [axonometric builders](axonometric.md). That reference incorporates the newer plan and exploded grammar pinned to `19f79daa`; the semantic routing survey below retains its original source pin.
+
 Choose a diagram by the relationship it must explain. This reference adapts [cathrynlavery/diagram-design at `a5e3978`](https://github.com/cathrynlavery/diagram-design/tree/a5e3978088cf89c7caff5c20cabd99fbc2a301de)—semantic pattern first, visual type second—to Artifacture's Lieflat-inspired default and host-page token system. The upstream project is MIT-licensed; retain attribution when porting code or templates.
 
 ## Contents

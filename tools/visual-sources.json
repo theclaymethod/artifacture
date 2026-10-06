@@ -55,7 +55,8 @@
     "repository": "https://github.com/cathrynlavery/diagram-design",
     "revision": "3ac5e10df1fa1c689da9191e6dda39c10aa0fe30",
     "license": "MIT",
-    "integration": "Reference grammars for sequence messages, state transitions, and nested layers. Original Artifacture builders use the shared GraphicScene renderer and existing clock; no upstream skins, templates, fonts, icons, or controller copied."
+    "integration": "Reference grammars for sequence messages, state transitions, and nested layers. Original Artifacture builders use the shared GraphicScene renderer and existing clock; no upstream skins, templates, fonts, icons, or controller copied. Axonometric plans and exploded physical assemblies adapt the newer pinned projection, occlusion and motion grammar into original shared-scene builders; the full MIT notice is copied as DIAGRAM-DESIGN-LICENSE. No upstream fonts, icons or motion controller bundled.",
+    "axonometricRevision": "19f79daa0b540ff398af853af9a8a1c90df197c6"
   },
   "shader-for-interfaces": {
     "repository": "https://github.com/v2space-labs/shader-for-interfaces",
