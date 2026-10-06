@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import './content-blocks.css';
 
 export type PipelineProps = {
@@ -32,7 +32,7 @@ export function Pipeline({ steps }: PipelineProps) {
   );
 }
 
-function normalizePipelineStep(step: PipelineStep): { title: string; body?: string } {
+function normalizePipelineStep(step: PipelineStep): Exclude<PipelineStep, string> {
   return isPipelineTitle(step) ? { title: step } : step;
 }
 

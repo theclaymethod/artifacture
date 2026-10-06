@@ -5,7 +5,7 @@ import { gzipSync, gunzipSync } from 'node:zlib';
 
 const root = path.resolve(import.meta.dirname, '..');
 const output = 'plugins/visual-explainer/assets/runtime.json.gz';
-const roots = ['LICENSE', 'README.md', 'DESIGN.md', 'package.json', 'package-lock.json', 'tsconfig.json', 'oxlint.config.ts', '.nvmrc', '.claude-plugin', 'scripts', 'visual-explainer-mdx', 'plugins/visual-explainer', 'tools', 'examples', 'evals', 'docs/research/primitive-candidates-2026-10-04.md', 'docs/research/diagram-design-integration.md'];
+const roots = ['LICENSE', 'README.md', 'DESIGN.md', 'package.json', 'package-lock.json', 'tsconfig.json', 'oxlint.config.ts', '.nvmrc', '.claude-plugin', 'scripts', 'visual-explainer-mdx', 'plugins/visual-explainer', 'tools', 'examples', 'evals', 'docs/research/primitive-candidates-2026-10-04.md', 'docs/research/diagram-design-integration.md', 'docs/research/punctum-2026-10-05.md'];
 const excluded = new Set([output, 'scripts/build-skill-runtime.mjs']);
 const files = [];
 

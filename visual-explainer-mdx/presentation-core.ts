@@ -14,11 +14,8 @@ export interface StageFit {
 }
 
 /**
- * Scale-to-fit math for the fixed-size stage: the stage renders at
- * stageWidth×stageHeight and is scaled by min(availW/stageW, availH/stageH),
- * then centered (letterboxed) in the leftover space. Scale is clamped at 0 so
- * a transiently unmeasured (0×0) container can never produce a negative or
- * NaN transform.
+ * Scale and center a fixed-size stage within the available area.
+ * Zero-size containers produce scale 0 while layout measurement is pending.
  */
 export function fitStage(
   availWidth: number,

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { createAsciiFrame, effectCellHash, type AsciiFrameOptions } from './ascii-frame';
 import { drawEffectSource, effectDimensions, useEffectSource, type EffectSource } from './media-source';
 

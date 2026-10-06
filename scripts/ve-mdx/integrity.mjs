@@ -1,10 +1,9 @@
 import { codeToHtml } from 'shiki';
+import { diffLines } from '../../visual-explainer-mdx/diff-lines.mjs';
 
 const diagramComponents = new Set(['DiagramCanvas', 'DiagramWalkthrough']);
-// Exported so scripts/ve-mdx/check.mjs can assert this set stays in sync with
-// components.tsx's actual named exports (roster-sync guard, plan 008 step 5).
-// Contents are unchanged — this only adds visibility, not a refactor of how
-// the set is built.
+// Keep the preflight component roster aligned with components.tsx exports.
+// scripts/ve-mdx/check.mjs validates this without executing TSX in Node.
 export const sharedComponents = new Set([
   'ExplainerShell',
   'Section',
@@ -14,6 +13,7 @@ export const sharedComponents = new Set([
   'RiskLedger',
   'DiagramCanvas',
   'GraphicCanvas',
+  'PunctumReadout',
   'GraphicSlide',
   'GraphicVideo',
   'NativeClip', 'NativeStill',
@@ -372,12 +372,9 @@ function findBalanced(input, start, open, close) {
   return -1;
 }
 
-// evaluateLiteral parses a JSX prop expression as a bounded literal — it never
-// executes source. Only object/array literals, strings (single/double/
-// backtick without `${` interpolation), numbers, booleans, and null are
-// accepted; anything else (identifiers, calls, spreads, arrow functions,
-// template interpolation) is rejected with the same diagnostic shape the
-// previous eval-based evaluator produced.
+// Parse bounded JSX literals without executing source. Object/array literals,
+// plain strings, numbers, booleans and null are accepted; identifiers, calls,
+// spreads, functions and template interpolation are rejected.
 function evaluateLiteral(expr, file, label, diagnostics) {
   try {
     const state = { input: expr, pos: 0 };
@@ -755,34 +752,6 @@ function parseUnifiedDiff(patch) {
   if (!rows.some((row) => row.kind === 'hunk')) errors.push('patch must include at least one unified diff hunk');
   if (!rows.some((row) => row.kind === 'add' || row.kind === 'remove')) errors.push('patch must include at least one added or removed line');
   return { rows, errors };
-}
-
-function diffLines(before, after) {
-  const a = before.split(/\r?\n/);
-  const b = after.split(/\r?\n/);
-  const table = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i -= 1) {
-    for (let j = b.length - 1; j >= 0; j -= 1) {
-      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
-    }
-  }
-  const rows = [{ kind: 'hunk', code: `@@ -1,${a.length} +1,${b.length} @@` }];
-  let i = 0;
-  let j = 0;
-  while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) {
-      rows.push({ kind: 'context', oldNo: i + 1, newNo: j + 1, code: a[i] });
-      i += 1;
-      j += 1;
-    } else if (j < b.length && (i === a.length || table[i][j + 1] >= table[i + 1][j])) {
-      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
-      j += 1;
-    } else if (i < a.length) {
-      rows.push({ kind: 'remove', oldNo: i + 1, code: a[i] });
-      i += 1;
-    }
-  }
-  return rows;
 }
 
 function assertJsonSerializable(value) {

@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **52 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **56 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -15,6 +15,10 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | Copy entry | Public API | Implemented choices and useful behavior |
 | --- | --- | --- |
 | graphics | `GraphicCanvas`, `createGraphicScene` | Rect, circle, polygon, path, line, text; arrows; validated immutable scene data |
+| dot-matrix-scene | `createDotMatrixScene` | 108 Punctum masks; stable five-by-nine cells, descenders, size/roundness, optional neutral lattice |
+| character-roll | `createCharacterRoll` | Fixed old/new grid, unchanged characters, finite discrete tracks, exact target and backward seeking |
+| column-scan | `createColumnScan`, `synthesizeScanWav` | Reveal/read modes, one timed accent, shared sound events, deterministic local PCM/WAV |
+| punctum-readout | `PunctumReadout`, `awaitPunctumFont` | Canonical variable WOFF2, caller-owned axes, capture readiness; complete OFL notice |
 | diagram | `createDiagramScene`, `diagramSceneFromLayout` | Flow, tree, swimlane, timeline; horizontal, vertical, auto; labeled and bidirectional edges |
 | diagram-canvas | `DiagramCanvas` | Same scene/layout owner, React wrapper, readable narrow-screen relationships |
 | diagram-walkthrough | `DiagramWalkthrough` | Explicit edge steps, moving packet, play/pause, previous/next/reset, reduced-motion manual steps |
@@ -76,6 +80,8 @@ The new scene builders are in [teaching-scenes.ts](../visual-explainer-mdx/teach
 A scene's semantic IDs remain stable within its source. Use `composeGraphics` to place independent instances and scope their identities. Posters render a sampled scene; slides frame it; video advances the same authored sequence. Theme tokens supply paint, font, and stroke roles. Hairline is the default, with thin structural/detail strokes and one cyan accent; 3b1b, Mono Color, and Algebrica share the geometry.
 
 Reactive charts and the interactive walkthrough have browser layout/control behavior. They are not automatically finite video samplers. The numeric plot, grid, sequence, token, and playhead builders supply a reusable scene route for authored output. Native Hairline camera/prism/spring/pointer tools and the editable Terrain/Riffle figures remain in the pinned vendor skill. Archify remains the larger architecture/workflow/sequence/dataflow/lifecycle CLI. Neither is miscounted as a React leaf.
+
+[Punctum displays](punctum.md) adds an interactive gallery of dot geometry, exact character rolls, synchronized scans/sound, and an optional variable-font readout. All four entries are indexed and copied with their source dependencies and OFL notices. The same scenes pass through composition, slides, and finite video.
 
 ## References examined on 2026-10-04
 

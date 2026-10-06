@@ -41,6 +41,8 @@ Optional `kicker`, `eyebrow`, `stat`, and label props are compatibility APIs, no
 - `Slide(title, kicker?, tone?)`
 - `PosterCanvas(eyebrow?, title, stat?, footer?, preset?, reviewTools?)`
 - `GraphicCanvas(scene)` draws immutable primitives from `createDiagramScene` or `createGraphicScene`.
+- `PunctumReadout(text, weight?, roundness?, size?, accent?)` uses the optional bundled variable font for short display text. Await `awaitPunctumFont(text)` before capture. Copy with `artifacture add punctum-readout`; retain its OFL notice.
+- `createDotMatrixScene`, `createCharacterRoll`, and `createColumnScan` prepare glyph cells and finite motion for the same canvas, composition, slide, or video. Scan sound comes from `synthesizeScanWav(scan.events, {duration: scan.motion.duration})`; use the audio currentTime to drive preview visuals. Read [punctum.md](../../../docs/punctum.md) for the copy entries, bounds, font boundary, and examples.
 - `composeGraphics` places complete scene blocks, scopes their identities and motion, and returns one scene/motion pair for the same canvas, poster, slide, or video. Declare destination frames and clipping; avoid concatenating scene objects. Read `docs/graphics-and-video.md` from `REPO` for the composition contract.
 - `GraphicSlide(slide)` places a shared graphic in a fixed frame created by `createSlideScene`.
 - `GraphicVideo(sequence, authoredSeconds?)` samples finite motion from `sequenceSlides`; use `ve:graphic-video` for a seekable browser export.

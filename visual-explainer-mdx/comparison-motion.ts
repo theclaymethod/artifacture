@@ -1,11 +1,11 @@
 import { createGraphicScene, type GraphicObject, type GraphicPrimitive, type GraphicScene } from './graphics-types';
-import { defineGraphicMotion, type GraphicMotion } from './graphic-motion';
+import { defineGraphicMotion, type GraphicMotion, type GraphicMotionTrack } from './graphic-motion';
 import { composeGraphics, type GraphicComposition } from './graphics-composition';
 
 export type ComparisonWipeInput = Readonly<{
   id: string; title: string; description: string; before: GraphicScene; after: GraphicScene;
   beforeMotion?: GraphicMotion; afterMotion?: GraphicMotion; registration: readonly string[];
-  duration: number; start: number; transition: number; from: number; to: number; axis?: 'x' | 'y'; ease?: 'linear' | 'smooth';
+  duration: number; start: number; transition: number; from: number; to: number; axis?: 'x' | 'y'; ease?: GraphicMotionTrack['ease'];
 }>;
 
 function primitiveGeometry(p: GraphicPrimitive) {

@@ -1,4 +1,4 @@
-import React, { useId, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { GraphicCanvas } from './graphics';
 import { dagNeighborhood, focusDagScene, prepareDag, type DagInput } from './dag-scene';
 import './dag-canvas.css';

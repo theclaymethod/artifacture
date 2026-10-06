@@ -1,4 +1,4 @@
-import React, { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { layoutDiagram } from './diagram-layout';
 import { GraphicCanvas } from './graphics';
 import { diagramSceneFromLayout } from './diagram-scene';

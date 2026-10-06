@@ -1,4 +1,3 @@
-import React from 'react';
 import { GraphicCanvas } from './graphics';
 import { createGraphicScene } from './graphics-types';
 import type { GraphicScene } from './graphics-types';

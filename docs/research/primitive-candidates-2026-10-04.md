@@ -303,6 +303,10 @@ The inspector awaits the caller's scene snapshot at zero, the last encoded time,
 
 Neither pick adds another render engine or style. The frame plan is shared export tooling; semantic geometry remains reusable from poster through diagram and slide, with video sampling the same scene. Retained Hairline, 3b1b, Mono Color, and Algebrica themes still own strokes, contrast, and typography.
 
+### Punctum display primitives
+
+The [2026-10-05 Punctum intake](punctum-2026-10-05.md) adds pinned source evidence for dot-matrix glyph scenes, finite character rolls, and column scans with optional event-driven sound. A 45-position zero-to-one prototype used the existing GraphicScene/GraphicMotion clock and preserved backward seeking. Following approval, four [display blocks](../punctum.md) are now implemented and registered: dot-matrix scenes, finite rolls, column scans with generated WAV, and the canonical variable-font readout. They retain the existing themes and scene/motion clock. Font/glyph data ships with its full OFL notice and pinned hashes; film/site/tooling source and media are not copied. The Premiere GPU renderer remains a candidate.
+
 ### What the supplied X posts actually establish
 
 The parent agent read these posts in an authenticated browser and supplied the following evidence receipt. This lane did not download their media or independently inspect executable implementations.

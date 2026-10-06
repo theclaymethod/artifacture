@@ -1,4 +1,4 @@
-import React, { useId, type CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 import type { GraphicFont, GraphicObject, GraphicPaint, GraphicPrimitive, GraphicScene } from './graphics-types';
 export { createGraphicScene } from './graphics-types';
 

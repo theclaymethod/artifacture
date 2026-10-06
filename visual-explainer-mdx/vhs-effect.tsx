@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createVhsRenderer } from './vhs-renderer';
 import { drawEffectSource, effectDimensions, useEffectSource, useReducedEffectMotion, type EffectSource } from './media-source';
 
