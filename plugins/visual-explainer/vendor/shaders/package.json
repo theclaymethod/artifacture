@@ -1,0 +1,52 @@
+{
+  "name": "shaders-workspace",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Declarative shader components - monorepo workspace",
+  "author": "Shader Effects Inc.<https://github.com/shader-effects-inc>",
+  "homepage": "https://shaders.com/",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.17.11",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vueuse/components": "^10.11.1",
+    "@vueuse/core": "^10.11.1",
+    "changelogen": "^0.6.2",
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.2.0",
+    "glob": "^13.0.1",
+    "sharp": "^0.34.5",
+    "tsx": "^4.19.2",
+    "turbo": "^2.7.3",
+    "typescript": "^5.7.2",
+    "vite": "npm:rolldown-vite@^7.1.2",
+    "vite-plugin-dts": "^3.9.1",
+    "vue-tsc": "^2.2.0"
+  },
+  "scripts": {
+    "lib:build": "turbo run shaders#build",
+    "test": "pnpm --filter shaders-core test:run",
+    "release": "node scripts/release.mjs"
+  },
+  "engines": {
+    "node": "22.20.x",
+    "pnpm": "10.0.0"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "react",
+    "svelte",
+    "webgpu",
+    "webgl",
+    "wgsl",
+    "glsl"
+  ],
+  "packageManager": "pnpm@10.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  }
+}

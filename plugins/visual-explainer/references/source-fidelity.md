@@ -13,6 +13,27 @@ import { Riffle, Phone, Exploded } from './artifacture/hairline-figures';
 
 For a new bespoke figure, follow the unchanged [Hairline authoring skill](../vendor/hairline-create/SKILL.md), kernel and builders. The older `createHairlineScene` prepared-path adapter is useful for controlled SVG/video; it does not replace the interactive runtime.
 
+## Shaders
+
+`artifacture add shaders` installs the pinned official `shaders@4.0.0` package and copies its MIT notice. The `shader-components` module reexports the full original React library, including generators, materials, filters, transitions and cursor effects. Use the original props, composition and defaults; do not recreate a shader in SVG or CSS. The engine, component definitions, framework sources and documentation are bundled unchanged with a pinned revision and hash manifest. Shader Effects Inc.'s platform editor and preset assets are separate and excluded.
+
+```tsx
+import { Shader, Aurora } from './artifacture/shader-components';
+<Shader disableTelemetry style={{ width: '100%', height: 500 }}><Aurora /></Shader>
+
+import { NativeShader } from './artifacture/native-shader';
+<NativeShader effect="Plasma" seconds={seconds} label="Plasma shader" />
+```
+
+`NativeShader` supports Plasma, SimplexNoise and Spiral with fixed original props. Its controller calls the original `renderSyntheticFrame` API, freezes native invalidation frames, supports backward seeking and awaits the GPU fence. `createShaderSurface(canvas, {effect, props})` returns `draw(seconds)`, `resize(width, height)` and `dispose()` for a custom presentation/video host. Pass the existing owner’s time; no independent playback clock is introduced. WebGPU failure is reported explicitly. Stateful simulations, media and cursor effects retain native live behavior and need the upstream recording workflow; they are not exposed as reversible samplers.
+
+```bash
+artifacture source shaders
+artifacture source-video examples/visual-explainer-mdx/shaders.video.json --out assets/shaders
+```
+
+The shader job uses `library: "shaders"`, `example: "Plasma" | "SimplexNoise" | "Spiral"`, optional original `props`, plus duration/fps/width/height. The HTML is a generated GPU capture host, not an upstream example document. The bundle retains the editable adapter, job, pinned original-source manifest, MIT notice, clip and decoded stills. Inspect the [interactive example](../../../examples/visual-explainer-mdx/shaders.tsx).
+
 ## Diagram Design
 
 Follow the complete [Diagram Design skill](../vendor/diagram-design/skills/diagram-design/SKILL.md), including its type-specific references, skin, geometry and motion. The original templates, 204 examples, and Python axonometry/build scripts are bundled unchanged. An explicit request for the original styling selects its defaults; for a branded project, follow its profile/onboarding workflow.

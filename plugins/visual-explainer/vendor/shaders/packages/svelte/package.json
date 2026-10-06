@@ -1,0 +1,46 @@
+{
+  "name": "shaders-svelte",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/generatePresetCode.d.ts",
+      "import": "./dist/utils/generatePresetCode.js",
+      "default": "./dist/utils/generatePresetCode.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist dist-types",
+    "generate": "tsx ../core/scripts/generate-components.ts --framework=svelte",
+    "prebuild": "pnpm run clean && pnpm run generate",
+    "build": "echo '⚙️  Building svelte package...' && vite build && pnpm run build:types",
+    "build:types": "svelte-package --input src/lib --output dist-types && node scripts/copy-types.js && rm -rf dist-types"
+  },
+  "dependencies": {
+    "shaders-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.2.6",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte": "^5",
+    "svelte-check": "^3.8.6",
+    "tslib": "^2.7.0",
+    "vite-plugin-externalize-deps": "^0.10.0",
+    "vite": "npm:rolldown-vite@7.1.16"
+  },
+  "peerDependencies": {
+    "svelte": "^5"
+  }
+}

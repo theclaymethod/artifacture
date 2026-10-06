@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **52 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **53 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -32,6 +32,7 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | axonometric-plan | `DiagramDesignFigure`, `createAxonometricPlan`, `createAxonometricPlanMotion` | Rounded floor/site geometry, topological occlusion, horizontal roof/floor names and phased reveal |
 | exploded-axonometric | `DiagramDesignFigure`, `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
 | hairline | 27 original figures, `createHairlineScene` | Official Hairline runtime plus separate prepared-path scene adapter |
+| shaders | Original React exports, `NativeShader`, `createShaderSurface` | Official Shader Effects WebGPU library; reversible GPU-fenced frames for Plasma, SimplexNoise and Spiral |
 | data-chart | `DataChart` | Bar, line, dot; signed values, missing measurements, exact narrow-screen views |
 | charts | `LieflatChart` | Rung bars, unit field, barcode, bubble matrix, threads; exact values and encoding explanations |
 | thread-plot | `ThreadPlot` | Smaller record-trace leaf; stage/category paths, selectable record, portrait layout |
