@@ -172,7 +172,7 @@ test('public export and individually discoverable components deliver interactive
         assert.deepEqual(block.stylesheets, []);
         assert.deepEqual(block.files.map(file => file.destination), ['LICENSE', ...(id === 'video-frames' ? [] : ['LEMO-LICENSE']), `${id}.ts`]);
       }
-      assert.deepEqual(JSON.parse(succeeds(components(['list', '--query', 'spring', '--json']))).map(block => block.id), ['psychopomp-clip']);
+      assert.deepEqual(JSON.parse(succeeds(components(['list', '--query', 'spring', '--json']))).map(block => block.id), ['psychopomp-clip', 'hairline']);
       assert.deepEqual(JSON.parse(succeeds(components(['list', '--query', 'elastic-spring', '--json']))), []);
       assert.ok(!JSON.parse(succeeds(components(['list', '--query', 'GraphicScene', '--json']))).some((block) => block.id === 'charts'));
       const workspace = path.join(externalRoot, 'workspace');

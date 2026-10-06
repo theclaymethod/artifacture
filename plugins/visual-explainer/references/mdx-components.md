@@ -75,3 +75,14 @@ Primary explainer presets are `hairline` (default isometric illustrations) and `
 Copy selected model/vector blocks with `artifacture add shape-ascii particle-object living-forms procedural-props orbital-text trace-path`. Use `modelAsset` to bridge a reviewed img2threejs factory. Read `docs/model-visuals.md` and copied `MODEL-AUTHORING.md` for readiness, ownership, supported geometry and source closure.
 
 Copy these with `artifacture add ascii-image ascii-sweep ascii-object vhs`. See `docs/media-effects.md` for the source contracts, video decoding ownership, CORS/WebGL constraints, and Blender authoring/export instructions. Keep teaching text after the effect.
+
+## Original source figures
+
+- `DiagramDesignFigure(example, height?, title?, seconds?)`: all 204 original Diagram Design HTML documents; native controls or optional shared time.
+- `PrLensFigure(example, height?, seconds?)`: original renderer SVG and SMIL pulses.
+- `ChalkboardFigure(example, height?, seconds?)`: original nine documents; shared time only where the original has `paint(t)`. Its separately licensed font is not included.
+- `NativeLivingForm(form, seconds?, settings?)`: original Strata, Arbor and Resonance TSL renderer and source scene.
+- `NativeProceduralProp(kind, seconds?, label?, reveal?)`: original clay trophy geometry/scene and 720 ms reveal.
+- `SourceFigure(asset, seconds?, height?, onFrame?)`: unchanged HTML preview or thin native-clock wrapper. `seekSourceFrame` awaits capture acknowledgement.
+
+Import original Hairline figures from `hairline-figures`; they retain their native pointer/spring interaction. See [source-fidelity.md](source-fidelity.md) for vendor boundaries, licensing, explicit time and MP4/still export.

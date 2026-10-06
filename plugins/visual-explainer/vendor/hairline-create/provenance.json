@@ -1,14 +1,14 @@
 {
-  "repository": "https://github.com/lucasmarkes/hairline",
-  "revision": "c3692e0c797956268847d843949f79714b6f7a41",
-  "upstreamPath": "skills/hairline-create",
-  "license": "MIT",
-  "licensePath": "LICENSE",
-  "integration": "Complete upstream skill and interactive runtime, copied unchanged. Artifacture guidance lives outside this directory.",
+  "source": "https://github.com/lucasmarkes/hairline",
+  "commit": "bc782244216620434b14736df1d74daed2d05046",
   "files": [
     {
+      "path": "LICENSE",
+      "sha256": "948d56f0bc8c383c04c453136dcfb78407f97de65ff8bb4fabff2b79ddd17f59"
+    },
+    {
       "path": "SKILL.md",
-      "sha256": "f3c0ba3e801f6f944cfa34fbdb5a452a4e9d7feeb444d95d86d19bb82408f25e"
+      "sha256": "6ac0f05de48bea61650e60f6ec9b11b9352d9ee4592b3ad02823fa4be7f67b62"
     },
     {
       "path": "bench.html",
@@ -20,7 +20,7 @@
     },
     {
       "path": "concepts.md",
-      "sha256": "1bd3b4d829b3cb3a46d91e95626485ef5e4fc23b82987013403d49a57e4eb2a2"
+      "sha256": "0d1bcd3b4a6b6c1cf3b51d72f9bae85403026d129ee4c3d706a177c6f6710347"
     },
     {
       "path": "examples/riffle.js",
@@ -36,20 +36,19 @@
     },
     {
       "path": "look.md",
-      "sha256": "430daa2069e33e311273ef2f3d3ce0acd3d1e91fc12c7fae0a2daf72dcee93f4"
+      "sha256": "d3bc1ae47e4331d39e8c0c589a2439a25bf9e0a09de7dcc653593e0a77e0743e"
     },
     {
       "path": "look.mjs",
-      "sha256": "203f397f2012c216e02934360df9b594f2e9826a0d3896bd80f88e4a9f943ee7"
+      "sha256": "c7d5c06208ca69982d92df709bf69fd58cbe714b1482d58f5f2ad83ca2612651"
     },
     {
       "path": "rules.md",
-      "sha256": "d6dfe89f9051a552674feee9b1da7b38c3c92c14dfe2bf28bd2627a3a953fb3a"
+      "sha256": "70fa38179961aaccb35d6411e7ae6e9fc0199763ea723400daec673de72bff27"
     },
     {
       "path": "validate.mjs",
       "sha256": "6ebd6268dea478d076e50029f55dbf57df11cfb772a5253862347f66de767db8"
     }
-  ],
-  "licenseSha256": "948d56f0bc8c383c04c453136dcfb78407f97de65ff8bb4fabff2b79ddd17f59"
+  ]
 }

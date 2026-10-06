@@ -9,36 +9,48 @@
   "lieflat": {
     "repository": "https://github.com/larashero3-dotcom/lieflat-charts",
     "license": "PolyForm-Noncommercial-1.0.0",
-    "integration": "Visual reference for five original LieflatChart families and JSON authoring: rung-bars, unit-field, barcode, bubble-matrix, and threads. No upstream code, templates, or assets bundled.",
+    "integration": "Original PolyForm Noncommercial chart skill, full template galleries, mono tokens and validation script are resolved from the pinned upstream with artifacture source lieflat, outside the MIT source-copy tree. For an explicit Lieflat request use the original workflow for permitted purposes. The five Artifacture encodings remain clearly identified independent implementations.",
     "revision": "eace082a317b696c5570c25826a53a7fa113e984"
   },
   "algebrica": {
     "repository": "https://github.com/antoniolupetti/algebrica",
     "license": "CC-BY-NC-4.0",
-    "integration": "Visual reference only. Original theme and examples; no upstream content or assets bundled."
+    "integration": "Original mathematical content and editable SVGs remain an external CC-BY-NC source. artifacture source algebrica resolves the pinned original for permitted use; the serif palette is explicitly an independent adaptation and does not claim original artwork.",
+    "revision": "aa9f3dcf97126aa05c7d5b1a341813335eb32cf4"
   },
   "mono-color": {
     "repository": "https://github.com/yanliudesign/mono-color-skill",
     "license": "MIT for code; separate terms for images",
-    "integration": "Visual reference only. Original theme; no upstream example or reference images bundled.",
-    "originalAsset": "plugins/visual-explainer/templates/assets/repair-mouse.webp \u2014 generated for Artifacture with OpenAI image generation; original opened-mouse still life, no upstream image supplied."
+    "integration": "33 unchanged original MIT software files including skill, machine-readable composition/rhythm/type/carrier/imperfection catalogs and utilities. Original artwork and third-party reference images excluded under separate image terms. Use the actual image-generation workflow for new artwork.",
+    "originalAsset": "plugins/visual-explainer/templates/assets/repair-mouse.webp \u2014 generated for Artifacture with OpenAI image generation; original opened-mouse still life, no upstream image supplied.",
+    "revision": "c8ff70597ddedcd65f21a0b528f6a70c35690b0a",
+    "bundledPath": "plugins/visual-explainer/vendor/mono-color"
   },
   "pr-lens": {
     "repository": "https://github.com/coldteadotai/pr-lens",
-    "revision": "c49b49e190d055ccd3a62743fccf8d96e2b10ba2",
+    "revision": "7a9115c8202da4db030be5954ada8862e6135dce",
     "license": "MIT",
-    "integration": "Reference for ordered data-flow motion. Original Artifacture walkthrough controller; no upstream app, posting workflow, or renderer source bundled."
+    "integration": "Official CLI, schema and renderer installed automatically. artifacture pr-lens delegates directly to the pinned native CLI. Twenty original renderer-produced SVGs and unchanged source graph examples are included. Original layout, typography, change states and ordered SMIL pulses remain intact. Publishing/comment workflows require explicit user authorization.",
+    "bundledPath": "plugins/visual-explainer/vendor/pr-lens",
+    "nativePackage": "@coldtea/pr-lens-cli",
+    "nativeVersion": "0.13.0",
+    "rendererVersion": "0.3.2"
   },
   "hairline": {
     "repository": "https://github.com/lucasmarkes/hairline",
-    "revision": "c3692e0c797956268847d843949f79714b6f7a41",
+    "revision": "bc782244216620434b14736df1d74daed2d05046",
     "license": "MIT",
-    "integration": "Complete unchanged skill and interactive runtime bundled in plugins/visual-explainer/vendor/hairline-create, including upstream examples, build/look/validation guidance, and MIT LICENSE. File hashes are recorded in vendor/hairline-create/provenance.json. Hairline illustration grammar is the default host across formats, with reusable Lieflat chart encodings. The rotating-point video remains original Artifacture geometry and animation and does not include the upstream pointer engine or figure code."
+    "integration": "Official 27-figure React runtime installed automatically; complete original authoring skill and runtime vendored unchanged, with MIT notice and file hashes. Controlled prepared-path SVG scenes are a separate adaptation.",
+    "bundledPath": "plugins/visual-explainer/vendor/hairline-create",
+    "nativePackage": "@lucasmarkes/hairline",
+    "nativeVersion": "0.3.0"
   },
   "3blue1brown": {
     "url": "https://www.3blue1brown.com/",
     "repository": "https://github.com/3b1b/manim",
-    "integration": "Requested reference for mathematical visual explanation, continuous object identity, and coupled geometric motion. No upstream code, channel assets, footage, or music bundled."
+    "integration": "Literal 3Blue1Brown rendering uses the original pinned 3b1b/ManimGL source, resolved with artifacture source 3blue1brown. Existing Manim Community native clips use the real pinned Community engine and are identified separately. No channel footage, artwork, music or copyrighted explanations bundled.",
+    "revision": "fafa083a4fb274bba9cabde0b6e2f50ba6da0622",
+    "license": "MIT for ManimGL code; channel assets separate"
   },
   "typography": {
     "url": "https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography",
@@ -49,20 +61,22 @@
     "repository": "https://github.com/lilyzhng/chalkboarding",
     "revision": "f6af618a5a5642861a04f3d16b8a90c891177269",
     "license": "MIT for code; separate third-party font terms",
-    "integration": "Reference for idempotent paint(time), token/batch reveal, plots, playheads, and scalar grids. Original scene builders and finite track helpers; no upstream code, chalk skin, font, media, or example assets bundled."
+    "integration": "31 unchanged original MIT source files: full skill, templates, nine examples, deterministic chalky.js, CSS, slip/dust filters, beat controllers and export/QA scripts. Third-party PencilPete font and demo media excluded; a licensed font is required for original typography.",
+    "bundledPath": "plugins/visual-explainer/vendor/chalkboarding"
   },
   "diagram-design": {
     "repository": "https://github.com/cathrynlavery/diagram-design",
-    "revision": "3ac5e10df1fa1c689da9191e6dda39c10aa0fe30",
+    "revision": "3996c1607503ec4bcdb60b018568359d20f71d15",
     "license": "MIT",
-    "integration": "Reference grammars for sequence messages, state transitions, and nested layers. Original Artifacture builders use the shared GraphicScene renderer and existing clock; no upstream skins, templates, fonts, icons, or controller copied. Axonometric plans and exploded physical assemblies adapt the newer pinned projection, occlusion and motion grammar into original shared-scene builders; the full MIT notice is copied as DIAGRAM-DESIGN-LICENSE. No upstream fonts, icons or motion controller bundled.",
-    "axonometricRevision": "19f79daa0b540ff398af853af9a8a1c90df197c6"
+    "integration": "284 unchanged original source files, all 204 HTML examples, type references, skins, animation controllers and original Python axonometric/exploded builders. DiagramDesignFigure renders the original documents. Full MIT and third-party notices retained.",
+    "bundledPath": "plugins/visual-explainer/vendor/diagram-design"
   },
   "shader-for-interfaces": {
     "repository": "https://github.com/v2space-labs/shader-for-interfaces",
     "revision": "08fe6fc1dad56fcdf29b967c3d5d65966bdac860",
     "license": "MIT",
-    "integration": "Data-contract reference for original scalar-grid SVG scenes. No shader renderer, GLSL, texture, particle system, or upstream source bundled."
+    "integration": "All 14 original MIT skill/reference files unchanged, including renderer selection and original GLSL/WGSL shader recipes. Follow the native GPU workflow for shader requests; the controlled scalar-grid is a separate SVG adapter.",
+    "bundledPath": "plugins/visual-explainer/vendor/shader-for-interfaces"
   },
   "prettymaps": {
     "repository": "https://github.com/marceloprates/prettymaps",
@@ -74,13 +88,15 @@
     "repository": "https://github.com/emilkowalski/skills",
     "revision": "e8a175de22ae1e49370fc144c1f3bb9aeedf988d",
     "license": "MIT",
-    "integration": "Reference for trigger origins, interruption, masks, and reduced motion. Candidate finite adapters only; no upstream recipes copied into the component library."
+    "integration": "All 25 original MIT skills, motion recipes and standards bundled unchanged. Use the original trigger, interruption, spring/easing and reduced-motion guidance for interactive motion.",
+    "bundledPath": "plugins/visual-explainer/vendor/emil-skills"
   },
   "lemo-opuscar": {
     "repository": "https://github.com/lemomo-ai/lemo-opuscar",
-    "revision": "54be47b14f2ecb2e7c5f473c934db8de0235b795",
+    "revision": "b65efe6ea393fdc71212898ea4c57c754cfefa46",
     "license": "MIT for code; separate demo media/model terms",
-    "integration": "Monotone scalar/vector sampling adapted into visual-explainer-mdx/authored-values.ts; subtitle interval and millisecond-carry ideas adapted into narration-cues.ts. Full LemoLab MIT notice copied as visual-explainer-mdx/LEMO-LICENSE and included in both source-copy closures. No upstream renderer, voice model, fonts, music or demo media bundled."
+    "integration": "1,334 unchanged original source files: all 43 style guides, demo drawing engines, production/render/voice/music tools and guides. Original core OFL font files/notices included. Demo media, third-party models, HDRIs and voice/music assets excluded; their own terms apply. Small shared-clock timing adaptations remain separate from the original film workflow.",
+    "bundledPath": "plugins/visual-explainer/vendor/lemo-opuscar"
   },
   "pdoom-video": {
     "repository": "https://github.com/JohnHeibel/PDoomVideo",
@@ -98,13 +114,14 @@
     "repository": "https://github.com/tuzhechen2005/opus-video-skills",
     "revision": "59744a69c7b916cfbe4c4ec84006b0c2f5e2fde1",
     "license": "MIT; derived templates also retain John Heibel MIT notice",
-    "integration": "Shared cue-sheet, finite capture, karaoke and beat-analysis contract references. No source, renderer, dependencies or assets bundled."
+    "integration": "Original MIT painted-animation and kinetic-reel skills, templates, engines, deterministic renderers, beat analysis and worked source examples bundled unchanged, preserving John Heibel notice. Demo GIF/JPEG/audio/video excluded.",
+    "bundledPath": "plugins/visual-explainer/vendor/opus-video-skills"
   },
   "lemo-wake": {
     "repository": "https://github.com/lemomo-ai/lemo-wake",
     "revision": "ebb758c66c61cf571b57d341ec3f5cbb4bf74d08",
     "license": "CC-BY-NC-4.0 for code and documentation",
-    "integration": "Frame-capture and loop-QA contract reference for original visual-explainer-mdx/video-frames.ts. Its explicit rounding and awaited snapshots distinguish authored endpoint closure from last encoded frame similarity. No upstream CC-BY-NC source, renderer, assets or QA scripts bundled."
+    "integration": "Original image reconstruction, segmentation/depth, animation, capture and loop QA workflow resolves at the pinned source with artifacture source lemo-wake. CC-BY-NC applies to its code/documentation. The independent frame-plan utility is not a substitute for the original workflow."
   },
   "notdwd-video-reference": {
     "url": "https://x.com/notdwd/status/2106140092750536984",
@@ -113,5 +130,27 @@
   "deedy-video-reference": {
     "url": "https://x.com/deedydas/status/2104957026199900220",
     "integration": "Read-only workflow reference for script planning, animatics, narrated code walkthroughs, word-aligned captions and screenshot/transcription review. No media or provider-specific tooling bundled."
+  },
+  "canvasui": {
+    "repository": "https://github.com/DavidHDev/canvas-ui",
+    "revision": "a04a99b235299ee79a123a16ccb2e6cf9da74b6b",
+    "license": "Application-use license; component redistribution and ports prohibited",
+    "integration": "Pinned external original for inspection/application use under its license. No restricted source, shaders, media or ports enter the source-copy package. Independently authored ASCII/sweep/VHS effects are identified as adaptations."
+  },
+  "psychopomp": {
+    "repository": "https://github.com/kitlangton/psychopomp",
+    "revision": "156444d4fee830a9c88307b2c27352412cd5c18d",
+    "license": "MIT",
+    "integration": "Actual pinned native engine, editable source/job and checked clip/still bundles, installed/rendered with artifacture engine. Browser diagram helpers do not replace the native physical renderer."
+  },
+  "manim-community": {
+    "repository": "https://github.com/ManimCommunity/manim",
+    "revision": "5dc0d3b8dfe23b1dbf2284cca111c5d146a44db0",
+    "license": "MIT",
+    "integration": "Actual pinned Community native engine with Typst, editable source/job and checked clips/stills. Distinct from the original 3b1b/ManimGL engine."
+  },
+  "hyperframes": {
+    "url": "https://github.com/heygen-com/hyperframes",
+    "integration": "Original framework owns browser video timeline, media decoding and seeking, compile and encoding. Retain native composition source; do not label a palette or generic animation as the framework."
   }
 }

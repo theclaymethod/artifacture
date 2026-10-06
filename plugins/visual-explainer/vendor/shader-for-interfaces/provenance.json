@@ -1,0 +1,62 @@
+{
+  "source": "https://github.com/v2space-labs/shader-for-interfaces",
+  "commit": "08fe6fc1dad56fcdf29b967c3d5d65966bdac860",
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "810b86b8f842aa903bbfa3da36d6140f344ca98743df8811f2e3d00f8a994b52"
+    },
+    {
+      "path": "README.md",
+      "sha256": "637d5a881461584315d8a83fab36d97a86da7451633cfe2bbdb39db6785046dd"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "8592269a0f19d5d68555819d29412b12171aa403f4b9eaf013248daab0ce964d"
+    },
+    {
+      "path": "references/brief-to-effect.md",
+      "sha256": "804cdb5c94550bea91e3117ebfe87e9d0c028ad4cc76d5f50606d0ad937f33a9"
+    },
+    {
+      "path": "references/color-direction.md",
+      "sha256": "e4122d9e0e3b02e48b487c69180fc8d3710f06e0ef7beec2cca3a7f73a36d819"
+    },
+    {
+      "path": "references/data-visualization.md",
+      "sha256": "4c2e111a731e2b5f4e39d3acf5525b1625a2d7b4a4c1eb7545b2058fb22066d0"
+    },
+    {
+      "path": "references/effect-selection.md",
+      "sha256": "41962b358cb172da338c2b2b774ed286e53ab1dee604b5e0d94049d882fa1470"
+    },
+    {
+      "path": "references/glsl-patterns.md",
+      "sha256": "16407ca012c9e9ac021a2055bbe6fa00a5e716bb428df4d839d1ff536b75f90f"
+    },
+    {
+      "path": "references/particles.md",
+      "sha256": "a8d9fcbcc5c8e879aeeac66603c20013b23a4b7e266ac153c3a9695946bb3c6d"
+    },
+    {
+      "path": "references/performance-accessibility.md",
+      "sha256": "532a1df91a9d86fe427119575ed7cceb4cbdd98c2afee580b8a4a6775195da4b"
+    },
+    {
+      "path": "references/r3f-integration.md",
+      "sha256": "424778c0ea48508ab2c3c404a6b493f4f7ef6e6588e4940306e6f36d2c1844c6"
+    },
+    {
+      "path": "references/textures-and-distortion.md",
+      "sha256": "02aa676d80e3289f616bcb49dd7d21bf2af760986b1160e2105be8d98a3b3186"
+    },
+    {
+      "path": "references/ui-integration.md",
+      "sha256": "7588ca2358e3f2e21f0326e3ef33cd9e417634380a2a3bb839c7f3f8d0cc137f"
+    },
+    {
+      "path": "references/vgpu-wgsl.md",
+      "sha256": "5834420cc0662135dfa802b2a7e2adeca94935c828895b1a106a0230db9362e7"
+    }
+  ]
+}

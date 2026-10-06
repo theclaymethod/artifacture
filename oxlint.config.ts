@@ -17,7 +17,8 @@ export default defineConfig({
     ".windsurf/**",
     "dist/**",
     "node_modules/**",
-    "plugins/visual-explainer/vendor/hairline-create/**",
+    // Vendored upstream files stay byte-identical; lint the Artifacture wrappers.
+    "plugins/visual-explainer/vendor/**",
     "tools/oxlint/anti-slop/**",
   ],
   jsPlugins: [

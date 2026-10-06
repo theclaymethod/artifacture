@@ -11,6 +11,9 @@ const help = `Usage:
   artifacture list [--query <text>] [--json]
   artifacture export <source.mdx|source.tsx> --out <output.html>
   artifacture video <source.tsx> --out <output.html>
+  artifacture pr-lens <command> [arguments...]
+  artifacture source <name|list> [--json]
+  artifacture source-video <job.json> --out <directory>
   artifacture engine list [--json]
   artifacture engine setup <manim|psychopomp>
   artifacture engine scaffold <engine> <directory> [--theme <preset>]
@@ -85,7 +88,7 @@ async function installPackages(plan) {
   for (const kind of ['dependency', 'devDependency']) {
     const missing = plan.requirements.filter(requirement => requirement.kind === kind && !requirement.declared);
     if (!missing.length) continue;
-    await npm(['install', ...(kind === 'devDependency' ? ['--save-dev'] : []), '--no-audit', '--no-fund', ...missing.map(requirement => `${requirement.name}@${requirement.tested}`)], plan.root);
+    await npm(['install', '--save-exact', ...(kind === 'devDependency' ? ['--save-dev'] : []), '--no-audit', '--no-fund', ...missing.map(requirement => `${requirement.name}@${requirement.tested}`)], plan.root);
     installed = true;
   }
   if (!installed && plan.requirements.length) {
@@ -146,6 +149,7 @@ async function ensureBrowser() {
 }
 
 const runtimeCommands = {
+  'source-video': 'scripts/source-video.mjs',
   export: 'scripts/ve-mdx/export.mjs',
   'export-static': 'scripts/ve-mdx/export-static.mjs',
   video: 'scripts/ve-mdx/graphic-video.mjs',
@@ -163,6 +167,11 @@ async function main() {
   if (['help', '--help', '-h'].includes(command) || args.includes('--help') || args.includes('-h')) console.log(help);
   else if (command === 'path') console.log(packageRoot);
   else if (command === 'list') await import(pathToFileURL(path.join(packageRoot, 'scripts/components.mjs')).href);
+  else if (command === 'source') await run(process.execPath, [path.join(packageRoot, 'scripts/visual-sources.mjs'), ...args], process.cwd());
+  else if (command === 'pr-lens') {
+    const manifest = fileURLToPath(import.meta.resolve('@coldtea/pr-lens-cli/package.json'));
+    await run(process.execPath, [path.join(path.dirname(manifest), 'dist/bin.js'), ...args], process.cwd());
+  }
   else if (command === 'engine') await run(process.execPath, [path.join(packageRoot, 'scripts/video-engines.mjs'), ...args], process.cwd());
   else if (command === 'init' || command === 'add') await copy(command, args);
   else if (Object.hasOwn(runtimeCommands, command)) {
@@ -172,7 +181,7 @@ async function main() {
     }
     if (!args.length || (command !== 'finalize' && args[0].startsWith('-'))) throw new Error(`${command} requires a source or artifact path.`);
     const resolvedArgs = args.map((argument, index) => (index === 0 && command !== 'finalize') || (command === 'pdf' && index === 1) || ['--out', '--truth', '--json', '--screens', '--report', '--verdicts', '--output'].includes(args[index - 1]) ? path.resolve(argument) : argument);
-    if (command === 'pdf' || (command === 'verify' && !args.includes('--static-only'))) await ensureBrowser();
+    if (command === 'source-video' || command === 'pdf' || (command === 'verify' && !args.includes('--static-only'))) await ensureBrowser();
     await run(process.execPath, [path.join(packageRoot, runtimeCommands[command]), ...resolvedArgs], packageRoot);
   } else throw new Error(`Unknown command: ${command}. Run artifacture help.`);
 }

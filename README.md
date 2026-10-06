@@ -230,3 +230,17 @@ The presentation runner checks browser layout and interaction. Chromium is
 required. Run `npm run check` for these flows plus types, manifests, seeded
 verifier cases, and export/release guards. New test files remain opt-in; extend
 existing observable flows or use direct runtime checks.
+
+### Original source libraries
+
+`npx artifacture add hairline` installs the official 27-figure Hairline runtime. `diagram`, `axonometric-plan` and `exploded-axonometric` include all 204 unchanged Diagram Design documents and their native motion. `living-forms` and `procedural-props` include native f-explainer renderers alongside the controlled capture adapters. Source-specific authoring skills, licenses and revision/hash manifests are included in the skill install. See [source fidelity](plugins/visual-explainer/references/source-fidelity.md) for usage and attribution.
+
+## Original libraries in presentations and videos
+
+`artifacture add hairline diagram diagram-walkthrough living-forms procedural-props` installs the official Hairline runtime and copies wrappers for unchanged original diagrams/renderers. Native figures keep their source geometry and motion. Seekable figures accept `seconds` from your presentation/video timeline. Use `artifacture source <name>` to resolve the actual authoring workflow; the CLI handles paths and pinned checkouts.
+
+```bash
+npx artifacture source-video examples/visual-explainer-mdx/diagram-design.video.json --out assets/phone
+```
+
+The CLI sets up Chromium and the encoder, then produces an MP4, decoded stills, editable originals/adapters and provenance. `NativeClip` and `NativeStill` reuse that directory across outputs. See [source libraries](docs/source-libraries.md), [adapter guidance](plugins/visual-explainer/references/source-fidelity.md) and the [presentation example](examples/visual-explainer-mdx/source-libraries.tsx). Originals retain their author credits and licenses; excluded fonts/media remain explicit.
