@@ -3,6 +3,7 @@ import { PresentationDeck, PresentationSlide } from '../../visual-explainer-mdx/
 import { DiagramDesignFigure } from '../../visual-explainer-mdx/diagram-design-figure';
 import { PrLensFigure } from '../../visual-explainer-mdx/pr-lens-figure';
 import { Exploded } from '../../visual-explainer-mdx/hairline-figures';
+import { NativeShader } from '../../visual-explainer-mdx/native-shader';
 
 export default function SourceLibraries() {
   const [seconds, setSeconds] = useState(0);
@@ -22,6 +23,10 @@ export default function SourceLibraries() {
       <div style={{ width: 850, margin: '0 auto' }}><Exploded theme="light" intensity={0.5} label="Exploded application window" /></div>
       <p style={{ fontSize: 28 }}>Move across the figure to explore its layers. Hairline owns its springs and pointer response.</p>
       <a href="https://github.com/lucasmarkes/hairline" style={{ fontSize: 24 }}>Hairline · Lucas Markes</a>
+    </PresentationSlide>
+    <PresentationSlide title="Sample the original GPU shader" shortTitle="Shaders" tone="light">
+      <NativeShader effect="Plasma" seconds={seconds} label="Original Plasma shader" style={{ height: 650 }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{clock}<a href="https://github.com/shader-effects-inc/shaders" style={{ fontSize: 24 }}>Shaders · Shader Effects Inc.</a></div>
     </PresentationSlide>
   </PresentationDeck>;
 }
