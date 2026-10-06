@@ -2,6 +2,8 @@
 
 Choose the route before authoring:
 
+- **Diagram Design's original skin, geometry or animation:** read [source-fidelity.md](../references/source-fidelity.md) and follow the bundled original skill. Use its original HTML or `DiagramDesignFigure`; the layouts below are separate Artifacture adapters.
+
 - **Compact flow, tree, swimlane, or timeline:** `DiagramCanvas` sizes and lays out nodes from their content. Use the example below; no additional diagram reference is needed.
 - **Ordered walkthrough of a compact graph:** read [animated-diagrams.md](../references/animated-diagrams.md) for opt-in `DiagramWalkthrough`. Author explicit steps against stable edge IDs; playback starts paused.
 - **Complex architecture, workflow, sequence, dataflow, or lifecycle:** read [archify.md](../references/archify.md). Keep editable typed JSON and use Archify's validated standalone HTML delivery.

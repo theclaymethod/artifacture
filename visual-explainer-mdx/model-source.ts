@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mediaDimensions, type EffectImage, type EffectSource } from './media-source';
-import type { ModelAsset, ModelPaint, ModelSource } from './model-types';
+import type { ModelAsset, ModelPaint, ModelPresentation, ModelSource } from './model-types';
 
 function releaseRoots(roots: readonly THREE.Object3D[]) {
   const geometries = new Set<THREE.BufferGeometry>();
@@ -26,10 +26,10 @@ function releaseRoots(roots: readonly THREE.Object3D[]) {
   for (const resource of geometries) resource.dispose();
 }
 
-export function modelAsset(root: THREE.Object3D, options: Readonly<{ sample?: (seconds: number) => void; paint?: readonly ModelPaint[] }> = {}): ModelAsset {
+export function modelAsset(root: THREE.Object3D, options: Readonly<{ sample?: (seconds: number) => void; paint?: readonly ModelPaint[]; presentation?: ModelPresentation }> = {}): ModelAsset {
   let disposed = false;
   return {
-    root, sample: options.sample, paint: options.paint,
+    root, sample: options.sample, paint: options.paint, presentation: options.presentation,
     dispose() {
       if (disposed) return;
       disposed = true;

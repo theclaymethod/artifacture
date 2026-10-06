@@ -1,7 +1,7 @@
 /* oxlint-disable anti-slop/no-runtime-typeof, anti-slop/no-unknown-parameters -- Decode external manifest JSON here before it reaches React or a composition. */
 export type NativeClipAsset = Readonly<{
-  id: string; title: string; engine: 'manim' | 'psychopomp';
-  theme: 'hairline' | '3b1b' | 'mono-color' | 'algebrica';
+  id: string; title: string; engine: 'manim' | 'psychopomp' | 'source';
+  theme: 'hairline' | '3b1b' | 'mono-color' | 'algebrica' | 'original';
   video: string; poster: string; width: number; height: number; fps: number; duration: number; frames: number; hasAudio: boolean;
   stills: readonly Readonly<{ seconds: number; sampledSeconds: number; frameIndex: number; image: string }>[];
 }>;
@@ -27,7 +27,7 @@ function fileName(value: unknown): string {
 export function validateNativeClipAsset(input: unknown): NativeClipAsset {
   if (!input || typeof input !== 'object' || !('id' in input) || !('title' in input) || !('engine' in input) || !('theme' in input) || !('video' in input) || !('poster' in input) || !('width' in input) || !('height' in input) || !('fps' in input) || !('duration' in input) || !('frames' in input) || !('hasAudio' in input) || !('stills' in input)) throw new Error('Expected a complete native manifest asset.');
   const id = text(input.id), title = text(input.title), engine = input.engine, theme = input.theme;
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(id) || (engine !== 'manim' && engine !== 'psychopomp') || (theme !== 'hairline' && theme !== '3b1b' && theme !== 'mono-color' && theme !== 'algebrica')) throw new Error('Native assets need a slug ID, supported engine and theme.');
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(id) || (engine !== 'manim' && engine !== 'psychopomp' && engine !== 'source') || (theme !== 'hairline' && theme !== '3b1b' && theme !== 'mono-color' && theme !== 'algebrica' && theme !== 'original')) throw new Error('Native assets need a slug ID, supported engine and theme.');
   const width = integer(input.width), height = integer(input.height), fps = integer(input.fps), frames = integer(input.frames), duration = seconds(input.duration);
   const hasAudio = input.hasAudio;
   if (hasAudio !== true && hasAudio !== false) throw new Error('Native assets must declare whether the encoded clip contains audio.');

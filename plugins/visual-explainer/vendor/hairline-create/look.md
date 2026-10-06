@@ -59,11 +59,12 @@ Answer each with yes or no. A no is fixed in the figure before anything is hande
 8. **The read-out names what is under the pointer**, in a few characters, and says `rest` at rest. `look.mjs` prints every picture's read-out, and fails when the rest picture's is not `rest`. A warning that an answering picture still says `rest` means the `--answer` point misses the part, or the hit test does. Whether the name is right is for you to say.
 9. **Nothing leaves the frame.** With the slider at each end (`?intensity=0`, `?intensity=1`) and the pointer at the figure's edges, every part stays inside the plate. `look.mjs` fails when the drawing's box leaves the 400 × 320 viewBox in any picture. The box is the geometry: a stroke reaches half its width past it, so a line on the frame's edge is still a no. It also says how much of the frame the rest pose covers, and warns below a quarter; the examples cover 36%.
 10. **Both themes.** In `?theme=dark` and `?theme=light`, nothing vanishes and nothing is left the wrong colour.
-11. **No words** (rule 10). Nothing in the drawing is a letter, a digit, an arrow or an icon.
+11. **No words** (rule 10). Nothing in the drawing is a letter, a digit, an arrow or an icon. In a figure made from a mark, the mark itself and a glyph that is part of it are the exception, and so is a glyph built as a solid that is the figure's whole subject; anything else still fails.
 12. **The page is clean.** No line under the stage reporting an error, and nothing on the console. `look.mjs` reads both, on every picture, and fails on any console error, console warning or page error.
+13. **An empty state says something is missing.** Only for an empty state: in the smallest picture, at rest, with no read-out, can you say what the object would hold and that it holds none?
 
 If you are unsure whether the figure's weight is right, build an example the same way and put the two side by side: `node <skill folder>/build.mjs <skill folder>/examples/terrain.js`. Or look at it: `node <skill folder>/look.mjs <skill folder>/examples/terrain.js --answer 30,90,0` writes its sheet beside yours.
 
 ## Without a browser
 
-Answer the same twelve from the code, each with the line that makes it true: the rest values for 2, the falloff or stagger for 3, the hit test for 4, the paint order for 6. Then say at hand-over, in these words, that the figure was **not looked at in a browser**. Do not skip the list and do not guess a yes.
+Answer the same questions from the code, each with the line that makes it true: the rest values for 2, the falloff or stagger for 3, the hit test for 4, the paint order for 6. Then say at hand-over, in these words, that the figure was **not looked at in a browser**. Do not skip the list and do not guess a yes.

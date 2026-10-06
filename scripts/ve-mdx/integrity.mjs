@@ -20,7 +20,7 @@ export const sharedComponents = new Set([
   'DagCanvas',
   'AsciiImage', 'AsciiSweep', 'AsciiObject', 'VhsEffect',
   'ModelView', 'OrbitalText', 'TracePath',
-  'DiagramWalkthrough',
+  'DiagramWalkthrough', 'DiagramDesignFigure', 'NativeLivingForm', 'NativeProceduralProp', 'PrLensFigure', 'ChalkboardFigure', 'SourceFigure',
   'DataChart',
   'LieflatChart',
   'CodeBlock',

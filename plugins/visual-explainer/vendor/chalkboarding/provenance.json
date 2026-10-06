@@ -1,0 +1,130 @@
+{
+  "source": "https://github.com/lilyzhng/chalkboarding",
+  "commit": "f6af618a5a5642861a04f3d16b8a90c891177269",
+  "files": [
+    {
+      "path": ".github/pull_request_template.md",
+      "sha256": "6dcbd4774aa2af91afec38ad39b71c6d2ff98d44eed3968b8de8179d88e06b1b"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "d74866e254a616b75705b1466470cc0e7470b4b5df40f69e99045f28238be1f2"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "620a8f86e4288c59c270cd928d41caa20bd6f223497a217b94b4b4ba8184215c"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1dbe5a2d4b8476abc733cc0d5f9f357aaef4366d1e103481233b8e289fb1cd20"
+    },
+    {
+      "path": "README.md",
+      "sha256": "1eb4bba4eb470438763696e998b874c7b27db99b14d778d5f62476a367e57462"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "5883f35abe120f5c600e60c7258a0deb2724fa50c3f3c9e6367cdfa4252f47c9"
+    },
+    {
+      "path": "animation-patterns.md",
+      "sha256": "2f0b660ce45d736d64c2f624f83cf582405572acbe93f0ab1487ff0fa1dd64da"
+    },
+    {
+      "path": "chalkboard.css",
+      "sha256": "1bb2af85591e961408735b1358ebfd149e364f9e7f88a39ebe2a066154912a87"
+    },
+    {
+      "path": "design-system.md",
+      "sha256": "26bea24dec88950f1135d215ae199c262a6c3af497a9449bae61860eeda541df"
+    },
+    {
+      "path": "examples/example1_kangaroo.html",
+      "sha256": "31b037cb99d531f7d344b5f6433f7ee1278c124ffe37642c2cd681a1a24a54f4"
+    },
+    {
+      "path": "examples/example2_dog_and_cat.html",
+      "sha256": "c3769be2311a189d8f31e6f55dd583c8946e68750ae8623ee40925a2a8fbaab3"
+    },
+    {
+      "path": "examples/example3_rejection_sampling.html",
+      "sha256": "df2070e614c583cc911e5073c033ab2c58f6683331db045f386b513f59046977"
+    },
+    {
+      "path": "examples/example4_go_to_school.html",
+      "sha256": "e33a02575c3348c3b43e83871b788a1c6f408ebbbb7a233caaca5c82d8ddb9da"
+    },
+    {
+      "path": "examples/example5_decoding_race.html",
+      "sha256": "e0d1cf4d1a65c6512a7f17ada05033303bb8b505fef48731bcea138b557a0ad0"
+    },
+    {
+      "path": "examples/example6_twin_timelines.html",
+      "sha256": "60adef080823bb4ca91d7565f00f0a8a7ee9964721d9f4a0867f3c6f0649be13"
+    },
+    {
+      "path": "examples/example7_dflash_flat_cost.html",
+      "sha256": "2d2d3aebfd414dfd84220942b696e7d4474ac549eabf4f2f79c73d78a54bccd0"
+    },
+    {
+      "path": "examples/example8_dflash_kv_injection.html",
+      "sha256": "f48f0ce64a5f69a3a59e6e5bd7afc6d7d3866c41d2b407fe566d7c0155559169"
+    },
+    {
+      "path": "examples/example9_internet_journey.html",
+      "sha256": "e4079c40e103e0ff3f8170397bfadeea309e4b4dd5139e6c65c2b4848ef22dd0"
+    },
+    {
+      "path": "fonts/README.md",
+      "sha256": "4b20213cfc477e4147b2f3d919e2a694f74afe0c8c39198c3ee2f6b15a389a6c"
+    },
+    {
+      "path": "fonts/chalky.css",
+      "sha256": "b049514d3df43f22360ca219317f07ea34a1f04e06efc47f1dc205e8d1ab9f31"
+    },
+    {
+      "path": "fonts/chalky.js",
+      "sha256": "1a52d4cbd323a5ed44895ff15cb692c57608334c320fb7e8851ee962e1723b70"
+    },
+    {
+      "path": "fonts/slip-filters.svg",
+      "sha256": "04be7ad376500a6a7308358463c82518fa727c6e2999bc4694ba72298080bcbd"
+    },
+    {
+      "path": "scripts/_bootstrap.sh",
+      "sha256": "f14b34ce7c8e8455a85e3a12fc7fe2f8ef75379b54dce2c1678dcd048f8e1576"
+    },
+    {
+      "path": "scripts/export.sh",
+      "sha256": "293fd42a7bed6b9518eb33fe071d2531f965f5c1d4f8142e0e4fbd7ec937f6b2"
+    },
+    {
+      "path": "scripts/export_media.py",
+      "sha256": "ad094b8f729a5c764e03f50544aaf7895ab7d7999778abe6e5133201751a6331"
+    },
+    {
+      "path": "scripts/narrate.py",
+      "sha256": "1e59cdca01c14b25c48b542c799d03fb6cd68eb1be8538562ce8f595cc8c3940"
+    },
+    {
+      "path": "scripts/qa.sh",
+      "sha256": "b0bdc8f61d3e1836bc358af2b0ea38a1ae799256ea014e52f32595b42ab2d699"
+    },
+    {
+      "path": "scripts/screenshot_beats.py",
+      "sha256": "226806ad2ac04095894fa54aaed6449677b7d2ed77ee05a8d1922bcd3e4fd0ac"
+    },
+    {
+      "path": "scripts/trace_bitmap.py",
+      "sha256": "962fdcacdbdf760452e34a96cbf9e315c0d71eea3d9916733a53b7f1310998e6"
+    },
+    {
+      "path": "template.html",
+      "sha256": "5d003d66150034a0858741d4fc68691e7468abba2b99b6d470f727b84faf3fe9"
+    },
+    {
+      "path": "worked-examples.md",
+      "sha256": "7ed20cfc4e75b71f89d36e67d8c9e735272aa652866ec12b7f359017ec28278f"
+    }
+  ]
+}

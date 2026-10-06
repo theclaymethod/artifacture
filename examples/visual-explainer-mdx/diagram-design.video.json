@@ -1,0 +1,8 @@
+{
+  "library": "diagram-design",
+  "example": "exploded-phone-animated",
+  "duration": 3,
+  "fps": 30,
+  "width": 1280,
+  "height": 1080
+}

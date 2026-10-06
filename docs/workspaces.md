@@ -59,7 +59,7 @@ Required packages and stylesheet imports are added automatically. Import the cop
 
 The `authored-values` and `narration-cues` leaves copy parameter sampling and subtitle tools without npm dependencies. Keep their copied `LEMO-LICENSE` notice as well. Sample parameters with the same authored time as the scene; compile narration cues against the actual audio duration before serialization.
 
-The `charts` block retains the five Lieflat encodings under the shared themes. The `hairline` block adapts prepared silhouette and crease paths; it does not install the native pointer engine. The `video` block adds the existing paused GSAP playback runtime and supports one video host per document. See [graphics and video](graphics-and-video.md) for the source contracts.
+The `charts` block supplies five independently authored Lieflat-inspired encodings. The `hairline` block automatically installs the official 27-figure React package and also includes the separate prepared-path scene adapter. Original Diagram Design, PR Lens, Chalkboarding and native f-explainer wrappers retain upstream rendering and accept explicit time where supported. See [source libraries](source-libraries.md). The `video` block adds the existing paused GSAP playback runtime and supports one video host per document. See [graphics and video](graphics-and-video.md) for the source contracts.
 
 The original `video-frames` leaf defines frame rounding explicitly and separates the last encoded sample from the authored endpoint. Await detached snapshots when inspecting a loop; frame closure does not prove audio or velocity continuity.
 

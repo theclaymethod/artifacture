@@ -1,5 +1,7 @@
 # Mono Color
 
+The actual image-generation skill and its complete design catalogs are bundled under `vendor/mono-color`. Read [source-fidelity.md](source-fidelity.md) for that workflow; a page palette alone does not reproduce it.
+
 Use `preset="mono-color"` for an editorial page or poster with one or two inks on neutral paper. The direction is informed by [Monocolor Editorial Print](https://github.com/yanliudesign/mono-color-skill): asymmetrical composition, visible paper, and a narrowly assigned second ink. Upstream example images are references, not reusable template assets.
 
 The built-in adaptation uses cobalt (`#2148b8`) with terracotta (`#c65f38`). One ink carries the main content; the second marks a meaningful comparison or emphasis. An explicit one-ink request stays one ink. Keep readable text in the strongest ink and verify contrast on the chosen paper.

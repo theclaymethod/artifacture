@@ -5,7 +5,7 @@ license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
   maintainer: Clayton Kim
-  version: "0.9.0"
+  version: "0.10.0"
 ---
 
 # Visual Explainer
@@ -16,7 +16,7 @@ Remove any element whose absence changes neither meaning nor operation. Do not a
 
 ## Use the installed CLI
 
-Require Node 22.12 or newer. Set `SKILL_DIR` internally to the absolute directory containing this file. Use `node "$SKILL_DIR/scripts/artifacture.mjs"` for `init`, `add`, `list`, `export`, `video`, `engine`, and `verify`. The CLI handles runtime setup, required npm packages, and workspace stylesheet imports. The user only installs the skill and asks for an artifact; do not ask them to configure paths, caches, or a second checkout.
+Require Node 22.12 or newer. Set `SKILL_DIR` internally to the absolute directory containing this file. Use `node "$SKILL_DIR/scripts/artifacture.mjs"` for `init`, `add`, `list`, `export`, `video`, `engine`, `source`, `source-video`, `pr-lens`, and `verify`. The CLI handles runtime setup, required npm packages, and workspace stylesheet imports. The user only installs the skill and asks for an artifact; do not ask them to configure paths, caches, or a second checkout.
 
 When authoring imports or following a reference that uses `npm --prefix REPO`, obtain the ready runtime with `REPO=$(node "$SKILL_DIR/scripts/artifacture.mjs" path)`. Pass absolute source and output paths. Private brands and copied consumer edits remain user-owned. See [installation.md](references/installation.md) only for development overrides or troubleshooting.
 
@@ -35,12 +35,13 @@ Completion requires editable source, a successful export, and evidence for every
 |---|---|---|
 | React workspace, reusable components, or seekable scene motion | [react-workspaces.md](references/react-workspaces.md) | Discover actual APIs with the component CLI; copy local leaf modules instead of importing the full renderer into an app. |
 | chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
-| diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
-| axonometric floor/site plan, exploded object or physical assembly | [axonometric.md](references/axonometric.md) | Editable projected SVG, tray occlusion, shared part levels and finite motion. |
+| diagram or architecture | [web-diagram.md](cards/web-diagram.md) | For Diagram Design's original look, read [source-fidelity.md](references/source-fidelity.md) and use the bundled original skill. |
+| axonometric floor/site plan, exploded object or physical assembly | [source-fidelity.md](references/source-fidelity.md) | Use the original templates and geometry. Read [axonometric.md](references/axonometric.md) only for the compact shared-clock adaptation. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
-| interactive Hairline figure | [vendored Hairline skill](vendor/hairline-create/SKILL.md) | Use its unchanged kernel, bench, build, and validation workflow. |
+| interactive Hairline figure | [source-fidelity.md](references/source-fidelity.md) | Install the official 27-figure runtime, or use the bundled authoring skill for a new figure. |
+| chalkboard explanation or Mono Color editorial image | [source-fidelity.md](references/source-fidelity.md) | Follow the bundled source-specific workflow. |
 | motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
 | native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |
 | ASCII, texture treatments, or 3D model media | [media-effects.md](references/media-effects.md) | Copy controlled effects and preserve media decoding ownership. |
@@ -50,6 +51,8 @@ Completion requires editable source, a successful export, and evidence for every
 | project recap | [project-recap.md](cards/project-recap.md) | — |
 
 For point-and-click annotation, read [annotate.md](commands/annotate.md). If the request lacks a material choice that cannot be inferred, read [clarify.md](references/clarify.md). For a component API not shown by the selected card, read [mdx-components.md](references/mdx-components.md). For poster, video, brand-heavy, or bespoke HTML work, read [legacy-html.md](references/legacy-html.md) and only the branch it selects.
+
+For any named source library, read [source-fidelity.md](references/source-fidelity.md) before substituting or recreating a visual. Resolve its original with `source`; vendor unchanged allowed code, isolate shims, and feed explicit time only where its native controller supports seeking. Reuse rendered clips/stills across presentations and videos.
 
 ## Authoring rules
 

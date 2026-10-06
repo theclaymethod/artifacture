@@ -4,6 +4,10 @@ Use a plan for the physical arrangement of rooms, furniture, buildings or a site
 
 These builders adapt Cathryn Lavery’s [diagram-design](https://github.com/cathrynlavery/diagram-design/tree/19f79daa0b540ff398af853af9a8a1c90df197c6), specifically [axonometric plans](https://github.com/cathrynlavery/diagram-design/blob/19f79daa0b540ff398af853af9a8a1c90df197c6/skills/diagram-design/references/type-axonometric-plan.md) and [exploded views](https://github.com/cathrynlavery/diagram-design/blob/19f79daa0b540ff398af853af9a8a1c90df197c6/skills/diagram-design/references/type-exploded.md). The full MIT notice is bundled as `visual-explainer-mdx/DIAGRAM-DESIGN-LICENSE` and copied with either block. No upstream fonts, icons, HTML skins or motion controller are required.
 
+## Original Diagram Design
+
+For the original look and complete geometry, use [source-fidelity.md](source-fidelity.md). The install now includes `DiagramDesignFigure`, all 204 original documents, and the full vendored skill and builders. The builders below are a compact Artifacture adaptation for a shared finite timeline.
+
 ## Install and author
 
 Use the installed skill CLI; it handles runtime setup, dependencies and styles:

@@ -1,0 +1,1 @@
+PencilPete.ttf is a third-party JOEBOB font and is excluded from this distribution. The original MIT runtime, CSS, SVG filters, instructions and HTML are included unchanged. Supply a properly licensed font when using the original chalk face; otherwise select a user-owned font and document the typography change. The source font README and license are preserved.

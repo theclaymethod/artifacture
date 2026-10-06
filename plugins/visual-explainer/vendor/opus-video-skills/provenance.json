@@ -1,0 +1,202 @@
+{
+  "source": "https://github.com/tuzhechen2005/opus-video-skills",
+  "commit": "59744a69c7b916cfbe4c4ec84006b0c2f5e2fde1",
+  "files": [
+    {
+      "path": "skills/kinetic-reel/README.md",
+      "sha256": "1bbf6555be25b3d9a51d8bcdf978975e966f7e20bc83dfd1853459df3d920971"
+    },
+    {
+      "path": "skills/kinetic-reel/README.zh-CN.md",
+      "sha256": "27be194d3eec45226759b8b99738229b07901835d82524086a80902ed2fad544"
+    },
+    {
+      "path": "skills/kinetic-reel/SKILL.md",
+      "sha256": "35b582ea71893b55e296e50afda78a3d419d20222246b4eede0e87b59f10565f"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/site-intro/README.md",
+      "sha256": "5a4a588281dc6dd8e9b88f8dbf8ca33b6321edc0a24011d8d4db82657862f7aa"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/site-intro/css/intro-reel.css",
+      "sha256": "f06081b045f2eb2b142742b0e343ed9adbeb85f8dbd614dfe2cbf2f58d6fd901"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/site-intro/index.html",
+      "sha256": "90a866b5d40f3e38528b7630694bc984683d3dc446b9983c372a6e7f195a5c1d"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/site-intro/js/intro-reel.js",
+      "sha256": "5b2ed9a7edfe108e9a996fe0ed7958560fae9c4d58cae2ec3503ccc571736fce"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/site-intro/worker.js",
+      "sha256": "a5be3ea59150e7e2da6c624de4bb8ed93b91069555455058e986928a7b47500d"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/work-reel-26/README.md",
+      "sha256": "67fa99122468a3ffc580f884f0f1d87208b95fdf5dc77f1c50df5080a67b6ead"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/work-reel-26/STORYBOARD.md",
+      "sha256": "d9df37b00617484acf302f2af653af85a80f40cb9bae74ca0a654400e7880c02"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/work-reel-26/cues.js",
+      "sha256": "05bc76852435cba6236c01bfe38112cb5a8a2ba0252e4d24675706c0cf1b5f63"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/work-reel-26/reel.js",
+      "sha256": "cc98f26cd590a1a3b38a09152cf04ee9b010de64c0a003186c28bd47257f5fc0"
+    },
+    {
+      "path": "skills/kinetic-reel/examples/work-reel-26/score.mjs",
+      "sha256": "2d4bc7f1ca4a0e25bc055dbafaf7f06f891c66b8112f467aceb22dcca1b94405"
+    },
+    {
+      "path": "skills/kinetic-reel/references/sound.md",
+      "sha256": "089a7a1c0be5840a3da8bf2365d3985a74fc2ba95002b34fe8681eec3cdf48f2"
+    },
+    {
+      "path": "skills/kinetic-reel/references/style-guide.md",
+      "sha256": "c233530f569c67bd39fdc0eb67358b26530ddf1dcf1cb44847788cea3fdb620d"
+    },
+    {
+      "path": "skills/kinetic-reel/scripts/new_project.sh",
+      "sha256": "dd849e06b15a9af73d3d24b5b733f7be5aad8e214a4e21dbff347bf38ffe3ea7"
+    },
+    {
+      "path": "skills/kinetic-reel/template/STORYBOARD.md",
+      "sha256": "c6f60b9cb3973873e0fe0a46da814420ea574cd91ba50e135016310dd059750f"
+    },
+    {
+      "path": "skills/kinetic-reel/template/music/score.mjs",
+      "sha256": "56f29978641d69cd275ae91f80fb27b59a004800fb58f668862db82d0607c9ce"
+    },
+    {
+      "path": "skills/kinetic-reel/template/package.json",
+      "sha256": "881f6b07c17d8aed7a59bdca731cc7ffa96f3b83ecb3fb1d40988c12ccd079aa"
+    },
+    {
+      "path": "skills/kinetic-reel/template/reel/cues.js",
+      "sha256": "3a867f1f3c04cf8a6058c4838a4c4b4b7236c0ebbd9de4fdbff202eb7e426e2b"
+    },
+    {
+      "path": "skills/kinetic-reel/template/reel/index.html",
+      "sha256": "1df2971d7105719745f4ec32ab240a2586d8eeb462df19cdeff313c53ba86a69"
+    },
+    {
+      "path": "skills/kinetic-reel/template/reel/reel.js",
+      "sha256": "53c298a2dcbf1ab3877be302601a3e991097c0120c8a0ad6eaf41acb0a7ff5f2"
+    },
+    {
+      "path": "skills/kinetic-reel/template/render.mjs",
+      "sha256": "2112d356740263a5af68f81e18fdb4a2b3901665280cf5807d3e41d2b6e636f5"
+    },
+    {
+      "path": "skills/painted-animation/README.md",
+      "sha256": "8fbe497fde2435425034833129488bc13c22f8939fd224aa1cdc8f1432c88468"
+    },
+    {
+      "path": "skills/painted-animation/README.zh-CN.md",
+      "sha256": "1fea1eb8699930bde40a6a13ac07b5cf215ff739bd8beaf4bf94dfd464998113"
+    },
+    {
+      "path": "skills/painted-animation/SKILL.md",
+      "sha256": "c14428f8293bf78cb885b4df5531f1268c7dc4aa137aee608d10e2353405dbc3"
+    },
+    {
+      "path": "skills/painted-animation/examples/xiaozhen/STORYBOARD.md",
+      "sha256": "59a1f67eb3401040b10eb889b829294e24ba679f4c4365b61e7810630556dd87"
+    },
+    {
+      "path": "skills/painted-animation/examples/xiaozhen/xz_set.js",
+      "sha256": "ebe0d82484e3c420f5ec4f4a7ea0a4c6ce593bf1814c5712578d4aef248fbdb0"
+    },
+    {
+      "path": "skills/painted-animation/examples/xiaozhen/xz_shots.js",
+      "sha256": "d66fca18ff52998dfe31762741877b79d69bf566ec8e537b18cbfa6ce6b6bc69"
+    },
+    {
+      "path": "skills/painted-animation/references/music-video.md",
+      "sha256": "e706b70f8a30f2dea4501cca694549ad13cc60751b512062f33df367808c895b"
+    },
+    {
+      "path": "skills/painted-animation/scripts/beat_grid.py",
+      "sha256": "dca08b57db2ba4d49a88cbcc693443c8fb18387474c3dc40f36294d88e7602d0"
+    },
+    {
+      "path": "skills/painted-animation/scripts/new_project.sh",
+      "sha256": "eadc25da6fbc22a53cd77a436de3bc7c7c77d838b670d88aedefe00efb92d8d5"
+    },
+    {
+      "path": "skills/painted-animation/template/ANIMATION_GUIDE.md",
+      "sha256": "f638e1fb3876f587e39ec11a20e2df3aac91421c926d82c2743768642caab990"
+    },
+    {
+      "path": "skills/painted-animation/template/LICENSE",
+      "sha256": "7d25ae95b305b884c08ce898e53b58d2e180ff0119e5d203d8b4ae30420f3b33"
+    },
+    {
+      "path": "skills/painted-animation/template/README.md",
+      "sha256": "c383c6bf64add0bdd38c0244616faa4adf859e1aae93cb93223a8de822924801"
+    },
+    {
+      "path": "skills/painted-animation/template/gpu_probe.mjs",
+      "sha256": "62b370f9687383870c69ad8edb2646211c32460fe2e779a5b02ff33786b01e42"
+    },
+    {
+      "path": "skills/painted-animation/template/package-lock.json",
+      "sha256": "4c79bac79ca749472c0b9f74cef1c6409ef7ab0513417c9ba4b94838731667d1"
+    },
+    {
+      "path": "skills/painted-animation/template/package.json",
+      "sha256": "c14fb0dd2641a316e54b90c4658ba10b6ce3b02b1921417e8128368dbcd005cb"
+    },
+    {
+      "path": "skills/painted-animation/template/render.mjs",
+      "sha256": "1151ad59ad0c7bbe59e4e273465689d81d41f896d6bafc8981b527d110b77fe6"
+    },
+    {
+      "path": "skills/painted-animation/template/src/clawd.js",
+      "sha256": "578fbd46d21cdcc92b14806f3cc8c7b1b9e9f7ea53ddda7b1c150afa9f3c512a"
+    },
+    {
+      "path": "skills/painted-animation/template/src/config.js",
+      "sha256": "6d9374c59bd90bede9d4761eea6136b772a5883c414a67b8a5673510b8c1d435"
+    },
+    {
+      "path": "skills/painted-animation/template/src/core.js",
+      "sha256": "6367b03a09bb0650ad4161a6e0668ddaf64178ddf33bb57b8fe25536e7234c5b"
+    },
+    {
+      "path": "skills/painted-animation/template/src/karaoke.js",
+      "sha256": "fa68bb6ed9169ab945716cf1ad451ce9c36205d277f7921ed85e00735a91b0ae"
+    },
+    {
+      "path": "skills/painted-animation/template/src/scenes/demo.js",
+      "sha256": "c783bd05af05875e014afd215d1945b189121910e8cef3218a5a8c7aac1dc361"
+    },
+    {
+      "path": "skills/painted-animation/template/src/sheets.js",
+      "sha256": "cdd9320e0cb5e1e5bbfdeac221e21b69714b96e4a9b05e62cda4817b4d80010c"
+    },
+    {
+      "path": "skills/painted-animation/template/src/timeline.js",
+      "sha256": "93d455142bf642355cb77cce64ad1a8397996be4f23e121bd18d6fce52bc1503"
+    },
+    {
+      "path": "skills/painted-animation/template/studio.html",
+      "sha256": "edd47db6a1c914b10e3709cd2fac6dce502d033ae215fd1b06967d46eaf3809e"
+    },
+    {
+      "path": "README.md",
+      "sha256": "b520e0f51fc2508f12bfd666989565e10443869c0e9e308399fd7470cee73637"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "ea30fc6f274c0c2b325db2d5b4bc196b51292cf85215b4da67c5fb0b1b0d89fa"
+    }
+  ]
+}
