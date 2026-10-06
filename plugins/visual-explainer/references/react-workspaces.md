@@ -56,7 +56,7 @@ Search an API such as `CodeBlock`, `createSequenceScene`, or `focusInOrder` to
 obtain its actual copy boundary and variants. Use the live catalog as the
 complete inventory.
 
-There are 52 copyable entries in the same registry; supported variants are searchable.
+The registry's live results contain the copyable entries and searchable variants.
 The broad MDX API contains additional presentation components and icons that have
 not all been extracted as copyable leaves. Do not count referenced upstream types
 as installed components. Read `REPO/docs/component-catalog.md` and the real

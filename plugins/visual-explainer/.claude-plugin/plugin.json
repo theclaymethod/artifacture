@@ -1,6 +1,6 @@
 {
   "name": "visual-explainer",
-  "description": "Create charts, diagrams, reviews, and presentations as standalone HTML.",
+  "description": "Create reusable graphics, diagrams, reviews, slides, and narrated animated explainer videos.",
   "version": "0.9.0",
   "author": {
     "name": "Clayton Kim"

@@ -17,7 +17,7 @@ npm run ve:video-collection -- check <collection.json> --repo <source-repository
 npm run ve:video-collection -- scaffold <collection.json> --repo <source-repository> --out <new-directory>
 ```
 
-Read `COLLECTION.md` and each episode's `SCRIPT.md` with the user before treating the script as settled. Iterate on its question, causal mechanism, evidence or consequence, and handoff. Each supplied narration beat stays attached to claims and a scene. Compilation checks evidence bindings; it does not fact-check prose or approve a script.
+Read `COLLECTION.md` and each episode's `SCRIPT.md`. Follow the session's script review or autonomous iteration preference before treating it as settled. Iterate on its question, causal mechanism, evidence or consequence, and handoff using [dynamic-video-authoring.md](dynamic-video-authoring.md). Each narration beat stays attached to claims and a scene. Compilation checks evidence bindings; it does not fact-check prose or approve a script.
 
 For a draft's structure, use an immediate visible event, a viewer prediction, an observed result, one causal mechanism, and a usable rule. End with the next episode's curiosity when the series needs it. Ground observed results in supplied evidence. Adapt this sequence to the instructional mode and the material. The user-supplied [technical explainer field guide](https://muse.ai/s/top-technical-explainer-videos-jxh6bxv9t04xjb) is an authoring reference, not a source of validated performance measurements. See [the editable script iteration](../../../docs/video-script-iteration.md).
 

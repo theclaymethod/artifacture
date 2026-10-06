@@ -18,7 +18,7 @@ New illustrations follow [default-explainer-theme.md](default-explainer-theme.md
 | Statement | Inter / EB Garamond; 64–96px at 1920 × 1080 |
 | Supporting text | Inter; 28–36px at 1920 × 1080 |
 | Math | Serif notation through `--ve-font-math` |
-| Hairline strokes | Silhouette 1.5, crease 0.8, active 1.5 in the engine's 400 × 320 frame |
+| Hairline strokes | Silhouette 1.2, crease 0.65, active 1.2 in the engine's 400 × 320 frame |
 
 Let the illustration occupy most of the frame. Use meaningful object features, rounded solids, honest occlusion, and a stronger silhouette than crease. Use the unchanged Hairline engine's public projection and rounded-solid functions. Keep physical labels outside its SVG and anchor them to projected features. For mathematics, use real functions, geometry transformations, arrowheads, and notation. Keep Lieflat mark size tied to declared units or actual records. Inspect the compressed result at playback size.
 

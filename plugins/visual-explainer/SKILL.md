@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Use when explaining systems, code changes, plans, or data with diagrams, charts, HTML pages, slides, videos, or reusable React graphics and motion.
+description: Explain systems, code changes, plans, or data through editable diagrams, charts, slides, narrated animated videos, and reusable React graphics. Use for visual explanations and video collections.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -41,7 +41,7 @@ Completion requires editable source, a successful export, and evidence for every
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
 | interactive Hairline figure | [vendored Hairline skill](vendor/hairline-create/SKILL.md) | Use its unchanged kernel, bench, build, and validation workflow. |
-| motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
+| animated explainer, review film, or sizzle reel | [generate-video.md](commands/generate-video.md) | [dynamic-video-authoring.md](references/dynamic-video-authoring.md) teaches story, primitive selection, choreography, audio alignment, and proof. Use [render-video.md](commands/render-video.md) for an existing deck; [video-collections.md](references/video-collections.md) for shared episodes. |
 | native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |
 | ASCII, texture treatments, or 3D model media | [media-effects.md](references/media-effects.md) | Copy controlled effects and preserve media decoding ownership. |
 | reference image to low-detail procedural 3D | [procedural-models.md](references/procedural-models.md) | Use the installed img2threejs skill and reuse its reviewed factory across outputs. |
@@ -57,6 +57,7 @@ For point-and-click annotation, read [annotate.md](commands/annotate.md). If the
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
 - For illustrations, read [default-explainer-theme.md](references/default-explainer-theme.md). Reuse shared geometry across formats; isolate strict Hairline pointer figures from seekable video scenes.
 - For reusable React work, keep the scene → composition → slide → video boundary. Sample explicit time, author narrow layouts separately, and call `disposeGraphicVideo` when a registered host leaves.
+- For video, stage a visible event and its consequence. Keep subjects identifiable as they move, compare, separate, and recombine. Use the component index to find implemented motion; a component tour and a narrated argument need different scripts. Align important events to the recorded narration, then inspect the encoded film as well as the source preview.
 - Use `LieflatChart` for editorial data stories and `DataChart` for quick bar, line, or dot comparisons. Marks must encode evidence; never invent records or quantities to fill a pattern.
 - When adjusting type, read [typography.md](references/typography.md). Compose readable text blocks through measure, grouping, weight, and spacing.
 - Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.

@@ -13,7 +13,7 @@ Use upstream skills for runtime mechanics. Use Artifacture's references for comp
 - TTS voice matrix by content type (`af_heart`, `af_nova`, `am_adam`, `bf_emma`, `af_sky`, `am_michael`, …)
 - Timed-element contract (`class="clip"` + `data-start` / `data-duration` / `data-track-index`)
 - `npx hyperframes preview` — live browser preview during authoring
-- `npx hyperframes lint` + `validate` — rule + WCAG audit
+- `npx hyperframes check` — lint, runtime, layout, and WCAG audit; `snapshot` — inspected authored frames
 - General GSAP idiom (see `/gsap` skill)
 
 **Artifacture owns:**
@@ -24,18 +24,18 @@ Use upstream skills for runtime mechanics. Use Artifacture's references for comp
 - Draft rendering, keyframe inspection, and delivery.
 - `hyperframes-doctor.sh` runtime and skill checks.
 
-**Availability.** `hyperframes-doctor.sh` probes `~/.claude/skills/` and `~/.claude/plugins/cache/heygen-com/` for the upstream skills. Probe outcomes:
+**Availability.** `hyperframes-doctor.sh` probes `~/.agents/skills/`, `~/.codex/skills/`, `~/.claude/skills/`, and `~/.claude/plugins/cache/heygen-com/` for upstream skills. Probe outcomes:
 
 - **Installed** → use upstream runtime guidance with Artifacture composition rules.
 - **Missing** → the doctor emits a warning and install hint (`npx skills add heygen-com/hyperframes`) and video commands fall back to authoring directly from our refs (`hyperframes.md`, `gsap-rules.md`, `reel-patterns.md`). Never fatal.
 
 ## Runtime Requirements
 
-- Node.js ≥ 22
-- FFmpeg on `PATH`
+- Node.js ≥ 22.12
+- FFmpeg and `ffprobe` on `PATH`
 - Chrome/Chromium (Puppeteer will download `chrome-headless-shell` on first run, ~150–300MB)
 
-The skill runs `npx hyperframes doctor` at the start of any video command to verify these are present. If anything fails, the command aborts with install hints rather than attempting to render. See `scripts/hyperframes-doctor.sh`.
+Run `scripts/hyperframes-doctor.sh` before rendering. Resolve reported runtime prerequisites and continue any independent source authoring. Missing companion skills remain non-fatal.
 
 ## Invocation
 
@@ -71,13 +71,13 @@ See the upstream docs for exact attribute reference; see our templates (`templat
 These rules come from the upstream project and are non-negotiable:
 
 - **Timelines must be `{ paused: true }`.** The engine drives seeking; if the timeline auto-plays, frames will be nondeterministic.
-- **Timelines must be registered synchronously** on `window.__timelines["<id>"]` before `DOMContentLoaded` settles. No `async`, no `setTimeout`, no Promise-wrapped construction.
+- **Register the completed timeline** on `window.__timelines["<id>"]`. Artifacture's shared exporter registers synchronously. For source-owned compositions, follow the installed renderer's readiness contract; do not publish a partially constructed clock.
 - **No `Math.random()`, no `Date.now()`, no real-time logic.** The capture is frame-seeked, not real-time. If randomness is needed, use a seeded PRNG.
 - **No `repeat: -1`** (infinite tweens). Engine hangs. Compute finite repeat count from duration if you need looping.
 - **Video elements must carry `muted playsinline`.** Audio travels separately as `<audio>` elements (even when the source file is the same).
 - **Never call `video.play()` / `audio.play()` / `.seek()` manually.** The engine owns playback.
 - **Root standalone compositions do NOT use `<template>` wrappers.** Sub-compositions (loaded via `data-composition-src`) DO.
-- **`data-track-index` controls audio mixing and overlap validation, not visual z-order.** For z-order use CSS `z-index`.
+- **Every audio element needs a unique ID and explicit timing.** HyperFrames owns seeking and mixing. `data-track-index` is a Studio lane; use CSS `z-index` for visual stacking.
 
 See `references/gsap-rules.md` for the GSAP-specific version of this list.
 
@@ -99,17 +99,16 @@ The skill uses a standard set of flags:
 For both `/generate-video` and `/render-video`:
 
 ```
-1. npx hyperframes doctor            # stop on missing dependencies
-2. Author TSX and export static HTML  # GSAP timeline + assets
-3. npx hyperframes lint              # stop on errors
-4. npx hyperframes validate          # WCAG contrast audit
-5. npx hyperframes render -q draft   # preview
-6. extract-keyframes.sh out.mp4      # 3 review frames
-7. Inspect keyframes and repair the source
-8. npx hyperframes render -q standard # authorized final render
+1. Check renderer prerequisites and pin its project version
+2. Author a causal story, shared scenes, and finite motion
+3. Generate/measure narration, align cues, and retime the source
+4. Export the shared video with audio, or a source-owned complete composition
+5. Run hyperframes check and snapshot; inspect events, cuts, and reverse seeking
+6. Run Artifacture verification and disclose incomplete certification
+7. Encode, inspect decoded frames and delivered audio, then deliver
 ```
 
-Inspect the draft before spending time on the final render. Honor existing authorization; rendering cost alone does not require reconfirmation.
+Inspect the source preview before encoding. Use a draft render when encoded motion or media needs review; rerender after repairs or for a requested delivery master. Honor existing authorization. See [dynamic-video-authoring.md](dynamic-video-authoring.md) for primitive selection and choreography.
 
 ## Output Defaults
 

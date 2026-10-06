@@ -341,7 +341,7 @@ export const componentRegistry = Object.freeze({
     delivery: ['GraphicScene data', 'React SVG through GraphicCanvas'],
     entryPoints: [{ module: 'hairline-scene', exports: ['createHairlineScene'], types: ['HairlineSolid'] }],
     constraints: ['Prepared-path adapter only: it does not copy or run the native Hairline kernel or generate HL.prism geometry.', 'Supply at least one solid and at most one active solid.'],
-    examples: ['examples/visual-explainer-mdx/primitives-tour.tsx', 'examples/visual-explainer-mdx/primitives-tour-source.ts'],
+    examples: ['examples/visual-explainer-mdx/motion-review.tsx', 'examples/visual-explainer-mdx/motion-review-source.ts', 'examples/visual-explainer-mdx/showcase-hairline.ts'],
     dependsOn: ['graphics'],
     files: [source('hairline-scene.ts')],
   },
