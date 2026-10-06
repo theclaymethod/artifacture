@@ -1,0 +1,1065 @@
+{
+  "name": "shaders-core",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry.d.ts",
+      "import": "./dist/registry.js",
+      "require": "./dist/registry.js"
+    },
+    "./telemetry": {
+      "types": "./dist/telemetry/index.d.ts",
+      "import": "./dist/telemetry/index.js",
+      "require": "./dist/telemetry/index.js"
+    },
+    "./utilities/transformations": {
+      "types": "./dist/utilities/transformations/index.d.ts",
+      "import": "./dist/utilities/transformations/index.js",
+      "require": "./dist/utilities/transformations/index.js"
+    },
+    "./std": {
+      "types": "./dist/std/index.d.ts",
+      "import": "./dist/std/index.js",
+      "require": "./dist/std/index.js"
+    },
+    "./AngularBlur": {
+      "types": "./dist/shaders/AngularBlur/index.d.ts",
+      "import": "./dist/shaders/AngularBlur/index.js",
+      "require": "./dist/shaders/AngularBlur/index.js"
+    },
+    "./Arc": {
+      "types": "./dist/shaders/Arc/index.d.ts",
+      "import": "./dist/shaders/Arc/index.js",
+      "require": "./dist/shaders/Arc/index.js"
+    },
+    "./Ascii": {
+      "types": "./dist/shaders/Ascii/index.d.ts",
+      "import": "./dist/shaders/Ascii/index.js",
+      "require": "./dist/shaders/Ascii/index.js"
+    },
+    "./Aurora": {
+      "types": "./dist/shaders/Aurora/index.d.ts",
+      "import": "./dist/shaders/Aurora/index.js",
+      "require": "./dist/shaders/Aurora/index.js"
+    },
+    "./BarShift": {
+      "types": "./dist/shaders/BarShift/index.d.ts",
+      "import": "./dist/shaders/BarShift/index.js",
+      "require": "./dist/shaders/BarShift/index.js"
+    },
+    "./BarnDoors": {
+      "types": "./dist/shaders/BarnDoors/index.d.ts",
+      "import": "./dist/shaders/BarnDoors/index.js",
+      "require": "./dist/shaders/BarnDoors/index.js"
+    },
+    "./Beam": {
+      "types": "./dist/shaders/Beam/index.d.ts",
+      "import": "./dist/shaders/Beam/index.js",
+      "require": "./dist/shaders/Beam/index.js"
+    },
+    "./Bend": {
+      "types": "./dist/shaders/Bend/index.d.ts",
+      "import": "./dist/shaders/Bend/index.js",
+      "require": "./dist/shaders/Bend/index.js"
+    },
+    "./Blob": {
+      "types": "./dist/shaders/Blob/index.d.ts",
+      "import": "./dist/shaders/Blob/index.js",
+      "require": "./dist/shaders/Blob/index.js"
+    },
+    "./BlockDissolve": {
+      "types": "./dist/shaders/BlockDissolve/index.d.ts",
+      "import": "./dist/shaders/BlockDissolve/index.js",
+      "require": "./dist/shaders/BlockDissolve/index.js"
+    },
+    "./BlockNoise": {
+      "types": "./dist/shaders/BlockNoise/index.d.ts",
+      "import": "./dist/shaders/BlockNoise/index.js",
+      "require": "./dist/shaders/BlockNoise/index.js"
+    },
+    "./BlueNoise": {
+      "types": "./dist/shaders/BlueNoise/index.d.ts",
+      "import": "./dist/shaders/BlueNoise/index.js",
+      "require": "./dist/shaders/BlueNoise/index.js"
+    },
+    "./Blur": {
+      "types": "./dist/shaders/Blur/index.d.ts",
+      "import": "./dist/shaders/Blur/index.js",
+      "require": "./dist/shaders/Blur/index.js"
+    },
+    "./Boids": {
+      "types": "./dist/shaders/Boids/index.d.ts",
+      "import": "./dist/shaders/Boids/index.js",
+      "require": "./dist/shaders/Boids/index.js"
+    },
+    "./BokehBlur": {
+      "types": "./dist/shaders/BokehBlur/index.d.ts",
+      "import": "./dist/shaders/BokehBlur/index.js",
+      "require": "./dist/shaders/BokehBlur/index.js"
+    },
+    "./BrickPattern": {
+      "types": "./dist/shaders/BrickPattern/index.d.ts",
+      "import": "./dist/shaders/BrickPattern/index.js",
+      "require": "./dist/shaders/BrickPattern/index.js"
+    },
+    "./BrightnessContrast": {
+      "types": "./dist/shaders/BrightnessContrast/index.d.ts",
+      "import": "./dist/shaders/BrightnessContrast/index.js",
+      "require": "./dist/shaders/BrightnessContrast/index.js"
+    },
+    "./BrushedMetal": {
+      "types": "./dist/shaders/BrushedMetal/index.d.ts",
+      "import": "./dist/shaders/BrushedMetal/index.js",
+      "require": "./dist/shaders/BrushedMetal/index.js"
+    },
+    "./Bulge": {
+      "types": "./dist/shaders/Bulge/index.d.ts",
+      "import": "./dist/shaders/Bulge/index.js",
+      "require": "./dist/shaders/Bulge/index.js"
+    },
+    "./CRTScreen": {
+      "types": "./dist/shaders/CRTScreen/index.d.ts",
+      "import": "./dist/shaders/CRTScreen/index.js",
+      "require": "./dist/shaders/CRTScreen/index.js"
+    },
+    "./CarbonFiber": {
+      "types": "./dist/shaders/CarbonFiber/index.d.ts",
+      "import": "./dist/shaders/CarbonFiber/index.js",
+      "require": "./dist/shaders/CarbonFiber/index.js"
+    },
+    "./Chalkboard": {
+      "types": "./dist/shaders/Chalkboard/index.d.ts",
+      "import": "./dist/shaders/Chalkboard/index.js",
+      "require": "./dist/shaders/Chalkboard/index.js"
+    },
+    "./ChannelBlur": {
+      "types": "./dist/shaders/ChannelBlur/index.d.ts",
+      "import": "./dist/shaders/ChannelBlur/index.js",
+      "require": "./dist/shaders/ChannelBlur/index.js"
+    },
+    "./CheckerWipe": {
+      "types": "./dist/shaders/CheckerWipe/index.d.ts",
+      "import": "./dist/shaders/CheckerWipe/index.js",
+      "require": "./dist/shaders/CheckerWipe/index.js"
+    },
+    "./Checkerboard": {
+      "types": "./dist/shaders/Checkerboard/index.d.ts",
+      "import": "./dist/shaders/Checkerboard/index.js",
+      "require": "./dist/shaders/Checkerboard/index.js"
+    },
+    "./Chevron": {
+      "types": "./dist/shaders/Chevron/index.d.ts",
+      "import": "./dist/shaders/Chevron/index.js",
+      "require": "./dist/shaders/Chevron/index.js"
+    },
+    "./ChromaFlow": {
+      "types": "./dist/shaders/ChromaFlow/index.d.ts",
+      "import": "./dist/shaders/ChromaFlow/index.js",
+      "require": "./dist/shaders/ChromaFlow/index.js"
+    },
+    "./ChromaticAberration": {
+      "types": "./dist/shaders/ChromaticAberration/index.d.ts",
+      "import": "./dist/shaders/ChromaticAberration/index.js",
+      "require": "./dist/shaders/ChromaticAberration/index.js"
+    },
+    "./Chrome": {
+      "types": "./dist/shaders/Chrome/index.d.ts",
+      "import": "./dist/shaders/Chrome/index.js",
+      "require": "./dist/shaders/Chrome/index.js"
+    },
+    "./Circle": {
+      "types": "./dist/shaders/Circle/index.d.ts",
+      "import": "./dist/shaders/Circle/index.js",
+      "require": "./dist/shaders/Circle/index.js"
+    },
+    "./ColorWheel": {
+      "types": "./dist/shaders/ColorWheel/index.d.ts",
+      "import": "./dist/shaders/ColorWheel/index.js",
+      "require": "./dist/shaders/ColorWheel/index.js"
+    },
+    "./CompressionArtifacts": {
+      "types": "./dist/shaders/CompressionArtifacts/index.d.ts",
+      "import": "./dist/shaders/CompressionArtifacts/index.js",
+      "require": "./dist/shaders/CompressionArtifacts/index.js"
+    },
+    "./ConcentricSpin": {
+      "types": "./dist/shaders/ConcentricSpin/index.d.ts",
+      "import": "./dist/shaders/ConcentricSpin/index.js",
+      "require": "./dist/shaders/ConcentricSpin/index.js"
+    },
+    "./ConicGradient": {
+      "types": "./dist/shaders/ConicGradient/index.d.ts",
+      "import": "./dist/shaders/ConicGradient/index.js",
+      "require": "./dist/shaders/ConicGradient/index.js"
+    },
+    "./ContourLines": {
+      "types": "./dist/shaders/ContourLines/index.d.ts",
+      "import": "./dist/shaders/ContourLines/index.js",
+      "require": "./dist/shaders/ContourLines/index.js"
+    },
+    "./CornerPin": {
+      "types": "./dist/shaders/CornerPin/index.d.ts",
+      "import": "./dist/shaders/CornerPin/index.js",
+      "require": "./dist/shaders/CornerPin/index.js"
+    },
+    "./Crescent": {
+      "types": "./dist/shaders/Crescent/index.d.ts",
+      "import": "./dist/shaders/Crescent/index.js",
+      "require": "./dist/shaders/Crescent/index.js"
+    },
+    "./Cross": {
+      "types": "./dist/shaders/Cross/index.d.ts",
+      "import": "./dist/shaders/Cross/index.js",
+      "require": "./dist/shaders/Cross/index.js"
+    },
+    "./Crystal": {
+      "types": "./dist/shaders/Crystal/index.d.ts",
+      "import": "./dist/shaders/Crystal/index.js",
+      "require": "./dist/shaders/Crystal/index.js"
+    },
+    "./CurlNoise": {
+      "types": "./dist/shaders/CurlNoise/index.d.ts",
+      "import": "./dist/shaders/CurlNoise/index.js",
+      "require": "./dist/shaders/CurlNoise/index.js"
+    },
+    "./CursorRipples": {
+      "types": "./dist/shaders/CursorRipples/index.d.ts",
+      "import": "./dist/shaders/CursorRipples/index.js",
+      "require": "./dist/shaders/CursorRipples/index.js"
+    },
+    "./CursorTrail": {
+      "types": "./dist/shaders/CursorTrail/index.d.ts",
+      "import": "./dist/shaders/CursorTrail/index.js",
+      "require": "./dist/shaders/CursorTrail/index.js"
+    },
+    "./DataMosh": {
+      "types": "./dist/shaders/DataMosh/index.d.ts",
+      "import": "./dist/shaders/DataMosh/index.js",
+      "require": "./dist/shaders/DataMosh/index.js"
+    },
+    "./DiamondGradient": {
+      "types": "./dist/shaders/DiamondGradient/index.d.ts",
+      "import": "./dist/shaders/DiamondGradient/index.js",
+      "require": "./dist/shaders/DiamondGradient/index.js"
+    },
+    "./DiamondWipe": {
+      "types": "./dist/shaders/DiamondWipe/index.d.ts",
+      "import": "./dist/shaders/DiamondWipe/index.js",
+      "require": "./dist/shaders/DiamondWipe/index.js"
+    },
+    "./DiffuseBlur": {
+      "types": "./dist/shaders/DiffuseBlur/index.d.ts",
+      "import": "./dist/shaders/DiffuseBlur/index.js",
+      "require": "./dist/shaders/DiffuseBlur/index.js"
+    },
+    "./DisplacementMap": {
+      "types": "./dist/shaders/DisplacementMap/index.d.ts",
+      "import": "./dist/shaders/DisplacementMap/index.js",
+      "require": "./dist/shaders/DisplacementMap/index.js"
+    },
+    "./Dither": {
+      "types": "./dist/shaders/Dither/index.d.ts",
+      "import": "./dist/shaders/Dither/index.js",
+      "require": "./dist/shaders/Dither/index.js"
+    },
+    "./DotGrid": {
+      "types": "./dist/shaders/DotGrid/index.d.ts",
+      "import": "./dist/shaders/DotGrid/index.js",
+      "require": "./dist/shaders/DotGrid/index.js"
+    },
+    "./DropShadow": {
+      "types": "./dist/shaders/DropShadow/index.d.ts",
+      "import": "./dist/shaders/DropShadow/index.js",
+      "require": "./dist/shaders/DropShadow/index.js"
+    },
+    "./Duotone": {
+      "types": "./dist/shaders/Duotone/index.d.ts",
+      "import": "./dist/shaders/Duotone/index.js",
+      "require": "./dist/shaders/Duotone/index.js"
+    },
+    "./Ellipse": {
+      "types": "./dist/shaders/Ellipse/index.d.ts",
+      "import": "./dist/shaders/Ellipse/index.js",
+      "require": "./dist/shaders/Ellipse/index.js"
+    },
+    "./Emboss": {
+      "types": "./dist/shaders/Emboss/index.d.ts",
+      "import": "./dist/shaders/Emboss/index.js",
+      "require": "./dist/shaders/Emboss/index.js"
+    },
+    "./Engraving": {
+      "types": "./dist/shaders/Engraving/index.d.ts",
+      "import": "./dist/shaders/Engraving/index.js",
+      "require": "./dist/shaders/Engraving/index.js"
+    },
+    "./ErosionNoise": {
+      "types": "./dist/shaders/ErosionNoise/index.d.ts",
+      "import": "./dist/shaders/ErosionNoise/index.js",
+      "require": "./dist/shaders/ErosionNoise/index.js"
+    },
+    "./Exposure": {
+      "types": "./dist/shaders/Exposure/index.d.ts",
+      "import": "./dist/shaders/Exposure/index.js",
+      "require": "./dist/shaders/Exposure/index.js"
+    },
+    "./FallingLines": {
+      "types": "./dist/shaders/FallingLines/index.d.ts",
+      "import": "./dist/shaders/FallingLines/index.js",
+      "require": "./dist/shaders/FallingLines/index.js"
+    },
+    "./FilmGrain": {
+      "types": "./dist/shaders/FilmGrain/index.d.ts",
+      "import": "./dist/shaders/FilmGrain/index.js",
+      "require": "./dist/shaders/FilmGrain/index.js"
+    },
+    "./FilmStock": {
+      "types": "./dist/shaders/FilmStock/index.d.ts",
+      "import": "./dist/shaders/FilmStock/index.js",
+      "require": "./dist/shaders/FilmStock/index.js"
+    },
+    "./Flip": {
+      "types": "./dist/shaders/Flip/index.d.ts",
+      "import": "./dist/shaders/Flip/index.js",
+      "require": "./dist/shaders/Flip/index.js"
+    },
+    "./FloatingParticles": {
+      "types": "./dist/shaders/FloatingParticles/index.d.ts",
+      "import": "./dist/shaders/FloatingParticles/index.js",
+      "require": "./dist/shaders/FloatingParticles/index.js"
+    },
+    "./FlowField": {
+      "types": "./dist/shaders/FlowField/index.d.ts",
+      "import": "./dist/shaders/FlowField/index.js",
+      "require": "./dist/shaders/FlowField/index.js"
+    },
+    "./Flower": {
+      "types": "./dist/shaders/Flower/index.d.ts",
+      "import": "./dist/shaders/Flower/index.js",
+      "require": "./dist/shaders/Flower/index.js"
+    },
+    "./FlowingGradient": {
+      "types": "./dist/shaders/FlowingGradient/index.d.ts",
+      "import": "./dist/shaders/FlowingGradient/index.js",
+      "require": "./dist/shaders/FlowingGradient/index.js"
+    },
+    "./FlutedGlass": {
+      "types": "./dist/shaders/FlutedGlass/index.d.ts",
+      "import": "./dist/shaders/FlutedGlass/index.js",
+      "require": "./dist/shaders/FlutedGlass/index.js"
+    },
+    "./Fog": {
+      "types": "./dist/shaders/Fog/index.d.ts",
+      "import": "./dist/shaders/Fog/index.js",
+      "require": "./dist/shaders/Fog/index.js"
+    },
+    "./Form3D": {
+      "types": "./dist/shaders/Form3D/index.d.ts",
+      "import": "./dist/shaders/Form3D/index.js",
+      "require": "./dist/shaders/Form3D/index.js"
+    },
+    "./FractalNoise": {
+      "types": "./dist/shaders/FractalNoise/index.d.ts",
+      "import": "./dist/shaders/FractalNoise/index.js",
+      "require": "./dist/shaders/FractalNoise/index.js"
+    },
+    "./Frost": {
+      "types": "./dist/shaders/Frost/index.d.ts",
+      "import": "./dist/shaders/Frost/index.js",
+      "require": "./dist/shaders/Frost/index.js"
+    },
+    "./GaborNoise": {
+      "types": "./dist/shaders/GaborNoise/index.d.ts",
+      "import": "./dist/shaders/GaborNoise/index.js",
+      "require": "./dist/shaders/GaborNoise/index.js"
+    },
+    "./Glass": {
+      "types": "./dist/shaders/Glass/index.d.ts",
+      "import": "./dist/shaders/Glass/index.js",
+      "require": "./dist/shaders/Glass/index.js"
+    },
+    "./GlassTiles": {
+      "types": "./dist/shaders/GlassTiles/index.d.ts",
+      "import": "./dist/shaders/GlassTiles/index.js",
+      "require": "./dist/shaders/GlassTiles/index.js"
+    },
+    "./Glitch": {
+      "types": "./dist/shaders/Glitch/index.d.ts",
+      "import": "./dist/shaders/Glitch/index.js",
+      "require": "./dist/shaders/Glitch/index.js"
+    },
+    "./Glow": {
+      "types": "./dist/shaders/Glow/index.d.ts",
+      "import": "./dist/shaders/Glow/index.js",
+      "require": "./dist/shaders/Glow/index.js"
+    },
+    "./Godrays": {
+      "types": "./dist/shaders/Godrays/index.d.ts",
+      "import": "./dist/shaders/Godrays/index.js",
+      "require": "./dist/shaders/Godrays/index.js"
+    },
+    "./Goo": {
+      "types": "./dist/shaders/Goo/index.d.ts",
+      "import": "./dist/shaders/Goo/index.js",
+      "require": "./dist/shaders/Goo/index.js"
+    },
+    "./GradientMap": {
+      "types": "./dist/shaders/GradientMap/index.d.ts",
+      "import": "./dist/shaders/GradientMap/index.js",
+      "require": "./dist/shaders/GradientMap/index.js"
+    },
+    "./Grayscale": {
+      "types": "./dist/shaders/Grayscale/index.d.ts",
+      "import": "./dist/shaders/Grayscale/index.js",
+      "require": "./dist/shaders/Grayscale/index.js"
+    },
+    "./Grid": {
+      "types": "./dist/shaders/Grid/index.d.ts",
+      "import": "./dist/shaders/Grid/index.js",
+      "require": "./dist/shaders/Grid/index.js"
+    },
+    "./GridDistortion": {
+      "types": "./dist/shaders/GridDistortion/index.d.ts",
+      "import": "./dist/shaders/GridDistortion/index.js",
+      "require": "./dist/shaders/GridDistortion/index.js"
+    },
+    "./Group": {
+      "types": "./dist/shaders/Group/index.d.ts",
+      "import": "./dist/shaders/Group/index.js",
+      "require": "./dist/shaders/Group/index.js"
+    },
+    "./HTMLInCanvas": {
+      "types": "./dist/shaders/HTMLInCanvas/index.d.ts",
+      "import": "./dist/shaders/HTMLInCanvas/index.js",
+      "require": "./dist/shaders/HTMLInCanvas/index.js"
+    },
+    "./DOMTexture": {
+      "types": "./dist/shaders/HTMLInCanvas/index.d.ts",
+      "import": "./dist/shaders/HTMLInCanvas/index.js",
+      "require": "./dist/shaders/HTMLInCanvas/index.js"
+    },
+    "./Halftone": {
+      "types": "./dist/shaders/Halftone/index.d.ts",
+      "import": "./dist/shaders/Halftone/index.js",
+      "require": "./dist/shaders/Halftone/index.js"
+    },
+    "./Heart": {
+      "types": "./dist/shaders/Heart/index.d.ts",
+      "import": "./dist/shaders/Heart/index.js",
+      "require": "./dist/shaders/Heart/index.js"
+    },
+    "./Heatmap": {
+      "types": "./dist/shaders/Heatmap/index.d.ts",
+      "import": "./dist/shaders/Heatmap/index.js",
+      "require": "./dist/shaders/Heatmap/index.js"
+    },
+    "./HexGrid": {
+      "types": "./dist/shaders/HexGrid/index.d.ts",
+      "import": "./dist/shaders/HexGrid/index.js",
+      "require": "./dist/shaders/HexGrid/index.js"
+    },
+    "./Hologram": {
+      "types": "./dist/shaders/Hologram/index.d.ts",
+      "import": "./dist/shaders/Hologram/index.js",
+      "require": "./dist/shaders/Hologram/index.js"
+    },
+    "./Holographic": {
+      "types": "./dist/shaders/Holographic/index.d.ts",
+      "import": "./dist/shaders/Holographic/index.js",
+      "require": "./dist/shaders/Holographic/index.js"
+    },
+    "./HueShift": {
+      "types": "./dist/shaders/HueShift/index.d.ts",
+      "import": "./dist/shaders/HueShift/index.js",
+      "require": "./dist/shaders/HueShift/index.js"
+    },
+    "./ImageTexture": {
+      "types": "./dist/shaders/ImageTexture/index.d.ts",
+      "import": "./dist/shaders/ImageTexture/index.js",
+      "require": "./dist/shaders/ImageTexture/index.js"
+    },
+    "./InkFlow": {
+      "types": "./dist/shaders/InkFlow/index.d.ts",
+      "import": "./dist/shaders/InkFlow/index.js",
+      "require": "./dist/shaders/InkFlow/index.js"
+    },
+    "./Invert": {
+      "types": "./dist/shaders/Invert/index.d.ts",
+      "import": "./dist/shaders/Invert/index.js",
+      "require": "./dist/shaders/Invert/index.js"
+    },
+    "./IrisWipe": {
+      "types": "./dist/shaders/IrisWipe/index.d.ts",
+      "import": "./dist/shaders/IrisWipe/index.js",
+      "require": "./dist/shaders/IrisWipe/index.js"
+    },
+    "./Irradiance": {
+      "types": "./dist/shaders/Irradiance/index.d.ts",
+      "import": "./dist/shaders/Irradiance/index.js",
+      "require": "./dist/shaders/Irradiance/index.js"
+    },
+    "./IsometricCubes": {
+      "types": "./dist/shaders/IsometricCubes/index.d.ts",
+      "import": "./dist/shaders/IsometricCubes/index.js",
+      "require": "./dist/shaders/IsometricCubes/index.js"
+    },
+    "./Kaleidoscope": {
+      "types": "./dist/shaders/Kaleidoscope/index.d.ts",
+      "import": "./dist/shaders/Kaleidoscope/index.js",
+      "require": "./dist/shaders/Kaleidoscope/index.js"
+    },
+    "./KeyFrames": {
+      "types": "./dist/shaders/KeyFrames/index.d.ts",
+      "import": "./dist/shaders/KeyFrames/index.js",
+      "require": "./dist/shaders/KeyFrames/index.js"
+    },
+    "./LensDistortion": {
+      "types": "./dist/shaders/LensDistortion/index.d.ts",
+      "import": "./dist/shaders/LensDistortion/index.js",
+      "require": "./dist/shaders/LensDistortion/index.js"
+    },
+    "./LensFlare": {
+      "types": "./dist/shaders/LensFlare/index.d.ts",
+      "import": "./dist/shaders/LensFlare/index.js",
+      "require": "./dist/shaders/LensFlare/index.js"
+    },
+    "./LightEdge": {
+      "types": "./dist/shaders/LightEdge/index.d.ts",
+      "import": "./dist/shaders/LightEdge/index.js",
+      "require": "./dist/shaders/LightEdge/index.js"
+    },
+    "./LightLeak": {
+      "types": "./dist/shaders/LightLeak/index.d.ts",
+      "import": "./dist/shaders/LightLeak/index.js",
+      "require": "./dist/shaders/LightLeak/index.js"
+    },
+    "./Line": {
+      "types": "./dist/shaders/Line/index.d.ts",
+      "import": "./dist/shaders/Line/index.js",
+      "require": "./dist/shaders/Line/index.js"
+    },
+    "./LinearBlur": {
+      "types": "./dist/shaders/LinearBlur/index.d.ts",
+      "import": "./dist/shaders/LinearBlur/index.js",
+      "require": "./dist/shaders/LinearBlur/index.js"
+    },
+    "./LinearGradient": {
+      "types": "./dist/shaders/LinearGradient/index.d.ts",
+      "import": "./dist/shaders/LinearGradient/index.js",
+      "require": "./dist/shaders/LinearGradient/index.js"
+    },
+    "./LinearWipe": {
+      "types": "./dist/shaders/LinearWipe/index.d.ts",
+      "import": "./dist/shaders/LinearWipe/index.js",
+      "require": "./dist/shaders/LinearWipe/index.js"
+    },
+    "./LiquidMetal": {
+      "types": "./dist/shaders/LiquidMetal/index.d.ts",
+      "import": "./dist/shaders/LiquidMetal/index.js",
+      "require": "./dist/shaders/LiquidMetal/index.js"
+    },
+    "./Liquify": {
+      "types": "./dist/shaders/Liquify/index.d.ts",
+      "import": "./dist/shaders/Liquify/index.js",
+      "require": "./dist/shaders/Liquify/index.js"
+    },
+    "./MagneticFilings": {
+      "types": "./dist/shaders/MagneticFilings/index.d.ts",
+      "import": "./dist/shaders/MagneticFilings/index.js",
+      "require": "./dist/shaders/MagneticFilings/index.js"
+    },
+    "./Marble": {
+      "types": "./dist/shaders/Marble/index.d.ts",
+      "import": "./dist/shaders/Marble/index.js",
+      "require": "./dist/shaders/Marble/index.js"
+    },
+    "./MeshGradient": {
+      "types": "./dist/shaders/MeshGradient/index.d.ts",
+      "import": "./dist/shaders/MeshGradient/index.js",
+      "require": "./dist/shaders/MeshGradient/index.js"
+    },
+    "./Mirror": {
+      "types": "./dist/shaders/Mirror/index.d.ts",
+      "import": "./dist/shaders/Mirror/index.js",
+      "require": "./dist/shaders/Mirror/index.js"
+    },
+    "./MultiPointGradient": {
+      "types": "./dist/shaders/MultiPointGradient/index.d.ts",
+      "import": "./dist/shaders/MultiPointGradient/index.js",
+      "require": "./dist/shaders/MultiPointGradient/index.js"
+    },
+    "./Nebula": {
+      "types": "./dist/shaders/Nebula/index.d.ts",
+      "import": "./dist/shaders/Nebula/index.js",
+      "require": "./dist/shaders/Nebula/index.js"
+    },
+    "./Neon": {
+      "types": "./dist/shaders/Neon/index.d.ts",
+      "import": "./dist/shaders/Neon/index.js",
+      "require": "./dist/shaders/Neon/index.js"
+    },
+    "./NoiseDissolve": {
+      "types": "./dist/shaders/NoiseDissolve/index.d.ts",
+      "import": "./dist/shaders/NoiseDissolve/index.js",
+      "require": "./dist/shaders/NoiseDissolve/index.js"
+    },
+    "./ObjectTracker": {
+      "types": "./dist/shaders/ObjectTracker/index.d.ts",
+      "import": "./dist/shaders/ObjectTracker/index.js",
+      "require": "./dist/shaders/ObjectTracker/index.js"
+    },
+    "./Obsidian": {
+      "types": "./dist/shaders/Obsidian/index.d.ts",
+      "import": "./dist/shaders/Obsidian/index.js",
+      "require": "./dist/shaders/Obsidian/index.js"
+    },
+    "./PagePeel": {
+      "types": "./dist/shaders/PagePeel/index.d.ts",
+      "import": "./dist/shaders/PagePeel/index.js",
+      "require": "./dist/shaders/PagePeel/index.js"
+    },
+    "./Paper": {
+      "types": "./dist/shaders/Paper/index.d.ts",
+      "import": "./dist/shaders/Paper/index.js",
+      "require": "./dist/shaders/Paper/index.js"
+    },
+    "./Parallelogram": {
+      "types": "./dist/shaders/Parallelogram/index.d.ts",
+      "import": "./dist/shaders/Parallelogram/index.js",
+      "require": "./dist/shaders/Parallelogram/index.js"
+    },
+    "./ParticleField": {
+      "types": "./dist/shaders/ParticleField/index.d.ts",
+      "import": "./dist/shaders/ParticleField/index.js",
+      "require": "./dist/shaders/ParticleField/index.js"
+    },
+    "./ParticleFlow": {
+      "types": "./dist/shaders/ParticleFlow/index.d.ts",
+      "import": "./dist/shaders/ParticleFlow/index.js",
+      "require": "./dist/shaders/ParticleFlow/index.js"
+    },
+    "./Particles": {
+      "types": "./dist/shaders/Particles/index.d.ts",
+      "import": "./dist/shaders/Particles/index.js",
+      "require": "./dist/shaders/Particles/index.js"
+    },
+    "./PerlinNoise": {
+      "types": "./dist/shaders/PerlinNoise/index.d.ts",
+      "import": "./dist/shaders/PerlinNoise/index.js",
+      "require": "./dist/shaders/PerlinNoise/index.js"
+    },
+    "./Perspective": {
+      "types": "./dist/shaders/Perspective/index.d.ts",
+      "import": "./dist/shaders/Perspective/index.js",
+      "require": "./dist/shaders/Perspective/index.js"
+    },
+    "./PixelSort": {
+      "types": "./dist/shaders/PixelSort/index.d.ts",
+      "import": "./dist/shaders/PixelSort/index.js",
+      "require": "./dist/shaders/PixelSort/index.js"
+    },
+    "./PixelThrow": {
+      "types": "./dist/shaders/PixelThrow/index.d.ts",
+      "import": "./dist/shaders/PixelThrow/index.js",
+      "require": "./dist/shaders/PixelThrow/index.js"
+    },
+    "./Pixelate": {
+      "types": "./dist/shaders/Pixelate/index.d.ts",
+      "import": "./dist/shaders/Pixelate/index.js",
+      "require": "./dist/shaders/Pixelate/index.js"
+    },
+    "./Plasma": {
+      "types": "./dist/shaders/Plasma/index.d.ts",
+      "import": "./dist/shaders/Plasma/index.js",
+      "require": "./dist/shaders/Plasma/index.js"
+    },
+    "./Plastic": {
+      "types": "./dist/shaders/Plastic/index.d.ts",
+      "import": "./dist/shaders/Plastic/index.js",
+      "require": "./dist/shaders/Plastic/index.js"
+    },
+    "./PolarCoordinates": {
+      "types": "./dist/shaders/PolarCoordinates/index.d.ts",
+      "import": "./dist/shaders/PolarCoordinates/index.js",
+      "require": "./dist/shaders/PolarCoordinates/index.js"
+    },
+    "./Polygon": {
+      "types": "./dist/shaders/Polygon/index.d.ts",
+      "import": "./dist/shaders/Polygon/index.js",
+      "require": "./dist/shaders/Polygon/index.js"
+    },
+    "./Posterize": {
+      "types": "./dist/shaders/Posterize/index.d.ts",
+      "import": "./dist/shaders/Posterize/index.js",
+      "require": "./dist/shaders/Posterize/index.js"
+    },
+    "./Prism": {
+      "types": "./dist/shaders/Prism/index.d.ts",
+      "import": "./dist/shaders/Prism/index.js",
+      "require": "./dist/shaders/Prism/index.js"
+    },
+    "./ProgressiveBlur": {
+      "types": "./dist/shaders/ProgressiveBlur/index.d.ts",
+      "import": "./dist/shaders/ProgressiveBlur/index.js",
+      "require": "./dist/shaders/ProgressiveBlur/index.js"
+    },
+    "./RadialGradient": {
+      "types": "./dist/shaders/RadialGradient/index.d.ts",
+      "import": "./dist/shaders/RadialGradient/index.js",
+      "require": "./dist/shaders/RadialGradient/index.js"
+    },
+    "./RadialWipe": {
+      "types": "./dist/shaders/RadialWipe/index.d.ts",
+      "import": "./dist/shaders/RadialWipe/index.js",
+      "require": "./dist/shaders/RadialWipe/index.js"
+    },
+    "./RandomBars": {
+      "types": "./dist/shaders/RandomBars/index.d.ts",
+      "import": "./dist/shaders/RandomBars/index.js",
+      "require": "./dist/shaders/RandomBars/index.js"
+    },
+    "./ReactionDiffusion": {
+      "types": "./dist/shaders/ReactionDiffusion/index.d.ts",
+      "import": "./dist/shaders/ReactionDiffusion/index.js",
+      "require": "./dist/shaders/ReactionDiffusion/index.js"
+    },
+    "./RectangularCoordinates": {
+      "types": "./dist/shaders/RectangularCoordinates/index.d.ts",
+      "import": "./dist/shaders/RectangularCoordinates/index.js",
+      "require": "./dist/shaders/RectangularCoordinates/index.js"
+    },
+    "./ReflectivePlane": {
+      "types": "./dist/shaders/ReflectivePlane/index.d.ts",
+      "import": "./dist/shaders/ReflectivePlane/index.js",
+      "require": "./dist/shaders/ReflectivePlane/index.js"
+    },
+    "./Repeater": {
+      "types": "./dist/shaders/Repeater/index.d.ts",
+      "import": "./dist/shaders/Repeater/index.js",
+      "require": "./dist/shaders/Repeater/index.js"
+    },
+    "./Ring": {
+      "types": "./dist/shaders/Ring/index.d.ts",
+      "import": "./dist/shaders/Ring/index.js",
+      "require": "./dist/shaders/Ring/index.js"
+    },
+    "./RippleWipe": {
+      "types": "./dist/shaders/RippleWipe/index.d.ts",
+      "import": "./dist/shaders/RippleWipe/index.js",
+      "require": "./dist/shaders/RippleWipe/index.js"
+    },
+    "./Ripples": {
+      "types": "./dist/shaders/Ripples/index.d.ts",
+      "import": "./dist/shaders/Ripples/index.js",
+      "require": "./dist/shaders/Ripples/index.js"
+    },
+    "./RoundedRect": {
+      "types": "./dist/shaders/RoundedRect/index.d.ts",
+      "import": "./dist/shaders/RoundedRect/index.js",
+      "require": "./dist/shaders/RoundedRect/index.js"
+    },
+    "./Saturation": {
+      "types": "./dist/shaders/Saturation/index.d.ts",
+      "import": "./dist/shaders/Saturation/index.js",
+      "require": "./dist/shaders/Saturation/index.js"
+    },
+    "./Scratches": {
+      "types": "./dist/shaders/Scratches/index.d.ts",
+      "import": "./dist/shaders/Scratches/index.js",
+      "require": "./dist/shaders/Scratches/index.js"
+    },
+    "./Sharpness": {
+      "types": "./dist/shaders/Sharpness/index.d.ts",
+      "import": "./dist/shaders/Sharpness/index.js",
+      "require": "./dist/shaders/Sharpness/index.js"
+    },
+    "./Shatter": {
+      "types": "./dist/shaders/Shatter/index.d.ts",
+      "import": "./dist/shaders/Shatter/index.js",
+      "require": "./dist/shaders/Shatter/index.js"
+    },
+    "./SimplexNoise": {
+      "types": "./dist/shaders/SimplexNoise/index.d.ts",
+      "import": "./dist/shaders/SimplexNoise/index.js",
+      "require": "./dist/shaders/SimplexNoise/index.js"
+    },
+    "./SineWave": {
+      "types": "./dist/shaders/SineWave/index.d.ts",
+      "import": "./dist/shaders/SineWave/index.js",
+      "require": "./dist/shaders/SineWave/index.js"
+    },
+    "./SliceWipe": {
+      "types": "./dist/shaders/SliceWipe/index.d.ts",
+      "import": "./dist/shaders/SliceWipe/index.js",
+      "require": "./dist/shaders/SliceWipe/index.js"
+    },
+    "./Smoke": {
+      "types": "./dist/shaders/Smoke/index.d.ts",
+      "import": "./dist/shaders/Smoke/index.js",
+      "require": "./dist/shaders/Smoke/index.js"
+    },
+    "./SmokeFill": {
+      "types": "./dist/shaders/SmokeFill/index.d.ts",
+      "import": "./dist/shaders/SmokeFill/index.js",
+      "require": "./dist/shaders/SmokeFill/index.js"
+    },
+    "./SmokeFlow": {
+      "types": "./dist/shaders/SmokeFlow/index.d.ts",
+      "import": "./dist/shaders/SmokeFlow/index.js",
+      "require": "./dist/shaders/SmokeFlow/index.js"
+    },
+    "./Solarize": {
+      "types": "./dist/shaders/Solarize/index.d.ts",
+      "import": "./dist/shaders/Solarize/index.js",
+      "require": "./dist/shaders/Solarize/index.js"
+    },
+    "./SolidColor": {
+      "types": "./dist/shaders/SolidColor/index.d.ts",
+      "import": "./dist/shaders/SolidColor/index.js",
+      "require": "./dist/shaders/SolidColor/index.js"
+    },
+    "./Sparkle": {
+      "types": "./dist/shaders/Sparkle/index.d.ts",
+      "import": "./dist/shaders/Sparkle/index.js",
+      "require": "./dist/shaders/Sparkle/index.js"
+    },
+    "./Spherize": {
+      "types": "./dist/shaders/Spherize/index.d.ts",
+      "import": "./dist/shaders/Spherize/index.js",
+      "require": "./dist/shaders/Spherize/index.js"
+    },
+    "./Spiral": {
+      "types": "./dist/shaders/Spiral/index.d.ts",
+      "import": "./dist/shaders/Spiral/index.js",
+      "require": "./dist/shaders/Spiral/index.js"
+    },
+    "./Star": {
+      "types": "./dist/shaders/Star/index.d.ts",
+      "import": "./dist/shaders/Star/index.js",
+      "require": "./dist/shaders/Star/index.js"
+    },
+    "./Stone": {
+      "types": "./dist/shaders/Stone/index.d.ts",
+      "import": "./dist/shaders/Stone/index.js",
+      "require": "./dist/shaders/Stone/index.js"
+    },
+    "./Strands": {
+      "types": "./dist/shaders/Strands/index.d.ts",
+      "import": "./dist/shaders/Strands/index.js",
+      "require": "./dist/shaders/Strands/index.js"
+    },
+    "./Stretch": {
+      "types": "./dist/shaders/Stretch/index.d.ts",
+      "import": "./dist/shaders/Stretch/index.js",
+      "require": "./dist/shaders/Stretch/index.js"
+    },
+    "./Stripes": {
+      "types": "./dist/shaders/Stripes/index.d.ts",
+      "import": "./dist/shaders/Stripes/index.js",
+      "require": "./dist/shaders/Stripes/index.js"
+    },
+    "./StudioBackground": {
+      "types": "./dist/shaders/StudioBackground/index.d.ts",
+      "import": "./dist/shaders/StudioBackground/index.js",
+      "require": "./dist/shaders/StudioBackground/index.js"
+    },
+    "./SunBurst": {
+      "types": "./dist/shaders/SunBurst/index.d.ts",
+      "import": "./dist/shaders/SunBurst/index.js",
+      "require": "./dist/shaders/SunBurst/index.js"
+    },
+    "./Surface3D": {
+      "types": "./dist/shaders/Surface3D/index.d.ts",
+      "import": "./dist/shaders/Surface3D/index.js",
+      "require": "./dist/shaders/Surface3D/index.js"
+    },
+    "./Swirl": {
+      "types": "./dist/shaders/Swirl/index.d.ts",
+      "import": "./dist/shaders/Swirl/index.js",
+      "require": "./dist/shaders/Swirl/index.js"
+    },
+    "./Teardrop": {
+      "types": "./dist/shaders/Teardrop/index.d.ts",
+      "import": "./dist/shaders/Teardrop/index.js",
+      "require": "./dist/shaders/Teardrop/index.js"
+    },
+    "./Text": {
+      "types": "./dist/shaders/Text/index.d.ts",
+      "import": "./dist/shaders/Text/index.js",
+      "require": "./dist/shaders/Text/index.js"
+    },
+    "./ThinFilm": {
+      "types": "./dist/shaders/ThinFilm/index.d.ts",
+      "import": "./dist/shaders/ThinFilm/index.js",
+      "require": "./dist/shaders/ThinFilm/index.js"
+    },
+    "./TiltShift": {
+      "types": "./dist/shaders/TiltShift/index.d.ts",
+      "import": "./dist/shaders/TiltShift/index.js",
+      "require": "./dist/shaders/TiltShift/index.js"
+    },
+    "./TimeTrail": {
+      "types": "./dist/shaders/TimeTrail/index.d.ts",
+      "import": "./dist/shaders/TimeTrail/index.js",
+      "require": "./dist/shaders/TimeTrail/index.js"
+    },
+    "./Tint": {
+      "types": "./dist/shaders/Tint/index.d.ts",
+      "import": "./dist/shaders/Tint/index.js",
+      "require": "./dist/shaders/Tint/index.js"
+    },
+    "./Trapezoid": {
+      "types": "./dist/shaders/Trapezoid/index.d.ts",
+      "import": "./dist/shaders/Trapezoid/index.js",
+      "require": "./dist/shaders/Trapezoid/index.js"
+    },
+    "./TriangularGrid": {
+      "types": "./dist/shaders/TriangularGrid/index.d.ts",
+      "import": "./dist/shaders/TriangularGrid/index.js",
+      "require": "./dist/shaders/TriangularGrid/index.js"
+    },
+    "./Tritone": {
+      "types": "./dist/shaders/Tritone/index.d.ts",
+      "import": "./dist/shaders/Tritone/index.js",
+      "require": "./dist/shaders/Tritone/index.js"
+    },
+    "./Truchet": {
+      "types": "./dist/shaders/Truchet/index.d.ts",
+      "import": "./dist/shaders/Truchet/index.js",
+      "require": "./dist/shaders/Truchet/index.js"
+    },
+    "./Twirl": {
+      "types": "./dist/shaders/Twirl/index.d.ts",
+      "import": "./dist/shaders/Twirl/index.js",
+      "require": "./dist/shaders/Twirl/index.js"
+    },
+    "./VHS": {
+      "types": "./dist/shaders/VHS/index.d.ts",
+      "import": "./dist/shaders/VHS/index.js",
+      "require": "./dist/shaders/VHS/index.js"
+    },
+    "./VenetianBlinds": {
+      "types": "./dist/shaders/VenetianBlinds/index.d.ts",
+      "import": "./dist/shaders/VenetianBlinds/index.js",
+      "require": "./dist/shaders/VenetianBlinds/index.js"
+    },
+    "./Vesica": {
+      "types": "./dist/shaders/Vesica/index.d.ts",
+      "import": "./dist/shaders/Vesica/index.js",
+      "require": "./dist/shaders/Vesica/index.js"
+    },
+    "./Vibrance": {
+      "types": "./dist/shaders/Vibrance/index.d.ts",
+      "import": "./dist/shaders/Vibrance/index.js",
+      "require": "./dist/shaders/Vibrance/index.js"
+    },
+    "./VideoTexture": {
+      "types": "./dist/shaders/VideoTexture/index.d.ts",
+      "import": "./dist/shaders/VideoTexture/index.js",
+      "require": "./dist/shaders/VideoTexture/index.js"
+    },
+    "./Vignette": {
+      "types": "./dist/shaders/Vignette/index.d.ts",
+      "import": "./dist/shaders/Vignette/index.js",
+      "require": "./dist/shaders/Vignette/index.js"
+    },
+    "./Voronoi": {
+      "types": "./dist/shaders/Voronoi/index.d.ts",
+      "import": "./dist/shaders/Voronoi/index.js",
+      "require": "./dist/shaders/Voronoi/index.js"
+    },
+    "./Voxels": {
+      "types": "./dist/shaders/Voxels/index.d.ts",
+      "import": "./dist/shaders/Voxels/index.js",
+      "require": "./dist/shaders/Voxels/index.js"
+    },
+    "./Water": {
+      "types": "./dist/shaders/Water/index.d.ts",
+      "import": "./dist/shaders/Water/index.js",
+      "require": "./dist/shaders/Water/index.js"
+    },
+    "./Watercolor": {
+      "types": "./dist/shaders/Watercolor/index.d.ts",
+      "import": "./dist/shaders/Watercolor/index.js",
+      "require": "./dist/shaders/Watercolor/index.js"
+    },
+    "./WaveDistortion": {
+      "types": "./dist/shaders/WaveDistortion/index.d.ts",
+      "import": "./dist/shaders/WaveDistortion/index.js",
+      "require": "./dist/shaders/WaveDistortion/index.js"
+    },
+    "./Waveform": {
+      "types": "./dist/shaders/Waveform/index.d.ts",
+      "import": "./dist/shaders/Waveform/index.js",
+      "require": "./dist/shaders/Waveform/index.js"
+    },
+    "./WaveletNoise": {
+      "types": "./dist/shaders/WaveletNoise/index.d.ts",
+      "import": "./dist/shaders/WaveletNoise/index.js",
+      "require": "./dist/shaders/WaveletNoise/index.js"
+    },
+    "./Weave": {
+      "types": "./dist/shaders/Weave/index.d.ts",
+      "import": "./dist/shaders/Weave/index.js",
+      "require": "./dist/shaders/Weave/index.js"
+    },
+    "./WebcamTexture": {
+      "types": "./dist/shaders/WebcamTexture/index.d.ts",
+      "import": "./dist/shaders/WebcamTexture/index.js",
+      "require": "./dist/shaders/WebcamTexture/index.js"
+    },
+    "./Wool": {
+      "types": "./dist/shaders/Wool/index.d.ts",
+      "import": "./dist/shaders/Wool/index.js",
+      "require": "./dist/shaders/Wool/index.js"
+    },
+    "./WorleyNoise": {
+      "types": "./dist/shaders/WorleyNoise/index.d.ts",
+      "import": "./dist/shaders/WorleyNoise/index.js",
+      "require": "./dist/shaders/WorleyNoise/index.js"
+    },
+    "./ZoomBlur": {
+      "types": "./dist/shaders/ZoomBlur/index.d.ts",
+      "import": "./dist/shaders/ZoomBlur/index.js",
+      "require": "./dist/shaders/ZoomBlur/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "pnpm run clean && tsx scripts/generateRegistry.ts",
+    "build": "echo '⚙️  Building core package...' && tsc && vite build",
+    "postbuild": "tsx scripts/inject-jsdoc.ts && tsx scripts/docsManifest.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "lint:facade": "eslint src"
+  },
+  "dependencies": {
+    "colorjs.io": "^0.5.2",
+    "typegpu": "0.12.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.46.0",
+    "@webgpu/types": "^0.1.60",
+    "@vitest/ui": "^4.0.15",
+    "eslint": "^9.37.0",
+    "glob": "^13.0.1",
+    "happy-dom": "^20.0.11",
+    "sharp": "^0.34.5",
+    "tsx": "^4.19.2",
+    "unplugin-typegpu": "0.12.2",
+    "vite-plugin-externalize-deps": "^0.10.0",
+    "vitest": "^4.0.15",
+    "vite": "npm:rolldown-vite@7.1.16"
+  }
+}

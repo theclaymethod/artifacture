@@ -73,6 +73,7 @@
     "playwright-core": "1.60.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "shaders": "4.0.0",
     "shiki": "4.3.1",
     "tailwindcss": "^4.3.0",
     "three": "0.186.1",

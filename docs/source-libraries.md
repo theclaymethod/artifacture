@@ -29,6 +29,8 @@ Artifacture preserves original code and native rendering behind small local adap
 | [manim-community](https://github.com/ManimCommunity/manim) | `5dc0d3b8dfe23b1dbf2284cca111c5d146a44db0` | Actual pinned Community native engine with Typst, editable source/job and checked clips/stills. Distinct from the original 3b1b/ManimGL engine. |
 | [hyperframes](https://github.com/heygen-com/hyperframes) | `reference` | Original framework owns browser video timeline, media decoding and seeking, compile and encoding. Retain native composition source; do not label a palette or generic animation as the framework. |
 
+| [shaders](https://github.com/shader-effects-inc/shaders) | `4.0.0` / `935f71a7789f0e07811dfe6fd0d8f707e9848238` | Official native package installed automatically; 513 unchanged production-source/documentation files with MIT credit and hashes. Full original React exports. Plasma, SimplexNoise and Spiral have reversible, GPU-fenced time control and source-video export. Other components keep native live behavior. Platform presets/editor assets excluded. |
+
 ## Presentation and video boundary
 
 Original figures display with their source controller. Seekable native controllers receive explicit seconds through `SourceFigure`; native f-explainer models use a documented absolute-time shim. Source-video runs the unchanged Lemo frame renderer and a pinned standalone FFmpeg process. MP4, decoded stills, editable originals/adapters, source hashes and licenses form one portable asset directory. See [source fidelity](../plugins/visual-explainer/references/source-fidelity.md) and the [presentation example](../examples/visual-explainer-mdx/source-libraries.tsx).
@@ -36,3 +38,5 @@ Original figures display with their source controller. Seekable native controlle
 ## Verified scope
 
 All vendored manifest hashes were checked. All 27 Hairline figures were mounted, Diagram Design native/controlled playback inspected, and native f-explainer models rendered on the actual GPU. Native source-video produced 90-frame exploded-phone footage and decoded stills. Existing export, component-closure, type and browser checks cover the adapters. The full source inventory does not imply that every upstream film, provider workflow or excluded media asset was rendered. Chalkboarding typography requires its separately licensed font; original Diagram Design web-font links need a network connection.
+
+Shaders verification: all 513 vendored file hashes match. Plasma, SimplexNoise and Spiral returned to pixel-identical frames after `0 → 6 → 0` on the actual GPU. Native Plasma source-video exported 90 frames and three decoded stills. The full React library is available, but every upstream component/preset has not been individually reviewed.

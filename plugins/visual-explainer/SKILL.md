@@ -41,6 +41,7 @@ Completion requires editable source, a successful export, and evidence for every
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
 | slides or presentation | [slide-deck.md](cards/slide-deck.md) | For bespoke fixed-stage presentation chrome, read [deck-navigation-shell.md](references/deck-navigation-shell.md), then [slide-patterns.md](references/slide-patterns.md). |
 | interactive Hairline figure | [source-fidelity.md](references/source-fidelity.md) | Install the official 27-figure runtime, or use the bundled authoring skill for a new figure. |
+| Shader Effects WebGPU components, materials or shader video | [source-fidelity.md](references/source-fidelity.md) | Install `shaders`; use original React exports for live behavior or the native frame controller for supported explicit-time effects. |
 | chalkboard explanation or Mono Color editorial image | [source-fidelity.md](references/source-fidelity.md) | Follow the bundled source-specific workflow. |
 | motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
 | native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |

@@ -152,5 +152,14 @@
   "hyperframes": {
     "url": "https://github.com/heygen-com/hyperframes",
     "integration": "Original framework owns browser video timeline, media decoding and seeking, compile and encoding. Retain native composition source; do not label a palette or generic animation as the framework."
+  },
+  "shaders": {
+    "repository": "https://github.com/shader-effects-inc/shaders",
+    "revision": "935f71a7789f0e07811dfe6fd0d8f707e9848238",
+    "license": "MIT for the engine/components/bindings; separate platform/editor/preset terms",
+    "nativePackage": "shaders",
+    "nativeVersion": "4.0.0",
+    "bundledPath": "plugins/visual-explainer/vendor/shaders",
+    "integration": "Official shaders@4.0.0 installed automatically; 513 unchanged original software/documentation files with MIT notice and SHA-256 manifest. Full original React exports are available. NativeShader/createShaderSurface samples original Plasma, SimplexNoise and Spiral through the original frame-locked GPU API. Other components retain native live behavior. Platform presets/editor assets are excluded."
   }
 }
