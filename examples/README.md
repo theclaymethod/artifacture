@@ -35,7 +35,7 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 | Source | What to learn |
 |---|---|
-| [preset-gallery.mdx](visual-explainer-mdx/preset-gallery.mdx) | Compare Hairline, 3b1b, Algebrica, and Mono Color |
+| [preset-gallery.mdx](visual-explainer-mdx/preset-gallery.mdx) | Compare ISO, 3b1b, Algebrica, and Mono Color |
 | [showcase.tsx](visual-explainer-mdx/showcase.tsx) | Explore an agent workflow, calculated attention, a zero-value code fix, and a circle generating a wave |
 | [preset-artifact.tsx](visual-explainer-mdx/preset-artifact.tsx) | Theme one queue explanation with `?preset=algebrica` |
 | [presentation-deck.tsx](visual-explainer-mdx/presentation-deck.tsx) | Use a fixed stage with supporting detail |
@@ -60,7 +60,7 @@ For standalone HTML, use the [template guide](../plugins/visual-explainer/templa
 
 [component-catalog.tsx](visual-explainer-mdx/component-catalog.tsx) previews the actual
 copyable diagrams, scene builders, charts, code views, and interactions. Switch
-Hairline, 3b1b, Mono Color, and Algebrica; seek authored time directly.
+ISO, 3b1b, Mono Color, and Algebrica; seek authored time directly.
 
 ```bash
 npm run ve:export -- examples/visual-explainer-mdx/component-catalog.tsx --out dist/components.html
@@ -82,3 +82,5 @@ Supply an array with `id`, `title`, `description`, `file`, `poster`, `captions`,
 `duration` fields; media paths are relative to its `clips/` directory. The public preview uses
 four narrated excerpts from the rendered Artifacture films. Those media outputs
 are separate from the reusable source examples.
+
+The [ISO circuit](visual-explainer-mdx/iso.tsx) demonstrates live face details and Motionmaxxing curves. Its [shared source](visual-explainer-mdx/iso-source.ts) also supplies the [video sequence](visual-explainer-mdx/iso-video.tsx). Export the gallery with `npm run ve:export`; render the sequence with `artifacture fframes` or `npm run ve:graphic-video`. Place the encoded video beside the gallery as `iso-native.mp4`.

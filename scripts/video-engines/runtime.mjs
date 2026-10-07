@@ -84,7 +84,7 @@ export async function readyEngine(id) {
   if (receipt.engine !== id || receipt.version !== engine.version || !await exists(id === 'manim' ? runtime.python : runtime.executable)) throw new Error(`Native runtime is incomplete. Run artifacture engine setup ${id}.`);
   if (id === 'manim' && receipt.dependenciesSha256 !== hash(await fs.readFile(path.join(import.meta.dirname, 'manim.lock')))) throw new Error('Manim dependency lock changed. Run artifacture engine setup manim.');
   if (id === 'psychopomp') {
-    const theme = await nativeTheme(root, 'hairline');
+    const theme = await nativeTheme(root, 'iso');
     if (receipt.tokensSha256 !== theme.tokensSha256 || receipt.themeBridgeSha256 !== hash(await fs.readFile(path.join(runtime.source, 'crates/psychopomp-render/src/render/theme.rs')))) throw new Error('Psychopomp theme bridge changed. Run artifacture engine setup psychopomp.');
   }
   return { ...runtime, receipt };

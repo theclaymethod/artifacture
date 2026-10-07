@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ThreadPlot, validateThreadsSpec } from './lieflat-threads';
 import type { BarcodeSpec, BubbleMatrixSpec, LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec } from './lieflat-types';
 import './lieflat-charts.css';

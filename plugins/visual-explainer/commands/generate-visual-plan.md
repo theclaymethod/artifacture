@@ -23,6 +23,6 @@ Lead with a concrete current-versus-desired example. Include the sections the im
 - Existing checks and direct runtime validation that would establish success. Propose new test files only within the user's authorized scope.
 - Compatibility, performance, migration, or rollback notes that affect the design.
 
-Prefer prose for rationale, tables for comparable facts, and diagrams for relationships. Use shared components and the default Hairline preset. Do not add a document-type kicker, arbitrary focal statistic, metric tiles, or repeated cards around each paragraph.
+Prefer prose for rationale, tables for comparable facts, and diagrams for relationships. Use shared components and the default ISO preset. Do not add a document-type kicker, arbitrary focal statistic, metric tiles, or repeated cards around each paragraph.
 
 Write MDX/TSX beside `~/.agent/diagrams/<feature-name>-plan.html`, export using `SKILL.md`, and complete `references/verification.md`. Open the artifact and report the editable source, HTML, final report, and unresolved assumptions.

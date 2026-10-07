@@ -2,7 +2,7 @@
 
 Use fixed-canvas output when the user requests a poster, social image, infographic, or individual slide image. Responsive pages remain the normal reading format. Keep editable TSX and deliver HTML plus the requested raster output.
 
-Default to `hairline`; use `3b1b` for mathematical explanations. [Algebrica](algebrica.md) and [Mono Color](mono-color.md) are available when requested. Typography, palette, and composition follow the selected preset. A focal statistic, metadata strip, or display-font effect is never required.
+Default to `iso`; use `3b1b` for mathematical explanations. [Algebrica](algebrica.md) and [Mono Color](mono-color.md) are available when requested. Typography, palette, and composition follow the selected preset. A focal statistic, metadata strip, or display-font effect is never required.
 
 ## Select the renderer
 

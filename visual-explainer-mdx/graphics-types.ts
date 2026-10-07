@@ -1,13 +1,13 @@
 export type GraphicBounds = Readonly<{ x: number; y: number; width: number; height: number }>;
 export type GraphicPlacement = Readonly<{ scale: number; x: number; y: number }>;
 export type GraphicClip = Readonly<{ kind: 'empty' }> | Readonly<{ kind: 'rect'; bounds: GraphicBounds }>;
-const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true };
+const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, live: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true };
 export type GraphicPaint = keyof typeof graphicPaintRoles;
 const graphicFonts = { body: true, display: true, math: true, mono: true };
 const graphicStrokeRoles = { structure: true, detail: true, guide: true, data: true, active: true };
 export type GraphicFont = keyof typeof graphicFonts;
 export type GraphicStrokeRole = keyof typeof graphicStrokeRoles;
-type PrimitiveStyle = Readonly<{ fill?: GraphicPaint; stroke?: GraphicPaint; strokeWidth?: number; strokeRole?: GraphicStrokeRole; dash?: string; role?: 'node' | 'arrow-label-mask' }>;
+type PrimitiveStyle = Readonly<{ fill?: GraphicPaint; stroke?: GraphicPaint; strokeWidth?: number; strokeRole?: GraphicStrokeRole; glow?: boolean; dash?: string; role?: 'node' | 'arrow-label-mask' }>;
 export type GraphicPrimitive = PrimitiveStyle & (
   | Readonly<{ kind: 'rect'; x: number; y: number; width: number; height: number; radius?: number | 'node' }>
   | Readonly<{ kind: 'circle'; x: number; y: number; radius: number }>
@@ -89,6 +89,7 @@ function validatePrimitive(p: GraphicPrimitive, id: string) {
   if (!['rect', 'circle', 'polygon', 'path', 'line', 'text'].includes(p.kind)) fail(`Unsupported primitive ${p.kind}`);
   const finite = (values: readonly number[]) => { if (values.some((n) => !Number.isFinite(n))) fail('Non-finite geometry'); };
   if (p.strokeWidth !== undefined) finite([p.strokeWidth]);
+  if (p.glow !== undefined && p.glow !== true && p.glow !== false) fail('Glow must be boolean');
   if (p.strokeRole !== undefined && !Object.hasOwn(graphicStrokeRoles, p.strokeRole)) fail(`Unsupported stroke role ${p.strokeRole}`);
   for (const role of [p.fill, p.stroke]) if (role !== undefined && !Object.hasOwn(graphicPaintRoles, role)) fail(`Unsupported paint ${role}`);
   if (p.role !== undefined && p.role !== 'node' && p.role !== 'arrow-label-mask') fail(`Unsupported primitive role ${p.role}`);

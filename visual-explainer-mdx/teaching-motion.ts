@@ -6,8 +6,8 @@ export type RouteTimestamp = Readonly<{ at: number; distance: number; focus?: st
 export type FollowPathInput = Readonly<{
   duration: number; target: string; route: PreparedGraphicRoute; anchor?: GraphicPoint; trace?: string; initialFocus?: string;
   traversal:
-    | Readonly<{ mode: 'distance'; start: number; duration: number; from?: number; to?: number; ease?: 'linear' | 'smooth'; arrivalFocus?: string }>
-    | Readonly<{ mode: 'timestamp'; keys: readonly RouteTimestamp[]; ease?: 'linear' | 'smooth' }>;
+    | Readonly<{ mode: 'distance'; start: number; duration: number; from?: number; to?: number; ease?: GraphicMotionTrack['ease']; arrivalFocus?: string }>
+    | Readonly<{ mode: 'timestamp'; keys: readonly RouteTimestamp[]; ease?: GraphicMotionTrack['ease'] }>;
 }>;
 
 /** Compile distance traversal and exact arrival focus into the shared scene clock. */

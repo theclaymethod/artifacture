@@ -5,7 +5,7 @@ import { setupRuntime } from './setup-runtime.mjs';
 
 try {
   const command = process.argv[2];
-  const root = await setupRuntime({ install: ['path', 'export', 'export-static', 'video', 'chart', 'archify', 'verify', 'finalize', 'pdf', 'pr-lens', 'source-video'].includes(command) });
+  const root = await setupRuntime({ install: ['path', 'export', 'export-static', 'video', 'fframes', 'pr-lens', 'source-video', 'chart', 'archify', 'verify', 'finalize', 'pdf'].includes(command) });
   if (command === 'path') console.log(root);
   else await import(pathToFileURL(join(root, 'scripts/artifacture.mjs')).href);
 } catch (error) {

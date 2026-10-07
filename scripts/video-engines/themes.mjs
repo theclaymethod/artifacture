@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 
-const presets = ['hairline', '3b1b', 'mono-color', 'algebrica'];
+const presets = ['iso', '3b1b', 'mono-color', 'algebrica'];
 
 // Read the destination's existing tokens; native engines do not own another palette.
 export async function nativeTheme(root, name) {
@@ -44,16 +44,16 @@ export async function bridgePsychopompThemes(source, themes) {
     await writeFile(backup, value, { flag: 'wx' });
     return value;
   });
-  const variants = ['Hairline', 'ThreeBOneB', 'MonoColor', 'Algebrica'];
+  const variants = ['Iso', 'ThreeBOneB', 'MonoColor', 'Algebrica'];
   const rgb = hex => [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16));
   const changes = [
-    ['    Neutral,\n}', `    Neutral,\n    // Artifacture themes v1; paint-only adapter.\n    Hairline,\n    #[serde(rename = "3b1b")]\n    ThreeBOneB,\n    MonoColor,\n    Algebrica,\n}`],
+    ['    Neutral,\n}', `    Neutral,\n    // Artifacture themes v1; paint-only adapter.\n    Iso,\n    #[serde(rename = "3b1b")]\n    ThreeBOneB,\n    MonoColor,\n    Algebrica,\n}`],
     ['pub const ALL: [Self; 6]', 'pub const ALL: [Self; 10]'],
-    ['        Self::Neutral,\n    ];', '        Self::Neutral,\n        Self::Hairline, Self::ThreeBOneB, Self::MonoColor, Self::Algebrica,\n    ];'],
-    ['            Self::Neutral => "Clear Neutral",', '            Self::Neutral => "Clear Neutral",\n            Self::Hairline => "Hairline", Self::ThreeBOneB => "3b1b",\n            Self::MonoColor => "Mono Color", Self::Algebrica => "Algebrica",'],
-    ['            "neutral" => Ok(Self::Neutral),', '            "neutral" => Ok(Self::Neutral),\n            "hairline" => Ok(Self::Hairline), "3b1b" => Ok(Self::ThreeBOneB),\n            "mono-color" => Ok(Self::MonoColor), "algebrica" => Ok(Self::Algebrica),'],
+    ['        Self::Neutral,\n    ];', '        Self::Neutral,\n        Self::Iso, Self::ThreeBOneB, Self::MonoColor, Self::Algebrica,\n    ];'],
+    ['            Self::Neutral => "Clear Neutral",', '            Self::Neutral => "Clear Neutral",\n            Self::Iso => "ISO", Self::ThreeBOneB => "3b1b",\n            Self::MonoColor => "Mono Color", Self::Algebrica => "Algebrica",'],
+    ['            "neutral" => Ok(Self::Neutral),', '            "neutral" => Ok(Self::Neutral),\n            "iso" => Ok(Self::Iso), "3b1b" => Ok(Self::ThreeBOneB),\n            "mono-color" => Ok(Self::MonoColor), "algebrica" => Ok(Self::Algebrica),'],
     ['        match self {\n            Self::Original => Palette {', `        match self {\n${themes.map((theme, index) => `            Self::${variants[index]} => Palette {\n                background: ${JSON.stringify(rgb(theme.background))}, surface: ${JSON.stringify(rgb(theme.surface))},\n                raised: ${JSON.stringify(rgb(theme.detail))}, text: ${JSON.stringify(rgb(theme.text))}, muted: ${JSON.stringify(rgb(theme.ink))},\n                accent: ${JSON.stringify(rgb(theme.accent))}, keyword: ${JSON.stringify(rgb(theme.text))},\n                types: ${JSON.stringify(rgb(theme.text))}, string: ${JSON.stringify(rgb(theme.text))},\n            },`).join('\n')}\n            Self::Original => Palette {`],
-    ['        if self == Self::Neutral {', '        if matches!(self, Self::Hairline | Self::ThreeBOneB | Self::MonoColor | Self::Algebrica) {\n            return match tone {\n                Tone::Plain => palette.text, Tone::Muted => palette.muted,\n                _ => palette.accent,\n            };\n        }\n        if self == Self::Neutral {'],
+    ['        if self == Self::Neutral {', '        if matches!(self, Self::Iso | Self::ThreeBOneB | Self::MonoColor | Self::Algebrica) {\n            return match tone {\n                Tone::Plain => palette.text, Tone::Muted => palette.muted,\n                _ => palette.accent,\n            };\n        }\n        if self == Self::Neutral {'],
   ];
   let patched = original;
   for (const [before, after] of changes) {

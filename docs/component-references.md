@@ -1,6 +1,6 @@
 # Component references
 
-The [source inventory](source-libraries.md) records the originals now installed or vendored, including their licenses and runtime boundaries. The additional references below guide editable blocks; they are not claims that every candidate API is installed. Hairline remains the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
+The [source inventory](source-libraries.md) records the originals now installed or vendored, including their licenses and runtime boundaries. The additional references below guide editable blocks; they are not claims that every candidate API is installed. ISO is the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
 
 | Reference | Useful parts | Local fit |
 | --- | --- | --- |
@@ -14,10 +14,11 @@ The [source inventory](source-libraries.md) records the originals now installed 
 | [React Flow sub-flows](https://reactflow.dev/learn/layouting/sub-flows) | Parent-relative placement and bounded child groups | Architecture diagrams with nested systems. Existing scene composition already scopes object IDs and fits child scenes into frames. |
 | [shadcn registry items](https://ui.shadcn.com/docs/registry/registry-item-json) | Source files, registry dependencies, npm dependencies, and destination paths | The source-copy CLI and new workspace setup. Consumers own the copied code and import local modules. |
 | [Motion Engineering by rari](https://x.com/0xwhrrari/status/2105643919119696297) | Seekable frames, explicit story states, a shared timeline, and frame review | Workspace motion uses the existing finite sampler. A preview can jump directly to any authored time without replaying earlier frames. |
+| [Punctum](https://github.com/sundyme/punctum) | Dot-matrix glyph data, size/shape axes, character rolls, column scans, event-driven sound, and aspect-specific film layouts | Implemented [dot scenes, character rolls, column scans with generated WAV, and variable-font readouts](punctum.md). Shared scene/clock APIs and full OFL notices; the Premiere GPU renderer remains a candidate. [Pinned source audit](research/punctum-2026-10-05.md). |
 
 ## Shared design rules
 
-Each block owns geometry or behavior. Theme tokens own color, fonts, and stroke roles. Hairline diagrams and charts use thin structural and detail strokes, with one contrasting accent for the current focus. Mathematical scenes use 3b1b's black background, readable math, and motion that demonstrates a causal step.
+Each block owns geometry or behavior. Theme tokens own color, fonts, and stroke roles. ISO diagrams and charts use thin structural and detail strokes, with one contrasting accent for the current focus. Mathematical scenes use 3b1b's black background, readable math, and motion that demonstrates a causal step.
 
 A poster samples a scene at a chosen state. A diagram explains relationships in that scene. Slides frame and sequence the scene, and video advances the same sequence clock. Source copies keep those levels connected without requiring the full MDX renderer.
 

@@ -126,14 +126,8 @@ async function assertStaticGenerated(filePath, bundled = false) {
   if (failures.length) throw new Error(`${filePath}: ${failures.join(', ')}`);
 }
 
-// Roster-sync guard: components.tsx's named exports, integrity.mjs's
-// sharedComponents set, and the progressively disclosed component reference
-// are hand-maintained lists with no automatic sync between them. A component
-// added to one but not another silently produces false integrity failures or
-// stale docs. This does not derive one list from another — deriving
-// integrity.mjs's set from the module at runtime means importing TSX into a
-// plain-node context, which is messier than a guard (deferred; see plan
-// 008's maintenance notes) — it only asserts the lists still agree.
+// Match the public component exports, the integrity allowlist and the reference.
+// Read TSX source so this plain-Node check never executes component modules.
 async function assertRosterInSync() {
   const componentsSource = await fs.readFile(path.resolve(repoRoot, 'visual-explainer-mdx/components.tsx'), 'utf8');
   const exported = new Set([...componentsSource.matchAll(/^export function (\w+)/gm)].map((match) => match[1]));

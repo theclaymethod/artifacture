@@ -161,5 +161,25 @@
     "nativeVersion": "4.0.0",
     "bundledPath": "plugins/visual-explainer/vendor/shaders",
     "integration": "Official shaders@4.0.0 installed automatically; 513 unchanged original software/documentation files with MIT notice and SHA-256 manifest. Full original React exports are available. NativeShader/createShaderSurface samples original Plasma, SimplexNoise and Spiral through the original frame-locked GPU API. Other components retain native live behavior. Platform presets/editor assets are excluded."
+  },
+  "iso-figure": {
+    "repository": "https://github.com/MrBongoC/ai-iso-skill",
+    "revision": "44b4da7714148eef547cc1b102e433472dfe3531",
+    "license": "MIT",
+    "integration": "30-degree projection adapted into original shared rounded face primitives; no gallery shell, pointer clock or ornamental plates copied. ISO-FIGURE-LICENSE accompanies the copyable leaf."
+  },
+  "iso-glow": {
+    "url": "https://isoglow.dev/",
+    "archive": "https://isoglow.dev/iso-glow.zip",
+    "retrieved": "2026-10-07",
+    "sha256": "fe2d14a964609439f682a693c79d62e3813ad3f42ddecfe73fcd7b2629a19720",
+    "license": "MIT",
+    "integration": "Reference for live-part lighting within the ISO theme. One accent, scoped blur and face-local live details; no pointer runtime or example assets copied. ISO-GLOW-LICENSE accompanies the copyable leaf."
+  },
+  "motionmaxxing": {
+    "repository": "https://github.com/Tejashmakwana/motionmaxxing",
+    "revision": "8c8ec0f2a6f6c9a0da15cd24f7b1298ab298368c",
+    "license": "Apache-2.0",
+    "integration": "Eight monotone curves adapted from runtime/motion.js into the existing absolute-time sampler. No playback runtime, reference footage or third-party bundled libraries copied. MOTIONMAXXING-LICENSE and MOTIONMAXXING-NOTICE accompany the copyable leaf."
   }
 }

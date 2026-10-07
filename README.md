@@ -61,7 +61,7 @@ cd my-explainer
 npm run dev
 ```
 
-Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](https://github.com/theclaymethod/artifacture/blob/main/docs/workspaces.md) for the source ownership model and [installation](https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md) for other agent harnesses.
+Use Node 22.12 or newer. The starter includes a responsive ISO composition and direct motion seeking. See [workspaces](https://github.com/theclaymethod/artifacture/blob/main/docs/workspaces.md) for the source ownership model and [installation](https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md) for other agent harnesses.
 
 Discover available blocks before authoring:
 
@@ -178,9 +178,11 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 ## Shared visual defaults
 
-The [default explainer theme](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
+The [default explainer theme](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/default-explainer-theme.md) uses ISO isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
 
-Typography, spacing, and colors come from [shared theme tokens](https://github.com/theclaymethod/artifacture/blob/main/docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
+ISO is the default shared theme (formerly Hairline): fine neutral linework, reusable isometric face geometry, one live accent and restrained lighting. Copy `iso` and `motion-eases` with `artifacture add iso motion-eases`; Motionmaxxing landing/exit curves also work directly on existing motion tracks. See the [ISO guide](plugins/visual-explainer/references/iso.md).
+
+Typography, spacing, and colors come from [shared theme tokens](https://github.com/theclaymethod/artifacture/blob/main/docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. ISO replaces the Lieflat palette while preserving its chart encodings.
 
 | Algebrica | Mono Color |
 |---|---|
@@ -195,6 +197,8 @@ The complete pinned [Hairline skill and interactive runtime](https://github.com/
 The [shared graphics architecture](https://github.com/theclaymethod/artifacture/blob/main/docs/graphics-and-video.md) supports diagrams and posters. Diagram scenes compose into slides, and complete slide scenes sequence into video. Collections add instructional modes, canonical subjects and terms, pinned evidence, and episode handoffs. Start with the [collection guide](https://github.com/theclaymethod/artifacture/blob/main/docs/video-collections.md), then [iterate on the script and storyboard](https://github.com/theclaymethod/artifacture/blob/main/docs/video-script-iteration.md). Compare [animation engine options](https://github.com/theclaymethod/artifacture/blob/main/docs/animation-engines.md) before choosing a native renderer.
 
 `ve:graphic-video` exports HTML plus a local runtime JavaScript file. Keep them together. Canonical web fonts require network access in the raw preview; HyperFrames compile caches and embeds them. Collection scaffolding produces an authoring package. Rendered checks and narrative review determine whether a video is complete.
+
+For an experimental native GPU alternative on macOS, `artifacture fframes <video-source.tsx> --out <new-project-directory>` exports the same shared sequence as a deduplicated SVG bank and a pinned FFrames Rust project. Run its `inspect`, `strip`, and `render` commands before accepting the output. The current bridge is silent and vector-only; native header layout requires explicit line breaks. See the [FFrames guide](plugins/visual-explainer/references/fframes.md).
 
 ## Export, check, revise
 

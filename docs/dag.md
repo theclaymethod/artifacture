@@ -31,7 +31,7 @@ const motion = createDagReveal(dag, 0.5, 1);
 <GraphicCanvas scene={createDagDiagram(input, 'vertical')} />;
 ```
 
-`prepareDag` validates and snapshots the input, returns a stable topological order, edges, a labeled `GraphicScene`, and the matching label-free minimap. The d3-dag 1.2.2 grid layout puts each node on its own row, preserving multi-parent merges and disconnected roots. Stable author order resolves ties between ready nodes; nodes may be supplied before their parents. Edge identities derive from their endpoint IDs, independent of array position. All geometry uses the existing SVG primitive renderer and theme roles. Hairline retains thin strokes and a single accent; the same scenes work in 3b1b, Mono Color and Algebrica.
+`prepareDag` validates and snapshots the input, returns a stable topological order, edges, a labeled `GraphicScene`, and the matching label-free minimap. The d3-dag 1.2.2 grid layout puts each node on its own row, preserving multi-parent merges and disconnected roots. Stable author order resolves ties between ready nodes; nodes may be supplied before their parents. Edge identities derive from their endpoint IDs, independent of array position. All geometry uses the existing SVG primitive renderer and theme roles. ISO retains thin strokes and a single accent; the same scenes work in 3b1b, Mono Color and Algebrica.
 
 `dagNeighborhood` returns related IDs and edges. `focusDagScene` produces a frozen focused pose, with an optional minimap view. `createDagReveal` returns ordinary finite `GraphicMotion` data. It introduces no renderer or animation clock: use `sampleScene`, composition, slides and video as with other blocks. The interactive list is a page control; use the labeled scene for a static poster or authored video.
 

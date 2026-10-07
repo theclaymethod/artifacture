@@ -75,6 +75,7 @@
     "react-dom": "19.2.7",
     "shaders": "4.0.0",
     "shiki": "4.3.1",
+    "svg-path-properties": "2.1.0",
     "tailwindcss": "^4.3.0",
     "three": "0.186.1",
     "vite": "^8.0.12"

@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import { useId } from 'react';
 import { validateNativeClipAsset, type NativeClipAsset } from './native-asset';
 export { validateNativeClipAsset, type NativeClipAsset } from './native-asset';
 export type NativeClipPlacement = Readonly<{ start: number; duration: number; mediaStart?: number; track?: number }>;

@@ -185,7 +185,7 @@ export function createMotionReview(timing: MotionReviewTiming = motionReviewTimi
   });
   const slide = createSlideScene({
     id: 'keep-zero', title: 'How zero becomes one.', explanation: 'An empty cart should stay empty.',
-    graphic: composition.scene, width: 1920, height: 1080, preset: 'hairline', appearance: 'light',
+    graphic: composition.scene, width: 1920, height: 1080, preset: 'iso', appearance: 'light',
   });
   const sequence = sequenceSlides('artifacture-motion-review', [{ slide, motion: composition.motion, duration }]);
   const moments = { cacheArrival, handlerArrival, beforeSave, editStart, editEnd, fixedRuleStart, replayCache, replayHandler, storageArrival, missingExample };
@@ -196,15 +196,15 @@ export const review = createMotionReview();
 export const narrowReview = createMotionReview(motionReviewTiming, true);
 export const sequence = review.sequence;
 
-type Theme = 'hairline' | '3b1b' | 'mono-color' | 'algebrica';
+type Theme = 'iso' | '3b1b' | 'mono-color' | 'algebrica';
 const themes: readonly Readonly<{ id: Theme; label: string }>[] = [
-  { id: 'hairline', label: 'Hairline' }, { id: '3b1b', label: '3b1b' },
+  { id: 'iso', label: 'ISO' }, { id: '3b1b', label: '3b1b' },
   { id: 'mono-color', label: 'Mono Color' }, { id: 'algebrica', label: 'Algebrica' },
 ];
 
 export default function MotionReview() {
   const [time, setTime] = useState(0);
-  const [theme, setTheme] = useState<Theme>('hairline');
+  const [theme, setTheme] = useState<Theme>('iso');
   const [narrow, setNarrow] = useState(false);
   useEffect(() => {
     const media = window.matchMedia('(max-width: 760px)');

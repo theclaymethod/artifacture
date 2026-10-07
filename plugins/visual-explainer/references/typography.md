@@ -11,3 +11,5 @@ Adapted from [Pierrick Calvez’s *A Five-Minute Guide to Better Typography*](ht
 - Use tabular figures and right alignment for comparable numeric columns. Keep units explicit and precision consistent.
 
 Review desktop and mobile with fonts loaded. Remove content before shrinking it below the readable floor.
+
+[Punctum](../../../docs/research/punctum-2026-10-05.md) is an optional reference for short dot-matrix readouts and glyph explanations. Its size and shape axes suit authored display changes; keep body text, code, captions, and mathematics on the existing preset font roles. The font and glyph sources carry OFL terms separately from the film tooling's MIT license. Copy the canonical variable font with `artifacture add punctum-readout`, and await `awaitPunctumFont(text)` before capture. Dot scenes, character rolls, and column scans use the same glyph data through the shared scene/motion APIs. See [the display contracts](../../../docs/punctum.md).

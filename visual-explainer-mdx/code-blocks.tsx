@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { alignDiffRows, diffLines } from './diff-lines.mjs';
+import type { DiffRow } from './diff-lines.mjs';
 import './code-blocks.css';
+
+export type { DiffRow } from './diff-lines.mjs';
 
 export type CodeBlockProps = {
   code: string;
@@ -8,14 +12,6 @@ export type CodeBlockProps = {
   highlightLines?: number[];
   annotations?: Array<{ line: number; note: string }>;
   diff?: 'unified';
-  html?: string;
-};
-
-export type DiffRow = {
-  kind: 'context' | 'add' | 'remove' | 'hunk';
-  oldNo?: number;
-  newNo?: number;
-  code: string;
   html?: string;
 };
 
@@ -111,8 +107,9 @@ function UnifiedDiffTable({ rows }: { rows: DiffRow[] }) {
 }
 
 function SplitDiffTable({ rows }: { rows: DiffRow[] }) {
-  const left = rows.filter((row) => row.kind !== 'add');
-  const right = rows.filter((row) => row.kind !== 'remove');
+  const aligned = alignDiffRows(rows);
+  const left = aligned.map(row => row.kind === 'hunk' ? { kind: 'hunk' as const, code: row.code } : row.before);
+  const right = aligned.map(row => row.kind === 'hunk' ? { kind: 'hunk' as const, code: row.code } : row.after);
   return (
     <div className="ve-diff-split ve-scroll-x">
       <DiffSide title="Before" rows={left} side="old" />
@@ -121,17 +118,17 @@ function SplitDiffTable({ rows }: { rows: DiffRow[] }) {
   );
 }
 
-function DiffSide({ title, rows, side }: { title: string; rows: DiffRow[]; side: 'old' | 'new' }) {
+function DiffSide({ title, rows, side }: { title: string; rows: (DiffRow | undefined)[]; side: 'old' | 'new' }) {
   return (
     <div className="ve-diff-side">
       <div className="ve-diff-side-title">{title}</div>
       <table className="ve-diff-table">
         <tbody>
           {rows.map((row, index) => (
-            <tr data-ve-diff-kind={row.kind} key={`${side}-${row.oldNo ?? 'x'}-${row.newNo ?? 'x'}-${index}`}>
-              <td className="ve-diff-gutter">{side === 'old' ? row.oldNo ?? '' : row.newNo ?? ''}</td>
-              <td className="ve-diff-mark">{diffGlyph(row.kind)}</td>
-              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row.html ?? escapeHtml(row.code) }} />
+            <tr data-ve-diff-kind={row?.kind ?? 'gap'} key={`${side}-${index}`}>
+              <td className="ve-diff-gutter">{side === 'old' ? row?.oldNo ?? '' : row?.newNo ?? ''}</td>
+              <td className="ve-diff-mark">{row ? diffGlyph(row.kind) : ''}</td>
+              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row ? row.html ?? escapeHtml(row.code) : '&nbsp;' }} />
             </tr>
           ))}
         </tbody>
@@ -337,34 +334,6 @@ function parseUnifiedDiff(patch: string): DiffRow[] {
       newLine += 1;
     } else if (line.startsWith('\\ No newline')) {
       continue;
-    }
-  }
-  return rows;
-}
-
-function diffLines(before: string, after: string): DiffRow[] {
-  const a = before.split(/\r?\n/);
-  const b = after.split(/\r?\n/);
-  const table = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i -= 1) {
-    for (let j = b.length - 1; j >= 0; j -= 1) {
-      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
-    }
-  }
-  const rows: DiffRow[] = [{ kind: 'hunk', code: `@@ -1,${a.length} +1,${b.length} @@` }];
-  let i = 0;
-  let j = 0;
-  while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) {
-      rows.push({ kind: 'context', oldNo: i + 1, newNo: j + 1, code: a[i] });
-      i += 1;
-      j += 1;
-    } else if (j < b.length && (i === a.length || table[i][j + 1] >= table[i + 1][j])) {
-      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
-      j += 1;
-    } else if (i < a.length) {
-      rows.push({ kind: 'remove', oldNo: i + 1, code: a[i] });
-      i += 1;
     }
   }
   return rows;

@@ -8,7 +8,7 @@ import { NativeShader } from '../../visual-explainer-mdx/native-shader';
 export default function SourceLibraries() {
   const [seconds, setSeconds] = useState(0);
   const clock = <label style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 26 }}>Time <input aria-label="Source time" type="range" min={0} max={6} step={0.01} value={seconds} onChange={event => setSeconds(Number(event.target.value))} style={{ width: 480 }} />{seconds.toFixed(2)} s</label>;
-  return <PresentationDeck title="Original figures, shared presentation controls" preset="hairline">
+  return <PresentationDeck title="Original figures, shared presentation controls" preset="iso">
     <PresentationSlide shortTitle="Exploded view" tone="light">
       <div style={{ display: 'grid', gridTemplateRows: '1fr auto', gap: 20 }}>
         <DiagramDesignFigure example="exploded-phone-animated" seconds={seconds} height={840} />

@@ -15,7 +15,7 @@ const [command, ...args] = process.argv.slice(2);
 const execute = promisify(execFile);
 
 function replaceOnce(source, fragment, replacement) {
-  if (source.split(fragment).length !== 2) throw new Error('Pinned Archify template does not match the Hairline adapter.');
+  if (source.split(fragment).length !== 2) throw new Error('Pinned Archify template does not match the ISO adapter.');
   return source.replace(fragment, replacement);
 }
 
@@ -48,10 +48,10 @@ async function applyTheme() {
         editorial: viewerText('viewer.preset.editorial')
       };`,
     `var LABELS = {
-        classic: 'Hairline',
+        classic: 'ISO',
         'signal-flow': viewerText('viewer.preset.flow.short')
       };`);
-  template = replaceOnce(template, '{{i18n:viewer.preset.classic}}', 'Hairline');
+  template = replaceOnce(template, '{{i18n:viewer.preset.classic}}', 'ISO');
   template = replaceOnce(template, '{{i18n:viewer.preset.classic.hint}}', 'Fine gray strokes on white');
   for (const preset of ['blueprint', 'editorial']) {
     const option = new RegExp(`        <button class="preset-option" data-preset-value="${preset}"[\\s\\S]*?</button>\\n`, 'g');
@@ -90,7 +90,7 @@ async function rejectRetiredSources() {
     // Leave malformed input and path diagnostics to the upstream CLI.
     try { source = JSON.parse(await readFile(input, 'utf8')); } catch { continue; }
     if (['blueprint', 'editorial'].includes(source?.meta?.visual_preset)) {
-      throw new Error(`Archify preset "${source.meta.visual_preset}" is retired. Set meta.visual_preset to "classic" for Hairline or "signal-flow".`);
+      throw new Error(`Archify preset "${source.meta.visual_preset}" is retired. Set meta.visual_preset to "classic" for ISO or "signal-flow".`);
     }
   }
 }

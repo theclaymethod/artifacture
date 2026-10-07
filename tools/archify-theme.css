@@ -1,4 +1,4 @@
-/* Hairline treatment of Archify's schema-compatible Classic preset. */
+/* ISO treatment of Archify's schema-compatible Classic preset. */
 [data-preset="classic"][data-theme="light"] {
   --bg: #fff; --text: #202127; --text-muted: #5f626a; --text-dim: #5f626a;
   --text-faint: #5f626a; --grid: transparent; --panel: #fff;

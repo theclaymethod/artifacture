@@ -17,7 +17,7 @@ const diagram = createDiagramScene({
 const slide = createSlideScene({
 	id: 'build-slide', title: 'Keep the source editable',
 	explanation: 'The source remains the same when the output format changes.',
-	graphic: diagram, preset: 'hairline', appearance: 'light',
+	graphic: diagram, preset: 'iso', appearance: 'light',
 });
 const motion = defineGraphicMotion(diagram, {
 	duration: 12,
@@ -68,6 +68,10 @@ Each instance uses the composition's clock starting at zero. Its own motion can 
 
 The compositor clones and deeply freezes its output. It introduces no renderer, wall clock, callback, or React payload. The [architecture and cleanup plan](plans/reusable-graphics-blocks.md) records the chosen boundary and remaining migrations.
 
+## Reuse ISO geometry
+
+`createIsoScene` projects rounded top/front/side faces into this same primitive model. Face-local details can declare `live: true`; they use the `live` paint role and a scoped SVG halo when the owning part is highlighted. Other face marks stay neutral. `glow: true` is also available on authored primitives. See the [ISO guide](../plugins/visual-explainer/references/iso.md) for geometry, licensing and Motionmaxxing easing options.
+
 ## Reuse native Hairline solids
 
 `createHairlineScene` accepts the unchanged engine's `HL.prism` path pairs. Author rounded geometry with its public `Cam`, `rings`, `prism`, and `fillet` functions. Pass solids in their composed back-to-front order; keep physical labels outside the figure.
@@ -100,7 +104,18 @@ npm run ve:graphic-video -- examples/visual-explainer-mdx/math-activation.tsx --
 
 The video source exports `sequence`. The exporter validates every slide and motion track, resolves all sequence presets, renders the first frame, and compiles one browser runtime with Vite. Its paused GSAP timeline registers synchronously under the composition ID. Every update calls the same sampler and React graphics renderer. GSAP is pinned in the package dependencies.
 
-A video export consists of HTML plus a local content-hashed JavaScript asset. Keep those files together when you move or serve the output. Raw exports preserve the shared Google Fonts stylesheet and require network access for the named web fonts. System fallbacks remain available when that request fails. HyperFrames compilation caches the requested fonts for compiled playback. This does not make the raw export wholly offline.
+Attach an actual narration recording after retiming the sequence to its measured speech:
+
+```bash
+artifacture video /absolute/film.tsx --out /absolute/video/index.html \
+  --audio /absolute/narration.wav --audio-start 0.6
+```
+
+`--audio` accepts WAV, MP3, M4A, OGG, or FLAC. `ffprobe` measures the audio stream. The exporter copies a content-hashed asset and adds an ID-bearing audio element with explicit start, duration, volume, and track. A recording that ends beyond the finite sequence is rejected; align and retime the source first. Up to one millisecond of duration-rounding tolerance is allowed. HyperFrames owns playback and mixing. Speech generation, alignment, captions, and MP4 encoding remain separate production steps. Silent exports need no FFmpeg installation.
+
+A video export consists of HTML plus a local content-hashed JavaScript asset and any attached narration. Keep those files together when you move or serve the output. Raw exports preserve the shared Google Fonts stylesheet and require network access for the named web fonts. System fallbacks remain available when that request fails. HyperFrames compilation caches the requested fonts for compiled playback. This does not make the raw export wholly offline.
+
+The bundled skill's [dynamic authoring guide](../plugins/visual-explainer/references/dynamic-video-authoring.md) maps story events to actual primitives and explains narration alignment, native clips, continuity, and encoded-film review. The smaller `video-longform.tsx` example now reveals relationships and transfers focus on authored time; `motion-review.tsx` demonstrates a continuous request, source correction, and replay.
 
 Use [shared themes](shared-themes.md) for palettes across diagrams, posters, slides, and videos. `preset` selects the palette. `appearance` selects light or dark independently. Explicit built-in presets and registry brands remain supported. The motion stylesheet supplies stage and illustration rules, rather than another palette.
 

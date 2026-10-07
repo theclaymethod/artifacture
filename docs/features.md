@@ -4,7 +4,7 @@ Artifacture exports editable source as standalone HTML. Readers need a browser; 
 
 ## Data stories
 
-New React workspaces can start with `npm run components -- init <directory>`. The [workspace guide](workspaces.md) covers editable source copies, default Hairline motion, and adding more blocks.
+New React workspaces can start with `npm run components -- init <directory>`. The [workspace guide](workspaces.md) covers editable source copies, default ISO motion, and adding more blocks.
 
 `LieflatChart` provides five forms: countable units, rung bars, dated activity, bubble matrices, and individual paths. Several figures can use the same records. The [repair example](../examples/visual-explainer-mdx/data-charts.mdx) follows 72 illustrative devices from intake to outcome.
 
@@ -33,7 +33,7 @@ npm run ve:archify -- guide "API request with cache fallback" --json
 npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifacture.architecture.json dist/architecture.html --json
 ```
 
-Keep the JSON beside the exported HTML. The wrapper defaults to showcase quality and preserves Archify's diagnostics and atomic delivery. Set `meta.visual_preset` to `"classic"` for Hairline's fine gray geometry on white; the viewer calls this schema-compatible treatment Hairline and also offers Signal Flow. Blueprint and Editorial are retired. Inspect screenshots after delivery; layout checks do not establish a live system's behavior. [Archify guide](../plugins/visual-explainer/references/archify.md).
+Keep the JSON beside the exported HTML. The wrapper defaults to showcase quality and preserves Archify's diagnostics and atomic delivery. Set `meta.visual_preset` to `"classic"` for ISO's fine gray geometry on white; the viewer calls this schema-compatible treatment ISO and also offers Signal Flow. Blueprint and Editorial are retired. Inspect screenshots after delivery; layout checks do not establish a live system's behavior. [Archify guide](../plugins/visual-explainer/references/archify.md).
 
 The [diagram guide](../plugins/visual-explainer/references/diagram-design.md) covers 27 visual types and seven semantic patterns, including custom SVG and Mermaid. Split a crowded figure into overview and detail. Custom SVG follows the [geometry contract](../plugins/visual-explainer/references/diagrams-svg.md) and [host tokens](../plugins/visual-explainer/references/diagram-tokens.md).
 
@@ -47,15 +47,15 @@ An explicit `--pdf` request adds a PDF captured from the rendered deck. Keep the
 
 ## Themes
 
-Hairline is the default host palette and typography for diagrams, pages, posters, slides, and video. Use the primary `3b1b` preset for mathematical mechanisms and derivations. Lieflat's countable chart geometry works inside either host; selecting a palette does not construct that geometry. See [shared themes](shared-themes.md) for paint and appearance contracts and [source provenance](../tools/visual-sources.json) for references and licenses.
+ISO is the default host palette and typography for diagrams, pages, posters, slides, and video. Use the primary `3b1b` preset for mathematical mechanisms and derivations. Lieflat's countable chart geometry works inside either host; selecting a palette does not construct that geometry. See [shared themes](shared-themes.md) for paint and appearance contracts and [source provenance](../tools/visual-sources.json) for references and licenses.
 
 ```tsx
-<ExplainerShell preset="hairline" title="Request handling" />
+<ExplainerShell preset="iso" title="Request handling" />
 <SlideDeck preset="3b1b" appearance="dark" orientation="horizontal" title="A proof in steps" />
-<PosterCanvas preset="hairline" title="Mouse repair" />
+<PosterCanvas preset="iso" title="Mouse repair" />
 ```
 
-The retained alternatives are `algebrica` and `mono-color`, with `mono-industrial` optional and `custom` for local tokens. Algebrica provides serif reading text; Mono Color uses limited inks and asymmetric composition. Hairline replaces the Lieflat palette without changing its five chart encodings. OA Design, Nothing, Blueprint, Editorial, Paper & Ink, and Terminal palettes are retired; their authored slugs now fail with migration guidance. New brand slugs can resolve through the [external design-system registry](design-systems.md).
+The retained alternatives are `algebrica` and `mono-color`, with `mono-industrial` optional and `custom` for local tokens. Algebrica provides serif reading text; Mono Color uses limited inks and asymmetric composition. ISO replaces the Lieflat palette without changing its five chart encodings. OA Design, Nothing, Blueprint, Editorial, Paper & Ink, and Terminal palettes are retired; their authored slugs now fail with migration guidance. New brand slugs can resolve through the [external design-system registry](design-systems.md).
 
 Keep metadata that explains state, ownership, provenance, sequence, or navigation. Remove decorative numbers, badges, kickers, metric tiles, and repeated captions.
 

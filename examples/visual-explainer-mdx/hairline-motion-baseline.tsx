@@ -1,6 +1,6 @@
 import React from 'react';
 import themes from '../../visual-explainer-mdx/themes.css?raw';
-import theme from '../../plugins/visual-explainer/templates/hairline-motion-theme.css?raw';
+import theme from '../../plugins/visual-explainer/templates/iso-motion-theme.css?raw';
 
 const css = `${themes}
 ${theme}
@@ -80,7 +80,7 @@ export default function HairlineMotionBaseline() {
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" />
       </head>
       <body>
-        <main id="root" className="motion-stage" data-ve-preset="hairline" data-ve-appearance={themeName} data-motion-theme={themeName}
+        <main id="root" className="motion-stage" data-ve-preset="iso" data-ve-appearance={themeName} data-motion-theme={themeName}
           data-composition-id="hairline-motion" data-width="1920" data-height="1080"
           data-start="0" data-duration="16">
             <header className="statement" id="statement">

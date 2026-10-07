@@ -1,7 +1,8 @@
 import React from 'react';
-import { createDiagramScene, createSlideScene, GraphicVideo, sequenceSlides } from '../../visual-explainer-mdx/components';
+import { createDiagramScene, createSlideScene, defineGraphicMotion, GraphicVideo, sequenceSlides, type GraphicScene } from '../../visual-explainer-mdx/components';
+import { focusInOrder } from '../../visual-explainer-mdx/teaching-motion';
 import themes from '../../visual-explainer-mdx/themes.css?raw';
-import motionTheme from '../../plugins/visual-explainer/templates/hairline-motion-theme.css?raw';
+import motionTheme from '../../plugins/visual-explainer/templates/iso-motion-theme.css?raw';
 
 export const retryDiagrams = {
   identity: createDiagramScene({
@@ -56,13 +57,13 @@ export const retryDiagrams = {
 
 export const retrySlides = [
   createSlideScene({
-    id: 'preserve-operation-identity', title: 'Preserve the operation identity across retries.',
+    id: 'preserve-operation-identity', title: 'Preserve the operation identity\nacross retries.',
     explanation: 'Keep the same job identity. A timeout may have hidden a successful side effect.',
     graphic: retryDiagrams.identity,
   }),
   createSlideScene({
     id: 'classify-before-retrying', title: 'Classify the failure before retrying.',
-    explanation: 'Wait before retrying temporary failures within a fixed attempt budget. Retain permanent failures; another identical attempt cannot repair invalid input.',
+    explanation: 'Wait before retrying temporary failures within a fixed attempt budget.\nRetain permanent failures; another identical attempt cannot repair invalid input.',
     graphic: retryDiagrams.classification,
   }),
   createSlideScene({
@@ -72,8 +73,25 @@ export const retrySlides = [
   }),
 ];
 
-// Each beat holds for eight seconds; shared sequences cut at their boundaries.
-export const sequence = sequenceSlides('ve-mdx-longform', retrySlides.map((slide) => ({ slide, duration: 8 })));
+// Nodes establish the map; relationships draw in causal order and focus follows.
+const choreography = [
+  { nodes: ['operation', 'first-attempt', 'effect', 'retry'], edges: ['first-request', 'first-effect', 'retry-request', 'same-operation'] },
+  { nodes: ['failure', 'temporary', 'retry', 'permanent', 'retain'], edges: ['temporary-failure', 'wait-retry', 'permanent-failure', 'retain-error'] },
+  { nodes: ['failed-job', 'quarantine', 'repair', 'replay'], edges: ['retain', 'inspect', 'replay-repaired'] },
+];
+export const beatDuration = 12;
+function stageDiagram(scene: GraphicScene, order: typeof choreography[number]) {
+  const arrivals = new Map(order.edges.map((id, index) => [`edge:${id}`, index * 2 + 2.6] as const));
+  const tracks = scene.objects.flatMap(object => {
+    if (object.kind === 'node') return [];
+    const start = arrivals.get(object.kind === 'edge-label' ? object.id.replace(/:label$/, '') : object.id);
+    if (start === undefined) throw new Error(`Missing authored arrival for ${object.id}`);
+    return [{ target: object.id, property: object.kind === 'edge' ? 'reveal' as const : 'opacity' as const, start, duration: .45, from: 0, to: 1, ease: 'smooth' as const }];
+  });
+  const focus = focusInOrder(scene, { duration: beatDuration, targets: order.nodes.map(id => `node:${id}`), start: .2, step: 2, transition: .3 });
+  return defineGraphicMotion(scene, { duration: beatDuration, tracks: [...tracks, ...focus.tracks] });
+}
+export const sequence = sequenceSlides('ve-mdx-longform', retrySlides.map((slide, index) => ({ slide, motion: stageDiagram(slide.graphic, choreography[index]), duration: beatDuration })));
 
 export default function VideoLongform() {
   return <><style>{themes + motionTheme}</style><GraphicVideo sequence={sequence} /></>;

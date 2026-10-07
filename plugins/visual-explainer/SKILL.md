@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Use when explaining systems, code changes, plans, or data with diagrams, charts, HTML pages, slides, videos, or reusable React graphics and motion.
+description: Explain systems, code changes, plans, or data through editable diagrams, charts, slides, narrated animated videos, and reusable React graphics. Use for visual explanations and video collections.
 license: MIT
 metadata:
   author: nicobailon (original visual-explainer)
@@ -10,7 +10,7 @@ metadata:
 
 # Visual Explainer
 
-Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the Hairline preset across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
+Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the [ISO preset](references/iso.md) across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
 
 Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
@@ -36,6 +36,7 @@ Completion requires editable source, a successful export, and evidence for every
 | React workspace, reusable components, or seekable scene motion | [react-workspaces.md](references/react-workspaces.md) | Discover actual APIs with the component CLI; copy local leaf modules instead of importing the full renderer into an app. |
 | chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
 | diagram or architecture | [web-diagram.md](cards/web-diagram.md) | For Diagram Design's original look, read [source-fidelity.md](references/source-fidelity.md) and use the bundled original skill. |
+| isometric objects, devices or causal lighting | [iso.md](references/iso.md) | Project reusable face details and live geometry; sample Motionmaxxing curves through the shared clock. |
 | axonometric floor/site plan, exploded object or physical assembly | [source-fidelity.md](references/source-fidelity.md) | Use the original templates and geometry. Read [axonometric.md](references/axonometric.md) only for the compact shared-clock adaptation. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |
@@ -43,8 +44,9 @@ Completion requires editable source, a successful export, and evidence for every
 | interactive Hairline figure | [source-fidelity.md](references/source-fidelity.md) | Install the official 27-figure runtime, or use the bundled authoring skill for a new figure. |
 | Shader Effects WebGPU components, materials or shader video | [source-fidelity.md](references/source-fidelity.md) | Install `shaders`; use original React exports for live behavior or the native frame controller for supported explicit-time effects. |
 | chalkboard explanation or Mono Color editorial image | [source-fidelity.md](references/source-fidelity.md) | Follow the bundled source-specific workflow. |
-| motion video | [generate-video.md](commands/generate-video.md) | Use the [Hairline motion baseline](references/motion-video-baseline.md); read [video-collections.md](references/video-collections.md) for shared episodes and instructional modes. Use [render-video.md](commands/render-video.md) for an existing deck. |
+| animated explainer, review film, or sizzle reel | [generate-video.md](commands/generate-video.md) | [dynamic-video-authoring.md](references/dynamic-video-authoring.md) teaches story, primitive selection, choreography, audio alignment, and proof. Use [render-video.md](commands/render-video.md) for an existing deck; [video-collections.md](references/video-collections.md) for shared episodes. |
 | native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |
+| try FFrames as a video renderer | [fframes.md](references/fframes.md) | Experimental macOS Metal export of shared silent vector sequences; preserve the TypeScript source and inspect native output. |
 | ASCII, texture treatments, or 3D model media | [media-effects.md](references/media-effects.md) | Copy controlled effects and preserve media decoding ownership. |
 | reference image to low-detail procedural 3D | [procedural-models.md](references/procedural-models.md) | Use the installed img2threejs skill and reuse its reviewed factory across outputs. |
 | code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |
@@ -61,6 +63,7 @@ For any named source library, read [source-fidelity.md](references/source-fideli
 - Prefer shared components, semantic content, and tokens over hand-authored coordinates or page CSS.
 - For illustrations, read [default-explainer-theme.md](references/default-explainer-theme.md). Reuse shared geometry across formats; isolate strict Hairline pointer figures from seekable video scenes.
 - For reusable React work, keep the scene → composition → slide → video boundary. Sample explicit time, author narrow layouts separately, and call `disposeGraphicVideo` when a registered host leaves.
+- For video, stage a visible event and its consequence. Keep subjects identifiable as they move, compare, separate, and recombine. Use the component index to find implemented motion; a component tour and a narrated argument need different scripts. Align important events to the recorded narration, then inspect the encoded film as well as the source preview.
 - Use `LieflatChart` for editorial data stories and `DataChart` for quick bar, line, or dot comparisons. Marks must encode evidence; never invent records or quantities to fill a pattern.
 - When adjusting type, read [typography.md](references/typography.md). Compose readable text blocks through measure, grouping, weight, and spacing.
 - Use `DiagramCanvas` for compact supported layouts; use Archify for complex typed system maps. The diagram card routes both. Keep labels readable at initial scale: at least 14px in figures and 16px in body copy. Resize or split content before shrinking it.

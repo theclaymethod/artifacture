@@ -34,7 +34,7 @@ try {
     console.log(`Ready: ${receipt.engine} ${receipt.version}`);
   } else if (command === 'scaffold') {
     if (![2, 4].includes(args.length) || (args.length === 4 && args[2] !== '--theme')) throw new Error('Usage: artifacture engine scaffold <engine> <directory> [--theme <preset>]');
-    const engine = engineById(args[0]), directory = path.resolve(args[1]), theme = args[3] ?? 'hairline';
+    const engine = engineById(args[0]), directory = path.resolve(args[1]), theme = args[3] ?? 'iso';
     if (!engine.themes.includes(theme)) throw new Error(`Unsupported native theme: ${theme}.`);
     if (await exists(directory)) throw new Error('Scaffold directory already exists; choose a new directory.');
     const job = JSON.parse(await fs.readFile(path.join(import.meta.dirname, `video-engines/templates/${engine.id}.job.json`), 'utf8'));

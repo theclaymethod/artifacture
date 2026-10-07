@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useId } from 'react';
+import { useId } from 'react';
 import './charts.css';
 
 export type ChartDatum = { label: string; value: number | null };
@@ -126,7 +126,7 @@ export function DataChart({ data, title, kind = 'bar', description, valueLabel, 
 
 function NarrowChart({ measured, kind, fraction, id, summary, valueLabel }: {
   measured: MeasuredDatum[];
-  kind: 'bar' | 'line' | 'dot';
+  kind: NonNullable<DataChartProps['kind']>;
   fraction: (value: number) => number;
   id: string;
   summary: string;

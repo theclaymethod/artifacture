@@ -1,4 +1,4 @@
-import React, { useId, type CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 
 export interface OrbitalTextPalette {
   background: string;

@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **53 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **60 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -10,11 +10,15 @@ artifacture add sequence-scene reveal-in-order --cwd ./explainer
 
 Read an entry's `entryPoints`, `variants`, `constraints`, and `examples` before using it. The [preview source](../examples/visual-explainer-mdx/component-catalog.tsx) renders 34 examples with actual local components, four theme choices, and direct time seeking. Export it with `npm run ve:export -- examples/visual-explainer-mdx/component-catalog.tsx --out dist/components.html`.
 
-The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrates how these blocks combine: a Hairline agent workflow, calculated toy attention in 3b1b, a Mono Color code fix that preserves zero, and an Algebrica circle generating a sine wave. Its [scene samplers](../examples/visual-explainer-mdx/showcase-scenes.ts) share the existing renderer and sample explicit authored time. These compositions are examples of the indexed APIs, rather than additional installation entries. Export with `npm run ve:export -- examples/visual-explainer-mdx/showcase.tsx --out dist/showcase/index.html`; the [examples guide](../examples/README.md) describes the optional video gallery assets.
+The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrates how these blocks combine: an ISO agent workflow, calculated toy attention in 3b1b, a Mono Color code fix that preserves zero, and an Algebrica circle generating a sine wave. Its [scene samplers](../examples/visual-explainer-mdx/showcase-scenes.ts) share the existing renderer and sample explicit authored time. These compositions are examples of the indexed APIs, rather than additional installation entries. Export with `npm run ve:export -- examples/visual-explainer-mdx/showcase.tsx --out dist/showcase/index.html`; the [examples guide](../examples/README.md) describes the optional video gallery assets.
 
 | Copy entry | Public API | Implemented choices and useful behavior |
 | --- | --- | --- |
 | graphics | `GraphicCanvas`, `createGraphicScene` | Rect, circle, polygon, path, line, text; arrows; validated immutable scene data |
+| dot-matrix-scene | `createDotMatrixScene` | 108 Punctum masks; stable five-by-nine cells, descenders, size/roundness, optional neutral lattice |
+| character-roll | `createCharacterRoll` | Fixed old/new grid, unchanged characters, finite discrete tracks, exact target and backward seeking |
+| column-scan | `createColumnScan`, `synthesizeScanWav` | Reveal/read modes, one timed accent, shared sound events, deterministic local PCM/WAV |
+| punctum-readout | `PunctumReadout`, `awaitPunctumFont` | Canonical variable WOFF2, caller-owned axes, capture readiness; complete OFL notice |
 | diagram | `DiagramDesignFigure`, `createDiagramScene`, `diagramSceneFromLayout` | Flow, tree, swimlane, timeline; horizontal, vertical, auto; labeled and bidirectional edges |
 | diagram-canvas | `DiagramCanvas` | Same scene/layout owner, React wrapper, readable narrow-screen relationships |
 | diagram-walkthrough | `PrLensFigure`, `DiagramWalkthrough` | Explicit edge steps, moving packet, play/pause, previous/next/reset, reduced-motion manual steps |
@@ -33,11 +37,14 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | exploded-axonometric | `DiagramDesignFigure`, `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
 | hairline | 27 original figures, `createHairlineScene` | Official Hairline runtime plus separate prepared-path scene adapter |
 | shaders | Original React exports, `NativeShader`, `createShaderSurface` | Official Shader Effects WebGPU library; reversible GPU-fenced frames for Plasma, SimplexNoise and Spiral |
+| iso | `createIsoScene`, `projectIsoPoint` | Rounded face geometry, face-local windows/vents and causal live lighting |
+| motion-eases | `sampleMotionEase` | Eight bounded Motionmaxxing arrival/exit curves on the existing sampler |
 | data-chart | `DataChart` | Bar, line, dot; signed values, missing measurements, exact narrow-screen views |
 | charts | `LieflatChart` | Rung bars, unit field, barcode, bubble matrix, threads; exact values and encoding explanations |
 | thread-plot | `ThreadPlot` | Smaller record-trace leaf; stage/category paths, selectable record, portrait layout |
 | code-block | `CodeBlock` | Escaped plain code or prepared highlighted HTML; filename, line annotations |
 | diff-block | `DiffBlock` | Unified/split; patch or before/after text; real addition/removal marks |
+| code-diff | `prepareCodeDiff`, `createCodeDiffScene`, `focusCodeDiff`, `createCodeDiffTransition` | Aligned gaps, inline token changes, exact context folds and line origins; cue focus; retained-character edits in either direction |
 | terminal-block | `TerminalBlock` | ANSI transcript and optional prompt; a component, not a retired art theme |
 | json-tree | `JsonTree` | Native disclosures for objects/arrays; configurable initial depth |
 | quiz | `Quiz` | Choices, explanations, correct/incorrect feedback and completed score |
@@ -59,12 +66,14 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | authored-values | `createMonotoneTrack`, `createVectorTrack` | Scalar/vector cubic sampling at authored seconds; increasing keys, equal dimensions, endpoint holds |
 | video-frames | `createVideoFramePlan`, `inspectLoopFrames` | Explicit frame rounding and encoded sample times; awaited exact-endpoint closure separated from last-frame similarity |
 | narration-cues | `normalizeNarrationCues`, `alignedWordsToCues`, `formatSubtitleTime`, `serializeNarrationCues` | Immutable absolute-second cues; alignment provenance; explicit overlap/bounds policy; SRT/WebVTT |
-| motion | `defineGraphicMotion`, `sampleScene` | Opacity, reveal, highlight, illustration translation/routes, rectangular masks; linear/smooth and discrete boundaries; deterministic seeking |
+| motion | `defineGraphicMotion`, `sampleScene` | Opacity, reveal, highlight, illustration translation/routes, rectangular masks; linear/smooth, eight Motionmaxxing curves and discrete boundaries; deterministic seeking |
 | composition | `composeGraphics` | Fitted scene instances, scoped identities, frame clipping, one duration |
 | slides | `createSlideScene`, `sequenceSlides`, `GraphicSlide` | Frame, title, explanation, theme, finite sequence |
 | video | `GraphicVideo`, `registerGraphicVideo` | Same slide sampler, paused GSAP playback, explicit disposal |
 
 The new scene builders are in [teaching-scenes.ts](../visual-explainer-mdx/teaching-scenes.ts). Ordered tracks are in [teaching-motion.ts](../visual-explainer-mdx/teaching-motion.ts). They return the existing `GraphicScene` and `GraphicMotion` data; no additional renderer, grouping layer, or clock exists. Sibling APIs share a source module and dependency closure. Broad imports still re-export extracted React leaves for existing consumers.
+
+[Code review diffs](../plugins/visual-explainer/references/code-review-diffs.md) adds a seekable gallery and a short encoded specimen. Split and unified layouts share the same literal diff model. The animated edit reuses `createSourceScene` and `editWithIdentity`: changed tokens clear, retained characters move, and replacement tokens arrive. The older page `DiffBlock` now uses the same row-alignment owner, including gaps and indentation-only anchors.
 
 [Motion presets](motion-presets.md) describes the new traversal, comparison, and narrated source compilers. The [worked motion review](../examples/visual-explainer-mdx/motion-review.tsx) composes those APIs on one finite clock. Install them with `artifacture add follow-path comparison-wipe source-range-focus`; route and clip helpers travel with existing motion consumers, and narration preserves its license closure.
 
@@ -74,9 +83,11 @@ The new scene builders are in [teaching-scenes.ts](../visual-explainer-mdx/teach
 
 ## Reuse through the levels
 
-A scene's semantic IDs remain stable within its source. Use `composeGraphics` to place independent instances and scope their identities. Posters render a sampled scene; slides frame it; video advances the same authored sequence. Theme tokens supply paint, font, and stroke roles. Hairline is the default, with thin structural/detail strokes and one cyan accent; 3b1b, Mono Color, and Algebrica share the geometry.
+A scene's semantic IDs remain stable within its source. Use `composeGraphics` to place independent instances and scope their identities. Posters render a sampled scene; slides frame it; video advances the same authored sequence. Theme tokens supply paint, font, and stroke roles. ISO is the default, with thin structural/detail strokes and one cyan accent; 3b1b, Mono Color, and Algebrica share the geometry.
 
 Reactive charts and the interactive walkthrough have browser layout/control behavior. They are not automatically finite video samplers. The numeric plot, grid, sequence, token, and playhead builders supply a reusable scene route for authored output. Native Hairline camera/prism/spring/pointer tools and the editable Terrain/Riffle figures remain in the pinned vendor skill. Archify remains the larger architecture/workflow/sequence/dataflow/lifecycle CLI. Neither is miscounted as a React leaf.
+
+[Punctum displays](punctum.md) adds an interactive gallery of dot geometry, exact character rolls, synchronized scans/sound, and an optional variable-font readout. All four entries are indexed and copied with their source dependencies and OFL notices. The same scenes pass through composition, slides, and finite video.
 
 ## Original source integrations
 
@@ -86,4 +97,6 @@ The current [source inventory](source-libraries.md) supersedes the earlier refer
 
 [Media effects](media-effects.md) documents the independent ASCII/sweep/VHS blocks and optional Blender source workflow. The [gallery source](../examples/visual-explainer-mdx/media-effects.tsx) exposes four themes, seeking and PNG frame export. [Selected model visuals](model-visuals.md) documents the imported shape matcher, factories, points and SVG leaves. The [selected gallery source](../examples/visual-explainer-mdx/selected-visuals.tsx) compares their live output.
 
-[Axonometric plans and exploded views](../plugins/visual-explainer/references/source-fidelity.md) now default to the original Diagram Design documents. The [compact scene gallery](../examples/visual-explainer-mdx/axonometric.tsx) remains a separate authored adaptation; the [original-source presentation](../examples/visual-explainer-mdx/source-libraries.tsx) demonstrates faithful reuse.
+[Axonometric plans and exploded views](../plugins/visual-explainer/references/source-fidelity.md) now default to the original Diagram Design documents. The [original-source gallery](../examples/visual-explainer-mdx/axonometric.tsx) presents those originals; the [original-source presentation](../examples/visual-explainer-mdx/source-libraries.tsx) demonstrates faithful reuse.
+
+The `iso` block adds reusable isometric top/front/side geometry with live face details; `motion-eases` adds eight Motionmaxxing curves consumed directly by the existing sampler. Discover either by capability or exact ID. The default preset is `iso`; `hairline` remains the upstream interactive runtime and a separate prepared-path adapter.

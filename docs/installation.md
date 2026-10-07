@@ -27,7 +27,7 @@ cd my-explainer
 npm run dev
 ```
 
-The starter includes React, TypeScript, Vite, a responsive Hairline composition, and finite motion with direct seeking. Dependencies are installed by `init`.
+The starter includes React, TypeScript, Vite, a responsive ISO composition, and finite motion with direct seeking. Dependencies are installed by `init`.
 
 Discover blocks with `npx artifacture list`. Export and verify with the same CLI:
 

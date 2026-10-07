@@ -8,11 +8,11 @@ export const dagInput: DagInput = {
   nodes: [
     { id: 'graphics', label: 'Graphic primitives', parentIds: [] },
     { id: 'theme', label: 'Shared theme', parentIds: [] },
-    { id: 'hairline', label: 'Hairline illustrations', parentIds: ['graphics', 'theme'] },
+    { id: 'iso', label: 'ISO illustrations', parentIds: ['graphics', 'theme'] },
     { id: 'diagrams', label: 'Diagrams', parentIds: ['graphics', 'theme'] },
     { id: 'charts', label: 'Charts', parentIds: ['graphics', 'theme'] },
     { id: 'motion', label: 'Authored motion', parentIds: ['graphics'] },
-    { id: 'composition', label: 'Composition', parentIds: ['hairline', 'diagrams', 'charts', 'motion'] },
+    { id: 'composition', label: 'Composition', parentIds: ['iso', 'diagrams', 'charts', 'motion'] },
     { id: 'poster', label: 'Poster', parentIds: ['composition'] },
     { id: 'slides', label: 'Slides', parentIds: ['composition'] },
     { id: 'native', label: 'Manim / Psychopomp clips', parentIds: [] },
@@ -21,4 +21,4 @@ export const dagInput: DagInput = {
 };
 export const dag = prepareDag(dagInput);
 export const motion = createDagReveal(dag, 0.6, 2);
-export const sequence = sequenceSlides('dag-reveal', [{ slide: createSlideScene({ id: 'dag-reveal-slide', title: 'Build the picture once.', explanation: 'Each dependent appears after its inputs. The same scene can become a poster, slide, or video.', graphic: dag.scene, preset: 'hairline' }), motion, duration: motion.duration }]);
+export const sequence = sequenceSlides('dag-reveal', [{ slide: createSlideScene({ id: 'dag-reveal-slide', title: 'Build the picture once.', explanation: 'Each dependent appears after its inputs. The same scene can become a poster, slide, or video.', graphic: dag.scene, preset: 'iso' }), motion, duration: motion.duration }]);

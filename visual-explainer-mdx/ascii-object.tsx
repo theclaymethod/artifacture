@@ -1,8 +1,8 @@
-import React from 'react';
 import type { AsciiFrameOptions } from './ascii-frame';
+import type { ModelSource } from './model-types';
 import { ModelView } from './model-view';
 
-export type AsciiModel = Readonly<{ kind: 'gltf'; src: string }> | Readonly<{ kind: 'geometry'; geometry: 'torus-knot' | 'icosahedron' | 'blocks' }>;
+export type AsciiModel = Extract<ModelSource, { kind: 'gltf' | 'geometry' }>;
 export type AsciiObjectProps = AsciiFrameOptions & Readonly<{
   model: AsciiModel; seconds: number; label: string; width?: number; height?: number; ascii?: boolean; rotationSpeed?: number; className?: string;
 }>;

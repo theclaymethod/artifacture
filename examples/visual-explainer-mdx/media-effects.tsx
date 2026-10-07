@@ -21,7 +21,7 @@ function illustration(palette: AsciiPalette, assembled: boolean) {
 }
 
 export default function MediaEffectsGallery() {
-  const [preset, setPreset] = useState('hairline'), [seconds, setSeconds] = useState(1.35), [playing, setPlaying] = useState(false);
+  const [preset, setPreset] = useState('iso'), [seconds, setSeconds] = useState(1.35), [playing, setPlaying] = useState(false);
   const [palette, setPalette] = useState<AsciiPalette>({ background: '#ffffff', ink: '#202127', accent: '#079fba' });
   const [geometry, setGeometry] = useState<'torus-knot' | 'icosahedron' | 'blocks'>('torus-knot'), [ascii, setAscii] = useState(true);
   const [modelUrl, setModelUrl] = useState(''), [model, setModel] = useState<AsciiModel>({ kind: 'geometry', geometry: 'torus-knot' });
@@ -47,7 +47,7 @@ export default function MediaEffectsGallery() {
   return <main ref={root} className="component-catalog effects-gallery" data-ve-preset={preset} data-ve-appearance={preset === '3b1b' ? 'dark' : 'light'}>
     <header><h1>Shape, texture, motion.</h1><p>Reusable media effects with a shared palette and a caller-controlled clock. Scrub forward or backward to compare the same pose.</p></header>
     <div className="catalog-controls effect-controls">
-      <label>Theme <select value={preset} onChange={event => setPreset(event.target.value)}><option value="hairline">Hairline</option><option value="3b1b">3b1b</option><option value="mono-color">Mono Color</option><option value="algebrica">Algebrica</option></select></label>
+      <label>Theme <select value={preset} onChange={event => setPreset(event.target.value)}><option value="iso">ISO</option><option value="3b1b">3b1b</option><option value="mono-color">Mono Color</option><option value="algebrica">Algebrica</option></select></label>
       <button type="button" onClick={() => { if (playing) timeline.current?.pause(); else timeline.current?.play(); setPlaying(!playing); }}>{playing ? 'Pause' : 'Play'}</button>
       <label>Time <input aria-label="Effect time" type="range" min="0" max="6" step="0.01" value={seconds} onChange={event => { timeline.current?.pause().seek(Number(event.target.value), false); setPlaying(false); }} /><output>{seconds.toFixed(2)}s</output></label>
     </div>

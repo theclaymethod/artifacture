@@ -1,4 +1,4 @@
-import React, { type CSSProperties, type SVGProps } from 'react';
+import { type CSSProperties, type SVGProps } from 'react';
 
 export type TracePathStyle = Omit<CSSProperties, 'strokeDasharray' | 'strokeDashoffset'>;
 

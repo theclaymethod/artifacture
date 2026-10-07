@@ -12,6 +12,6 @@ Resolve `$1` as a history window: `2w` → two weeks, `30d` → thirty days, `3m
 
 Compose the narrative in `cards/project-recap.md`: purpose, current architecture, meaningful recent changes, unresolved decisions, and the contracts needed to resume work. Use `DiagramCanvas` through the diagram card. State blockers and follow-up actions directly with their evidence; omit unsupported health counts, severity badges, and generic dashboards.
 
-Use the default Hairline preset. Author MDX/TSX, export to `~/.agent/diagrams/<slug>-project-recap.html`, and complete `references/verification.md`. Open the result and report its source, HTML, final report, and unresolved claims.
+Use the default ISO preset. Author MDX/TSX, export to `~/.agent/diagrams/<slug>-project-recap.html`, and complete `references/verification.md`. Open the result and report its source, HTML, final report, and unresolved claims.
 
 $@

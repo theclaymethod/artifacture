@@ -18,7 +18,7 @@ Every composition's timeline must be registered on `window.__timelines` using th
 
 Required constraints:
 - `{ paused: true }` — the engine drives playback, not GSAP's autoplay
-- Registration must be **synchronous** relative to `DOMContentLoaded`. No `async`, no `setTimeout`, no Promises wrapping the assignment
+- Register the completed timeline. Artifacture's shared exporter does this synchronously; a source-owned composition follows the installed renderer's readiness contract.
 - One timeline per composition ID
 - Composition IDs must match the `data-composition-id` on the composition root
 
@@ -28,9 +28,9 @@ These patterns conflict with deterministic frame seeking.
 
 | Pattern | Why it breaks |
 |---|---|
-| `Math.random()` anywhere | Each frame re-evaluates; produces noise |
+| Unseeded `Math.random()` in authored motion | Frames or repeated builds can differ |
 | `Date.now()` / `new Date()` | Capture is not real-time; timestamps drift |
-| `repeat: -1` | Infinite tweens never terminate; engine hangs |
+| Unbounded repetition without a finite composition duration | The renderer cannot infer a finite ending; prefer explicit bounded repeats |
 | `gsap.ticker.add(...)` callbacks with side effects | Fires on every frame; non-deterministic |
 | `element.animate(...)` (Web Animations API) | Engine only tracks GSAP timelines |
 | CSS `@keyframes` with `animation-iteration-count: infinite` | Same infinite-loop problem |
@@ -78,7 +78,7 @@ Inside a Hyperframes composition:
 - `<video>` elements must have `muted` and `playsinline` attributes
 - Audio should travel as `<audio>` elements, not as the audio track of a `<video>` (even if the source file has both)
 - Never call `video.play()`, `audio.play()`, or `.currentTime = …` from your own code — the engine seeks these for you
-- `data-track-index` on media elements controls audio mixing ordering; it does NOT affect visual z-order (use CSS `z-index`)
+- Give audio a unique ID and explicit timing. `data-track-index` is a Studio lane; visual stacking uses CSS `z-index`.
 
 ## Entrance Animation Patterns
 

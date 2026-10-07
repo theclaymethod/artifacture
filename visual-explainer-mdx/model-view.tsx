@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useReducedEffectMotion } from './media-source';
 import { createModelView } from './model-renderer';
 import type { ModelFrame, ModelFrameReport, ModelViewController, ModelViewOptions } from './model-types';

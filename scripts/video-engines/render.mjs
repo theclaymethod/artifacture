@@ -19,7 +19,7 @@ export function validateJob(input) {
   const extension = path.extname(relativeFile(input.source));
   if (input.engine === 'manim' && (extension !== '.py' || typeof input.scene !== 'string' || !/^[A-Za-z_]\w*$/.test(input.scene))) throw new Error('Manim requires a .py source and a Scene class name.');
   if (input.engine === 'psychopomp' && (!['.rs', '.json'].includes(extension) || input.scene !== undefined)) throw new Error('Psychopomp requires a .rs Scene Program or .json Scene Plan, without a scene option.');
-  const job = { ...input, theme: input.theme ?? 'hairline', width: input.width ?? 1920, height: input.height ?? 1080, fps: input.fps ?? 30, stills: input.stills ?? [0] };
+  const job = { ...input, theme: input.theme ?? 'iso', width: input.width ?? 1920, height: input.height ?? 1080, fps: input.fps ?? 30, stills: input.stills ?? [0] };
   if (!engineById(job.engine).themes.includes(job.theme)) throw new Error(`Unsupported native theme ${job.theme}.`);
   if (![job.width, job.height].every(value => Number.isSafeInteger(value) && value >= 64 && value <= 3840 && value % 2 === 0) || !Number.isSafeInteger(job.fps) || job.fps < 1 || job.fps > 60) throw new Error('Native output needs even integer dimensions from 64 to 3840 and an integer FPS from 1 to 60.');
   if (!Array.isArray(job.stills) || !job.stills.length || job.stills.length > 24 || job.stills.some(value => !Number.isFinite(value) || value < 0) || new Set(job.stills).size !== job.stills.length) throw new Error('Choose 1–24 distinct, finite, nonnegative still times.');

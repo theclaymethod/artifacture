@@ -112,11 +112,11 @@
   color: var(--ve-muted);
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline, .ve-risk-ledger) {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline, .ve-risk-ledger) {
   gap: 0;
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline .ve-pipeline-item, .ve-risk-ledger .ve-risk-card) {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline .ve-pipeline-item, .ve-risk-ledger .ve-risk-card) {
   border: 0;
   border-top: 1px solid var(--ve-rule);
   border-radius: 0;
@@ -124,20 +124,20 @@
   padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline .ve-pipeline-position {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline .ve-pipeline-position {
   color: var(--ve-muted);
   font-variant-numeric: tabular-nums;
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="low"] .ve-risk-level {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="low"] .ve-risk-level {
   color: var(--ve-ok);
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="medium"] .ve-risk-level {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="medium"] .ve-risk-level {
   color: var(--ve-warn);
 }
 
-:is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="high"] .ve-risk-level {
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="high"] .ve-risk-level {
   color: var(--ve-danger);
 }
 

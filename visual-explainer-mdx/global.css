@@ -68,17 +68,17 @@
 
 
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) {
     color-scheme: light;
     caret-color: var(--ve-accent);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) ::selection {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) ::selection {
     background: color-mix(in srgb, var(--ve-accent) 18%, transparent);
     color: var(--ve-heading);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :focus-visible {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :focus-visible {
     outline: 3px solid var(--ve-accent);
     outline-offset: 3px;
   }
@@ -100,20 +100,20 @@
     max-width: var(--ve-copy-measure, 56ch);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-inner {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-inner {
     gap: 0;
     padding-block: clamp(1rem, 3vw, 2.5rem) clamp(4rem, 8vw, 8rem);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-table-shell,
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-mermaid-shell] {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-table-shell,
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-mermaid-shell] {
     border-color: var(--ve-rule);
     background: var(--ve-panel);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
     corner-shape: squircle;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
     align-items: end;
     padding: clamp(2rem, 5vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem);
     border: 0;
@@ -124,7 +124,7 @@
     box-shadow: none;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header h1 {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header h1 {
     max-width: 18ch;
     font-size: clamp(3rem, 7vw, 6rem);
     line-height: 1.04;
@@ -132,20 +132,20 @@
     text-wrap: balance;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header > div > p {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header > div > p {
     max-width: 52ch;
     font-size: clamp(1rem, 1.6vw, 1.25rem);
     line-height: 1.5;
   }
 
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section {
     gap: clamp(1rem, 3vw, 2.5rem);
     padding: clamp(2rem, 5vw, 4.75rem) 0;
     border-bottom: 1px solid var(--ve-rule);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section-heading h2 {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section-heading h2 {
     max-width: 16ch;
     font-size: clamp(1.35rem, 2vw, 1.75rem);
     line-height: 1.1;
@@ -154,7 +154,7 @@
   }
 
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-preset-card {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-preset-card {
     padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
     border: 0;
     border-top: 1px solid var(--ve-rule);
@@ -163,7 +163,7 @@
     box-shadow: none;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-callout {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-callout {
     padding: 1rem 0 0;
     border: 0;
     border-top: 1px solid var(--ve-accent);
@@ -172,7 +172,7 @@
     box-shadow: none;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button {
     min-height: 2.25rem;
     border: 1px solid transparent;
     border-radius: 999px;
@@ -182,23 +182,23 @@
     transition: background-color 160ms ease-out, color 160ms ease-out, transform 100ms ease-out;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:hover {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:hover {
     background: color-mix(in srgb, var(--ve-heading) 8%, transparent);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:active {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) button:active {
     transform: translateY(1px) scale(0.98);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) code:not([data-ve-code-block] code) {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) code:not([data-ve-code-block] code) {
     border-radius: 999px;
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > p:first-child {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > p:first-child {
     color: var(--ve-accent);
   }
 
-  :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > div:last-child {
+  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) [data-ve-default-preset="true"] > div:last-child {
     background: var(--ve-accent);
   }
 
@@ -214,7 +214,7 @@
   }
 
   @media (max-width: 1023px) {
-    :is([data-ve-preset="hairline"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
+    :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
       padding: 2rem 0;
     }
 

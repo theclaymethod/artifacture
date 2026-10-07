@@ -2,13 +2,13 @@
 
 Use the [default explainer theme](default-explainer-theme.md) across formats. This reference adds motion choreography and documents the original rotating-point specimen. An explicit brand, design spec, or requested look takes precedence. Deck-to-video work retains the source's meaningful visual encodings.
 
-The primary languages are Hairline isometric mechanisms on white and explicit `3b1b` mathematical mechanisms on black. Both combine Lieflat's data encodings with one cyan causal accent. A physical object or a mathematical relationship carries the explanation; motion shows how it works and preserves its identity.
+The primary languages are ISO isometric mechanisms on white and explicit `3b1b` mathematical mechanisms on black. Both combine Lieflat's data encodings with one cyan causal accent. A physical object or a mathematical relationship carries the explanation; motion shows how it works and preserves its identity.
 
 ## Visual language
 
-New illustrations follow [default-explainer-theme.md](default-explainer-theme.md). Inline [themes.css](../../../visual-explainer-mdx/themes.css) before [hairline-motion-theme.css](../templates/hairline-motion-theme.css). Set `data-ve-preset="hairline"` for physical mechanisms, or `data-ve-preset="3b1b"` for mathematical mechanisms. A dark Hairline appearance remains available; selecting black alone does not construct a mathematical explanation. `data-motion-theme` remains an appearance compatibility attribute.
+New illustrations follow [default-explainer-theme.md](default-explainer-theme.md). Inline [themes.css](../../../visual-explainer-mdx/themes.css) before [iso-motion-theme.css](../templates/iso-motion-theme.css). Set `data-ve-preset="iso"` for physical mechanisms, or `data-ve-preset="3b1b"` for mathematical mechanisms. A dark ISO appearance remains available; selecting black alone does not construct a mathematical explanation. `data-motion-theme` remains an appearance compatibility attribute.
 
-| Role | Hairline / 3b1b |
+| Role | ISO / 3b1b |
 |---|---|
 | Canvas | White / black; flat, without decorative texture |
 | Illustration outline | Neutral gray `#8a8d98` / white `#f5f5f5`; rounded caps and joins |
@@ -18,9 +18,9 @@ New illustrations follow [default-explainer-theme.md](default-explainer-theme.md
 | Statement | Inter / EB Garamond; 64–96px at 1920 × 1080 |
 | Supporting text | Inter; 28–36px at 1920 × 1080 |
 | Math | Serif notation through `--ve-font-math` |
-| Hairline strokes | Silhouette 1.5, crease 0.8, active 1.5 in the engine's 400 × 320 frame |
+| Hairline strokes | Silhouette 1.2, crease 0.65, active 1.2 in the engine's 400 × 320 frame |
 
-Let the illustration occupy most of the frame. Use meaningful object features, rounded solids, honest occlusion, and a stronger silhouette than crease. Use the unchanged Hairline engine's public projection and rounded-solid functions. Keep physical labels outside its SVG and anchor them to projected features. For mathematics, use real functions, geometry transformations, arrowheads, and notation. Keep Lieflat mark size tied to declared units or actual records. Inspect the compressed result at playback size.
+Let the illustration occupy most of the frame. Use meaningful object features, rounded solids, honest occlusion, and a stronger silhouette than crease. Use `createIsoScene` for shared seekable geometry and live face details; use the unchanged Hairline engine for prepared pointer figures. Keep physical labels outside its SVG and anchor them to projected features. For mathematics, use real functions, geometry transformations, arrowheads, and notation. Keep Lieflat mark size tied to declared units or actual records. Inspect the compressed result at playback size.
 
 Keep statements and mathematical labels outside the physical illustration. Direct labels may identify variables or relationships when needed. Do not add ornamental labels, badges, numbering, fake measurements, status chips, or decorative captions.
 
@@ -55,6 +55,6 @@ The sample uses the pinned GSAP URL shown in its source; HyperFrames bundles it 
 
 ## Sources
 
-Hairline's [skill](https://hairline.lucasmarkes.com/skill) and [source](https://github.com/lucasmarkes/hairline) inform the illustration language. Artifacture bundles the complete unchanged skill and interactive runtime from revision `c3692e0c797956268847d843949f79714b6f7a41`, with its MIT license and [file hashes](../vendor/hairline-create/provenance.json). The original reference composition includes neither that runtime nor an upstream figure.
+Hairline's [skill](https://hairline.lucasmarkes.com/skill) and [source](https://github.com/lucasmarkes/hairline) inform the illustration language. Artifacture bundles the complete unchanged skill and interactive runtime from revision `bc782244216620434b14736df1d74daed2d05046`, with its MIT license and [file hashes](../vendor/hairline-create/provenance.json). The original reference composition includes neither that runtime nor an upstream figure.
 
 [3Blue1Brown](https://www.3blue1brown.com/) and the author's [Manim repository](https://github.com/3b1b/manim) are the requested references for visual mathematical explanation. The geometry and animation here are original; no channel assets, characters, footage, or music are reused.

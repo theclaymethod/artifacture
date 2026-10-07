@@ -1,12 +1,12 @@
 import React from 'react';
 import { DiagramCanvas, ExplainerShell, Section, type VisualPreset } from '../../visual-explainer-mdx/components';
 
-const themes = { hairline: 'hairline', '3b1b': '3b1b', algebrica: 'algebrica', 'mono-color': 'mono-color' } satisfies Record<string, VisualPreset>;
+const themes = { iso: 'iso', '3b1b': '3b1b', algebrica: 'algebrica', 'mono-color': 'mono-color' } satisfies Record<string, VisualPreset>;
 const requested = 'window' in globalThis ? new URLSearchParams(window.location.search).get('preset') : null;
 function isTheme(value: string | null): value is keyof typeof themes {
   return value !== null && Object.hasOwn(themes, value);
 }
-const preset = isTheme(requested) ? themes[requested] : 'hairline';
+const preset = isTheme(requested) ? themes[requested] : 'iso';
 
 export default function PresetArtifact() {
   return (

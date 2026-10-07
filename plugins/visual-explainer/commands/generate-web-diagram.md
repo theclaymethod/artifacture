@@ -8,7 +8,7 @@ For comparisons or tabular data, use `cards/comparison-table.md` instead.
 2. Use `DiagramCanvas` for its supported layouts. Let content determine node size; split dense graphs into overview and detail. Read the card's conditional references for specialized types or custom SVG.
 3. Keep MDX/TSX or Archify typed JSON as editable source, export through its route, and complete `references/verification.md` through the finalizer. Save to `~/.agent/diagrams/<slug>.html` with its editable source alongside it.
 
-Use the default Hairline preset unless the user names another. Labels, connectors, and supporting prose must explain the system; omit decorative headings, metrics, status, and legends.
+Use the default ISO preset unless the user names another. Labels, connectors, and supporting prose must explain the system; omit decorative headings, metrics, status, and legends.
 
 ## Independent sections
 

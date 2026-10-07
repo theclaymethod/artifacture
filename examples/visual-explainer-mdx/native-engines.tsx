@@ -22,7 +22,7 @@ export function NativeEngineTimeline({ asset, baseUrl }: { asset: NativeClipAsse
 
 type NativeExample = Readonly<{ asset: NativeClipAsset; baseUrl: string }>;
 export default function NativeEngineGallery() {
-  const [preset, setPreset] = useState<'hairline' | '3b1b'>('hairline');
+  const [preset, setPreset] = useState<'iso' | '3b1b'>('iso');
   const [examples, setExamples] = useState<NativeExample[]>();
   const [error, setError] = useState<string>();
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function NativeEngineGallery() {
   }, []);
   return <main className="component-catalog" data-ve-preset={preset} data-ve-theme={preset === '3b1b' ? 'dark' : 'light'}>
     <header><h1>Native motion, shared language.</h1><p>Mathematical scenes and physical diagrams rendered from editable source, then reused as clips and selected stills.</p></header>
-    <div className="catalog-controls"><label>Theme <select value={preset} onChange={event => setPreset(event.target.value === '3b1b' ? '3b1b' : 'hairline')}><option value="hairline">Hairline</option><option value="3b1b">3b1b</option></select></label></div>
+    <div className="catalog-controls"><label>Theme <select value={preset} onChange={event => setPreset(event.target.value === '3b1b' ? '3b1b' : 'iso')}><option value="iso">ISO</option><option value="3b1b">3b1b</option></select></label></div>
     {examples ? examples.filter(item => item.asset.theme === preset).map(item => <NativeEngineExample key={`${item.asset.engine}-${item.asset.theme}`} {...item} />) : <p role={error ? 'alert' : 'status'}>{error ?? 'Loading rendered examples…'}</p>}
     <section><h2>Create a scene.</h2><pre><code>{`artifacture engine setup manim\nartifacture engine scaffold manim ./math --theme ${preset}\nartifacture engine render ./math/manim.job.json --out ./math/render\n\nartifacture engine setup psychopomp\nartifacture engine scaffold psychopomp ./diagram --theme ${preset}\nartifacture engine render ./diagram/psychopomp.job.json --out ./diagram/render`}</code></pre><p><a href="../dag/">Explore the reusable dependency graph</a></p></section>
   </main>;

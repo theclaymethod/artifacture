@@ -12,7 +12,7 @@
     {
       "name": "visual-explainer",
       "source": "./plugins/visual-explainer",
-      "description": "Create charts, diagrams, reviews, and presentations as standalone HTML.",
+      "description": "Create reusable graphics, diagrams, reviews, slides, and narrated animated explainer videos.",
       "version": "0.10.0",
       "author": {
         "name": "Clayton Kim"
@@ -24,7 +24,9 @@
         "html",
         "visualization",
         "diff-review",
-        "slides"
+        "slides",
+        "animation",
+        "video"
       ],
       "category": "visualization",
       "tags": [
@@ -32,7 +34,9 @@
         "html-generation",
         "code-review",
         "slides",
-        "mermaid"
+        "mermaid",
+        "animation",
+        "video"
       ]
     }
   ]

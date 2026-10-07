@@ -32,7 +32,7 @@ import { PresentationDeck, PresentationSlide, DrillCard, HairlineList } from 'vi
 
 export default function Deck() {
   return (
-    <PresentationDeck title="How a queue recovers" preset="hairline">
+    <PresentationDeck title="How a queue recovers" preset="iso">
       <PresentationSlide title="A timeout can hide success" shortTitle="Uncertainty">
         <HairlineList items={[
           { head: 'Preserve identity', body: 'Every attempt uses the same operation key.' },
@@ -63,7 +63,7 @@ Notes:
   pixels. Shared labels use at least 24px and body recipes use 26–28px;
   custom text should follow that floor. Inspect the exported deck at its
   intended viewport, with the rail open. Reduce content before reducing type.
-- **Visual language** defaults to `hairline`, with `3b1b` for mathematical mechanisms. Choose `algebrica` for scholarly
+- **Visual language** defaults to `iso`, with `3b1b` for mathematical mechanisms. Choose `algebrica` for scholarly
   reading or `mono-color` for one or two inks. Use tone changes to explain a
   change in content; omit decorative kickers, counts, badges, and hover effects.
 

@@ -40,7 +40,7 @@ function pointImage() {
 }
 
 export default function SelectedVisuals() {
-  const [theme, setTheme] = useState('hairline'), [choice, setChoice] = useState<SourceChoice>('pump');
+  const [theme, setTheme] = useState('iso'), [choice, setChoice] = useState<SourceChoice>('pump');
   const [seconds, setSeconds] = useState(1.35), [playing, setPlaying] = useState(false), [mode, setMode] = useState<'shaded' | 'shape-ascii' | 'particles'>('shape-ascii');
   const [palette, setPalette] = useState({ background: '#fff', ink: '#202127', accent: '#079fba' });
   const [cellSize, setCellSize] = useState(9), [spread, setSpread] = useState(0), [url, setUrl] = useState('');
@@ -72,7 +72,7 @@ export default function SelectedVisuals() {
   return <main ref={root} className="component-catalog effects-gallery selected-gallery" data-ve-preset={theme} data-ve-appearance={theme === '3b1b' ? 'dark' : 'light'}>
     <header><h1>One model. Many visual languages.</h1><p>Your selected components, rebuilt as reusable blocks. Change the model, treatment and theme; every view follows the same authored time.</p></header>
     <div className="catalog-controls effect-controls">
-      <label>Theme <select value={theme} onChange={event => setTheme(event.target.value)}><option value="hairline">Hairline</option><option value="3b1b">3b1b</option><option value="mono-color">Mono Color</option><option value="algebrica">Algebrica</option></select></label>
+      <label>Theme <select value={theme} onChange={event => setTheme(event.target.value)}><option value="iso">ISO</option><option value="3b1b">3b1b</option><option value="mono-color">Mono Color</option><option value="algebrica">Algebrica</option></select></label>
       <button type="button" onClick={() => { if (playing) clock.current?.pause(); else clock.current?.play(); setPlaying(!playing); }}>{playing ? 'Pause' : 'Play'}</button>
       <label>Time <input aria-label="Visual time" type="range" min="0" max="6" step="0.01" value={seconds} onChange={event => { clock.current?.pause().seek(Number(event.target.value), false); setPlaying(false); }} /><output>{seconds.toFixed(2)}s</output></label>
     </div>

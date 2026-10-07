@@ -344,7 +344,7 @@ function AskSlide({ shortTitle, tone }: SlideMeta) {
   );
 }
 
-export default function PresentationDeckDemo({ preset = 'hairline' }: { preset?: string }) {
+export default function PresentationDeckDemo({ preset = 'iso' }: { preset?: string }) {
   return (
     <PresentationDeck title="Retry and repair failed jobs" preset={preset}>
       <ThesisSlide shortTitle="Job record" tone="dark" />
