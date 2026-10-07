@@ -25,3 +25,31 @@ export function diffLines(before, after) {
   }
   return rows;
 }
+
+export function alignDiffRows(rows) {
+  const aligned = [];
+  for (let index = 0; index < rows.length;) {
+    const row = rows[index];
+    if (row.kind === 'hunk') { aligned.push({ kind: 'hunk', code: row.code }); index++; }
+    else if (row.kind === 'context') { aligned.push({ kind: 'context', before: row, after: row }); index++; }
+    else {
+      if (row.kind !== 'add' && row.kind !== 'remove') throw new Error(`Unsupported diff row kind: ${row.kind}`);
+      const removed = [], added = [];
+      while (index < rows.length && ['add', 'remove'].includes(rows[index].kind)) {
+        const change = rows[index++];
+        (change.kind === 'remove' ? removed : added).push(change);
+      }
+      let left = 0, right = 0;
+      const pairUntil = (leftEnd, rightEnd) => {
+        while (left < leftEnd || right < rightEnd) aligned.push({ kind: 'change', before: left < leftEnd ? removed[left++] : undefined, after: right < rightEnd ? added[right++] : undefined });
+      };
+      const anchors = diffLines(removed.map(item => item.code.trim()).join('\n'), added.map(item => item.code.trim()).join('\n'));
+      for (const anchor of anchors) if (anchor.kind === 'context' && anchor.oldNo <= removed.length && anchor.newNo <= added.length) {
+        pairUntil(anchor.oldNo - 1, anchor.newNo - 1);
+        aligned.push({ kind: 'change', before: removed[left++], after: added[right++] });
+      }
+      pairUntil(removed.length, added.length);
+    }
+  }
+  return aligned;
+}

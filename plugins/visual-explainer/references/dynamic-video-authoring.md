@@ -46,6 +46,7 @@ Read each selected entry's `entryPoints`, `constraints`, `variants`, and `exampl
 | A signal moving, waiting, returning, then changing focus at arrival | `follow-path`, `prepareGraphicRoute` | `examples/visual-explainer-mdx/motion-review.tsx`: the route drawing and carrier use the same prepared geometry. |
 | A before/after comparison that stays registered | `comparison-wipe` | The same example; registration preserves structural geometry. A wipe does not relayout or morph a graph. |
 | The exact code responsible for a visible consequence | `source-range-focus`, `createSourceScene`, `editWithIdentity` | The same example: source ranges, retained character identities, stable edit intervals, and cue bindings. |
+| A reviewable code change, its context, and the edit itself | `code-diff` | [code-review-diffs.md](code-review-diffs.md): aligned split/unified views, inline token changes, context folds, cue focus, and staged retained-character transitions. |
 | A cascade or transferred attention | `reveal-in-order`, `focus-in-order`, `motion` | `examples/visual-explainer-mdx/video-longform.tsx` and `component-catalog.tsx`. |
 | Messages, ownership layers, or a state transition | `sequence-scene`, `layer-scene`, `state-scene` | `component-catalog.tsx`; builders produce ordinary scenes. |
 | Multi-parent dependencies and lineage | `dag` | `dag-source.ts`; authored reveal shares the scene sampler, while interactive navigation remains a page control. |

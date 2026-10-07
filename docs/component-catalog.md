@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **56 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **57 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -41,6 +41,7 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | thread-plot | `ThreadPlot` | Smaller record-trace leaf; stage/category paths, selectable record, portrait layout |
 | code-block | `CodeBlock` | Escaped plain code or prepared highlighted HTML; filename, line annotations |
 | diff-block | `DiffBlock` | Unified/split; patch or before/after text; real addition/removal marks |
+| code-diff | `prepareCodeDiff`, `createCodeDiffScene`, `focusCodeDiff`, `createCodeDiffTransition` | Aligned gaps, inline token changes, exact context folds and line origins; cue focus; retained-character edits in either direction |
 | terminal-block | `TerminalBlock` | ANSI transcript and optional prompt; a component, not a retired art theme |
 | json-tree | `JsonTree` | Native disclosures for objects/arrays; configurable initial depth |
 | quiz | `Quiz` | Choices, explanations, correct/incorrect feedback and completed score |
@@ -68,6 +69,8 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | video | `GraphicVideo`, `registerGraphicVideo` | Same slide sampler, paused GSAP playback, explicit disposal |
 
 The new scene builders are in [teaching-scenes.ts](../visual-explainer-mdx/teaching-scenes.ts). Ordered tracks are in [teaching-motion.ts](../visual-explainer-mdx/teaching-motion.ts). They return the existing `GraphicScene` and `GraphicMotion` data; no additional renderer, grouping layer, or clock exists. Sibling APIs share a source module and dependency closure. Broad imports still re-export extracted React leaves for existing consumers.
+
+[Code review diffs](../plugins/visual-explainer/references/code-review-diffs.md) adds a seekable gallery and a short encoded specimen. Split and unified layouts share the same literal diff model. The animated edit reuses `createSourceScene` and `editWithIdentity`: changed tokens clear, retained characters move, and replacement tokens arrive. The older page `DiffBlock` now uses the same row-alignment owner, including gaps and indentation-only anchors.
 
 [Motion presets](motion-presets.md) describes the new traversal, comparison, and narrated source compilers. The [worked motion review](../examples/visual-explainer-mdx/motion-review.tsx) composes those APIs on one finite clock. Install them with `artifacture add follow-path comparison-wipe source-range-focus`; route and clip helpers travel with existing motion consumers, and narration preserves its license closure.
 

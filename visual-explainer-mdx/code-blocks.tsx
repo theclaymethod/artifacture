@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { diffLines } from './diff-lines.mjs';
+import { alignDiffRows, diffLines } from './diff-lines.mjs';
 import type { DiffRow } from './diff-lines.mjs';
 import './code-blocks.css';
 
@@ -107,8 +107,9 @@ function UnifiedDiffTable({ rows }: { rows: DiffRow[] }) {
 }
 
 function SplitDiffTable({ rows }: { rows: DiffRow[] }) {
-  const left = rows.filter((row) => row.kind !== 'add');
-  const right = rows.filter((row) => row.kind !== 'remove');
+  const aligned = alignDiffRows(rows);
+  const left = aligned.map(row => row.kind === 'hunk' ? { kind: 'hunk' as const, code: row.code } : row.before);
+  const right = aligned.map(row => row.kind === 'hunk' ? { kind: 'hunk' as const, code: row.code } : row.after);
   return (
     <div className="ve-diff-split ve-scroll-x">
       <DiffSide title="Before" rows={left} side="old" />
@@ -117,17 +118,17 @@ function SplitDiffTable({ rows }: { rows: DiffRow[] }) {
   );
 }
 
-function DiffSide({ title, rows, side }: { title: string; rows: DiffRow[]; side: 'old' | 'new' }) {
+function DiffSide({ title, rows, side }: { title: string; rows: (DiffRow | undefined)[]; side: 'old' | 'new' }) {
   return (
     <div className="ve-diff-side">
       <div className="ve-diff-side-title">{title}</div>
       <table className="ve-diff-table">
         <tbody>
           {rows.map((row, index) => (
-            <tr data-ve-diff-kind={row.kind} key={`${side}-${row.oldNo ?? 'x'}-${row.newNo ?? 'x'}-${index}`}>
-              <td className="ve-diff-gutter">{side === 'old' ? row.oldNo ?? '' : row.newNo ?? ''}</td>
-              <td className="ve-diff-mark">{diffGlyph(row.kind)}</td>
-              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row.html ?? escapeHtml(row.code) }} />
+            <tr data-ve-diff-kind={row?.kind ?? 'gap'} key={`${side}-${index}`}>
+              <td className="ve-diff-gutter">{side === 'old' ? row?.oldNo ?? '' : row?.newNo ?? ''}</td>
+              <td className="ve-diff-mark">{row ? diffGlyph(row.kind) : ''}</td>
+              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row ? row.html ?? escapeHtml(row.code) : '&nbsp;' }} />
             </tr>
           ))}
         </tbody>

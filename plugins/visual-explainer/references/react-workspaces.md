@@ -44,6 +44,7 @@ Use `list --query <capability-or-API> --json` before choosing a block. The index
 | diagram-canvas, diagram-walkthrough | Flow/tree/swimlane/timeline and an interactive packet trace |
 | data-chart, thread-plot | Bar/line/dot measurements and selectable individual record traces |
 | code-block, diff-block, terminal-block, json-tree, quiz | Annotated source, unified/split edits, transcripts, expandable data, and feedback |
+| code-diff | Aligned split/unified scenes, inline changes, context folds, cue focus and identity-preserving animated edits; read [code-review-diffs.md](code-review-diffs.md) |
 | pipeline, decision-matrix, risk-ledger | Ordered steps, real choice criteria, and concrete failure signals |
 | sequence-scene, state-scene, layer-scene | Messages, transition loops, and nested ownership as GraphicScene data |
 | plot-scene, token-scene, playhead-scene, grid-scene | Numeric line/scatter, discrete decisions, timed events, and fraction-filled scalar cells |

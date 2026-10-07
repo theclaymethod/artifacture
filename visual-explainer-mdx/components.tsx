@@ -53,6 +53,8 @@ export { createSourceScene } from './source-scenes';
 export type { SourcePart, SourceVersion, SourcePosition, SourceRange, SourceLayout, SourceCell, SourceSceneInput, PreparedSourceScene } from './source-scenes';
 export { focusSourceRange, editWithIdentity } from './narrated-motion';
 export type { SourceEdit, SourceCueBinding, SourceCueFocusInput, SourceCueFocus } from './narrated-motion';
+export { prepareCodeDiff, createCodeDiffScene, focusCodeDiff, createCodeDiffTransition } from './code-diff';
+export type { CodeDiffPart, CodeDiffLine, CodeDiffRow, CodeDiffFold, CodeDiffInput, PreparedCodeDiff, CodeDiffLayout, CodeDiffSceneInput, CodeDiffFocusBeat, PreparedCodeDiffScene, CodeDiffTransitionInput, PreparedCodeDiffTransition } from './code-diff';
 export { createSlideScene, sequenceSlides, sampleSlideSequence, GraphicSlide } from './graphic-slides';
 export type { GraphicSlideScene, GraphicSlideSequence } from './graphic-slides';
 export { GraphicVideo } from './graphic-video';
