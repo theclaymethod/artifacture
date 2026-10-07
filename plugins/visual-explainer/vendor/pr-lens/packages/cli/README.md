@@ -1,0 +1,196 @@
+# @coldtea/pr-lens-cli
+
+PR Lens on the command line. It reads a diff with your own model key, checks the result against the contract, and hands you the pull request comment.
+
+MIT © Coldtea AI.
+
+```bash
+npx @coldtea/pr-lens-cli analyze --base origin/main
+```
+
+## Bring your own key
+
+Only `analyze` talks to a model; `render`, `comment`, `validate`, `export` and `canvas` never do. Its key is read from the environment, never from a flag: a flag lands in shell history and in the log of whatever CI runs it. The diff goes to the provider you name and nowhere else: there is no PR Lens service in this path.
+
+```bash
+export GEMINI_API_KEY=…      # Gemini is the default, not a requirement
+pr-lens analyze --base origin/main --head HEAD
+```
+
+Three request shapes are implemented rather than a list of vendors:
+
+| `--provider`        | Endpoint                                                          | Key              |
+| ------------------- | ----------------------------------------------------------------- | ---------------- |
+| `gemini` (default)  | Google's own API                                                  | `GEMINI_API_KEY` |
+| `openai`            | OpenAI's own API                                                  | `OPENAI_API_KEY` |
+| `openai-compatible` | anything else speaking `/chat/completions`, named by `--base-url` | `OPENAI_API_KEY` |
+
+DeepSeek, Anthropic's compatibility endpoint, OpenRouter, Ollama and llama.cpp are all reached by pointing `--base-url` at them, and a new vendor needs no release here. OpenAI is listed separately from the servers that copied it because the two have drifted: it renamed the output limit to `max_completion_tokens` and its newer models reject `max_tokens`, which is the only spelling the others know. There is no field both accept, so you say which endpoint you are talking to rather than the CLI guessing from a hostname.
+
+Every provider gets temperature 0, so the same diff tends to draw the same diagram. OpenAI's reasoning models accept only their own default and reject a request that sets any other value: pass `--temperature default` to send none, or `--temperature <n>` for another value.
+
+```bash
+pr-lens analyze --base origin/main \
+  --provider openai-compatible \
+  --base-url http://localhost:11434/v1 \
+  --model qwen3-coder \
+  --api-key-env OLLAMA_KEY
+```
+
+## Where the files go
+
+`analyze` and `render` write to `.pr-lens/` in the current directory, and the first write adds `.pr-lens/` to the repository's `.gitignore` alongside a README saying what the directory holds.
+
+None of it is meant to be committed. The SVGs, the document and the manifest are rebuilt from the diff whenever anyone wants them, and a diagram of a pull request that merged months ago is worse than no diagram. What is meant to last is the comment on the pull request, and the map `export` writes.
+
+`--out` overrides the location on every command that writes. Point it somewhere else and PR Lens leaves your `.gitignore` alone: that directory is yours to decide about.
+
+`canvas` keeps one more file there, `.pr-lens/canvas.json`, which holds the write token for every canvas this checkout has pushed. It is the one file in the directory that cannot be rebuilt, and a bigger reason the directory is ignored.
+
+## The commands
+
+### `analyze`
+
+Diff in, graph document out.
+
+```bash
+pr-lens analyze --base origin/main --pr 42
+```
+
+The document lands in `.pr-lens/graph.json` unless `--out` says otherwise.
+
+The base is the merge base of the two refs, not the tip of the base branch: a diff against the tip would blame this pull request for every change made on the base branch since it forked.
+
+The commit shas, the repository, the pull request number and the line counts are filled in from the repository itself, and anything the model writes there is discarded. A fact the model is free to restate is a fact that eventually disagrees with itself.
+
+The answer is parsed against the contract. If it fails, the validation errors, paths and all, go back to the model once, and only once: a model that cannot fix a named path in one round does not fix it in three. `--dry-run` reports what would be sent and sends nothing.
+
+### `render`
+
+```bash
+pr-lens render .pr-lens/graph.json
+```
+
+Draws the document as self-contained light and dark SVGs (one pair per drill-down section per lens, or one pair per lens when the document has no sections), and writes two files beside them: `manifest.json`, which says what was drawn and under which file name, and `drawn.graph.json`, the document those pictures actually show.
+
+Both matter to what comes next. The manifest is where `comment` gets its file names, so neither command re-derives the other's. And `drawn.graph.json` exists because this is where corrections are applied: excluding a node can empty out a whole drill-down section, and the renderer then draws no picture for it. A comment composed from the document that went _in_ would announce a section that came out of nothing.
+
+The SVGs carry no script and no external reference, and the same document renders to the same bytes every time. `--theme light` or `--theme dark` draws one half of the pair.
+
+The renderer also hands back an atlas of where every lane, node, edge and flow step landed in each picture. `render` and `export` write no file for it. The SVGs and the manifest are what a comment and a canvas need, and a file of coordinates beside them would be a second copy of the geometry to keep in step. A program that wants the boxes calls `@coldtea/pr-lens-renderer` directly.
+
+### `comment`
+
+```bash
+pr-lens comment --graph .pr-lens/<drawing>/drawn.graph.json --manifest .pr-lens/<drawing>/manifest.json \
+  --asset-base-url https://raw.githubusercontent.com/owner/repo/pr-lens/42
+```
+
+Composes the markdown (the `<picture>` pairs that read in both GitHub themes, the headline chips, the nested `<details>` tree) and prints it. Each diagram links to itself: a comment column is about 830 pixels wide and a system with several lanes is several times that, so it arrives scaled to fit and one click gives a reader the size the labels were drawn at. The two files have to belong to each other: the manifest records the hash of the document it came from, and a mismatched pair is refused rather than composed into a comment describing diagrams nobody drew. It posts nothing; posting is the caller's business, and `--print-marker` gives that caller the hidden marker that identifies an existing comment to update.
+
+### `validate`
+
+```bash
+pr-lens validate .pr-lens/graph.json .github/pr-lens.yml
+```
+
+Parses graph documents, patch documents, render manifests and configs, JSON or YAML, and reports every problem in each rather than only the first. A file with no `kind` field is read as a config, because a config is the only one of the four a person writes by hand.
+
+### `export`
+
+```bash
+pr-lens export .pr-lens/graph.json -o .github/pr-lens.map.json
+```
+
+Turns a pull-request document into the map of the system once that pull request has merged: elements the change deletes are dropped, along with the edges and flow steps that hung from them; the rest stops being annotated, the walkthrough goes with the change it narrated, and the result is stamped with the single commit it reflects.
+
+The map is a snapshot, not a source of truth. Nothing reads it back into the pipeline: a committed map that overrode inference would be hand-maintained rot with merge conflicts attached. Commit it so a repository has something to read, to diff, and to hand an agent.
+
+### `canvas`
+
+```bash
+pr-lens canvas push
+```
+
+Puts the document on prlens.dev as a canvas: a page anyone you share it with can read, and an SVG a README can embed.
+
+`push` sends the JSON document, never an SVG; the app draws it. Give it the `drawn.graph.json` a render wrote, so the page shows what the diagrams show. With one drawing in the checkout a bare `push` finds it; with several it lists them and asks which.
+
+The first push of a document mints a canvas, and every push after that updates the same one. It is matched by the path the document came from, or by the document's title when no recorded path points at a canvas. The title match is what lets `pull`, `render`, `push` land back on the canvas you pulled: the pull writes the source document, the render writes the drawing somewhere else, and only one of them can be the recorded path. So a corrected diagram becomes a new revision of its canvas instead of a near copy. Because `render` gives each drawing a directory named after its title, a second diagram gets its own path and its own canvas without you asking for one. `--canvas <id|name>` picks a canvas for a single push and `--name` says what to call a new one; the document's title is the default. It prints the view link, the embed, and the way to take it down again:
+
+```
+✓ https://prlens.dev/c/{id} — rev 1 · 4 diagrams
+  unlisted: anyone you share it with can open it, no sign-in needed
+  README embed: https://prlens.dev/c/{id}.svg
+  remove: pr-lens canvas delete
+```
+
+The view link is the one to share. The edit link is the same page with the write token in the fragment, and anyone holding it can push over your canvas, so it stays with you. The embed is the hero diagram as an SVG, for a README or a wiki.
+
+A canvas plays the document's walkthrough when it carries one. The app checks that every step resolves against the diagrams it drew, and a push it refuses arrives here as `CANVAS_REJECTED` carrying the app's own words rather than a generic failure.
+
+Changing a canvas takes its write token or a sign-in as its owner. The CLI sends the write token when this checkout has one, since it works signed in or not. A second laptop, a fresh CI runner, or a checkout that never pulled the edit link sends the account token instead. `canvas claim` accepts only the write token, because claiming is how a canvas gets an owner in the first place.
+
+`pull` fetches the document back, by the view link or the bare id, into `.pr-lens/graph.json` unless `-o` says otherwise, and records the revision. Pull the edit link, the one ending in `#w=…`, and its token is recorded too: that is how a fresh checkout, or one that lost `.pr-lens/canvas.json`, gets the canvas back. A push carries the revision it last saw, and one that has been overtaken is refused rather than applied: pull, then push again.
+
+`rotate` mints a new write token and retires the old one. Use it when an edit link has leaked. The CLI saves the new token before it sends the request, so if the connection drops, the next command finishes the rotation instead of losing the token. The token lives in `.pr-lens/canvas.json`, keyed by canvas id, and git ignores it. Lose that file and the canvas is still readable by everyone; pushing to it again needs the token, which the edit link still carries.
+
+`delete` removes the hosted canvas: the document, every revision of it, and the images drawn from it, at once and for good. It needs the write token, like `push`. The local graph and SVG files stay where they are.
+
+A canvas is a labelled map of a system, so before pushing one it is fair to ask where it goes. The short answer: it can be opened by anyone you share it with and nobody else, it is never listed or indexed, it is kept in the EU until you delete it, and nothing is done with it beyond drawing the page. The long answer, with every company that touches it and the region each runs in, is the [privacy policy](https://prlens.dev/privacy).
+
+Registry writes take a lock at `.pr-lens/canvas.json.lock`. The CLI never removes another command's lock. If a command dies and leaves one behind, the error names its process id and you remove the file yourself.
+
+The CLI refuses to write the registry where git could commit it. If a checkout tracks `.pr-lens/canvas.json` or un-ignores `.pr-lens/`, the command fails with `CANVAS_REGISTRY_EXPOSED` and writes nothing.
+
+`--api` points at another PR Lens app, or set `PR_LENS_API_URL`. The protocol between the CLI and the app is five routes and one error envelope, written up in [the canvas API contract](https://github.com/coldteadotai/pr-lens/blob/main/docs/canvas-api.md) so a private server can answer it and documents stay on your network.
+
+### `auth`
+
+```bash
+pr-lens auth login
+```
+
+Signs this machine in, so the canvases it pushes belong to your account. Signed out, they are unlisted pages that only a link reaches. `push`, `pull` and `render` all work signed out, and always will.
+
+It prints a code and opens the browser. The code travels in the link, so you never type it; check that it matches the one on the page:
+
+```
+  Code WDJB-MJHT · opening https://prlens.dev/device?code=WDJB-MJHT
+  Check the page shows the same code, then approve. The code lasts 15 minutes.
+  Waiting for it…
+```
+
+Approving links this machine to your account. Every canvas the machine has already pushed becomes yours, and so does every one it pushes after that. `--no-browser` prints the link instead of opening it, for a machine you reach over SSH.
+
+`status` says which app this machine is signed in to and asks the app whether the sign-in still works. `--json` gives the same answer for scripts. Neither prints the token. When the app can't be reached, `status` says it couldn't check; it does not call the sign-in bad.
+
+`logout` forgets the sign-in kept on this machine. The machine stays linked, so the canvases it pushed stay yours. To remove the machine from your account, use the app's settings; signing in again from a removed machine links it back.
+
+The sign-in lives in `~/.config/pr-lens/auth/`, one file per app and readable by you alone, so one machine can be signed in to prlens.dev and to a private store at the same time. `PR_LENS_TOKEN` overrides it, which is how CI signs in without a browser. [The Action](https://github.com/coldteadotai/pr-lens/tree/main/packages/action) takes it as its `token` input.
+
+## Corrections
+
+A repository's `.github/pr-lens.yml` is picked up automatically by `render` and applied at draw time: renames, exclusions, lane pins, groupings. It is an overlay: inference never writes back into it, so a correction keeps holding as the code moves and the model renames things between runs, and the document on disk stays the record of what was inferred.
+
+```yaml
+schemaVersion: 0.1.0
+map:
+  rename:
+    - match: functions/src/broadcast/sendBroadcastBulk.ts
+      to: Broadcast sender
+  exclude:
+    - "**/*.test.ts"
+```
+
+A lane pin may name a lane the document never declared; the band is created and takes the id for its label. And `render` reports any correction that changed nothing about what it drew. A config that has drifted, usually because the file a selector named has moved, otherwise fails silently and forever.
+
+`--config` points elsewhere and `--no-config` ignores it, on both `render` and `analyze`. `analyze` reads only `lenses` from it, since which lenses to fill is a question for extraction and the rest is a question for drawing.
+
+## Failures
+
+Every failure carries a code, so a script can branch on it: `USAGE`, `UNREADABLE_FILE`, `UNKNOWN_DOCUMENT`, `INVALID_DOCUMENT`, `GIT_FAILED`, `EMPTY_DIFF`, `REPOSITORY_UNKNOWN`, `MISSING_API_KEY`, `PROVIDER_FAILED`, `MODEL_OUTPUT_INVALID`, `RENDER_FAILED`, and for `canvas`: `CANVAS_UNREGISTERED`, `CANVAS_UNKNOWN`, `CANVAS_CONFLICT`, `CANVAS_REJECTED`, `CANVAS_RATE_LIMITED`, `CANVAS_UNAVAILABLE`, `CANVAS_REGISTRY_EXPOSED`, and for `auth`: `AUTH_REQUIRED`, `MACHINE_REVOKED`, `APP_UNAVAILABLE`. Misuse exits 2, everything else exits 1.
+
+---
+
+Part of [PR Lens](https://prlens.dev). Review what actually matters.

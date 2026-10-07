@@ -1,0 +1,37 @@
+{
+  "name": "shaders-react",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "generate": "tsx ../core/scripts/generate-components.ts --framework=react",
+    "prebuild": "pnpm run clean && pnpm run generate",
+    "build": "echo '⚙️  Building react package...' && vite build"
+  },
+  "dependencies": {
+    "shaders-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite-plugin-externalize-deps": "^0.10.0",
+    "vite": "npm:rolldown-vite@7.1.16"
+  }
+}

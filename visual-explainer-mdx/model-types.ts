@@ -1,13 +1,19 @@
-import type { Material, Object3D } from 'three';
+import type { Box3, Camera, Material, Object3D } from 'three';
 import type { AsciiFrameOptions, AsciiPalette } from './ascii-frame';
 import type { EffectImage, EffectSource } from './media-source';
 
 export type ModelPaint = Readonly<{ material: Material; role: 'ink' | 'accent' }>;
+/** A source model may retain its authored camera and lights instead of generic fitting. */
+export type ModelPresentation = (context: Readonly<{ aspect: number; bounds: Box3 }>) => Readonly<{
+  camera: Camera;
+  lights: readonly Object3D[];
+}>;
 export type ModelAsset = Readonly<{
   root: Object3D;
   sample?: (seconds: number) => void;
   paint?: readonly ModelPaint[];
   image?: EffectImage;
+  presentation?: ModelPresentation;
   dispose: () => void;
 }>;
 export type ModelFactory = (context: Readonly<{ signal: AbortSignal }>) => ModelAsset | Promise<ModelAsset>;

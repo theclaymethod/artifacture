@@ -630,3 +630,21 @@ function describeElement(element: HTMLElement) {
   }
   return parts.join(' > ');
 }
+
+export { DiagramDesignFigure, diagramDesignExamples, type DiagramDesignFigureProps, type DiagramDesignExample } from './diagram-design-figure';
+export * from './hairline-figures';
+
+export { NativeLivingForm, nativeLivingFormSettings } from "./native-living-forms";
+export type { NativeLivingFormProps } from "./native-living-forms";
+
+export { NativeProceduralProp } from "./native-procedural-props";
+export type { NativeProceduralPropProps } from "./native-procedural-props";
+
+export { PrLensFigure, prLensExamples } from './pr-lens-figure';
+export type { PrLensExample } from './pr-lens-figure';
+
+export { ChalkboardFigure, chalkboardExamples } from './chalkboard-figure';
+export type { ChalkboardExample } from './chalkboard-figure';
+
+export { SourceFigure, prepareSourceDocument, seekSourceFrame } from './source-figure';
+export type { SourceDocument, SourceTiming, SourceFigureProps } from './source-figure';

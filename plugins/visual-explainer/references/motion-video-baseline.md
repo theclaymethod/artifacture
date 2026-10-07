@@ -55,6 +55,6 @@ The sample uses the pinned GSAP URL shown in its source; HyperFrames bundles it 
 
 ## Sources
 
-Hairline's [skill](https://hairline.lucasmarkes.com/skill) and [source](https://github.com/lucasmarkes/hairline) inform the illustration language. Artifacture bundles the complete unchanged skill and interactive runtime from revision `c3692e0c797956268847d843949f79714b6f7a41`, with its MIT license and [file hashes](../vendor/hairline-create/provenance.json). The original reference composition includes neither that runtime nor an upstream figure.
+Hairline's [skill](https://hairline.lucasmarkes.com/skill) and [source](https://github.com/lucasmarkes/hairline) inform the illustration language. Artifacture bundles the complete unchanged skill and interactive runtime from revision `bc782244216620434b14736df1d74daed2d05046`, with its MIT license and [file hashes](../vendor/hairline-create/provenance.json). The original reference composition includes neither that runtime nor an upstream figure.
 
 [3Blue1Brown](https://www.3blue1brown.com/) and the author's [Manim repository](https://github.com/3b1b/manim) are the requested references for visual mathematical explanation. The geometry and animation here are original; no channel assets, characters, footage, or music are reused.

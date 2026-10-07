@@ -1,6 +1,6 @@
 # Component references
 
-These references guide the next editable blocks. They are design and API references, not bundled dependencies or copied upstream assets. ISO is the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
+The [source inventory](source-libraries.md) records the originals now installed or vendored, including their licenses and runtime boundaries. The additional references below guide editable blocks; they are not claims that every candidate API is installed. ISO is the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
 
 | Reference | Useful parts | Local fit |
 | --- | --- | --- |

@@ -1,0 +1,1144 @@
+{
+  "repository": "https://github.com/cathrynlavery/diagram-design",
+  "revision": "3996c1607503ec4bcdb60b018568359d20f71d15",
+  "license": "MIT",
+  "integration": "Unchanged upstream skill, assets, projection and example builders. No rewritten geometry or controller.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "bb7e12e91fecef43024111123ff784cec6c485585561d8b552557c0173b3ed29"
+    },
+    {
+      "path": "THIRD_PARTY_LICENSES.md",
+      "sha256": "ad931154e2f91bf545fc9c442666a2159aa56c0af3cca0b7246e02c6efeab6ba"
+    },
+    {
+      "path": "scripts/axonometry.py",
+      "sha256": "c7697a9a72d77673f333f0d6bd428fd59eddfff871b73d7224aadb9a76a32cd0"
+    },
+    {
+      "path": "scripts/build-axonometric-plan-examples.py",
+      "sha256": "9207c968bb9e674fac3005b2e29745c78fc3a069cf8546756a62856c6ad34ee9"
+    },
+    {
+      "path": "scripts/build-exploded-examples.py",
+      "sha256": "10167871f810c1dadce14d5a94b9471e8f6794462f655136d6ed431c39b37d90"
+    },
+    {
+      "path": "skills/diagram-design/SKILL.md",
+      "sha256": "a7f05d4349b1747c7c01044ba168307dc77a2c693f174449589a0b434fad9e84"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture-dark.html",
+      "sha256": "3767f518519dc7b6fc98066cc76c70937446ea9e71e380cf7c6064dc6ed6f5ba"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture-delta-dark.html",
+      "sha256": "d3f0984c7ff145656bb400ff294e9595d7f5f1209d156edbb5e5676e8ee199b9"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture-delta-full.html",
+      "sha256": "8f8a7c12fc734468910c107105c8529bd4b2f9de8ac215d89b6e82aec74dfcf6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture-delta.html",
+      "sha256": "a8b9b1e1f27caba825f5335e1026dec2f32deb60c7e3a83730bc2183aaf56b52"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture-full.html",
+      "sha256": "84425acb29b181a165e8c07fad268304f77223a92797a7f58679f51c3dd47502"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-architecture.html",
+      "sha256": "03716fdb0a4ad641c30a5267b14a4c573d699f0f31ab3d8a0ba4e2b74ad56177"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-campus-animated.html",
+      "sha256": "264e23e3b660890e7a764fe560684b633e4311d29634247747c191bd10717cf7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-campus-dark.html",
+      "sha256": "0e7874df6b1cd3440ad4405c5b3f169a24bb145b3ca1cda32122b6f911678c27"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-campus-full.html",
+      "sha256": "cf05113f4d001df86ff0b731d2db5f49eeb405ce5d497ae07ceaadff6b60224e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-campus.html",
+      "sha256": "a9862c1365d638e186b66830c1538b9f977339ae3d614bbe3a2eea492c8e4841"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-coffee-shop-animated.html",
+      "sha256": "e1dc88f0f107bc776efcb8262f3acb60570be3101afec967b616d0bb2eb6fa61"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-coffee-shop-dark.html",
+      "sha256": "0d5836e9b4ca2f85c4a1fd976ef0b7f89a29a29fb169dcb59b483a4e731bd46b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-coffee-shop-full.html",
+      "sha256": "98b3a6a6ceb7e91ea767ff4ceecf19f3e884c78bd04cb15395eedbb1acb213bd"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-coffee-shop.html",
+      "sha256": "d67a797a53ad6d177f209dd00420febea2df04ee7af9d7d42e77debd6ad481f0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-dark.html",
+      "sha256": "fa041519f9e71e518069334397886c6e545f9286b28dcdbc254a6aaa96a1034a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-full.html",
+      "sha256": "36a99daff79ef9a63cb931614985a338574548e562ba462e32b3d7e4b4cbc53c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-warehouse-animated.html",
+      "sha256": "fa2b842b0316fe2d0ee1aceafc2ead9e3bbfa3b6fb33e5696d7302d386885a22"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-warehouse-dark.html",
+      "sha256": "a85d79254ec2e1813a13055efb9951b84ea55a04f43aa6fb6c880aa448924d38"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-warehouse-full.html",
+      "sha256": "5b9d7acfa93b0b070b1ce7f6fb999be4898c841afccb46857391b4adc28d071b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan-warehouse.html",
+      "sha256": "1e7105599390f06c43583e6e5acf9b3a90f04b810064f5333bc61024c4c1831e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-axonometric-plan.html",
+      "sha256": "06f0e85d99c7e59b52d0bcbdb491eb5ec0a51a6036879fe6d809626ffa2b7fac"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bar-dark.html",
+      "sha256": "fb96534eff0910a006dabca940d71aeb1019076abfbe9a020758747c2e2cbb0a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bar-full.html",
+      "sha256": "0095ec6576fff513fee6a731d6eba7fbd9e4726a3e8f6ac183407c0b69a36f58"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bar.html",
+      "sha256": "1bbd708cdca419c137160056ed9862532a3402ba65d9335bae1be0aef90c7abb"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-beeswarm-dark.html",
+      "sha256": "597cf05ad582eb0dbe8040949c6f164096ce84631e6d3ba85d5fbf778d2b1dc7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-beeswarm-full.html",
+      "sha256": "b9c6db9d3cbae523d16ac476d37e7996d034d00835218ce8888c373396f2e702"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-beeswarm.html",
+      "sha256": "ddd5c2adc0a9aaf46673b4e3e3207619808d00b719090fe14353d5bf816ccd31"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bubble-dark.html",
+      "sha256": "e5297625f2a81cebcd63250dcd7455f5c84160da501354f530dfcf59baf0ab9e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bubble-full.html",
+      "sha256": "21c83751d106234c8ec450c97d0681a9d680f8e1bea3ab06473696dbd262c42b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bubble.html",
+      "sha256": "a507ae84a0a6d03c329e8a26cf5e9de9c77aa21c74d9ce25379af2019f7cd18a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bump-dark.html",
+      "sha256": "c6982966a1c775a0d3b176a21f1a86193453ca9550a7c8c00db6ca4f38d4e757"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bump-full.html",
+      "sha256": "80976313d11eb5c20148143ce2df4ec3fe2340c917965244d8ee959293e35d79"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-bump.html",
+      "sha256": "5c3b46f8d1d0db041cf524ea87a1147f37d1ff2f69ca3b9a4963ae4a8f514756"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-data-flow-dark.html",
+      "sha256": "68144451031cc5c6d56dbb15b6532f24efc2bac4e3dfc9c5e9b8177d539777d8"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-data-flow-full.html",
+      "sha256": "bf4db055606bd5f15e64e0da67c8f2023b8cbea6a27a4bca2be24dbe12f6245a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-data-flow.html",
+      "sha256": "511788f809b9d674e2f92568955e5fc0c5f5f7a3960eaa0049e136ec93957add"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-datalake-dark.html",
+      "sha256": "98ed93bddc4d2112c3bd886aa2aa469c4f592a034eb39d2d3056033dc75d810d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-datalake-full.html",
+      "sha256": "c84e13615eeb5d1cee261e485831a180752ef905f9a6252be3cf3b85415073cf"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-datalake.html",
+      "sha256": "a6d9fbf97952ef55f41c531ef1d32d4ba46a6bdb1fc1664997e0b8f51926c9f9"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-db-schema-dark.html",
+      "sha256": "40d12080e78a1ce39f5d6858f9e02562b8f4ec0bffe303ab8d4fc473db561024"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-db-schema-full.html",
+      "sha256": "a69144b54b23e7e6046234ed31fcc26625147af8a9e0dfeff05f4553c3eba8f6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-db-schema.html",
+      "sha256": "58d473906c57670fecee29bc55377df5b433549445962204412ebd2c081b76db"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dependency-dark.html",
+      "sha256": "7eb7c3d1e90d9dbb49a97f9490184ff1768930847fe86a112f0262513691c035"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dependency-full.html",
+      "sha256": "5844a5bfa0eb30e5c7c8d5d23d4a3230ed5fe051e6ca84daf34a5ecb7185ef5b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dependency.html",
+      "sha256": "973f7b5f5ac1746bb018e9ea8de9f6853b5f14ff41173e64abcf9855ea5f353b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-deployment-dark.html",
+      "sha256": "7688eec54dde8950375d2bb724438bce6dce18714ed2f99a0a60ffaacb17190a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-deployment-full.html",
+      "sha256": "6f6ae188e2c2874a7b6f28943575eff72773950a9ac15dac8b7b3209cfd88cc5"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-deployment.html",
+      "sha256": "6e28f0eee98dd728bfa6b5210b1885caf2b39992fdd06a680e37bbc8863e89b2"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-integration-dark.html",
+      "sha256": "8cb30572815bfe86e449bb22266768f6dd52d91725faebd276c7e9de24113749"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-integration-full.html",
+      "sha256": "9fc9f12a662ed1bf3e837c11be1b05df03db7a845ea203846a47b247ab6edf99"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-integration.html",
+      "sha256": "929b6aaefa9a362d4cd18fb1801a57f28d32aa8dd78ba577375a11926ee2cc94"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-security-matrix-dark.html",
+      "sha256": "ac5515d7fb1e850249aedf6d39deb848cd9edc02068c6944d37a04ca0fcc995e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-security-matrix-full.html",
+      "sha256": "9cd7d120e069a9be73a0f98b94282e8e9906f802c49fb1c57e5553479d8033ee"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-dp-security-matrix.html",
+      "sha256": "88d7a3fb9788300082274924f1f95dfd0a5a8b3bfca3fcd91b424cc8caa50044"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-er-dark.html",
+      "sha256": "c007c14d88a48a8ea30b1144dd4ac392ee7891a2278262e2a6f6836b43aa7fdf"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-er-full.html",
+      "sha256": "9f43422370cbd751196fd5b8ab802a177d015f739b39064c58f5e7273f56e1c3"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-er.html",
+      "sha256": "aee470dcf37af317f14d21cd9420f6bcb1b65f0fb0047483a42b8afc0cab2774"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-ai-stack-animated.html",
+      "sha256": "ff84282f887f8302f1d7793ed9ac76650c8c69f0b83474c577a2be44e56a87cc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-ai-stack-dark.html",
+      "sha256": "53289f5a527c603ae22ccd8d7b0085f32d465613f1717ae12b38f287eb8b7e94"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-ai-stack-full.html",
+      "sha256": "ac8c4bfaecd9230d4a7c647ae51b38311cd928269a52b3dea859ccd3b1fdd056"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-ai-stack.html",
+      "sha256": "9f7d37c697bd57150e9261ee3ee0e9bf44a995e4f3b4b5825536a6551131f0d4"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-dark.html",
+      "sha256": "408cdc4779bf0db7456cdda4651cd1678adbb129c5c06ba6bf0d6632b544770c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-full.html",
+      "sha256": "9fa801cfb5b30b10225e45e3242506b8ffbf7a500704ecd098e671010b476611"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-keyboard-animated.html",
+      "sha256": "c1a4d1d8fea1f56949f8858c4770f08c51069e6f7e749c84c143efac8f7bf98f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-keyboard-dark.html",
+      "sha256": "183f8e69f9f20f9f8fbdcaca8af0e0acb27739aa7a20bad7847f744a3ed22144"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-keyboard-full.html",
+      "sha256": "29393c4de884bf2d911408201b671428c851dffc3750ada760f888bc3ba3144f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-keyboard.html",
+      "sha256": "37968765b1e7e13305478baae412a22ebae67949060b60022e86e78a277ee24c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-phone-animated.html",
+      "sha256": "16ecd58fda92e0316a6db6d2861e01cecd9209cc6186c21f430015f2b03ce301"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-phone-dark.html",
+      "sha256": "5858263d95a656e199f56e00e75491ab161e3f49c4f2e6ec0622f8aa8d85c83f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-phone-full.html",
+      "sha256": "378328ee24c63d56df718273c8660103afde05d74ffb3de283ba8806ec99c9b4"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-phone.html",
+      "sha256": "e98927d48da40c2a2c953e179a4624ca8cf35b52dd7b9d25cc911cf065192a17"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-unboxing-animated.html",
+      "sha256": "a493abf5c4e1a6becb4af374980ccbc36d2df0c12dc3d09944e69152e3ba8425"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-unboxing-dark.html",
+      "sha256": "3bbe1e9be1c611e49796bdfe47bf69c714ec5e0ff5a13921cce548cfafe94f0b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-unboxing-full.html",
+      "sha256": "f8605e05217302ab8aba92c55523a56c9f65ffac8f3b8909d6e278f563869903"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded-unboxing.html",
+      "sha256": "7dcc95afd0a6d2520e320e56e3f95c40d74116b22c0fd89bb51609beff6151c7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-exploded.html",
+      "sha256": "164bee35a19956151cb0c3043ac41054de9d5ae6dfcf0ed2c2c211d16218604d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-fishbone-dark.html",
+      "sha256": "f884b81b83f7ce40cf85b8aa6c3a55db99b7fb2d38502deff222aaff36d7db47"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-fishbone-full.html",
+      "sha256": "75bfad970d61909fedbf2ede67c3e88057ab46909d7ea7f2c16d3ad2a029aa2e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-fishbone.html",
+      "sha256": "cd7079857240a9f6228804d3492af0add2eb36343798c9e0ef90657f2a246d04"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-flowchart-dark.html",
+      "sha256": "9b69415f880744d1c3dff23cf1dfa6bfbcc3bf38178456ce6668a74b783647ef"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-flowchart-full.html",
+      "sha256": "14ba425e802f9fe7b952b17162c8fbe0674b73562f9f83f362e8de96d455a90d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-flowchart.html",
+      "sha256": "4242060c6b8bdb601c33f040ec656c0c23b8dc36eb94133af839cf7b507b7308"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-gantt-dark.html",
+      "sha256": "81016c2956b4cf51d0c2e2b0302ea53c535f3f59a21eae8d4b1a596c448ddb2b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-gantt-full.html",
+      "sha256": "aab29f4296a7500417c899a445bb7df5f6b785135960e66c5fdfbead27ca475f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-gantt.html",
+      "sha256": "607745921006b312ab710c3166036aebeb31a2b7cd40df36713a850a28cb73f3"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-heatmap-dark.html",
+      "sha256": "6ec2953db65dbabcdbd5abe3d43f7e001524317ddd3e1230398f9de927e547c0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-heatmap-full.html",
+      "sha256": "4509527b8a5fe6e6bb74ba2f2f94d32e3b2f0ed8e6bf3ee1e91239aeba3560b2"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-heatmap.html",
+      "sha256": "1dd42f8cdfb73d1f0a139de52653c98da760ef4e1403990424f6a5da201cdb6b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level-dark.html",
+      "sha256": "49a52a62a30781de7d6ee051cddf9837884a84bb1ce1891eb4dadb4bb82348ae"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level-full.html",
+      "sha256": "d25bde14ab1ac1d9bf47b1613f864517ce3d88553043192abbc856f69bd0f7b6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level-vertical-dark.html",
+      "sha256": "492b0b9aebb037bfd10f65b16f2212592407a1731682d7469214225451a58fc6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level-vertical-full.html",
+      "sha256": "3f72c30a5be5a5bd9cde92e366ae1a97cae8473f1d8da2981ffc6d187b5c3dc3"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level-vertical.html",
+      "sha256": "fac0ef026d59a5086880087db4162a3ee2e064a8685c0a093b218df737884c02"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-high-level.html",
+      "sha256": "33789942cb06be5228ffa6e450602d1f7c9344b7d263fa2674b7ba5e6dd7e788"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-import-drawio.html",
+      "sha256": "f6b4cc1e49c1a680dbc1914cc2efabe1f6be418f4473019d8358819a8fbf6d63"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-import-excalidraw.html",
+      "sha256": "5c247643065004228e3e07061d4435608abc03c5fa4e2c404c6ef2a2d6b9da80"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-import-mermaid.html",
+      "sha256": "10c5623a9f6daf9dccb85f15225a155b721e0ec3304d7769c4bb87290da2664a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-it-state-dark.html",
+      "sha256": "21363f1e08eadbf4c88940f845dd36f462a60e191064d4d9781dd68c9daad4b5"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-it-state-full.html",
+      "sha256": "ed7b2271c358c6046a49c03498384a86fdceda98a1632b235047ee9da9a7b1a0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-it-state.html",
+      "sha256": "59103bffa775b744828643e361b71f4b80e5ef8a0042abe9ce65c81e3d5dd21e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-journey-dark.html",
+      "sha256": "c1866ca355d8859d27f6e99d9e2415daf204c313ed4463ae9663ba9e930a9949"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-journey-full.html",
+      "sha256": "8a8263ed88d245376cc7dd0ec8068f02701b346a5d3127e9bb999406046af7cc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-journey.html",
+      "sha256": "b01e32ff87d63fddf6d1db47155906dd624acc13327856269114f760afc754f0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-kanban-dark.html",
+      "sha256": "30809cae8600a1852131362df275d9ab1c6aeedc65d3855caed264d48e19f5dc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-kanban-full.html",
+      "sha256": "a297c9d5da1ea46c6c3c69ffa49525965208cf2ffebb8031a577075d85a390d1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-kanban.html",
+      "sha256": "3b19fb185019e0e341496de095bb1d92bd1fe4705c1502562ef47cb88329b2bb"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-layers-dark.html",
+      "sha256": "412df7b0710cf14cd95c1e806e708241bda6b3bc8e1f142107adf857ed6aa7d1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-layers-full.html",
+      "sha256": "0719489be758a08ad66f2de27d120103c41a51982408e78faffac6b9409c9fbc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-layers.html",
+      "sha256": "196f3cd9866d64da9e04323f258534b1a51d1116140c0db2c8e330adb516a809"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-line-dark.html",
+      "sha256": "552abdcac08788dac5ee7fa419ab854c5e09451b69822eb48935712880382a9d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-line-full.html",
+      "sha256": "f3757327ce4d465a58b8aaf7428a1c4b3472f7422e782b32164f765b82dcdf96"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-line.html",
+      "sha256": "83f5e305d6ce509b25371db6f6e73fa6f3982b7a8dbe09451091c0a15f3b1d90"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-loop-dark.html",
+      "sha256": "cab1f56390bd59c6b13317854c0fe32497967ab4e822c004d30eedc3324d27c0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-loop-full.html",
+      "sha256": "c2effa4d65d8713420c2a9261e7eea4f5273f3f87e7e09398bcc6310655bdb4e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-loop-terminal.html",
+      "sha256": "93a2f86cca043537bf472973c6c1d51de54d85208ec54cd448c40e3f09aa73e8"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-loop.html",
+      "sha256": "b5d0e37b14614ba95d95cdbc5ecdfb84c6c03d7cf664124e029cecb97af340bc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-marimekko-dark.html",
+      "sha256": "91371c8c9915cd5a9fa5d04ddd425d2a17df8b495e2c1a195de8e73130bb3f44"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-marimekko-full.html",
+      "sha256": "df9d831fd30cb1e42239a3246c45eb95a728ac2c4def9300e1aa101c46ff0ba7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-marimekko.html",
+      "sha256": "aefe70d1e699919a5bfacf2222c686d236d4c70a6236afb249fd73670dce6d35"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-medallion-dark.html",
+      "sha256": "65740eb4e2b1286636fc749bdb528dbab7e03948d104c368667ab1ccf85a46f2"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-medallion-full.html",
+      "sha256": "f6ceacd25be82850f65689b07d52b4c9b0e633604e909b13e77ad6468895a688"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-medallion.html",
+      "sha256": "e88a5b1f1f67a7bf6ad83c5144a7f79973a732f68972ba648ec81968579032eb"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-nested-dark.html",
+      "sha256": "8c9862a5a41d2fc5485b51cb9aab318595ceadd2f799ccab7b57e3183906c4c5"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-nested-full.html",
+      "sha256": "a5e238e87124e92de2188939a8d797200a947530987b45b10c947c23985979b0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-nested.html",
+      "sha256": "33608608681a08fd6a6cd16837442b6209e1b9af042adfb7160a91e024fca72e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-org-chart-dark.html",
+      "sha256": "fd0233be926462fd539b3a953a8abc012fb1f6248b71b658a0a3d194fd4f45e6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-org-chart-full.html",
+      "sha256": "a1b5d313f47e6cb26240edd5d696e4dc944b6996bbe92f0be7c0b90836d2631f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-org-chart.html",
+      "sha256": "8c4e95ee52d597f28743673ea11f01ecfcf1a230d6f3dfb6d5ad641b770af46c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-paved-road-animated.html",
+      "sha256": "edc92180b5dc86cdec954ba50a81e50ccea4a994b58619819bfdf26ff5651689"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-polar-dark.html",
+      "sha256": "7c284696cfed61e832dd4dde814840901967cca64bd54a4cddfff7cbeaddb04e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-polar-full.html",
+      "sha256": "bfd2ec50116c00a9312efe7bfa5dadfe2512de7c27873e15bdecaa044c932bf3"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-polar.html",
+      "sha256": "596e2042f18044ef1fa2c2eb849f39fa5c7767b2a17e272617ebd27e10bc86b1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-policy-trace-animated.html",
+      "sha256": "a754efcb4d5d780798d3f386c0a5d68f36b0b12e142bc44603c2d39065daa1e3"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-process-dark.html",
+      "sha256": "5e6ac1365d2e473568ba736975495b9c3509004fb6fca571dedefa8e6cdc5c8e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-process-full.html",
+      "sha256": "d0c0e6df7ae42fa92a1015421fa1cef211847c4037026de2c70d77a5e164a4cc"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-process.html",
+      "sha256": "50ca0b9e6a3e9f5ba8102ff3c6fb87b6a66b1d59f272777b72a97639d4fe2375"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-pyramid-dark.html",
+      "sha256": "831bc6531d0b3b0eba1b348722a0b3e4d5548f287f5380ddb7e26d3f5edcb80c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-pyramid-full.html",
+      "sha256": "15306216ab2647d81038cafbb32139fd8e33cff6c1f2407fabbfb9dceb2c2c6e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-pyramid.html",
+      "sha256": "d12cf7c4c921f3bbd66026af9ed947ff23acdcf414a4309b59c173377d9bdd80"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-quadrant-consultant.html",
+      "sha256": "421142d6be52e56315a4b7d02f94a940fe2d7e4d8b506795392b8086c900926c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-quadrant-dark.html",
+      "sha256": "ac1edf5d9c1251a51a93eb82db17fc1820811f1934ec59c1272ea7f89c501465"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-quadrant-full.html",
+      "sha256": "11208b7d6353a4feed795e2c1539153843dcf2c057da414c73958b68e08b439e"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-quadrant.html",
+      "sha256": "a147cc85f78958da824d53d226067bff687f3e35a64601394c3075f55c675648"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-queue-animated.html",
+      "sha256": "f42628ce17ae487d0b1ebf2cf29a216a70775f8f305a243e38cb0c44d2efbe0a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-radar-dark.html",
+      "sha256": "e24eabbc722e67b83ac498407247e1c09d162ff19e047944a323d44594a68258"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-radar-full.html",
+      "sha256": "18203b78130ef1200e78afd8e5a574029f560f4064730e2f2661b6d33ff9e1e6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-radar.html",
+      "sha256": "767b6a52116665a75b5895c1bde6d96a6a3277449229ff7e21b33afff9b9fcdf"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-ridgeline-dark.html",
+      "sha256": "b430c4ec58ab69c044cba2eb39e20adbc8769cbd85fb5f41d8c3f75136d62f90"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-ridgeline-full.html",
+      "sha256": "9c2631fdd7b5f9df360d18778400212c0fa689685ae1c46d0e65c7279b4a71e6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-ridgeline.html",
+      "sha256": "0e6b87dfbbba5e8b246a195d28cdb49a52aeebd4912fb40ffabc4fb752b04821"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sankey-dark.html",
+      "sha256": "4c2a4ff17cfba1412aee8b6569e76c1d314d9ce64d6038c99e89505225b9baf1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sankey-full.html",
+      "sha256": "52949b4f1bcfba7bf89c49542ddf6937fda80be6c10c806366cd056d94732eeb"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sankey.html",
+      "sha256": "f9196488b04763405fe56a56ed201630ce63aa86c96dcf8ba652d3927093707c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-scatter-dark.html",
+      "sha256": "d1e48f5da1c729879834b797d871eeeff1222fa270ae6a051d02ec40dda42744"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-scatter-full.html",
+      "sha256": "83e8cb8e6d2e788071b3a843c5746ed980675507e41d99b9a3b11beb07b8e6a6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-scatter.html",
+      "sha256": "576e0061f65b1885cf5fccb794c2827b19fbea66cc14e8284f3fa075ef755d06"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence-dark.html",
+      "sha256": "667d448a51a817fb334d3fae0c6f2ed2ab8a2219e42bb29d97c9e012c2d96a8a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence-full.html",
+      "sha256": "e165d6e2fe2fa56538820ab6efa56a7ea79f29d75775bac47ee865483d512c1c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence-oauth-dark.html",
+      "sha256": "8237be551f450082823ba237958d62cf54c9ca1f98ea5e4f1c1eeed68e6613d0"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence-oauth-full.html",
+      "sha256": "c5e5f5d947c7f99474e4390a4ca2536285ca03e57aa7eae7bcb580c4c955fc2f"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence-oauth.html",
+      "sha256": "700ff6d8a06aa0b04b67520e4def6388f1a334c1a63d9df9edc5f697eeee4a40"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-sequence.html",
+      "sha256": "12dcedc98c28d15f7a455f1266c8d8bd93bebe1ed8f352d89bc20703eaa00fad"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-slopegraph-dark.html",
+      "sha256": "fb1fcd70a4d7e63cb57d39ddedfb54f4840118ec6e9905111a4d263ccc7c62b4"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-slopegraph-full.html",
+      "sha256": "262b5db6e1c27327e9ff204ec359821fa92700e5883926ac0217d67a6c13c237"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-slopegraph.html",
+      "sha256": "1d0d0d6835e38c1e84e6a8b7cf2a3f0f3c59f70025941b994b844a6048f53af5"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state-dark.html",
+      "sha256": "d5a29f22ee80fef6fe6f857e767fb0bf4afca8bc8f8cbb478f33286d76f88706"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state-full.html",
+      "sha256": "bdcd07a2f12fb3ae0afe34b8f3d9fc455a7fbe02f671b97a7163d35726894017"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state-lifecycle-dark.html",
+      "sha256": "caf933ffcfffd7cc46e4354d5d3dd4d2c0ea8fc5c56e5fefb9b0ec63dc3358d9"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state-lifecycle-full.html",
+      "sha256": "fdfa99fd013a6703987ca573417821849833b844125773007bf90fdccb21bd1c"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state-lifecycle.html",
+      "sha256": "a09228bc242faa5eb4e31bb28375eca99ddfc5af1edf23581851018b1b16d7eb"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-state.html",
+      "sha256": "75521144ce5aaf477096f355e86ae2d3301eb136391a6bd0702a844a8fe7ce30"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-story-map-dark.html",
+      "sha256": "0c288216307ff36b43b513445e0e63fa83ed5902695ead17fdd507a470acc6b7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-story-map-full.html",
+      "sha256": "ba97bf483442959c35e8d64cd36d177d94fff76215ca3e3b44901b5e4f586443"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-story-map.html",
+      "sha256": "40f737ca1c2a9f46cd8a3ad1a377faabc1adc546a410ff8395e6622b4e773da1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-streamgraph-dark.html",
+      "sha256": "986d4485111c165a18f0eb86055aa326f932c618d26c32f90d6b9457f9189515"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-streamgraph-full.html",
+      "sha256": "122b4aaf9bb2bb90c4b13e9268c5017ac37c48f87e7350c322d303a970e49549"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-streamgraph.html",
+      "sha256": "513da4be5bb1e2e544ba79a7b3c88d704e367098b0faff7645ae5b922fe58d60"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-swimlane-dark.html",
+      "sha256": "1b45aa776b6e9b71249cb244b0ae0ca9ccc341d316d324364a0fad3d51e60d00"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-swimlane-full.html",
+      "sha256": "5c26540db8c18a1b33e32b90b1cf640d6482804b01d45fa87547c2a73a625852"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-swimlane.html",
+      "sha256": "75fc463ad3282dd0faaa4328c6b07f7e853184eeb1edcff2add8f7ed1876ab3b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-timeline-dark.html",
+      "sha256": "64bcbb52a88e989b642dee6ef9ca2c47000407430b240760911a062a8e6735a7"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-timeline-full.html",
+      "sha256": "4e9195b6c3eb9d9ff4ee0bb9a19ac166c7098465d80ccf7148af73df4cdcd7f1"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-timeline.html",
+      "sha256": "1a58e3824eb2bb89ff6e57439b61c38d6e4c08b187143436f50108d8e60bfc45"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree-block-decomposition-dark.html",
+      "sha256": "1a862a84bb85391a850e6c6cc5d657dd019a1c2a4efe8e7d05f6045b876856df"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree-block-decomposition-full.html",
+      "sha256": "d844788fe465a807a0091d99e431221fb1fc62b7a6214b8605721870f8b89149"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree-block-decomposition.html",
+      "sha256": "8fedc41a9e45f45eb13e33d1d4125b8e7f37a9ee6e97c69596c18dfaef628c44"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree-dark.html",
+      "sha256": "43aa056d0761d323cad0bd6205de3083fe7413af4e10639cad5e92c8ed41beac"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree-full.html",
+      "sha256": "988fda69a8fc3f043b263c254389adc282394d2a468163dde70fa8b56fc6392b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-tree.html",
+      "sha256": "5de9151661ad9e1b21809d58494390472cdd82ca1ef1ddcde88b6f14e667afcd"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-treemap-dark.html",
+      "sha256": "43cbbb2ec7c30a71edf5f5436e51dd8369cedb1da80f6e6241b62278ea4e5698"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-treemap-full.html",
+      "sha256": "c0b0569090b69050b7b70592dd7d0d3ad01a41e84ea80d03433cf5c3b35e52a2"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-treemap.html",
+      "sha256": "95f0dd0e5072bbe327c7a85d1fa71a18cff3ade32240a917c4b672940d151008"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-uml-class-dark.html",
+      "sha256": "eca2e26603714d4df494532a2a712101321a484cc2d1263f7629b8f0e214357d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-uml-class-full.html",
+      "sha256": "9c9efff3c44878a9f7cf459ed7a1c7fcdd927cfbfb73ef35ac6b0c0c8d7a7671"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-uml-class.html",
+      "sha256": "c6c353f4d53c476fc3530f20d09cdb9d4b47a2bd22d0f3c56c807732534a685d"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-venn-dark.html",
+      "sha256": "85c6fd7c48e0c4989aebad24862e49d8783386f4cfa3efb27d1e86a724558077"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-venn-full.html",
+      "sha256": "1dd7525e58092b6a4bf1463fdf0df2914d717e3abcfdbaf04ed0ba3dd814f310"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-venn.html",
+      "sha256": "86d763a94bc20fb3038cb00b9ef0fedd1e00cd8009df50852eac77d92e3965da"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-wardley-dark.html",
+      "sha256": "80aff4e268d3775541eca4cf1c1cac918f0895637cd79568d4895e84b9f2046b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-wardley-full.html",
+      "sha256": "8a9d56c9e50b57bb990a172822b01361cd4cb57322675fdde40be364e890210b"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-wardley.html",
+      "sha256": "b0ffc8f5bde65a8d77d863f22cd6c0d0211490c059dbcb503798851d1413860a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-waterfall-dark.html",
+      "sha256": "ce4eb6038b09b87eca88b6981a7b43d19f603f480b6e91fb16d5d7c58a9103a6"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-waterfall-full.html",
+      "sha256": "0fc4fdb8af3cdc49efb75d713303751c3d37c360ac3e27ea282945359ed67f9a"
+    },
+    {
+      "path": "skills/diagram-design/assets/example-waterfall.html",
+      "sha256": "10c4445b0582ddd6644ac734914c3549e9eb39075ee6e258ea78044a43c0ca3d"
+    },
+    {
+      "path": "skills/diagram-design/assets/icons.html",
+      "sha256": "8e7f54214b31e9152020e012aff18cb97defdec47ac09cee2081499c0bb0eb4f"
+    },
+    {
+      "path": "skills/diagram-design/assets/index.html",
+      "sha256": "d020d922a2a682097546a6e943ebb5bcbbaa7841d4f74d52a3266c0cd7fc6343"
+    },
+    {
+      "path": "skills/diagram-design/assets/template-dark.html",
+      "sha256": "6114859e48ed8a0da7825e2855d6d0653e5c8bb223f96b72b793cd7aad5457b0"
+    },
+    {
+      "path": "skills/diagram-design/assets/template-full.html",
+      "sha256": "1ceada773af8c318d19aa1dfd2da7ddc74ee071cac7790a1e2a5325ca0b0c3f3"
+    },
+    {
+      "path": "skills/diagram-design/assets/template-motion.html",
+      "sha256": "2ea119fe1271b20618cd1f94e608ce8fec03febf5b36a157135d50272a10ab3c"
+    },
+    {
+      "path": "skills/diagram-design/assets/template-terminal.html",
+      "sha256": "d449b50f439214cef9025b91f7ad4d8f786c0f329496aa95b5ea864c1586708d"
+    },
+    {
+      "path": "skills/diagram-design/assets/template.html",
+      "sha256": "acfada6dd26c214c981439bd9e2b24c797a96b08300a31a0381b9a29c4fc0f25"
+    },
+    {
+      "path": "skills/diagram-design/references/animation.md",
+      "sha256": "f58403a570e2848b21005ad349ae5cfe17593ed283329257be8ca524b032076a"
+    },
+    {
+      "path": "skills/diagram-design/references/doctor.md",
+      "sha256": "0623d90b6fa0cdad48126256c115f2be17ddf10721a3a6112011a130e7c62140"
+    },
+    {
+      "path": "skills/diagram-design/references/export-registry.md",
+      "sha256": "6d35bdccf32e7a2f28ebafac75d099451881a3ad9e268798c86acea2c2c66410"
+    },
+    {
+      "path": "skills/diagram-design/references/export.md",
+      "sha256": "6b20851e9a0e61a46219e930d4a97d7f5222e0b673fd295b5695ce6b06087b75"
+    },
+    {
+      "path": "skills/diagram-design/references/import-drawio.md",
+      "sha256": "2615ba8efb300ecc498df72223a91c6c712411efb38892fc779b583ad8b7b4ce"
+    },
+    {
+      "path": "skills/diagram-design/references/import-excalidraw.md",
+      "sha256": "02168ea7793a0fab546e84c410f2c946336f1088fa3c9c301504aec81d34dad4"
+    },
+    {
+      "path": "skills/diagram-design/references/import-mermaid.md",
+      "sha256": "d2eda74f00b154dbd0d138269464aca3d34c5081679e9ec95744d0741c96963a"
+    },
+    {
+      "path": "skills/diagram-design/references/layout-budget.md",
+      "sha256": "e5c65909ab7a361329d8028eaa3c32be611b278a5ced0cdc27486d61b97df104"
+    },
+    {
+      "path": "skills/diagram-design/references/onboarding.md",
+      "sha256": "bd006056fe82262f659a18a9596aef9ad33d17bc3239b90c965b89600aa79b0c"
+    },
+    {
+      "path": "skills/diagram-design/references/output-spec.md",
+      "sha256": "ca333e5eed72947dbc4f354b38c31005f949dbfcb98bdbbe595a3cf408d6e4ce"
+    },
+    {
+      "path": "skills/diagram-design/references/primitive-annotation.md",
+      "sha256": "f78cac0af423ead9b74926fa669e9227efc21f15d0f51ea46bc93e79c55a121a"
+    },
+    {
+      "path": "skills/diagram-design/references/primitive-icons.md",
+      "sha256": "bb4a97f27c1bff90107ce54429c89196eba971af982998a9bf4214a0c7570f06"
+    },
+    {
+      "path": "skills/diagram-design/references/primitive-sketchy.md",
+      "sha256": "8859f0d70c10f46f59817cb348346e7fb9e1609b70a4a513d297b8c850c866a4"
+    },
+    {
+      "path": "skills/diagram-design/references/primitive-terminal.md",
+      "sha256": "7b52c2fb229c822a60b0061caa64ae6a68aacd4f1c22a1a98d1d0eaaa2333b55"
+    },
+    {
+      "path": "skills/diagram-design/references/primitives-core.md",
+      "sha256": "42b3ec126edd1dfafb9ee9d624ea0fb4d00286a38d96ced2374b63d61c514a5b"
+    },
+    {
+      "path": "skills/diagram-design/references/profiles.md",
+      "sha256": "51f6d24e40eca1a13dc562b4b33aa76b56172c5c30fc94897e5bb369a34f9886"
+    },
+    {
+      "path": "skills/diagram-design/references/semantic-patterns.md",
+      "sha256": "61d08c029edb5462b4c49b537e0ccc25edc553e6f79227eec9ebd688fbccafe7"
+    },
+    {
+      "path": "skills/diagram-design/references/style-guide.md",
+      "sha256": "f667075e888bf27b981a3c8c51175b7be82a00bcad9d7c33ca9dfe59240a5a38"
+    },
+    {
+      "path": "skills/diagram-design/references/type-architecture-delta.md",
+      "sha256": "e5813f26e1fb924863efe70db36f112e1b9570e47335d7f6fa6e46473136e4e5"
+    },
+    {
+      "path": "skills/diagram-design/references/type-architecture.md",
+      "sha256": "cb5672b5c69cbe24a0b18d144f8b2e4507a124ebb0dbc0bc898ceafb27612caa"
+    },
+    {
+      "path": "skills/diagram-design/references/type-axonometric-plan.md",
+      "sha256": "bd273dec357859d98c46506564f698741c0c1d01d565ad58b32226f100b1fc70"
+    },
+    {
+      "path": "skills/diagram-design/references/type-bar.md",
+      "sha256": "a6ab12ffe6fed07652f47924deefa14e9010f161db26daa90d918db16e353d9d"
+    },
+    {
+      "path": "skills/diagram-design/references/type-data-flow.md",
+      "sha256": "ad1cd8358c9360663200f5100a199e57e43a4e6702982752220ad423127941e8"
+    },
+    {
+      "path": "skills/diagram-design/references/type-db-schema.md",
+      "sha256": "433f2ede171453ccbc1e6e8d0be4846fa5fb88bb499e8ba7e6db02d066a06c46"
+    },
+    {
+      "path": "skills/diagram-design/references/type-dependency.md",
+      "sha256": "f44fafda00c4ec547b8871494513fa02de495ef612e4f38601c4934bbf8ff0bf"
+    },
+    {
+      "path": "skills/diagram-design/references/type-deployment.md",
+      "sha256": "c4be740ffee76ff69574228d4ab6447ab2c127e04037aac5f6cd9870429b9b43"
+    },
+    {
+      "path": "skills/diagram-design/references/type-dp-integration.md",
+      "sha256": "0b85e3b883e97e1a86e50d2e50eb73bc3fb4b70e2e3132e93356956ccc68a64f"
+    },
+    {
+      "path": "skills/diagram-design/references/type-dp-security-matrix.md",
+      "sha256": "209f4870ec19d90eff1ab80ecfe0062f3a5075c3b666b1a3a900a27260ba8832"
+    },
+    {
+      "path": "skills/diagram-design/references/type-er.md",
+      "sha256": "0f4a718b202edec593e4555e0353a4080d4be6d98328209db083898f2f01302c"
+    },
+    {
+      "path": "skills/diagram-design/references/type-exploded.md",
+      "sha256": "92456818a24129cbeb25f8e771d377e41a5d72b5a2fec9d1e4c35997f41a18b2"
+    },
+    {
+      "path": "skills/diagram-design/references/type-fishbone.md",
+      "sha256": "59aeafe1c8b6d80898e91ff4557fa6002cc99fd0650590dbdb4e990d35e670cf"
+    },
+    {
+      "path": "skills/diagram-design/references/type-flowchart.md",
+      "sha256": "c2af5e2b849255ae4859125db7b101b74bfb9b201204725c1e83fac51a98ebab"
+    },
+    {
+      "path": "skills/diagram-design/references/type-gantt.md",
+      "sha256": "83a84cdd4b2880debd9e602f1d27ffc54197a6c783eb46228711641956f858ee"
+    },
+    {
+      "path": "skills/diagram-design/references/type-heatmap.md",
+      "sha256": "42573794d1c82c07fd644b3b14a1c1f94e76a80514b31ff0d83fa58264043876"
+    },
+    {
+      "path": "skills/diagram-design/references/type-high-level.md",
+      "sha256": "86e9e681189b013752edc512a8efb651e67aba52e9ddfbfe46d1fc117f1d5248"
+    },
+    {
+      "path": "skills/diagram-design/references/type-it-state.md",
+      "sha256": "744e18db2ddf29e501af903ef79deafb1500f546611137d27cd14fe8ccbb77db"
+    },
+    {
+      "path": "skills/diagram-design/references/type-journey.md",
+      "sha256": "135501cef58abd6c716746248a5bfd163e56b68d9f314516bb8f60d26a895256"
+    },
+    {
+      "path": "skills/diagram-design/references/type-kanban.md",
+      "sha256": "8f7cd376421b9854a97bf2d230ea77e0de9a3a227cf85f02cd7b1367a29fdc54"
+    },
+    {
+      "path": "skills/diagram-design/references/type-layers.md",
+      "sha256": "393a65464f1189a2244c989a7448a8be5446d5932c907bbdba57d10997729534"
+    },
+    {
+      "path": "skills/diagram-design/references/type-line.md",
+      "sha256": "b299244ac3b45df11ba77f1b64b6233295fd0712a25573976b258c04460aebf8"
+    },
+    {
+      "path": "skills/diagram-design/references/type-loop.md",
+      "sha256": "c7e98b8eda1e6d6904920f4d96310745deb0651920e9d531c8f40e54304ab60d"
+    },
+    {
+      "path": "skills/diagram-design/references/type-medallion.md",
+      "sha256": "a1af03521adb53431766a559e05c984ee07871fd3cf495cf63146999f56f6f42"
+    },
+    {
+      "path": "skills/diagram-design/references/type-nested.md",
+      "sha256": "07c3b848cc0f2a78098ef267d4587acd49a393e409e0b926738d58437896eec9"
+    },
+    {
+      "path": "skills/diagram-design/references/type-org-chart.md",
+      "sha256": "9905c67d6cf884f4537b9f86f893e6a90b4dc4134ff8bf8ce6187d151efbd6ab"
+    },
+    {
+      "path": "skills/diagram-design/references/type-polar.md",
+      "sha256": "51fd08897a65f4ae2fe0c28b5e3afdd4867633fb960e3107551e49f4f9d1e97c"
+    },
+    {
+      "path": "skills/diagram-design/references/type-process.md",
+      "sha256": "8b149deb5393d5b6eaefdd525ef65143caf763283f3b668ce301bd3b0b808815"
+    },
+    {
+      "path": "skills/diagram-design/references/type-pyramid.md",
+      "sha256": "a07536682478832fbf552aaa066dc827eaa1a072c538766387c8b900ae7add38"
+    },
+    {
+      "path": "skills/diagram-design/references/type-quadrant.md",
+      "sha256": "2346caba0370beaf8b33efd5d9a3e24f3d555b7160a3d523d9d07a37ce6c353a"
+    },
+    {
+      "path": "skills/diagram-design/references/type-radar.md",
+      "sha256": "8379b0313afbfdbb5a641c98f8ac6668419b4add6cea0749a646365fad02c1d3"
+    },
+    {
+      "path": "skills/diagram-design/references/type-sankey.md",
+      "sha256": "bcc39b963fa4f340c7654204fa0c6c0a248a0b42b1669ebeb2375381d8013a2c"
+    },
+    {
+      "path": "skills/diagram-design/references/type-scatter.md",
+      "sha256": "b89fc3d4777c5a09a82d889aaf1592ebf6fa7bc71877458c6b39c32778e690e6"
+    },
+    {
+      "path": "skills/diagram-design/references/type-sequence.md",
+      "sha256": "407428e36332c96b7db698f7ffff7b28461fa6c0bc0671cecf3ed3c39a9bcab0"
+    },
+    {
+      "path": "skills/diagram-design/references/type-state.md",
+      "sha256": "f5cda20b18da2bb92f291d200ac37ffd8af13328768ae0acf42d688384aa0433"
+    },
+    {
+      "path": "skills/diagram-design/references/type-story-map.md",
+      "sha256": "ee49c426397c3e5234fb544ea1394f7c8879610fea897da3b636891e3affb4c4"
+    },
+    {
+      "path": "skills/diagram-design/references/type-swimlane.md",
+      "sha256": "4b689b9dd72078dc76fd2fbb1eb6c0bf0304fee667ae7cd56fab5f19b535f250"
+    },
+    {
+      "path": "skills/diagram-design/references/type-timeline.md",
+      "sha256": "9102e61347b17b303eafad52d4f8941d507faf889d9316ed0325e5e0f0ba01ca"
+    },
+    {
+      "path": "skills/diagram-design/references/type-tree.md",
+      "sha256": "e45c0bb3c4667f57eb8592b01325c7860859d2a9569a0441f62ead0bd7d70a0d"
+    },
+    {
+      "path": "skills/diagram-design/references/type-treemap.md",
+      "sha256": "973b108b165ee3481a747afc28086e5fc23e7fe043fde4c9a47a4b18fde93ac2"
+    },
+    {
+      "path": "skills/diagram-design/references/type-uml-class.md",
+      "sha256": "8cc0bc8f77a38da58110287c1b112043be9751389ef45772fe607eae9aa77ecd"
+    },
+    {
+      "path": "skills/diagram-design/references/type-venn.md",
+      "sha256": "f8d5d4f0506160e0502f932140306b12d25adea1d1f6f319fb38c2345b0c6b42"
+    },
+    {
+      "path": "skills/diagram-design/references/type-wardley.md",
+      "sha256": "aa93eb728a022b85f38de69c1d287752f91c487b05c50396ee21e769162900a9"
+    },
+    {
+      "path": "skills/diagram-design/references/type-waterfall.md",
+      "sha256": "1079c0915c7e651d8556369aebed180154afb05799192c7eebaf442f7c16f8e1"
+    },
+    {
+      "path": "skills/diagram-design/scripts/drawio_extract.py",
+      "sha256": "32b4952de6f56fdc40dfb2b3d02ae42cdecec54e8190ab2bf3b172e3950c8af5"
+    },
+    {
+      "path": "skills/diagram-design/scripts/excalidraw_extract.py",
+      "sha256": "fd895d16be7f75032ae3d77dd2f15e91c3631e7c7af8a2a1a65474c4c7781f2a"
+    },
+    {
+      "path": "skills/diagram-design/scripts/export_svg.py",
+      "sha256": "95fa986f24a56d2c51318d516466793637e7e5c100c3835b4a2134f9ab399aba"
+    },
+    {
+      "path": "skills/diagram-design/scripts/mermaid_extract.py",
+      "sha256": "2be23c01d8838ee45d6a3e4c7a03d4e6caa20f0c426cd69c6287320dac49d132"
+    },
+    {
+      "path": "skills/diagram-design/scripts/self_check.py",
+      "sha256": "b5f798725d4a76693b6d1c2ff5ecfc0aa162c69ffe38cd63c32bb192f49afd13"
+    }
+  ]
+}

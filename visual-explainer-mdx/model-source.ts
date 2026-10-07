@@ -26,10 +26,10 @@ function releaseRoots(roots: readonly THREE.Object3D[]) {
   for (const resource of geometries) resource.dispose();
 }
 
-export function modelAsset(root: THREE.Object3D, options: Pick<ModelAsset, 'sample' | 'paint'> = {}): ModelAsset {
+export function modelAsset(root: THREE.Object3D, options: Pick<ModelAsset, 'sample' | 'paint' | 'presentation'> = {}): ModelAsset {
   let disposed = false;
   return {
-    root, sample: options.sample, paint: options.paint,
+    root, sample: options.sample, paint: options.paint, presentation: options.presentation,
     dispose() {
       if (disposed) return;
       disposed = true;

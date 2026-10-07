@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
 import { modelAborted, modelAsset } from './model-source';
-import type { ModelFactory } from './model-types';
+import type { ModelFactory, ModelPresentation } from './model-types';
 
 export type LivingFormKind = 'strata' | 'arbor' | 'resonance';
 
@@ -132,6 +132,20 @@ function buildForm(kind: LivingFormKind, material: THREE.Material, motionScale: 
   throw new Error('Unknown living form. Use strata, arbor, or resonance.');
 }
 
+// Camera, fitting, material, and light values from the original f-explainer forms.
+const livingPresentation: ModelPresentation = ({ aspect, bounds }) => {
+  const camera = new THREE.PerspectiveCamera(33, aspect, 0.1, 40);
+  const size = bounds.getSize(new THREE.Vector3());
+  const fieldOfView = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  camera.position.set(0, 0.1, Math.max(aspect < 1.2 ? 12 : 9.8, size.x * 1.12 / (fieldOfView * aspect) + size.z / 2));
+  camera.lookAt(0, 0, 0);
+  const hemisphere = new THREE.HemisphereLight(0xb8e3c5, 0x020604, 0.22);
+  const key = new THREE.DirectionalLight(0xe8f8e9, 3.6); key.position.set(-3, 4, 5);
+  const rim = new THREE.DirectionalLight(0xe89a70, 2.8); rim.position.set(4, 1, -2);
+  const fill = new THREE.DirectionalLight(0x79bd8b, 1.3); fill.position.set(-4, -2, 1);
+  return { camera, lights: [hemisphere, key, rim, fill] };
+};
+
 export function createLivingForm(kind: LivingFormKind, options: Readonly<LivingFormOptions> = {}): ModelFactory {
   const motionScale = options.motionScale ?? 1;
   if (!Number.isFinite(motionScale)) throw new Error('Living form motionScale must be finite.');
@@ -139,9 +153,9 @@ export function createLivingForm(kind: LivingFormKind, options: Readonly<LivingF
   return context => {
     if (context.signal.aborted) throw modelAborted();
     const material = new THREE.MeshStandardMaterial({
-      color: '#76b995',
-      metalness: 0.12,
-      roughness: 0.58,
+      color: 0xa4c8af,
+      metalness: 0.22,
+      roughness: 0.46,
       side: THREE.DoubleSide,
     });
     let form: BuiltForm;
@@ -153,7 +167,7 @@ export function createLivingForm(kind: LivingFormKind, options: Readonly<LivingF
     }
     const asset = modelAsset(form.root, {
       sample: form.sample,
-      paint: [{ material, role: 'accent' }],
+      presentation: livingPresentation,
     });
     if (!context.signal.aborted) return asset;
     asset.dispose();

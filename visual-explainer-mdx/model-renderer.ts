@@ -25,11 +25,8 @@ export function createModelView(canvas: HTMLCanvasElement, options: ModelViewOpt
   const scene = new THREE.Scene(), pivot = new THREE.Group(), fit = new THREE.Group();
   pivot.add(fit); scene.add(pivot);
   const ratio = width / height;
-  const camera = new THREE.OrthographicCamera(-1.9 * ratio, 1.9 * ratio, 1.9, -1.9, 0.1, 100);
+  let camera: THREE.Camera = new THREE.OrthographicCamera(-1.9 * ratio, 1.9 * ratio, 1.9, -1.9, 0.1, 100);
   camera.position.set(4, 3, 5); camera.lookAt(0, 0, 0);
-  scene.add(new THREE.AmbientLight('#ffffff', 1.7));
-  const key = new THREE.DirectionalLight('#ffffff', 3); key.position.set(-3, 5, 6); scene.add(key);
-  const fill = new THREE.DirectionalLight('#ffffff', 0.8); fill.position.set(4, 1, -2); scene.add(fill);
   const matcher = createGlyphMatcher(width, height, abort.signal), luminance = createAsciiFrame(width, height);
   let renderer: THREE.WebGLRenderer | undefined, asset: ModelAsset | undefined, ownsAsset = false;
   let particles: ParticleSurface | undefined, pointCount = 0, pointSeed = 0;
@@ -55,8 +52,18 @@ export function createModelView(canvas: HTMLCanvasElement, options: ModelViewOpt
       const bounds = new THREE.Box3().setFromObject(asset.root), size = bounds.getSize(new THREE.Vector3()), center = bounds.getCenter(new THREE.Vector3());
       const extent = Math.max(size.x, size.y, size.z);
       if (!Number.isFinite(extent) || extent <= 0 || ![center.x, center.y, center.z].every(Number.isFinite)) throw new Error('The model has no finite renderable bounds.');
-      const scale = 2.85 / extent;
-      fit.scale.setScalar(scale); fit.position.copy(center).multiplyScalar(-scale); fit.add(asset.root);
+      if (asset.presentation) {
+        const presentation = asset.presentation({ aspect: ratio, bounds });
+        camera = presentation.camera;
+        scene.add(...presentation.lights);
+      } else {
+        const scale = 2.85 / extent;
+        fit.scale.setScalar(scale); fit.position.copy(center).multiplyScalar(-scale);
+        scene.add(new THREE.AmbientLight('#ffffff', 1.7));
+        const key = new THREE.DirectionalLight('#ffffff', 3); key.position.set(-3, 5, 6); scene.add(key);
+        const fill = new THREE.DirectionalLight('#ffffff', 0.8); fill.position.set(4, 1, -2); scene.add(fill);
+      }
+      fit.add(asset.root);
       if (asset.image) { camera.position.set(0, 0, 5); camera.lookAt(0, 0, 0); }
       for (const binding of asset.paint ?? []) {
         if (!('color' in binding.material) || !(binding.material.color instanceof THREE.Color)) throw new Error('Model paint bindings require a material with a Three Color.');
@@ -96,7 +103,7 @@ export function createModelView(canvas: HTMLCanvasElement, options: ModelViewOpt
           } else particles.setOptions(frame.particles ?? {});
         }
         asset.sample?.(frame.seconds);
-        pivot.rotation.y = frame.seconds * (frame.rotationSpeed ?? (asset.image ? 0 : 0.35));
+        pivot.rotation.y = frame.seconds * (frame.rotationSpeed ?? (asset.image || asset.sample ? 0 : 0.35));
         scene.updateMatrixWorld(true);
         pivot.visible = frame.treatment !== 'particles';
         if (particles) {

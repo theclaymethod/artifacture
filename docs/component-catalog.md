@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **59 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **60 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -19,25 +19,26 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | character-roll | `createCharacterRoll` | Fixed old/new grid, unchanged characters, finite discrete tracks, exact target and backward seeking |
 | column-scan | `createColumnScan`, `synthesizeScanWav` | Reveal/read modes, one timed accent, shared sound events, deterministic local PCM/WAV |
 | punctum-readout | `PunctumReadout`, `awaitPunctumFont` | Canonical variable WOFF2, caller-owned axes, capture readiness; complete OFL notice |
-| diagram | `createDiagramScene`, `diagramSceneFromLayout` | Flow, tree, swimlane, timeline; horizontal, vertical, auto; labeled and bidirectional edges |
+| diagram | `DiagramDesignFigure`, `createDiagramScene`, `diagramSceneFromLayout` | Flow, tree, swimlane, timeline; horizontal, vertical, auto; labeled and bidirectional edges |
 | diagram-canvas | `DiagramCanvas` | Same scene/layout owner, React wrapper, readable narrow-screen relationships |
-| diagram-walkthrough | `DiagramWalkthrough` | Explicit edge steps, moving packet, play/pause, previous/next/reset, reduced-motion manual steps |
+| diagram-walkthrough | `PrLensFigure`, `DiagramWalkthrough` | Explicit edge steps, moving packet, play/pause, previous/next/reset, reduced-motion manual steps |
 | dag | `DagCanvas`, `prepareDag`, `createDagScene`, `createDagDiagram`, `dagNeighborhood`, `focusDagScene`, `createDagReveal` | Compact multi-parent DAG, stable ordering, cycle witnesses, keyboard focus, full lineage, shared-scene reveal |
 | ascii-image, ascii-sweep | `AsciiImage`, `AsciiSweep` | Media-to-glyph sampling and deterministic four-direction image reveals |
 | ascii-object | `AsciiObject` | Three.js geometry or Blender GLB with authored-time pose and shared glyph output |
 | model-view, shape-ascii, particle-object | `ModelView`, `createModelView`, `modelAsset` | One factory or GLB as shaded geometry, measured six-region ASCII or original seeded points; awaitable capture |
-| living-forms | `createLivingForm` | Strata, Arbor, Resonance; direct-time geometry factories |
-| procedural-props | `createProceduralProp` | Three soft geometric props with finite analytic settling |
+| living-forms | `NativeLivingForm`, `createLivingForm` | Original Strata, Arbor, Resonance TSL renderer; native or explicit-time poses |
+| procedural-props | `NativeProceduralProp`, `createProceduralProp` | Original clay trophies, native scene and analytic reveal |
 | orbital-text, trace-path | `OrbitalText`, `TracePath` | Explicit-time SVG phrase rings and normalized path reveal |
 | vhs | `VhsEffect` | Explicit-time scanlines, drift, grain and channel separation |
 | native-clip | `NativeClip`, `NativeStill`, `validateNativeClipAsset` | Validated rendered assets, selected frames, finite HyperFrames placement |
 | manim-clip | Native source and job; `NativeClip`, `NativeStill` | Pinned Manim mathematical source, Typst formulas, secant-to-tangent recipe |
 | psychopomp-clip | Native source and job; `NativeClip`, `NativeStill` | Pinned Rust Scene Program, bowed connections, springs and travelling packets |
-| axonometric-plan | `createAxonometricPlan`, `createAxonometricPlanMotion` | Rounded floor/site geometry, topological occlusion, horizontal roof/floor names and phased reveal |
-| exploded-axonometric | `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
+| axonometric-plan | `DiagramDesignFigure`, `createAxonometricPlan`, `createAxonometricPlanMotion` | Rounded floor/site geometry, topological occlusion, horizontal roof/floor names and phased reveal |
+| exploded-axonometric | `DiagramDesignFigure`, `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
+| hairline | 27 original figures, `createHairlineScene` | Official Hairline runtime plus separate prepared-path scene adapter |
+| shaders | Original React exports, `NativeShader`, `createShaderSurface` | Official Shader Effects WebGPU library; reversible GPU-fenced frames for Plasma, SimplexNoise and Spiral |
 | iso | `createIsoScene`, `projectIsoPoint` | Rounded face geometry, face-local windows/vents and causal live lighting |
 | motion-eases | `sampleMotionEase` | Eight bounded Motionmaxxing arrival/exit curves on the existing sampler |
-| hairline | `createHairlineScene` | Caller-prepared silhouette and crease paths; preserved depth order |
 | data-chart | `DataChart` | Bar, line, dot; signed values, missing measurements, exact narrow-screen views |
 | charts | `LieflatChart` | Rung bars, unit field, barcode, bubble matrix, threads; exact values and encoding explanations |
 | thread-plot | `ThreadPlot` | Smaller record-trace leaf; stage/category paths, selectable record, portrait layout |
@@ -54,7 +55,7 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | state-scene | `createStateScene` | States around a cycle, labeled transitions, optional active state; at most two transitions per pair |
 | layer-scene | `createLayerScene` | Nested labeled regions communicate containment/ownership |
 | plot-scene | `createPlotScene` | Numeric line/scatter; explicit or observed domains; null breaks paths; at most one accented series |
-| token-scene | `createTokenScene` | Grid of labeled tokens; neutral, accepted, rejected; rejected tokens have a strike |
+| token-scene | `ChalkboardFigure`, `createTokenScene` | Grid of labeled tokens; neutral, accepted, rejected; rejected tokens have a strike |
 | playhead-scene | `createPlayheadScene` | Event rows on a finite numeric axis; an independent translatable playhead |
 | grid-scene | `createGridScene` | Explicit scalar domain, fractional cell fill, null slash; at most 32 columns and 1,024 cells |
 | reveal-in-order | `revealInOrder` | Ordered opacity or path reveal; explicit duration, start, step, transition |
@@ -88,26 +89,14 @@ Reactive charts and the interactive walkthrough have browser layout/control beha
 
 [Punctum displays](punctum.md) adds an interactive gallery of dot geometry, exact character rolls, synchronized scans/sound, and an optional variable-font readout. All four entries are indexed and copied with their source dependencies and OFL notices. The same scenes pass through composition, slides, and finite video.
 
-## References examined on 2026-10-04
+## Original source integrations
 
-| Reference | Checked source | What entered the library |
-| --- | --- | --- |
-| [Chalkboarding](https://github.com/lilyzhng/chalkboarding/tree/f6af618a5a5642861a04f3d16b8a90c891177269), resolved from the supplied short link | README, animation patterns, example inventory; MIT code, separate font terms | Original token, playhead, plot and grid builders; finite ordered tracks, repeatable sampling. No chalk skin or font imported. |
-| [Diagram Design](https://github.com/cathrynlavery/diagram-design/tree/3ac5e10df1fa1c689da9191e6dda39c10aa0fe30) | 42 type references and animation contract; MIT | Original sequence, state and containment geometry; existing walkthrough exposed as a leaf. Reference grammars are not counted as implemented React components. |
-| [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts/blob/eace082a317b696c5570c25826a53a7fa113e984/catalog.md) | Catalog, templates inventory, LICENSE, linked X post and OpenAgentSkill listing | Existing five original encodings plus newly exposed DataChart/ThreadPlot; line/scatter scene route. No restricted upstream templates copied. The catalog heading says 63 but its table contains 61 named rows at this pin. |
-| [Shader for Interfaces](https://github.com/v2space-labs/shader-for-interfaces/tree/08fe6fc1dad56fcdf29b967c3d5d65966bdac860) | Scalar/vector/domain/missing-value contracts; MIT recipes | Original scalar-grid geometry using the existing SVG renderer; no GPU dependency or hidden time. |
-| [prettymaps](https://github.com/marceloprates/prettymaps/tree/02f85870ced807b7d24ce1764764ff877f9edffd) | Python geometry, route and export code; LICENSE is AGPL-3.0 despite MIT package metadata | Map layers/routes are researched candidates. No drawing code or geographic assets copied into the default library. |
-| [Emil's skills](https://github.com/emilkowalski/skills/tree/e8a175de22ae1e49370fc144c1f3bb9aeedf988d) | Animation recipes, interruption, trigger origin, masks, reduced motion; MIT | Existing interactive leaves retain explicit controls. Original registered comparison masks now compile to shared scene motion; origin reveals remain candidates. |
-| [Lemo-Opuscar](https://github.com/lemomo-ai/lemo-opuscar/tree/54be47b14f2ecb2e7c5f473c934db8de0235b795) | JS cubic tracks, Python subtitle timing, caption assembly and actual ASR output; MIT | Adapted, validated `authored-values` and `narration-cues` leaves with the full MIT notice; browser seeking and WebVTT output checked. No demo media, voice models or new renderer imported. |
-| [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo/tree/fa546a38092e75f2b079e6a86d6abc54dd525d17), [Awesome Opus videos](https://github.com/yihui-dev/awesome-opus5-5-videos/tree/3d54892e2ae5b0e8d337171e6508bba4cec01ab8), [Opus Video Skills](https://github.com/tuzhechen2005/opus-video-skills/tree/59744a69c7b916cfbe4c4ec84006b0c2f5e2fde1) | Actual chapter/render code, provenance records, cue sheets, capture and audio analysis; license details in the research | Original finite path traversal and exact source-range/cue focus are installed. Capture and collection contracts remain research candidates; upstream renderers and media were not copied. |
-| [Lemo Wake](https://github.com/lemomo-ai/lemo-wake/tree/ebb758c66c61cf571b57d341ec3f5cbb4bf74d08) | Frame capture, loop QA and report-state code; CC BY-NC 4.0 | Original frame-plan/loop-inspection leaf. No upstream source or assets copied. Research also identifies stale-report and skipped-check risks. |
-
-[The research receipt](research/primitive-candidates-2026-10-04.md) gives exact contracts and next prototype checks for fields, contours, maps, masks, equation matching, and source-range code focus. A source recipe becomes an index entry after its local copy, build, and real browser/export behavior are demonstrated.
+The current [source inventory](source-libraries.md) supersedes the earlier reference-only audit. Hairline installs the official original runtime. Diagram Design retains all 204 documents and the original axonometric/exploded builders. PR Lens uses its real renderer; Chalkboarding retains its native painter. Source wrappers delegate time to the native implementation, and `artifacture source-video` renders original source into reusable clips and decoded stills. Fonts, excluded media and external license restrictions are recorded beside the source.
 
 [Dependency graphs](dag.md) documents DAG reuse. [Native engines](native-engines.md) documents optional Manim and Psychopomp setup and the source-to-clip contract. Native pixels remain rendered media; their source and provenance travel with each output.
 
 [Media effects](media-effects.md) documents the independent ASCII/sweep/VHS blocks and optional Blender source workflow. The [gallery source](../examples/visual-explainer-mdx/media-effects.tsx) exposes four themes, seeking and PNG frame export. [Selected model visuals](model-visuals.md) documents the imported shape matcher, factories, points and SVG leaves. The [selected gallery source](../examples/visual-explainer-mdx/selected-visuals.tsx) compares their live output.
 
-[Axonometric plans and exploded views](../plugins/visual-explainer/references/axonometric.md) adapt the MIT diagram-design grammar at `19f79daa`. The [gallery](../examples/visual-explainer-mdx/axonometric.tsx) contains campus, office, device and unboxing examples, four themes and seeking; it renders the completed base scenes for print.
+[Axonometric plans and exploded views](../plugins/visual-explainer/references/source-fidelity.md) now default to the original Diagram Design documents. The [original-source gallery](../examples/visual-explainer-mdx/axonometric.tsx) presents those originals; the [original-source presentation](../examples/visual-explainer-mdx/source-libraries.tsx) demonstrates faithful reuse.
 
-The `iso` block adds reusable isometric top/front/side geometry with live face details; `motion-eases` adds eight Motionmaxxing curves consumed directly by the existing sampler. Discover either by capability or exact ID. The default preset is `iso`; `hairline` remains a separate upstream prepared-path block, not a theme.
+The `iso` block adds reusable isometric top/front/side geometry with live face details; `motion-eases` adds eight Motionmaxxing curves consumed directly by the existing sampler. Discover either by capability or exact ID. The default preset is `iso`; `hairline` remains the upstream interactive runtime and a separate prepared-path adapter.
