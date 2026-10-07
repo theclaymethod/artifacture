@@ -1,6 +1,6 @@
 # Templates
 
-Use the MDX pipeline for new pages, chart JSON for standalone charts, and these starters for custom HTML. They show layout and export mechanics; replace the subject, copy, and illustrative data together. Hairline is the default, with 3b1b for mathematical mechanisms. Both use Lieflat data encodings and one contrasting accent. Read [the default explainer theme](../references/default-explainer-theme.md) for the visual contract; these older starters do not redefine it.
+Use the MDX pipeline for new pages, chart JSON for standalone charts, and these starters for custom HTML. They show layout and export mechanics; replace the subject, copy, and illustrative data together. ISO is the default, with 3b1b for mathematical mechanisms. Both use Lieflat data encodings and one contrasting accent. Read [the default explainer theme](../references/default-explainer-theme.md) for the visual contract; these older starters do not redefine it.
 
 | Starter | Use |
 | --- | --- |

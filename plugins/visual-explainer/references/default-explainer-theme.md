@@ -1,6 +1,6 @@
 # Default explainer theme
 
-Use `hairline` as the default host across new posters, diagrams, slides, and videos: white paper, fine gray isometric geometry, readable neutral text, and one cyan accent. Use `3b1b` for mathematical mechanisms: black paper, white and gray geometry, large arrowheads, and serif notation. Lieflat supplies the data encodings within either host. Explicit presets and brands take precedence. [Shared themes](../../../docs/shared-themes.md) owns the shared paint and typography roles.
+Use `iso` as the default host across new posters, diagrams, slides, and videos: white paper or charcoal, fine gray isometric geometry, readable neutral text, and one cyan accent. [ISO](iso.md) combines Hairline linework, iso-figure projection and iso-glow causal lighting. Use `3b1b` for mathematical mechanisms: black paper, white and gray geometry, large arrowheads, and serif notation. Lieflat supplies the data encodings within either host. Explicit presets and brands take precedence. [Shared themes](../../../docs/shared-themes.md) owns the shared paint and typography roles.
 
 ## Reuse the explanation
 
@@ -16,7 +16,7 @@ Define each object and relationship once. Static formats select a scene state. A
 
 ## Draw meaningful objects
 
-Choose a recognizable object whose action explains the mechanism. Use Hairline's public `Cam`, `proj`, `rings`, `prism`, `rrect`, and `fillet` geometry rather than a new imitation engine. Start at `Cam(45, 0.5, S)`. Draw an opaque ground-colored silhouette and one inset crease. Omit vertical corners and hidden edges. Paint back to front, fit the extreme pose, and compose a complete rest pose.
+Choose a recognizable object whose action explains the mechanism. Use the shared `iso` block for projected face geometry and live details. For the original rounded silhouette language, use Hairline's public `Cam`, `proj`, `rings`, `prism`, `rrect`, and `fillet` through the separate prepared-path adapter. Start that route at `Cam(45, 0.5, S)`. Draw an opaque ground-colored silhouette and one inset crease. Omit vertical corners and hidden edges. Paint back to front, fit the extreme pose, and compose a complete rest pose.
 
 The host's outline, crease, and active widths are 1.2, 0.65, and 1.2 in Hairline's 400 × 320 logical frame. Diagram outlines and routes use 0.85 logical units; chart marks use 0.85, with finer guides at 0.55. The silhouette must read at 240px wide. Selection changes color. Check the actual reading size and compressed video. Generic boxes with different colors or corner radii do not become Hairline illustrations.
 

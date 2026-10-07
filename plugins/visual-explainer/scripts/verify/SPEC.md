@@ -56,7 +56,7 @@ fan these dimensions out into separate model calls.
 {
   "file": "/absolute/path/artifact.html",
   "profile": "slides",
-  "preset": "hairline",
+  "preset": "iso",
   "summary": {"errors": 0, "warns": 1, "skipped": 125, "passed": 28},
   "checks": [],
   "screenshots": [],

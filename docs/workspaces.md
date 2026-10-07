@@ -8,7 +8,7 @@ cd explainer
 npm run dev
 ```
 
-The starter uses Hairline and includes a scene composition, finite motion, and a time scrubber. Edit the authored scene and sequence in `src`. The copied modules in `src/artifacture` belong to the new workspace.
+The starter uses ISO and includes a scene composition, finite motion, and a time scrubber. Edit the authored scene and sequence in `src`. The copied modules in `src/artifacture` belong to the new workspace.
 
 `init` installs the starter dependencies. `add` installs missing packages and adds stylesheet imports to the app entry. The installed skill uses the same CLI automatically; its user only needs the skill install command.
 
@@ -59,7 +59,7 @@ Required packages and stylesheet imports are added automatically. Import the cop
 
 The `authored-values` and `narration-cues` leaves copy parameter sampling and subtitle tools without npm dependencies. Keep their copied `LEMO-LICENSE` notice as well. Sample parameters with the same authored time as the scene; compile narration cues against the actual audio duration before serialization.
 
-The `charts` block retains the five Lieflat encodings under the shared themes. The `hairline` block adapts prepared silhouette and crease paths; it does not install the native pointer engine. The `video` block adds the existing paused GSAP playback runtime and supports one video host per document. See [graphics and video](graphics-and-video.md) for the source contracts.
+The `charts` block retains the five Lieflat encodings under the shared themes. The `iso` block adapts prepared silhouette and crease paths; it does not install the native pointer engine. The `video` block adds the existing paused GSAP playback runtime and supports one video host per document. See [graphics and video](graphics-and-video.md) for the source contracts.
 
 The original `video-frames` leaf defines frame rounding explicitly and separates the last encoded sample from the authored endpoint. Await detached snapshots when inspecting a loop; frame closure does not prove audio or velocity continuity.
 

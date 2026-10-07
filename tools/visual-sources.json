@@ -29,12 +29,6 @@
     "license": "MIT",
     "integration": "Reference for ordered data-flow motion. Original Artifacture walkthrough controller; no upstream app, posting workflow, or renderer source bundled."
   },
-  "hairline": {
-    "repository": "https://github.com/lucasmarkes/hairline",
-    "revision": "c3692e0c797956268847d843949f79714b6f7a41",
-    "license": "MIT",
-    "integration": "Complete unchanged skill and interactive runtime bundled in plugins/visual-explainer/vendor/hairline-create, including upstream examples, build/look/validation guidance, and MIT LICENSE. File hashes are recorded in vendor/hairline-create/provenance.json. Hairline illustration grammar is the default host across formats, with reusable Lieflat chart encodings. The rotating-point video remains original Artifacture geometry and animation and does not include the upstream pointer engine or figure code."
-  },
   "3blue1brown": {
     "url": "https://www.3blue1brown.com/",
     "repository": "https://github.com/3b1b/manim",
@@ -113,5 +107,31 @@
   "deedy-video-reference": {
     "url": "https://x.com/deedydas/status/2104957026199900220",
     "integration": "Read-only workflow reference for script planning, animatics, narrated code walkthroughs, word-aligned captions and screenshot/transcription review. No media or provider-specific tooling bundled."
+  },
+  "hairline": {
+    "repository": "https://github.com/lucasmarkes/hairline",
+    "revision": "c3692e0c797956268847d843949f79714b6f7a41",
+    "license": "MIT",
+    "integration": "Complete unchanged skill and interactive runtime bundled in plugins/visual-explainer/vendor/hairline-create, including upstream examples, build/look/validation guidance, and MIT LICENSE. File hashes are recorded in vendor/hairline-create/provenance.json. Hairline illustration grammar informs the default ISO host across formats, with reusable Lieflat chart encodings. The rotating-point video remains original Artifacture geometry and animation and does not include the upstream pointer engine or figure code."
+  },
+  "iso-figure": {
+    "repository": "https://github.com/MrBongoC/ai-iso-skill",
+    "revision": "44b4da7714148eef547cc1b102e433472dfe3531",
+    "license": "MIT",
+    "integration": "30-degree projection adapted into original shared rounded face primitives; no gallery shell, pointer clock or ornamental plates copied. ISO-FIGURE-LICENSE accompanies the copyable leaf."
+  },
+  "iso-glow": {
+    "url": "https://isoglow.dev/",
+    "archive": "https://isoglow.dev/iso-glow.zip",
+    "retrieved": "2026-10-07",
+    "sha256": "fe2d14a964609439f682a693c79d62e3813ad3f42ddecfe73fcd7b2629a19720",
+    "license": "MIT",
+    "integration": "Reference for live-part lighting within the ISO theme. One accent, scoped blur and face-local live details; no pointer runtime or example assets copied. ISO-GLOW-LICENSE accompanies the copyable leaf."
+  },
+  "motionmaxxing": {
+    "repository": "https://github.com/Tejashmakwana/motionmaxxing",
+    "revision": "8c8ec0f2a6f6c9a0da15cd24f7b1298ab298368c",
+    "license": "Apache-2.0",
+    "integration": "Eight monotone curves adapted from runtime/motion.js into the existing absolute-time sampler. No playback runtime, reference footage or third-party bundled libraries copied. MOTIONMAXXING-LICENSE and MOTIONMAXXING-NOTICE accompany the copyable leaf."
   }
 }

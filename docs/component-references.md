@@ -1,6 +1,6 @@
 # Component references
 
-These references guide the next editable blocks. They are design and API references, not bundled dependencies or copied upstream assets. Hairline remains the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
+These references guide the next editable blocks. They are design and API references, not bundled dependencies or copied upstream assets. ISO is the default. 3b1b, Mono Color, and Algebrica share the same geometry and data contracts.
 
 | Reference | Useful parts | Local fit |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ These references guide the next editable blocks. They are design and API referen
 
 ## Shared design rules
 
-Each block owns geometry or behavior. Theme tokens own color, fonts, and stroke roles. Hairline diagrams and charts use thin structural and detail strokes, with one contrasting accent for the current focus. Mathematical scenes use 3b1b's black background, readable math, and motion that demonstrates a causal step.
+Each block owns geometry or behavior. Theme tokens own color, fonts, and stroke roles. ISO diagrams and charts use thin structural and detail strokes, with one contrasting accent for the current focus. Mathematical scenes use 3b1b's black background, readable math, and motion that demonstrates a causal step.
 
 A poster samples a scene at a chosen state. A diagram explains relationships in that scene. Slides frame and sequence the scene, and video advances the same sequence clock. Source copies keep those levels connected without requiring the full MDX renderer.
 

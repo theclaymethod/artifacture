@@ -147,7 +147,7 @@ test('public export and individually discoverable components deliver interactive
       const discoveredIds = catalog.map((block) => block.id);
       assert.equal(new Set(discoveredIds).size, discoveredIds.length, 'Discovery IDs must be unique.');
       assert.ok(discoveredIds.every(id => !id.startsWith('__')), 'Internal copy dependencies must stay hidden.');
-      for (const id of ['graphics', 'diagram', 'hairline', 'motion', 'composition', 'slides', 'video', 'charts', 'diagram-canvas', 'diagram-walkthrough', 'data-chart', 'thread-plot', 'code-block', 'diff-block', 'terminal-block', 'json-tree', 'quiz', 'pipeline', 'decision-matrix', 'risk-ledger', 'sequence-scene', 'state-scene', 'layer-scene', 'plot-scene', 'token-scene', 'playhead-scene', 'grid-scene', 'reveal-in-order', 'focus-in-order', 'authored-values', 'narration-cues', 'video-frames', 'follow-path', 'comparison-wipe', 'source-range-focus']) {
+      for (const id of ['graphics', 'diagram', 'iso', 'motion', 'composition', 'slides', 'video', 'charts', 'diagram-canvas', 'diagram-walkthrough', 'data-chart', 'thread-plot', 'code-block', 'diff-block', 'terminal-block', 'json-tree', 'quiz', 'pipeline', 'decision-matrix', 'risk-ledger', 'sequence-scene', 'state-scene', 'layer-scene', 'plot-scene', 'token-scene', 'playhead-scene', 'grid-scene', 'reveal-in-order', 'focus-in-order', 'authored-values', 'narration-cues', 'video-frames', 'follow-path', 'comparison-wipe', 'source-range-focus']) {
         assert.ok(discoveredIds.includes(id), `The public CLI must discover ${id}.`);
       }
       for (const id of ['dag', 'native-clip', 'manim-clip', 'psychopomp-clip']) assert.ok(discoveredIds.includes(id), `The public CLI must discover ${id}.`);
@@ -180,12 +180,12 @@ test('public export and individually discoverable components deliver interactive
       assert.equal(existsSync(workspace), false);
       assert.match(succeeds(components(['init', workspace])), /files created/);
       const beforeAdd = snapshot(workspace);
-      assert.match(succeeds(components(['add', 'hairline', 'charts', '--cwd', workspace, '--dry-run'])), /lieflat-charts\.tsx/);
+      assert.match(succeeds(components(['add', 'iso', 'charts', '--cwd', workspace, '--dry-run'])), /lieflat-charts\.tsx/);
       assert.deepEqual(snapshot(workspace), beforeAdd);
-      succeeds(components(['add', 'hairline', 'charts', '--cwd', workspace]));
+      succeeds(components(['add', 'iso', 'charts', '--cwd', workspace]));
       const beforeRerun = snapshot(workspace);
       assert.match(succeeds(components(['init', workspace])), /0 files created/);
-      assert.match(succeeds(components(['add', 'hairline', 'charts', '--cwd', workspace])), /0 files created/);
+      assert.match(succeeds(components(['add', 'iso', 'charts', '--cwd', workspace])), /0 files created/);
       assert.deepEqual(snapshot(workspace), beforeRerun);
       const motionFile = path.join(workspace, 'src/artifacture/graphic-motion.ts');
       const original = readFileSync(motionFile);
@@ -282,12 +282,12 @@ test('public export and individually discoverable components deliver interactive
           await page.getByRole('heading', { name: heading, exact: true }).waitFor();
         }
         const theme = page.getByRole('combobox', { name: 'Theme', exact: true });
-        for (const preset of ['hairline', '3b1b', 'mono-color', 'algebrica']) {
+        for (const preset of ['iso', '3b1b', 'mono-color', 'algebrica']) {
           await theme.selectOption(preset);
           await page.waitForFunction(value => document.querySelector('main')?.getAttribute('data-ve-preset') === value, preset);
           assert.ok(await page.locator('main').evaluate(element => getComputedStyle(element).getPropertyValue('--ve-accent').trim()));
         }
-        await theme.selectOption('hairline');
+        await theme.selectOption('iso');
         const slider = page.getByRole('slider', { name: 'Authored time', exact: true });
         for (const width of [1280, 390]) {
           await page.setViewportSize({ width, height: 900 });

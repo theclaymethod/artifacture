@@ -29,7 +29,7 @@ A job has a stable identity, meaningful title, engine, confined relative source 
 
 `ARTIFACTURE_NATIVE_THEME` passes the resolved theme JSON to the source. Manim receives `ARTIFACTURE_NATIVE_FONT` for its bundled display font. The sample reads those inputs instead of introducing a separate palette.
 
-Hairline is the default. All four retained presets resolve paint and stroke tokens from `visual-explainer-mdx/themes.css`. The Manim example uses the resolved colors, thin strokes and display font. Psychopomp receives four additional theme variants through a small, anchor-checked paint adapter over the pinned source. Its native geometry, spring channels, shader materials, and CommitMono text renderer remain upstream implementations; this is not the browser Hairline illustration kernel. Bloom, grain and vignette are disabled in the supplied physical-diagram scene. Semantic states retain labels while sharing one accent.
+ISO is the default. All four retained presets resolve paint and stroke tokens from `visual-explainer-mdx/themes.css`. The Manim example uses the resolved colors, thin strokes and display font. Psychopomp receives four additional theme variants through a small, anchor-checked paint adapter over the pinned source. Its native geometry, spring channels, shader materials, and CommitMono text renderer remain upstream implementations; this is not the browser Hairline illustration kernel. Bloom, grain and vignette are disabled in the supplied physical-diagram scene. Semantic states retain labels while sharing one accent.
 
 The result directory contains:
 

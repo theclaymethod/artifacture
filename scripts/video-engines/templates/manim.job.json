@@ -5,7 +5,7 @@
   "engine": "manim",
   "source": "secant-to-tangent.py",
   "scene": "SecantToTangent",
-  "theme": "hairline",
+  "theme": "iso",
   "width": 1920,
   "height": 1080,
   "fps": 30,

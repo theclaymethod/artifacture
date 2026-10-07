@@ -107,7 +107,7 @@ graph TD
 
 **Node-label fonts.** Space Grotesk at 15px (docs) or 20px (slide decks).
 
-**When to use this theme:** only for an explicit Mono-Industrial request. Default output inherits the `hairline` preset.
+**When to use this theme:** only for an explicit Mono-Industrial request. Default output inherits the `iso` preset.
 
 ### CSS Overrides on Mermaid SVG
 

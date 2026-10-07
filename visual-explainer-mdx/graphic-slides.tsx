@@ -8,7 +8,7 @@ export type GraphicSlideScene = Readonly<{ id: string; title: string; explanatio
 export type GraphicSlideSequence = Readonly<{ id: string; width: number; height: number; duration: number; slides: readonly Readonly<{ slide: GraphicSlideScene; motion: GraphicMotion; start: number; duration: number }>[] }>;
 
 export function createSlideScene(input: Omit<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'> & Partial<Pick<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'>>): GraphicSlideScene {
-  const slide = { ...input, graphic: createGraphicScene(input.graphic), width: input.width ?? 1920, height: input.height ?? 1080, preset: input.preset ?? 'hairline', appearance: input.appearance ?? 'light' };
+  const slide = { ...input, graphic: createGraphicScene(input.graphic), width: input.width ?? 1920, height: input.height ?? 1080, preset: input.preset ?? 'iso', appearance: input.appearance ?? 'light' };
   if (slide.appearance !== 'light' && slide.appearance !== 'dark') throw new Error('Unsupported slide appearance.');
   assertSupportedPreset(slide.preset);
   if ([slide.id, slide.title, slide.explanation].some((value) => value !== String(value) || !value.trim()) || !Number.isFinite(slide.width) || !Number.isFinite(slide.height) || slide.width <= 0 || slide.height <= 0) throw new Error('Slides need meaning, a stable ID, and finite positive dimensions.');

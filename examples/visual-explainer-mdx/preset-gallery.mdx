@@ -2,12 +2,12 @@ import { DiagramCanvas, ExplainerShell, Section } from '../../visual-explainer-m
 
 export default function VisualLanguages() {
   const themes = [
-    { id: 'hairline', title: 'Hairline', text: 'Fine gray geometry on white, with one contrasting accent for the active relationship.' },
+    { id: 'iso', title: 'ISO', text: 'Fine gray geometry on white, with one contrasting accent for the active relationship.' },
     { id: 'algebrica', title: 'Algebrica', text: 'Serif type on warm stone for definitions, proofs, and longer explanations.' },
     { id: 'mono-color', title: 'Mono Color', text: 'Cobalt on neutral paper, with a second ink for emphasis.' },
   ];
   return (
-    <ExplainerShell title="Compare the three themes" summary="The same source-to-HTML diagram in Hairline, Algebrica, and Mono Color." reviewTools={false}>
+    <ExplainerShell title="Compare the three themes" summary="The same source-to-HTML diagram in ISO, Algebrica, and Mono Color." reviewTools={false}>
       {themes.map((theme) => (
         <div key={theme.id} data-ve-preset={theme.id} style={{ background: 'var(--ve-bg)', color: 'var(--ve-text)', padding: 'clamp(20px, 4vw, 48px)' }}>
           <Section title={theme.title}>

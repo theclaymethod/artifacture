@@ -1,5 +1,5 @@
 export const BUILTIN_PRESET_NAMES = Object.freeze([
-  'hairline',
+  'iso',
   '3b1b',
   'mono-color',
   'algebrica',
@@ -7,9 +7,10 @@ export const BUILTIN_PRESET_NAMES = Object.freeze([
   'custom',
 ]);
 
-export const DEFAULT_PRESET = 'hairline';
+export const DEFAULT_PRESET = 'iso';
 
 const RETIRED_PRESETS = new Set([
+  'hairline',
   'lieflat',
   'oa-design',
   'nothing',
@@ -34,7 +35,7 @@ export function assertSupportedPreset(name) {
   }
   if (RETIRED_PRESETS.has(name)) {
     const detail = name === 'lieflat' ? ' Lieflat chart encodings remain available in every kept theme.' : '';
-    throw new PresetPolicyError(`Preset "${name}" is retired. Migrate to "hairline", "3b1b", "mono-color", or "algebrica".${detail}`);
+    throw new PresetPolicyError(`Preset "${name}" is retired. Migrate to "iso", "3b1b", "mono-color", or "algebrica".${detail}`);
   }
 }
 /* oxlint-enable anti-slop/no-runtime-typeof */

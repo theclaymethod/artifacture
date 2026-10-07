@@ -275,7 +275,7 @@
   }
 
   :root:not([data-ve-preset]),
-  [data-ve-preset="hairline"],
+  [data-ve-preset="iso"],
   [data-ve-preset="3b1b"] {
     --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
     --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -334,7 +334,7 @@
   }
 
   :root:not([data-ve-preset]),
-  [data-ve-preset="hairline"] {
+  [data-ve-preset="iso"] {
     --ve-graphic-stroke: 0.85;
     --ve-graphic-detail-stroke: 0.6;
     --ve-graphic-active-stroke: 1.15;
@@ -348,9 +348,9 @@
   }
 
   :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
-  [data-ve-preset="hairline"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
   .motion-stage:is([data-ve-appearance="dark"], [data-motion-theme="dark"]):not([data-ve-preset]) {
-    --ve-bg: #000000;
+    --ve-bg: #0d0e0f;
     --ve-bg-alt: #ffffff;
     --ve-text: #f5f5f5;
     --ve-muted: #b6bac4;
@@ -458,7 +458,7 @@
     --ve-diagram-accent-fill: var(--ve-accent-soft);
   }
 
-  @scope ([data-ve-preset="hairline"], [data-ve-preset="3b1b"]) to ([data-ve-preset]) {
+  @scope ([data-ve-preset="iso"], [data-ve-preset="3b1b"]) to ([data-ve-preset]) {
     :scope a,
     :scope:is(a) {
       color: var(--ve-text);

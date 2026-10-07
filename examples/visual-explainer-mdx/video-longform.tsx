@@ -2,7 +2,7 @@ import React from 'react';
 import { createDiagramScene, createSlideScene, defineGraphicMotion, GraphicVideo, sequenceSlides, type GraphicScene } from '../../visual-explainer-mdx/components';
 import { focusInOrder } from '../../visual-explainer-mdx/teaching-motion';
 import themes from '../../visual-explainer-mdx/themes.css?raw';
-import motionTheme from '../../plugins/visual-explainer/templates/hairline-motion-theme.css?raw';
+import motionTheme from '../../plugins/visual-explainer/templates/iso-motion-theme.css?raw';
 
 export const retryDiagrams = {
   identity: createDiagramScene({

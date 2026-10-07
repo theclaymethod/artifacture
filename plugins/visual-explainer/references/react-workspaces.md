@@ -18,8 +18,8 @@ The starter provides React, TypeScript, Vite, horizontal and vertical compositio
 For an existing React project, use `add` rather than `init`:
 
 ```bash
-node "$SKILL_DIR/scripts/artifacture.mjs" add hairline charts slides video --cwd /absolute/project --dry-run
-node "$SKILL_DIR/scripts/artifacture.mjs" add hairline charts slides video --cwd /absolute/project
+node "$SKILL_DIR/scripts/artifacture.mjs" add iso charts slides video --cwd /absolute/project --dry-run
+node "$SKILL_DIR/scripts/artifacture.mjs" add iso charts slides video --cwd /absolute/project
 ```
 
 The CLI installs missing npm packages and imports the required styles. Use `--no-install` to retain manual package management or `--entry <file>` for a custom app entry. Exact reruns preserve files; a conflict stops the whole plan before writing. Reconcile consumer edits rather than overwriting them. The CLI requires paths without symlink ancestors.
@@ -34,6 +34,8 @@ Use `list --query <capability-or-API> --json` before choosing a block. The index
 | diagram | Node and relationship layout adapted to a scene |
 | dag | Multi-parent dependency minimap, lineage focus and a shared-scene reveal |
 | native-clip, manim-clip, psychopomp-clip | Validated rendered clips and selected frames, with optional native source starters |
+| iso | Projected faces, local windows/vents and one live lighting state |
+| motion-eases | Motionmaxxing landing and exit curves on explicit time |
 | hairline | Prepared `HL.prism` silhouette and crease pairs; native kernel stays separate |
 | axonometric-plan, exploded-axonometric | Model-coordinate plans, rounded physical parts, tray occlusion and finite phase/lift motion; read [axonometric.md](axonometric.md) |
 | charts | Lieflat rung bars, unit fields, barcode, bubble matrix, and record threads |
@@ -63,11 +65,11 @@ not all been extracted as copyable leaves. Do not count referenced upstream type
 as installed components. Read `REPO/docs/component-catalog.md` and the real
 `component-catalog.tsx` example for the available contracts.
 
-Hairline is the default. `3b1b`, `mono-color`, and `algebrica` retain geometry and data contracts. Browser mathematical scenes use Unicode with STIX Two Math. For native formula typesetting and matching-shape transforms, read [native-engines.md](native-engines.md) and use Manim Community. Interactive charts remain React components. Numeric plot and scalar-grid builders provide a scene route for authored output.
+ISO is the default. `3b1b`, `mono-color`, and `algebrica` retain geometry and data contracts. Browser mathematical scenes use Unicode with STIX Two Math. For native formula typesetting and matching-shape transforms, read [native-engines.md](native-engines.md) and use Manim Community. Interactive charts remain React components. Numeric plot and scalar-grid builders provide a scene route for authored output.
 
 `authored-values` and `narration-cues` retain their adapted LemoLab MIT notice as `LEMO-LICENSE` beside the copied source. They add no npm dependencies or clock. Keep actual audio duration and alignment provenance when compiling cues. Overlap repair and clipping padded ASR starts require explicit options; clipped cues retain the original source interval.
 
-Import `themes.css` once in the app entry. Slides and video also need `hairline-motion-theme.css`; chart leaves import their own chart CSS. Read `REPO/docs/shared-themes.md` for token roles and `REPO/docs/graphics-and-video.md` for full scene and delivery contracts. Native pointer-driven Hairline figures use the vendored skill instead of this sampler.
+Import `themes.css` once in the app entry. Slides and video also need `iso-motion-theme.css`; chart leaves import their own chart CSS. Read `REPO/docs/shared-themes.md` for token roles and `REPO/docs/graphics-and-video.md` for full scene and delivery contracts. Native pointer-driven Hairline figures use the vendored skill instead of this sampler.
 
 ## Author and inspect motion
 

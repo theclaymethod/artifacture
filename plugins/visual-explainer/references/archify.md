@@ -8,7 +8,7 @@ Archify source is typed JSON. Retain that JSON beside the generated HTML; do not
 
 1. Inspect the source system and choose one supported type: `architecture`, `workflow`, `sequence`, `dataflow`, or `lifecycle`. Record the primary question, boundaries, and evidence for nodes and relationships.
 2. Run `npm run ve:archify -- setup` when the runtime is absent. It installs the pinned stable Archify `v2.16.0` revision `c826e6c3a7abad19c0f3cd1ca57207d54b1ad8de`. `npm run ve:archify -- path` prints its runtime root. Read that installation's schema and example for the chosen type. The Artifacture wrapper resolves the installation; run `npm run ve:archify -- doctor` to check availability and `npm run ve:archify -- guide "<brief>" --json` when choosing a type.
-3. Author `<slug>.<type>.json`. Keep node names specific, supporting details concise, and optional stories, roles, status, or source references grounded in inspected evidence. Set `meta.visual_preset` to `"classic"` for Artifacture's Hairline treatment: white, fine gray strokes, and a single cyan accent. Classic remains the internal upstream schema token; the viewer calls it Hairline. Omit animation for a static default.
+3. Author `<slug>.<type>.json`. Keep node names specific, supporting details concise, and optional stories, roles, status, or source references grounded in inspected evidence. Set `meta.visual_preset` to `"classic"` for Artifacture's ISO treatment: white, fine gray strokes, and a single cyan accent. Classic remains the internal upstream schema token; the viewer calls it ISO. Omit animation for a static default.
 4. Validate and deliver through the wrapper:
 
 ```bash
@@ -23,6 +23,6 @@ Archify validation establishes its rendering contract; visual review still matte
 
 ## Visual direction
 
-The owned adapter applies Hairline at every render from the pristine pinned template. Fresh Hairline views start light; an explicit saved preference or `?theme=dark` still selects the dark treatment. The menu and `S` shortcut offer Hairline and Signal Flow. Blueprint and Editorial are retired in authored input and the viewer API. Keep upstream control chrome that performs a real action. Do not add outer dashboards, decorative status, metric tiles, fake legends, or tiny uppercase framing around the map. Use source evidence only when it is requested or needed for interpretation.
+The owned adapter applies ISO at every render from the pristine pinned template. Fresh ISO views start light; an explicit saved preference or `?theme=dark` still selects the dark treatment. The menu and `S` shortcut offer ISO and Signal Flow. Blueprint and Editorial are retired in authored input and the viewer API. Keep upstream control chrome that performs a real action. Do not add outer dashboards, decorative status, metric tiles, fake legends, or tiny uppercase framing around the map. Use source evidence only when it is requested or needed for interpretation.
 
 If Archify is unavailable, report the missing dependency and use a supported `DiagramCanvas`, Mermaid, or custom SVG route only when it preserves the requested meaning. Follow [diagram-design.md](diagram-design.md) for that choice.

@@ -62,7 +62,7 @@ Use the slide card for ordinary decks. For a bespoke fixed 1920×1080 presentati
 
 ## Presets
 
-Primary explainer presets are `hairline` (default isometric illustrations) and `3b1b` (mathematical mechanisms on black). Lieflat charts use either host's tokens. Retained alternatives are `mono-color` and `algebrica`, with `mono-industrial` optional and `custom` for local tokens. The former `lieflat` palette and `oa-design`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal` fail with migration guidance. New external brand names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` when learning or using an external design system.
+Primary explainer presets are `iso` (default isometric illustrations) and `3b1b` (mathematical mechanisms on black). Lieflat charts use either host's tokens. Retained alternatives are `mono-color` and `algebrica`, with `mono-industrial` optional and `custom` for local tokens. The former `lieflat` palette and `oa-design`, `nothing`, `blueprint`, `editorial`, `paper-ink`, and `terminal` fail with migration guidance. New external brand names resolve through the external design-system registry. Read `docs/design-systems.md` from `REPO` when learning or using an external design system.
 
 - `DagCanvas`: compact dependency graph with parent/child or full-lineage focus, keyboard navigation, and shared themed scene geometry. Copy with `artifacture add dag`; see `docs/dag.md` in the runtime.
 

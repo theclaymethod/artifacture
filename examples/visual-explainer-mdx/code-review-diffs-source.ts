@@ -57,6 +57,6 @@ export function createDiffReviewSequence(narrow = false) {
       { id: 'result', scene: result, motion: resultMotion, frame: narrow ? { x: 0, y: 620, width: 800, height: 440 } : { x: 860, y: 100, width: 640, height: 440 }, clip: 'frame' },
     ],
   });
-  const slide = createSlideScene({ id: narrow ? 'diff-review-portrait' : 'diff-review-landscape', title: 'Zero is a value.', explanation: 'Change the condition. Preserve the input. Replay the outcome.', graphic: composition.scene, width: narrow ? 1080 : 1920, height: narrow ? 1920 : 1080, preset: 'hairline', appearance: 'light' });
+  const slide = createSlideScene({ id: narrow ? 'diff-review-portrait' : 'diff-review-landscape', title: 'Zero is a value.', explanation: 'Change the condition. Preserve the input. Replay the outcome.', graphic: composition.scene, width: narrow ? 1080 : 1920, height: narrow ? 1920 : 1080, preset: 'iso', appearance: 'light' });
   return sequenceSlides(slide.id, [{ slide, motion: composition.motion, duration }]);
 }

@@ -61,7 +61,7 @@ async function main() {
     const source = path.join(temp, 'chart.tsx');
     const built = path.join(temp, 'chart.html');
     const component = path.join(repoRoot, 'visual-explainer-mdx/components');
-    await fs.writeFile(source, `import React from 'react';\nimport { LieflatChart } from ${JSON.stringify(component)};\nconst chart = ${JSON.stringify(props)};\nexport default function Chart() { return <main data-ve-preset="hairline" style={{maxWidth:1120,margin:'0 auto',padding:'clamp(20px,5vw,72px)',fontFamily:'var(--ve-font-body)'}}><LieflatChart {...chart} /></main>; }\n`);
+    await fs.writeFile(source, `import React from 'react';\nimport { LieflatChart } from ${JSON.stringify(component)};\nconst chart = ${JSON.stringify(props)};\nexport default function Chart() { return <main data-ve-preset="iso" style={{maxWidth:1120,margin:'0 auto',padding:'clamp(20px,5vw,72px)',fontFamily:'var(--ve-font-body)'}}><LieflatChart {...chart} /></main>; }\n`);
     await exportChart(source, built);
     await fs.mkdir(path.dirname(output), { recursive: true });
     // Stage beside the destination so rename stays atomic across filesystem boundaries.

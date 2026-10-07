@@ -73,7 +73,7 @@ try {
   const payload = JSON.stringify(sequence).replaceAll('<', '\\u003c');
   const compositionId = JSON.stringify(sequence.id).replaceAll('<', '\\u003c');
   const canonicalTheme = await fs.readFile(path.join(root, 'visual-explainer-mdx/themes.css'), 'utf8');
-  const motionTheme = await fs.readFile(path.join(root, 'plugins/visual-explainer/templates/hairline-motion-theme.css'), 'utf8');
+  const motionTheme = await fs.readFile(path.join(root, 'plugins/visual-explainer/templates/iso-motion-theme.css'), 'utf8');
   const presetNames = [...new Set(sequence.slides.map(({ slide }) => slide.preset))];
   const brandStyle = presetNames.map((preset) => {
     const brand = resolvePresetCssForExport(`<div data-ve-preset="${preset}"></div>`, { repoRoot: root, globalCssPath: path.join(root, 'visual-explainer-mdx/themes.css') });

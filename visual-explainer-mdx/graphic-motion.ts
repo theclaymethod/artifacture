@@ -2,8 +2,9 @@ import type { GraphicBounds, GraphicClip, GraphicObject, GraphicScene } from './
 import { createGraphicScene, validateGraphicBounds, validateGraphicScene } from './graphics-types';
 import { sampleGraphicRoute, validateGraphicRoute, type GraphicPoint, type PreparedGraphicRoute } from './graphic-routes';
 import { intersectGraphicClips } from './graphic-clips';
+import { motionEaseNames, sampleMotionEase, type MotionEase } from './motion-eases';
 
-type Timing = Readonly<{ target: string; start: number; duration: number; ease?: 'linear' | 'smooth' }>;
+type Timing = Readonly<{ target: string; start: number; duration: number; ease?: MotionEase }>;
 export type GraphicMotionTrack = Timing & (
   | Readonly<{ property: 'opacity' | 'reveal'; from: number; to: number; interpolation?: 'step-end' }>
   | Readonly<{ property: 'highlight'; from: number; to: number; interpolation?: 'threshold' | 'step-end' }>
@@ -41,7 +42,7 @@ function validateMotion(scene: GraphicScene, motion: GraphicMotion) {
     const object = objects.get(track.target);
     if (!object) throw new Error(`Unknown motion target: ${track.target}`);
     if (!['opacity', 'reveal', 'highlight', 'translation', 'route', 'mask'].includes(track.property)) throw new Error(`Unsupported motion property: ${track.property}`);
-    if (track.ease !== undefined && track.ease !== 'linear' && track.ease !== 'smooth') throw new Error(`Unsupported motion ease: ${track.ease}`);
+    if (track.ease !== undefined && !motionEaseNames.includes(track.ease)) throw new Error(`Unsupported motion ease: ${track.ease}`);
     if (!Number.isFinite(track.start) || track.start < 0 || !Number.isFinite(track.duration) || track.duration <= 0 || track.start + track.duration > motion.duration) throw new Error(`Motion track exceeds its finite duration: ${track.target}`);
     if (track.property === 'translation') {
       if ([track.from.x, track.from.y, track.to.x, track.to.y].some((n) => !Number.isFinite(n))) throw new Error(`Translation must be finite: ${track.target}`);
@@ -84,8 +85,7 @@ export function sampleScene(input: GraphicScene, motion: GraphicMotion, authored
   for (const tracks of grouped.values()) {
     tracks.sort((a, b) => a.start - b.start);
     const track = tracks.filter((t) => t.start <= time).at(-1) ?? tracks[0];
-    let progress = Math.min(1, Math.max(0, (time - track.start) / track.duration));
-    if (track.ease === 'smooth') progress = progress * progress * (3 - 2 * progress);
+    const progress = sampleMotionEase(track.ease ?? 'linear', Math.min(1, Math.max(0, (time - track.start) / track.duration)));
     const state = { ...(states.get(track.target) ?? baseStates.get(track.target) ?? { opacity: 1, reveal: 1, highlight: false, x: 0, y: 0 }) };
     if (track.property === 'translation') {
       state.x = interpolate(track.from.x, track.to.x, progress);

@@ -1,6 +1,6 @@
 # Build an explanation that moves
 
-Use this guide when authoring a video, a PR review, or a sizzle reel. It teaches the implemented library; the live component index owns exact signatures and copy boundaries. Read the [motion baseline](motion-video-baseline.md) for Hairline and 3b1b styling, or preserve the user's requested visual identity.
+Use this guide when authoring a video, a PR review, or a sizzle reel. It teaches the implemented library; the live component index owns exact signatures and copy boundaries. Read the [motion baseline](motion-video-baseline.md) for ISO and 3b1b styling, or preserve the user's requested visual identity.
 
 ## Turn the topic into a visible question
 
@@ -50,7 +50,7 @@ Read each selected entry's `entryPoints`, `constraints`, `variants`, and `exampl
 | A cascade or transferred attention | `reveal-in-order`, `focus-in-order`, `motion` | `examples/visual-explainer-mdx/video-longform.tsx` and `component-catalog.tsx`. |
 | Messages, ownership layers, or a state transition | `sequence-scene`, `layer-scene`, `state-scene` | `component-catalog.tsx`; builders produce ordinary scenes. |
 | Multi-parent dependencies and lineage | `dag` | `dag-source.ts`; authored reveal shares the scene sampler, while interactive navigation remains a page control. |
-| A physical assembly separating into meaningful parts | `exploded-axonometric`, `axonometric-plan`, `hairline` | `axonometric-source.ts` and [axonometric.md](axonometric.md). Native Hairline silhouettes keep their separate crease and occlusion rules. |
+| A physical assembly separating into meaningful parts | `exploded-axonometric`, `axonometric-plan`, `iso` | `axonometric-source.ts` and [axonometric.md](axonometric.md). Native Hairline silhouettes keep their separate crease and occlusion rules. |
 | A numerical trend, units, or individual records | `plot-scene`, `grid-scene`, `charts`, `thread-plot` | `component-catalog.tsx` and `repair-story-data.ts`. A React chart is not automatically a seekable video scene. |
 | An authored value driving multiple consequences | `authored-values`, `motion` | Derive related geometry from the same scalar/vector sampler. Built-in tracks support opacity, reveal, highlight, illustration translation, route traversal, and rectangular masks. |
 | A mechanical character change or scan | `dot-matrix-scene`, `character-roll`, `column-scan`, `punctum-readout` | `punctum-source.ts` and `punctum-video.tsx`; font/readout and prepared SVG cells are separate surfaces. Scan audio is a separately synthesized recording. |
@@ -73,7 +73,7 @@ Use the supported primitives for causal movement. When a camera, mask, native cl
 
 Inspect continuity immediately before, at, and after every cut. Keep the identity, position, direction, speed, and focus relationship that carries the viewer across it. A change of mechanism may justify a cut; the resulting image still needs a readable entry state. When the installed motion-doctrine skill is available, apply its seam checks to the authored transitions.
 
-Use Hairline for physical mechanisms and thin-line diagrams, 3b1b for mathematical construction, and Mono Color or Algebrica when requested. Preserve one causal accent across a collection. Inspect fine strokes after video compression and at the actual playback size; visible active relationships and readable type matter more than a token value.
+Use [ISO](iso.md) for physical mechanisms and thin-line diagrams, 3b1b for mathematical construction, and Mono Color or Algebrica when requested. Preserve one causal accent across a collection. Inspect fine strokes after video compression and at the actual playback size; visible active relationships and readable type matter more than a token value.
 
 ## Align the film to actual speech
 
@@ -106,3 +106,5 @@ Run the [Artifacture verification route](verification.md) and disclose any incom
 Render once source and frame checks pass. A second encode is useful after a repair or when a delivery master was requested. Honor existing authorization. Inspect a contact sheet decoded from the MP4, especially the proof and final frames. Check actual dimensions, frame rate, duration, and the audio stream with `ffprobe`; listen or recognize the delivered audio when available, and report which check was performed. Review clipped speech, audible artifacts, illegible labels, frozen motion, and seams in the encoded result.
 
 If hosting is requested, verify the public player, chapter seeking, caption loading, and byte-range support for the MP4. Deliver a watch link and downloadable film with editable source and evidence. Explain any remaining limitation precisely. For a collection, check canonical subjects and terms in adjacent episodes and give the next episode a useful starting question.
+
+For isometric mechanisms and directed arrivals/departures, read [ISO and Motionmaxxing](iso.md). The `iso` and `motion-eases` blocks are copied leaves on the existing finite clock; preserve active color meaning, causal response and real reading holds.

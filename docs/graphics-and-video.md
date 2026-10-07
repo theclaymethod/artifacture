@@ -17,7 +17,7 @@ const diagram = createDiagramScene({
 const slide = createSlideScene({
 	id: 'build-slide', title: 'Keep the source editable',
 	explanation: 'The source remains the same when the output format changes.',
-	graphic: diagram, preset: 'hairline', appearance: 'light',
+	graphic: diagram, preset: 'iso', appearance: 'light',
 });
 const motion = defineGraphicMotion(diagram, {
 	duration: 12,
@@ -67,6 +67,10 @@ Choose `clip: 'frame'` to cut overflow at the destination frame. Choose `clip: '
 Each instance uses the composition's clock starting at zero. Its own motion can end earlier and hold; it cannot exceed the composition duration. Supply different local motions for independent timing. Whole-block placement is static. Changes inside a diagram still belong to its layout owner; individual diagram nodes cannot translate away from their routes. Cross-block connections, rotation, arbitrary clip paths, and animated instance placement require separate capability work.
 
 The compositor clones and deeply freezes its output. It introduces no renderer, wall clock, callback, or React payload. The [architecture and cleanup plan](plans/reusable-graphics-blocks.md) records the chosen boundary and remaining migrations.
+
+## Reuse ISO geometry
+
+`createIsoScene` projects rounded top/front/side faces into this same primitive model. Face-local details can declare `live: true`; they use the `live` paint role and a scoped SVG halo when the owning part is highlighted. Other face marks stay neutral. `glow: true` is also available on authored primitives. See the [ISO guide](../plugins/visual-explainer/references/iso.md) for geometry, licensing and Motionmaxxing easing options.
 
 ## Reuse native Hairline solids
 

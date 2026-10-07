@@ -10,7 +10,7 @@ metadata:
 
 # Visual Explainer
 
-Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the Hairline preset across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
+Produce editable source and verified, self-contained HTML. The [default explainer theme](references/default-explainer-theme.md) uses the [ISO preset](references/iso.md) across posters, diagrams, slides, and videos. An explicit brand or requested look takes precedence. Prefer prose when a visual would add no understanding.
 
 Remove any element whose absence changes neither meaning nor operation. Do not add kickers, decorative numbering, badges, metric tiles, or tiny uppercase labels to create hierarchy. Use composition, spacing, readable typography, and direct language.
 
@@ -36,6 +36,7 @@ Completion requires editable source, a successful export, and evidence for every
 | React workspace, reusable components, or seekable scene motion | [react-workspaces.md](references/react-workspaces.md) | Discover actual APIs with the component CLI; copy local leaf modules instead of importing the full renderer into an app. |
 | chart or quantitative data | [charts.md](references/charts.md) | Select unit, record, time, or relationship encodings; use basic comparisons when the evidence is sparse. |
 | diagram or architecture | [web-diagram.md](cards/web-diagram.md) | The card routes custom geometry and specialized diagrams. |
+| isometric objects, devices or causal lighting | [iso.md](references/iso.md) | Project reusable face details and live geometry; sample Motionmaxxing curves through the shared clock. |
 | axonometric floor/site plan, exploded object or physical assembly | [axonometric.md](references/axonometric.md) | Editable projected SVG, tray occlusion, shared part levels and finite motion. |
 | implementation plan | [visual-plan.md](cards/visual-plan.md) | — |
 | comparison or data table | [comparison-table.md](cards/comparison-table.md) | — |

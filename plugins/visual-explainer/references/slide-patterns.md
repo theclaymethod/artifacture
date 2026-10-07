@@ -13,7 +13,7 @@ The source determines the slide count. Do not require a divider for every sectio
 
 ## Composition and typography
 
-Use the `hairline` preset by default, with `3b1b` for mathematical mechanisms and derivations. Named alternatives may change the palette and typography; they do not change readability or factual standards. Keep titles descriptive, body copy direct, and supporting evidence near the claim.
+Use the `iso` preset by default, with `3b1b` for mathematical mechanisms and derivations. Named alternatives may change the palette and typography; they do not change readability or factual standards. Keep titles descriptive, body copy direct, and supporting evidence near the claim.
 
 | Content | Starting treatment |
 |---|---|

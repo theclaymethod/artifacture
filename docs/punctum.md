@@ -1,6 +1,6 @@
 # Dot displays and synchronized scans
 
-Punctum adds display blocks within Hairline, 3b1b, Mono Color, and Algebrica. These are reusable primitives, not another theme. The [interactive gallery](../examples/visual-explainer-mdx/punctum.tsx) demonstrates all four copy entries, direct time seeking, the font axes, and optional generated sound.
+Punctum adds display blocks within ISO, 3b1b, Mono Color, and Algebrica. These are reusable primitives, not another theme. The [interactive gallery](../examples/visual-explainer-mdx/punctum.tsx) demonstrates all four copy entries, direct time seeking, the font axes, and optional generated sound.
 
 ```bash
 artifacture list --query punctum --json

@@ -1,6 +1,6 @@
 # Artifacture visual language
 
-Hairline is the default host for new explainers, diagrams, posters, slides, and videos. Use the `3b1b` preset for mathematical mechanisms and derivations. Combine either with Lieflat's data encodings when the explanation includes observations. Retained presets and external brands keep their authored tokens. Retired palettes must migrate to a kept theme.
+ISO is the default host for new explainers, diagrams, posters, slides, and videos. Use the `3b1b` preset for mathematical mechanisms and derivations. Combine either with Lieflat's data encodings when the explanation includes observations. Retained presets and external brands keep their authored tokens. Retired palettes must migrate to a kept theme.
 
 ## Composition
 
@@ -8,11 +8,11 @@ Each chart, diagram, or section answers a question. Establish hierarchy with pos
 
 Remove any element whose removal changes neither understanding nor operation. Do not add kickers, decorative numbering, status badges, metric tiles, source-like labels, or captions that repeat the title. Keep real sources, units, sequence, navigation, and state visible.
 
-## Default: Hairline illustrations
+## Default: ISO illustrations
 
 Use a white canvas, readable neutral text, fine gray geometry, and one cyan accent. The accent identifies the active causal object, edge, or trace. Keep small labels in readable neutral ink. Move the accent when the cause moves; do not leave unrelated objects colored.
 
-Build recognizable isometric objects with the unchanged Hairline engine's public geometry functions. Start with `Cam(45, 0.5, S)`, rounded footprints, and prisms. A solid has an opaque ground-colored silhouette, one inset crease, and only the marks its identity needs. Omit vertical corner lines and hidden edges. Paint back to front and fit the most extreme pose before animation.
+Build recognizable isometric objects with `createIsoScene`, face-local details and opaque rounded faces. Use the unchanged Hairline engine for pointer-driven prepared figures. A solid has an opaque ground-colored silhouette, one inset crease, and only the marks its identity needs. Omit vertical corner lines and hidden edges. Paint back to front and fit the most extreme pose before animation.
 
 Use the source figure's 400 × 320 logical frame. The silhouette must read at 240px wide. At that frame, the default outline, crease, and active strokes are 1.5, 0.8, and 1.5 units. Selection changes color rather than adding thickness. Inspect larger video exports and compressed frames before accepting these weights.
 
@@ -32,7 +32,7 @@ Reveal the premise, carry the same objects through the operation, and then show 
 
 Choose the observations and relationships the reader needs to see. Use countable marks for quantities and individual paths for outcomes that a total would hide. A simple comparison is enough when there are few observations.
 
-Use the host's paper, text, and accent roles. Hairline replaces the former Lieflat palette; its chart encodings remain reusable. Keep Mono Color and Algebrica as alternatives, with Mono-Industrial optional. Monospace belongs to code and machine identifiers.
+Use the host's paper, text, and accent roles. ISO replaces the former Lieflat palette; its chart encodings remain reusable. Keep Mono Color and Algebrica as alternatives, with Mono-Industrial optional. Monospace belongs to code and machine identifiers.
 
 Open space separates sections. Fine rules connect related rows. Charts use direct labels, honest scales, and marks tied to actual observations. Bars start at zero; a missing observation remains missing. Use the one accent for the focal record or relationship. Separate other series with direct labels, position, or line style.
 

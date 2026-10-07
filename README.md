@@ -61,7 +61,7 @@ cd my-explainer
 npm run dev
 ```
 
-Use Node 22.12 or newer. The starter includes a responsive Hairline composition and direct motion seeking. See [workspaces](https://github.com/theclaymethod/artifacture/blob/main/docs/workspaces.md) for the source ownership model and [installation](https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md) for other agent harnesses.
+Use Node 22.12 or newer. The starter includes a responsive ISO composition and direct motion seeking. See [workspaces](https://github.com/theclaymethod/artifacture/blob/main/docs/workspaces.md) for the source ownership model and [installation](https://github.com/theclaymethod/artifacture/blob/main/docs/installation.md) for other agent harnesses.
 
 Discover available blocks before authoring:
 
@@ -178,9 +178,11 @@ npm run ve:archify -- deliver architecture examples/visual-explainer-mdx/artifac
 
 ## Shared visual defaults
 
-The [default explainer theme](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/default-explainer-theme.md) uses Hairline isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
+The [default explainer theme](https://github.com/theclaymethod/artifacture/blob/main/plugins/visual-explainer/references/default-explainer-theme.md) uses ISO isometric objects on white across posters, diagrams, slides, and videos. The explicit `3b1b` preset uses mathematical mechanisms and serif notation on black. Both use Lieflat's data encodings, readable neutral text, and one cyan causal accent. An explicit brand or requested look takes precedence.
 
-Typography, spacing, and colors come from [shared theme tokens](https://github.com/theclaymethod/artifacture/blob/main/docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. Hairline replaces the Lieflat palette while preserving its chart encodings.
+ISO is the default shared theme (formerly Hairline): fine neutral linework, reusable isometric face geometry, one live accent and restrained lighting. Copy `iso` and `motion-eases` with `artifacture add iso motion-eases`; Motionmaxxing landing/exit curves also work directly on existing motion tracks. See the [ISO guide](plugins/visual-explainer/references/iso.md).
+
+Typography, spacing, and colors come from [shared theme tokens](https://github.com/theclaymethod/artifacture/blob/main/docs/shared-themes.md). Algebrica and Mono Color are primary alternatives; Mono Industrial and custom design systems remain available. ISO replaces the Lieflat palette while preserving its chart encodings.
 
 | Algebrica | Mono Color |
 |---|---|

@@ -96,10 +96,10 @@ export const sequence = sequenceSlides('artifacture-blocks-explainer', phases.fl
     });
   }
   const composition = layout(phase.id, phase.graphic, phase.lines, duration, phase.motion, phase.font);
-  const variants = phase.id === 'themes' ? ['hairline', '3b1b', 'mono-color', 'algebrica'] : ['hairline'];
+  const variants = phase.id === 'themes' ? ['iso', '3b1b', 'mono-color', 'algebrica'] : ['iso'];
   return variants.map((preset) => {
     const appearance = preset === '3b1b' ? 'dark' : 'light';
-    const slide = createSlideScene({ id: phase.id + (variants.length > 1 ? '-' + preset : ''), title: phase.title, explanation: phase.id === 'themes' ? `${preset === 'mono-color' ? 'Mono Color' : preset === 'algebrica' ? 'Algebrica' : preset === '3b1b' ? '3b1b' : 'Hairline'} changes the appearance; every local object ID and relationship stays the same.` : phase.explanation, graphic: composition.scene, preset, appearance });
+    const slide = createSlideScene({ id: phase.id + (variants.length > 1 ? '-' + preset : ''), title: phase.title, explanation: phase.id === 'themes' ? `${preset === 'mono-color' ? 'Mono Color' : preset === 'algebrica' ? 'Algebrica' : preset === '3b1b' ? '3b1b' : 'ISO'} changes the appearance; every local object ID and relationship stays the same.` : phase.explanation, graphic: composition.scene, preset, appearance });
     return { slide, motion: variants.length > 1 ? defineGraphicMotion(composition.scene, { duration: duration / 4, tracks: [] }) : composition.motion, duration: duration / variants.length };
   });
 }));

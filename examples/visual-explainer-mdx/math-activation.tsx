@@ -1,7 +1,7 @@
 import React from 'react';
 import { composeGraphics, createGraphicScene, createSlideScene, defineGraphicMotion, GraphicSlide, GraphicVideo, sampleSlideSequence, sequenceSlides, type GraphicObject, type GraphicPrimitive } from '../../visual-explainer-mdx/components';
 import themes from '../../visual-explainer-mdx/themes.css?raw';
-import motionTheme from '../../plugins/visual-explainer/templates/hairline-motion-theme.css?raw';
+import motionTheme from '../../plugins/visual-explainer/templates/iso-motion-theme.css?raw';
 
 const symbol = (x: number, y: number, label: string, size = 32): GraphicPrimitive => ({ kind: 'text', x, y, lines: [label], leading: size * 1.2, size, anchor: 'middle', fill: 'ink', font: 'math' });
 const points = [

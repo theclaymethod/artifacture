@@ -10,7 +10,7 @@ Use these patterns for custom HTML layout, theming, and containment. Prefer the 
 
 ## Theme Setup
 
-Use the active preset from `REPO/visual-explainer-mdx/themes.css`; `hairline` is the default. Raw HTML publishes equivalent values once. Alias older CSS roles such as `--bg`, `--surface`, `--text`, and `--accent` to that preset, rather than copying a second palette. See [tokens.md](tokens.md) and [diagram-tokens.md](diagram-tokens.md). Verify all supported themes.
+Use the active preset from `REPO/visual-explainer-mdx/themes.css`; `iso` is the default. Raw HTML publishes equivalent values once. Alias older CSS roles such as `--bg`, `--surface`, `--text`, and `--accent` to that preset, rather than copying a second palette. See [tokens.md](tokens.md) and [diagram-tokens.md](diagram-tokens.md). Verify all supported themes.
 
 ## Background Atmosphere
 

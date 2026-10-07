@@ -4,7 +4,7 @@
   "title": "One picture travels through the pipeline",
   "engine": "psychopomp",
   "source": "psychopomp.rs",
-  "theme": "hairline",
+  "theme": "iso",
   "width": 1920,
   "height": 1080,
   "fps": 30,

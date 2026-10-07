@@ -5,10 +5,10 @@ import { agentBeats, sampleAgent, sampleAttention, sampleReview, sampleWave, att
 import '../../visual-explainer-mdx/themes.css';
 import './showcase.css';
 
-type Mode = 'hairline' | '3b1b' | 'mono-color' | 'algebrica';
-const modes: { id: Mode; label: string }[] = [{ id: 'hairline', label: 'Hairline' }, { id: '3b1b', label: '3b1b' }, { id: 'mono-color', label: 'Mono Color' }, { id: 'algebrica', label: 'Algebrica' }];
+type Mode = 'iso' | '3b1b' | 'mono-color' | 'algebrica';
+const modes: { id: Mode; label: string }[] = [{ id: 'iso', label: 'ISO' }, { id: '3b1b', label: '3b1b' }, { id: 'mono-color', label: 'Mono Color' }, { id: 'algebrica', label: 'Algebrica' }];
 const info = {
-  hairline: { title: 'How an agent uses a tool.', description: 'Follow a request through context, reasoning, execution, and review. The cyan mark follows the work; the workspace stays put.', command: 'artifacture add hairline motion authored-values --cwd ./explainer' },
+  iso: { title: 'How an agent uses a tool.', description: 'Follow a request through context, reasoning, execution, and review. The cyan mark follows the work; the workspace stays put.', command: 'artifacture add hairline motion authored-values --cwd ./explainer' },
   '3b1b': { title: 'Attention follows the query.', description: 'Seven words, seven key vectors, one changing query. The strongest connection emerges from the calculated weights.', command: 'artifacture add graphics grid-scene composition authored-values --cwd ./explainer' },
   'mono-color': { title: 'Zero isn’t missing.', description: 'A tiny defaulting operator can silently change a valid zero into one. Watch the value reach storage, then apply the fix.', command: 'artifacture add sequence-scene diff-block motion --cwd ./explainer' },
   algebrica: { title: 'A circle becomes a wave.', description: 'One angle drives both drawings. The vertical projection becomes the curve; there is no separate animation to synchronize.', command: 'artifacture add graphics plot-scene composition --cwd ./explainer' },
@@ -17,7 +17,7 @@ const info = {
 type Clip = { id: string; title: string; description: string; file: string; poster: string; captions?: string; duration: number };
 
 export default function Showcase() {
-  const [mode, setMode] = useState<Mode>('hairline');
+  const [mode, setMode] = useState<Mode>('iso');
   const [time, setTime] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [narrow, setNarrow] = useState(false);
@@ -53,13 +53,13 @@ export default function Showcase() {
     setPlaying(false); setMode(next); setTime(0);
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(true);
   };
-  const agent = mode === 'hairline' ? sampleAgent(time) : null;
+  const agent = mode === 'iso' ? sampleAgent(time) : null;
   const attention = mode === '3b1b' ? sampleAttention(time, narrow) : null;
   const review = mode === 'mono-color' ? sampleReview(time, quantity, fixed) : null;
   const wave = mode === 'algebrica' ? sampleWave(time, narrow) : null;
   const scene = agent?.scene ?? attention?.scene ?? review?.scene ?? wave!.scene;
   return <main className="showcase-page">
-    <nav className="showcase-navigation" aria-label="Artifacture previews"><a href="/showcase/" aria-current="page">Showcase</a><a href="/">Component catalog</a><a href="/reel/">Full reel</a><a href="/tutorial/">Worked tutorial</a></nav>
+    <nav className="showcase-navigation" aria-label="Artifacture previews"><a href="/showcase/" aria-current="page">Showcase</a><a href="/">Component catalog</a><a href="/iso/">ISO motion</a><a href="/reel/">Full reel</a><a href="/tutorial/">Worked tutorial</a></nav>
     <header className="showcase-intro"><h1>Watch the ideas work.</h1><p>Real compositions built from the shared library. Explore the mechanism, inspect the code, and watch excerpts from the videos.</p></header>
     <div className="showcase-modes" role="tablist" aria-label="Visual examples">{modes.map(item => <button type="button" role="tab" id={`tab-${item.id}`} aria-selected={mode === item.id} aria-controls="showcase-example" key={item.id} onClick={() => selectMode(item.id)}>{item.label}</button>)}</div>
     <section id="showcase-example" role="tabpanel" aria-labelledby={`tab-${mode}`} className={`showcase-example showcase-${mode}`} data-ve-preset={mode}>

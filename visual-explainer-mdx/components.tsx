@@ -31,6 +31,10 @@ export type { GraphicInstance, GraphicCompositionInput, GraphicComposition } fro
 export { createDiagramScene } from './diagram-scene';
 export { createHairlineScene } from './hairline-scene';
 export type { HairlineSolid } from './hairline-scene';
+export { createIsoScene, projectIsoPoint } from './iso-scene';
+export type { IsoPoint, IsoFace, IsoDetail, IsoPart, IsoSceneInput } from './iso-scene';
+export { motionEaseNames, sampleMotionEase } from './motion-eases';
+export type { MotionEase } from './motion-eases';
 export { defineGraphicMotion, sampleScene } from './graphic-motion';
 export type { GraphicMotion, GraphicMotionTrack } from './graphic-motion';
 export { createDotMatrixScene } from './dot-matrix';
@@ -218,7 +222,7 @@ type Annotation = {
 export function ExplainerShell({
   title,
   summary,
-  preset = 'hairline',
+  preset = 'iso',
   reviewTools = true,
   children,
 }: ShellProps) {
@@ -421,7 +425,7 @@ export function SlideDeck({
   eyebrow,
   children,
   orientation = 'vertical',
-  preset = 'hairline',
+  preset = 'iso',
   reviewTools = true,
 }: SlideDeckProps) {
   assertSupportedPreset(preset);
@@ -473,7 +477,7 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
   );
 }
 
-export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'hairline', reviewTools = true, children }: PosterCanvasProps) {
+export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'iso', reviewTools = true, children }: PosterCanvasProps) {
   assertSupportedPreset(preset);
   return (
     <main className="min-h-screen bg-[var(--ve-bg)] p-4 text-[var(--ve-text)] sm:p-8 [font-family:var(--ve-font-body)]" data-ve-preset={preset}>

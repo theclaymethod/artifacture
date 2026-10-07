@@ -1,12 +1,12 @@
 import { svgPathProperties } from 'svg-path-properties';
-import { parseHTML } from 'linkedom';
+import { DOMParser } from 'linkedom';
 
 const escape = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Resolve the four built-in presets into SVG presentation attributes. Native SVG
 // has no CSS custom-property cascade; private brands require the HTML route.
 export function nativeSvgTheme(css, preset, appearance) {
-  if (!['hairline', '3b1b', 'mono-color', 'algebrica'].includes(preset)) throw new Error('FFrames currently accepts the four built-in presets. Use the HTML route for private brands.');
+  if (!['iso', '3b1b', 'mono-color', 'algebrica'].includes(preset)) throw new Error('FFrames currently accepts the four built-in presets. Use the HTML route for private brands.');
   const declarations = {};
   for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const selector = match[1].trim();
@@ -41,7 +41,9 @@ export function createNativeSvgFrame(slide, graphicMarkup, theme, lengths = new 
   const graphicHeight = height - top - graphicY;
   if (graphicHeight <= 0) throw new Error(`Native slide ${slide.id} has no room for its graphic. Shorten the header or author a taller frame.`);
   const text = (lines, y, size, leading, font, fill, weight, spacing = 0) => `<text x="${x}" y="${y + size * .82}" font-family="${escape(font)}" font-size="${size}" font-weight="${weight}" letter-spacing="${spacing}" fill="${fill}">${lines.map((line, i) => `<tspan x="${x}" dy="${i ? leading : 0}">${escape(line)}</tspan>`).join('')}</text>`;
-  const { document } = parseHTML(graphicMarkup);
+  // SVG names are case-sensitive. HTML parsing lowercases filter primitives
+  // (feGaussianBlur, feMergeNode), which makes native renderers drop live parts.
+  const document = new DOMParser().parseFromString(graphicMarkup, 'image/svg+xml');
   const graphic = document.querySelector('svg');
   graphic.setAttribute('x', x); graphic.setAttribute('y', graphicY);
   graphic.setAttribute('width', width - x * 2); graphic.setAttribute('height', graphicHeight);

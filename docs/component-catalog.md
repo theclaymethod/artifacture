@@ -1,6 +1,6 @@
 # Reusable component catalog
 
-The same registry owns search and source copying. There are **57 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
+The same registry owns search and source copying. There are **59 public installation entries**, including the original eight bundles. This counts copy boundaries. Named variants share their owning implementation. The broad MDX API also contains presentation components and icons awaiting leaf extraction.
 
 ```bash
 artifacture list --query sequence --json
@@ -10,7 +10,7 @@ artifacture add sequence-scene reveal-in-order --cwd ./explainer
 
 Read an entry's `entryPoints`, `variants`, `constraints`, and `examples` before using it. The [preview source](../examples/visual-explainer-mdx/component-catalog.tsx) renders 34 examples with actual local components, four theme choices, and direct time seeking. Export it with `npm run ve:export -- examples/visual-explainer-mdx/component-catalog.tsx --out dist/components.html`.
 
-The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrates how these blocks combine: a Hairline agent workflow, calculated toy attention in 3b1b, a Mono Color code fix that preserves zero, and an Algebrica circle generating a sine wave. Its [scene samplers](../examples/visual-explainer-mdx/showcase-scenes.ts) share the existing renderer and sample explicit authored time. These compositions are examples of the indexed APIs, rather than additional installation entries. Export with `npm run ve:export -- examples/visual-explainer-mdx/showcase.tsx --out dist/showcase/index.html`; the [examples guide](../examples/README.md) describes the optional video gallery assets.
+The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrates how these blocks combine: an ISO agent workflow, calculated toy attention in 3b1b, a Mono Color code fix that preserves zero, and an Algebrica circle generating a sine wave. Its [scene samplers](../examples/visual-explainer-mdx/showcase-scenes.ts) share the existing renderer and sample explicit authored time. These compositions are examples of the indexed APIs, rather than additional installation entries. Export with `npm run ve:export -- examples/visual-explainer-mdx/showcase.tsx --out dist/showcase/index.html`; the [examples guide](../examples/README.md) describes the optional video gallery assets.
 
 | Copy entry | Public API | Implemented choices and useful behavior |
 | --- | --- | --- |
@@ -35,6 +35,8 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | psychopomp-clip | Native source and job; `NativeClip`, `NativeStill` | Pinned Rust Scene Program, bowed connections, springs and travelling packets |
 | axonometric-plan | `createAxonometricPlan`, `createAxonometricPlanMotion` | Rounded floor/site geometry, topological occlusion, horizontal roof/floor names and phased reveal |
 | exploded-axonometric | `createExplodedScene`, `createExplodedMotion` | 2–5 physical parts, hollow trays, shared levels, equal lift gaps, horizontal leaders and top-first motion |
+| iso | `createIsoScene`, `projectIsoPoint` | Rounded face geometry, face-local windows/vents and causal live lighting |
+| motion-eases | `sampleMotionEase` | Eight bounded Motionmaxxing arrival/exit curves on the existing sampler |
 | hairline | `createHairlineScene` | Caller-prepared silhouette and crease paths; preserved depth order |
 | data-chart | `DataChart` | Bar, line, dot; signed values, missing measurements, exact narrow-screen views |
 | charts | `LieflatChart` | Rung bars, unit field, barcode, bubble matrix, threads; exact values and encoding explanations |
@@ -63,7 +65,7 @@ The [worked showcase](../examples/visual-explainer-mdx/showcase.tsx) demonstrate
 | authored-values | `createMonotoneTrack`, `createVectorTrack` | Scalar/vector cubic sampling at authored seconds; increasing keys, equal dimensions, endpoint holds |
 | video-frames | `createVideoFramePlan`, `inspectLoopFrames` | Explicit frame rounding and encoded sample times; awaited exact-endpoint closure separated from last-frame similarity |
 | narration-cues | `normalizeNarrationCues`, `alignedWordsToCues`, `formatSubtitleTime`, `serializeNarrationCues` | Immutable absolute-second cues; alignment provenance; explicit overlap/bounds policy; SRT/WebVTT |
-| motion | `defineGraphicMotion`, `sampleScene` | Opacity, reveal, highlight, illustration translation/routes, rectangular masks; linear/smooth and discrete boundaries; deterministic seeking |
+| motion | `defineGraphicMotion`, `sampleScene` | Opacity, reveal, highlight, illustration translation/routes, rectangular masks; linear/smooth, eight Motionmaxxing curves and discrete boundaries; deterministic seeking |
 | composition | `composeGraphics` | Fitted scene instances, scoped identities, frame clipping, one duration |
 | slides | `createSlideScene`, `sequenceSlides`, `GraphicSlide` | Frame, title, explanation, theme, finite sequence |
 | video | `GraphicVideo`, `registerGraphicVideo` | Same slide sampler, paused GSAP playback, explicit disposal |
@@ -80,7 +82,7 @@ The new scene builders are in [teaching-scenes.ts](../visual-explainer-mdx/teach
 
 ## Reuse through the levels
 
-A scene's semantic IDs remain stable within its source. Use `composeGraphics` to place independent instances and scope their identities. Posters render a sampled scene; slides frame it; video advances the same authored sequence. Theme tokens supply paint, font, and stroke roles. Hairline is the default, with thin structural/detail strokes and one cyan accent; 3b1b, Mono Color, and Algebrica share the geometry.
+A scene's semantic IDs remain stable within its source. Use `composeGraphics` to place independent instances and scope their identities. Posters render a sampled scene; slides frame it; video advances the same authored sequence. Theme tokens supply paint, font, and stroke roles. ISO is the default, with thin structural/detail strokes and one cyan accent; 3b1b, Mono Color, and Algebrica share the geometry.
 
 Reactive charts and the interactive walkthrough have browser layout/control behavior. They are not automatically finite video samplers. The numeric plot, grid, sequence, token, and playhead builders supply a reusable scene route for authored output. Native Hairline camera/prism/spring/pointer tools and the editable Terrain/Riffle figures remain in the pinned vendor skill. Archify remains the larger architecture/workflow/sequence/dataflow/lifecycle CLI. Neither is miscounted as a React leaf.
 
@@ -107,3 +109,5 @@ Reactive charts and the interactive walkthrough have browser layout/control beha
 [Media effects](media-effects.md) documents the independent ASCII/sweep/VHS blocks and optional Blender source workflow. The [gallery source](../examples/visual-explainer-mdx/media-effects.tsx) exposes four themes, seeking and PNG frame export. [Selected model visuals](model-visuals.md) documents the imported shape matcher, factories, points and SVG leaves. The [selected gallery source](../examples/visual-explainer-mdx/selected-visuals.tsx) compares their live output.
 
 [Axonometric plans and exploded views](../plugins/visual-explainer/references/axonometric.md) adapt the MIT diagram-design grammar at `19f79daa`. The [gallery](../examples/visual-explainer-mdx/axonometric.tsx) contains campus, office, device and unboxing examples, four themes and seeking; it renders the completed base scenes for print.
+
+The `iso` block adds reusable isometric top/front/side geometry with live face details; `motion-eases` adds eight Motionmaxxing curves consumed directly by the existing sampler. Discover either by capability or exact ID. The default preset is `iso`; `hairline` remains a separate upstream prepared-path block, not a theme.
