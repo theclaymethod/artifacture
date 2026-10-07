@@ -196,6 +196,8 @@ The [shared graphics architecture](https://github.com/theclaymethod/artifacture/
 
 `ve:graphic-video` exports HTML plus a local runtime JavaScript file. Keep them together. Canonical web fonts require network access in the raw preview; HyperFrames compile caches and embeds them. Collection scaffolding produces an authoring package. Rendered checks and narrative review determine whether a video is complete.
 
+For an experimental native GPU alternative on macOS, `artifacture fframes <video-source.tsx> --out <new-project-directory>` exports the same shared sequence as a deduplicated SVG bank and a pinned FFrames Rust project. Run its `inspect`, `strip`, and `render` commands before accepting the output. The current bridge is silent and vector-only; native header layout requires explicit line breaks. See the [FFrames guide](plugins/visual-explainer/references/fframes.md).
+
 ## Export, check, revise
 
 Keep the MDX, TSX, or JSON as the editable source. Share the exported HTML. Browser checks catch mechanical failures; visual review checks composition, reading order, and labels.

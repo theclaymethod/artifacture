@@ -43,6 +43,7 @@ Completion requires editable source, a successful export, and evidence for every
 | interactive Hairline figure | [vendored Hairline skill](vendor/hairline-create/SKILL.md) | Use its unchanged kernel, bench, build, and validation workflow. |
 | animated explainer, review film, or sizzle reel | [generate-video.md](commands/generate-video.md) | [dynamic-video-authoring.md](references/dynamic-video-authoring.md) teaches story, primitive selection, choreography, audio alignment, and proof. Use [render-video.md](commands/render-video.md) for an existing deck; [video-collections.md](references/video-collections.md) for shared episodes. |
 | native mathematics or physical motion | [native-engines.md](references/native-engines.md) | Manim Community or Psychopomp renders source into reusable clips and selected stills. |
+| try FFrames as a video renderer | [fframes.md](references/fframes.md) | Experimental macOS Metal export of shared silent vector sequences; preserve the TypeScript source and inspect native output. |
 | ASCII, texture treatments, or 3D model media | [media-effects.md](references/media-effects.md) | Copy controlled effects and preserve media decoding ownership. |
 | reference image to low-detail procedural 3D | [procedural-models.md](references/procedural-models.md) | Use the installed img2threejs skill and reuse its reviewed factory across outputs. |
 | code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |

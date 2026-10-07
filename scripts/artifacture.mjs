@@ -11,6 +11,7 @@ const help = `Usage:
   artifacture list [--query <text>] [--json]
   artifacture export <source.mdx|source.tsx> --out <output.html>
   artifacture video <source.tsx> --out <output.html> [--audio <recording> --audio-start <seconds>]
+  artifacture fframes <source.tsx> --out <new-project-directory> [--fps <integer>] [--render]
   artifacture engine list [--json]
   artifacture engine setup <manim|psychopomp>
   artifacture engine scaffold <engine> <directory> [--theme <preset>]
@@ -149,6 +150,7 @@ const runtimeCommands = {
   export: 'scripts/ve-mdx/export.mjs',
   'export-static': 'scripts/ve-mdx/export-static.mjs',
   video: 'scripts/ve-mdx/graphic-video.mjs',
+  fframes: 'scripts/ve-mdx/fframes-video.mjs',
   chart: 'scripts/lieflat-chart.mjs',
   archify: 'scripts/archify.mjs',
   verify: 'plugins/visual-explainer/scripts/verify/ve-verify.mjs',

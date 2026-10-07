@@ -97,6 +97,8 @@ Captions follow measured word timing and reading groups. For long-form, deliver 
 
 Use the project's pinned HyperFrames version; inspect its CLI help before using an unfamiliar flag. Keep the brief, script, beat sheet, source, timing/claim receipts, generated composition, and encoded film together. Use the available upstream HyperFrames skills for renderer mechanics. The local [integration reference](hyperframes.md) is the fallback.
 
+When explicitly trying native GPU encoding of a shared silent vector sequence, read [FFrames](fframes.md). Its experimental bridge reuses `GraphicCanvas` and the absolute-time sampler. Native headers and rasterization require their own frame review; browser media, audio and private CSS remain on the HTML route.
+
 Check the exported composition with `hyperframes check`; inspect opening, event midpoints, full explanatory poses, boundaries, and ending with `snapshot`. Seek an earlier time, seek later, and return to the earlier time: the scene state must match. Check actual state changes as well as bounding boxes; a stationary geometry can still reveal or change focus.
 
 Run the [Artifacture verification route](verification.md) and disclose any incomplete review certification. Mechanics, an HTML export, a successful encode, and a final artifact verdict are separate facts.

@@ -57,13 +57,13 @@ export const retryDiagrams = {
 
 export const retrySlides = [
   createSlideScene({
-    id: 'preserve-operation-identity', title: 'Preserve the operation identity across retries.',
+    id: 'preserve-operation-identity', title: 'Preserve the operation identity\nacross retries.',
     explanation: 'Keep the same job identity. A timeout may have hidden a successful side effect.',
     graphic: retryDiagrams.identity,
   }),
   createSlideScene({
     id: 'classify-before-retrying', title: 'Classify the failure before retrying.',
-    explanation: 'Wait before retrying temporary failures within a fixed attempt budget. Retain permanent failures; another identical attempt cannot repair invalid input.',
+    explanation: 'Wait before retrying temporary failures within a fixed attempt budget.\nRetain permanent failures; another identical attempt cannot repair invalid input.',
     graphic: retryDiagrams.classification,
   }),
   createSlideScene({
