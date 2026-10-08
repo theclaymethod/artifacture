@@ -49,7 +49,7 @@
     "ve:chart": "node scripts/lieflat-chart.mjs",
     "ve:video-collection": "node plugins/visual-explainer/scripts/video-collection.mjs",
     "ve:graphic-video": "node scripts/ve-mdx/graphic-video.mjs",
-    "test:e2e": "node --test scripts/narrated-film-tools.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/deck-review-set.browser.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/preview.test.mjs",
+    "test:e2e": "node --test scripts/design-system.test.mjs scripts/narrated-film-tools.test.mjs scripts/ve-mdx/export-react-singleton.test.mjs evals/mechanics-mode.test.mjs evals/product-benchmark/check.test.mjs evals/deck-review-set.browser.test.mjs plugins/visual-explainer/scripts/embed-media.test.mjs plugins/visual-explainer/scripts/export-slides-pdf.test.mjs plugins/visual-explainer/scripts/preview.test.mjs",
     "build:diagram-examples": "node scripts/build-diagram-examples.mjs",
     "check:diagram-examples": "node scripts/build-diagram-examples.mjs --check",
     "build:pr-lens-examples": "node scripts/build-pr-lens-examples.mjs",

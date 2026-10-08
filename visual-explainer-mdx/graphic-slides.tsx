@@ -43,8 +43,9 @@ export function sampleSlideSequence(sequence: GraphicSlideSequence, authoredSeco
   return Object.freeze({ ...item.slide, graphic: sampleScene(item.slide.graphic, item.motion, Math.max(0, time - item.start)) });
 }
 
-export function GraphicSlide({ slide }: { slide: GraphicSlideScene }) {
-  return <article data-graphic-slide={slide.id} data-ve-preset={slide.preset} data-ve-appearance={slide.appearance} data-motion-theme={slide.appearance} className="motion-stage" style={{ boxSizing: 'border-box', width: '100%', height: '100%', padding: `${slide.height * 0.072}px ${slide.width * 0.066}px`, display: 'flex', flexDirection: 'column', gap: slide.height * 0.033 }}>
+/** `medium="video"` selects video-tier tokens, such as stronger muted lines in dark ISO. */
+export function GraphicSlide({ slide, medium }: { slide: GraphicSlideScene; medium?: 'video' }) {
+  return <article data-graphic-slide={slide.id} data-ve-preset={slide.preset} data-ve-appearance={slide.appearance} data-ve-medium={medium} data-motion-theme={slide.appearance} className="motion-stage" style={{ boxSizing: 'border-box', width: '100%', height: '100%', padding: `${slide.height * 0.072}px ${slide.width * 0.066}px`, display: 'flex', flexDirection: 'column', gap: slide.height * 0.033 }}>
     <h1 style={{ fontSize: slide.width * 0.045, maxWidth: '100%' }}>{slide.title}</h1>
     <p style={{ margin: 0, maxWidth: slide.width * 0.78, fontSize: slide.width * 0.021, lineHeight: 1.4, color: 'var(--ve-muted)' }}>{slide.explanation}</p>
     <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center' }}><GraphicCanvas scene={slide.graphic} style={{ width: '100%', height: '100%' }} /></div>

@@ -2,7 +2,7 @@
 
 Use the [default explainer theme](default-explainer-theme.md) across formats. This reference adds motion choreography and documents the original rotating-point specimen. An explicit brand, design spec, or requested look takes precedence. Deck-to-video work retains the source's meaningful visual encodings.
 
-The primary languages are ISO isometric mechanisms on white and explicit `3b1b` mathematical mechanisms on black. Both combine Lieflat's data encodings with one cyan causal accent. A physical object or a mathematical relationship carries the explanation; motion shows how it works and preserves its identity.
+The primary languages are ISO isometric mechanisms on white and explicit `3b1b` mathematical mechanisms on black. Both combine Lieflat's data encodings with one causal accent: ISO cyan, and 3b1b Manim blue. A physical object or a mathematical relationship carries the explanation; motion shows how it works and preserves its identity.
 
 ## Visual language
 
@@ -11,16 +11,19 @@ New illustrations follow [default-explainer-theme.md](default-explainer-theme.md
 | Role | ISO / 3b1b |
 |---|---|
 | Canvas | White / black; flat, without decorative texture |
-| Illustration outline | Neutral gray `#8a8d98` / white `#f5f5f5`; rounded caps and joins |
-| Inner crease | Dim gray `#b7b9c3` / `#747884`; thinner than the silhouette |
+| Illustration outline | Neutral gray `#8a8d98` / white `#ffffff`; rounded caps and joins |
+| Inner crease | Dim gray `#b7b9c3` / Manim GREY_C `#888888`; thinner than the silhouette |
 | Text | Readable neutral ink, separate from illustration lines |
-| Active relationship | Cyan `#079fba`; the same causal meaning throughout |
-| Statement | Inter / EB Garamond; 64–96px at 1920 × 1080 |
-| Supporting text | Inter; 28–36px at 1920 × 1080 |
+| Active relationship | Cyan `#079fba` / Manim BLUE_C `#58c4dd`; the same causal meaning throughout |
+| Secondary meanings | `attention` (3b1b YELLOW_C `#f7d96f`) for something to notice and `fault` (RED_C `#fc6255`) for something wrong; never a second causal accent |
+| Statement | Inter / EB Garamond; `--ve-video-type-title` 92px to `--ve-video-type-hero` 168px at 1920 × 1080 |
+| Supporting text | Inter; `--ve-video-type-label` 32px to `--ve-video-type-caption` 40px; never below `--ve-video-type-min` 24px on screen |
 | Math | Serif notation through `--ve-font-math` |
 | Hairline strokes | Silhouette 1.2, crease 0.65, active 1.2 in the engine's 400 × 320 frame |
 
 Let the illustration occupy most of the frame. Use meaningful object features, rounded solids, honest occlusion, and a stronger silhouette than crease. Use `createIsoScene` for shared seekable geometry and live face details; use the unchanged Hairline engine for prepared pointer figures. Keep physical labels outside its SVG and anchor them to projected features. For mathematics, use real functions, geometry transformations, arrowheads, and notation. Keep Lieflat mark size tied to declared units or actual records. Inspect the compressed result at playback size.
+
+Measure, do not guess, text extents: `measureText` and `wrapText` (`text-metrics`) use the bundled fonts' glyph widths, and `messageBubble`, `docPage` and the other `teaching-icons` builders size frames to their text. Run `inspectLegibility` with the output width and any camera view box; a wide shot shrinks labels below the 24 px floor faster than it looks in source units. When a camera zooms, pass `strokeScale` to `GraphicCanvas` (browser route) so line weight stays constant on screen. Join objects with scene `connectors` instead of hand-placed paths; they recompute from the objects' current bounds as the objects move. Place ISO labels with `isoLabelAnchor` and `isoFaceAnchor`. Dark ISO in video (`GraphicSlide medium="video"`, which the video runtime sets) raises muted line and label contrast for compression.
 
 Keep statements and mathematical labels outside the physical illustration. Direct labels may identify variables or relationships when needed. Do not add ornamental labels, badges, numbering, fake measurements, status chips, or decorative captions.
 

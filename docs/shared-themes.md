@@ -21,7 +21,7 @@ const slide = createSlideScene({
 });
 ```
 
-ISO light uses white paper and neutral gray illustration lines. Readable text ink is separate from those fine lines. Both primary modes use cyan `#079fba` for the active causal object or trace. Keep small text in neutral ink; accent-filled controls use dark ink. `--ve-font-display` and `--ve-font-body` own headings and prose. `--ve-font-math` supplies STIX Two Math for notation and subscripts, while the existing monospace role remains for code. The mathematical preset keeps EB Garamond for headings. Inspect loaded fonts and exported glyphs rather than checking only the declared family.
+ISO light uses white paper and neutral gray illustration lines. Readable text ink is separate from those fine lines. ISO uses cyan `#079fba` for the active causal object or trace; 3b1b uses Manim's palette: BLUE_C `#58c4dd` for the causal accent, YELLOW_C `#f7d96f` as `--ve-attention`, RED_C `#fc6255` as `--ve-fault`, and GREY_B/GREY_C neutrals. Every preset defines `--ve-attention` and `--ve-fault` (paints `attention` and `fault`) for meanings that must not compete with the causal accent. Keep small text in neutral ink; accent-filled controls use dark ink. `--ve-font-display` and `--ve-font-body` own headings and prose. `--ve-font-math` supplies STIX Two Math for notation and subscripts, while the existing monospace role remains for code. The mathematical preset keeps EB Garamond, the bundled serif nearest to 3Blue1Brown's CMU Serif, for headings. Video sizes live in `--ve-video-type-*` tokens at 1080p, with `--ve-video-type-band` for the kinetic-type band and `--ve-video-safe-*` margins. Inspect loaded fonts and exported glyphs rather than checking only the declared family.
 
 ## Keep color meaning and geometry together
 
