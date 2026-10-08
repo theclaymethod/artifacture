@@ -21,19 +21,23 @@ function assertRequirements(id, kind, declared, derived) {
 async function checkDiscovery(id, files) {
   const block = componentRegistry[id];
   for (const entry of block.entryPoints) {
-    const file = files.find(file => ['.ts', '.tsx', '.mjs'].some(extension => file.destination === `${entry.module}${extension}`));
+    const file = files.find(file => file.destination === entry.module || ['.ts', '.tsx', '.mjs'].some(extension => file.destination === `${entry.module}${extension}`));
     if (!file) throw new Error(`Block ${id} indexes an uncopied module: ${entry.module}.`);
-    const code = await fs.readFile(path.resolve(packageRoot, file.source), 'utf8');
-    const ast = ts.createSourceFile(file.source, code, ts.ScriptTarget.Latest, true);
+    // A plain JavaScript leaf keeps its types in a copied sibling declaration file.
+    const typesFile = file.destination.endsWith('.mjs') ? files.find(other => other.destination === file.destination.replace(/\.mjs$/, '.d.mts')) : undefined;
     const exported = new Set();
-    for (const statement of ast.statements) {
-      if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
-        for (const element of statement.exportClause.elements) exported.add(element.name.text);
-      } else if (ts.canHaveModifiers(statement) && ts.getModifiers(statement)?.some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword)) {
-        if (statement.name && ts.isIdentifier(statement.name)) exported.add(statement.name.text);
-        if (ts.isVariableStatement(statement)) {
-          for (const declaration of statement.declarationList.declarations) {
-            if (ts.isIdentifier(declaration.name)) exported.add(declaration.name.text);
+    for (const source of [file, typesFile].filter(Boolean)) {
+      const code = await fs.readFile(path.resolve(packageRoot, source.source), 'utf8');
+      const ast = ts.createSourceFile(source.source, code, ts.ScriptTarget.Latest, true);
+      for (const statement of ast.statements) {
+        if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
+          for (const element of statement.exportClause.elements) exported.add(element.name.text);
+        } else if (ts.canHaveModifiers(statement) && ts.getModifiers(statement)?.some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword)) {
+          if (statement.name && ts.isIdentifier(statement.name)) exported.add(statement.name.text);
+          if (ts.isVariableStatement(statement)) {
+            for (const declaration of statement.declarationList.declarations) {
+              if (ts.isIdentifier(declaration.name)) exported.add(declaration.name.text);
+            }
           }
         }
       }

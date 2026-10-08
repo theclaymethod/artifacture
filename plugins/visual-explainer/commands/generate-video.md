@@ -28,13 +28,15 @@ Honor explicit durations outside these ranges. Otherwise begin around 60s for an
 
 Discover actual blocks with `list --query <capability> --json` and read selected constraints and examples. Start with `REPO/examples/visual-explainer-mdx/motion-review.tsx` for a continuous request/code/comparison story, `video-longform.tsx` for a smaller diagram cascade, or `math-activation.tsx` for mathematical construction.
 
-Keep a brief, script, and beat sheet beside the source. Each beat names its entry state, event, consequence, evidence, and intended speech cue. Move the mechanism and preserve identifiable subjects. Hold completed states long enough to read them.
+Keep a brief, script, and beat sheet beside the source. Each beat names its entry state, event, consequence, evidence, and intended speech cue. Move the mechanism and preserve identifiable subjects. Hold completed states long enough to read them: `inspectEndHolds` (`end-holds`) reports tracks still changing within 0.75 s of a cut and cues that appear within 1.1 s of it.
+
+Settle the story before recording. Offer two or three structures when the opening or an analogy is open (a question first, the analogy as the mechanism itself, a closing callback), map any analogy to the real mechanism, and get the script approved. Every later script change re-records narration and re-times each beat.
 
 Author TSX with shared scene builders. Compile finite motion, combine blocks with `composeGraphics`, frame them with `createSlideScene`, and export one `sequenceSlides` sequence. The exporter bundles the renderer and registers its paused GSAP clock synchronously on `window.__timelines`. A sequence cuts between scenes; one continuous scene can carry many beats.
 
 Use the dynamic guide to choose routes, source edits, registered comparisons, dependency cascades, physical assemblies, mathematical clips, and effects. Read [native-engines.md](../references/native-engines.md) when Manim or Psychopomp improves the mechanism. A native starter or upstream reference is not a rendered capability.
 
-For cameras, captions, or other delivery layers beyond the shared sequence, use a source-owned complete composition with `export-static` and [gsap-rules.md](../references/gsap-rules.md). Preserve the shared renderer and one finite master clock. Revisions belong in editable source; re-export after repairs.
+For cameras, captions, or other delivery layers beyond the shared sequence, use a source-owned complete composition with `export-static` and [gsap-rules.md](../references/gsap-rules.md). Derive camera moves from content with `frameScene` (`scene-framing`) rather than hand-placed keys; it keeps everything that has appeared in view and below a reserved type band. Preserve the shared renderer and one finite master clock. Revisions belong in editable source; re-export after repairs.
 
 ## Record and align narration
 
@@ -45,6 +47,17 @@ npx hyperframes tts /absolute/script.txt --voice af_nova --output /absolute/vide
 ```
 
 Measure the recording and align or recognize its words. Check names, quantities, code operators, and the complete ending. Use `narration-cues` for cue provenance and subtitle serialization. Retime visual consequences to the recorded cues; include breathing space and a readable final hold.
+
+For a voice generated in takes, record one take per section with pause markers between beats when the engine supports them, and set pace with the engine's duration target instead of time-stretching afterwards. Then assemble with the CLI (recognized words are `[{ text, start, end }]` JSON, for example from `npx hyperframes transcribe --json`):
+
+```bash
+node "$SKILL_DIR/scripts/artifacture.mjs" narration check-take --script take-1.txt --words take-1.words.json
+node "$SKILL_DIR/scripts/artifacture.mjs" narration join --out joined.wav take-1.wav take-2.wav
+node "$SKILL_DIR/scripts/artifacture.mjs" narration cut --audio joined.wav --words joined.words.json \
+  --script beats.json --out narration.wav --timing timing.json --dense 05,07
+```
+
+`check-take` exits 1 when a take adds, drops or changes a word; regenerate that take. `join` normalizes each take and exits 2 when takes differ by more than 1.5 LU. `cut` aligns the script with `alignScript` (`narration-align`), cuts each beat at the quietest point inside its pause, adds reading holds, normalizes to −16 LUFS, and writes per-beat word timing; it exits 2 when a cut is louder than −40 dB, which is heard as a click or a clipped word.
 
 ```bash
 node "$SKILL_DIR/scripts/artifacture.mjs" video /absolute/film.tsx \

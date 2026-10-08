@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Narrated films
+- Added `narration-align`: `alignScript` times every script word from a whole-recording transcript without later lines drifting when recognition drops, merges, splits or spells a word as digits; `compareTranscript` lists added, missing and changed words in a take.
+- Added `artifacture narration check-take | join | cut`: verify takes against their scripts, join takes at an even loudness, and cut beats at the quietest point inside each pause with reading holds, a −16 LUFS master and per-beat word timing. Exit codes gate loudness spread and audible cuts.
+- Added `scene-framing` (`frameScene`, `sampleFrame`, `widestFrame`) for camera keys computed from visible content below a reserved type band, and `end-holds` (`inspectEndHolds`) for beats that would cut before their end state can be read.
+
 ### Developer preview
 - Added `/annotate` and `artifacture-preview` for agent-owned local review sessions with exact-element comments, compact source-aware copy for coding agents, and guarded direct text edits that rebuild the owning MDX/TSX project while preserving the active slide.
 - Added Preview, Comment, and Edit text modes; a collapsible review queue; edit undo; publish output paths; optional Bun support alongside npm and pnpm; and an injected bridge that never modifies the deliverable HTML.
