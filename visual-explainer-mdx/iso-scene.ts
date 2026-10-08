@@ -64,3 +64,39 @@ export function createIsoScene(input: IsoSceneInput): GraphicScene {
   if (minX < bounds.x || minY < bounds.y || maxX > bounds.x + bounds.width || maxY > bounds.y + bounds.height) throw new Error('ISO frame clips the rest geometry.');
   return createGraphicScene({ id: input.id, title: input.title, description: input.description, bounds, objects });
 }
+
+function partFaces(part: IsoPart) {
+  const { x, y, z } = part.origin, { width: w, depth: d, height: h } = part.size;
+  return {
+    side: { origin: { x: x + w, y: y + d, z: z + h }, width: d, height: h },
+    front: { origin: { x, y: y + d, z: z + h }, width: w, height: h },
+    top: { origin: { x, y, z: z + h }, width: w, height: d },
+  };
+}
+
+/** The projected point at fractions (u, v) of a part's visible face; (0.5, 0.5) is the face centre. */
+export type IsoAnchor = Readonly<{ x: number; y: number }>;
+export type IsoLabelAnchor = Readonly<{ x: number; y: number; anchor: 'start' | 'middle' | 'end' }>;
+
+export function isoFaceAnchor(part: IsoPart, face: IsoFace, u = .5, v = .5): IsoAnchor {
+  if (![u, v].every(n => Number.isFinite(n) && n >= 0 && n <= 1)) throw new Error('ISO face anchors use fractions from 0 to 1.');
+  const plane = partFaces(part)[face];
+  if (!plane) throw new Error(`Unsupported ISO face: ${face}`);
+  return facePoint(face, plane.origin, plane.width * u, plane.height * v);
+}
+
+/**
+ * Where to put a label beside a part's projected outline, with the matching text anchor:
+ * `above` and `below` centre the label, `left` and `right` align it away from the part.
+ */
+export function isoLabelAnchor(part: IsoPart, position: 'above' | 'below' | 'left' | 'right', gap = 14): IsoLabelAnchor {
+  if (!Number.isFinite(gap) || gap < 0) throw new Error('ISO label gaps must be finite and nonnegative.');
+  const { x, y, z } = part.origin, { width: w, depth: d, height: h } = part.size;
+  const corners = [0, w].flatMap(dx => [0, d].flatMap(dy => [0, h].map(dz => projectIsoPoint({ x: x + dx, y: y + dy, z: z + dz }))));
+  const minX = Math.min(...corners.map(p => p.x)), maxX = Math.max(...corners.map(p => p.x));
+  const minY = Math.min(...corners.map(p => p.y)), maxY = Math.max(...corners.map(p => p.y));
+  const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+  if (position === 'above') return { x: midX, y: minY - gap, anchor: 'middle' };
+  if (position === 'below') return { x: midX, y: maxY + gap, anchor: 'middle' };
+  return position === 'left' ? { x: minX - gap, y: midY, anchor: 'end' } : { x: maxX + gap, y: midY, anchor: 'start' };
+}

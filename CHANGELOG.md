@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Design system for video
+- Added `text-metrics` (`measureText`, `wrapText`) with advance widths generated from the bundled fonts, and `graphic-bounds` for measured object bounds; `scene-framing` now uses them.
+- Added scene `connectors` that join object edges and follow movement, `strokeScale` on `GraphicCanvas` for constant on-screen line weight, `attention` and `fault` paints, and text `anchor: 'end'`.
+- Added `teaching-icons` (measured message bubble, document page, person, pass and fail marks, browser, search, film frame, flat and ISO version stacks), `legibility` (`inspectLegibility`), and ISO `isoFaceAnchor` / `isoLabelAnchor`.
+- The `3b1b` preset now uses Manim's palette (BLUE_C accent, YELLOW_C attention, RED_C fault, GREY_B/GREY_C neutrals). Added `--ve-video-type-*` and `--ve-video-safe-*` tokens and a dark-ISO video tier selected by `GraphicSlide medium="video"`.
+
 ### Narrated films
 - Added `narration-align`: `alignScript` times every script word from a whole-recording transcript without later lines drifting when recognition drops, merges, splits or spells a word as digits; `compareTranscript` lists added, missing and changed words in a take.
 - Added `artifacture narration check-take | join | cut`: verify takes against their scripts, join takes at an even loudness, and cut beats at the quietest point inside each pause with reading holds, a −16 LUFS master and per-beat word timing. Exit codes gate loudness spread and audible cuts.

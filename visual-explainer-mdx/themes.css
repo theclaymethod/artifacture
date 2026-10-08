@@ -260,6 +260,19 @@
 
   :root,
   [data-ve-preset] {
+    /* Secondary meanings beside the one causal accent: something to notice, something wrong. */
+    --ve-attention: #a86400;
+    --ve-fault: #c0392b;
+    /* Video type at 1080p; scale with the output height. The band is the top fraction kept for kinetic type. */
+    --ve-video-type-hero: 168px;
+    --ve-video-type-display: 112px;
+    --ve-video-type-title: 92px;
+    --ve-video-type-caption: 40px;
+    --ve-video-type-label: 32px;
+    --ve-video-type-min: 24px;
+    --ve-video-type-band: 0.26;
+    --ve-video-safe-x: 0.0625;
+    --ve-video-safe-y: 0.06;
     --ve-graphic-stroke: 1.5;
     --ve-graphic-detail-stroke: 1;
     --ve-graphic-active-stroke: 2.2;
@@ -350,6 +363,8 @@
   :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
   [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
   .motion-stage:is([data-ve-appearance="dark"], [data-motion-theme="dark"]):not([data-ve-preset]) {
+    --ve-attention: #f2c14e;
+    --ve-fault: #ff6b5b;
     --ve-bg: #0d0e0f;
     --ve-bg-alt: #ffffff;
     --ve-text: #f5f5f5;
@@ -385,17 +400,30 @@
     --ve-slide-rule: var(--ve-rule);
   }
 
+  /* Dark ISO in video: thin muted lines and labels need more contrast after compression. */
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"])[data-ve-medium="video"] {
+    --ve-muted: #c8ccd4;
+    --ve-illustration-ink: #c8ccd4;
+    --ve-illustration-muted: #8f939e;
+    --ve-diagram-frame: #8f939e;
+  }
+
+  /* Manim's 3Blue1Brown palette: BLUE_C accent, YELLOW_C attention, RED_C fault, GREY_B/GREY_C neutrals. */
   [data-ve-preset="3b1b"] {
     --ve-font-display: "EB Garamond", Georgia, serif;
     --ve-display-weight: 400;
     --ve-heading-weight: 400;
     --ve-bg: #000000;
     --ve-bg-alt: #ffffff;
-    --ve-text: #f5f5f5;
-    --ve-muted: #b6bac4;
-    --ve-illustration-ink: #f5f5f5;
-    --ve-illustration-muted: #747884;
-    --ve-diagram-frame: #747884;
+    --ve-text: #ffffff;
+    --ve-muted: #bbbbbb;
+    --ve-accent: #58c4dd;
+    --ve-accent-contrast: #000000;
+    --ve-attention: #f7d96f;
+    --ve-fault: #fc6255;
+    --ve-illustration-ink: #ffffff;
+    --ve-illustration-muted: #888888;
+    --ve-diagram-frame: #888888;
     --ve-graphic-stroke: 2;
     --ve-graphic-detail-stroke: 0.8;
     --ve-graphic-active-stroke: 2.6;

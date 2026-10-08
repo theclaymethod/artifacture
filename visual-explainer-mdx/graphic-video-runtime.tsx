@@ -26,7 +26,7 @@ export function registerGraphicVideo(sequence: GraphicSlideSequence) {
   if (!host) throw new Error('GraphicVideo host is missing.');
   const root = createRoot(host);
   const clock = { seconds: 0 };
-  const draw = () => flushSync(() => root.render(<GraphicSlide slide={sampleSlideSequence(checked, clock.seconds)} />));
+  const draw = () => flushSync(() => root.render(<GraphicSlide slide={sampleSlideSequence(checked, clock.seconds)} medium="video" />));
   draw();
   const timeline = gsap.timeline({ paused: true });
   timeline.fromTo(clock, { seconds: 0 }, { seconds: checked.duration, duration: checked.duration, ease: 'none', onUpdate: draw }, 0);

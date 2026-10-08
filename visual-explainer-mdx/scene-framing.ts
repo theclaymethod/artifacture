@@ -1,5 +1,6 @@
 import { sampleScene, type GraphicMotion } from './graphic-motion';
-import type { GraphicBounds, GraphicObject, GraphicPrimitive, GraphicScene } from './graphics-types';
+import type { GraphicBounds, GraphicObject, GraphicScene } from './graphics-types';
+import { objectBounds } from './graphic-bounds';
 import { sampleMotionEase, type MotionEase } from './motion-eases';
 
 export type FrameKey = Readonly<{ t: number; cx: number; cy: number; width: number; ease?: MotionEase }>;
@@ -18,45 +19,16 @@ export type SceneFramingOptions = Readonly<{
   maxWidth?: number;
   /** Sample spacing in seconds. */
   step?: number;
+  /** Preset whose fonts measure text; defaults to ISO. */
+  preset?: string;
 }>;
 
 type Box = { x0: number; y0: number; x1: number; y1: number };
 
-function points(list: readonly (readonly [number, number])[]): Box | null {
-  if (!list.length) return null;
-  const xs = list.map(point => point[0]), ys = list.map(point => point[1]);
-  return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
-}
-
-/** Approximate primitive bounds in scene units; text width is estimated from its characters. */
-function primitiveBox(primitive: GraphicPrimitive): Box | null {
-  switch (primitive.kind) {
-    case 'rect': return { x0: primitive.x, y0: primitive.y, x1: primitive.x + primitive.width, y1: primitive.y + primitive.height };
-    case 'circle': return { x0: primitive.x - primitive.radius, y0: primitive.y - primitive.radius, x1: primitive.x + primitive.radius, y1: primitive.y + primitive.radius };
-    case 'line': return points([[primitive.x1, primitive.y1], [primitive.x2, primitive.y2]]);
-    case 'polygon': return points(primitive.points.map(point => [point.x, point.y] as const));
-    case 'path': {
-      const values = (primitive.d.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) ?? []).map(Number), pairs: [number, number][] = [];
-      for (let i = 0; i + 1 < values.length; i += 2) pairs.push([values[i], values[i + 1]]);
-      // Relative commands would mislead a coordinate scan; frame their start point generously.
-      if (/[a-df-z]/.test(primitive.d)) { const [x, y] = pairs[0] ?? [0, 0]; return { x0: x - 30, y0: y - 30, x1: x + 30, y1: y + 30 }; }
-      return points(pairs);
-    }
-    case 'text': {
-      const width = Math.max(...primitive.lines.map(line => line.length)) * primitive.size * (primitive.font === 'mono' ? .62 : .55);
-      const x0 = primitive.anchor === 'middle' ? primitive.x - width / 2 : primitive.x;
-      return { x0, y0: primitive.y - primitive.size * .85, x1: x0 + width, y1: primitive.y + (primitive.lines.length - 1) * primitive.leading + primitive.size * .25 };
-    }
-    default: return null;
-  }
-}
-
 const union = (a: Box | null, b: Box | null): Box | null => !a ? b : !b ? a : { x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1) };
-
-function objectBox(object: GraphicObject): Box | null {
-  const box = object.primitives.reduce<Box | null>((acc, primitive) => union(acc, primitiveBox(primitive)), null);
-  const dx = object.state?.x ?? 0, dy = object.state?.y ?? 0;
-  return box && { x0: box.x0 + dx, y0: box.y0 + dy, x1: box.x1 + dx, y1: box.y1 + dy };
+function objectBox(object: GraphicObject, preset?: string): Box | null {
+  const bounds = objectBounds(object, { preset });
+  return bounds && { x0: bounds.x, y0: bounds.y, x1: bounds.x + bounds.width, y1: bounds.y + bounds.height };
 }
 
 /**
@@ -65,7 +37,7 @@ function objectBox(object: GraphicObject): Box | null {
  * leave as a sequence moves on. Smoothing never shrinks a frame below its raw content.
  */
 export function frameScene(scene: GraphicScene, motion: GraphicMotion, options: SceneFramingOptions = {}): readonly FrameKey[] {
-  const { aspect = 16 / 9, reserveTop = 0, lookahead = .7, memory = Infinity, padding = 1.22, minWidth = 0, maxWidth = Infinity, step = .1 } = options;
+  const { aspect = 16 / 9, reserveTop = 0, lookahead = .7, memory = Infinity, padding = 1.22, minWidth = 0, maxWidth = Infinity, step = .1, preset } = options;
   if (!(aspect > 0) || !(reserveTop >= 0 && reserveTop < .9) || !(lookahead >= 0) || !(memory > 0) || !(padding >= 1) || !(minWidth >= 0) || !(maxWidth >= minWidth) || !(step > 0)) throw new Error('Framing needs a positive aspect and step, padding of at least 1, and ordered width limits.');
   const first = new Map<string, number>(), last = new Map<string, number>();
   for (const track of motion.tracks) {
@@ -80,7 +52,7 @@ export function frameScene(scene: GraphicScene, motion: GraphicMotion, options: 
     for (let j = i; j < times.length && times[j] <= t + lookahead; j++) for (const object of visible[j]) {
       if (j > i && (first.get(object.id) ?? 0) > t + lookahead) continue;
       if (last.has(object.id) && last.get(object.id)! < times[j] - memory) continue;
-      box = union(box, objectBox(object));
+      box = union(box, objectBox(object, preset));
     }
     return box ?? { x0: scene.bounds.x, y0: scene.bounds.y, x1: scene.bounds.x + scene.bounds.width, y1: scene.bounds.y + scene.bounds.height };
   });

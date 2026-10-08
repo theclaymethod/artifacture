@@ -1,7 +1,7 @@
 export type GraphicBounds = Readonly<{ x: number; y: number; width: number; height: number }>;
 export type GraphicPlacement = Readonly<{ scale: number; x: number; y: number }>;
 export type GraphicClip = Readonly<{ kind: 'empty' }> | Readonly<{ kind: 'rect'; bounds: GraphicBounds }>;
-const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, live: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true };
+const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, live: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true, attention: true, fault: true };
 export type GraphicPaint = keyof typeof graphicPaintRoles;
 const graphicFonts = { body: true, display: true, math: true, mono: true };
 const graphicStrokeRoles = { structure: true, detail: true, guide: true, data: true, active: true };
@@ -14,7 +14,7 @@ export type GraphicPrimitive = PrimitiveStyle & (
   | Readonly<{ kind: 'polygon'; points: readonly Readonly<{ x: number; y: number }>[] }>
   | Readonly<{ kind: 'path'; d: string; arrow?: 'end' | 'both' }>
   | Readonly<{ kind: 'line'; x1: number; x2: number; y1: number; y2: number }>
-  | Readonly<{ kind: 'text'; x: number; y: number; lines: readonly string[]; leading: number; size: number; weight?: number; anchor?: 'start' | 'middle'; label?: boolean; font?: GraphicFont; textLength?: number }>
+  | Readonly<{ kind: 'text'; x: number; y: number; lines: readonly string[]; leading: number; size: number; weight?: number; anchor?: 'start' | 'middle' | 'end'; label?: boolean; font?: GraphicFont; textLength?: number }>
 );
 export type GraphicObject = Readonly<{
   id: string;
@@ -26,7 +26,25 @@ export type GraphicObject = Readonly<{
   clip?: GraphicClip;
   node?: Readonly<{ id: string; order: number; label: string }>;
   edge?: Readonly<{ id?: string; fromOrder: number; toOrder: number; sourceAnchor?: string; targetAnchor?: string }>;
-  state?: Readonly<{ opacity: number; reveal: number; highlight: boolean; x: number; y: number }>;
+  /** Motion state. `scale` multiplies the object about (originX, originY) in its own coordinates. */
+  state?: Readonly<{ opacity: number; reveal: number; highlight: boolean; x: number; y: number; scale?: number; originX?: number; originY?: number }>;
+}>;
+export type GraphicConnectorSide = 'auto' | 'top' | 'bottom' | 'left' | 'right';
+/** A line between two objects' edges; the renderer recomputes it as the objects move. */
+export type GraphicConnector = Readonly<{
+  id: string;
+  from: string;
+  to: string;
+  fromSide?: GraphicConnectorSide;
+  toSide?: GraphicConnectorSide;
+  /** Curvature as a fraction of the connector length; 0 is straight, negative bends the other way. */
+  bend?: number;
+  /** Clearance between each object edge and the line, in scene units. */
+  gap?: number;
+  arrow?: 'end' | 'both' | 'none';
+  stroke?: GraphicPaint;
+  strokeRole?: GraphicStrokeRole;
+  dash?: string;
 }>;
 export type GraphicScene = Readonly<{
   id: string;
@@ -34,6 +52,7 @@ export type GraphicScene = Readonly<{
   description: string;
   bounds: GraphicBounds;
   objects: readonly GraphicObject[];
+  connectors?: readonly GraphicConnector[];
 }>;
 
 export function validateGraphicScene(scene: GraphicScene): void {
@@ -68,11 +87,22 @@ export function validateGraphicScene(scene: GraphicScene): void {
     }
     if (object.state) {
       const state = object.state;
-      if ([state.opacity, state.reveal].some((n) => !Number.isFinite(n) || n < 0 || n > 1) || !Number.isFinite(state.x) || !Number.isFinite(state.y) || ![true, false].includes(state.highlight)) throw new Error(`Invalid graphic state: ${object.id}`);
+      if ([state.opacity, state.reveal].some((n) => !Number.isFinite(n) || n < 0 || n > 1) || !Number.isFinite(state.x) || !Number.isFinite(state.y) || ![true, false].includes(state.highlight) || (state.scale !== undefined && (!Number.isFinite(state.scale) || state.scale <= 0)) || [state.originX, state.originY].some(n => n !== undefined && !Number.isFinite(n))) throw new Error(`Invalid graphic state: ${object.id}`);
     }
     for (const primitive of object.primitives) validatePrimitive(primitive, object.id);
   }
   for (const object of scene.objects) if (object.edge && (!nodeOrders.has(object.edge.fromOrder) || !nodeOrders.has(object.edge.toOrder))) throw new Error(`Edge endpoints must resolve inside their scene: ${object.id}`);
+  for (const connector of scene.connectors ?? []) {
+    if (connector.id !== String(connector.id) || !connector.id.trim() || ids.has(connector.id)) throw new Error(`Connector IDs must be unique: ${connector.id}`);
+    ids.add(connector.id);
+    if (connector.from === connector.to || ![connector.from, connector.to].every(id => scene.objects.some(object => object.id === id))) throw new Error(`Connector endpoints must be two objects in the scene: ${connector.id}`);
+    if ([connector.fromSide, connector.toSide].some(side => side !== undefined && !['auto', 'top', 'bottom', 'left', 'right'].includes(side))) throw new Error(`Unsupported connector side: ${connector.id}`);
+    if ((connector.bend !== undefined && (!Number.isFinite(connector.bend) || Math.abs(connector.bend) > 2)) || (connector.gap !== undefined && (!Number.isFinite(connector.gap) || connector.gap < 0))) throw new Error(`Connector bend must be within ±2 and gap nonnegative: ${connector.id}`);
+    if (connector.arrow !== undefined && !['end', 'both', 'none'].includes(connector.arrow)) throw new Error(`Unsupported connector arrow: ${connector.id}`);
+    if (connector.stroke !== undefined && !Object.hasOwn(graphicPaintRoles, connector.stroke)) throw new Error(`Unsupported connector paint: ${connector.id}`);
+    if (connector.strokeRole !== undefined && !Object.hasOwn(graphicStrokeRoles, connector.strokeRole)) throw new Error(`Unsupported connector stroke role: ${connector.id}`);
+    if (connector.dash !== undefined && !/^[\d. ,]+$/.test(connector.dash)) throw new Error(`Invalid connector dash: ${connector.id}`);
+  }
 }
 
 export function validateGraphicBounds(bounds: GraphicBounds): void {
@@ -109,7 +139,7 @@ function validatePrimitive(p: GraphicPrimitive, id: string) {
     case 'text':
       if (p.font !== undefined && !Object.hasOwn(graphicFonts, p.font)) fail(`Unsupported graphic font ${p.font}`);
       finite([p.x, p.y, p.size, p.leading, ...(p.weight !== undefined ? [p.weight] : [])]);
-      if (p.size <= 0 || p.leading <= 0 || !p.lines.length || p.lines.some((line) => line !== String(line)) || (p.anchor !== undefined && p.anchor !== 'start' && p.anchor !== 'middle')) fail('Invalid text geometry');
+      if (p.size <= 0 || p.leading <= 0 || !p.lines.length || p.lines.some((line) => line !== String(line)) || (p.anchor !== undefined && p.anchor !== 'start' && p.anchor !== 'middle' && p.anchor !== 'end')) fail('Invalid text geometry');
       if (p.textLength !== undefined && (!Number.isFinite(p.textLength) || p.textLength <= 0 || p.lines.length !== 1)) fail('Text length requires one line and positive finite width');
       break;
     case 'line': finite([p.x1, p.x2, p.y1, p.y2]); break;
@@ -150,5 +180,6 @@ function freezeScene(scene: GraphicScene): GraphicScene {
   }
   Object.freeze(scene.bounds);
   Object.freeze(scene.objects);
+  if (scene.connectors) { scene.connectors.forEach(Object.freeze); Object.freeze(scene.connectors); }
   return Object.freeze(scene);
 }

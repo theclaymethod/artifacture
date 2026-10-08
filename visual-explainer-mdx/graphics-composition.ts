@@ -1,4 +1,4 @@
-import { createGraphicScene, validateGraphicBounds, type GraphicBounds, type GraphicObject, type GraphicPlacement, type GraphicScene } from './graphics-types';
+import { createGraphicScene, validateGraphicBounds, type GraphicBounds, type GraphicConnector, type GraphicObject, type GraphicPlacement, type GraphicScene } from './graphics-types';
 import { defineGraphicMotion, type GraphicMotion, type GraphicMotionTrack } from './graphic-motion';
 import { intersectGraphicClips, transformGraphicBounds, transformGraphicClip } from './graphic-clips';
 
@@ -27,6 +27,7 @@ export function composeGraphics(input: GraphicCompositionInput): GraphicComposit
   if (!Number.isFinite(input.duration) || input.duration <= 0) throw new Error('Composition duration must be finite and positive.');
   const instances = new Set<string>();
   const objects: GraphicObject[] = [];
+  const connectors: GraphicConnector[] = [];
   const tracks: GraphicMotionTrack[] = [];
   let nextOrder = 0;
   for (const instance of input.instances) {
@@ -55,11 +56,13 @@ export function composeGraphics(input: GraphicCompositionInput): GraphicComposit
         clip: intersectGraphicClips(transformGraphicClip(object.clip, placement), instance.clip === 'frame' ? { kind: 'rect', bounds: instance.frame } : undefined),
       });
     }
+    connectors.push(...(source.connectors ?? []).map(connector => ({ ...connector, id: identity(connector.id), from: identity(connector.from), to: identity(connector.to) })));
     tracks.push(...motion.tracks.map(track => track.property === 'mask'
       ? { ...track, target: identity(track.target), bounds: transformGraphicBounds(track.bounds, placement) }
       : { ...track, target: identity(track.target) }));
   }
-  const scene = createGraphicScene({ id: input.id, title: input.title, description: input.description, bounds: input.bounds, objects });
+  const base = { id: input.id, title: input.title, description: input.description, bounds: input.bounds, objects };
+  const scene = createGraphicScene(connectors.length ? { ...base, connectors } : base);
   return Object.freeze({ scene, motion: defineGraphicMotion(scene, { duration: input.duration, tracks }) });
 }
 
