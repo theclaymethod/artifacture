@@ -2,10 +2,17 @@ import { GraphicCanvas } from './graphics';
 import { createGraphicScene } from './graphics-types';
 import type { GraphicScene } from './graphics-types';
 import { defineGraphicMotion, sampleScene, type GraphicMotion } from './graphic-motion';
+import { sampleMotionEase } from './motion-eases';
 import { assertSupportedPreset } from './preset-policy.mjs';
 
 export type GraphicSlideScene = Readonly<{ id: string; title: string; explanation: string; graphic: GraphicScene; width: number; height: number; preset: string; appearance: 'light' | 'dark' }>;
-export type GraphicSlideSequence = Readonly<{ id: string; width: number; height: number; duration: number; slides: readonly Readonly<{ slide: GraphicSlideScene; motion: GraphicMotion; start: number; duration: number }>[] }>;
+/**
+ * How a slide's graphic enters from the previous slide. `zoom-through` lands from slightly zoomed in
+ * and the outgoing graphic punches in, so the cut happens on motion; `direction` slides the incoming
+ * graphic from the side the previous one left toward. The header and explanation do not move.
+ */
+export type SlideTransition = Readonly<{ kind: 'cut' }> | Readonly<{ kind: 'zoom-through'; duration?: number; direction?: 'left' | 'right' | 'none'; zoom?: number }>;
+export type GraphicSlideSequence = Readonly<{ id: string; width: number; height: number; duration: number; slides: readonly Readonly<{ slide: GraphicSlideScene; motion: GraphicMotion; start: number; duration: number; transition?: SlideTransition }>[] }>;
 
 export function createSlideScene(input: Omit<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'> & Partial<Pick<GraphicSlideScene, 'width' | 'height' | 'preset' | 'appearance'>>): GraphicSlideScene {
   const slide = { ...input, graphic: createGraphicScene(input.graphic), width: input.width ?? 1920, height: input.height ?? 1080, preset: input.preset ?? 'iso', appearance: input.appearance ?? 'light' };
@@ -15,7 +22,7 @@ export function createSlideScene(input: Omit<GraphicSlideScene, 'width' | 'heigh
   return Object.freeze(slide);
 }
 
-export function sequenceSlides(id: string, entries: readonly Readonly<{ slide: GraphicSlideScene; motion?: GraphicMotion; duration: number }>[] ): GraphicSlideSequence {
+export function sequenceSlides(id: string, entries: readonly Readonly<{ slide: GraphicSlideScene; motion?: GraphicMotion; duration: number; transition?: SlideTransition }>[] ): GraphicSlideSequence {
   if (id !== String(id) || !id.trim() || !entries.length) throw new Error('A sequence needs an ID and at least one slide.');
   const { width, height } = entries[0].slide;
   let start = 0;
@@ -28,7 +35,10 @@ export function sequenceSlides(id: string, entries: readonly Readonly<{ slide: G
     if (entry.slide.width !== width || entry.slide.height !== height) throw new Error('Sequence slides must share frame dimensions.');
     const motion = defineGraphicMotion(entry.slide.graphic, entry.motion ?? { duration: entry.duration, tracks: [] });
     if (motion.duration > entry.duration) throw new Error('Slide motion exceeds its sequence slot.');
-    const item = Object.freeze({ slide, motion, start, duration: entry.duration });
+    const transition = entry.transition;
+    if (transition && !(transition.kind === 'cut' || (transition.kind === 'zoom-through' && [transition.duration ?? .3, transition.zoom ?? .06].every(n => Number.isFinite(n) && n > 0 && n < 1) && ['left', 'right', 'none', undefined].includes(transition.direction)))) throw new Error(`Unsupported slide transition: ${slide.id}`);
+    if (transition?.kind === 'zoom-through' && (transition.duration ?? .3) * 2 > entry.duration) throw new Error(`A transition needs a slot at least twice its duration: ${slide.id}`);
+    const item = Object.freeze(transition ? { slide, motion, start, duration: entry.duration, transition: Object.freeze({ ...transition }) } : { slide, motion, start, duration: entry.duration });
     start += entry.duration;
     if (!Number.isFinite(start)) throw new Error('Sequence duration overflow.');
     return item;
@@ -39,8 +49,28 @@ export function sequenceSlides(id: string, entries: readonly Readonly<{ slide: G
 export function sampleSlideSequence(sequence: GraphicSlideSequence, authoredSeconds: number): GraphicSlideScene {
   if (!Number.isFinite(authoredSeconds) || authoredSeconds < 0) throw new Error('Sequence time must be finite and nonnegative.');
   const time = Math.min(sequence.duration, authoredSeconds);
-  const item = sequence.slides.find((entry) => time < entry.start + entry.duration) ?? sequence.slides.at(-1)!;
-  return Object.freeze({ ...item.slide, graphic: sampleScene(item.slide.graphic, item.motion, Math.max(0, time - item.start)) });
+  const index = sequence.slides.findIndex((entry) => time < entry.start + entry.duration);
+  const at = index < 0 ? sequence.slides.length - 1 : index, item = sequence.slides[at], local = Math.max(0, time - item.start);
+  const graphic = sampleScene(item.slide.graphic, item.motion, local);
+  const enter = at > 0 && item.transition?.kind === 'zoom-through' ? item.transition : undefined;
+  const next = sequence.slides[at + 1]?.transition, exit = next?.kind === 'zoom-through' ? next : undefined;
+  if (!enter && !exit) return Object.freeze({ ...item.slide, graphic });
+  // Shrinking the view box zooms in. `direction` is the way content travels: for 'left', the outgoing
+  // graphic drifts left and the incoming one starts to the right and settles leftward.
+  let scale = 1, shift = 0;
+  if (enter) {
+    const progress = sampleMotionEase('soft-land', Math.min(1, local / (enter.duration ?? .3)));
+    scale *= 1 - (enter.zoom ?? .06) * (1 - progress);
+    shift += (enter.direction === 'left' ? -1 : enter.direction === 'right' ? 1 : 0) * .04 * (1 - progress);
+  }
+  if (exit) {
+    const window = (exit.duration ?? .3) / 2, progress = sampleMotionEase('accel-exit', Math.min(1, Math.max(0, (local - (item.duration - window)) / window)));
+    scale *= 1 - (exit.zoom ?? .06) * .8 * progress;
+    shift -= (exit.direction === 'left' ? -1 : exit.direction === 'right' ? 1 : 0) * .05 * progress;
+  }
+  const b = graphic.bounds, width = b.width * scale, height = b.height * scale;
+  const bounds = { x: b.x + (b.width - width) / 2 + shift * b.width, y: b.y + (b.height - height) / 2, width, height };
+  return Object.freeze({ ...item.slide, graphic: createGraphicScene({ ...graphic, bounds }) });
 }
 
 /** `medium="video"` selects video-tier tokens, such as stronger muted lines in dark ISO. */

@@ -36,7 +36,7 @@ Author TSX with shared scene builders. Compile finite motion, combine blocks wit
 
 Use the dynamic guide to choose routes, source edits, registered comparisons, dependency cascades, physical assemblies, mathematical clips, and effects. Read [native-engines.md](../references/native-engines.md) when Manim or Psychopomp improves the mechanism. A native starter or upstream reference is not a rendered capability.
 
-For cameras, captions, or other delivery layers beyond the shared sequence, use a source-owned complete composition with `export-static` and [gsap-rules.md](../references/gsap-rules.md). Derive camera moves from content with `frameScene` (`scene-framing`) rather than hand-placed keys; it keeps everything that has appeared in view and below a reserved type band. Preserve the shared renderer and one finite master clock. Revisions belong in editable source; re-export after repairs.
+For cameras, captions, or other delivery layers beyond the shared sequence, use a source-owned complete composition with `export-static` and [gsap-rules.md](../references/gsap-rules.md). Derive camera moves from content with `frameScene` (`scene-framing`) rather than hand-placed keys, and pass them as `GraphicMotion.camera`; it keeps everything that has appeared in view and below a reserved type band. Kinetic type (`kinetic-type`), arrive/leave phrases (`motion-phrases`), `scale` and `value` tracks, and `zoom-through` slide transitions are shared-sequence features, so they also reach the FFrames bridge. Preserve the shared renderer and one finite master clock. Revisions belong in editable source; re-export after repairs.
 
 ## Record and align narration
 

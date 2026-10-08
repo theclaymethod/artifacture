@@ -15,4 +15,6 @@ export type SpeechMatchOptions = Readonly<{
 export function normalizeSpokenWord(word: string, options?: SpeechMatchOptions): string;
 export function alignScript(lines: readonly ScriptLine[], recognized: readonly RecognizedWord[], options?: SpeechMatchOptions): readonly AlignedScriptLine[];
 export function toAlignedWords(line: AlignedScriptLine): readonly AlignedWord[];
+export type CueTimeOptions = SpeechMatchOptions & Readonly<{ occurrence?: number; lead?: number; latest?: number; fallback?: number }>;
+export function cueTime(line: AlignedScriptLine, word: string, options?: CueTimeOptions): number;
 export function compareTranscript(scriptText: string, recognized: readonly RecognizedWord[], options?: SpeechMatchOptions): readonly TranscriptDifference[];

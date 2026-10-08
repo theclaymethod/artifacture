@@ -1,5 +1,8 @@
 import { createGraphicScene, validateGraphicBounds, type GraphicBounds, type GraphicConnector, type GraphicObject, type GraphicPlacement, type GraphicScene } from './graphics-types';
 import { defineGraphicMotion, type GraphicMotion, type GraphicMotionTrack } from './graphic-motion';
+import type { CameraKey } from './graphic-camera';
+import type { GraphicPoint } from './graphic-routes';
+import type { MotionEase } from './motion-eases';
 import { intersectGraphicClips, transformGraphicBounds, transformGraphicClip } from './graphic-clips';
 
 export type GraphicInstance = Readonly<{
@@ -9,7 +12,10 @@ export type GraphicInstance = Readonly<{
   frame: GraphicBounds;
   align?: Readonly<{ x: 'start' | 'center' | 'end'; y: 'start' | 'center' | 'end' }>;
   clip: 'none' | 'frame';
+  /** Move the whole instance in composition coordinates; every object must be an illustration. */
+  moves?: readonly InstanceMove[];
 }>;
+export type InstanceMove = Readonly<{ start: number; duration: number; from: GraphicPoint; to: GraphicPoint; ease?: MotionEase }>;
 export type GraphicCompositionInput = Readonly<{
   id: string;
   title: string;
@@ -17,6 +23,8 @@ export type GraphicCompositionInput = Readonly<{
   bounds: GraphicBounds;
   duration: number;
   instances: readonly GraphicInstance[];
+  /** Camera over the composed scene, for example from frameScene. */
+  camera?: readonly CameraKey[];
 }>;
 export type GraphicComposition = Readonly<{ scene: GraphicScene; motion: GraphicMotion }>;
 
@@ -60,10 +68,19 @@ export function composeGraphics(input: GraphicCompositionInput): GraphicComposit
     tracks.push(...motion.tracks.map(track => track.property === 'mask'
       ? { ...track, target: identity(track.target), bounds: transformGraphicBounds(track.bounds, placement) }
       : { ...track, target: identity(track.target) }));
+    for (const move of instance.moves ?? []) {
+      // State translation is in each object's local units, inside its placement scale.
+      if (source.objects.some(object => object.kind !== 'illustration')) throw new Error(`Moving an instance needs illustration objects only: ${instance.id}`);
+      if (motion.tracks.some(track => (track.property === 'translation' || track.property === 'route') && track.start < move.start + move.duration && move.start < track.start + track.duration)) throw new Error(`Instance moves overlap the instance's own translation: ${instance.id}`);
+      for (const object of source.objects) {
+        const scale = placement.scale * (object.placement?.scale ?? 1);
+        tracks.push({ target: identity(object.id), property: 'translation', start: move.start, duration: move.duration, ease: move.ease, from: { x: move.from.x / scale, y: move.from.y / scale }, to: { x: move.to.x / scale, y: move.to.y / scale } });
+      }
+    }
   }
   const base = { id: input.id, title: input.title, description: input.description, bounds: input.bounds, objects };
   const scene = createGraphicScene(connectors.length ? { ...base, connectors } : base);
-  return Object.freeze({ scene, motion: defineGraphicMotion(scene, { duration: input.duration, tracks }) });
+  return Object.freeze({ scene, motion: defineGraphicMotion(scene, input.camera ? { duration: input.duration, tracks, camera: input.camera } : { duration: input.duration, tracks }) });
 }
 
 // A length prefix is injective even when local IDs already contain scoped IDs.
