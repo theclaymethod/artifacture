@@ -19,6 +19,7 @@ const help = `Usage:
   artifacture engine setup <manim|psychopomp>
   artifacture engine scaffold <engine> <directory> [--theme <preset>]
   artifacture engine render <job.json> --out <directory>
+  artifacture narration <check-take|join|cut> [options]
   artifacture verify <artifact.html> [--json <report.json>]
 
 init and add install required npm packages and import styles automatically.
@@ -175,6 +176,7 @@ async function main() {
     await run(process.execPath, [path.join(path.dirname(manifest), 'dist/bin.js'), ...args], process.cwd());
   }
   else if (command === 'engine') await run(process.execPath, [path.join(packageRoot, 'scripts/video-engines.mjs'), ...args], process.cwd());
+  else if (command === 'narration') await run(process.execPath, [path.join(packageRoot, 'scripts/narration.mjs'), ...args], process.cwd());
   else if (command === 'init' || command === 'add') await copy(command, args);
   else if (Object.hasOwn(runtimeCommands, command)) {
     if (command === 'archify') {
