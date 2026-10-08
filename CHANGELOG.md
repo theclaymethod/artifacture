@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Motion for video
+- Added `GraphicMotion.camera` (`graphic-camera`: `sampleCamera`, `widestCamera`): sampled scenes take the camera's view box, so posters, slides, both video routes and the FFrames bridge share it. `frameScene` keys are camera keys.
+- Added `scale` (about an origin) and `value` (counted single-line text) tracks, `motion-phrases` (`arrive`, `leave`, `arriveInOrder`), and `kinetic-type` (`compileKineticType`, `addKineticType`).
+- Added `zoom-through` slide transitions on `sequenceSlides` entries, instance `moves` and a composition `camera` in `composeGraphics`, and `cueTime` in `narration-align`.
+
 ### Design system for video
 - Added `text-metrics` (`measureText`, `wrapText`) with advance widths generated from the bundled fonts, and `graphic-bounds` for measured object bounds; `scene-framing` now uses them.
 - Added scene `connectors` that join object edges and follow movement, `strokeScale` on `GraphicCanvas` for constant on-screen line weight, `attention` and `fault` paints, and text `anchor: 'end'`.

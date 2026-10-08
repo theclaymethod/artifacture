@@ -1,9 +1,10 @@
 import { sampleScene, type GraphicMotion } from './graphic-motion';
 import type { GraphicBounds, GraphicObject, GraphicScene } from './graphics-types';
 import { objectBounds } from './graphic-bounds';
-import { sampleMotionEase, type MotionEase } from './motion-eases';
+import { sampleCamera, widestCamera, type CameraKey } from './graphic-camera';
 
-export type FrameKey = Readonly<{ t: number; cx: number; cy: number; width: number; ease?: MotionEase }>;
+/** Same shape as a camera key, so frameScene output can be passed as GraphicMotion.camera. */
+export type FrameKey = CameraKey;
 export type SceneFramingOptions = Readonly<{
   /** Output aspect ratio as width / height. */
   aspect?: number;
@@ -32,7 +33,7 @@ function objectBox(object: GraphicObject, preset?: string): Box | null {
 }
 
 /**
- * Camera keys that keep everything visible in frame, plus anything arriving within the lookahead,
+ * Camera keys (usable as `GraphicMotion.camera`) that keep everything visible in frame, plus anything arriving within the lookahead,
  * placed below a reserved top band. With `memory`, content that stopped changing longer ago may
  * leave as a sequence moves on. Smoothing never shrinks a frame below its raw content.
  */
@@ -70,19 +71,10 @@ export function frameScene(scene: GraphicScene, motion: GraphicMotion, options: 
 
 /** The view box at an authored time, eased between keys. Each key's ease shapes the move into it. */
 export function sampleFrame(keys: readonly FrameKey[], authoredSeconds: number, aspect = 16 / 9): GraphicBounds {
-  if (!keys.length || !Number.isFinite(authoredSeconds) || !(aspect > 0)) throw new Error('Sampling a frame needs keys, a finite time and a positive aspect.');
-  let at: Omit<FrameKey, 't' | 'ease'> = keys[keys.length - 1];
-  if (authoredSeconds < keys[0].t) at = keys[0];
-  else for (let i = 0; i < keys.length - 1; i++) if (authoredSeconds >= keys[i].t && authoredSeconds < keys[i + 1].t) {
-    const a = keys[i], b = keys[i + 1], u = sampleMotionEase(b.ease ?? 'smooth', Math.min(1, Math.max(0, (authoredSeconds - a.t) / Math.max(1e-3, b.t - a.t))));
-    at = { cx: a.cx + (b.cx - a.cx) * u, cy: a.cy + (b.cy - a.cy) * u, width: a.width + (b.width - a.width) * u };
-    break;
-  }
-  return Object.freeze({ x: at.cx - at.width / 2, y: at.cy - at.width / aspect / 2, width: at.width, height: at.width / aspect });
+  return sampleCamera(keys, authoredSeconds, aspect);
 }
 
 /** The widest framing in a set of keys, for a still, a poster or a slide of the same beat. */
 export function widestFrame(keys: readonly FrameKey[], aspect = 16 / 9): GraphicBounds {
-  if (!keys.length) throw new Error('Choosing a frame needs at least one key.');
-  return sampleFrame([keys.reduce((best, key) => key.width > best.width ? key : best, keys[0])], 0, aspect);
+  return widestCamera(keys, aspect);
 }

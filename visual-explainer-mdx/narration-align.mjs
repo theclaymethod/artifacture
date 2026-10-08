@@ -90,3 +90,17 @@ export function compareTranscript(scriptText, recognized, options = {}) {
   }
   return Object.freeze(differences.map(difference => Object.freeze(difference)));
 }
+
+/**
+ * Line-relative seconds for an event tied to a spoken word: the word's start minus `lead`, never
+ * before 0 and never later than `latest` (for example the slot length minus its end hold).
+ * Missing words fall back to `fallback` (a fraction of the line's length) instead of failing.
+ */
+export function cueTime(line, word, options = {}) {
+  const { occurrence = 0, lead = .15, latest = Infinity, fallback = .5 } = options;
+  if (!Number.isSafeInteger(occurrence) || occurrence < 0 || !(lead >= 0) || !(fallback >= 0 && fallback <= 1)) throw new Error('Cue times need a nonnegative occurrence and lead, and a fallback fraction.');
+  const key = normalizeSpokenWord(word, options);
+  const hits = line.words.filter(candidate => normalizeSpokenWord(candidate.text, options).startsWith(key));
+  const at = hits[occurrence] ? hits[occurrence].start - line.start : (line.end - line.start) * fallback;
+  return Math.min(latest, Math.max(0, at - lead));
+}

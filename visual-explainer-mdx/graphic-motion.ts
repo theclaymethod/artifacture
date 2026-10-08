@@ -3,6 +3,7 @@ import { createGraphicScene, validateGraphicBounds, validateGraphicScene } from 
 import { sampleGraphicRoute, validateGraphicRoute, type GraphicPoint, type PreparedGraphicRoute } from './graphic-routes';
 import { intersectGraphicClips } from './graphic-clips';
 import { motionEaseNames, sampleMotionEase, type MotionEase } from './motion-eases';
+import { sampleCamera, validateCameraKeys, type CameraKey } from './graphic-camera';
 
 type Timing = Readonly<{ target: string; start: number; duration: number; ease?: MotionEase }>;
 export type GraphicMotionTrack = Timing & (
@@ -11,8 +12,14 @@ export type GraphicMotionTrack = Timing & (
   | Readonly<{ property: 'translation'; from: GraphicPoint; to: GraphicPoint }>
   | Readonly<{ property: 'route'; route: PreparedGraphicRoute; anchor?: GraphicPoint; from: number; to: number }>
   | Readonly<{ property: 'mask'; bounds: GraphicBounds; axis: 'x' | 'y'; side: 'start' | 'end'; from: number; to: number }>
+  /** Scale about `origin` (object coordinates; defaults to the origin). */
+  | Readonly<{ property: 'scale'; from: number; to: number; origin?: GraphicPoint }>
+  /** Count a single-line text object between two numbers, for example a question counter. */
+  | Readonly<{ property: 'value'; from: number; to: number; format?: ValueFormat }>
 );
-export type GraphicMotion = Readonly<{ duration: number; tracks: readonly GraphicMotionTrack[] }>;
+export type ValueFormat = Readonly<{ decimals?: number; prefix?: string; suffix?: string }>;
+/** `camera` moves the view box over time; sampled scenes take its bounds at the scene's aspect ratio. */
+export type GraphicMotion = Readonly<{ duration: number; tracks: readonly GraphicMotionTrack[]; camera?: readonly CameraKey[] }>;
 
 export function defineGraphicMotion(scene: GraphicScene, motion: GraphicMotion): GraphicMotion {
   validateMotion(scene, motion);
@@ -24,9 +31,12 @@ export function defineGraphicMotion(scene: GraphicScene, motion: GraphicMotion):
       if (track.anchor) Object.freeze(track.anchor);
     }
     if (track.property === 'mask') Object.freeze(track.bounds);
+    if (track.property === 'scale' && track.origin) Object.freeze(track.origin);
+    if (track.property === 'value' && track.format) Object.freeze(track.format);
     Object.freeze(track);
   }
   Object.freeze(result.tracks);
+  if (result.camera) { result.camera.forEach(Object.freeze); Object.freeze(result.camera); }
   return Object.freeze(result);
 }
 function channel(track: GraphicMotionTrack): string {
@@ -41,11 +51,19 @@ function validateMotion(scene: GraphicScene, motion: GraphicMotion) {
   for (const track of motion.tracks) {
     const object = objects.get(track.target);
     if (!object) throw new Error(`Unknown motion target: ${track.target}`);
-    if (!['opacity', 'reveal', 'highlight', 'translation', 'route', 'mask'].includes(track.property)) throw new Error(`Unsupported motion property: ${track.property}`);
+    if (!['opacity', 'reveal', 'highlight', 'translation', 'route', 'mask', 'scale', 'value'].includes(track.property)) throw new Error(`Unsupported motion property: ${track.property}`);
     if (track.ease !== undefined && !motionEaseNames.includes(track.ease)) throw new Error(`Unsupported motion ease: ${track.ease}`);
     if (!Number.isFinite(track.start) || track.start < 0 || !Number.isFinite(track.duration) || track.duration <= 0 || track.start + track.duration > motion.duration) throw new Error(`Motion track exceeds its finite duration: ${track.target}`);
     if (track.property === 'translation') {
       if ([track.from.x, track.from.y, track.to.x, track.to.y].some((n) => !Number.isFinite(n))) throw new Error(`Translation must be finite: ${track.target}`);
+    } else if (track.property === 'scale') {
+      if ([track.from, track.to].some(n => !Number.isFinite(n) || n <= 0) || (track.origin && ![track.origin.x, track.origin.y].every(Number.isFinite))) throw new Error(`Scale must be positive and finite: ${track.target}`);
+      if (object.kind !== 'illustration') throw new Error(`Scale supports illustration objects: ${track.target}`);
+    } else if (track.property === 'value') {
+      if (![track.from, track.to].every(Number.isFinite)) throw new Error(`Counted values must be finite: ${track.target}`);
+      const decimals = track.format?.decimals ?? 0;
+      if (!Number.isSafeInteger(decimals) || decimals < 0 || decimals > 6 || [track.format?.prefix, track.format?.suffix].some(part => part !== undefined && part !== String(part))) throw new Error(`Value formats need 0–6 decimals and text affixes: ${track.target}`);
+      if (object.primitives.length !== 1 || object.primitives[0].kind !== 'text' || object.primitives[0].lines.length !== 1) throw new Error(`Value tracks need an object with one single-line text primitive: ${track.target}`);
     } else if ([track.from, track.to].some((n) => !Number.isFinite(n) || n < 0 || n > 1)) throw new Error(`Opacity, reveal, and highlight values must be between zero and one: ${track.target}`);
     if (track.property === 'route') {
       validateGraphicRoute(track.route);
@@ -66,6 +84,7 @@ function validateMotion(scene: GraphicScene, motion: GraphicMotion) {
     if (previous.some((p) => track.start < p.start + p.duration && p.start < track.start + track.duration)) throw new Error(`Overlapping tracks for ${key}.`);
     intervals.set(key, [...previous, track]);
   }
+  if (motion.camera) validateCameraKeys(motion.camera, motion.duration);
 }
 
 export function sampleScene(input: GraphicScene, motion: GraphicMotion, authoredSeconds: number): GraphicScene {
@@ -79,6 +98,7 @@ export function sampleScene(input: GraphicScene, motion: GraphicMotion, authored
     grouped.set(key, [...(grouped.get(key) ?? []), track]);
   }
   const states = new Map<string, NonNullable<GraphicObject['state']>>();
+  const values = new Map<string, string>();
   const clips = new Map<string, GraphicClip | undefined>();
   const baseClips = new Map(base.objects.map(object => [object.id, object.clip]));
   const baseStates = new Map(base.objects.map((object) => [object.id, object.state]));
@@ -90,6 +110,14 @@ export function sampleScene(input: GraphicScene, motion: GraphicMotion, authored
     if (track.property === 'translation') {
       state.x = interpolate(track.from.x, track.to.x, progress);
       state.y = interpolate(track.from.y, track.to.y, progress);
+    } else if (track.property === 'scale') {
+      state.scale = interpolate(track.from, track.to, progress);
+      state.originX = track.origin?.x ?? 0;
+      state.originY = track.origin?.y ?? 0;
+    } else if (track.property === 'value') {
+      const { decimals = 0, prefix = '', suffix = '' } = track.format ?? {};
+      values.set(track.target, `${prefix}${interpolate(track.from, track.to, progress).toFixed(decimals)}${suffix}`);
+      continue;
     } else if (track.property === 'route') {
       const point = sampleGraphicRoute(track.route, interpolate(track.from, track.to, progress));
       state.x = point.x - (track.anchor?.x ?? 0);
@@ -114,11 +142,14 @@ export function sampleScene(input: GraphicScene, motion: GraphicMotion, authored
     }
     states.set(track.target, Object.freeze(state));
   }
-  return createGraphicScene({ ...base, objects: base.objects.map(object => {
-    if (!states.has(object.id) && !clips.has(object.id)) return object;
-    if (!clips.has(object.id)) return { ...object, state: states.get(object.id) };
-    if (!states.has(object.id)) return { ...object, clip: clips.get(object.id) };
-    return { ...object, state: states.get(object.id), clip: clips.get(object.id) };
+  const bounds = motion.camera ? sampleCamera(motion.camera, time, base.bounds.width / base.bounds.height) : base.bounds;
+  return createGraphicScene({ ...base, bounds, objects: base.objects.map(object => {
+    const value = values.get(object.id);
+    const counted = value === undefined ? object : { ...object, primitives: object.primitives.map(primitive => primitive.kind === 'text' ? { ...primitive, lines: [value] } : primitive) };
+    if (!states.has(object.id) && !clips.has(object.id)) return counted;
+    if (!clips.has(object.id)) return { ...counted, state: states.get(object.id) };
+    if (!states.has(object.id)) return { ...counted, clip: clips.get(object.id) };
+    return { ...counted, state: states.get(object.id), clip: clips.get(object.id) };
   }) });
 }
 
