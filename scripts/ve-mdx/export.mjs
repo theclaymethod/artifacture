@@ -147,9 +147,12 @@ function veMdxPreflightPlugin(source, draft) {
     name: 'visual-explainer-mdx-preflight',
     enforce: 'pre',
     async transform(code, id) {
-      const cleanId = id.split('?')[0];
-      if (path.resolve(cleanId) !== source) return null;
-      const result = await preflightSource(code, { id: path.relative(repoRoot, source), draft });
+      const file = path.resolve(id.split('?')[0]);
+      // The entry, and each MDX module it imports from its own directory tree (for example one
+      // chapter per file), gets the same integrity checks and code highlighting.
+      const chapter = file.endsWith('.mdx') && file.startsWith(path.dirname(source) + path.sep) && !file.split(path.sep).includes('node_modules');
+      if (file !== source && !chapter) return null;
+      const result = await preflightSource(code, { id: path.relative(repoRoot, file), draft });
       return { code: result.code, map: null };
     },
   };

@@ -1,4 +1,5 @@
-import { Badge, CodeBlock, DataTable, DiagramCanvas, DiffBlock, ExplainerShell, Section, StatusPill } from '../../visual-explainer-mdx/components';
+import { Badge, DataTable, DiagramCanvas, ExplainerShell, Section, StatusPill } from '../../visual-explainer-mdx/components';
+import ReviewScanCode from './review-scan-code.mdx';
 
 <ExplainerShell title="Overdraft guard review" summary="A synthetic review of one wallet change: the claims, the checks behind them, and the code." chapterNav appearance="auto" reviewTools={false}>
 
@@ -40,16 +41,7 @@ import { Badge, CodeBlock, DataTable, DiagramCanvas, DiffBlock, ExplainerShell, 
 </Section>
 
 <Section id="code" title="The code under review" navLabel="Code">
-  <DiffBlock language="python" filename="wallet/core.py" before={`def withdraw(balance: int, amount: int) -> int:
-    return balance - amount
-`} after={`def withdraw(balance: int, amount: int) -> int:
-    if amount > balance:
-        raise OverdraftError(f"{amount} is above the balance")
-    return balance - amount
-`} />
-  <CodeBlock language="ts" filename="wallet.test.ts" code={"// Escaped markup stays text: \u003cscript\u003ealert(1)\u003c/script\u003e\nexport function check(balance: number, amount: number): boolean {\n  return amount <= balance;\n}"} />
-  <CodeBlock language="shell" filename="Run the checks" code={"uv run pytest tests/test_core.py -q"} />
-  <CodeBlock language="json" filename="result.json" code={"{\"claim\": \"C1\", \"state\": \"Proven\", \"checks\": 2}"} />
+  <ReviewScanCode />
 </Section>
 
 </ExplainerShell>

@@ -10,6 +10,7 @@
 - `CodeBlock` and `DiffBlock` now color tokens from the preset's `--ve-syntax-*` ramp through Shiki's CSS-variables theme, and diff rows use `--ve-code-add` / `--ve-code-remove` with a `+`/`-` gutter. Diffs list removed lines before added lines and drop the empty row after a final newline.
 - The MDX preflight decodes `\u`/`\x` escapes in literal props, so code escaped as `\u003c` highlights as `<`; it also finds `CodeBlock` and `DiffBlock` tags with a quote-aware scan.
 - The review panel label uses `--ve-accent-text`, which passes AA on ISO light and dark.
+- `ve:export` now runs the MDX preflight (integrity checks and code highlighting) on each MDX module that the entry imports from its own directory tree, so an explainer can keep one chapter per file.
 
 ### Narrated films
 - Added `narration-align`: `alignScript` times every script word from a whole-recording transcript without later lines drifting when recognition drops, merges, splits or spells a word as digits; `compareTranscript` lists added, missing and changed words in a take.

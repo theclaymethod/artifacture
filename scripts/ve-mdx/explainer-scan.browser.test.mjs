@@ -54,21 +54,26 @@ async function colorPairs(page, selector) {
 
 let workDir;
 let artifact;
+let browser;
 
-test.before(() => {
+test.before(async () => {
+  browser = await chromium.launch({ headless: true });
   workDir = mkdtempSync(path.join(os.tmpdir(), 'artifacture-review-scan-'));
   artifact = path.join(workDir, 'review-scan.html');
   const result = spawnSync(process.execPath, ['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
 });
 
-test.after(() => rmSync(workDir, { recursive: true, force: true }));
+test.after(async () => {
+  await browser?.close();
+  rmSync(workDir, { recursive: true, force: true });
+});
 
 for (const scheme of ['light', 'dark']) {
   test(`review-scan at 1280px in ${scheme} mode: rail, table, key and code`, async () => {
-    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
     try {
-      const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
+      const page = await context.newPage();
       const errors = [];
       page.on('pageerror', (error) => errors.push(error.message));
       await page.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });
@@ -129,15 +134,15 @@ for (const scheme of ['light', 'dark']) {
         }
       }
     } finally {
-      await browser.close();
+      await context.close();
     }
   });
 }
 
 test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, reduced motion', async () => {
-  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' });
   try {
-    const page = await browser.newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' });
+    const page = await context.newPage();
     await page.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });
     const toggle = page.locator('.ve-chapter-toggle');
     await toggle.waitFor();
@@ -161,7 +166,8 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
     await motion.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });
     await motion.waitForSelector('[data-ve-chapter-rail]');
     assert.equal(await motion.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'smooth');
+    await motion.close();
   } finally {
-    await browser.close();
+    await context.close();
   }
 });
