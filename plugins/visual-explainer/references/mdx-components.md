@@ -4,13 +4,18 @@ Read this only when the selected card does not show the component or prop you ne
 
 ## Long-form artifacts
 
-- `ExplainerShell(title, summary?, preset?, reviewTools?)`
-- `Section(title, kicker?)`
+- `ExplainerShell(title, summary?, preset?, reviewTools?, chapterNav?, appearance?)`
+- `Section(title, kicker?, id?, navLabel?, anchors?)`
+- `ChapterRail(chapters, label?)`
+- `DataTable(columns, rows, caption?, label?)`
+- `StatusPill(tone, children)`
+- `Badge(tone?, stroke?, glyph?, children)`
+- `Legend(items, title?)`
 - `Callout(children)`
 - `Pipeline(steps)`
 - `DecisionMatrix(rows)`
 - `RiskLedger(risks)`
-- `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?)`
+- `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?, legend?)`
 - `DiagramWalkthrough(nodes, edges, steps, layout?, direction?, lanes?, dates?, title?, description?)`
 - `LieflatChart(spec, title, description?, source?)`
 - `DataChart(data, kind?, title, description?, valueLabel?, formatValue?, source?)`
@@ -20,6 +25,14 @@ Read this only when the selected card does not show the component or prop you ne
 - `JsonTree(data, collapsedDepth?)`
 - `Quiz(questions)`
 - `MermaidBlock(chart, caption?)`
+
+`chapterNav` builds a chapter rail from the direct `Section` children: a sticky side rail at 1200px and wider, and a compact sticky top bar with a disclosure list below that. It marks the current chapter with `aria-current` while the reader scrolls. Links are fragment anchors, so they work from the keyboard and without script; smooth scrolling runs only without a reduced-motion preference. Give a `Section` an `id` for stable links, a short `navLabel`, and `anchors={[{id, label}]}` for the in-section targets the rail lists. With a rail, the review tool docks under it. `appearance="auto"` follows `prefers-color-scheme`; the default stays light.
+
+`DataTable` is the scan-first table: a sticky header, subtle zebra rows, and no wrapper overflow. Column `kind` sets the treatment: `id` (monospace, unwrapped), `number` (right-aligned, tabular figures), `status` (a `StatusPill`), `tags` (badges only), or `text` (wraps). A cell is a string, a number, `null`, or `{text, href?, status?, badges?, note?}`. Give a row an `id` to make it a link target. Below 640px each row becomes a labelled card.
+
+`StatusPill`, `Badge`, `Legend` and diagram node `tone` share one state ramp: `ok`, `info`, `warn`, `err` and `neutral`, from the `--ve-status-*` tokens, each AA in light and dark. Pair every tone with a word; color is never the only cue. A `stroke="dashed"` badge, node or key swatch is dashed and hatched: use it for a weaker evidence tier. `glyph` (`rect`, `oval`, `diamond`) carries a third category, such as a verifier kind. A `DiagramCanvas` `legend` repeats the exact tone, stroke and glyph that its nodes use.
+
+`CodeBlock` and `DiffBlock` highlight with Shiki at export. Token colors come from the preset's `--ve-syntax-*` ramp on the code surface. Diff rows use `--ve-code-add` and `--ve-code-remove` with a `+`/`-` gutter. Escape `<` and `>` in code strings as `\u003c` and `\u003e`; the preflight decodes them before highlighting, and Shiki escapes the output.
 
 `DiagramCanvas` supports `flow`, `tree`, `swimlane`, and `timeline` layouts. Set `direction="auto" | "horizontal" | "vertical"` to control flow. Timeline dates order milestones; their spacing does not encode elapsed duration. Nodes support `rect`, `oval`, `diamond`, and `dot` shapes; edges support `solid`, `dashed`, and `bidirectional` styles.
 

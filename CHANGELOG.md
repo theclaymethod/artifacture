@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Scan-first explainers
+- Added a chapter rail to `ExplainerShell` (`chapterNav`): a sticky side rail at 1200px and wider, a compact top bar with a disclosure list below that, `aria-current` tracking while the reader scrolls, fragment links, Escape to close, and smooth scrolling only without a reduced-motion preference. `Section` takes `id`, `navLabel` and `anchors`. With a rail, the review tool docks under it.
+- Added `appearance="auto"` to `ExplainerShell`, which follows `prefers-color-scheme` with the ISO dark tokens; code keeps a dark plate in dark mode.
+- Added `DataTable`, `StatusPill`, `Badge` and `Legend`: a sticky header, zebra rows, right-aligned tabular numbers, monospace IDs, state pills, flag badges, and labelled cards below 640px.
+- Added the `--ve-status-*` state ramp (`ok`, `info`, `warn`, `err`, `neutral`), AA in light and dark. `DiagramCanvas` nodes take `tone` and `stroke="dashed"` (dashed and hatched), and `DiagramCanvas` takes a `legend`.
+- `CodeBlock` and `DiffBlock` now color tokens from the preset's `--ve-syntax-*` ramp through Shiki's CSS-variables theme, and diff rows use `--ve-code-add` / `--ve-code-remove` with a `+`/`-` gutter. Diffs list removed lines before added lines and drop the empty row after a final newline.
+- The MDX preflight decodes `\u`/`\x` escapes in literal props, so code escaped as `\u003c` highlights as `<`; it also finds `CodeBlock` and `DiffBlock` tags with a quote-aware scan.
+- The review panel label uses `--ve-accent-text`, which passes AA on ISO light and dark.
+
 ### Narrated films
 - Added `narration-align`: `alignScript` times every script word from a whole-recording transcript without later lines drifting when recognition drops, merges, splits or spells a word as digits; `compareTranscript` lists added, missing and changed words in a take.
 - Added `artifacture narration check-take | join | cut`: verify takes against their scripts, join takes at an even loudness, and cut beats at the quietest point inside each pause with reading holds, a −16 LUFS master and per-beat word timing. Exit codes gate loudness spread and audible cuts.

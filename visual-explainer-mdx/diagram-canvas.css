@@ -97,6 +97,20 @@
   outline-offset: 3px;
 }
 
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone] {
+  padding-left: 0.875rem;
+  border-left: 3px solid var(--ve-status-neutral);
+}
+
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="ok"] { border-left-color: var(--ve-status-ok); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="info"] { border-left-color: var(--ve-status-info); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="warn"] { border-left-color: var(--ve-status-warn); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="err"] { border-left-color: var(--ve-status-err); }
+
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-stroke="dashed"] {
+  border-left-style: dashed;
+}
+
 @media (max-width: 640px) {
   .ve-diagram-shell.ve-diagram-has-mobile .ve-diagram-variant-desktop {
     display: none;

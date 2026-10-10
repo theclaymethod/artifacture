@@ -1,0 +1,221 @@
+/* Chapter rail: sticky side rail at >=1200px, compact sticky top bar below that. */
+.ve-has-chapters {
+  --ve-rail-width: 15rem;
+  --ve-topbar-height: 3.5rem;
+  --ve-sticky-top: var(--ve-topbar-height);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.ve-has-chapters) {
+    scroll-behavior: smooth;
+  }
+}
+
+.ve-has-chapters :is(.ve-section, [data-ve-anchor], [data-ve-data-table] tr[id]) {
+  scroll-margin-top: calc(var(--ve-sticky-top) + 1rem);
+}
+
+.ve-chapter-rail {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--ve-rule);
+  background: var(--ve-nav-bg);
+  color: var(--ve-text);
+  font-family: var(--ve-font-body);
+}
+
+.ve-chapter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--ve-topbar-height);
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ve-heading);
+  font: 500 1rem/1.25 var(--ve-font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ve-has-chapters .ve-chapter-rail .ve-chapter-toggle {
+  min-height: var(--ve-topbar-height);
+  border-radius: 0;
+  background: transparent;
+}
+
+.ve-chapter-count {
+  color: var(--ve-muted);
+  font-family: var(--ve-font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-chapter-current {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ve-chapter-caret {
+  font-family: var(--ve-font-mono);
+}
+
+.ve-chapter-heading {
+  display: none;
+  margin: 0 0 0.75rem;
+  color: var(--ve-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ve-chapter-list {
+  display: none;
+  max-height: calc(100vh - var(--ve-topbar-height));
+  margin: 0;
+  padding: 0.5rem 1.25rem 1rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-chapter-list {
+  display: block;
+}
+
+.ve-chapter-list ol {
+  margin: 0;
+  padding: 0 0 0.25rem 2.25rem;
+  list-style: none;
+}
+
+.ve-chapter-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.25rem 0.5rem;
+  border-left: 2px solid transparent;
+  color: var(--ve-muted);
+  font-size: 1rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.ve-chapter-anchors {
+  display: none;
+}
+
+/* Only the current chapter opens its in-section targets, so every chapter stays in view. */
+.ve-chapter-list [data-ve-current="true"] > .ve-chapter-anchors {
+  display: block;
+}
+
+.ve-chapter-anchors a {
+  min-height: 44px;
+  font-size: 0.9375rem;
+}
+
+.ve-chapter-index {
+  color: var(--ve-muted);
+  font-family: var(--ve-font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-chapter-list a:hover {
+  color: var(--ve-heading);
+}
+
+.ve-chapter-list [data-ve-current="true"] > a,
+.ve-chapter-list a[aria-current="location"] {
+  border-left-color: var(--ve-accent);
+  color: var(--ve-heading);
+  font-weight: 600;
+}
+
+.ve-chapter-list a:focus-visible,
+.ve-chapter-toggle:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: -3px;
+}
+
+.ve-shell-frame {
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .ve-has-chapters {
+    --ve-sticky-top: 0px;
+  }
+
+  .ve-has-chapters .ve-shell-frame {
+    display: grid;
+    grid-template-columns: var(--ve-rail-width) minmax(0, 1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    max-width: calc(var(--ve-page-max) + var(--ve-rail-width) + 3rem);
+    margin-inline: auto;
+    padding-inline: 2.5rem;
+  }
+
+  .ve-has-chapters .ve-shell-inner {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .ve-chapter-rail {
+    align-self: start;
+    height: 100vh;
+    padding-top: clamp(2rem, 5vw, 5rem);
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .ve-chapter-toggle {
+    display: none;
+  }
+
+  .ve-chapter-heading {
+    display: block;
+  }
+
+  .ve-chapter-list,
+  .ve-chapter-rail[data-ve-open="true"] .ve-chapter-list {
+    display: block;
+    max-height: calc(100vh - 8rem);
+    padding: 0;
+  }
+
+  /* Chapter headings already live in the rail: give each section body the full measure. */
+  .ve-has-chapters .ve-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* With a rail, the review tool docks under it instead of reserving a right gutter. */
+  .ve-has-chapters.ve-has-review {
+    padding-right: 0;
+  }
+
+  .ve-has-chapters.ve-has-review .ve-chapter-list {
+    max-height: calc(100vh - 24rem);
+  }
+
+  .ve-has-chapters .ve-review-panel > div:first-child {
+    flex-wrap: wrap;
+  }
+
+  .ve-has-chapters .ve-review-panel > div:first-child > button {
+    flex: none;
+  }
+
+  .ve-has-chapters .ve-review-panel {
+    right: auto;
+    left: max(2.5rem, calc((100vw - (var(--ve-page-max) + var(--ve-rail-width) + 3rem)) / 2 + 2.5rem));
+    width: var(--ve-rail-width);
+  }
+}

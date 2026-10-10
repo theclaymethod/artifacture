@@ -1,6 +1,14 @@
+// One trailing newline ends the last line; it does not add an empty line.
+function splitLines(text) {
+  if (text === '') return [];
+  const lines = text.split(/\r?\n/);
+  if (lines.length > 1 && lines.at(-1) === '') lines.pop();
+  return lines;
+}
+
 export function diffLines(before, after) {
-  const a = before.split(/\r?\n/);
-  const b = after.split(/\r?\n/);
+  const a = splitLines(before);
+  const b = splitLines(after);
   const table = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
   for (let i = a.length - 1; i >= 0; i -= 1) {
     for (let j = b.length - 1; j >= 0; j -= 1) {
@@ -15,12 +23,13 @@ export function diffLines(before, after) {
       rows.push({ kind: 'context', oldNo: i + 1, newNo: j + 1, code: a[i] });
       i += 1;
       j += 1;
-    } else if (j < b.length && (i === a.length || table[i][j + 1] >= table[i + 1][j])) {
-      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
-      j += 1;
-    } else if (i < a.length) {
+    } else if (i < a.length && (j === b.length || table[i + 1][j] >= table[i][j + 1])) {
+      // Removed lines come before the lines that replace them, as in a unified diff.
       rows.push({ kind: 'remove', oldNo: i + 1, code: a[i] });
       i += 1;
+    } else {
+      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
+      j += 1;
     }
   }
   return rows;

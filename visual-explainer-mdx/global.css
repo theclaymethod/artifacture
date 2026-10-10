@@ -73,6 +73,10 @@
     caret-color: var(--ve-accent);
   }
 
+  [data-ve-preset="iso"][data-ve-appearance="dark"] {
+    color-scheme: dark;
+  }
+
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) ::selection {
     background: color-mix(in srgb, var(--ve-accent) 18%, transparent);
     color: var(--ve-heading);

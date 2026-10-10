@@ -1,7 +1,7 @@
 export type GraphicBounds = Readonly<{ x: number; y: number; width: number; height: number }>;
 export type GraphicPlacement = Readonly<{ scale: number; x: number; y: number }>;
 export type GraphicClip = Readonly<{ kind: 'empty' }> | Readonly<{ kind: 'rect'; bounds: GraphicBounds }>;
-const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, live: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true };
+const graphicPaintRoles = { none: true, background: true, ink: true, muted: true, frame: true, 'node-background': true, 'node-stroke': true, 'illustration-ink': true, 'illustration-muted': true, accent: true, live: true, 'accent-background': true, 'solid-lit': true, 'solid-shade': true, 'status-ok': true, 'status-info': true, 'status-warn': true, 'status-err': true, 'status-neutral': true, 'status-ok-background': true, 'status-info-background': true, 'status-warn-background': true, 'status-err-background': true, 'status-neutral-background': true, hatch: true };
 export type GraphicPaint = keyof typeof graphicPaintRoles;
 const graphicFonts = { body: true, display: true, math: true, mono: true };
 const graphicStrokeRoles = { structure: true, detail: true, guide: true, data: true, active: true };

@@ -476,4 +476,75 @@
     }
   }
 
+  /* State ramp. One tone per factual state, each with an AA ink and a soft fill.
+     Components pair every tone with a text label, a glyph or a line style; color is never the
+     only cue. Syntax and diff roles color code on the code surface. */
+  :root,
+  [data-ve-preset] {
+    --ve-accent-text: var(--ve-accent);
+    --ve-status-ok: #116b3a;
+    --ve-status-ok-soft: #e5f3ea;
+    --ve-status-info: #1f4fb5;
+    --ve-status-info-soft: #e7eefb;
+    --ve-status-warn: #8a4f00;
+    --ve-status-warn-soft: #fbefd9;
+    --ve-status-err: #b0261c;
+    --ve-status-err-soft: #fbe6e3;
+    --ve-status-neutral: var(--ve-muted);
+    --ve-status-neutral-soft: color-mix(in srgb, var(--ve-text) 6%, var(--ve-bg));
+    --ve-syntax-keyword: #d2a8ff;
+    --ve-syntax-string: #a5d6ff;
+    --ve-syntax-constant: #f2cc60;
+    --ve-syntax-function: #ffa657;
+    --ve-syntax-parameter: #ffb3a7;
+    --ve-syntax-comment: #9aa1ab;
+    --ve-syntax-punctuation: #c9d1d9;
+    --ve-code-add: #56d364;
+    --ve-code-remove: #ff8f84;
+    --ve-code-add-bg: color-mix(in srgb, var(--ve-code-add) 16%, var(--ve-code-bg));
+    --ve-code-remove-bg: color-mix(in srgb, var(--ve-code-remove) 16%, var(--ve-code-bg));
+  }
+
+  :root:not([data-ve-preset]),
+  [data-ve-preset="iso"] {
+    --ve-accent-text: #05697b;
+  }
+
+  :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="3b1b"],
+  [data-ve-preset="mono-industrial"] {
+    --ve-accent-text: #3ccae2;
+    --ve-status-ok: #5fcb8c;
+    --ve-status-ok-soft: #10281a;
+    --ve-status-info: #8db4ff;
+    --ve-status-info-soft: #132140;
+    --ve-status-warn: #eeb45c;
+    --ve-status-warn-soft: #2c210f;
+    --ve-status-err: #ff8f84;
+    --ve-status-err-soft: #361715;
+  }
+
+  /* The light code surface remaps to the page background in dark mode; keep code on a dark plate. */
+  :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]) {
+    color-scheme: dark;
+    --ve-code-bg: #16171a;
+    --ve-code-text: #f5f5f5;
+    --ve-code-muted: #b6bac4;
+  }
+
+  /* Mono Color sets code on cobalt: keep its syntax monochrome and let the +/- gutter carry diffs. */
+  [data-ve-preset="mono-color"] {
+    --ve-syntax-keyword: var(--ve-code-text);
+    --ve-syntax-string: var(--ve-code-text);
+    --ve-syntax-constant: var(--ve-code-text);
+    --ve-syntax-function: var(--ve-code-text);
+    --ve-syntax-parameter: var(--ve-code-text);
+    --ve-syntax-comment: var(--ve-code-muted);
+    --ve-syntax-punctuation: var(--ve-code-text);
+    --ve-code-add: var(--ve-code-text);
+    --ve-code-remove: var(--ve-code-text);
+  }
+
 }

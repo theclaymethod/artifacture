@@ -1,0 +1,55 @@
+import { Badge, CodeBlock, DataTable, DiagramCanvas, DiffBlock, ExplainerShell, Section, StatusPill } from '../../visual-explainer-mdx/components';
+
+<ExplainerShell title="Overdraft guard review" summary="A synthetic review of one wallet change: the claims, the checks behind them, and the code." chapterNav appearance="auto" reviewTools={false}>
+
+<Section id="verdicts" title="Every claim and its state" navLabel="Verdicts" anchors={[{id: 'verdicts-table', label: 'Claim table'}]}>
+  <p>Four claims. <StatusPill tone="ok">2 Proven</StatusPill> <StatusPill tone="info">1 Backed</StatusPill> <StatusPill tone="err">1 Gap</StatusPill></p>
+  <div id="verdicts-table" data-ve-anchor="true">
+    <DataTable label="Claims" columns={[
+      {key: 'id', label: 'ID', kind: 'id', width: '4.5rem'},
+      {key: 'claim', label: 'Claim'},
+      {key: 'checks', label: 'Checks', kind: 'number', width: '5.5rem'},
+      {key: 'state', label: 'State', kind: 'status', width: '7.5rem'},
+      {key: 'flags', label: 'Flags', kind: 'tags', width: '10rem'},
+    ]} rows={[
+      {id: 'row-c1', cells: {id: {text: 'C1', href: '#code'}, claim: {text: 'withdraw refuses an amount above the balance.', note: 'Raises `OverdraftError` before the balance changes.'}, checks: 2, state: {text: 'Proven', status: 'ok'}, flags: null}},
+      {id: 'row-c2', cells: {id: {text: 'C2', href: '#code'}, claim: 'withdraw returns the balance minus the amount.', checks: 1, state: {text: 'Proven', status: 'ok'}, flags: {badges: [{label: 'control-missed', tone: 'warn'}]}}},
+      {id: 'row-c3', cells: {id: {text: 'C3', href: '#code'}, claim: 'A denial message hides the account number.', checks: 1, state: {text: 'Backed', status: 'info'}, flags: {badges: [{label: 'same-family', tone: 'warn'}]}}},
+      {id: 'row-c4', cells: {id: {text: 'C4', href: '#code'}, claim: 'The new fee function charges one unit per hundred.', checks: 0, state: {text: 'Gap', status: 'err'}, flags: {badges: [{label: 'cannot-fail', tone: 'err'}]}}},
+    ]} />
+  </div>
+</Section>
+
+<Section id="map" title="Checks and the claims they back" navLabel="Diagram">
+  <DiagramCanvas title="Checks by kind" description="Each check, with an edge to the state of the claim it backs." nodes={[
+    {id: 'unit', label: 'unit test', detail: 'fact tier'},
+    {id: 'review', label: 'model review', detail: 'guess tier', shape: 'diamond', stroke: 'dashed'},
+    {id: 'proven', label: 'Proven', detail: '2 claims', shape: 'oval', tone: 'ok'},
+    {id: 'backed', label: 'Backed', detail: '1 claim', shape: 'oval', tone: 'info'},
+  ]} edges={[
+    {from: 'unit', to: 'proven', label: '2'},
+    {from: 'review', to: 'backed', label: '1'},
+  ]} legend={[
+    {label: 'Proven', tone: 'ok'},
+    {label: 'Backed', tone: 'info'},
+    {label: 'fact tier', stroke: 'solid'},
+    {label: 'guess tier', stroke: 'dashed'},
+    {label: 'model judge', glyph: 'diamond'},
+  ]} />
+  <p>Tier badges use the same cue: <Badge stroke="solid">fact</Badge> <Badge stroke="dashed">guess</Badge></p>
+</Section>
+
+<Section id="code" title="The code under review" navLabel="Code">
+  <DiffBlock language="python" filename="wallet/core.py" before={`def withdraw(balance: int, amount: int) -> int:
+    return balance - amount
+`} after={`def withdraw(balance: int, amount: int) -> int:
+    if amount > balance:
+        raise OverdraftError(f"{amount} is above the balance")
+    return balance - amount
+`} />
+  <CodeBlock language="ts" filename="wallet.test.ts" code={"// Escaped markup stays text: \u003cscript\u003ealert(1)\u003c/script\u003e\nexport function check(balance: number, amount: number): boolean {\n  return amount <= balance;\n}"} />
+  <CodeBlock language="shell" filename="Run the checks" code={"uv run pytest tests/test_core.py -q"} />
+  <CodeBlock language="json" filename="result.json" code={"{\"claim\": \"C1\", \"state\": \"Proven\", \"checks\": 2}"} />
+</Section>
+
+</ExplainerShell>

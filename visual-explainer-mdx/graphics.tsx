@@ -9,6 +9,13 @@ const paints = {
   accent: 'var(--ve-accent)', live: 'var(--ve-accent)', 'accent-background': 'var(--ve-diagram-accent-fill)',
   'solid-lit': 'color-mix(in srgb, var(--ve-diagram-ink) 7%, var(--ve-diagram-bg))',
   'solid-shade': 'color-mix(in srgb, var(--ve-diagram-ink) 15%, var(--ve-diagram-bg))',
+  'status-ok': 'var(--ve-status-ok)', 'status-info': 'var(--ve-status-info)', 'status-warn': 'var(--ve-status-warn)',
+  'status-err': 'var(--ve-status-err)', 'status-neutral': 'var(--ve-status-neutral)',
+  'status-ok-background': 'var(--ve-status-ok-soft)', 'status-info-background': 'var(--ve-status-info-soft)',
+  'status-warn-background': 'var(--ve-status-warn-soft)', 'status-err-background': 'var(--ve-status-err-soft)',
+  'status-neutral-background': 'var(--ve-status-neutral-soft)',
+  // Resolved per canvas instance in Primitive: a diagonal hatch pattern in the diagram ink.
+  hatch: 'none',
 } satisfies Record<GraphicPaint, string>;
 
 const fonts = {
@@ -36,7 +43,7 @@ function primitiveStrokeWidth(p: GraphicPrimitive, object: GraphicObject) {
 
 function Primitive({ primitive: p, object, prefix, arrowId, glowId }: { primitive: GraphicPrimitive; object: GraphicObject; prefix: string; arrowId: string; glowId: string }) {
   const highlight = object.state?.highlight ?? false;
-  const style = { fill: paint(p.fill, highlight), stroke: paint(p.stroke, highlight, true), strokeWidth: primitiveStrokeWidth(p, object), strokeDasharray: p.dash, filter: p.glow && highlight ? `url(#${glowId})` : undefined };
+  const style = { fill: p.fill === 'hatch' ? `url(#ve-hatch-${prefix})` : paint(p.fill, highlight), stroke: paint(p.stroke, highlight, true), strokeWidth: primitiveStrokeWidth(p, object), strokeDasharray: p.dash, filter: p.glow && highlight ? `url(#${glowId})` : undefined };
   const node = p.role === 'node' && object.node ? { 'data-diagram-id': `ve-node-${prefix}-${object.node.order}`, 'data-ve-node-id': object.node.id } : {};
   const semantics = { 'data-diagram-role': p.role, ...node };
   switch (p.kind) {
@@ -64,6 +71,7 @@ export function GraphicCanvas({ scene, instancePrefix, className = 'h-auto w-ful
   return <svg aria-labelledby={`${titleId} ${descId}`} className={className} data-diagram-role="diagram" data-graphic-scene={scene.id} role="img" style={style} viewBox={`${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`} width="100%" xmlns="http://www.w3.org/2000/svg">
     <title id={titleId}>{scene.title}</title><desc id={descId}>{scene.description}</desc>
     <defs><marker id={arrowId} markerHeight="7" markerWidth="7" orient="auto-start-reverse" refX="9" refY="5" viewBox="0 0 10 10"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" /></marker>
+      {scene.objects.some(object => object.primitives.some(p => p.fill === 'hatch')) ? <pattern id={`ve-hatch-${prefix}`} height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse" width="8"><line stroke="var(--ve-diagram-muted)" strokeOpacity="0.35" strokeWidth="1.5" x1="0" x2="0" y1="0" y2="8" /></pattern> : null}
       {scene.objects.some(object => object.primitives.some(p => p.glow)) ? <filter id={glowId} x="-100%" y="-100%" width="300%" height="300%" colorInterpolationFilters="sRGB"><feGaussianBlur stdDeviation="2.3" /><feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge></filter> : null}
       {scene.objects.map((object, index) => object.clip ? <clipPath key={object.id} id={`ve-clip-${prefix}-${index}`} clipPathUnits="userSpaceOnUse">{object.clip.kind === 'rect' ? <rect {...object.clip.bounds} /> : <rect width="0" height="0" />}</clipPath> : null)}
     </defs>

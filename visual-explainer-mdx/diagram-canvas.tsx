@@ -3,11 +3,12 @@ import { layoutDiagram } from './diagram-layout';
 import { GraphicCanvas } from './graphics';
 import { diagramSceneFromLayout } from './diagram-scene';
 import type { DiagramCanvasProps } from './diagram-types';
+import { Legend } from './data-table';
 import './diagram-canvas.css';
 
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 
-export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
+export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description, legend }: DiagramCanvasProps) {
   const rawId = useId().replace(/:/g, '');
   const figureRef = useRef<HTMLElement>(null);
   const [availableWidth, setAvailableWidth] = useState<number | null>(null);
@@ -48,6 +49,7 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto
         <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={rawId} style={{ aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`, minWidth: diagram.viewBox.width, maxWidth: diagram.viewBox.width, marginInline: 'auto' }} />
       </div>
       <MobileSwimlaneVariant diagram={diagram} idPrefix={rawId} title={title} />
+      {legend?.length ? <Legend items={legend} /> : null}
     </figure>
   );
 }
@@ -61,7 +63,7 @@ function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnTy
           const connections = diagram.edges.filter(({ edge }) => edge.from === node.id || (edge.style === 'bidirectional' && edge.to === node.id && edge.from !== node.id));
           const context = [node.lane ? diagram.laneLabels.get(node.lane) ?? node.lane : undefined, node.date].filter(Boolean).join(' · ');
           return (
-            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
+            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} data-ve-stroke={node.stroke} data-ve-tone={node.tone} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
               {context ? <p className="ve-diagram-mobile-lane">{context}</p> : null}
               <h3>{node.label}</h3>
               {node.detail ? <p>{node.detail}</p> : null}

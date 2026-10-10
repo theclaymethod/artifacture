@@ -3,6 +3,23 @@
   box-sizing: border-box;
 }
 
+/* Shiki's css-variables theme emits var(--shiki-token-*); map each role to the preset's syntax ramp. */
+:is(.ve-code-block, .ve-diff-block) {
+  --shiki-background: var(--ve-code-bg);
+  --shiki-foreground: var(--ve-code-text);
+  --shiki-token-keyword: var(--ve-syntax-keyword);
+  --shiki-token-string: var(--ve-syntax-string);
+  --shiki-token-string-expression: var(--ve-syntax-string);
+  --shiki-token-constant: var(--ve-syntax-constant);
+  --shiki-token-function: var(--ve-syntax-function);
+  --shiki-token-parameter: var(--ve-syntax-parameter);
+  --shiki-token-comment: var(--ve-syntax-comment);
+  --shiki-token-punctuation: var(--ve-syntax-punctuation);
+  --shiki-token-link: var(--ve-syntax-string);
+  --shiki-token-inserted: var(--ve-code-add);
+  --shiki-token-deleted: var(--ve-code-remove);
+}
+
 .ve-quiz {
   font-family: var(--ve-font-body);
   font-size: 1rem;
@@ -132,29 +149,32 @@
   overflow-wrap: anywhere;
 }
 
+/* Added and removed rows: a tinted row, a colored edge and a +/- gutter, so a diff never relies on color alone. */
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="add"] {
-  background: color-mix(in srgb, var(--ve-ok) 14%, transparent);
-}
-
-.ve-diff-block .ve-diff-table [data-ve-diff-kind="add"] .ve-diff-mark {
-  color: var(--ve-ok);
+  background: var(--ve-code-add-bg);
 }
 
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="remove"] {
-  background: color-mix(in srgb, var(--ve-err) 14%, transparent);
+  background: var(--ve-code-remove-bg);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="add"] .ve-diff-mark {
+  box-shadow: inset 3px 0 0 var(--ve-code-add);
+  color: var(--ve-code-add);
 }
 
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="remove"] .ve-diff-mark {
-  color: var(--ve-err);
+  box-shadow: inset 3px 0 0 var(--ve-code-remove);
+  color: var(--ve-code-remove);
 }
 
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] {
-  background: var(--ve-panel-strong);
+  background: color-mix(in srgb, var(--ve-code-text) 7%, var(--ve-code-bg));
 }
 
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-code,
 .ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-mark {
-  color: var(--ve-code-accent);
+  color: var(--ve-code-muted);
 }
 
 .ve-diff-block .ve-diff-split {

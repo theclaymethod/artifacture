@@ -1,7 +1,7 @@
 import { diagramTypography as type, edgePath, labelLeaderEndpoint, layoutDiagram, type LaidOutNode } from './diagram-layout';
 import type { DiagramCanvasProps } from './diagram-types';
 import { createGraphicScene } from './graphics-types';
-import type { GraphicObject, GraphicPrimitive, GraphicScene } from './graphics-types';
+import type { GraphicObject, GraphicPaint, GraphicPrimitive, GraphicScene } from './graphics-types';
 
 export function createDiagramScene(input: DiagramCanvasProps & { id: string }): GraphicScene {
   const diagram = layoutDiagram(input.nodes, input.edges, input.layout ?? 'flow', input.lanes, input.dates, input.direction ?? 'auto');
@@ -49,12 +49,18 @@ function nodePrimitives(item: LaidOutNode): GraphicPrimitive[] {
   const centered = glyph === 'diamond' || glyph === 'oval' || glyph === 'dot';
   const x = centered ? item.x + item.width / 2 : item.x + 20;
   const top = glyph === 'dot' ? item.y + 40 : item.y + (item.height - item.textHeight) / 2;
-  const stroke = item.isAccented ? 'accent' : 'node-stroke';
-  const fill = item.isAccented ? 'accent-background' : 'node-background';
-  const outline: GraphicPrimitive = glyph === 'diamond' ? { kind: 'polygon', points: [{ x: item.x + item.width / 2, y: item.y }, { x: item.x + item.width, y: item.y + item.height / 2 }, { x: item.x + item.width / 2, y: item.y + item.height }, { x: item.x, y: item.y + item.height / 2 }], fill, stroke, strokeRole: item.isAccented ? 'active' : 'structure', role: 'node' }
+  const tone = item.tone;
+  const stroke: GraphicPaint = item.isAccented ? 'accent' : tone ? `status-${tone}` : 'node-stroke';
+  const fill: GraphicPaint = item.isAccented ? 'accent-background' : tone ? `status-${tone}-background` : 'node-background';
+  const dash = item.stroke === 'dashed' ? '6 4' : undefined;
+  const strokeRole = item.isAccented || tone ? 'active' : 'structure';
+  const outline: GraphicPrimitive = glyph === 'diamond' ? { kind: 'polygon', points: [{ x: item.x + item.width / 2, y: item.y }, { x: item.x + item.width, y: item.y + item.height / 2 }, { x: item.x + item.width / 2, y: item.y + item.height }, { x: item.x, y: item.y + item.height / 2 }], fill, stroke, strokeRole, dash, role: 'node' }
     : glyph === 'dot' ? { kind: 'circle', x: item.x + item.width / 2, y: item.y + 12, radius: 12, fill: stroke, role: 'node' }
-      : { kind: 'rect', x: item.x, y: item.y, width: item.width, height: item.height, radius: glyph === 'oval' ? item.height / 2 : 'node', fill, stroke, strokeRole: item.isAccented ? 'active' : 'structure', role: 'node' };
-  return [outline,
+      : { kind: 'rect', x: item.x, y: item.y, width: item.width, height: item.height, radius: glyph === 'oval' ? item.height / 2 : 'node', fill, stroke, strokeRole, dash, role: 'node' };
+  const hatch: GraphicPrimitive[] = item.stroke !== 'dashed' || glyph === 'dot' ? []
+    : glyph === 'diamond' && outline.kind === 'polygon' ? [{ ...outline, fill: 'hatch', stroke: 'none', dash: undefined, role: undefined }]
+      : [{ kind: 'rect', x: item.x, y: item.y, width: item.width, height: item.height, radius: glyph === 'oval' ? item.height / 2 : 'node', fill: 'hatch' }];
+  return [outline, ...hatch,
     { kind: 'text', x, y: top + 16, lines: item.labelLines, leading: type.labelLeading, size: type.labelSize, weight: 600, anchor: centered ? 'middle' : 'start', fill: 'ink', label: true },
     ...(item.detailLines.length ? [{ kind: 'text' as const, x, y: top + item.labelLines.length * type.labelLeading + 8 + 14, lines: item.detailLines, leading: type.detailLeading, size: type.detailSize, anchor: centered ? 'middle' as const : 'start' as const, fill: 'muted' as const }] : []),
   ];
