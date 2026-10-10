@@ -3,7 +3,9 @@
 @layer base {
   :root,
   [data-ve-preset] {
-    --ve-shell-title-size: clamp(2.25rem, 9.6vw, 4.5rem);
+    --ve-shell-title-size: clamp(1.875rem, 1.25rem + 2vw, 2.5rem);
+    --ve-shell-title-measure: 28ch;
+    --ve-shell-title-leading: 1.1;
     --ve-shell-summary-size: 1.125rem;
     --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
     --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -129,7 +131,6 @@
   }
 
   [data-ve-preset="algebrica"] {
-    --ve-shell-title-size: clamp(2.25rem, 4.5vw, 3.5rem);
     --ve-shell-title-measure: 24ch;
     --ve-shell-summary-size: 1.25rem;
     --ve-font-display: "EB Garamond", Georgia, serif;

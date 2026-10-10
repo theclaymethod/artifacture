@@ -11,6 +11,7 @@ export const sharedComponents = new Set([
   'Pipeline',
   'DecisionMatrix',
   'RiskLedger',
+  'DefinitionList', 'Definition', 'Subsection',
   'DiagramCanvas',
   'DataTable', 'StatusPill', 'Badge', 'Legend', 'ChapterRail',
   'GraphicCanvas',

@@ -126,8 +126,18 @@ for (const scheme of ['light', 'dark']) {
       assert.equal(await page.locator('script:has-text("alert(1)")').count(), 0);
       assert.ok((await page.locator('.ve-code-shiki', { hasText: '<script>alert(1)</script>' }).count()) > 0);
 
-      // AA: pills, badges, key labels, rail links and code tokens on their real backgrounds.
-      for (const selector of ['.ve-status-pill', '.ve-badge', '.ve-legend-label', '.ve-chapter-list a', '.ve-code-shiki span[style*="--shiki-token"]', '.ve-diff-mark']) {
+      // Cover title: a modest size above the section headings, so a long title stays readable.
+      const titleSize = await page.$eval('.ve-shell-header h1', (element) => parseFloat(getComputedStyle(element).fontSize));
+      const headingSize = await page.$eval('.ve-section-heading h2', (element) => parseFloat(getComputedStyle(element).fontSize));
+      assert.equal(titleSize, 40);
+      assert.ok(titleSize > headingSize, `title ${titleSize}px, heading ${headingSize}px`);
+
+      // Subsection and DefinitionList: a rail anchor under a rule, and term and detail in two columns.
+      assert.equal(await page.$eval('#claim-c2', (element) => element.dataset.veAnchor), 'true');
+      assert.equal(await page.$eval('.ve-definition-list', (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length), 2);
+
+      // AA: pills, badges, key labels, rail links, definitions and code tokens on their real backgrounds.
+      for (const selector of ['.ve-status-pill', '.ve-badge', '.ve-legend-label', '.ve-chapter-list a', '.ve-definition-list > *', '.ve-code-shiki span[style*="--shiki-token"]', '.ve-diff-mark']) {
         for (const pair of await colorPairs(page, selector)) {
           if (!pair.text) continue;
           assert.ok(contrast(pair.fg, pair.bg) >= 4.5, `${selector} "${pair.text}" contrast ${contrast(pair.fg, pair.bg).toFixed(2)} in ${scheme}`);
@@ -161,6 +171,8 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     assert.equal(await page.$eval('[data-ve-data-table] tbody tr', (row) => getComputedStyle(row).display), 'block');
     assert.equal(await page.$eval('[data-ve-data-table] thead', (head) => getComputedStyle(head).display), 'none');
+    assert.equal(await page.$eval('.ve-shell-header h1', (element) => getComputedStyle(element).fontSize), '30px');
+    assert.equal(await page.$eval('.ve-definition-list', (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length), 1);
 
     const motion = await browser.newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'no-preference' });
     await motion.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });

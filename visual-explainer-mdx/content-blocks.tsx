@@ -15,6 +15,47 @@ export type RiskLedgerProps = {
   risks: Array<{ risk: string; signal: string; mitigation: string; level?: 'low' | 'medium' | 'high' }>;
 };
 
+export type DefinitionListProps = { children: ReactNode };
+
+export type DefinitionProps = { term: ReactNode; tone?: 'ok' | 'info' | 'warn' | 'err' | 'neutral'; children: ReactNode };
+
+export type SubsectionProps = {
+  title: ReactNode;
+  id?: string;
+  level?: 3 | 4;
+  marker?: ReactNode;
+  children: ReactNode;
+};
+
+/** Term and detail pairs in two columns. The columns stack below 640px. */
+export function DefinitionList({ children }: DefinitionListProps) {
+  return <dl className="ve-definition-list">{children}</dl>;
+}
+
+/** One term and its detail. A tone colors both; keep a word in the term, so color is never the only cue. */
+export function Definition({ term, tone, children }: DefinitionProps) {
+  return (
+    <>
+      <dt data-ve-tone={tone}>{term}</dt>
+      <dd data-ve-tone={tone}>{children}</dd>
+    </>
+  );
+}
+
+/** A titled block under a rule inside a Section. An id makes it a chapter-rail anchor. A marker, such as a step number, goes before the title. */
+export function Subsection({ title, id, level = 3, marker, children }: SubsectionProps) {
+  const Heading = level === 4 ? 'h4' : 'h3';
+  return (
+    <section className="ve-subsection" data-ve-anchor={id ? 'true' : undefined} data-ve-level={level} id={id}>
+      <Heading className="ve-subsection-title">
+        {marker === undefined ? null : <span className="ve-subsection-marker">{marker}</span>}
+        <span>{title}</span>
+      </Heading>
+      {children}
+    </section>
+  );
+}
+
 export function Pipeline({ steps }: PipelineProps) {
   return (
     <ol className="ve-pipeline">

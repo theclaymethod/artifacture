@@ -24,8 +24,8 @@ export type { AsciiModel, AsciiObjectProps } from './ascii-object';
 export type { VhsEffectProps } from './vhs-effect';
 export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
 export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
-export { Pipeline, DecisionMatrix, RiskLedger } from './content-blocks';
-export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps } from './content-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection } from './content-blocks';
+export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
 export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
@@ -251,7 +251,7 @@ export function ExplainerShell({
     <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
       <header className="ve-shell-header grid gap-6">
         <div>
-          <h1 className="max-w-[var(--ve-shell-title-measure,18ch)] text-balance text-[length:var(--ve-shell-title-size)] leading-[1.04] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+          <h1 className="max-w-[var(--ve-shell-title-measure)] text-balance text-[length:var(--ve-shell-title-size)] leading-[var(--ve-shell-title-leading)] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
             {title}
           </h1>
           {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}

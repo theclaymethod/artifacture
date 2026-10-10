@@ -104,6 +104,54 @@
     max-width: var(--ve-copy-measure, 56ch);
   }
 
+  .ve-section-body > * + * {
+    margin-top: 1rem;
+  }
+
+  .ve-section-body > * + :is(h3:not([class]), .ve-subsection) {
+    margin-top: 2.5rem;
+  }
+
+  .ve-section-body :is(h3, h4):not([class]) {
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-weight: 600;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  .ve-section-body h3:not([class]) {
+    font-size: 1.25rem;
+  }
+
+  .ve-section-body h4:not([class]) {
+    font-size: 1.0625rem;
+  }
+
+  .ve-section-body * + h4:not([class]) {
+    margin-top: 1.75rem;
+  }
+
+  .ve-section-body :is(ul, ol):not([class]) {
+    padding-left: 1.25rem;
+  }
+
+  .ve-section-body ul:not([class]) {
+    list-style: disc;
+  }
+
+  .ve-section-body ol:not([class]) {
+    list-style: decimal;
+  }
+
+  .ve-section-body :is(ul, ol):not([class]) > li + li {
+    margin-top: 0.375rem;
+  }
+
+  .ve-section-body :is(p, li, dd) code {
+    overflow-wrap: anywhere;
+  }
+
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-inner {
     gap: 0;
     padding-block: clamp(1rem, 3vw, 2.5rem) clamp(4rem, 8vw, 8rem);
@@ -126,20 +174,6 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-  }
-
-  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header h1 {
-    max-width: 18ch;
-    font-size: clamp(3rem, 7vw, 6rem);
-    line-height: 1.04;
-    letter-spacing: -0.035em;
-    text-wrap: balance;
-  }
-
-  :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header > div > p {
-    max-width: 52ch;
-    font-size: clamp(1rem, 1.6vw, 1.25rem);
-    line-height: 1.5;
   }
 
 

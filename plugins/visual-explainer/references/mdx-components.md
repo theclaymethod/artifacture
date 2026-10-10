@@ -15,6 +15,8 @@ Read this only when the selected card does not show the component or prop you ne
 - `Pipeline(steps)`
 - `DecisionMatrix(rows)`
 - `RiskLedger(risks)`
+- `DefinitionList(children)` with `Definition(term, tone?, children)`
+- `Subsection(title, id?, level?, marker?, children)`
 - `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?, legend?)`
 - `DiagramWalkthrough(nodes, edges, steps, layout?, direction?, lanes?, dates?, title?, description?)`
 - `LieflatChart(spec, title, description?, source?)`
@@ -31,6 +33,8 @@ Read this only when the selected card does not show the component or prop you ne
 `DataTable` is the scan-first table: a sticky header, subtle zebra rows, and no wrapper overflow. Column `kind` sets the treatment: `id` (monospace, unwrapped), `number` (right-aligned, tabular figures), `status` (a `StatusPill`), `tags` (badges only), or `text` (wraps). A cell is a string, a number, `null`, or `{text, href?, status?, badges?, note?}`. Give a row an `id` to make it a link target. Below 640px each row becomes a labelled card.
 
 `StatusPill`, `Badge`, `Legend` and diagram node `tone` share one state ramp: `ok`, `info`, `warn`, `err` and `neutral`, from the `--ve-status-*` tokens, each AA in light and dark. Pair every tone with a word; color is never the only cue. A `stroke="dashed"` badge, node or key swatch is dashed and hatched: use it for a weaker evidence tier. `glyph` (`rect`, `oval`, `diamond`) carries a third category, such as a verifier kind. A `DiagramCanvas` `legend` repeats the exact tone, stroke and glyph that its nodes use.
+
+A `Section` body has a default reading rhythm: 1rem between blocks, unclassed `h3` and `h4` headings, and list markers. `Subsection` groups content under a rule; its `title` can hold code and pills, a `marker` (such as a step number) goes before the title, `level={4}` nests it, and an `id` makes it a rail anchor. `DefinitionList` sets term and detail pairs in two columns that stack below 640px; a `Definition` `tone` colors one pair, so keep a word such as "Warning" in the term. Use these before page CSS.
 
 `CodeBlock` and `DiffBlock` highlight with Shiki at export. Token colors come from the preset's `--ve-syntax-*` ramp on the code surface. Diff rows use `--ve-code-add` and `--ve-code-remove` with a `+`/`-` gutter. Escape `<` and `>` in code strings as `\u003c` and `\u003e`; the preflight decodes them before highlighting, and Shiki escapes the output. The preflight also runs on each `.mdx` module that the entry imports from its own directory tree, so a long explainer can keep one self-contained chapter per file.
 
