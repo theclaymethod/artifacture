@@ -149,6 +149,8 @@
   }
 
   .ve-section-body :is(p, li, dd) code {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
     overflow-wrap: anywhere;
   }
 

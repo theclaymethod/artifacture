@@ -8,8 +8,14 @@
   border-radius: 999px;
   background: var(--ve-tone-soft);
   color: var(--ve-tone-ink);
+  max-width: 100%;
   font: 600 0.875rem/1.3 var(--ve-font-body);
   white-space: nowrap;
+}
+
+/* In running text a long pill wraps inside its line box, so it never widens the page. */
+:is(p, li, dd) > :is(.ve-status-pill, .ve-badge) {
+  white-space: normal;
 }
 
 .ve-status-pill {
@@ -36,6 +42,7 @@
 :is(.ve-status-pill, .ve-badge)[data-ve-tone="neutral"] { --ve-tone-ink: var(--ve-status-neutral); --ve-tone-soft: var(--ve-status-neutral-soft); }
 
 .ve-status-dot {
+  flex: none;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 999px;
