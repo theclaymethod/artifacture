@@ -115,7 +115,7 @@ export function Deck({ slides }: { slides: Slide[] }) {
       if (
         event.target instanceof Element &&
         event.target.closest(
-          'button,a,input,textarea,select,[contenteditable],[role="dialog"],[data-no-deck-nav]',
+          'button,a,input,textarea,select,video,audio,[contenteditable],[role="dialog"],[data-no-deck-nav]',
         )
       )
         return;

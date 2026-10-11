@@ -12,6 +12,8 @@ import Story from "./opening.mdx";
 
 import chapters from "./chapters.json";
 
+const baseUrl = import.meta.env.BASE_URL;
+
 function Film() {
   const video = useRef<HTMLVideoElement>(null);
   const [active, setActive] = useState(0);
@@ -35,9 +37,10 @@ function Film() {
         playsInline
         controls
         preload="metadata"
-        poster="/media/poster.jpg"
+        poster={`${baseUrl}media/poster.jpg`}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onVolumeChange={(event) => setMuted(event.currentTarget.muted)}
         onTimeUpdate={() =>
           setActive(
             chapters.reduce(
@@ -49,10 +52,10 @@ function Film() {
         }
         aria-label="Make the invisible obvious — a 52 second narrated motion study"
       >
-        <source src="/media/overdrive.mp4" type="video/mp4" />
+        <source src={`${baseUrl}media/overdrive.mp4`} type="video/mp4" />
         <track
           kind="captions"
-          src="/media/overdrive.vtt"
+          src={`${baseUrl}media/overdrive.vtt`}
           srcLang="en"
           label="English"
         />
@@ -219,7 +222,7 @@ function Anatomy() {
         </p>
       </div>
       <iframe
-        src="/vendor/anatomy-dial.html"
+        src={`${baseUrl}vendor/anatomy-dial.html`}
         title="Interactive Anatomy dial indicator"
         sandbox="allow-scripts"
         loading="lazy"
@@ -537,7 +540,7 @@ export default function App() {
               ISO + Anatomy, rendered with native FFrames. Fresh Ainthony
               narration.
             </p>
-            <a href="/media/overdrive.mp4" download>
+            <a href={`${baseUrl}media/overdrive.mp4`} download>
               Download the film ↗
             </a>
           </div>
@@ -583,7 +586,7 @@ export default function App() {
           Editable MDX + React. Hairline + Anatomy. Native FFrames. Ainthony
           voice.
         </span>
-        <a href="/media/overdrive-source.zip" download>
+        <a href={`${baseUrl}media/overdrive-source.zip`} download>
           Get the source ↗
         </a>
       </footer>

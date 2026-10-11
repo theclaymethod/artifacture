@@ -73,7 +73,7 @@ export function Deck({ slides }: { slides: Slide[] }) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      if (event.target instanceof Element && event.target.closest('button,a,input,textarea,select,[contenteditable],[role="dialog"],[data-no-deck-nav]')) return;
+      if (event.target instanceof Element && event.target.closest('button,a,input,textarea,select,video,audio,[contenteditable],[role="dialog"],[data-no-deck-nav]')) return;
       if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       event.preventDefault();
       const next = event.key === 'ArrowRight' || event.key === 'ArrowDown';
