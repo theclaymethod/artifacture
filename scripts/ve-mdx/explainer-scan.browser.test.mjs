@@ -277,7 +277,8 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
     const motion = await browser.newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'no-preference' });
     await motion.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });
     await motion.waitForSelector('[data-ve-chapter-rail]');
-    assert.equal(await motion.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'smooth');
+    // Every jump is instant, also when the reader allows motion.
+    assert.equal(await motion.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
     await motion.close();
   } finally {
     await context.close();
@@ -526,6 +527,197 @@ test('guided review: the chapters of the change, the flags, Reviewed, the typed 
     await context.close();
   }
 });
+
+// ---- Calm navigation: each jump instant and once, a clicked control keeps its place ----------
+
+// Runs before the page's own script: records each programmatic scroll and each scroll position.
+const SCROLL_WATCH = `(() => {
+  const watch = { calls: [], moves: [], inner: 0 };
+  window.__scrolls = watch;
+  for (const [owner, name] of [[window, 'scrollTo'], [window, 'scroll'], [window, 'scrollBy'], [Element.prototype, 'scrollIntoView'], [Element.prototype, 'scrollTo'], [Element.prototype, 'scrollBy']]) {
+    const original = owner[name];
+    owner[name] = function (...args) { watch.calls.push(name); return original.apply(this, args); };
+  }
+  let last = 0;
+  window.addEventListener('scroll', () => { if (window.scrollY !== last) watch.moves.push(Math.round(window.scrollY)); last = window.scrollY; }, { passive: true });
+  document.addEventListener('scroll', (event) => { if (event.target !== document) watch.inner += 1; }, { capture: true, passive: true });
+})();`;
+const resetScrolls = (page) => page.evaluate(() => { const w = window.__scrolls; w.calls.length = 0; w.moves.length = 0; w.inner = 0; });
+const scrolls = (page) => page.evaluate(() => JSON.parse(JSON.stringify(window.__scrolls)));
+const topOf = (page, selector) => page.$eval(selector, (element) => element.getBoundingClientRect().top);
+const near = (actual, expected, message, slack = 2) => assert.ok(Math.abs(actual - expected) <= slack, `${message}: ${actual} is not ${expected}`);
+// A click at the element's own place: Playwright's click would first scroll it into view.
+async function clickInPlace(page, selector, index = 0) {
+  const point = await page.$$eval(selector, (elements, i) => { const r = elements[i].getBoundingClientRect(); return { x: r.left + Math.min(24, r.width / 2), y: r.top + r.height / 2 }; }, index);
+  await page.mouse.click(point.x, point.y);
+}
+// Put an element at a height on the screen, at once.
+const placeAt = (page, selector, y, index = 0) => page.$$eval(selector, (elements, [i, at]) => window.scrollTo({ top: elements[i].getBoundingClientRect().top + window.scrollY - at, behavior: 'instant' }), [index, y]);
+
+for (const [width, height] of [[1280, 900], [375, 812]]) {
+  // The target lands under the sticky top bar (56px below 1200px wide) with 1rem to spare.
+  const offset = width >= 1200 ? 16 : 72;
+
+  test(`guided review at ${width}px: Next, Previous, deep links and one page each land once, at once`, async () => {
+    const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+    await context.addInitScript({ content: SCROLL_WATCH });
+    try {
+      const page = await context.newPage();
+      const url = pathToFileURL(trust.html).href;
+      await page.goto(url + '#ch-1', { waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-live]');
+      await page.waitForTimeout(300);
+      // No smooth scrolling, even for a reader who allows motion.
+      assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
+
+      // Next and Previous from the foot of a chapter: the chapter's top, in one instant scroll, and no second.
+      for (const [from, to, rel] of [['ch-1', 'ch-2', 'next'], ['ch-2', 'ch-3', 'next'], ['ch-3', 'ch-2', 'prev']]) {
+        await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+        await page.waitForTimeout(100);
+        await resetScrolls(page);
+        await page.click(`#${from} [data-ve-pager-${rel}]`);
+        await page.waitForTimeout(600);
+        const watched = await scrolls(page);
+        assert.deepEqual(watched.calls, ['scrollIntoView'], `${from} to ${to}: ${watched.calls}`);
+        assert.deepEqual(watched.moves, [await page.evaluate(() => Math.round(window.scrollY))], `${from} to ${to} moved ${watched.moves}`);
+        near(await topOf(page, `#${to}`), offset, `${to} top`);
+      }
+
+      // Previous and Next sit in the same place on every chapter, read to its foot.
+      const places = { next: [], prev: [] };
+      for (let i = 0; i <= 9; i += 1) {
+        await page.evaluate((n) => { location.hash = `ch-${n}`; }, i);
+        await page.waitForTimeout(150);
+        await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+        for (const rel of ['next', 'prev']) {
+          const link = await page.$(`#ch-${i} [data-ve-pager-${rel}]`);
+          if (link) places[rel].push((await link.boundingBox()).y);
+        }
+      }
+      for (const [rel, ys] of Object.entries(places)) {
+        assert.equal(ys.length, 9, `${rel} links`);
+        assert.ok(Math.max(...ys) - Math.min(...ys) <= 2, `${rel} sits at ${ys.map(Math.round)}`);
+      }
+
+      // A link inside the page to a claim in another chapter: once, at once, its block and its parent open.
+      await page.evaluate(() => { location.hash = 'ch-1'; });
+      await page.waitForTimeout(200);
+      await resetScrolls(page);
+      await page.evaluate(() => { location.hash = 'claim-c01'; });
+      await page.waitForTimeout(600);
+      let watched = await scrolls(page);
+      assert.equal(watched.calls.length, 1, `in-page link: ${watched.calls}`);
+      assert.ok(watched.moves.length <= 1, `in-page link moved ${watched.moves}`);
+      near(await topOf(page, '#claim-c01'), offset, 'in-page claim top');
+
+      // A deep link on load: one landing after the fonts and a frame; only the target's block and its parent open.
+      await page.goto('about:blank');
+      await page.goto(url + '#claim-c01', { waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-live]');
+      await page.waitForTimeout(1200);
+      watched = await scrolls(page);
+      assert.equal(watched.calls.length, 1, `deep link: ${watched.calls}`);
+      assert.ok(new Set(watched.moves).size <= 1, `deep link moved ${watched.moves}`);
+      near(await topOf(page, '#claim-c01'), offset, 'deep-link claim top');
+      assert.deepEqual(await page.$$eval('details[open]', (blocks) => blocks.map((block) => block.id)), ['promise-p1', 'claim-c01']);
+      assert.equal(await page.evaluate(() => location.hash), '#claim-c01');
+
+      // Read as one page, and back: the chapter at the reading line keeps its place on the screen.
+      await page.evaluate(() => { location.hash = 'ch-3'; });
+      await page.waitForTimeout(200);
+      await page.evaluate(() => window.scrollTo({ top: window.scrollY + 600, behavior: 'instant' }));
+      const openMenu = async () => { if (width < 1200) await page.click('.ve-chapter-toggle'); };
+      for (const mode of ['one', 'pages']) {
+        const before = await topOf(page, '#ch-3');
+        await resetScrolls(page);
+        await openMenu();
+        assert.deepEqual((await scrolls(page)).moves, [], 'opening the chapter menu scrolled the page');
+        await page.click('.ve-read-mode');
+        await page.waitForSelector(`main[data-ve-paged="${mode}"]`);
+        await page.waitForTimeout(500);
+        near(await topOf(page, '#ch-3'), before, `ch-3 after "${mode}"`);
+      }
+    } finally {
+      await context.close();
+    }
+  });
+
+  test(`guided review at ${width}px: a disclosure or a view switch keeps its place, and the rail follows quietly`, async () => {
+    const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+    await context.addInitScript({ content: SCROLL_WATCH });
+    try {
+      const page = await context.newPage();
+      const url = pathToFileURL(trust.html).href;
+      await page.goto(url + '#ch-7', { waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-live]');
+      await page.waitForTimeout(300);
+
+      // Open and close a block in mid-screen: its summary stays where it was clicked.
+      const summary = '#ch-7 [data-ve-review-item] > details > summary';
+      await placeAt(page, summary, height / 2, 1);
+      for (const step of ['open', 'close']) {
+        const before = await page.$$eval(summary, (s) => s[1].getBoundingClientRect().top);
+        await clickInPlace(page, summary, 1);
+        await page.waitForTimeout(300);
+        near(await page.$$eval(summary, (s) => s[1].getBoundingClientRect().top), before, `${step} moved the summary`);
+      }
+      // Close the last block from the foot of the page: the shorter page does not pull the summary down.
+      const last = await page.$$eval(summary, (s) => s.length - 1);
+      await clickInPlace(page, summary, last).catch(() => {});
+      await page.$$eval(summary, (s, i) => { s[i].parentElement.open = true; }, last);
+      await page.waitForTimeout(200);
+      await placeAt(page, summary, offset + 40, last);
+      await page.waitForTimeout(200);
+      const atFoot = await page.$$eval(summary, (s, i) => s[i].getBoundingClientRect().top, last);
+      await clickInPlace(page, summary, last);
+      await page.waitForTimeout(300);
+      near(await page.$$eval(summary, (s, i) => s[i].getBoundingClientRect().top, last), atFoot, 'closing at the foot moved the summary');
+
+      // Simple / Detailed and Before / After: the switch keeps its place when the figure changes height.
+      for (const chapter of ['ch-1', 'ch-3']) {
+        await page.evaluate((c) => { location.hash = c; }, chapter);
+        await page.waitForTimeout(300);
+        const switches = `#${chapter} .ve-diagram-mode-switch`;
+        const count = await page.locator(switches).count();
+        assert.ok(count > 0, `${chapter} has no view switch`);
+        for (let i = 0; i < count; i += 1) {
+          await placeAt(page, switches, height / 3, i);
+          await page.waitForTimeout(150);
+          const labels = `${switches} >> nth=${i} >> label`;
+          for (const option of [1, 0]) {
+            const before = await page.$$eval(switches, (s, n) => s[n].getBoundingClientRect().top, i);
+            const box = await page.locator(labels).nth(option).boundingBox();
+            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+            await page.waitForTimeout(300);
+            near(await page.$$eval(switches, (s, n) => s[n].getBoundingClientRect().top, i), before, `${chapter} switch ${i} option ${option}`);
+          }
+        }
+      }
+
+      // One page: the reader scrolls through the chapters; the rail follows, and never scrolls the page or itself.
+      await page.evaluate(() => { localStorage.setItem('ve-read-mode:' + location.pathname, 'one'); });
+      await page.goto(url, { waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-paged="one"]');
+      await page.waitForTimeout(300);
+      const label = () => page.textContent('.ve-chapter-current');
+      const first = await label();
+      await resetScrolls(page);
+      await page.mouse.move(width / 2, height / 2);
+      for (let i = 0; i < 12; i += 1) {
+        await page.mouse.wheel(0, 500);
+        await page.waitForTimeout(40);
+      }
+      await page.waitForTimeout(300);
+      const watched = await scrolls(page);
+      assert.ok(watched.moves.length > 0, 'the wheel did not scroll');
+      assert.deepEqual(watched.calls, [], `the rail scrolled: ${watched.calls}`);
+      assert.equal(watched.inner, 0, 'something scrolled inside the page');
+      assert.notEqual(await label(), first, 'the rail did not follow the scroll');
+    } finally {
+      await context.close();
+    }
+  });
+}
 
 for (const scheme of ['light', 'dark']) {
   test(`guided review at 375px in ${scheme} mode: AA contrast of the review marks, no sideways scroll`, async () => {
