@@ -101,7 +101,7 @@ export type Derived = {
   /** Each check: its result, the claims and parts that it backs, and the test that it runs. */
   checks?: Record<string, DerivedCheckRow>;
   /** The changed test files as the checks they provide, and the changed tests that back no claim. */
-  tests?: { files: Array<{ path: string; file: string; checks: string[] }>; orphans: Array<{ path: string; file: string; tests: string[] }>; orphan_tests: number; summary: string; action: string };
+  tests?: { orphan_tests: number; summary: string; action: string };
 };
 export type DerivedCheckRow = {
   id: string; name: string; kind: string; result: CheckResult; claims: Array<{ id: string; name: string; parts: string[] }>;
@@ -120,7 +120,7 @@ export type SpineGroup = {
   id: string; name: string; note: string | null; replaced_by: { id: string; name: string } | null; files: SpineFile[]; added: number; removed: number; unclaimed: number;
   tier?: ChangeTier; explain?: string[]; flags?: number; reviewable?: boolean;
 };
-export type DerivedSpine = { groups: SpineGroup[]; files: number; protected: number; partial: number; summary: string; unassigned?: string[]; flags?: number; github?: string[]; links?: Array<{ from: string; to: string; n: number }> };
+export type DerivedSpine = { groups: SpineGroup[]; files: number; protected: number; partial: number; summary: string; unassigned?: string[]; flags?: number };
 export type Refs = {
   schema: number; head: string; repo?: string; refs: ResolvedRef[]; controls: Record<string, ControlEdit[]>; derived: Derived;
   diff: {

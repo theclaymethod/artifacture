@@ -2,8 +2,7 @@
 // see DIAGRAM-DESIGN-LICENSE and plugins/visual-explainer/vendor/diagram-design): a sequence
 // (lifelines, activation bars, dashed returns, U-shaped self calls, one loop frame), a state machine
 // (rounded states, a start dot, ringed end dots, labelled transitions, self-loops above), a schema
-// (two-part entity boxes with mono fields), a flow and the map of how the changed files connect
-// (ranked boxes, right-angle elbows, fan-in badges, one marked cycle). The host's tokens replace the
+// (two-part entity boxes with mono fields) and a flow (ranked boxes, right-angle elbows). The host's tokens replace the
 // upstream skin, and its type floor (14px) replaces the 8px mono labels.
 // On top of that grammar sit our own layers: a change status on each element (added, changed,
 // removed, same) in colour and in words, a Before / After switch, the page's Simple / Detailed mode
@@ -29,8 +28,7 @@ export type SchemaSpec = {
   links: Array<{ from: string; to: string; label?: string; cardinality?: [string, string]; status?: ChangeStatus }>;
 };
 export type FlowSpec = { kind: 'flow'; title?: string; caption?: string; nodes: Array<{ id: string; label: string; focal?: boolean } & Layered>; edges: Move[] };
-export type MapSpec = { kind: 'map'; title?: string; caption?: string; nodes: Array<{ id: string; label: string; chapter?: string }>; edges: Array<{ from: string; to: string; n: number }> };
-export type TypedDiagramSpec = SequenceSpec | StateSpec | SchemaSpec | FlowSpec | MapSpec;
+export type TypedDiagramSpec = SequenceSpec | StateSpec | SchemaSpec | FlowSpec;
 type View = 'before' | 'after';
 
 const STATUS_WORD = { added: 'new', changed: 'changed', removed: 'removed', same: 'unchanged' } satisfies Record<ChangeStatus, string>;
@@ -192,7 +190,7 @@ function SequenceList({ spec, c }: { spec: SequenceSpec; c: Ctx }) {
   );
 }
 
-// ---- Ranked graphs: state, flow and the map of the changed files -------------------------------
+// ---- Ranked graphs: state and flow ---------------------------------------------------------------
 
 /** A box label in lines of about 24 characters, so a long name makes a taller box, not a wider one. */
 function wrapLabel(text: string, max = 24): string[] {
@@ -205,8 +203,8 @@ function wrapLabel(text: string, max = 24): string[] {
   return out;
 }
 
-type GNode = { id: string; label: string; sub?: string; status?: ChangeStatus; chapter?: string; focal?: boolean; end?: boolean; mono?: boolean; badge?: string };
-type GEdge = { from: string; to: string; label?: string; status?: ChangeStatus; cycle?: boolean };
+type GNode = { id: string; label: string; sub?: string; status?: ChangeStatus; chapter?: string; focal?: boolean; end?: boolean; mono?: boolean };
+type GEdge = { from: string; to: string; label?: string; status?: ChangeStatus };
 
 /** Ranks by the longest path from the sources, with the edges that close a cycle set aside. */
 function rank(nodes: GNode[], edges: GEdge[]) {
@@ -319,9 +317,9 @@ function RankedGraph({ nodes, edges, c, vertical = false, ends = false, start }:
         const p = path(e);
         const struck = c.view === 'after' && e.status === 'removed';
         return (
-          <g className={`ve-dd-edge-g${e.cycle ? ' ve-dd-accent ve-dd-dashed' : ''}`} data-ve-status={e.status ?? 'same'} data-ve-struck={struck ? 'true' : undefined} key={i}>
-            <path className="ve-dd-edge" d={p.d} markerEnd={`url(#${c.markers}-${e.cycle ? 'accent' : 'arrow'})`} />
-            {e.label || e.cycle ? <MaskedLabel text={`${e.cycle ? 'cycle · ' : ''}${e.label ?? ''}${word(e.status) ? ` (${word(e.status)})` : ''}`} x={p.lx} y={p.ly} /> : null}
+          <g className="ve-dd-edge-g" data-ve-status={e.status ?? 'same'} data-ve-struck={struck ? 'true' : undefined} key={i}>
+            <path className="ve-dd-edge" d={p.d} markerEnd={`url(#${c.markers}-arrow)`} />
+            {e.label ? <MaskedLabel text={`${e.label}${word(e.status) ? ` (${word(e.status)})` : ''}`} x={p.lx} y={p.ly} /> : null}
           </g>
         );
       })}
@@ -334,7 +332,6 @@ function RankedGraph({ nodes, edges, c, vertical = false, ends = false, start }:
               <text className="ve-dd-name" data-ve-mono={n.mono ? 'true' : undefined} textAnchor="middle" x={p.x + p.w / 2} y={p.y + 27}>{lines.get(n.id)!.map((l, i) => <tspan dy={i ? 20 : 0} key={i} x={p.x + p.w / 2}>{l}</tspan>)}</text>
               {n.sub ? <text className="ve-dd-status" textAnchor="middle" x={p.x + p.w / 2} y={p.y + 27 + lines.get(n.id)!.length * 20}>{n.sub}</text> : null}
             </Linked>
-            {n.badge ? <g><rect className="ve-dd-badge" height="20" rx="2" width={g4(textWidth(n.badge, true) + 12)} x={p.x + p.w - g4(textWidth(n.badge, true) + 12) - 4} y={p.y - 10} /><text className="ve-dd-badge-text" textAnchor="end" x={p.x + p.w - 10} y={p.y + 4}>{n.badge}</text></g> : null}
             {ends && n.end && vertical ? <g><line className="ve-dd-edge" x1={p.x + p.w / 2} x2={p.x + p.w / 2} y1={p.y + p.h} y2={p.y + p.h + 16} /><circle className="ve-dd-end-ring" cx={p.x + p.w / 2} cy={p.y + p.h + 26} r="8" /><circle className="ve-dd-start" cx={p.x + p.w / 2} cy={p.y + p.h + 26} r="5" /></g> : null}
             {ends && n.end && !vertical ? <g><line className="ve-dd-edge" markerEnd={`url(#${c.markers}-arrow)`} x1={p.x + p.w} x2={p.x + p.w + 24} y1={p.y + p.h / 2} y2={p.y + p.h / 2} /><circle className="ve-dd-end-ring" cx={p.x + p.w + 40} cy={p.y + p.h / 2} r="8" /><circle className="ve-dd-start" cx={p.x + p.w + 40} cy={p.y + p.h / 2} r="5" /></g> : null}
           </g>
@@ -359,18 +356,6 @@ function Flow({ spec, c }: { spec: FlowSpec; c: Ctx }) {
   const ids = new Set(nodes.map((n) => n.id));
   const edges: GEdge[] = spec.edges.filter((e) => shown(e.status, c.view) && ids.has(e.from) && ids.has(e.to)).map((e) => ({ from: e.from, to: e.to, label: e.label && name({ label: e.label, code: e.code }, c), status: e.status }));
   return <RankedGraph c={c} edges={edges} nodes={nodes} />;
-}
-
-/** The map of how the changed files connect: each chapter a box, an arrow for its imports of another, its fan-in as a badge, one cycle marked. */
-function FileMap({ spec, c }: { spec: MapSpec; c: Ctx }) {
-  const fanIn = new Map<string, number>();
-  for (const e of spec.edges) fanIn.set(e.to, (fanIn.get(e.to) ?? 0) + 1);
-  const nodes: GNode[] = spec.nodes.map((n) => ({ id: n.id, label: n.label, chapter: n.chapter, badge: `${fanIn.get(n.id) ?? 0} in` }));
-  const { back } = rank(nodes, spec.edges);
-  // Diagram Design marks one cycle: the back edge with the most imports. The others stay in the list below the figure.
-  const cycle = spec.edges.filter((e) => back.has(`${e.from}>${e.to}`)).sort((a, b) => b.n - a.n)[0];
-  const edges: GEdge[] = spec.edges.filter((e) => !back.has(`${e.from}>${e.to}`) || e === cycle).map((e) => ({ from: e.from, to: e.to, cycle: e === cycle, label: e === cycle ? `${e.n} ${e.n === 1 ? 'import' : 'imports'}` : undefined }));
-  return <RankedGraph c={c} edges={edges} nodes={nodes} vertical />;
 }
 
 // ---- Schema ------------------------------------------------------------------------------------
@@ -433,9 +418,6 @@ function textList(spec: TypedDiagramSpec, c: Ctx): ReactNode {
   let items: string[];
   if (spec.kind === 'schema') {
     items = spec.entities.filter((e) => shown(e.status, c.view)).map((e) => `${name({ label: e.name, code: e.code }, c)}${word(e.status) ? ` (${word(e.status)})` : ''}: ${e.fields.filter((f) => shown(f.status, c.view)).map((f) => f.name + (word(f.status) ? ` (${word(f.status)})` : '')).join(', ')}.`);
-  } else if (spec.kind === 'map') {
-    const label = (id: string) => spec.nodes.find((n) => n.id === id)?.label ?? id;
-    items = spec.edges.map((e) => `${label(e.from)} imports ${label(e.to)}: ${e.n} ${e.n === 1 ? 'import' : 'imports'}.`);
   } else {
     const nodes: Array<{ id: string; label: string; code?: string }> = spec.nodes;
     const at = (id: string) => nodes.find((n) => n.id === id) ?? { label: id };
@@ -444,7 +426,7 @@ function textList(spec: TypedDiagramSpec, c: Ctx): ReactNode {
   return <ul className="ve-typed-list" data-ve-typed-list>{items.map((t, i) => <li key={i}>{t}</li>)}</ul>;
 }
 
-const BUDGET = { sequence: { lifelines: 5, messages: 12 }, map: { nodes: 9 } } as const;
+const BUDGET = { sequence: { lifelines: 5, messages: 12 } } as const;
 
 function assertSpec(spec: TypedDiagramSpec, title: string) {
   const errors: string[] = [];
@@ -474,10 +456,8 @@ function assertSpec(spec: TypedDiagramSpec, title: string) {
     const names = new Set(spec.entities.map((e) => e.name));
     for (const l of spec.links) if (!names.has(l.from) || !names.has(l.to)) errors.push(`a link names an entity that the diagram does not have: ${l.from} to ${l.to}`);
     if (spec.entities.length > 4) errors.push('it has more than four entities; split it');
-  } else if (spec.kind === 'map') {
-    if (spec.nodes.length > BUDGET.map.nodes) errors.push(`it has ${spec.nodes.length} boxes; Diagram Design allows ${BUDGET.map.nodes}`);
   } else {
-    errors.push('its kind is not a typed diagram (sequence, state, schema, flow or map)');
+    errors.push('its kind is not a typed diagram (sequence, state, schema or flow)');
   }
   if (errors.length) throw new TrustMapError(`diagram ${title}: ` + errors.join('; '));
 }
@@ -500,12 +480,11 @@ function Switch<T extends string>({ title, legend, value, options, onChange }: {
 function elements(spec: TypedDiagramSpec): Array<{ status?: ChangeStatus; code?: string }> {
   if (spec.kind === 'sequence') return [...spec.actors, ...spec.steps.flatMap((s) => ('from' in s ? [s] : []))];
   if (spec.kind === 'schema') return [...spec.entities, ...spec.entities.flatMap((e) => e.fields), ...spec.links];
-  if (spec.kind === 'map') return [];
   return [...spec.nodes, ...spec.edges];
 }
 
 /**
- * A typed diagram from explain.json (or the derived map of the changed files), in Diagram Design's
+ * A typed diagram from explain.json, in Diagram Design's
  * grammar, with the guided review's layers: Before / After (Before hides what the PR adds; After shows
  * what it removes, struck through), Simple / Detailed when an element names its code, and links to the
  * chapters. Each status also shows as a word, so colour is never the only cue. The same steps show as
@@ -522,9 +501,9 @@ export function TypedDiagram({ spec, name: fallback, chapters = {} }: { spec: Ty
   const all = elements(spec);
   const used = new Set(all.map((x) => x.status ?? 'same'));
   const coded = all.some((x) => x.code);
-  const figure = spec.kind === 'sequence' ? <Sequence c={c} spec={spec} /> : spec.kind === 'state' ? <State c={c} spec={spec} /> : spec.kind === 'schema' ? <Schema c={c} spec={spec} /> : spec.kind === 'flow' ? <Flow c={c} spec={spec} /> : <FileMap c={c} spec={spec} />;
+  const figure = spec.kind === 'sequence' ? <Sequence c={c} spec={spec} /> : spec.kind === 'state' ? <State c={c} spec={spec} /> : spec.kind === 'schema' ? <Schema c={c} spec={spec} /> : <Flow c={c} spec={spec} />;
   const linked: Array<{ label: string; chapter?: string }> = spec.kind === 'sequence' ? spec.actors : spec.kind === 'schema' ? spec.entities.map((e) => ({ label: e.name, chapter: e.chapter })) : spec.nodes;
-  const links = spec.kind === 'map' ? [] : linked.filter((x) => x.chapter && chapters[x.chapter]);
+  const links = linked.filter((x) => x.chapter && chapters[x.chapter]);
   const changes = used.has('added') || used.has('removed');
   return (
     <figure className="ve-typed" data-ve-typed={spec.kind} data-ve-view={view}>

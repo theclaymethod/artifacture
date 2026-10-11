@@ -98,7 +98,7 @@ test.before(async () => {
   // The exports run at the same time; the bad cases fail in the pre-render, before a bundle.
   const map = (dir) => JSON.parse(readFileSync(path.join(dir, 'trust-map.json'), 'utf8'));
   const oldDir = path.join(workDir, 'old-shape');
-  const [scan, good, noAction, idInProse, oldShape, slogan, repeated, ste, noLint] = await Promise.all([
+  const [scan, good, noAction, idInProse, oldShape, slogan, repeated, ste, noLint, enumeration] = await Promise.all([
     run(['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact]),
     // One claim joins an old claim: its old id C09 must still find it.
     exportTrustCase(trustDir, (dir) => {
@@ -126,11 +126,16 @@ test.before(async () => {
     exportTrustCase(path.join(workDir, 'repeated'), plantInMdx(['A caller asks the wallet for an amount, and the wallet pays it or refuses it.', 'The wallet now refuses an overdraft. A caller asks the wallet for an amount, and the wallet pays it or refuses it.'])),
     exportTrustCase(path.join(workDir, 'ste'), plantInMdx(['The fixture is small, so each chapter is short.', 'The fixture is small; each chapter is short.'])),
     exportTrustCase(path.join(workDir, 'no-lint'), () => {}, ['--ste-lint', path.join(workDir, 'no-such-lint.py')]),
+    // Raw enumerations: two chapter titles joined by a bare word, and an opener that holds only a long list.
+    exportTrustCase(path.join(workDir, 'enumeration'), plantInMdx(
+      ['- The fixture is small, so each chapter is short.', '- Print the balances from a script imports Refuse an overdraft before paying out: 2 imports.'],
+      ['<h3 className="ve-subsection-title" id="verdict-glossary">', `<Disclosure summary="Show all 11 files">\n\n${Array.from({ length: 11 }, (_, i) => `- file ${i + 1}`).join('\n')}\n\n</Disclosure>\n\n<h3 className="ve-subsection-title" id="verdict-glossary">`],
+    )),
   ]);
   assert.equal(scan.status, 0, scan.out);
   assert.equal(good.status, 0, good.out);
   assert.equal(oldShape.status, 0, oldShape.out);
-  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), map: map(trustDir), noAction, idInProse, slogan, repeated, ste, noLint };
+  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), map: map(trustDir), noAction, idInProse, slogan, repeated, ste, noLint, enumeration };
 });
 
 test.after(async () => {
@@ -324,6 +329,10 @@ test('guided review: the export checks (data, IDs, copy, STE), the stamp, and th
   assert.notEqual(trust.ste.status, 0);
   assert.match(trust.ste.out, /ch-8: STE semicolon: .* in "The fixture is small; each chapter is short\."/);
   assert.doesNotMatch(trust.ste.out, /slogan|shows \d+ times/);
+  // The export fails on mechanical text that answers no reader question: a title join and a raw enumeration.
+  assert.notEqual(trust.enumeration.status, 0);
+  assert.match(trust.enumeration.out, /ch-8: a block joins two titles with a bare word, for example "Print the balances from a script" imports "Refuse an overdraft before paying out"/);
+  assert.match(trust.enumeration.out, /ch-8: the opener "Show all 11 files" holds only a list of 11 items, with no explanation/);
   assert.notEqual(trust.noLint.status, 0);
   assert.match(trust.noLint.out, /the STE lint is not at .*no-such-lint\.py\. .*--ste-lint off/);
 
@@ -337,7 +346,7 @@ test('guided review: the export checks (data, IDs, copy, STE), the stamp, and th
   try {
     const page = await off.newPage();
     await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
-    assert.deepEqual(await visibleChapters(page), ['ch-0', 'ch-1', 'ch-2', 'ch-3', 'ch-4', 'ch-5', 'ch-6', 'ch-7', 'ch-8', 'ch-9']);
+    assert.deepEqual(await visibleChapters(page), ['ch-0', 'ch-1', 'ch-2', 'ch-3', 'ch-4', 'ch-5', 'ch-6', 'ch-7', 'ch-8']);
     const text = await page.innerText('main');
     for (const want of ['Not ready', 'things to review', trust.map.promises[0].label, 'checks caught their planted bug', 'Show the answer', 'wallet/core.py']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
     assert.equal(await page.locator('[data-ve-review-call]').first().isVisible(), false, 'a call control shows without JavaScript');
@@ -393,7 +402,7 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
     // Read as one page: every chapter in sequence; the choice stays after a reload.
     await page.click('.ve-read-mode button[aria-pressed="false"]');
     await page.waitForSelector('main[data-ve-paged="one"]');
-    assert.equal((await visibleChapters(page)).length, 10);
+    assert.equal((await visibleChapters(page)).length, 9);
     await page.reload({ waitUntil: 'load' });
     await page.waitForSelector('main[data-ve-paged="one"]');
     await page.click('.ve-read-mode button[aria-pressed="false"]');
@@ -489,7 +498,7 @@ test('guided review: the checklist order, the calls in local storage, the export
   }
 });
 
-test('guided review: the chapters of the change, the flags, Reviewed, the typed diagram, the full diff and the checks before you approve', async () => {
+test('guided review: the chapters of the change, the flags, Reviewed, the typed diagram and the checks before you approve', async () => {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
     const page = await context.newPage();
@@ -503,9 +512,24 @@ test('guided review: the chapters of the change, the flags, Reviewed, the typed 
     const chapters = await page.$$eval('[data-ve-change-chapter]', (s) => s.map((x) => x.dataset.veChangeChapter));
     assert.deepEqual(chapters, derived.spine.groups.filter((g) => g.tier !== 'tests').map((g) => g.id));
     assert.deepEqual(derived.spine.unassigned, []);
+    // A file to act on (no claim, a claim on part of it, or a flag) shows once; the rest of a chapter is one line, with a link to the diff.
     for (const f of Object.keys(JSON.parse(readFileSync(path.join(trust.dir, 'refs.resolved.json'), 'utf8')).diff.files)) {
-      assert.equal(await page.locator(`#ch-3 [data-ve-spine-file="${f}"]`).count(), f.startsWith('tests/') ? 0 : 1, f);
+      if (f.startsWith('tests/')) assert.equal(await page.locator(`#ch-3 [data-ve-spine-file="${f}"]`).count(), 0, f);
     }
+    for (const g of derived.spine.groups.filter((x) => x.tier !== 'tests')) {
+      let quiet = 0;
+      for (const f of g.files) {
+        const n = await page.locator(`#ch-3 [data-ve-spine-file="${f.path}"]`).count();
+        if (['check', 'ask', 'read', 'partial'].includes(f.status.kind) || f.flags.length) assert.equal(n, 1, f.path);
+        else { assert.ok(n <= 1, f.path); quiet += 1 - n; }
+      }
+      const line = page.locator(`[data-ve-change-chapter="${g.id}"] [data-ve-quiet-files]`);
+      if (!quiet) { assert.equal(await line.count(), 0, g.id); continue; }
+      assert.match(await line.textContent(), new RegExp(`^(Its|The other) ${quiet === 1 ? 'file' : `${quiet} files`} |^Of (its|the other) ${quiet} files, `), g.id);
+      assert.equal(await line.locator('a').getAttribute('href'), `https://github.com/${trust.map.repo}/pull/${trust.map.pr}/files`);
+    }
+    // No list of every link, every file or every changed test.
+    assert.equal(await page.locator('#ch-3 :is(#spine-map, .ve-change-toc)').count(), 0);
     assert.match(await page.textContent('[data-ve-spine-tests]'), /2 test files\. They show as the checks they provide/);
     // Each chapter of the explain step explains its idea in one or two paragraphs.
     for (const c of explain.change.chapters) assert.equal(await page.locator(`[data-ve-change-chapter="${c.id}"] .ve-change-explain`).count(), c.explain.length);
@@ -543,20 +567,12 @@ test('guided review: the chapters of the change, the flags, Reviewed, the typed 
     }
     assert.equal(await page.locator('#ch-5 [data-ve-check-row="v02"][data-ve-result="cannot-fail"]').count() > 0, true);
     assert.match(await page.textContent('#ch-5'), new RegExp(derived.tests.summary.replace('.', '\\.')));
-    await page.locator('#ch-5 summary:has-text("Show the checks by test file")').click();
-    assert.match(await page.textContent('#ch-5 .ve-checks-file'), /tests\/test_core\.py provides 2 checks/);
+    assert.equal(await page.locator('#ch-5 details > summary:has-text("Show")').filter({ hasText: /by file|by test file|Show all/ }).count(), 0);
     // A check row keeps its test and its planted bug behind it until the reviewer opens it.
     const row = page.locator('#ch-5 [data-ve-check-row="v02"]').first();
     assert.equal(await row.locator('.ve-disclosure-body [data-ve-diff-block]').count(), 0);
     await row.locator('summary').first().click();
     await page.waitForFunction(() => document.querySelector('#ch-5 [data-ve-check-row="v02"] .ve-disclosure-body [data-ve-diff-block]'));
-
-    // The full diff: every changed file, in GitHub's order, each with its chapter.
-    await page.goto(url + '#ch-9', { waitUntil: 'load' });
-    await page.waitForFunction(() => !document.getElementById('ch-9').hidden);
-    const order = await page.$$eval('[data-ve-full-diff] > li .ve-file-path', (c) => c.map((x) => x.textContent));
-    assert.equal(order.length, derived.spine.files);
-    assert.deepEqual(order, [...order].sort());
 
     // Before you approve: each check is a command, lines to read or real inputs, never generic.
     await page.goto(url + '#verdict-approve', { waitUntil: 'load' });
@@ -629,7 +645,7 @@ test('guided review: calm navigation at 1280px and 375px', { concurrency: true }
 
       // Previous and Next sit in the same place on every chapter, read to its foot.
       const places = { next: [], prev: [] };
-      for (let i = 0; i <= 9; i += 1) {
+      for (let i = 0; i <= 8; i += 1) {
         await page.evaluate((n) => { location.hash = `ch-${n}`; }, i);
         await page.waitForTimeout(150);
         await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
@@ -639,7 +655,7 @@ test('guided review: calm navigation at 1280px and 375px', { concurrency: true }
         }
       }
       for (const [rel, ys] of Object.entries(places)) {
-        assert.equal(ys.length, 9, `${rel} links`);
+        assert.equal(ys.length, 8, `${rel} links`);
         assert.ok(Math.max(...ys) - Math.min(...ys) <= 2, `${rel} sits at ${ys.map(Math.round)}`);
       }
 
@@ -930,7 +946,7 @@ test('guided review: embedded type, quiet glossary marks, the reading measure an
     const chapters = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all.map((d) => [d.open, d.querySelector('.ve-disclosure-meta')?.textContent ?? '']));
     assert.ok(chapters.length >= 2);
     assert.deepEqual(chapters.map(([open]) => open), chapters.map((_, i) => i === 0));
-    for (const [, meta] of chapters) assert.match(meta, /^\d+ files?/);
+    for (const [, meta] of chapters) assert.match(meta, /^(\d+ to look at closely)?$/);
     const second = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all[1].id);
     await page.goto(pathToFileURL(firstHtml).href + '#' + second, { waitUntil: 'load' });
     await page.waitForFunction((id) => document.getElementById(id)?.open, second);

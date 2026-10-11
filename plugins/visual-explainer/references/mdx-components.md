@@ -108,9 +108,9 @@ Copy these with `artifacture add ascii-image ascii-sweep ascii-object vhs`. See 
 
 The card [trust-map](../cards/trust-map.md) holds the data contract and the page; these render the derived data of a trust map and never compute it again.
 
-- The guided review: `ReviewStart` (the merge state, the progress, the ways in), `DiffSpine` (the chapters of the change, their flags and files, the map of how they connect), `EvidenceGuide` (how to read a promise, a bar and one bug with two results), `VerifierView` (the checks by promise; tests as the checks they provide), `UnderstandingCheck` (questions from the data), `ReviewChecklist` (blockers, then risks to accept, each with its evidence and the reviewer's call), `ReviewVerdict`, `ApproveChecks`, `FullDiff`, `ReviewProgress`, `ChapterProgress`, `ExportReview` (copies the calls as Markdown).
+- The guided review: `ReviewStart` (the merge state, the progress, the ways in), `DiffSpine` (the chapters of the change, their flags and the files to act on), `EvidenceGuide` (how to read a promise, a bar and one bug with two results), `VerifierView` (the checks by promise), `UnderstandingCheck` (questions from the data), `ReviewChecklist` (blockers, then risks to accept, each with its evidence and the reviewer's call), `ReviewVerdict`, `ApproveChecks`, `ReviewProgress`, `ChapterProgress`, `ExportReview` (copies the calls as Markdown).
 - Shared rows: `ClaimRow`, `CheckRow`, `ClaimTimeline`, `FileCard`, `BarCard`, `BarChip`, `ChangedCode`, `ClaimBody`, `ClaimDetail`, `VerdictPill`, `CodeRef`, `PromiseLink`, `Glossary`, `Glossed`, `Invariants`, `VerdictLegend`.
-- Figures: `ArchitectureDiagram` (Simple and Detailed), `TypedDiagram` (sequence, state, schema, flow and the changed-file map, in Diagram Design's grammar, with Before / After), `Walkthrough`, `StepThrough` (one step at a time, its station lit).
+- Figures: `ArchitectureDiagram` (Simple and Detailed), `TypedDiagram` (sequence, state, schema and flow, in Diagram Design's grammar, with Before / After), `Walkthrough`, `StepThrough` (one step at a time, its station lit).
 - The earlier level ladder: `MergeVerdict`, `PromiseChips`, `PromiseList`, `VerifyTheVerifiers`, `UnclaimedChanges`, `WhatChanged`.
 - `CopyLink`: a 44px control that copies the address of a fragment.
 

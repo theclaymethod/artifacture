@@ -100,7 +100,6 @@
 
 .ve-dd-name[data-ve-mono="true"],
 .ve-dd-field,
-.ve-dd-badge-text,
 .ve-dd-frame-op,
 .ve-dd-tag,
 .ve-dd-card {
@@ -237,16 +236,6 @@ text[data-ve-struck="true"] {
   fill: none;
   stroke: var(--ve-dd-ink);
   stroke-width: 1.2;
-}
-
-.ve-dd-badge {
-  fill: var(--ve-dd-paper);
-  stroke: var(--ve-dd-rule);
-}
-
-.ve-dd-badge-text {
-  fill: var(--ve-dd-muted);
-  font-size: 12px;
 }
 
 .ve-dd-tag {

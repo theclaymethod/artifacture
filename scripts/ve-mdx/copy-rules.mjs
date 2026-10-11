@@ -43,3 +43,10 @@ export const RUN_IN_LABELS = [
 
 /** A repeated sentence counts only from this many words. Shorter ones are UI labels. */
 export const REPEAT_MIN_WORDS = 4;
+
+/** A title counts for the title-join rule from this many words: a chapter title, a promise label, a heading. */
+export const TITLE_MIN_WORDS = 4;
+
+/** An opener (a Disclosure) whose body is only a list of more than this many items, with fewer than EXPLAIN_MIN_WORDS words besides, is a raw enumeration. */
+export const MAX_BARE_ITEMS = 10;
+export const EXPLAIN_MIN_WORDS = 8;

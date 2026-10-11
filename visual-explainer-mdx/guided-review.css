@@ -880,22 +880,6 @@ html:not([data-ve-js]) .ve-review-todo {
 
 /* ---- The chapters of the change: the idea on the left, its code on the right ----------------------- */
 
-.ve-change-toc ol {
-  display: grid;
-  gap: var(--ve-space-1);
-  margin: 0;
-  padding-left: var(--ve-space-5);
-}
-
-.ve-change-toc li {
-  max-width: none;
-}
-
-.ve-change-toc-flags {
-  color: var(--ve-muted);
-  font-size: var(--ve-text-small);
-}
-
 /* The chapters of the change: a run of openers, the first one open. */
 .ve-change-chapters {
   margin-top: var(--ve-space-7);
@@ -1073,46 +1057,6 @@ html:not([data-ve-js]) .ve-review-todo {
   gap: var(--ve-space-2) var(--ve-space-3);
 }
 
-.ve-file-row-tests {
-  grid-column: 1 / -1;
-  color: var(--ve-text);
-  overflow-wrap: anywhere;
-}
-
-/* ---- Every changed file, in GitHub's order ------------------------------------------------------- */
-
-.ve-full-diff {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--ve-text-small);
-}
-
-.ve-full-diff > li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 8rem 13rem;
-  gap: var(--ve-space-1) var(--ve-space-3);
-  align-items: baseline;
-  max-width: none;
-  padding: var(--ve-space-2) 0;
-  border-top: 1px solid color-mix(in srgb, var(--ve-rule) 70%, transparent);
-}
-
-.ve-full-diff > li > .ve-churn {
-  text-align: right;
-}
-
-.ve-full-diff-links {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 640px) {
-  .ve-full-diff > li {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-}
-
 /* ---- Before you approve ---------------------------------------------------------------------------- */
 
 .ve-approve {
@@ -1244,34 +1188,14 @@ html:not([data-ve-js]) .ve-approve > li {
 }
 
 .ve-orphans {
-  padding: var(--ve-space-4);
+  padding: var(--ve-space-3) var(--ve-space-4);
   border: 1px solid color-mix(in srgb, var(--ve-status-warn) 35%, transparent);
   border-radius: var(--ve-card-radius);
   background: color-mix(in srgb, var(--ve-status-warn-soft) 45%, var(--ve-bg));
 }
 
 .ve-orphans > p {
-  margin: 0 0 var(--ve-space-2);
-}
-
-.ve-orphan-files {
-  display: grid;
-  gap: var(--ve-space-2);
   margin: 0;
-  padding-left: var(--ve-space-5);
-  font-size: var(--ve-text-small);
-  overflow-wrap: anywhere;
-}
-
-.ve-orphan-files > li,
-.ve-checks-file > p {
-  max-width: none;
-}
-
-.ve-checks-file {
-  display: grid;
-  gap: var(--ve-space-2);
-  margin-bottom: var(--ve-space-5);
 }
 
 .ve-spine-tests {
@@ -1280,6 +1204,6 @@ html:not([data-ve-js]) .ve-approve > li {
 }
 
 /* What changed: a figure in the spine gets the air of a figure. */
-[data-ve-trust="spine"] > * + :is(.ve-file-map, .ve-change-chapters, .ve-subsection) {
+[data-ve-trust="spine"] > * + :is(.ve-change-chapters, .ve-subsection) {
   margin-top: var(--ve-space-7);
 }

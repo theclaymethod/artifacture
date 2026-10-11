@@ -107,7 +107,7 @@ async function replaceAsync(input, pattern, replacer) {
 
 // The trust-map components (visual-explainer-mdx/trust-map.tsx) need the static pre-render: it
 // validates their data and runs the trust-map checks.
-const TRUST_MAP_COMPONENTS = /<(VerifierView|FullDiff|ApproveChecks|MergeVerdict|PromiseList|PromiseChips|ClaimDetail|VerifyTheVerifiers|UnclaimedChanges|WhatChanged|Glossary|CodeRef|ReviewStart|ReviewChecklist|DiffSpine|EvidenceGuide|UnderstandingCheck|ReviewVerdict)\b/;
+const TRUST_MAP_COMPONENTS = /<(VerifierView|ApproveChecks|MergeVerdict|PromiseList|PromiseChips|ClaimDetail|VerifyTheVerifiers|UnclaimedChanges|WhatChanged|Glossary|CodeRef|ReviewStart|ReviewChecklist|DiffSpine|EvidenceGuide|UnderstandingCheck|ReviewVerdict)\b/;
 const REACT_DEDUPE = ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'];
 
 /** The plugins that the static pre-render and the browser bundle share. `seen` collects the MDX files, `stamps` the trust maps that the source imports. */
