@@ -424,11 +424,15 @@
   padding-inline: 0;
 }
 
+/* A column of lines: a flex container drops the newline text between them, so tinted rows touch. */
+[data-ve-code-lines] .ve-code-block .ve-code-shiki code {
+  display: flex;
+  flex-direction: column;
+}
+
 :where([data-ve-code-lines]) .ve-code-shiki .line {
-  display: inline-block;
+  display: block;
   position: relative;
-  width: 100%;
-  vertical-align: top;
   padding-right: 1rem;
   padding-left: calc(var(--ve-line-digits, 3) * 1ch + 3.5ch);
 }
