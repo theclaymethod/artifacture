@@ -68,7 +68,7 @@ function ValueView({ value }: { value: unknown }) {
       <div className="ve-example-table-wrap">
         <table className="ve-example-table">
           <thead><tr>{keys.map((k) => <th key={k} scope="col">{k}</th>)}</tr></thead>
-          <tbody>{value.map((r, i) => <tr key={i}>{keys.map((k) => <td key={k}><code>{cell(r[k])}</code></td>)}</tr>)}</tbody>
+          <tbody>{value.map((r, i) => <tr key={i}>{keys.map((k) => <td key={k}>{cell(r[k]) ? <code>{cell(r[k])}</code> : null}</td>)}</tr>)}</tbody>
         </table>
       </div>
     );
