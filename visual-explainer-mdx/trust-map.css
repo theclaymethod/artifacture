@@ -26,3 +26,8 @@
 [data-ve-tiers] {
   margin-block: 1rem;
 }
+
+/* A quieter line under a result line. */
+.ve-quiet {
+  color: var(--ve-muted);
+}

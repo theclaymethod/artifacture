@@ -1,6 +1,6 @@
 {
- "schema": 1,
- "head": "cc1975a5b1b11abcc71fd0c36d7e8a75a3957510",
+ "schema": 2,
+ "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
  "repo": "fixture/wallet",
  "refs": [
   {
@@ -17,7 +17,7 @@
    ],
    "language": "python",
    "excerpt": "def withdraw(balance: int, amount: int) -> int:\n    \"\"\"\n    @cc [owner:fixture,label:product] no-overdraft\n    `withdraw` refuses an amount above the balance with `OverdraftError`.\n    \"\"\"\n    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L8-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L8-L15"
   },
   {
    "ref": {
@@ -34,7 +34,7 @@
    ],
    "language": "python",
    "excerpt": "    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L15"
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L15"
   },
   {
    "ref": {
@@ -50,7 +50,7 @@
    ],
    "language": "python",
    "excerpt": "def denial(account: str, amount: int) -> str:\n    return f\"We cannot pay out {amount}. The balance is too low.\"",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/messages.py#L4-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/messages.py#L4-L5"
   },
   {
    "ref": {
@@ -71,7 +71,7 @@
    ],
    "language": "python",
    "excerpt": "    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L13-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L13-L15"
   },
   {
    "ref": {
@@ -86,7 +86,7 @@
    ],
    "language": "python",
    "excerpt": "\"\"\"Added by the PR. No test names this module, and the PR text does not mention it.\"\"\"\n\n\ndef fee(amount: int) -> int:\n    return amount // 100 + 1",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/fees.py#L1-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/fees.py#L1-L5"
   },
   {
    "ref": {
@@ -102,7 +102,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/bin/report.py#L7-L11",
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/bin/report.py#L7-L11",
    "link_only": true
   },
   {
@@ -119,7 +119,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/tests/test_core.py#L6-L11",
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/tests/test_core.py#L6-L11",
    "link_only": true
   },
   {
@@ -136,7 +136,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/tests/test_messages.py#L6-L10",
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/tests/test_messages.py#L6-L10",
    "link_only": true
   },
   {
@@ -153,7 +153,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/fees.py#L4-L5",
+   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/fees.py#L4-L5",
    "link_only": true
   }
  ],
@@ -190,7 +190,7 @@
    {
     "path": "proofs/Withdraw.lean",
     "language": "text",
-    "patch": "--- a/proofs/Withdraw.lean\n+++ b/proofs/Withdraw.lean\n@@ -1,4 +1,4 @@\n -- The model of `withdraw` in wallet/core.py. The fixture records the proof run; no test runs Lean.\n-def withdraw (b a : Nat) : Option Int := if a > b then none else some ((b : Int) - a)\n+def withdraw (b a : Nat) : Option Int := some ((b : Int) - a)\n \n theorem withdraw_nonneg (b a : Nat) (r : Int) (h : withdraw b a = some r) : 0 \u2264 r := by\n"
+    "patch": "--- a/proofs/Withdraw.lean\n+++ b/proofs/Withdraw.lean\n@@ -1,4 +1,4 @@\n -- The model of `withdraw` in wallet/core.py. The fixture records the proof run; no test runs Lean.\n-def withdraw (b a : Nat) : Option Int := if a > b then none else some ((b : Int) - a)\n+def withdraw (b a : Nat) : Option Int := some ((b : Int) - a)\n \n theorem withdraw_nonneg (b a : Nat) (r : Int) (h : withdraw b a = some r) : 0 ≤ r := by\n"
    }
   ]
  },
@@ -347,15 +347,17 @@
   }
  },
  "derived": {
-  "schema": 1,
-  "head": "cc1975a5b1b11abcc71fd0c36d7e8a75a3957510",
+  "schema": 2,
+  "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
   "promises": [
    {
     "id": "P4",
     "strength": "Gap",
     "claims": [
      "C03"
-    ]
+    ],
+    "count": 1,
+    "tally": "1 Gap"
    },
    {
     "id": "P1",
@@ -364,14 +366,18 @@
      "C02",
      "C01",
      "C08"
-    ]
+    ],
+    "count": 3,
+    "tally": "1 Formal, 1 Proven, 1 Asserted"
    },
    {
     "id": "P2",
     "strength": "Asserted",
     "claims": [
      "C04"
-    ]
+    ],
+    "count": 1,
+    "tally": "1 Asserted"
    },
    {
     "id": "P3",
@@ -380,9 +386,319 @@
      "C05",
      "C06",
      "C07"
-    ]
+    ],
+    "count": 3,
+    "tally": "1 Proven, 2 Backed"
    }
   ],
+  "claims": {
+   "C01": {
+    "strength": "Proven",
+    "tier": 3,
+    "checks": [
+     {
+      "id": "V01",
+      "name": "the overdraft test",
+      "kind": "unit",
+      "strength": "Proven",
+      "result": "caught"
+     },
+     {
+      "id": "V03",
+      "name": "the contract format check",
+      "kind": "contract-format",
+      "strength": "Proven",
+      "result": "caught"
+     }
+    ],
+    "n": 2,
+    "counts": {
+     "caught": 2
+    },
+    "summary": "2 checks: 2 caught their bug.",
+    "weakest": {
+     "id": "V01",
+     "name": "the overdraft test",
+     "result": "caught",
+     "strength": "Proven",
+     "text": "The weakest check is the overdraft test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug."
+    }
+   },
+   "C02": {
+    "strength": "Asserted",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V02",
+      "name": "the balance type test",
+      "kind": "unit",
+      "strength": "Asserted",
+      "result": "cannot-fail"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "cannot-fail": 1
+    },
+    "summary": "1 check: it cannot fail.",
+    "weakest": {
+     "id": "V02",
+     "name": "the balance type test",
+     "result": "cannot-fail",
+     "strength": "Asserted",
+     "text": "The weakest check is the balance type test. It cannot fail: it passed on each planted bug.",
+     "action": "Fix this check so that it can fail, or replace it (understando close). The cheapest fix: Assert the exact new balance in the test."
+    }
+   },
+   "C04": {
+    "strength": "Asserted",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V09",
+      "name": "the PR text alone",
+      "kind": "none",
+      "strength": "Asserted",
+      "result": "none"
+     }
+    ],
+    "n": 0,
+    "counts": {},
+    "summary": "No check: only the PR text states it.",
+    "weakest": {
+     "id": "V09",
+     "name": "the PR text alone",
+     "result": "none",
+     "strength": "Asserted",
+     "text": "No tool checks this claim. Only the PR text states it.",
+     "action": "Only the PR text states it. Add a check (understando close), or accept the risk."
+    }
+   },
+   "C05": {
+    "strength": "Backed",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V05",
+      "name": "the message review",
+      "kind": "model",
+      "strength": "Backed",
+      "result": "recorded"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "recorded": 1
+    },
+    "summary": "1 check: it is a record of a past run.",
+    "weakest": {
+     "id": "V05",
+     "name": "the message review",
+     "result": "recorded",
+     "strength": "Backed",
+     "text": "The weakest check is the message review. It is a record of a past run, and we did not run it again.",
+     "action": "Treat it as one opinion. Ask a model of another family to check it, or read the evidence yourself."
+    }
+   },
+   "C06": {
+    "strength": "Backed",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V06",
+      "name": "the network import search",
+      "kind": "boundary",
+      "strength": "Backed",
+      "result": "checked"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "checked": 1
+    },
+    "summary": "1 check: it is a mechanical check.",
+    "weakest": {
+     "id": "V06",
+     "name": "the network import search",
+     "result": "checked",
+     "strength": "Backed",
+     "text": "The weakest check is the network import search. It is a mechanical check with no planted bug.",
+     "action": "Plant a bug for this mechanical check, or add a CI rule that keeps it true."
+    }
+   },
+   "C07": {
+    "strength": "Proven",
+    "tier": 1,
+    "checks": [
+     {
+      "id": "V07",
+      "name": "the denial amount test",
+      "kind": "unit",
+      "strength": "Proven",
+      "result": "caught"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "caught": 1
+    },
+    "summary": "1 check: it caught its bug.",
+    "weakest": {
+     "id": "V07",
+     "name": "the denial amount test",
+     "result": "caught",
+     "strength": "Proven",
+     "text": "The weakest check is the denial amount test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug."
+    }
+   },
+   "C08": {
+    "strength": "Formal",
+    "tier": 5,
+    "checks": [
+     {
+      "id": "V08",
+      "name": "the balance proof",
+      "kind": "lean",
+      "strength": "Formal",
+      "result": "caught"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "caught": 1
+    },
+    "summary": "1 check: it caught its bug.",
+    "weakest": {
+     "id": "V08",
+     "name": "the balance proof",
+     "result": "caught",
+     "strength": "Formal",
+     "text": "The weakest check is the balance proof. It caught its planted bug.",
+     "action": "No action: it caught its planted bug."
+    }
+   },
+   "C03": {
+    "strength": "Gap",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V10",
+      "name": "no check yet",
+      "kind": "none",
+      "strength": "Gap",
+      "result": "none"
+     }
+    ],
+    "n": 0,
+    "counts": {},
+    "summary": "No check, and the PR text does not state it.",
+    "weakest": {
+     "id": "V10",
+     "name": "no check yet",
+     "result": "none",
+     "strength": "Gap",
+     "text": "No tool checks this claim, and the PR text does not state it.",
+     "action": "No check exists, and the PR text does not state it. Decide if it matters; to close it, add a check (understando close)."
+    }
+   }
+  },
+  "verify": {
+   "result": "4 of 5 checks caught their planted bug. 1 cannot fail.",
+   "other": "2 more checks have no planted bug: records of a past run, mechanical checks or checks that no control ran.",
+   "tone": "err",
+   "checks": 7,
+   "ran": 5,
+   "caught": 4,
+   "missed": 0,
+   "cannot": 1,
+   "weak": [
+    {
+     "check": "V02",
+     "control": "K02",
+     "name": "the balance type test",
+     "broke": "Add the amount to the balance, not take it away.",
+     "happened": "The check passed on each planted bug, so it can fail on nothing.",
+     "why": "So this check does not protect the new balance.",
+     "action": "Fix this check so that it can fail, or replace it (understando close). The cheapest fix: Assert the exact new balance in the test.",
+     "ids": "K02 · V02 · C02"
+    }
+   ],
+   "by_promise": [
+    {
+     "id": "P1",
+     "rows": [
+      {
+       "check": "V01",
+       "name": "the overdraft test",
+       "claim": "the overdraft refusal",
+       "broke": [
+        "Remove the line that raises OverdraftError."
+       ],
+       "ids": "V01 · K01"
+      },
+      {
+       "check": "V03",
+       "name": "the contract format check",
+       "claim": "the overdraft refusal",
+       "broke": [
+        "Put a colon into the contract ID, which the grammar does not permit."
+       ],
+       "ids": "V03 · K03"
+      },
+      {
+       "check": "V08",
+       "name": "the balance proof",
+       "claim": "the never-negative balance",
+       "broke": [
+        "Remove the guard from the Lean model, so a withdrawal can go below zero."
+       ],
+       "ids": "V08 · K08"
+      }
+     ]
+    },
+    {
+     "id": "P3",
+     "rows": [
+      {
+       "check": "V07",
+       "name": "the denial amount test",
+       "claim": "the amount in the denial",
+       "broke": [
+        "Remove the amount from the denial message."
+       ],
+       "ids": "V07 · K07"
+      }
+     ]
+    }
+   ],
+   "tiers": [
+    {
+     "label": "Formal proof",
+     "n": 1
+    },
+    {
+     "label": "Types and import rules",
+     "n": 2
+    },
+    {
+     "label": "Tests",
+     "n": 3
+    },
+    {
+     "label": "Recorded runs and model judgments",
+     "n": 1
+    }
+   ],
+   "broke": {
+    "K01": "Remove the line that raises OverdraftError.",
+    "K02": "Add the amount to the balance, not take it away.",
+    "K03": "Put a colon into the contract ID, which the grammar does not permit.",
+    "K07": "Remove the amount from the denial message.",
+    "K08": "Remove the guard from the Lean model, so a withdrawal can go below zero."
+   }
+  },
   "merge": {
    "form": "not-ready",
    "items": [
@@ -410,7 +726,7 @@
     {
      "path": "bin/report.py",
      "file": "bin/report.py",
-     "role": "report",
+     "role": "the report code",
      "change": "New file of 15 lines: main",
      "added": 15,
      "removed": 0,
@@ -423,6 +739,12 @@
      "claims": 0,
      "cited": 0,
      "total": 15,
+     "by": {
+      "cited": [],
+      "named": [],
+      "exercised": [],
+      "edited": []
+     },
      "risks": [],
      "action": {
       "kind": "skim",
@@ -430,7 +752,13 @@
      }
     }
    ],
-   "core": []
+   "core": [],
+   "summary": {
+    "risky": 0,
+    "rest": 1,
+    "lead": "No risky file is without a claim.",
+    "quiet": "1 other changed file has no claim. It is low risk: skim it."
+   }
   },
   "risky_unclaimed": 0,
   "bugs": []

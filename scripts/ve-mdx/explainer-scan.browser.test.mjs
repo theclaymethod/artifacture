@@ -15,6 +15,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const SOURCE = path.join(ROOT, 'examples/visual-explainer-mdx/review-scan.mdx');
 // The trust-map explainer: an understando fixture run (trust map, resolved refs, explain.json and the agent's MDX).
 const TRUST_FIXTURE = path.join(ROOT, 'scripts/ve-mdx/fixtures/trust-map');
+// The same map in the old shape (schema_version 1: each verifier lists its claims, no claim lists its checks).
+const OLD_SHAPE_MAP = path.join(ROOT, 'scripts/ve-mdx/fixtures/trust-map-v1/trust-map.json');
 
 function run(args) {
   return new Promise((resolve) => {
@@ -84,9 +86,17 @@ test.before(async () => {
   const trustDir = path.join(workDir, 'trust');
   // The exports run at the same time; the bad cases fail in the pre-render, before a bundle.
   const map = (dir) => JSON.parse(readFileSync(path.join(dir, 'trust-map.json'), 'utf8'));
-  const [scan, good, noAction, idInProse] = await Promise.all([
+  const oldDir = path.join(workDir, 'old-shape');
+  const [scan, good, noAction, idInProse, oldShape] = await Promise.all([
     run(['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact]),
-    exportTrustCase(trustDir, () => {}),
+    // One claim joins an old claim: its old id C09 must still find it.
+    exportTrustCase(trustDir, (dir) => {
+      const data = map(dir);
+      const c = data.claims.find((x) => x.id === 'C02');
+      c.legacy_ids = ['C02', 'C09'];
+      c.parts = [{ id: 'C02', text: 'The new balance is an int.' }, { id: 'C09', text: 'The new balance is the old balance less the amount.' }];
+      writeFileSync(path.join(dir, 'trust-map.json'), JSON.stringify(data));
+    }),
     exportTrustCase(path.join(workDir, 'no-action'), (dir) => {
       const data = map(dir);
       for (const p of data.promises) delete p.reviewer_action;
@@ -96,10 +106,12 @@ test.before(async () => {
       const mdx = path.join(dir, 'explainer.mdx');
       writeFileSync(mdx, readFileSync(mdx, 'utf8').replace('A planted bug proves the overdraft rule.', 'Control K01 proves the overdraft rule.'));
     }),
+    exportTrustCase(oldDir, (dir) => cpSync(OLD_SHAPE_MAP, path.join(dir, 'trust-map.json'))),
   ]);
   assert.equal(scan.status, 0, scan.out);
   assert.equal(good.status, 0, good.out);
-  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), map: map(trustDir), noAction, idInProse };
+  assert.equal(oldShape.status, 0, oldShape.out);
+  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), map: map(trustDir), noAction, idInProse };
 });
 
 test.after(async () => {
@@ -291,7 +303,7 @@ test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, an
     const page = await off.newPage();
     await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
     const text = await page.innerText('main');
-    for (const want of ['Can you merge it?', trust.map.promises[0].label, 'checks caught the bug we planted', 'changed file']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
+    for (const want of ['Can you merge it?', trust.map.promises[0].label, 'checks caught their planted bug', 'changed file']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
     assert.ok(await page.$eval('#claim-c02 .ve-disclosure-body', (body) => body.getBoundingClientRect().height > 0), 'the no-JS deep link does not show its claim');
   } finally {
     await off.close();
@@ -307,15 +319,54 @@ test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, an
     await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
     await page.waitForFunction(() => { const c = document.getElementById('claim-c02'); return c?.open && c.parentElement.closest('details').open; });
     assert.deepEqual(errors, []);
-    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), /\d+ of \d+ checks caught the bug we planted/);
+    const derived = JSON.parse(readFileSync(path.join(trust.dir, 'refs.resolved.json'), 'utf8')).derived;
+    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), new RegExp(`\\d+ of ${derived.verify.ran} checks caught their planted bug`));
     assert.ok(await page.$('[data-ve-weak-check] [data-ve-action]'), 'a weak check has no action');
+
+    // A claim card: the derived check summary with its count, then the weakest check with an action, then the checks, collapsed.
+    const claim = page.locator('#claim-c01');
+    assert.equal(await claim.locator('[data-ve-checks]').textContent(), derived.claims.C01.summary);
+    assert.match(derived.claims.C01.summary, /^2 checks: /);
+    assert.ok((await claim.locator('[data-ve-weakest] [data-ve-action]').textContent()).trim(), 'the weakest check has no action');
+    assert.equal(await page.locator('#claim-c02 [data-ve-weakest] [data-ve-action]').textContent(), derived.claims.C02.weakest.action);
+    assert.ok(await claim.locator('summary:has-text("Show the 2 checks")').count());
+    // "What we broke" is the full derived sentence, never cut.
+    assert.equal(await page.locator('[data-ve-weak-check] dd').first().textContent(), derived.verify.weak[0].broke);
+    assert.equal(await page.locator('text=...').count(), 0);
+
+    // An old claim id finds the claim that joins it: the deep link opens that claim and its promise.
+    await page.goto(pathToFileURL(trust.html).href + '#claim-c09', { waitUntil: 'load' });
+    await page.waitForFunction(() => { const c = document.getElementById('claim-c02'); return c?.open && c.parentElement.closest('details').open && document.getElementById('claim-c09'); });
+    assert.ok(await page.locator('#claim-c02 summary:has-text("Show the 2 statements that this claim joins")').count());
+    assert.deepEqual(errors, []);
   } finally {
     await on.close();
+  }
+
+  // The old shape still exports and renders the claim cards, from the same derived block.
+  const old = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  try {
+    const page = await old.newPage();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+    await page.goto(pathToFileURL(trust.oldHtml).href + '#claim-c01', { waitUntil: 'load' });
+    await page.waitForFunction(() => document.getElementById('claim-c01')?.open);
+    assert.deepEqual(errors, []);
+    assert.equal(await page.locator('[data-ve-trust="claim"]').count(), trust.map.claims.length);
+    assert.match(await page.textContent('#claim-c01 [data-ve-checks]'), /^2 checks: /);
+    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), /\d+ of \d+ checks caught their planted bug/);
+  } finally {
+    await old.close();
   }
 
   // The PR-body section comes from the same rules as the page.
   const section = path.join(trust.dir, 'pr-section.md');
   const result = spawnSync(process.execPath, ['scripts/ve-mdx/trust-map.mjs', 'pr-section', '--map', path.join(trust.dir, 'trust-map.json'), '--refs', path.join(trust.dir, 'refs.resolved.json'), '--explain', path.join(trust.dir, 'explain.json'), '--out', section], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(readFileSync(section, 'utf8'), /\*\*Merge verdict: Not ready\.\*\*/);
+  const body = readFileSync(section, 'utf8');
+  assert.match(body, /\*\*Merge verdict: Not ready\.\*\*/);
+  assert.match(body, /\| Claim \| Strength \| Checks \| Weakest check \|/);
+  assert.match(body, /No overdraft: Asserted\. Its 3 claims: 1 Formal, 1 Proven, 1 Asserted\./);
+  assert.doesNotMatch(body, /\b(red|green)\b/);
 });

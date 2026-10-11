@@ -43,6 +43,7 @@ const where = (node) => node.parentElement?.closest('section[id]')?.id ?? 'page'
  *  - Narrative prose shows no claim, verifier or control ID and no code (a backticked name)
  *    outside a Disclosure body, a table and a CodeRef. The data components keep their own rules.
  *  - Each Term and each abbreviation in the prose has a glossary entry.
+ *  - The verify level opens with its result line; each weak check and the weakest check of each claim has an action.
  *  - Each #fragment link has a target, and no id shows twice.
  */
 export function checkTrustMapPage(markup) {
@@ -80,11 +81,14 @@ export function checkTrustMapPage(markup) {
   }
   if (missing.size) errors.push(`the page uses terms that the glossary does not define: ${[...missing].sort().join(', ')}. Add each to the glossary of the trust map.`);
   const verify = body.querySelector('[data-ve-trust="verifiers"]');
-  if (verify && !(verify.firstElementChild?.hasAttribute('data-ve-result') && /\d+ of \d+ checks/.test(verify.firstElementChild.textContent))) {
-    errors.push('the verify level must open with its result count, for example "41 of 44 checks caught the bug we planted"');
+  if (verify && !(verify.firstElementChild?.hasAttribute('data-ve-result') && /\d+ of \d+ checks caught their planted bug/.test(verify.firstElementChild.textContent))) {
+    errors.push('the verify level must open with its result line from derived.verify.result, for example "41 of 44 checks caught their planted bug."');
   }
   for (const card of body.querySelectorAll('[data-ve-weak-check]')) {
     if (!card.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the weak check "${card.querySelector('h4')?.textContent ?? card.id}" has no reviewer action`);
+  }
+  for (const weak of body.querySelectorAll('[data-ve-weakest]')) {
+    if (!weak.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the weakest check of the claim ${weak.closest('details[id]')?.id ?? '?'} has no action`);
   }
   for (const card of body.querySelectorAll('[data-ve-unclaimed-file]')) {
     if (!card.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the unclaimed file "${card.querySelector('code')?.textContent ?? card.id}" has no action`);

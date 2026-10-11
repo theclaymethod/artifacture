@@ -3,23 +3,29 @@
 // components in trust-map.tsx render from the same rules.
 //
 // Inputs (the data contract, see plugins/visual-explainer/cards/trust-map.md):
-//   trust    trust-map.json, schema_version 1, with verdicts (it has `summary`)
-//   refs     refs.resolved.json, schema 1: resolved code refs, control patches and the diff
+//   trust    trust-map.json, schema_version 1 or 2 (promise -> claim -> check)
+//   refs     refs.resolved.json, schema 2: resolved code refs, control patches, the diff and the
+//            derived block (scripts/derive.py). Each strength, count, summary and action comes
+//            from the derived block; these rules render it and never compute it again.
 //   explain  explain.json: diagrams, change areas, unclaimed notes, risks, control walkthroughs
 
-export const TRUST_MAP_SCHEMAS = [1];
-export const REFS_SCHEMAS = [1];
+export const TRUST_MAP_SCHEMAS = [1, 2];
+export const REFS_SCHEMAS = [2];
 
 export type Verdict = 'Formal' | 'Proven' | 'Backed' | 'Asserted' | 'Gap';
 export type Tone = 'ok' | 'info' | 'warn' | 'err' | 'neutral';
 
 export type CodeRefSpec = { path: string; symbol?: string; part?: string; match?: string; context?: number | number[]; start?: number; end?: number; note?: string };
+export type ClaimPart = { id: string; text: string; stated?: boolean; invariant?: string };
 export type Claim = {
-  id: string; name?: string; text: string; verdict: Verdict; reason: string; source: string; layer?: string; tier?: number | null;
-  code?: CodeRefSpec[]; plain?: { what: string; proof: string; warning?: string }; waiver?: { reason: string }; invariant?: string;
-  /** The promise, claim, check shape: the ids of the claim's checks. Without it, each verifier that names the claim is one of its checks. */
-  checks?: string[]; legacy_ids?: string[];
+  id: string; name?: string; text: string; verdict?: Verdict; reason?: string; source: string; layer?: string; tier?: number | null; stated?: boolean;
+  code?: CodeRefSpec[]; plain?: { what: string; proof: string; warning?: string }; waiver?: { reason: string }; invariant?: string; invariants?: string[];
+  /** Schema 2: the ids of the claim's checks (never empty). Schema 1: each verifier that names the claim is one of its checks. */
+  checks?: string[];
+  /** Schema 2: the old claim ids that this claim joins, and their statements. */
+  legacy_ids?: string[]; parts?: ClaimPart[];
 };
+/** A verifier of kind `none` is a placeholder check: no tool checks the claim. */
 export type Verifier = {
   id: string; name?: string; kind: string; claims: string[]; tier: string; description: string; provenance: string; state?: string;
   ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[] }; baseline?: { status?: string; output_tail?: string };
@@ -27,22 +33,38 @@ export type Verifier = {
   mechanical?: { result?: { status: string; command: string; detail: string } };
 };
 export type Control = { id: string; name?: string; verifier: string; description: string; edits?: unknown[]; result?: { status?: string; output_tail?: string; note?: string } };
-export type Promise_ = { id: string; label: string; sentence: string; claims: string[]; reviewer_action?: string };
+export type Promise_ = { id: string; name?: string; label: string; sentence: string; claims: string[]; reviewer_action?: string };
 export type GlossaryEntry = { term: string; meaning: string; aliases?: string[] };
 export type TrustMap = {
   schema_version: number; repo: string; pr?: number; title?: string; base: string; head: string;
-  claims: Claim[]; verifiers: Verifier[]; controls: Control[]; promises: Promise_[]; flags: Array<{ flag: string; subject: string; detail: string; loud?: boolean }>;
+  claims: Claim[]; verifiers: Verifier[]; controls: Control[]; promises: Promise_[]; flags?: Array<{ flag: string; subject: string; detail: string; loud?: boolean }>;
   summary?: Record<string, number>; glossary?: GlossaryEntry[]; invariants?: Array<{ id: string; text: string; author: string; status: string }>;
 };
 export type ResolvedRef = { link_only?: boolean; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string };
 export type ControlEdit = { path: string; language: string; patch?: string; before?: string; after?: string; note?: string; rows?: unknown[] };
 /** The values that understando derives once (scripts/derive.py), so the review CLI, the PR body and the page agree. The components render them. */
+export type CheckResult = 'none' | 'broken' | 'cannot-fail' | 'missed' | 'no-bug' | 'checked' | 'recorded' | 'caught';
+export type DerivedCheck = { id: string; name: string; kind: string; strength: Verdict; result: CheckResult };
+/** One claim: its strength (its weakest check), its checks, "5 checks: 4 caught their bug, 1 missed.", and the weakest check with its action. */
+export type DerivedClaim = {
+  strength: Verdict; tier: number | null; checks: DerivedCheck[]; n: number; counts: Partial<Record<CheckResult, number>>; summary: string;
+  weakest: { id: string; name: string; result: CheckResult; strength: Verdict; text: string; action: string } | null;
+};
+export type DerivedWeak = { check: string; control: string; name: string; broke: string; happened: string; why: string; action: string; ids: string };
+/** Can these checks catch a bug? It counts checks, not controls. `broke` holds the full "what we broke" sentence of each control. */
+export type DerivedVerify = {
+  result: string; other: string; tone: Tone; checks: number; ran: number; caught: number; missed: number; cannot: number; weak: DerivedWeak[];
+  by_promise: Array<{ id: string; rows: Array<{ check: string; name: string; claim: string; broke: string[]; ids: string }> }>;
+  tiers: Array<{ label: string; n: number }>; broke: Record<string, string>;
+};
 export type Derived = {
   schema: number; head: string;
-  promises: Array<{ id: string; strength: Verdict; claims: string[] }>;
+  promises: Array<{ id: string; strength: Verdict; claims: string[]; count: number; tally: string }>;
+  claims: Record<string, DerivedClaim>;
+  verify: DerivedVerify;
   merge: { form: MergeForm; items: MergeItem[]; blockers: number };
   ready: Ready | null;
-  unclaimed: { files: UnclaimedFile[]; core: UnclaimedFile[] };
+  unclaimed: { files: UnclaimedFile[]; core: UnclaimedFile[]; summary: { risky: number; rest: number; lead: string; quiet: string } };
   risky_unclaimed: number;
   bugs: Array<{ heading: string; lines: string[]; verified: boolean }>;
 };
@@ -150,16 +172,25 @@ export function weakest(verdicts: Iterable<Verdict | undefined>): Verdict | null
   const found = [...verdicts].filter((v): v is Verdict => Boolean(v));
   return found.length ? found.reduce((a, b) => (VERDICTS.indexOf(b) > VERDICTS.indexOf(a) ? b : a)) : null;
 }
-export const tally = (verdicts: Verdict[]) => VERDICTS.filter((v) => verdicts.includes(v)).map((v) => `${verdicts.filter((x) => x === v).length} ${v}`).join(', ');
 export const ladder = (v: Verifier) => v.ladder ?? KIND_LADDER[v.kind] ?? null;
 
-export type PromiseRow = { promise: Promise_; strength: Verdict; claims: Claim[] };
+export type PromiseRow = { promise: Promise_; strength: Verdict; claims: Claim[]; count: number; tally: string };
 
-/** Each promise with its strength (the verdict of its weakest claim) and its claims, weakest first, as derive.py derived them. */
+/** Each promise with its strength (the verdict of its weakest claim), its claims, weakest first, its claim count and tally, as derive.py derived them. */
 export function promiseRows(data: TrustMap, refs: Refs): PromiseRow[] {
   const claims = new Map(data.claims.map((c) => [c.id, c]));
   const promises = new Map(data.promises.map((p) => [p.id, p]));
-  return refs.derived.promises.map((d) => ({ promise: promises.get(d.id)!, strength: d.strength, claims: d.claims.map((id) => claims.get(id)!) }));
+  return refs.derived.promises.map((d) => ({ promise: promises.get(d.id)!, strength: d.strength, claims: d.claims.map((id) => claims.get(id)!), count: d.count, tally: d.tally }));
+}
+
+/** The derived values of a claim (scripts/derive.py claim_rows). */
+export const derivedClaim = (refs: Refs, id: string): DerivedClaim => refs.derived.claims[id];
+/** The strength of a claim: the strength of its weakest check, as derive.py derived it. */
+export const strengthOf = (refs: Refs, id: string): Verdict => refs.derived.claims[id].strength;
+
+/** The claim with this id, or the claim that joins this old id (legacy_ids). */
+export function claimOf(data: TrustMap, id: string): Claim | undefined {
+  return data.claims.find((c) => c.id === id) ?? data.claims.find((c) => c.legacy_ids?.includes(id));
 }
 
 /** The section anchors of the promises level, weakest first, for <Section anchors={promiseAnchors(trust, refs)}>. */
@@ -168,9 +199,9 @@ export function promiseAnchors(data: TrustMap, refs: Refs) {
   return promiseRows(data, refs).map(({ promise: p }) => ({ id: promiseAnchor(p.id), label: p.label }));
 }
 
-/** The first line of a promise: the strongest rung that a planted bug proved, over its claims. */
-export function strongestTier(claims: Claim[]): string {
-  const tiers = claims.map((c) => c.tier).filter((t): t is number => Boolean(t));
+/** The first line of a promise: the strongest rung that a planted bug proved, over the derived tiers of its claims. */
+export function strongestTier(refs: Refs, claims: Claim[]): string {
+  const tiers = claims.map((c) => refs.derived.claims[c.id]?.tier).filter((t): t is number => Boolean(t));
   if (!tiers.length) return 'Strongest check: none. No check of this promise caught a planted bug.';
   const t = Math.max(...tiers);
   return `Strongest check: tier ${t}, ${LADDER_NAMES[t]}.`;
@@ -197,18 +228,18 @@ export function assertTrustMap(data: TrustMap): TrustMap {
   const errors: string[] = [];
   if (!data || typeof data !== 'object') throw new TrustMapError('trust map: the data is missing; pass data={trust}');
   if (!TRUST_MAP_SCHEMAS.includes(data.schema_version)) errors.push(`schema_version ${data.schema_version} is not supported (supported: ${TRUST_MAP_SCHEMAS.join(', ')})`);
-  if (!data.summary) errors.push('the map has no verdicts; run the verdict step first');
-  for (const key of ['claims', 'verifiers', 'controls', 'promises', 'flags'] as const) if (!Array.isArray(data[key])) errors.push(`${key} must be a list`);
+  for (const key of ['claims', 'verifiers', 'controls', 'promises'] as const) if (!Array.isArray(data[key])) errors.push(`${key} must be a list`);
+  // The verdict step writes the flags; a map without a verdict run has none.
+  if (data.flags !== undefined && !Array.isArray(data.flags)) errors.push('flags must be a list');
   if (errors.length) throw new TrustMapError('trust map is invalid:\n  ' + errors.join('\n  '));
   const claims = new Set(data.claims.map((c) => c.id));
-  for (const c of data.claims) if (!VERDICTS.includes(c.verdict)) errors.push(`claim ${c.id} has no verdict (${c.verdict})`);
   const member = new Map<string, string[]>();
   for (const p of data.promises) {
     for (const id of p.claims) {
       if (!claims.has(id)) errors.push(`promise ${p.id} names the claim ${id}, which the map does not have`);
       member.set(id, [...(member.get(id) ?? []), p.id]);
     }
-    for (const field of ['label', 'sentence', 'reviewer_action'] as const) {
+    for (const field of ['name', 'label', 'sentence', 'reviewer_action'] as const) {
       const hit = (p[field] ?? '').match(ID_PATTERN);
       if (hit) errors.push(`promise ${p.id}: its ${field} shows the ID ${hit[0]}; a reader sees it without opening anything`);
     }
@@ -217,13 +248,26 @@ export function assertTrustMap(data: TrustMap): TrustMap {
     const n = member.get(c.id)?.length ?? 0;
     if (n !== 1) errors.push(`claim ${c.id} is in ${n} promises (${(member.get(c.id) ?? []).join(', ') || 'none'}); it must be in exactly one`);
   }
-  const verdictOf = new Map(data.claims.map((c) => [c.id, c.verdict]));
-  for (const p of errors.length ? [] : data.promises) {
-    const strength = weakest(p.claims.map((id) => verdictOf.get(id)))!;
-    if (!STRONG.includes(strength) && !p.reviewer_action) errors.push(`promise ${p.id} is ${strength}, so it needs a reviewer_action`);
-  }
   const verifiers = new Set(data.verifiers.map((v) => v.id));
   for (const v of data.verifiers) for (const id of v.claims) if (!claims.has(id)) errors.push(`verifier ${v.id} names the claim ${id}, which the map does not have`);
+  if (data.schema_version >= 2) {
+    const listed = new Set<string>();
+    for (const c of data.claims) {
+      if (!c.checks?.length) errors.push(`claim ${c.id} lists no checks; each claim of schema 2 lists one or more (a kind none check when no tool checks it)`);
+      for (const id of c.checks ?? []) {
+        if (!verifiers.has(id)) errors.push(`claim ${c.id} lists the check ${id}, which the map does not have`);
+        listed.add(id);
+      }
+    }
+    for (const v of data.verifiers) if (!listed.has(v.id)) errors.push(`verifier ${v.id} is a check of no claim; list it in the checks of a claim, or remove it`);
+  }
+  const legacy = new Map<string, string>();
+  for (const c of data.claims) for (const old of c.legacy_ids ?? []) {
+    if (old === c.id) continue;
+    if (claims.has(old)) errors.push(`claim ${c.id} lists the legacy id ${old}, which is the id of another claim`);
+    else if (legacy.has(old)) errors.push(`claims ${legacy.get(old)} and ${c.id} both list the legacy id ${old}`);
+    legacy.set(old, c.id);
+  }
   for (const k of data.controls) if (!verifiers.has(k.verifier)) errors.push(`control ${k.id} names the verifier ${k.verifier}, which the map does not have`);
   if (errors.length) throw new TrustMapError('trust map is invalid:\n  ' + errors.join('\n  '));
   checked.set(data, true);
@@ -237,8 +281,14 @@ export function assertRefs(data: TrustMap, refs: Refs): Refs {
   if (refs.head !== data.head) throw new TrustMapError(`refs.resolved.json is for ${String(refs.head).slice(0, 10)}, the map head is ${data.head.slice(0, 10)}; run understando explain again`);
   const d = refs.derived;
   if (!d || d.head !== data.head) throw new TrustMapError('refs.resolved.json has no derived block for the map head; run understando explain again');
+  if (!d.claims || !d.verify) throw new TrustMapError('refs.resolved.json has no derived claims or verify block; run understando explain again');
   const ids = new Set(data.promises.map((p) => p.id));
   if (d.promises.length !== ids.size || d.promises.some((p) => !ids.has(p.id))) throw new TrustMapError('the derived promises do not match the promises of the map; run understando explain again');
+  const missing = data.claims.filter((c) => !d.claims[c.id]).map((c) => c.id);
+  if (missing.length) throw new TrustMapError(`the derived block has no row for the claims ${missing.join(', ')}; run understando explain again`);
+  const promises = new Map(data.promises.map((p) => [p.id, p]));
+  const errors = d.promises.filter((p) => !STRONG.includes(p.strength) && !promises.get(p.id)!.reviewer_action).map((p) => `promise ${p.id} is ${p.strength}, so it needs a reviewer_action`);
+  if (errors.length) throw new TrustMapError('trust map is invalid:\n  ' + errors.join('\n  '));
   checked.set(refs, true);
   return refs;
 }
@@ -389,19 +439,22 @@ export type UnclaimedAction = { kind: 'read' | 'ask' | 'check' | 'skim'; text: s
 export type UnclaimedFile = {
   path: string; file: string; role: string; change: string; added: number; removed: number; created: boolean;
   risks: string[]; note: string | null; action: UnclaimedAction; main: CodeRefSpec | null; claims: number; cited: number; total: number;
+  /** The claims that cover the file, by how: cited by a code ref, named in the text, exercised by a check, edited by a control. */
+  by?: { cited: string[]; named: string[]; exercised: string[]; edited: string[] };
 };
 
 // ---- Verify the verifiers -----------------------------------------------------------------------
 
-/** A short label for a planted bug, from its own description: the first clause. */
-export function mutationLabel(text: string): string {
-  const head = text.trim().split(/(?<=[a-z0-9)])[:,.]\s/)[0].replace(/\.$/, '');
-  return head.length <= 48 ? head : head.slice(0, 45).replace(/\s+\S*$/, '') + '...';
-}
-
 export const controlOutcome = (k: Control, v: Verifier): Outcome => (k.result?.status === 'red' ? 'caught' : v.state === 'cannot-fail' ? 'cannot-fail' : 'missed');
 
-export function controlWalkthrough(data: TrustMap, spec: { title: string; description: string; controls: string[] }) {
+/** What we broke in a control: the full short sentence that derive.py wrote (derived.verify.broke). */
+export function brokeOf(refs: Refs, id: string): string {
+  const text = refs.derived.verify.broke?.[id];
+  if (!text) throw new TrustMapError(`the derived block has no "what we broke" sentence for the control ${id}; run understando explain again`);
+  return text;
+}
+
+export function controlWalkthrough(data: TrustMap, refs: Refs, spec: { title: string; description: string; controls: string[] }) {
   const controls = new Map(data.controls.map((k) => [k.id, k]));
   const verifiers = new Map(data.verifiers.map((v) => [v.id, v]));
   const nodes: Array<Record<string, string>> = [];
@@ -414,7 +467,7 @@ export function controlWalkthrough(data: TrustMap, spec: { title: string; descri
     const v = verifiers.get(k.verifier)!;
     const outcome = controlOutcome(k, v);
     const [word, tone, meaning] = OUTCOME[outcome];
-    nodes.push({ id: `plant-${kid}`, label: mutationLabel(reader(k.description)), detail: `control ${kid}`, shape: 'oval' });
+    nodes.push({ id: `plant-${kid}`, label: brokeOf(refs, kid), detail: `control ${kid}`, shape: 'oval' });
     if (!seen.has(v.id)) {
       seen.add(v.id);
       const argv = v.command?.argv ?? [];
@@ -429,105 +482,22 @@ export function controlWalkthrough(data: TrustMap, spec: { title: string; descri
   return { title: spec.title, description: spec.description, nodes, edges, steps };
 }
 
-export const RUNG_WORDS: Record<number, string> = { 5: 'Formal proof', 4: 'Model check', 3: 'Types and import rules', 2: 'Property tests', 1: 'Tests' };
-
 /** The checks of a claim: `claim.checks` when the map has them, else each verifier that names the claim. */
 export function checksOf(data: TrustMap, c: Claim): Verifier[] {
   if (c.checks) return c.checks.map((id) => data.verifiers.find((v) => v.id === id)).filter((v): v is Verifier => Boolean(v));
   return data.verifiers.filter((v) => v.claims.includes(c.id));
 }
-/** The claims that a check backs, in either shape. */
-export const claimsOfCheck = (data: TrustMap, v: Verifier) => data.claims.filter((c) => checksOf(data, c).includes(v));
-
-export type CheckResult = 'caught' | 'missed' | 'cannot-fail' | 'no-bug';
-/** One check: it caught its bug when each planted bug made it fail; it missed when one did not. */
-export function checkResult(data: TrustMap, v: Verifier): CheckResult {
-  if (v.state === 'cannot-fail') return 'cannot-fail';
-  const ran = data.controls.filter((k) => k.verifier === v.id && k.result);
-  if (!ran.length) return 'no-bug';
-  return ran.every((k) => k.result?.status === 'red') ? 'caught' : 'missed';
-}
-const RESULT_RANK: CheckResult[] = ['cannot-fail', 'missed', 'no-bug', 'caught'];
-
-/** "5 checks: 4 caught their bug, 1 missed", and the weakest check, named in plain words, with its action. */
-export function claimChecks(data: TrustMap, refs: Refs, c: Claim, explain: Explain = {}) {
-  const checks = checksOf(data, c);
-  const results = checks.map((v) => checkResult(data, v));
-  const n = (r: CheckResult) => results.filter((x) => x === r).length;
-  const parts = [n('caught') && `${n('caught')} caught their bug`, n('missed') && `${n('missed')} missed`, n('cannot-fail') && `${n('cannot-fail')} cannot fail`, n('no-bug') && `${n('no-bug')} had no planted bug`].filter(Boolean);
-  const summary = checks.length ? `${checks.length} ${checks.length === 1 ? 'check' : 'checks'}: ${parts.join(', ')}.` : 'No check backs this claim.';
-  if (!checks.length) return { summary, weakest: null };
-  const i = results.map((r, j) => [RESULT_RANK.indexOf(r), j]).sort((a, b) => a[0] - b[0])[0][1];
-  const v = checks[i];
-  const r = results[i];
-  if (r === 'caught') return { summary, weakest: null };
-  const weak = verifierReport(data, refs, explain).weak.find((w) => w.verifier.id === v.id);
-  const said = r === 'no-bug' ? `${checkName(v)} had no planted bug, so no run proved that it can fail.` : `${checkName(v)} ${r === 'missed' ? 'missed its planted bug' : 'cannot fail'}.`;
-  const action = weak?.action ?? (r === 'no-bug' ? 'Plant a bug for this check, or accept the claim as it stands.' : 'Add a check that fails on this bug.');
-  return { summary, weakest: { check: v, text: said, action } };
-}
-
-export type WeakCheck = { control: Control; verifier: Verifier; name: string; broke: string; happened: string; why: string; action: string; ids: string };
-export type CaughtRow = { control: Control; name: string; broke: string; ids: string };
-
-/** The name of a check in plain words: its `name`, else its kind and its tool. */
-export function checkName(v: Verifier): string {
-  if (v.name) return v.name;
-  const argv = v.command?.argv ?? [];
-  const last = argv[argv.length - 1];
-  const target = last && (last.includes('/') || /\.\w+$/.test(last)) ? last.split('/').pop()! : 'the whole project';
-  const tool = v.independence?.tool && v.independence.tool !== v.kind ? `${v.independence.tool} on ` : '';
-  return `${capital(v.kind.replace(/-/g, ' '))} check (${tool}${target})`;
-}
-const broke = (k: Control) => k.name ?? mutationLabel(reader(k.description));
-const sameEdits = (a: Control, b: Control) => a.edits !== undefined && JSON.stringify(a.edits) === JSON.stringify(b.edits);
-
-/**
- * Can these checks catch a bug? The tally of the controls, a tone for the level, one card for
- * each check that missed its planted bug or cannot fail (each with one reviewer action), the
- * checks that caught their bug by promise, and the checks per tier.
- */
-export function verifierReport(data: TrustMap, refs: Refs, explain: Explain = {}) {
-  const verifiers = new Map(data.verifiers.map((v) => [v.id, v]));
-  const claims = new Map(data.claims.map((c) => [c.id, c]));
-  const ran = data.controls.filter((k) => k.result);
-  const outcome = (k: Control) => controlOutcome(k, verifiers.get(k.verifier)!);
-  const caught = ran.filter((k) => outcome(k) === 'caught');
-  const missed = ran.filter((k) => outcome(k) === 'missed');
-  const cannot = ran.filter((k) => outcome(k) === 'cannot-fail');
-  const tail = [missed.length ? `${missed.length} missed it` : '', cannot.length ? `${cannot.length} cannot fail` : ''].filter(Boolean).join(', and ');
-  const result = `${caught.length} of ${ran.length} checks caught the bug we planted.` + (tail ? ` ${capital(tail)}.` : '');
-  const tone: Tone = cannot.length ? 'err' : missed.length ? 'warn' : 'ok';
-  const fixes = new Map((explain.risks ?? []).flatMap((r) => r.claims.map((id) => [id, r.fix] as const)));
-  const weak: WeakCheck[] = [...missed, ...cannot].map((k) => {
-    const v = verifiers.get(k.verifier)!;
-    const protects = claimsOfCheck(data, v).map((c) => claimLabel(c).replace(/\.$/, ''));
-    const catcher = caught.find((o) => o.verifier !== v.id && sameEdits(o, k));
-    const fix = claimsOfCheck(data, v).map((c) => fixes.get(c.id)).find(Boolean);
-    const why = `So this check does not protect this rule: ${protects.join('; ')}.` + (catcher ? ` Only ${checkName(verifiers.get(catcher.verifier)!)} caught the same bug.` : '');
-    const action = catcher ? `Trust ${checkName(verifiers.get(catcher.verifier)!)}, not this check.` : fix ? `Add a check. The cheapest fix: ${fix}` : 'Add a check that fails on this bug, or fix this check so that it does.';
-    const happened = outcome(k) === 'cannot-fail' ? 'The check passed on each planted bug, so it can fail on nothing.' : 'The check still passed.';
-    return { control: k, verifier: v, name: checkName(v), broke: broke(k), happened, why, action, ids: [k.id, v.id, ...claimsOfCheck(data, v).map((c) => c.id)].join(' · ') };
-  });
-  const byPromise = promiseRows(data, refs).map(({ promise, claims: own }) => {
-    const mine = new Set(own.flatMap((c) => checksOf(data, c).map((v) => v.id)));
-    const rows = caught.filter((k) => mine.has(k.verifier)).map((k) => ({ control: k, name: checkName(verifiers.get(k.verifier)!), broke: broke(k), ids: `${k.id} · ${k.verifier}` }));
-    return { promise, rows };
-  }).filter((g) => g.rows.length);
-  const counts = new Map<string, number>();
-  for (const v of data.verifiers) { const rung = ladder(v); const word = rung ? RUNG_WORDS[rung] : 'Recorded runs and model judgments'; counts.set(word, (counts.get(word) ?? 0) + 1); }
-  const tiers = [5, 4, 3, 2, 1].map((n) => RUNG_WORDS[n]).concat('Recorded runs and model judgments').filter((w) => counts.has(w)).map((w) => ({ label: w, n: counts.get(w)! }));
-  return { result, tone, ran: ran.length, caught: caught.length, weak, byPromise, tiers };
-}
+/** A tool check: each verifier but a kind none placeholder. */
+export const isTool = (v: Verifier) => v.kind !== 'none';
 
 // ---- The PR-body section (markdown) ----------------------------------------------------------
 
-function mermaid(data: TrustMap): string {
+function mermaid(data: TrustMap, refs: Refs): string {
   const layers = new Map<string, Record<string, number>>();
   for (const c of data.claims) {
     const layer = c.layer ?? 'Claims';
     if (!layers.has(layer)) layers.set(layer, Object.fromEntries(VERDICTS.map((v) => [v, 0])));
-    layers.get(layer)![c.verdict] += 1;
+    layers.get(layer)![strengthOf(refs, c.id)] += 1;
   }
   const out = ['```mermaid', 'flowchart LR'];
   [...layers].forEach(([layer, counts], i) => {
@@ -562,26 +532,30 @@ export function prSection(data: TrustMap, refs: Refs, explain: Explain = {}, exp
     for (const g of ready.gates) out.push(`- [${g.pass ? 'x' : ' '}] **Gate ${g.n}, ${g.name}:** ${g.pass ? 'pass' : 'fail'}. ${g.detail}`);
     out.push('');
   }
-  out.push(mermaid(data), '', '| Claim | Verdict | Tier | Why |', '|---|---|---|---|');
+  out.push(mermaid(data, refs), '', '| Claim | Strength | Checks | Weakest check |', '|---|---|---|---|');
   const esc = (t: string) => t.replaceAll('|', '\\|');
   for (const c of data.claims) {
+    const d = derivedClaim(refs, c.id);
     const first = c.code?.[0];
     const permalink = first ? findRef(refs, first).permalink : null;
     const id = permalink ? `[${c.id}](${permalink})` : c.id;
-    const verdict = `**${c.verdict}**` + (c.waiver ? ` (waived: ${esc(c.waiver.reason)})` : '');
-    out.push(`| ${id}: ${esc(c.text)} | ${verdict} | ${c.tier || '-'} | ${esc(c.reason)} |`);
+    const strength = `**${d.strength}**` + (c.waiver ? ` (waived: ${esc(c.waiver.reason)})` : '');
+    const weak = d.weakest ? `${capital(d.weakest.name)}. ${d.weakest.action}` : '-';
+    out.push(`| ${id}: ${esc(capital(claimLabel(c)))} | ${strength} | ${esc(d.summary)} | ${esc(weak)} |`);
   }
   out.push('');
-  const s = data.summary ?? {};
-  out.push('- **Verdicts:** ' + VERDICTS.map((v) => `${s[v] ?? 0} ${v}`).join(', ') + '.');
-  out.push('- **Promises:** ' + promiseRows(data, refs).map(({ promise: p, strength, claims }) => { const t = strongestTier(claims); return `${p.label}: ${strength}, ${t[0].toLowerCase()}${t.slice(1)}`; }).join(' '));
+  if (data.summary) out.push('- **Verdicts:** ' + VERDICTS.map((v) => `${data.summary![v] ?? 0} ${v}`).join(', ') + '.');
+  out.push('- **Promises:** ' + promiseRows(data, refs).map(({ promise: p, strength, claims, count, tally }) => {
+    const t = strongestTier(refs, claims);
+    return `${p.label}: ${strength}. Its ${count} ${count === 1 ? 'claim' : 'claims'}: ${tally}. ${t}`;
+  }).join(' '));
   const waived = data.claims.filter((c) => c.waiver);
   if (waived.length) out.push('- **Waived:** ' + waived.map((c) => `${c.id}: ${c.waiver!.reason}`).join(' '));
-  const loud = data.flags.filter((f) => f.loud);
-  const dead = loud.filter((f) => f.flag === 'cannot-fail').map((f) => f.detail);
+  const loud = (data.flags ?? []).filter((f) => f.loud);
+  const dead = loud.filter((f) => f.flag === 'cannot-fail').map((f) => reader(f.detail));
   out.push('- **Cannot fail:** ' + (dead.length ? dead.join(' ') : 'none.'));
-  for (const f of loud) if (f.flag !== 'cannot-fail') out.push(`- **${f.flag}:** ${f.detail}`);
-  out.push(`- **Controls:** ${data.controls.filter((k) => k.result).length} ran in scratch worktrees. Cost: $0, with no model call.`);
+  for (const f of loud) if (f.flag !== 'cannot-fail') out.push(`- **${f.flag}:** ${reader(f.detail)}`);
+  out.push(`- **Checks:** ${refs.derived.verify.result}${refs.derived.verify.other ? ' ' + refs.derived.verify.other : ''} The planted bugs ran in scratch worktrees. Cost: $0, with no model call.`);
   for (const b of explain.bullets ?? []) out.push(`- ${b}`);
   if (explainerUrl) out.push(`- **Explainer:** ${explainerUrl}`);
   return out.join('\n') + '\n';
