@@ -413,6 +413,18 @@
   display: none;
 }
 
+/* Without JavaScript (a pre-rendered page before it hydrates, or with scripts off), a deep link
+   still shows its target: the targeted block, and each block that holds the target, show their
+   body. The script sets data-ve-js on the root and opens the blocks itself. */
+html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target))::details-content {
+  content-visibility: visible;
+  display: block;
+}
+
+html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) > .ve-disclosure-body {
+  display: block;
+}
+
 .ve-disclosure-body {
   min-width: 0;
   max-width: 100%;

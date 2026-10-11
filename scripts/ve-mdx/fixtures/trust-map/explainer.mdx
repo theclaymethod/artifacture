@@ -1,0 +1,135 @@
+{/* The fixture explainer, as the explain step writes it: the narrative in Markdown, the levels from data. The card trust-map of visual-explainer holds the contract. */}
+import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, ExplainerShell, Glossary, Glossed, MergeVerdict, PromiseChips, PromiseLink, PromiseList, Section, Step, Steps, UnclaimedChanges, VerifyTheVerifiers, WhatChanged, promiseAnchors } from 'visual-explainer-mdx/components';
+import trust from './trust-map.json';
+import refs from './refs.resolved.json';
+import explain from './explain.json';
+
+<ExplainerShell title="PR #7: Refuse overdrafts in the wallet" summary="The wallet now refuses an overdraft. This page explains the change, then shows how far each promise is proven." chapterNav appearance="auto" reviewTools={false}>
+
+<Section id="story" title="The story: what changed, and why you can trust it" navLabel="The story" anchors={[{ id: 'merge', label: 'Can you merge it?' }, { id: 'story-promises', label: 'What the PR promises' }]}>
+
+<MergeVerdict data={trust} refs={refs} explain={explain} />
+
+<Glossed data={trust} expand>
+<DefinitionList size="lead">
+<Definition term="The problem">Before this PR, a withdrawal could take the balance below zero.</Definition>
+<Definition term="The change">The withdraw function now refuses an amount above the balance, and a new function adds a fee.</Definition>
+<Definition term="Why you can trust it">A planted bug proves the overdraft rule. The promises below show the weak parts.</Definition>
+</DefinitionList>
+</Glossed>
+
+<ArchitectureDiagram spec={explain.diagrams.story} name="story" />
+
+<PromiseChips data={trust} refs={refs} />
+
+Next: [see why it was built this way](#why).
+
+</Section>
+
+<Section id="why" title="Why it was built this way" navLabel="Why it was built this way">
+
+<Glossed data={trust}>
+
+The user asked for a wallet that never pays out more than the balance. The author chose a guard in the withdraw function, and a check that fails when the guard is gone.
+
+</Glossed>
+
+Next: [see one run of the change, step by step](#loop).
+
+</Section>
+
+<Section id="loop" title="The loop: one run, step by step" navLabel="The loop">
+
+<Glossed data={trust}>
+
+One call takes an amount from a balance. Each step links to the promise that protects it.
+
+</Glossed>
+
+<ArchitectureDiagram spec={explain.diagrams.loop} name="loop" />
+
+<Steps label="The steps of one run">
+<Step id="loop-step-1">
+A caller asks the wallet to take an amount from the balance. <PromiseLink data={trust} id="P1" />
+
+<Disclosure summary="Show the code for this step">
+<CodeRef refs={refs} path="wallet/core.py" symbol="withdraw" />
+</Disclosure>
+</Step>
+<Step id="loop-step-2">
+The wallet refuses an amount above the balance, and else it gives the balance minus the amount. <PromiseLink data={trust} id="P1" />
+</Step>
+<Step id="loop-step-3">
+The PR also adds a fee function and a denial message, but the withdraw function does not call them yet. <PromiseLink data={trust} id="P4" />
+</Step>
+</Steps>
+
+Next: [see what the PR deletes and adds](#changed).
+
+</Section>
+
+<Section id="changed" title="What changed in the code" navLabel="What changed" anchors={[{ id: 'change-diagram', label: 'Before and after' }, { id: 'change-table', label: 'Deleted and replaced' }]}>
+
+The PR changes the wallet core and adds two modules and a report script.
+
+<WhatChanged data={trust} refs={refs} explain={explain} />
+
+Next: [check each promise, weakest first](#promises).
+
+</Section>
+
+<Section id="promises" title="The promises, weakest first" navLabel="The promises" anchors={promiseAnchors(trust, refs)}>
+
+<PromiseList data={trust} refs={refs} explain={explain} />
+
+Next: [see if the checks can catch a bug](#verifiers).
+
+</Section>
+
+<Section id="verifiers" title="Can these checks catch a bug?" navLabel="Can checks catch a bug?">
+
+<VerifyTheVerifiers data={trust} refs={refs} explain={explain} />
+
+Next: [see the changed code that no claim covers](#unclaimed).
+
+</Section>
+
+<Section id="unclaimed" title="Changed code that no claim covers" navLabel="Unclaimed changes">
+
+<UnclaimedChanges data={trust} refs={refs} explain={explain} />
+
+</Section>
+
+<Section id="tradeoffs" title="Trade-offs and concerns" navLabel="Trade-offs and concerns">
+
+<Glossed data={trust}>
+
+### Trade-offs
+
+- The fixture is small, so each level is short.
+
+### Concerns
+
+- The unit test that expects an integer from a withdrawal cannot fail.
+
+### How we checked this explainer
+
+- The e2e test runs each step on this fixture.
+
+</Glossed>
+
+</Section>
+
+<Section id="exercises" title="Exercises" navLabel="Exercises">
+
+*This chapter is a placeholder. The learning app fills it.*
+
+</Section>
+
+<Section id="glossary" title="Glossary: the words on this page" navLabel="Glossary">
+
+<Glossary data={trust} />
+
+</Section>
+
+</ExplainerShell>

@@ -80,6 +80,7 @@ export { LieflatChart } from './lieflat-charts';
 export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
 export { DiagramWalkthrough } from './diagram-walkthrough';
 export { DiagramModes, useDiagramMode } from './diagram-modes';
+export { ArchitectureDiagram, ClaimDetail, CodeRef, Glossary, Glossed, Invariants, MergeVerdict, PromiseChips, PromiseLink, PromiseList, UnclaimedChanges, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, WhatChanged, promiseAnchors } from './trust-map';
 export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 

@@ -14,6 +14,8 @@ export const sharedComponents = new Set([
   'DefinitionList', 'Definition', 'Subsection', 'Disclosure', 'CopyLink', 'Term', 'Steps', 'Step', 'ChipLinks',
   'DiagramCanvas',
   'DataTable', 'StatusPill', 'Badge', 'Legend', 'ChapterRail',
+  'ArchitectureDiagram', 'ClaimDetail', 'CodeRef', 'Glossary', 'Glossed', 'Invariants', 'MergeVerdict', 'PromiseChips', 'PromiseLink',
+  'PromiseList', 'UnclaimedChanges', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough', 'WhatChanged',
   'GraphicCanvas',
   'PunctumReadout',
   'GraphicSlide',
@@ -686,6 +688,29 @@ function buildRowsFromDiffTag(tag) {
     return diffLines(before, after);
   }
   return null;
+}
+
+/**
+ * Highlight the code of a resolved-refs file (refs.resolved.json, schema 1) at export time: each
+ * excerpt gets `html`, and each control patch gets highlighted diff `rows`. The data components
+ * then render the same markup in the static pre-render and in the browser.
+ */
+export async function highlightRefs(refs) {
+  for (const ref of refs.refs ?? []) if (ref.html === undefined && !ref.link_only) ref.html = await highlightCode(ref.excerpt, ref.language ?? 'text');
+  for (const edits of Object.values(refs.controls ?? {})) {
+    for (const edit of edits) {
+      if (edit.rows || (edit.patch === undefined && edit.before === undefined)) continue;
+      let rows = null;
+      if (edit.patch !== undefined) {
+        const parsed = parseUnifiedDiff(edit.patch);
+        rows = parsed.errors.length ? null : parsed.rows;
+      } else rows = diffLines(edit.before, edit.after ?? '');
+      if (!rows) continue;
+      edit.rows = [];
+      for (const row of rows) edit.rows.push({ ...row, html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, edit.language ?? 'text') });
+    }
+  }
+  return refs;
 }
 
 async function highlightCode(code, language) {

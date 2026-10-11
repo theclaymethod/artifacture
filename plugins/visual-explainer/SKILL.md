@@ -51,6 +51,7 @@ Completion requires editable source, a successful export, and evidence for every
 | reference image to low-detail procedural 3D | [procedural-models.md](references/procedural-models.md) | Use the installed img2threejs skill and reuse its reviewed factory across outputs. |
 | code walkthrough | [code-walkthrough.md](cards/code-walkthrough.md) | — |
 | explain a diff | [explain-diff.md](cards/explain-diff.md) | — |
+| PR trust map (understando) | [trust-map.md](cards/trust-map.md) | The data components, the data contract and the export checks of a trust-map explainer. |
 | project recap | [project-recap.md](cards/project-recap.md) | — |
 
 For point-and-click annotation, read [annotate.md](commands/annotate.md). If the request lacks a material choice that cannot be inferred, read [clarify.md](references/clarify.md). For a component API not shown by the selected card, read [mdx-components.md](references/mdx-components.md). For poster, video, brand-heavy, or bespoke HTML work, read [legacy-html.md](references/legacy-html.md) and only the branch it selects.

@@ -3,15 +3,35 @@
 // highlighted code and diffs) in light and dark mode.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SOURCE = path.join(ROOT, 'examples/visual-explainer-mdx/review-scan.mdx');
+// The trust-map explainer: an understando fixture run (trust map, resolved refs, explain.json and the agent's MDX).
+const TRUST_FIXTURE = path.join(ROOT, 'scripts/ve-mdx/fixtures/trust-map');
+
+function run(args) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, args, { cwd: ROOT });
+    let out = '';
+    child.stdout.on('data', (d) => { out += d; });
+    child.stderr.on('data', (d) => { out += d; });
+    child.on('exit', (status) => resolve({ status, out }));
+  });
+}
+
+/** A copy of the trust-map fixture with one change, exported; resolves to the export result. */
+function exportTrustCase(dir, change) {
+  cpSync(TRUST_FIXTURE, dir, { recursive: true });
+  change(dir);
+  return run(['scripts/ve-mdx/export.mjs', path.join(dir, 'explainer.mdx'), '--out', path.join(dir, 'explainer.html')]);
+}
 
 function luminance([r, g, b]) {
   const channel = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
@@ -55,13 +75,31 @@ async function colorPairs(page, selector) {
 let workDir;
 let artifact;
 let browser;
+let trust;
 
 test.before(async () => {
   browser = await chromium.launch({ headless: true });
   workDir = mkdtempSync(path.join(os.tmpdir(), 'artifacture-review-scan-'));
   artifact = path.join(workDir, 'review-scan.html');
-  const result = spawnSync(process.execPath, ['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
-  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  const trustDir = path.join(workDir, 'trust');
+  // The exports run at the same time; the bad cases fail in the pre-render, before a bundle.
+  const map = (dir) => JSON.parse(readFileSync(path.join(dir, 'trust-map.json'), 'utf8'));
+  const [scan, good, noAction, idInProse] = await Promise.all([
+    run(['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact]),
+    exportTrustCase(trustDir, () => {}),
+    exportTrustCase(path.join(workDir, 'no-action'), (dir) => {
+      const data = map(dir);
+      for (const p of data.promises) delete p.reviewer_action;
+      writeFileSync(path.join(dir, 'trust-map.json'), JSON.stringify(data));
+    }),
+    exportTrustCase(path.join(workDir, 'id-in-prose'), (dir) => {
+      const mdx = path.join(dir, 'explainer.mdx');
+      writeFileSync(mdx, readFileSync(mdx, 'utf8').replace('A planted bug proves the overdraft rule.', 'Control K01 proves the overdraft rule.'));
+    }),
+  ]);
+  assert.equal(scan.status, 0, scan.out);
+  assert.equal(good.status, 0, good.out);
+  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), map: map(trustDir), noAction, idInProse };
 });
 
 test.after(async () => {
@@ -232,4 +270,52 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
   } finally {
     await context.close();
   }
+});
+
+test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, and the export checks', async () => {
+  // The export fails on bad data and on an ID in the narrative prose.
+  assert.notEqual(trust.noAction.status, 0);
+  assert.match(trust.noAction.out, /needs a reviewer_action/);
+  assert.notEqual(trust.idInProse.status, 0);
+  assert.match(trust.idInProse.out, /the ID K01 is in the narrative prose/);
+
+  // The page names the trust map that it was built from.
+  const html = readFileSync(trust.html, 'utf8');
+  assert.ok(html.includes(`<meta name="ve-trust-map-head" content="${trust.map.head}">`));
+  const sha = createHash('sha256').update(readFileSync(path.join(trust.dir, 'trust-map.json'))).digest('hex');
+  assert.ok(html.includes(`<meta name="ve-trust-map-sha256" content="${sha}">`));
+
+  // Without JavaScript: the merge verdict, the promises, the claims and the verify result show, and a deep link shows its claim.
+  const off = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
+  try {
+    const page = await off.newPage();
+    await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
+    const text = await page.innerText('main');
+    for (const want of ['Can you merge it?', trust.map.promises[0].label, 'checks caught the bug we planted', 'changed file']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
+    assert.ok(await page.$eval('#claim-c02 .ve-disclosure-body', (body) => body.getBoundingClientRect().height > 0), 'the no-JS deep link does not show its claim');
+  } finally {
+    await off.close();
+  }
+
+  // With JavaScript: the page hydrates without an error, and a deep link opens the claim and its promise.
+  const on = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  try {
+    const page = await on.newPage();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+    await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
+    await page.waitForFunction(() => { const c = document.getElementById('claim-c02'); return c?.open && c.parentElement.closest('details').open; });
+    assert.deepEqual(errors, []);
+    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), /\d+ of \d+ checks caught the bug we planted/);
+    assert.ok(await page.$('[data-ve-weak-check] [data-ve-action]'), 'a weak check has no action');
+  } finally {
+    await on.close();
+  }
+
+  // The PR-body section comes from the same rules as the page.
+  const section = path.join(trust.dir, 'pr-section.md');
+  const result = spawnSync(process.execPath, ['scripts/ve-mdx/trust-map.mjs', 'pr-section', '--map', path.join(trust.dir, 'trust-map.json'), '--refs', path.join(trust.dir, 'refs.resolved.json'), '--explain', path.join(trust.dir, 'explain.json'), '--out', section], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(readFileSync(section, 'utf8'), /\*\*Merge verdict: Not ready\.\*\*/);
 });

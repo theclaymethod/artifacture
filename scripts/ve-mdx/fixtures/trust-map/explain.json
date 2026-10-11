@@ -1,0 +1,163 @@
+{
+ "diagrams": {
+  "story": {
+   "title": "Before and after",
+   "description": "Before the PR, the wallet paid out any amount. After it, the wallet checks the balance first.",
+   "eli5": {
+    "nodes": [
+     {
+      "id": "before",
+      "label": "Before: pay out any amount"
+     },
+     {
+      "id": "after",
+      "label": "After: check the balance first"
+     },
+     {
+      "id": "refuse",
+      "label": "Refuse an overdraft",
+      "shape": "oval"
+     }
+    ],
+    "edges": [
+     {
+      "from": "before",
+      "to": "after",
+      "label": "becomes"
+     },
+     {
+      "from": "after",
+      "to": "refuse",
+      "label": "stops"
+     }
+    ]
+   },
+   "detailed": {
+    "nodes": [
+     {
+      "id": "before",
+      "label": "withdraw: return balance - amount"
+     },
+     {
+      "id": "after",
+      "label": "withdraw: if amount > balance"
+     },
+     {
+      "id": "refuse",
+      "label": "raise OverdraftError",
+      "shape": "oval"
+     }
+    ],
+    "edges": [
+     {
+      "from": "before",
+      "to": "after",
+      "label": "PR"
+     },
+     {
+      "from": "after",
+      "to": "refuse",
+      "label": "yes"
+     }
+    ]
+   }
+  },
+  "loop": {
+   "title": "One withdrawal",
+   "description": "What the wallet does with one call.",
+   "eli5": {
+    "nodes": [
+     {
+      "id": "ask",
+      "label": "A withdrawal",
+      "shape": "oval"
+     },
+     {
+      "id": "guard",
+      "label": "Check the balance",
+      "shape": "diamond"
+     },
+     {
+      "id": "pay",
+      "label": "Pay out"
+     },
+     {
+      "id": "refuse",
+      "label": "Refuse it",
+      "shape": "oval"
+     }
+    ],
+    "edges": [
+     {
+      "from": "ask",
+      "to": "guard",
+      "label": "asks"
+     },
+     {
+      "from": "guard",
+      "to": "pay",
+      "label": "allows"
+     },
+     {
+      "from": "guard",
+      "to": "refuse",
+      "label": "stops"
+     }
+    ]
+   },
+   "detailed": {
+    "nodes": [
+     {
+      "id": "ask",
+      "label": "withdraw(balance, amount)",
+      "shape": "oval"
+     },
+     {
+      "id": "guard",
+      "label": "amount > balance?",
+      "shape": "diamond"
+     },
+     {
+      "id": "pay",
+      "label": "return balance - amount"
+     },
+     {
+      "id": "refuse",
+      "label": "raise OverdraftError",
+      "shape": "oval"
+     }
+    ],
+    "edges": [
+     {
+      "from": "ask",
+      "to": "guard"
+     },
+     {
+      "from": "guard",
+      "to": "pay",
+      "label": "no"
+     },
+     {
+      "from": "guard",
+      "to": "refuse",
+      "label": "yes"
+     }
+    ]
+   }
+  }
+ },
+ "unclaimed": {
+  "notes": {
+   "bin/report.py": "New. It reads a file of accounts and prints each balance. No claim covers it."
+  }
+ },
+ "risks": [
+  {
+   "claims": [
+    "C02"
+   ],
+   "why": "The balance test checks only the type of the result.",
+   "fix": "Assert the exact new balance in the test."
+  }
+ ]
+}

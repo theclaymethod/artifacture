@@ -9,7 +9,7 @@ const help = `Usage:
   artifacture init <directory>
   artifacture add <block...> [--cwd <project>]
   artifacture list [--query <text>] [--json]
-  artifacture export <source.mdx|source.tsx> --out <output.html>
+  artifacture export <source.mdx|source.tsx> --out <output.html> [--prerender] [--guard-repo <repo> --guard-head <sha>]
   artifacture video <source.tsx> --out <output.html> [--audio <recording> --audio-start <seconds>]
   artifacture fframes <source.tsx> --out <new-project-directory> [--fps <integer>] [--render]
   artifacture pr-lens <command> [arguments...]
@@ -184,7 +184,7 @@ async function main() {
       return;
     }
     if (!args.length || (command !== 'finalize' && args[0].startsWith('-'))) throw new Error(`${command} requires a source or artifact path.`);
-    const resolvedArgs = args.map((argument, index) => (index === 0 && command !== 'finalize') || (command === 'pdf' && index === 1) || ['--out', '--audio', '--truth', '--json', '--screens', '--report', '--verdicts', '--output'].includes(args[index - 1]) ? path.resolve(argument) : argument);
+    const resolvedArgs = args.map((argument, index) => (index === 0 && command !== 'finalize') || (command === 'pdf' && index === 1) || ['--out', '--audio', '--truth', '--json', '--screens', '--report', '--verdicts', '--output', '--guard-repo'].includes(args[index - 1]) ? path.resolve(argument) : argument);
     if (command === 'source-video' || command === 'pdf' || (command === 'verify' && !args.includes('--static-only'))) await ensureBrowser();
     await run(process.execPath, [path.join(packageRoot, runtimeCommands[command]), ...resolvedArgs], packageRoot);
   } else throw new Error(`Unknown command: ${command}. Run artifacture help.`);

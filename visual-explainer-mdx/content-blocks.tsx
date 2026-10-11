@@ -183,8 +183,10 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
       window.history.replaceState(window.history.state, '', parent ? `#${parent.id}` : window.location.pathname + window.location.search);
     }
   };
+  // The browser opens a block itself (a fragment link, find in page) before a pre-rendered page
+  // hydrates, so the open attribute can differ from the server markup.
   return (
-    <details className="ve-disclosure" data-ve-anchor={id ? 'true' : undefined} id={id} onToggle={onToggle} open={open || undefined} ref={ref}>
+    <details className="ve-disclosure" data-ve-anchor={id ? 'true' : undefined} id={id} onToggle={onToggle} open={open || undefined} ref={ref} suppressHydrationWarning>
       <summary className="ve-disclosure-summary">
         <span aria-hidden="true" className="ve-disclosure-caret" />
         <span className="ve-disclosure-label">{summary}</span>

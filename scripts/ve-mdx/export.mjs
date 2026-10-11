@@ -2,11 +2,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-import { build } from 'vite';
+import { createHash } from 'node:crypto';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { build, createServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
-import { preflightSource } from './integrity.mjs';
+import { highlightRefs, preflightSource } from './integrity.mjs';
+import { checkTrustMapPage, handCopied } from './trust-map-checks.mjs';
 import { injectDesignSystemCss, presetNamesInSource, resolvePresetCssForExport } from './design-systems.mjs';
 import { DEFAULT_PRESET } from '../../visual-explainer-mdx/preset-policy.mjs';
 
@@ -38,14 +42,21 @@ function parseArgs(argv) {
   const source = args.shift();
   let out = null;
   let draft = false;
+  let prerender = false;
+  let guardRepo = process.env.VE_GUARD_REPO || null;
+  let guardHead = process.env.VE_GUARD_HEAD || null;
   for (let i = 0; i < args.length; i += 1) {
     if (args[i] === '--out') out = args[++i];
     else if (args[i] === '--draft') draft = true;
+    else if (args[i] === '--prerender') prerender = true;
+    else if (args[i] === '--guard-repo') guardRepo = args[++i];
+    else if (args[i] === '--guard-head') guardHead = args[++i];
     else throw new Error(`Unknown argument: ${args[i]}`);
   }
-  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft]');
+  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft] [--prerender] [--guard-repo <repo> --guard-head <sha>]');
   if (!out) throw new Error('Missing --out <output.html>');
-  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft };
+  if (Boolean(guardRepo) !== Boolean(guardHead)) throw new Error('The no-hand-copy guard needs both --guard-repo and --guard-head (or VE_GUARD_REPO and VE_GUARD_HEAD).');
+  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft, prerender, guard: guardRepo ? { repo: path.resolve(guardRepo), head: guardHead } : null };
 }
 
 function viteFsPath(filePath) {
@@ -91,10 +102,66 @@ async function replaceAsync(input, pattern, replacer) {
   return output;
 }
 
+// The trust-map components (visual-explainer-mdx/trust-map.tsx) need the static pre-render: it
+// validates their data and runs the trust-map checks.
+const TRUST_MAP_COMPONENTS = /<(MergeVerdict|PromiseList|PromiseChips|ClaimDetail|VerifyTheVerifiers|UnclaimedChanges|WhatChanged|Glossary|CodeRef)\b/;
+const REACT_DEDUPE = ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'];
+
+/** The plugins that the static pre-render and the browser bundle share. `seen` collects the MDX files, `stamps` the trust maps that the source imports. */
+function sharedPlugins(source, draft, seen, stamps) {
+  return [veMdxPreflightPlugin(source, draft, seen), veDataPlugin(stamps), mdx(), react()];
+}
+
+// A bare 'visual-explainer-mdx/...' import resolves to this package, so an MDX source outside the
+// package needs no absolute path to it.
+const packageAlias = [{ find: /^visual-explainer-mdx\//, replacement: `${path.join(repoRoot, 'visual-explainer-mdx')}/` }];
+
+/**
+ * Render the source to HTML in Node (React server rendering), so the exported page shows its
+ * text, tables and data without JavaScript; the browser bundle then hydrates it. A component that
+ * throws, for example on bad trust-map data, fails the export here.
+ */
+async function prerender(source, draft, seen, stamps) {
+  const server = await createServer({
+    root: repoRoot,
+    configFile: false,
+    appType: 'custom',
+    logLevel: 'warn',
+    plugins: sharedPlugins(source, draft, seen, stamps),
+    resolve: { alias: packageAlias, dedupe: REACT_DEDUPE },
+    css: { postcss: { plugins: [] } },
+    optimizeDeps: { noDiscovery: true, include: [] },
+    server: { middlewareMode: true, hmr: false, ws: false, fs: { strict: false } },
+  });
+  try {
+    const mod = await server.ssrLoadModule(source);
+    return renderToString(React.createElement(mod.default));
+  } catch (error) {
+    throw new Error(`the static pre-render failed: ${error instanceof Error ? error.message : error}`);
+  } finally {
+    await server.close();
+  }
+}
+
 async function main() {
-  const { source, out, draft } = parseArgs(process.argv.slice(2));
+  const { source, out, draft, prerender: wantPrerender, guard } = parseArgs(process.argv.slice(2));
   if (!(await exists(source))) throw new Error(`Source not found: ${source}`);
   if (!/\.(mdx|tsx|jsx)$/.test(source)) throw new Error('Source must end in .mdx, .tsx, or .jsx');
+  const sourceCode = await fs.readFile(source, 'utf8');
+  const seen = new Set();
+  const stamps = new Map();
+  const trustMap = TRUST_MAP_COMPONENTS.test(sourceCode);
+  let markup = null;
+  if (wantPrerender || trustMap) {
+    markup = await prerender(source, draft, seen, stamps);
+    const errors = checkTrustMapPage(markup);
+    if (errors.length) throw new Error(`visual-explainer trust-map checks failed:\n  ${errors.join('\n  ')}`);
+  }
+  if (guard) {
+    const files = await Promise.all([...new Set([source, ...seen])].map(async (file) => ({ file: path.relative(process.cwd(), file), text: await fs.readFile(file, 'utf8') })));
+    const pasted = handCopied(files, guard.repo, guard.head);
+    if (pasted.length) throw new Error(`visual-explainer no-hand-copy guard failed:\n  ${pasted.join('\n  ')}`);
+  }
 
   const tmpRoot = path.join(repoRoot, '.ve-mdx-tmp');
   await fs.mkdir(tmpRoot, { recursive: true });
@@ -108,22 +175,27 @@ async function main() {
       `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Visual Explainer</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>`,
     );
 
+    // A pre-rendered page hydrates: React keeps the server markup and adds the behaviour.
+    const mount = markup === null
+      ? `createRoot(document.getElementById('root')).render(<Source />);`
+      : `document.documentElement.dataset.veJs = '';\nhydrateRoot(document.getElementById('root'), <Source />);`;
     await fs.writeFile(
       path.join(tmp, 'src/main.jsx'),
-      `import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport ${JSON.stringify(viteFsPath(path.join(repoRoot, 'visual-explainer-mdx/global.css')))};\nimport Source from ${JSON.stringify(viteFsPath(source))};\n\ncreateRoot(document.getElementById('root')).render(<Source />);\n`,
+      `import React from 'react';\nimport { createRoot, hydrateRoot } from 'react-dom/client';\nimport ${JSON.stringify(viteFsPath(path.join(repoRoot, 'visual-explainer-mdx/global.css')))};\nimport Source from ${JSON.stringify(viteFsPath(source))};\n\n${mount}\n`,
     );
 
     await build({
       root: tmp,
       base: './',
       logLevel: 'warn',
-      plugins: [veMdxPreflightPlugin(source, draft), mdx(), react(), tailwindcss()],
+      plugins: [...sharedPlugins(source, draft, seen, stamps), tailwindcss()],
       // A source outside the Artifacture package can have its own physical
       // React install. Without dedupe, the generated bundle renders with
       // Artifacture's ReactDOM while hooks import the source package's React,
       // leaving that second copy's dispatcher null at runtime.
       resolve: {
-        dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+        alias: packageAlias,
+        dedupe: REACT_DEDUPE,
       },
       server: {
         fs: {
@@ -146,7 +218,6 @@ async function main() {
     // registry ($ARTIFACTURE_DESIGN_DIR → ~/.artifacture/design-systems →
     // <repo>/design-systems) and inline the matching tokens.css. Unknown
     // names fall back to built-in tokens with a warning.
-    const sourceCode = await fs.readFile(source, 'utf8');
     const { css: designSystemCss, warnings } = resolvePresetCssForExport(sourceCode, {
       repoRoot,
       globalCssPath: path.join(repoRoot, 'visual-explainer-mdx/global.css'),
@@ -157,16 +228,51 @@ async function main() {
     }
 
     if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
+    if (markup !== null) generated = generated.replace('<div id="root"></div>', () => `<div id="root">${markup}</div>`);
+    // The trust map that the page was built from: its head and the SHA-256 of the file, so a
+    // reader (or understando review) can tell when the explainer is stale.
+    const meta = [...stamps.values()].map((s) => `<meta name="ve-trust-map-head" content="${s.head}">\n<meta name="ve-trust-map-sha256" content="${s.sha256}">\n`).join('');
+    if (meta) generated = generated.replace('</head>', () => `${meta}</head>`);
 
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, generated);
-    console.log(`Generated ${out}`);
+    console.log(`Generated ${out}${markup === null ? '' : ' (pre-rendered)'}`);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 }
 
-function veMdxPreflightPlugin(source, draft) {
+/**
+ * Data files that the source imports. A trust map (a JSON with schema_version, head, claims and
+ * promises) is stamped into the page; a resolved-refs file (refs.resolved.json) gets its code
+ * highlighted, the same in the pre-render and in the bundle.
+ */
+function veDataPlugin(stamps) {
+  return {
+    name: 'visual-explainer-mdx-data',
+    enforce: 'pre',
+    async transform(code, id) {
+      const file = id.split('?')[0];
+      if (!file.endsWith('.json') || file.includes(`${path.sep}node_modules${path.sep}`)) return null;
+      let value;
+      try {
+        value = JSON.parse(code);
+      } catch {
+        return null;
+      }
+      if (value && typeof value === 'object' && Array.isArray(value.claims) && Array.isArray(value.promises) && value.head && 'schema_version' in value) {
+        stamps.set(file, { head: value.head, sha256: createHash('sha256').update(await fs.readFile(file)).digest('hex') });
+        return null;
+      }
+      if (value && typeof value === 'object' && value.schema === 1 && Array.isArray(value.refs) && value.diff) {
+        return { code: JSON.stringify(await highlightRefs(value)), map: null };
+      }
+      return null;
+    },
+  };
+}
+
+function veMdxPreflightPlugin(source, draft, seen = new Set()) {
   return {
     name: 'visual-explainer-mdx-preflight',
     enforce: 'pre',
@@ -176,6 +282,7 @@ function veMdxPreflightPlugin(source, draft) {
       // chapter per file), gets the same integrity checks and code highlighting.
       const chapter = file.endsWith('.mdx') && file.startsWith(path.dirname(source) + path.sep) && !file.split(path.sep).includes('node_modules');
       if (file !== source && !chapter) return null;
+      seen.add(file);
       const result = await preflightSource(code, { id: path.relative(repoRoot, file), draft });
       return { code: result.code, map: null };
     },

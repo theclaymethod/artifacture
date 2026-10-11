@@ -1,0 +1,438 @@
+{
+ "schema": 1,
+ "head": "cc1975a5b1b11abcc71fd0c36d7e8a75a3957510",
+ "repo": "fixture/wallet",
+ "refs": [
+  {
+   "ref": {
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 8,
+   "end": 15,
+   "span": [
+    8,
+    15
+   ],
+   "language": "python",
+   "excerpt": "def withdraw(balance: int, amount: int) -> int:\n    \"\"\"\n    @cc [owner:fixture,label:product] no-overdraft\n    `withdraw` refuses an amount above the balance with `OverdraftError`.\n    \"\"\"\n    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L8-L15"
+  },
+  {
+   "ref": {
+    "match": "return balance - amount",
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 15,
+   "end": 15,
+   "span": [
+    15,
+    15
+   ],
+   "language": "python",
+   "excerpt": "    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L15"
+  },
+  {
+   "ref": {
+    "path": "wallet/messages.py",
+    "symbol": "denial"
+   },
+   "path": "wallet/messages.py",
+   "start": 4,
+   "end": 5,
+   "span": [
+    4,
+    5
+   ],
+   "language": "python",
+   "excerpt": "def denial(account: str, amount: int) -> str:\n    return f\"We cannot pay out {amount}. The balance is too low.\"",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/messages.py#L4-L5"
+  },
+  {
+   "ref": {
+    "context": [
+     0,
+     2
+    ],
+    "match": "if amount > balance:",
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 13,
+   "end": 15,
+   "span": [
+    13,
+    15
+   ],
+   "language": "python",
+   "excerpt": "    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/core.py#L13-L15"
+  },
+  {
+   "ref": {
+    "path": "wallet/fees.py"
+   },
+   "path": "wallet/fees.py",
+   "start": 1,
+   "end": 5,
+   "span": [
+    1,
+    5
+   ],
+   "language": "python",
+   "excerpt": "\"\"\"Added by the PR. No test names this module, and the PR text does not mention it.\"\"\"\n\n\ndef fee(amount: int) -> int:\n    return amount // 100 + 1",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/fees.py#L1-L5"
+  },
+  {
+   "ref": {
+    "path": "bin/report.py",
+    "symbol": "main"
+   },
+   "path": "bin/report.py",
+   "start": 7,
+   "end": 11,
+   "span": [
+    7,
+    11
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/bin/report.py#L7-L11",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "tests/test_core.py",
+    "symbol": "OverdraftTest"
+   },
+   "path": "tests/test_core.py",
+   "start": 6,
+   "end": 11,
+   "span": [
+    6,
+    11
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/tests/test_core.py#L6-L11",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "tests/test_messages.py",
+    "symbol": "DenialTest"
+   },
+   "path": "tests/test_messages.py",
+   "start": 6,
+   "end": 10,
+   "span": [
+    6,
+    10
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/tests/test_messages.py#L6-L10",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "wallet/fees.py",
+    "symbol": "fee"
+   },
+   "path": "wallet/fees.py",
+   "start": 4,
+   "end": 5,
+   "span": [
+    4,
+    5
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/cc1975a5b1b11abcc71fd0c36d7e8a75a3957510/wallet/fees.py#L4-L5",
+   "link_only": true
+  }
+ ],
+ "controls": {
+  "K01": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n"
+   }
+  ],
+  "K02": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..21b526c 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -13,3 +13,3 @@ def withdraw(balance: int, amount: int) -> int:\n     if amount > balance:\n         raise OverdraftError(f\"{amount} is above the balance\")\n-    return balance - amount\n+    return balance + amount\n"
+   }
+  ],
+  "K03": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..5f89aed 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -8,5 +8,5 @@ class OverdraftError(ValueError):\n def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n-    @cc [owner:fixture,label:product] no-overdraft\n+    @cc [owner:fixture,label:product] no-over:draft\n     `withdraw` refuses an amount above the balance with `OverdraftError`.\n     \"\"\"\n"
+   }
+  ],
+  "K07": [
+   {
+    "path": "wallet/messages.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/messages.py b/wallet/messages.py\nindex 9938bb1..ec3eba5 100644\n--- a/wallet/messages.py\n+++ b/wallet/messages.py\n@@ -3,3 +3,3 @@\n \n def denial(account: str, amount: int) -> str:\n-    return f\"We cannot pay out {amount}. The balance is too low.\"\n+    return f\"We cannot pay out. The balance is too low.\"\n"
+   }
+  ],
+  "K08": [
+   {
+    "path": "proofs/Withdraw.lean",
+    "language": "text",
+    "patch": "--- a/proofs/Withdraw.lean\n+++ b/proofs/Withdraw.lean\n@@ -1,4 +1,4 @@\n -- The model of `withdraw` in wallet/core.py. The fixture records the proof run; no test runs Lean.\n-def withdraw (b a : Nat) : Option Int := if a > b then none else some ((b : Int) - a)\n+def withdraw (b a : Nat) : Option Int := some ((b : Int) - a)\n \n theorem withdraw_nonneg (b a : Nat) (r : Int) (h : withdraw b a = some r) : 0 \u2264 r := by\n"
+   }
+  ]
+ },
+ "diff": {
+  "files": {
+   "bin/report.py": [
+    15,
+    0
+   ],
+   "proofs/Withdraw.lean": [
+    7,
+    0
+   ],
+   "tests/test_core.py": [
+    11,
+    1
+   ],
+   "tests/test_messages.py": [
+    14,
+    0
+   ],
+   "wallet/core.py": [
+    11,
+    1
+   ],
+   "wallet/fees.py": [
+    5,
+    0
+   ],
+   "wallet/messages.py": [
+    5,
+    0
+   ]
+  },
+  "deleted": [],
+  "created": [
+   "bin/report.py",
+   "proofs/Withdraw.lean",
+   "tests/test_messages.py",
+   "wallet/fees.py",
+   "wallet/messages.py"
+  ],
+  "added": {
+   "bin/report.py": [
+    [
+     1,
+     15
+    ]
+   ],
+   "proofs/Withdraw.lean": [
+    [
+     1,
+     7
+    ]
+   ],
+   "tests/test_core.py": [
+    [
+     3,
+     11
+    ],
+    [
+     15,
+     16
+    ]
+   ],
+   "tests/test_messages.py": [
+    [
+     1,
+     14
+    ]
+   ],
+   "wallet/core.py": [
+    [
+     1,
+     5
+    ],
+    [
+     9,
+     14
+    ]
+   ],
+   "wallet/fees.py": [
+    [
+     1,
+     5
+    ]
+   ],
+   "wallet/messages.py": [
+    [
+     1,
+     5
+    ]
+   ]
+  },
+  "symbols": {
+   "bin/report.py": {
+    "names": [
+     "main"
+    ],
+    "main": {
+     "path": "bin/report.py",
+     "symbol": "main"
+    }
+   },
+   "tests/test_core.py": {
+    "names": [
+     "OverdraftTest",
+     "OverdraftTest.test_withdraw_refuses_an_overdraft",
+     "BalanceTest"
+    ],
+    "main": {
+     "path": "tests/test_core.py",
+     "symbol": "OverdraftTest"
+    }
+   },
+   "tests/test_messages.py": {
+    "names": [
+     "DenialTest",
+     "DenialTest.test_denial_names_the_amount"
+    ],
+    "main": {
+     "path": "tests/test_messages.py",
+     "symbol": "DenialTest"
+    }
+   },
+   "wallet/core.py": {
+    "names": [
+     "withdraw",
+     "OverdraftError"
+    ],
+    "main": {
+     "path": "wallet/core.py",
+     "symbol": "withdraw"
+    }
+   },
+   "wallet/fees.py": {
+    "names": [
+     "fee"
+    ],
+    "main": {
+     "path": "wallet/fees.py",
+     "symbol": "fee"
+    }
+   },
+   "wallet/messages.py": {
+    "names": [
+     "denial"
+    ],
+    "main": {
+     "path": "wallet/messages.py",
+     "symbol": "denial"
+    }
+   }
+  }
+ },
+ "derived": {
+  "schema": 1,
+  "head": "cc1975a5b1b11abcc71fd0c36d7e8a75a3957510",
+  "promises": [
+   {
+    "id": "P4",
+    "strength": "Gap",
+    "claims": [
+     "C03"
+    ]
+   },
+   {
+    "id": "P1",
+    "strength": "Asserted",
+    "claims": [
+     "C02",
+     "C01",
+     "C08"
+    ]
+   },
+   {
+    "id": "P2",
+    "strength": "Asserted",
+    "claims": [
+     "C04"
+    ]
+   },
+   {
+    "id": "P3",
+    "strength": "Backed",
+    "claims": [
+     "C05",
+     "C06",
+     "C07"
+    ]
+   }
+  ],
+  "merge": {
+   "form": "not-ready",
+   "items": [
+    {
+     "label": "Correct fees",
+     "text": "Read the fee function yourself: no test calls it, and the PR text does not mention it.",
+     "href": "#promise-p4"
+    },
+    {
+     "label": "No overdraft",
+     "text": "Do not trust the new balance yet: its test cannot fail.",
+     "href": "#promise-p1"
+    },
+    {
+     "label": "Safe with many threads",
+     "text": "Do not use the wallet from many threads: only the PR text says that it is safe.",
+     "href": "#promise-p2"
+    }
+   ],
+   "blockers": 3
+  },
+  "ready": null,
+  "unclaimed": {
+   "files": [
+    {
+     "path": "bin/report.py",
+     "file": "bin/report.py",
+     "role": "report",
+     "change": "New file of 15 lines: main",
+     "added": 15,
+     "removed": 0,
+     "created": true,
+     "note": "New. It reads a file of accounts and prints each balance. No claim covers it.",
+     "main": {
+      "path": "bin/report.py",
+      "symbol": "main"
+     },
+     "claims": 0,
+     "cited": 0,
+     "total": 15,
+     "risks": [],
+     "action": {
+      "kind": "skim",
+      "text": "Low risk: skim."
+     }
+    }
+   ],
+   "core": []
+  },
+  "risky_unclaimed": 0,
+  "bugs": []
+ }
+}

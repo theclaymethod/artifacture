@@ -1,0 +1,28 @@
+/* Trust-map explainer: a card for each weak check and each risky unclaimed file. */
+.ve-weak-check {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--ve-rule);
+}
+
+.ve-weak-check > h4 {
+  margin: 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: 1.0625rem;
+}
+
+[data-ve-trust] > p + p,
+[data-ve-trust] > p + [data-ve-legend],
+[data-ve-trust] > [data-ve-legend] + p {
+  margin-top: 0.75rem;
+}
+
+[data-ve-trust] > .ve-subsection {
+  margin-top: 1.5rem;
+}
+
+[data-ve-tiers] {
+  margin-block: 1rem;
+}
