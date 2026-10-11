@@ -1123,3 +1123,44 @@ export function VerifierView({ data, refs }: WithRefs) {
     </div>
   );
 }
+
+// ---- The chapter rail: the review state of each chapter ------------------------------------------
+
+const noSubscribe = () => () => {};
+/** False in the server render and the hydration pass, so the page without script shows the static marks only. */
+const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => false);
+
+/** The merge state on the start and verdict chapters: its tone mark, its word for a screen reader. It comes from the data, so it shows without script. */
+function RailMerge({ refs }: { refs: Refs }) {
+  const [word, tone] = MERGE_WORDS[refs.derived.merge.form];
+  return <span className="ve-chapter-mark" data-ve-chapter-mark="merge" data-ve-tone={tone} title={word}><ToneMark tone={tone} /><span className="ve-visually-hidden">, {word}</span></span>;
+}
+
+function RailReviewed() {
+  return <span className="ve-chapter-mark" data-ve-chapter-mark="reviewed" data-ve-tone={DONE} title="Reviewed"><ToneMark tone={DONE} /><span className="ve-visually-hidden">, reviewed</span></span>;
+}
+
+/** The review chapter: "3 of 22" from the reviewer's calls, then a check once each item has a call. */
+function RailChecklist({ data, refs }: WithRefs) {
+  const hydrated = useHydrated();
+  const [calls] = useCalls(data.head);
+  const items = reviewItems(refs);
+  if (!hydrated || !items.length) return null;
+  const n = reviewed(calls, items);
+  if (n === items.length) return <RailReviewed />;
+  return <span className="ve-chapter-mark" data-ve-chapter-mark="count"><span className="ve-visually-hidden">, </span>{n} of {items.length}<span className="ve-visually-hidden"> reviewed</span></span>;
+}
+
+/** The chapters of the change: a check once the reader has marked each one Reviewed. */
+function RailSpine({ data, refs }: WithRefs) {
+  const hydrated = useHydrated();
+  const [calls] = useCalls(data.head);
+  const groups = (refs.derived.spine?.groups ?? []).filter(reviewable);
+  if (!hydrated || !groups.length || !groups.every((g) => calls[`chapter:${g.id}`]?.reviewed)) return null;
+  return <RailReviewed />;
+}
+
+Object.assign(ReviewStart, { chapterMark: ({ refs }: WithRefs) => <RailMerge refs={refs} /> });
+Object.assign(ReviewVerdict, { chapterMark: ({ refs }: WithRefs) => <RailMerge refs={refs} /> });
+Object.assign(ReviewChecklist, { chapterMark: ({ data, refs }: WithRefs) => <RailChecklist data={data} refs={refs} /> });
+Object.assign(DiffSpine, { chapterMark: ({ data, refs }: WithRefs) => <RailSpine data={data} refs={refs} /> });

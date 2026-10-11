@@ -367,13 +367,13 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
     await page.goto(url, { waitUntil: 'load' });
     await page.waitForSelector('main[data-ve-paged="pages"]');
     assert.deepEqual(await visibleChapters(page), ['ch-0']);
-    assert.equal(await page.textContent('[data-ve-here="true"] .ve-chapter-label'), 'StartYou are here');
+    assert.equal(await page.textContent('.ve-chapter-list a[aria-current="page"] .ve-chapter-label'), 'Start');
 
     // Next and previous, with the rail marker following.
     await page.click('#ch-0 [data-ve-pager-next]');
     await page.waitForFunction(() => location.hash === '#ch-1' && !document.getElementById('ch-1').hidden);
     assert.deepEqual(await visibleChapters(page), ['ch-1']);
-    assert.match(await page.textContent('[data-ve-here="true"]'), /The problem and the change/);
+    assert.match(await page.textContent('.ve-chapter-list a[aria-current="page"]'), /The problem and the change/);
     await page.click('#ch-1 [data-ve-pager-prev]');
     await page.waitForFunction(() => !document.getElementById('ch-0').hidden);
     await page.click('.ve-chapter-list a[href="#ch-7"]');
@@ -391,12 +391,12 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
     await page.waitForFunction(() => document.getElementById('claim-c02').open);
 
     // Read as one page: every chapter in sequence; the choice stays after a reload.
-    await page.click('.ve-read-mode');
+    await page.click('.ve-read-mode button[aria-pressed="false"]');
     await page.waitForSelector('main[data-ve-paged="one"]');
     assert.equal((await visibleChapters(page)).length, 10);
     await page.reload({ waitUntil: 'load' });
     await page.waitForSelector('main[data-ve-paged="one"]');
-    await page.click('.ve-read-mode');
+    await page.click('.ve-read-mode button[aria-pressed="false"]');
     await page.waitForSelector('main[data-ve-paged="pages"]');
 
     // The stepper: one step at a time, Next shows the next.
@@ -675,9 +675,11 @@ test('guided review: calm navigation at 1280px and 375px', { concurrency: true }
       for (const mode of ['one', 'pages']) {
         const before = await topOf(page, '#ch-3');
         await resetScrolls(page);
+        const content = await topOf(page, '#ve-content');
         await openMenu();
         assert.deepEqual((await scrolls(page)).moves, [], 'opening the chapter menu scrolled the page');
-        await page.click('.ve-read-mode');
+        near(await topOf(page, '#ve-content'), content, 'opening the chapter menu moved the content');
+        await page.click('.ve-read-mode button[aria-pressed="false"]');
         await page.waitForSelector(`main[data-ve-paged="${mode}"]`);
         await page.waitForTimeout(500);
         near(await topOf(page, '#ch-3'), before, `ch-3 after "${mode}"`);
@@ -766,6 +768,77 @@ test('guided review: calm navigation at 1280px and 375px', { concurrency: true }
   await Promise.all(runs);
 });
 
+test('guided review: the rail marks the current chapter and shows each chapter\'s review state from local storage', async () => {
+  const derived = derivedOf(trust.dir);
+  const groups = derived.spine.groups.filter((g) => g.reviewable !== false && g.tier !== 'tests' && g.tier !== 'generated').map((g) => g.id);
+  const sha = createHash('sha256').update(readFileSync(path.join(trust.dir, 'trust-map.json'))).digest('hex');
+  const key = `understando-review:${trust.map.head}:${sha}`;
+  const url = pathToFileURL(trust.html).href;
+  const marks = (page) => page.$$eval('.ve-chapter-list > li > a', (links) => Object.fromEntries(links.map((a) => [a.getAttribute('href'), [...a.querySelectorAll('[data-ve-chapter-mark]')].map((m) => `${m.dataset.veChapterMark}:${m.textContent}`).join(' ')])));
+  const word = { 'not-ready': 'Not ready', accept: 'Ready if you accept', ready: 'Ready' }[derived.merge.form];
+  assert.ok(groups.length, 'the fixture has chapters of the change');
+
+  // Without script: only the static marks, the merge state on the start and verdict chapters.
+  const off = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
+  try {
+    const page = await off.newPage();
+    await page.goto(url, { waitUntil: 'load' });
+    assert.deepEqual(Object.entries(await marks(page)).filter(([, m]) => m), [['#ch-0', `merge:, ${word}`], ['#ch-8', `merge:, ${word}`]]);
+  } finally {
+    await off.close();
+  }
+
+  for (const scheme of ['light', 'dark']) {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
+    try {
+      const page = await context.newPage();
+      await page.goto(url + '#ch-1', { waitUntil: 'load' });
+      // Every chapter of the change marked Reviewed, and one checklist item with a call.
+      const items = await page.$$eval('#ch-7 [data-ve-review-item]', (rows) => rows.map((r) => r.dataset.veReviewItem));
+      assert.ok(items.length, 'the fixture has checklist items');
+      await page.evaluate(([k, head, ids, first]) => {
+        const calls = Object.fromEntries(ids.map((id) => [`chapter:${id}`, { reviewed: true }]));
+        calls[first] = { call: 'ok' };
+        localStorage.setItem(k, JSON.stringify({ schema: 1, head, calls }));
+      }, [key, trust.map.head, groups, items[0]]);
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-live]');
+      await page.waitForFunction(() => document.querySelector('.ve-chapter-list a[href="#ch-7"] [data-ve-chapter-mark]'));
+      const got = await marks(page);
+      assert.equal(got['#ch-3'], 'reviewed:, reviewed');
+      assert.equal(got['#ch-7'], `count:, 1 of ${items.length} reviewed`);
+      assert.equal(got['#ch-0'], `merge:, ${word}`);
+      // The current chapter: aria-current="page", accent text in 600, no tint and no visible "You are here".
+      const here = await page.$eval('.ve-chapter-list a[aria-current="page"]', (a) => ({ href: a.getAttribute('href'), weight: getComputedStyle(a).fontWeight, bg: getComputedStyle(a).backgroundColor, text: a.closest('nav').innerText }));
+      assert.deepEqual([here.href, here.weight, here.bg], ['#ch-1', '600', 'rgba(0, 0, 0, 0)']);
+      assert.doesNotMatch(here.text, /You are here/);
+      assert.equal(await page.locator('.ve-chapter-list a[aria-current]').count(), 1);
+      // Each row is a 44px target; the reading switch says which mode is on.
+      for (const h of await page.$$eval('.ve-chapter-list a', (links) => links.filter((a) => a.offsetParent).map((a) => a.getBoundingClientRect().height))) assert.ok(h >= 44, `a rail row is ${h}px tall`);
+      assert.equal(await page.getAttribute('.ve-read-mode [data-ve-read-mode-option="pages"]', 'aria-pressed'), 'true');
+      for (const selector of ['.ve-chapter-list a', '.ve-chapter-index', '.ve-chapter-mark', '.ve-chapter-heading', '.ve-read-mode button', '.ve-read-mode-label']) {
+        for (const pair of await colorPairs(page, selector)) {
+          if (!pair.text) continue;
+          assert.ok(contrast(pair.fg, pair.bg) >= 4.5, `${selector} "${pair.text}" contrast ${contrast(pair.fg, pair.bg).toFixed(2)} in ${scheme}`);
+        }
+      }
+      if (scheme === 'dark') continue;
+      // The marks follow the reader's boxes at once: unmark a chapter of the change and its check goes.
+      // The in-chapter targets show under the current chapter only.
+      assert.equal(await page.locator('.ve-chapter-list a[href="#review-blockers"]').isVisible(), false);
+      await page.click('.ve-chapter-list a[href="#ch-7"]');
+      await page.waitForFunction(() => !document.getElementById('ch-7').hidden);
+      assert.equal(await page.locator('.ve-chapter-list a[href="#review-blockers"]').isVisible(), true);
+      await page.click('.ve-chapter-list a[href="#ch-3"]');
+      await page.waitForFunction(() => !document.getElementById('ch-3').hidden);
+      await page.locator(`[data-ve-chapter-reviewed="${groups[0]}"] input`).uncheck();
+      await page.waitForFunction(() => !document.querySelector('.ve-chapter-list a[href="#ch-3"] [data-ve-chapter-mark]'));
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 for (const scheme of ['light', 'dark']) {
   test(`guided review at 375px in ${scheme} mode: AA contrast of the review marks, no sideways scroll`, async () => {
     const context = await browser.newContext({ viewport: { width: 375, height: 812 }, colorScheme: scheme });
@@ -780,7 +853,7 @@ for (const scheme of ['light', 'dark']) {
       // Buttons ease their colour for 160ms after the theme applies: read the settled colours.
       await page.waitForTimeout(400);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'the page scrolls sideways');
-      for (const selector of ['.ve-claim-row-note', '.ve-file-row-status', '.ve-review-why', '.ve-review-label', '.ve-bar-card-state', '.ve-churn span', '.ve-review-todo', '.ve-question-option', '.ve-result-card-state', '.ve-pager-key', '.ve-timeline-tag', '.ve-check-row-result', '.ve-check-row-kind', '.ve-check-row-name', '.ve-flag-when', '.ve-chapter-here', '.ve-spine-meta', '.ve-typed-key li', '[data-ve-code-lines] .line span[style*="--shiki-token"]', '.ve-line-gutter', '.ve-line-key', '.ve-line-key .ve-line-sign']) {
+      for (const selector of ['.ve-claim-row-note', '.ve-file-row-status', '.ve-review-why', '.ve-review-label', '.ve-bar-card-state', '.ve-churn span', '.ve-review-todo', '.ve-question-option', '.ve-result-card-state', '.ve-pager-key', '.ve-timeline-tag', '.ve-check-row-result', '.ve-check-row-kind', '.ve-check-row-name', '.ve-flag-when', '.ve-spine-meta', '.ve-typed-key li', '[data-ve-code-lines] .line span[style*="--shiki-token"]', '.ve-line-gutter', '.ve-line-key', '.ve-line-key .ve-line-sign']) {
         for (const pair of await colorPairs(page, selector)) {
           if (!pair.text) continue;
           assert.ok(contrast(pair.fg, pair.bg) >= 4.5, `${selector} "${pair.text}" contrast ${contrast(pair.fg, pair.bg).toFixed(2)} in ${scheme}`);
