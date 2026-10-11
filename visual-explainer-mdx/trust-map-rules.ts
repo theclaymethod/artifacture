@@ -28,7 +28,7 @@ export type Claim = {
 /** A verifier of kind `none` is a placeholder check: no tool checks the claim. */
 export type Verifier = {
   id: string; name?: string; kind: string; claims: string[]; tier: string; description: string; provenance: string; state?: string;
-  ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[] }; baseline?: { status?: string; output_tail?: string };
+  ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[]; cwd?: string }; baseline?: { status?: string; output_tail?: string };
   recorded?: { source: string; result: string }; formal?: { tool: string; artifact: string; conformance: { status: string; source: string; detail?: string } };
   mechanical?: { result?: { status: string; command: string; detail: string } };
   /** A browser e2e run: the recorded video, its screenshots, captions and a text summary. */
@@ -61,7 +61,11 @@ export type DerivedClaim = {
   parts?: Array<{ id: string; text: string; strength: Verdict; check: string | null }>;
   bar?: DerivedBar;
 };
-export type DerivedWeak = { check: string; control: string; name: string; broke: string; happened: string; why: string; action: string; ids: string };
+/** A check that missed its planted bug or cannot fail. `caught_by` names another check that caught the same planted bug: one bug, two results. */
+export type DerivedWeak = {
+  check: string; control: string; name: string; broke: string; happened: string; why: string; action: string; ids: string;
+  claims?: string[]; caught_by?: { check: string; name: string; control: string; missed: string } | null;
+};
 /** Can these checks catch a bug? It counts checks, not controls. `broke` holds the full "what we broke" sentence of each control. */
 export type DerivedVerify = {
   result: string; other: string; tone: Tone; checks: number; ran: number; caught: number; missed: number; cannot: number; weak: DerivedWeak[];
@@ -80,12 +84,37 @@ export type Derived = {
   bars?: DerivedBars;
   claims: Record<string, DerivedClaim>;
   verify: DerivedVerify;
-  merge: { form: MergeForm; items: MergeItem[]; blockers: number };
+  /** `items` are the blockers (not ready) or the risks to accept; `accept` holds the risks to accept in each form, in the order of the review. */
+  merge: { form: MergeForm; items: MergeItem[]; blockers: number; accept?: MergeItem[] };
   ready: Ready | null;
   unclaimed: { files: UnclaimedFile[]; core: UnclaimedFile[]; summary: { risky: number; rest: number; lead: string; quiet: string } };
   risky_unclaimed: number;
   bugs: Array<{ heading: string; lines: string[]; verified: boolean }>;
+  /** The diff spine: each changed file by its change area, riskiest first, with what protects it. */
+  spine?: DerivedSpine;
+  /** Each check: its result, the claims and parts that it backs, and the test that it runs. */
+  checks?: Record<string, DerivedCheckRow>;
+  /** The changed test files as the checks they provide, and the changed tests that back no claim. */
+  tests?: { files: Array<{ path: string; file: string; checks: string[] }>; orphans: Array<{ path: string; file: string; tests: string[] }>; orphan_tests: number; summary: string; action: string };
 };
+export type DerivedCheckRow = {
+  id: string; name: string; kind: string; result: CheckResult; claims: Array<{ id: string; name: string; parts: string[] }>;
+  tests: Array<{ path: string; file: string; symbol: string | null }>; controls: string[]; ref: CodeRefSpec | null;
+};
+export type SpineKind = 'check' | 'ask' | 'read' | 'partial' | 'protected' | 'skim' | 'test' | 'other' | 'deleted';
+/** A "look closely" flag, pinned to a line at the head, from a verified source: a bug that find-bugs found, a check that missed or cannot fail, or risky code with no claim. */
+export type LookFlag = { level: 'risk' | 'question' | 'nit'; source: 'bug' | 'check' | 'unclaimed'; path: string; line: number; text: string; trigger: string | null; ref: CodeRefSpec };
+export type SpineFile = {
+  path: string; file: string; added: number; removed: number; created: boolean; deleted: boolean; role: string | null; note: string | null;
+  main: CodeRefSpec | null; claims: string[]; status: { kind: SpineKind; label: string; text: string | null };
+  flags?: LookFlag[]; tests?: string[]; diff?: string;
+};
+export type ChangeTier = 'core' | 'supporting' | 'wiring' | 'data' | 'docs' | 'generated' | 'tests';
+export type SpineGroup = {
+  id: string; name: string; note: string | null; replaced_by: { id: string; name: string } | null; files: SpineFile[]; added: number; removed: number; unclaimed: number;
+  tier?: ChangeTier; explain?: string[]; flags?: number; reviewable?: boolean;
+};
+export type DerivedSpine = { groups: SpineGroup[]; files: number; protected: number; partial: number; summary: string; unassigned?: string[]; flags?: number; github?: string[]; links?: Array<{ from: string; to: string; n: number }> };
 export type Refs = {
   schema: number; head: string; repo?: string; refs: ResolvedRef[]; controls: Record<string, ControlEdit[]>; derived: Derived;
   diff: {
@@ -95,11 +124,17 @@ export type Refs = {
   };
 };
 export type DiagramGraph = { nodes: Array<{ id: string; label?: string; detail?: string; shape?: string; [k: string]: unknown }>; edges: Array<{ from: string; to: string; label?: string; [k: string]: unknown }>; legend?: unknown[] };
-export type DiagramSpec = { title: string; description: string; layout?: string; direction?: string; eli5: DiagramGraph; detailed: DiagramGraph };
+/** `modes: 'independent'` is a per-PR layout hint: each mode gets its own grid, so the Simple mode has no dead space. */
+export type DiagramSpec = { title: string; description: string; layout?: string; direction?: string; modes?: 'shared' | 'independent'; eli5: DiagramGraph; detailed: DiagramGraph };
 export type Area = { id: string; name: string; paths?: string[]; replaced_by?: string; note?: string; rollup?: boolean };
+/** One chapter of the change: one idea, titled as a plain action, with its files in reading order (a path or a path prefix). */
+export type ChangeChapter = { id: string; title: string; tier?: ChangeTier; explain: string[]; files: Array<string | { path: string; note?: string }>; diagrams?: string[]; note?: string };
+/** A check before you approve: something to do, with a command, a check of the map, a file to read, or real inputs for a manual test. */
+export type ApproveCheck = { text: string; run?: string; cwd?: string; check?: string; ref?: CodeRefSpec; file?: string; inputs?: string };
 export type Explain = {
   diagrams?: Record<string, DiagramSpec>;
-  change?: { areas?: Area[] };
+  change?: { areas?: Area[]; chapters?: ChangeChapter[] };
+  verdict?: { checks?: ApproveCheck[] };
   /** notes: why a file matters; roles: its job in plain words; core: path prefixes of the core files, shown as covered in part. */
   unclaimed?: { notes?: Record<string, string>; roles?: Record<string, string>; core?: string[] };
   risks?: Array<{ claims: string[]; why: string; fix?: string }>;
@@ -121,8 +156,9 @@ export const KIND_LADDER: Record<string, number> = {
   e2e: 1, integration: 1, unit: 1, golden: 1, parity: 1, eval: 1, measurement: 1, property: 2, fuzz: 2,
   'type-pin': 3, contract: 3, 'contract-format': 3, boundary: 3, static: 3, tla: 4, lean: 5,
 };
+// The kind of the strongest check, in reader words: never a tier number.
 export const LADDER_NAMES: Record<number, string> = {
-  1: 'e2e or integration test', 2: 'property or fuzz test', 3: 'types, contracts or static rules', 4: 'model checking', 5: 'proof with conformance',
+  1: 'an end-to-end or integration test', 2: 'a property or fuzz test', 3: 'types, contracts or static rules', 4: 'a model check that matches the code', 5: 'a proof that matches the code',
 };
 export const TIER_WORD: Record<string, string> = { fact: 'a tool check, run again at the PR head', guess: 'a model judgment' };
 export const VISIBLE_UNCLAIMED = 5;
@@ -159,7 +195,7 @@ export const BUILTIN_GLOSSARY: GlossaryEntry[] = [
   { term: 'Verifier', meaning: 'a check that backs a claim, for example a test, a type check or an eval.', aliases: ['check'] },
   { term: 'Control', meaning: 'a bug that we put in a scratch copy of the code on purpose, to see if a verifier finds it.' },
   ...VERDICTS.map((v) => ({ term: v, meaning: VERDICT_MEANING[v] })),
-  { term: 'Tier', meaning: 'the rung of the strongest check that caught a planted bug: 1 an end-to-end test, 2 a property test, 3 a type or contract check, 4 a model check, 5 a proof.' },
+  { term: 'Tier', meaning: 'the kind of the strongest check that caught a planted bug, from an end-to-end test, through a property test, a type or contract check and a model check, up to a proof that matches the code.' },
   { term: 'Waived', meaning: 'the author chose not to verify the claim, and wrote the reason.' },
   { term: 'Caught the bug', meaning: OUTCOME.caught[2], aliases: ['caught'] },
   { term: 'Missed the bug', meaning: OUTCOME.missed[2], aliases: ['missed'] },
@@ -229,8 +265,30 @@ export function promiseAnchors(data: TrustMap, refs: Refs) {
 export function strongestTier(refs: Refs, claims: Claim[]): string {
   const tiers = claims.map((c) => refs.derived.claims[c.id]?.tier).filter((t): t is number => Boolean(t));
   if (!tiers.length) return 'Strongest check: none. No check of this promise caught a planted bug.';
-  const t = Math.max(...tiers);
-  return `Strongest check: tier ${t}, ${LADDER_NAMES[t]}.`;
+  return `Strongest check: ${LADDER_NAMES[Math.max(...tiers)]}.`;
+}
+
+/** True when `fix` says what `action` says already, so a page shows the action once. */
+export function repeats(action: string | undefined, fix: string | undefined): boolean {
+  const flat = (t?: string) => (t ?? '').replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase().replace(/[.]+$/, '');
+  const a = flat(action);
+  const f = flat(fix);
+  return Boolean(f) && (a === f || a.includes(f) || f.includes(a));
+}
+
+export type ReviewItem = MergeItem & { n: number; key: string; blocks: boolean; kind: 'promise' | 'claim' | 'other'; id: string | null };
+/**
+ * The guided review's checklist, in derive.py's order: each blocker, then each risk to accept.
+ * The page shows this order; it never sorts the items again.
+ */
+export function reviewItems(refs: Refs): ReviewItem[] {
+  const m = refs.derived.merge;
+  const blockers = m.form === 'not-ready' ? m.items : [];
+  const accept = m.accept ?? (m.form === 'accept' ? m.items : []);
+  return [...blockers.map((i) => ({ i, blocks: true })), ...accept.map((i) => ({ i, blocks: false }))].map(({ i, blocks }, n) => {
+    const hit = /^#(promise|claim)-(.+)$/.exec(i.href);
+    return { ...i, n: n + 1, blocks, key: `${blocks ? 'b' : 'a'}:${i.href}:${i.text}`, kind: (hit ? hit[1] : 'other') as ReviewItem['kind'], id: hit ? hit[2] : null };
+  });
 }
 
 export type Ready = { head: string; gates: Array<{ n: number; name: string; pass: boolean; detail: string; items?: string[] }> };
@@ -434,6 +492,8 @@ export function changeDiagram(areas: Area[], refs: Refs): DiagramSpec {
   return {
     title: 'Before and after',
     description: 'Each box is a group of changed files, with its line count from the diff. An arrow points from deleted code to the code that replaces it.',
+    // The Detailed boxes hold paths: a shared grid would leave the Simple boxes wide and far apart.
+    modes: 'independent',
     eli5: { nodes, edges }, detailed: { nodes: detailed, edges },
   };
 }

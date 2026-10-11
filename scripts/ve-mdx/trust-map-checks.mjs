@@ -15,6 +15,8 @@ const NOT_PROSE = [
   'script', 'style', 'nav', 'pre', 'table', '[data-ve-data-table]', '[data-ve-code-block]', '[data-ve-code-ref]', '[data-ve-diff-block]',
   '.ve-disclosure-body', '.ve-disclosure-meta', '[role="tooltip"]', 'blockquote[data-quote]', '[data-ve-diagram-modes]', '[data-ve-lint="skip"]',
   '.ve-chapter-rail', 'svg', '[data-ve-legend]',
+  // A path or a code name is not a word of the glossary.
+  'code',
 ].join(', ');
 
 const norm = (word) => {
