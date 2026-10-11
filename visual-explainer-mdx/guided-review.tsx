@@ -344,7 +344,7 @@ function ChangeChapterBlock({ data, refs, explain = {}, g, first, open = false }
         <h3 className="ve-subsection-title">{g.name}</h3>
         <p className="ve-spine-meta">{g.files.length} {g.files.length === 1 ? 'file' : 'files'} · <Churn added={g.added} removed={g.removed} /> · not part of the review progress</p>
         <p>{g.tier === 'tests'
-          ? 'The checks of this PR. The chapters above link the ones that back a claim; here each test file lists the tests that it changes. Their diffs stay collapsed.'
+          ? 'The checks of this PR. The chapters above link the ones that back a claim. Here each test file lists the tests that it changes, with its diff collapsed.'
           : 'Files that a tool writes. Review the generator instead: a change here follows from it.'}</p>
         <Disclosure contains={g.files.map((f) => fileAnchor(f.path))} summary={`Show the ${g.files.length} ${g.tier === 'tests' ? 'test' : 'generated'} files`}>
           <FileRows files={g.files} refs={refs} tests={g.tier === 'tests'} />
@@ -407,7 +407,7 @@ function FileMapFigure({ refs, explain = {} }: { refs: Refs; explain?: Explain }
   const kept = new Set(nodes.map((n) => n.id));
   const spec: TypedDiagramSpec = {
     kind: 'map', title: 'How the changed files connect',
-    caption: `Each box is a chapter of the change; an arrow is the imports of its files from another chapter. The badge counts the chapters that import it.${all.length > edges.length ? ` The map shows the ${edges.length} links with the most imports; the list below holds all ${all.length}.` : ''}`,
+    caption: `Each box is a chapter of the change. An arrow shows the imports of its files from another chapter. The badge counts the chapters that import it.${all.length > edges.length ? ` The map shows the ${edges.length} links with the most imports. The list below holds all ${all.length}.` : ''}`,
     nodes, edges: edges.filter((e) => kept.has(e.from) && kept.has(e.to)),
   };
   const name = new Map(groups.map((g) => [g.id, g.name]));
@@ -558,7 +558,7 @@ export function EvidenceGuide({ data, refs }: All) {
     <div data-ve-trust="evidence">
       {first && weakestClaim && wd ? (
         <Subsection id="evidence-promise" title="A promise rests on its claims, and a claim on its checks">
-          <p><Rich terms={terms} text={`Take the promise "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. A promise is only as strong as its weakest claim, so it is ${first.strength}.`} /></p>
+          <p><Rich terms={terms} text={`Take the promise "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. Its weakest claim is ${first.strength}, so the promise is ${first.strength}.`} /></p>
           <div className="ve-path" data-ve-path>
             <div className="ve-path-step"><span className="ve-guide-key">Promise</span><span className="ve-path-name">{first.promise.label}</span><VerdictPill verdict={first.strength} /></div>
             <ClaimTimeline claims={first.claims} data={data} refs={refs} weakest={weakestClaim.id} />
@@ -581,7 +581,7 @@ export function EvidenceGuide({ data, refs }: All) {
           </div>
           {refs.derived.bars ? (
             <div data-ve-bars>
-              <p><strong>For the whole PR.</strong> {refs.derived.bars.summary}</p>
+              <p>For the whole PR: {refs.derived.bars.summary}</p>
               <ul className="ve-bar-lines">{refs.derived.bars.story.filter((l) => /^\d+ of \d+/.test(l)).map((line, n) => {
                 const m = /^(\d+) of (\d+)/.exec(line)!;
                 return <li data-ve-bar-line="count" key={n}><CountMarks label={line} runs={[{ n: Number(m[1]), tone: 'ok', label: 'meets its bar' }, { n: Number(m[2]) - Number(m[1]), tone: 'warn', label: 'below its bar', hollow: true }]} /><span><Rich terms={terms} text={line} /></span></li>;
@@ -591,7 +591,7 @@ export function EvidenceGuide({ data, refs }: All) {
         </Subsection>
       ) : null}
       {pair && pair.caught_by ? (
-        <Subsection id="evidence-one-bug" title="One bug. Two different results.">
+        <Subsection id="evidence-one-bug" title="One bug, two results">
           <p><Rich terms={terms} text={`We planted one bug and ran two checks on it. ${capital(pair.broke)}`} /></p>
           {controls.get(pair.control) ? (() => {
             const edits = controlEdits(refs, controls.get(pair.control)!);
@@ -604,7 +604,7 @@ export function EvidenceGuide({ data, refs }: All) {
           })() : null}
           <div className="ve-two-results">
             <div className="ve-result-card" data-ve-tone="warn"><p className="ve-result-card-state"><ToneMark tone="warn" /> Missed the bug</p><p><strong>{capital(pair.name)}</strong></p><p>{pair.happened}</p></div>
-            <div className="ve-result-card" data-ve-tone="ok"><p className="ve-result-card-state"><ToneMark tone="ok" /> Caught the bug</p><p><strong>{capital(pair.caught_by.name)}</strong></p><p>It failed on the bug, as a good check must.</p></div>
+            <div className="ve-result-card" data-ve-tone="ok"><p className="ve-result-card-state"><ToneMark tone="ok" /> Caught the bug</p><p><strong>{capital(pair.caught_by.name)}</strong></p><p>It failed on the bug.</p></div>
           </div>
           <p><Rich terms={terms} text={pair.why} /> {pair.claims?.[0] ? <a href={'#' + claimAnchor(pair.claims[0])}>See the claim</a> : null}</p>
         </Subsection>
@@ -621,7 +621,7 @@ export function EvidenceGuide({ data, refs }: All) {
           <p>For each check, we broke the code on purpose and ran the check. A good check fails when the code is wrong: it caught the bug. Each kind of work has its own way to break it.</p>
           <dl className="ve-definition-list" data-ve-control-kinds>
             <dt>Planted bugs and mutants (backend)</dt>
-            <dd data-ve-planted>{verify.result}</dd>
+            <dd data-ve-planted>{verify.caught + verify.missed + verify.cannot} checks ran on a planted bug or a mutant.</dd>
             <dt>Degraded variants for evals (LLM)</dt>
             <dd>
               {verify.evals?.length ? (
@@ -640,7 +640,7 @@ export function EvidenceGuide({ data, refs }: All) {
               ) : <span>No frontend claim in this PR.</span>}
             </dd>
           </dl>
-          <p data-ve-tiers><strong>The checks by kind.</strong> {verify.tiers.map((t) => `${t.label}: ${t.n}`).join(' · ')}</p>
+          <p data-ve-tiers>The checks by kind: {verify.tiers.map((t) => `${t.label}: ${t.n}.`).join(' ')}</p>
           <p><a href="#ch-5">See every check, by promise</a></p>
         </div>
       </Subsection>
@@ -671,7 +671,7 @@ export function questionsFor(data: TrustMap, refs: Refs): Question[] {
     out.push({
       id: 'q-weakest', q: `The promise "${weak.promise.label}" is ${weak.strength}. Which claim makes it ${weak.strength}?`,
       options: options.map((c) => ({ text: capital(claimLabel(c)), right: strengthOf(refs, c.id) === weak.strength })),
-      why: `${capital(claimLabel(w))} is ${weak.strength}, the weakest of its ${weak.count} claims (${weak.tally}). A promise is only as strong as its weakest claim.`,
+      why: `${capital(claimLabel(w))} is ${weak.strength}, the weakest of its ${weak.count} claims (${weak.tally}). The promise takes the strength of its weakest claim.`,
       links: [{ href: '#' + promiseAnchor(weak.promise.id), label: 'See the promise' }, { href: '#evidence-promise', label: 'How a promise rests on its claims' }],
     });
   }
@@ -682,7 +682,7 @@ export function questionsFor(data: TrustMap, refs: Refs): Question[] {
     out.push({
       id: 'q-bar', q: `The claim "${claimLabel(barClaim)}" is ${strengthOf(refs, barClaim.id)}. Does it meet its evidence bar?`,
       options: [{ text: 'Yes, it meets its bar', right: b.met }, { text: 'No, it is below its bar', right: !b.met }],
-      why: `Its bar is ${b.need}. ${b.met ? 'Each of its parts has that evidence.' : `It has ${b.why}.`} Strength says how well checks back a claim; the bar says what evidence its kind of code needs.`,
+      why: `Its bar is ${b.need}. ${b.met ? 'Each of its parts has that evidence.' : `It has ${b.why}.`} Strength says how well checks back a claim. The bar says what evidence its kind of code needs.`,
       links: [{ href: '#' + claimAnchor(barClaim.id), label: 'See the claim' }, { href: '#evidence-bar', label: 'How a bar works' }],
     });
   }
@@ -721,7 +721,7 @@ function QuestionCard({ question, n }: { question: Question; n: number }) {
       <div aria-live="polite" data-ve-js-only>
         {chosen !== null ? (
           <div className="ve-question-why" data-ve-tone={ok ? 'ok' : 'warn'} data-ve-why>
-            <p><strong>{ok ? 'Right.' : `Not quite: the answer is ${answer}.`}</strong> {question.why}</p>
+            <p><strong>{ok ? 'Your answer is right.' : `The answer is ${answer}.`}</strong> {question.why}</p>
             <p>{question.links.map((l, i) => <Fragment key={l.href}>{i ? ' · ' : ''}<a href={l.href}>{l.label}</a></Fragment>)}</p>
           </div>
         ) : null}
@@ -737,14 +737,13 @@ function QuestionCard({ question, n }: { question: Question; n: number }) {
   );
 }
 
-/** Check your understanding: two or three questions from this PR's data, answered at once with the reason. Nothing is graded or stored. */
+/** Check your understanding: two or three questions from this PR's data, answered at once with the reason. The answers are not stored. */
 export function UnderstandingCheck({ data, refs }: WithRefs) {
   assertRefs(assertTrustMap(data), refs);
   const qs = questionsFor(data, refs);
   if (!qs.length) return <p>This PR has no weak promise or bar to ask about.</p>;
   return (
     <div data-ve-trust="questions">
-      <p className="ve-quiet">Your answers stay on this page. Nothing is graded, saved or sent.</p>
       <div className="ve-question-stack">{qs.map((q, i) => <QuestionCard key={q.id} n={i + 1} question={q} />)}</div>
     </div>
   );
@@ -771,7 +770,6 @@ function CallControls({ item, head }: { item: ReviewItem; head: string }) {
         <span>A note, if you want one</span>
         <textarea onChange={(e) => set(item.key, { note: e.target.value })} rows={2} value={now.note ?? ''} />
       </label>
-      <p className="ve-quiet">Saved in this browser only. Nothing is sent.</p>
     </fieldset>
   );
 }
@@ -910,7 +908,7 @@ export function reviewMarkdown(data: TrustMap, refs: Refs, calls: Calls): string
   return out.join('\n');
 }
 
-/** Copy the reviewer's calls as Markdown. It only copies: it never posts or sends. */
+/** Copy the reviewer's calls to the clipboard as Markdown, for a PR comment. */
 export function ExportReview({ data, refs }: WithRefs) {
   const [calls] = useCalls(data.head);
   const [state, setState] = useState<'idle' | 'copied' | 'manual'>('idle');
@@ -928,8 +926,8 @@ export function ExportReview({ data, refs }: WithRefs) {
   };
   return (
     <div className="ve-review-export" data-ve-js-only data-ve-review-export>
-      <button className="ve-button" data-ve-export onClick={copy} type="button">Copy my review as Markdown</button>
-      <span aria-live="polite" className="ve-quiet">{state === 'copied' ? 'Copied. Paste it into a PR comment.' : state === 'manual' ? 'Copy the text below.' : 'It only copies. Nothing is posted.'}</span>
+      <button className="ve-button" data-ve-export onClick={copy} type="button">Copy as Markdown</button>
+      <span aria-live="polite" className="ve-quiet">{state === 'copied' ? 'Copied to the clipboard.' : state === 'manual' ? 'Copy the text below.' : ''}</span>
       {state === 'manual' ? <textarea aria-label="Your review as Markdown" className="ve-review-export-text" readOnly rows={8} value={text} /> : null}
     </div>
   );
@@ -958,7 +956,7 @@ export function ReviewChecklist({ data, refs, explain = {} }: All) {
       </div>
       {/* Both parts always show, so a link to either one has its target: an empty part says so. */}
       <Subsection id="review-blockers" title={`Blocks the merge (${blocks.length})`}>
-        {blocks.length ? <ol className="ve-review-list">{blocks.map((i) => <ReviewItemCard data={data} explain={explain} h={h} item={i} key={i.key} refs={refs} />)}</ol> : <p>Nothing blocks the merge.</p>}
+        {blocks.length ? <ol className="ve-review-list">{blocks.map((i) => <ReviewItemCard data={data} explain={explain} h={h} item={i} key={i.key} refs={refs} />)}</ol> : <p>No item blocks the merge.</p>}
       </Subsection>
       <Subsection id="review-accept" title={`Ready if you accept (${accept.length})`}>
         {accept.length ? <ol className="ve-review-list" start={blocks.length + 1}>{accept.map((i) => <ReviewItemCard data={data} explain={explain} h={h} item={i} key={i.key} refs={refs} />)}</ol> : <p>No risk to accept.</p>}
@@ -1000,13 +998,13 @@ export function ReviewVerdict({ data, refs }: WithRefs) {
           {fix.length ? <p data-ve-left="fix"><strong>You marked {fix.length} as needing a fix:</strong> {fix.map((i, n) => <Fragment key={i.key}>{n ? ', ' : ''}{link(i)}</Fragment>)}.</p> : null}
           {left.length && left.length < items.length ? <p data-ve-left="todo"><strong>Still to review ({left.length}):</strong> {left.slice(0, 6).map((i, n) => <Fragment key={i.key}>{n ? ', ' : ''}{link(i)}</Fragment>)}{left.length > 6 ? ` and ${left.length - 6} more` : ''}.</p> : null}
           {items.length && left.length === items.length ? <p data-ve-left="none"><strong>You have made no call yet.</strong> Start with the riskiest item: {link(items[0])}.</p> : null}
-          {items.length && !left.length && !fix.length ? <p data-ve-left="done"><strong>You reviewed each item.</strong> Copy your review for the PR comment.</p> : null}
+          {items.length && !left.length && !fix.length ? <p data-ve-left="done"><strong>You made a call on each item.</strong></p> : null}
         </div>
         <ExportReview data={data} refs={refs} />
       </div>
       {refs.derived.ready ? (
         <div data-ve-ready-gates id="story-ready-gates">
-          <p><strong>The ready checklist.</strong> Four gates decide if the PR is ready to review. Each gate passes or fails.</p>
+          <p>The ready checklist: four gates decide if the PR is ready to review.</p>
           <Defs items={refs.derived.ready.gates.map((g) => [`Gate ${g.n}: ${g.name}`, <Rich key={g.n} text={(g.pass ? 'Pass. ' : 'Fail. ') + g.detail} />, g.pass ? 'ok' : 'err'] as [ReactNode, ReactNode, 'ok' | 'err'])} />
         </div>
       ) : null}
@@ -1078,13 +1076,10 @@ export function ApproveChecks({ data, refs, explain = {} }: All) {
 export function VerifierView({ data, refs }: WithRefs) {
   assertRefs(assertTrustMap(data), refs);
   const tests = refs.derived.tests;
-  const verify = refs.derived.verify;
   if (!refs.derived.checks || !tests) throw new TrustMapError('refs.resolved.json has no derived checks or tests; run understando explain again');
   const rows = promiseRows(data, refs);
   return (
     <div data-ve-trust="checks">
-      <p data-ve-checks-result><strong>{verify.result}</strong> <CountMarks label={verify.result} runs={[{ n: verify.caught, tone: 'ok', label: 'caught its planted bug' }, { n: verify.missed, tone: 'warn', label: 'missed its planted bug' }, { n: verify.cannot, tone: 'err', label: 'cannot fail' }]} /></p>
-      {verify.other ? <p className="ve-quiet">{verify.other}</p> : null}
       {tests.orphan_tests ? (
         <div className="ve-orphans" data-ve-orphans>
           <p><strong data-ve-orphan-count>{tests.summary}</strong> <span data-ve-action>{tests.action}</span></p>
@@ -1101,7 +1096,7 @@ export function VerifierView({ data, refs }: WithRefs) {
           {claims.map((c) => {
             const ids = derivedClaim(refs, c.id).checks.filter((x) => x.kind !== 'none').map((x) => x.id);
             return (
-              <div className="ve-checks-claim" key={c.id}>
+              <div className="ve-checks-claim" data-ve-record key={c.id}>
                 <ClaimRow claim={c} data={data} refs={refs} />
                 {ids.length ? <div className="ve-check-rows">{ids.map((id) => <CheckRow data={data} hideClaims id={id} key={id} lazy refs={refs} />)}</div> : <p className="ve-quiet">No tool checks this claim.</p>}
               </div>

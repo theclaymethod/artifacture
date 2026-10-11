@@ -29,11 +29,22 @@ function run(args) {
 }
 
 /** A copy of the trust-map fixture with one change, exported; resolves to the export result. */
-function exportTrustCase(dir, change) {
+function exportTrustCase(dir, change, args = []) {
   cpSync(TRUST_FIXTURE, dir, { recursive: true });
   change(dir);
-  return run(['scripts/ve-mdx/export.mjs', path.join(dir, 'explainer.mdx'), '--out', path.join(dir, 'explainer.html')]);
+  return run(['scripts/ve-mdx/export.mjs', path.join(dir, 'explainer.mdx'), '--out', path.join(dir, 'explainer.html'), ...args]);
 }
+
+/** A copy of the fixture MDX with each [from, to] replaced. */
+const plantInMdx = (...pairs) => (dir) => {
+  const mdx = path.join(dir, 'explainer.mdx');
+  let text = readFileSync(mdx, 'utf8');
+  for (const [from, to] of pairs) {
+    assert.ok(text.includes(from), `the fixture MDX lacks ${from}`);
+    text = text.replace(from, to);
+  }
+  writeFileSync(mdx, text);
+};
 
 function luminance([r, g, b]) {
   const channel = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
@@ -87,7 +98,7 @@ test.before(async () => {
   // The exports run at the same time; the bad cases fail in the pre-render, before a bundle.
   const map = (dir) => JSON.parse(readFileSync(path.join(dir, 'trust-map.json'), 'utf8'));
   const oldDir = path.join(workDir, 'old-shape');
-  const [scan, good, noAction, idInProse, oldShape] = await Promise.all([
+  const [scan, good, noAction, idInProse, oldShape, slogan, repeated, ste, noLint] = await Promise.all([
     run(['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact]),
     // One claim joins an old claim: its old id C09 must still find it.
     exportTrustCase(trustDir, (dir) => {
@@ -107,11 +118,19 @@ test.before(async () => {
       writeFileSync(mdx, readFileSync(mdx, 'utf8').replace('A planted bug proves the overdraft rule.', 'Control K01 proves the overdraft rule.'));
     }),
     exportTrustCase(oldDir, (dir) => cpSync(OLD_SHAPE_MAP, path.join(dir, 'trust-map.json'))),
+    // Copy: a reassurance line and a label run-in; a sentence of the narrative said twice; a hard STE violation; no lint.
+    exportTrustCase(path.join(workDir, 'slogan'), plantInMdx(
+      ['A planted bug proves the overdraft rule.', 'A planted bug proves the overdraft rule. Nothing is sent.'],
+      ['- The fixture is small', '- **In short.** The fixture is small'],
+    )),
+    exportTrustCase(path.join(workDir, 'repeated'), plantInMdx(['A caller asks the wallet for an amount, and the wallet pays it or refuses it.', 'The wallet now refuses an overdraft. A caller asks the wallet for an amount, and the wallet pays it or refuses it.'])),
+    exportTrustCase(path.join(workDir, 'ste'), plantInMdx(['The fixture is small, so each chapter is short.', 'The fixture is small; each chapter is short.'])),
+    exportTrustCase(path.join(workDir, 'no-lint'), () => {}, ['--ste-lint', path.join(workDir, 'no-such-lint.py')]),
   ]);
   assert.equal(scan.status, 0, scan.out);
   assert.equal(good.status, 0, good.out);
   assert.equal(oldShape.status, 0, oldShape.out);
-  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), map: map(trustDir), noAction, idInProse };
+  trust = { dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), map: map(trustDir), noAction, idInProse, slogan, repeated, ste, noLint };
 });
 
 test.after(async () => {
@@ -289,12 +308,23 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
 const derivedOf = (dir) => JSON.parse(readFileSync(path.join(dir, 'refs.resolved.json'), 'utf8')).derived;
 const visibleChapters = (page) => page.$$eval('section.ve-section[id^="ch-"]', (s) => s.filter((x) => !x.hidden && x.getBoundingClientRect().height > 0).map((x) => x.id));
 
-test('guided review: the export checks, the stamp, and the page without JavaScript', async () => {
+test('guided review: the export checks (data, IDs, copy, STE), the stamp, and the page without JavaScript', async () => {
   // The export fails on bad data and on an ID in the narrative prose.
   assert.notEqual(trust.noAction.status, 0);
   assert.match(trust.noAction.out, /needs a reviewer_action/);
   assert.notEqual(trust.idInProse.status, 0);
   assert.match(trust.idInProse.out, /the ID K01 is in the narrative prose/);
+  // The export fails on copy that reassures, labels, repeats itself or breaks a hard STE rule.
+  assert.notEqual(trust.slogan.status, 0);
+  assert.match(trust.slogan.out, /ch-0: the slogan "Nothing is sent\." reassures or labels instead of informing/);
+  assert.match(trust.slogan.out, /ch-8: the run-in label "In short\." labels the text/);
+  assert.notEqual(trust.repeated.status, 0);
+  assert.match(trust.repeated.out, /the sentence "The wallet now refuses an overdraft\." shows 2 times \(ch-0, ch-2\)/);
+  assert.notEqual(trust.ste.status, 0);
+  assert.match(trust.ste.out, /ch-8: STE semicolon: .* in "The fixture is small; each chapter is short\."/);
+  assert.doesNotMatch(trust.ste.out, /slogan|shows \d+ times/);
+  assert.notEqual(trust.noLint.status, 0);
+  assert.match(trust.noLint.out, /the STE lint is not at .*no-such-lint\.py\. .*--ste-lint off/);
 
   const html = readFileSync(trust.html, 'utf8');
   assert.ok(html.includes(`<meta name="ve-trust-map-head" content="${trust.map.head}">`));
@@ -378,7 +408,7 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
 test('guided review: the checklist order, the calls in local storage, the export, each claim once, and the questions', async () => {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
-    // The export only copies: catch what it writes to the clipboard.
+    // Catch what the export writes to the clipboard.
     await context.addInitScript(() => {
       window.__copied = [];
       Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text) => { window.__copied.push(text); } }, configurable: true });
@@ -434,13 +464,13 @@ test('guided review: the checklist order, the calls in local storage, the export
     const weakest = trust.map.claims.find((c) => c.id === row.claims[0]);
     assert.match(await q.locator('h3').textContent(), new RegExp(`"${promise.label}" is ${row.strength}`));
     await q.getByRole('button', { name: weakest.name, exact: false }).first().click();
-    assert.match(await q.locator('[data-ve-why]').textContent(), /^Right\./);
+    assert.match(await q.locator('[data-ve-why]').textContent(), /^Your answer is right\./);
     const bar = page.locator('[data-ve-question="q-bar"]');
     const askedName = /"(.+?)"/.exec(await bar.locator('h3').textContent())?.[1];
     const asked = trust.map.claims.find((c) => c.name === askedName);
     const met = derived.claims[asked.id].bar.met;
     await bar.getByRole('button', { name: 'Yes, it meets its bar' }).click();
-    assert.match(await bar.locator('[data-ve-why]').textContent(), met ? /^Right\./ : /^Not quite: the answer is No, it is below its bar\./);
+    assert.match(await bar.locator('[data-ve-why]').textContent(), met ? /^Your answer is right\./ : /^The answer is No, it is below its bar\./);
     assert.equal(await bar.locator('[data-ve-why] a').first().getAttribute('href'), `#claim-${asked.id.toLowerCase()}`);
   } finally {
     await context.close();

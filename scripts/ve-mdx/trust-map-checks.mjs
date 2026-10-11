@@ -2,11 +2,12 @@
 // on the static pre-render, so they see the narrative MDX and the data components as a reader
 // does, and on the MDX sources for the no-hand-copy guard.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import { isPlainWord, MAX_TERMS_PER_CHAPTER } from '../../visual-explainer-mdx/glossary-policy.mjs';
+import { REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES } from './copy-rules.mjs';
 
 const ID = /(?<![\w-])[CVK]\d+[a-z]?(?![\w-])/;
 const ACRONYM = /(?<![\w$#.-])([0-9]*[A-Z][A-Z0-9]*(?:-[0-9A-Z]+)*)(?![\w-])/g;
@@ -48,8 +49,10 @@ const where = (node) => node.parentElement?.closest('section[id]')?.id ?? 'page'
  *  - Each Term and each abbreviation in the prose has a glossary entry.
  *  - The verify level opens with its result line; each weak check and the weakest check of each claim has an action.
  *  - Each #fragment link has a target, and no id shows twice.
+ *  - The copy has no slogan, no label run-in and no sentence twice (copy-rules.mjs), and the
+ *    asd-ste100 lint finds no hard violation in it (`steLint`: the path of ste-lint.py, or false).
  */
-export function checkTrustMapPage(markup) {
+export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
   const { document } = parseHTML(`<!doctype html><html><body>${markup}</body></html>`);
   if (!document.querySelector('[data-ve-trust]')) return [];
   const errors = [];
@@ -116,7 +119,128 @@ export function checkTrustMapPage(markup) {
     const target = decodeURIComponent(a.getAttribute('href').slice(1));
     if (target && !ids.has(target)) errors.push(`the link #${target} has no target`);
   }
+  errors.push(...checkCopy(body));
+  if (steLint) errors.push(...lintSte(body, steLint));
   return errors;
+}
+
+// ---- The copy -------------------------------------------------------------------------------
+
+// Not copy: code, diagrams, the user's own words and the tooltip of a Term (the glossary holds its words).
+const NOT_COPY = 'script, style, pre, code, svg, blockquote[data-quote], [role="tooltip"], [data-ve-code-block], [data-ve-code-ref], [data-ve-diff-block], [data-ve-lint="skip"]';
+// Text that shows more than once by its role: controls, links, navigation, state pills and the
+// merge state, screen-reader text, the no-JS twin of a control, tables and the glossary.
+const NOT_REPEAT = `${NOT_COPY}, nav, button, summary, label, legend, option, a, table, .ve-visually-hidden, .ve-status-pill, .ve-verdict, [data-ve-review-progress], [data-ve-nojs-only], [data-ve-glossary], .ve-chapter-rail`;
+// One record of a data component: a claim, a check, a file, a review item or a glossary word. Its
+// values are data that understando derives from the map.
+const RECORD = 'li, details, article, tr, [data-ve-glossary] > dd, [data-ve-record]';
+// Inline elements join the text of their block; any other element starts a block of its own.
+const INLINE = 'span, strong, em, b, i, a, abbr, sup, sub, small, mark, kbd, q, cite, time, data, s, u, br, wbr';
+
+/**
+ * The text of each block of the page in document order, without the subtrees that match `skip`.
+ * Two inline elements with no space between them (a label and its value, a pill and a count) are
+ * two pieces of text, not one sentence.
+ */
+function textBlocks(body, skip) {
+  const out = [];
+  let open = null;
+  for (const node of textNodes(body, skip)) {
+    let block = node.parentElement;
+    while (block && block !== body && block.matches(INLINE)) block = block.parentElement;
+    const text = node.textContent;
+    const joined = open && open.block === block && (open.parent === node.parentElement || /\s$/.test(open.text) || /^[\s.,:;!?)]/.test(text) || !/[\w)]$/.test(open.text));
+    if (!joined) {
+      const data = block?.closest?.('[data-ve-trust]');
+      open = { block, parent: node.parentElement, text: '', where: block?.closest?.('section[id]')?.id ?? 'page', role: !data ? 'narrative' : block.closest(RECORD)?.closest('[data-ve-trust]') ? 'record' : 'component' };
+      out.push(open);
+    }
+    open.text += joined && open.parent !== node.parentElement && /[.!?]$/.test(open.text) && /^\S/.test(text) ? ` ${text}` : text;
+    open.parent = node.parentElement;
+  }
+  return out.map(({ text, where: at, role }) => ({ text: text.replace(/\s+/g, ' ').trim(), where: at, role })).filter((b) => b.text);
+}
+
+const sentencesOf = (text) => text.split(/(?<=[.!?])\s+(?=["“([]?[A-Z0-9])/).map((s) => s.trim()).filter(Boolean);
+const words = (sentence) => sentence.split(' ').filter((w) => /\w/.test(w)).length;
+
+/** Slogans, label run-ins and repeated sentences (the rules and their lists: copy-rules.mjs). */
+function checkCopy(body) {
+  const errors = [];
+  for (const { text, where: at } of textBlocks(body, NOT_COPY)) {
+    for (const sentence of sentencesOf(text)) {
+      const phrase = SLOGAN_PHRASES.find((p) => sentence.toLowerCase().includes(p));
+      if (phrase || SLOGAN_SENTENCES.some((re) => re.test(sentence))) {
+        errors.push(`${at}: the slogan "${sentence}" reassures or labels instead of informing${phrase ? ` ("${phrase}")` : ''}. Delete it. A control's label says what it does, and a fact that matters goes once in the chapter's Lead.`);
+      }
+    }
+  }
+  for (const el of body.querySelectorAll('p, li, dd')) {
+    if (el.closest(NOT_COPY)) continue;
+    const first = [...el.childNodes].find((n) => n.nodeType === 1 || (n.nodeType === 3 && n.textContent.trim()));
+    if (!first?.matches?.('strong, b')) continue;
+    const run = first.textContent.trim();
+    const label = run.replace(/[.:]$/, '');
+    // A Lead takes no run-in label at all; elsewhere the labels of RUN_IN_LABELS fail.
+    if (RUN_IN_LABELS.some((re) => re.test(label)) || (el.closest('[data-ve-lead]') && /[.:]$/.test(run))) {
+      errors.push(`${where(first)}: the run-in label "${run}" labels the text instead of saying something. Delete it and start with the plain sentence.`);
+    }
+  }
+  // A sentence twice: the narrative says it again, or a component outside its records does. The
+  // same value in several records (claims, checks, files, review items) is data, not copy.
+  const seen = new Map();
+  for (const { text, where: at, role } of textBlocks(body, NOT_REPEAT)) {
+    for (const sentence of sentencesOf(text)) {
+      // A label or a heading has no full stop: only a sentence counts.
+      if (words(sentence) < REPEAT_MIN_WORDS || !/[.!?]$/.test(sentence)) continue;
+      const key = sentence.toLowerCase().replace(/[.!?:]+$/, '');
+      const hit = seen.get(key) ?? { sentence, at: [], roles: [] };
+      hit.at.push(at);
+      hit.roles.push(role);
+      seen.set(key, hit);
+    }
+  }
+  for (const { sentence, at, roles } of seen.values()) {
+    if (at.length > 1 && (roles.includes('narrative') || roles.filter((r) => r === 'component').length > 1)) {
+      errors.push(`the sentence "${sentence}" shows ${at.length} times (${[...new Set(at)].join(', ')}). Say it once, where it matters most.`);
+    }
+  }
+  return errors;
+}
+
+// ---- The STE lint (asd-ste100) --------------------------------------------------------------
+
+/** ste-lint.py of the asd-ste100 skill: VE_STE_LINT (a path, or "off"), else the installed skill. */
+export function defaultSteLint() {
+  const env = process.env.VE_STE_LINT;
+  if (env) return env === 'off' ? false : path.resolve(env);
+  const installed = ['.agents', '.claude'].map((dir) => path.join(os.homedir(), dir, 'skills/asd-ste100/scripts/ste-lint.py'));
+  return installed.find((file) => existsSync(file)) ?? installed[0];
+}
+
+/**
+ * One run of the STE lint over the copy, one block per line; each hard violation is an error. The
+ * copy is the narrative and the text of the components outside their records. A record (a claim,
+ * a check, a file, a review item) holds the values that understando derives from the map.
+ */
+function lintSte(body, script) {
+  const off = 'Install the asd-ste100 skill, point --ste-lint (or VE_STE_LINT) at ste-lint.py, or turn the check off with --ste-lint off.';
+  if (!existsSync(script)) throw new Error(`the STE lint is not at ${script}. ${off}`);
+  const blocks = textBlocks(body, NOT_COPY).filter((b) => b.role !== 'record');
+  // One line for each block. A line that opens with a fence mark would hide the lines after it.
+  const input = blocks.map((b) => b.text.replace(/^(```|~~~)+/, '')).join('\n') + '\n';
+  const lint = spawnSync('python3', ['-I', script, '--json'], { input, encoding: 'utf8', maxBuffer: 1 << 26 });
+  if (lint.error) throw new Error(`the STE lint cannot run python3: ${lint.error.message}. ${off}`);
+  let report;
+  try {
+    report = JSON.parse(lint.stdout);
+  } catch {
+    throw new Error(`the STE lint gave no report (exit ${lint.status}): ${lint.stderr.trim()}`);
+  }
+  return report.violations.filter((v) => v.level === 'advisory-free').map((v) => {
+    const block = blocks[v.line - 1];
+    return `${block.where}: STE ${v.rule}: ${v.message} [${v.match}] in "${around(block.text, v.col - 1)}"`;
+  });
 }
 
 const squash = (line) => line.split(/\s+/).filter(Boolean).join(' ');
