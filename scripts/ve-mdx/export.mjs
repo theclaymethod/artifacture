@@ -7,7 +7,29 @@ import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
 import { preflightSource } from './integrity.mjs';
-import { injectDesignSystemCss, resolvePresetCssForExport } from './design-systems.mjs';
+import { injectDesignSystemCss, presetNamesInSource, resolvePresetCssForExport } from './design-systems.mjs';
+import { DEFAULT_PRESET } from '../../visual-explainer-mdx/preset-policy.mjs';
+
+// The web fonts that each built-in preset sets. themes.css imports every family for every preset;
+// an MDX export keeps only the families its presets use, as variable weight ranges, so the page
+// declares a few faces instead of about a hundred. Code stays the only mono text.
+const PRESET_FONTS = {
+  iso: ['Inter:wght@400..700', 'Geist+Mono:wght@400..500'],
+  '3b1b': ['Inter:wght@400..700', 'Geist+Mono:wght@400..500', 'EB+Garamond:wght@400..600', 'STIX+Two+Math'],
+  'mono-color': ['Inter:wght@400..700', 'Geist+Mono:wght@400..500'],
+  algebrica: ['Inter:wght@400..700', 'Geist+Mono:wght@400..500', 'EB+Garamond:wght@400..600', 'STIX+Two+Math'],
+  'mono-industrial': ['Space+Grotesk:wght@400..700', 'Space+Mono:wght@400;700'],
+};
+const FONT_IMPORT = /@import\s*(?:url\()?\s*["']?(https:\/\/fonts\.googleapis\.com\/css2\?[^"')]+)["']?\s*\)?\s*;?/;
+
+/** Replace the all-presets font import with the families of the presets that the source uses. */
+export function subsetFontImport(html, presets) {
+  const names = presets.length ? presets : [DEFAULT_PRESET];
+  if (!names.every((name) => PRESET_FONTS[name])) return html;
+  const families = [...new Set(names.flatMap((name) => PRESET_FONTS[name]))];
+  const url = `https://fonts.googleapis.com/css2?${families.map((family) => `family=${family}`).join('&')}&display=swap`;
+  return html.replace(FONT_IMPORT, `@import url("${url}");`);
+}
 
 const repoRoot = process.cwd();
 
@@ -133,6 +155,8 @@ async function main() {
     if (designSystemCss) {
       generated = injectDesignSystemCss(generated, designSystemCss);
     }
+
+    if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
 
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, generated);

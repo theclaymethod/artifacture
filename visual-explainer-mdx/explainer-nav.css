@@ -49,7 +49,7 @@
 
 .ve-chapter-count {
   color: var(--ve-muted);
-  font-family: var(--ve-font-mono);
+  font-family: var(--ve-font-body);
   font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
 }
@@ -63,7 +63,7 @@
 }
 
 .ve-chapter-caret {
-  font-family: var(--ve-font-mono);
+  font-family: var(--ve-font-body);
 }
 
 .ve-chapter-heading {
@@ -122,7 +122,7 @@
 
 .ve-chapter-index {
   color: var(--ve-muted);
-  font-family: var(--ve-font-mono);
+  font-family: var(--ve-font-body);
   font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
 }

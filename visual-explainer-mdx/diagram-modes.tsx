@@ -2,7 +2,7 @@ import { useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore
 import { layoutDiagramModes } from './diagram-layout';
 import { GraphicCanvas } from './graphics';
 import { diagramSceneFromLayout } from './diagram-scene';
-import { MobileSwimlaneVariant } from './diagram-canvas';
+import { fittedCanvasStyle, MobileSwimlaneVariant, pickDirection, useDiagramVariant } from './diagram-canvas';
 import { Legend, type LegendItem } from './data-table';
 import type { DiagramEdge, DiagramNode } from './diagram-types';
 import './diagram-canvas.css';
@@ -16,7 +16,8 @@ export type DiagramModesProps = {
   /** The same boxes named by their real modules or functions; a few more boxes at most. Each simple node id must also be a detailed node id. */
   detailed: DiagramModeGraph;
   layout?: 'flow' | 'tree';
-  direction?: 'auto' | 'horizontal' | 'vertical';
+  /** `wrap` sets the flow left to right in rows that fit the column (below 600px it is vertical). */
+  direction?: 'auto' | 'horizontal' | 'vertical' | 'wrap';
   title?: string;
   description?: string;
 };
@@ -72,32 +73,38 @@ export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'a
   const figureRef = useRef<HTMLElement>(null);
   const [mode, setMode] = useDiagramMode();
   const [availableWidth, setAvailableWidth] = useState<number | null>(null);
+  // Rows may be a little wider than the column: the figure then shrinks to fit, to 85% at most.
+  const wrapWidth = direction === 'wrap' && availableWidth !== null && availableWidth >= 600 ? Math.floor(availableWidth / 0.85) : 0;
   const candidates = useMemo(() => {
+    if (direction === 'wrap') {
+      const initial = wrapWidth ? layoutDiagramModes(simple, detailed, layout, 'wrap', wrapWidth) : layoutDiagramModes(simple, detailed, layout, 'vertical');
+      return { initial, horizontal: initial, vertical: initial };
+    }
     const initial = layoutDiagramModes(simple, detailed, layout, direction);
     if (direction !== 'auto') return { initial, horizontal: initial, vertical: initial };
     return { initial, horizontal: layoutDiagramModes(simple, detailed, layout, 'horizontal'), vertical: layoutDiagramModes(simple, detailed, layout, 'vertical') };
-  }, [simple, detailed, layout, direction]);
+  }, [simple, detailed, layout, direction, wrapWidth]);
   useLayoutEffect(() => {
     const figure = figureRef.current;
-    if (!figure || direction !== 'auto') return;
+    if (!figure || (direction !== 'auto' && direction !== 'wrap')) return;
     const update = (width: number) => { if (width > 0) setAvailableWidth((previous) => previous === Math.floor(width) ? previous : Math.floor(width)); };
     update(figure.clientWidth);
     const observer = new ResizeObserver(([entry]) => { if (entry) update(entry.contentRect.width); });
     observer.observe(figure);
     return () => observer.disconnect();
   }, [direction]);
+  const variant = useDiagramVariant();
   const pair = useMemo(() => {
     if (availableWidth === null || direction !== 'auto') return candidates.initial;
     const { horizontal, vertical } = candidates;
-    if (horizontal.detailed.viewBox.width <= availableWidth) return horizontal;
-    return vertical.detailed.viewBox.width < horizontal.detailed.viewBox.width ? vertical : horizontal;
+    return pickDirection(horizontal.detailed, vertical.detailed, availableWidth) === horizontal.detailed ? horizontal : vertical;
   }, [availableWidth, candidates, direction]);
   const diagram = pair[mode];
   const graph = mode === 'simple' ? simple : detailed;
   const scene = useMemo(() => diagramSceneFromLayout(diagram, { id: `diagram-${mode}`, title: `${title} (${mode})`, description }), [diagram, mode, title, description]);
   const label = { simple: 'Simple', detailed: 'Detailed' } as const;
   return (
-    <figure className="ve-diagram-shell ve-diagram-has-mobile ve-diagram-modes" data-ve-diagram-modes data-ve-mode={mode} ref={figureRef}>
+    <figure className="ve-diagram-shell ve-diagram-has-mobile ve-diagram-modes" data-ve-diagram-modes data-ve-mode={mode} data-ve-shown-variant={variant} ref={figureRef}>
       <fieldset className="ve-diagram-mode-switch">
         <legend><span className="ve-visually-hidden">{title}: </span>View</legend>
         {(['simple', 'detailed'] as const).map((option) => (
@@ -107,10 +114,11 @@ export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'a
           </label>
         ))}
       </fieldset>
-      <div aria-label={`${title}, ${label[mode].toLowerCase()} view, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" key={`desktop-${mode}`} role="region" tabIndex={0}>
-        <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={`${rawId}-${mode}`} style={{ aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`, minWidth: diagram.viewBox.width, maxWidth: diagram.viewBox.width, marginInline: 'auto' }} />
-      </div>
-      <MobileSwimlaneVariant diagram={diagram} idPrefix={`${rawId}-${mode}`} key={`mobile-${mode}`} title={`${title}, ${label[mode].toLowerCase()} view`} />
+      {variant === 'desktop' ? (
+        <div aria-label={`${title}, ${label[mode].toLowerCase()} view, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" key={`desktop-${mode}`} role="region" tabIndex={0}>
+          <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={`${rawId}-${mode}`} style={fittedCanvasStyle(diagram.viewBox)} />
+        </div>
+      ) : <MobileSwimlaneVariant diagram={diagram} idPrefix={`${rawId}-${mode}`} key={`mobile-${mode}`} title={`${title}, ${label[mode].toLowerCase()} view`} />}
       {graph.legend?.length ? <Legend items={graph.legend} /> : null}
     </figure>
   );

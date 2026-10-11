@@ -1,6 +1,7 @@
 import React, { Children, isValidElement, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChapterRail, chapterSlug, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance } from './explainer-nav';
 import { wrapWords } from './diagram-layout';
+import { scrollToTarget } from './content-blocks';
 import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
 export { DiagramCanvas } from './diagram-canvas';
 export { DataTable, StatusPill, Badge, Legend } from './data-table';
@@ -24,8 +25,8 @@ export type { AsciiModel, AsciiObjectProps } from './ascii-object';
 export type { VhsEffectProps } from './vhs-effect';
 export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
 export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
-export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, ChipLinks } from './content-blocks';
-export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, ChipLinksProps, ChipLinkItem } from './content-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, CopyLink, Term, Steps, Step, ChipLinks } from './content-blocks';
+export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, TermProps, StepsProps, StepProps, ChipLinksProps, ChipLinkItem } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
 export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
@@ -247,10 +248,18 @@ export function ExplainerShell({
 }: ShellProps) {
   assertSupportedPreset(preset);
   const resolved = useResolvedAppearance(appearance);
+  // The page renders after load, so the browser's own jump to the fragment finds nothing; land it
+  // here. A Disclosure lands the fragments inside it.
+  useEffect(() => {
+    let hash = window.location.hash.slice(1);
+    try { hash = decodeURIComponent(hash); } catch { /* keep the raw fragment */ }
+    const target = hash ? document.getElementById(hash) : null;
+    if (target && !target.closest('details')) scrollToTarget(target);
+  }, []);
   const chapters = chapterNav ? collectChapters(children) : [];
   const hasChapters = chapters.length > 0;
   const content = (
-    <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
+    <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10" id="ve-content" tabIndex={-1}>
       <header className="ve-shell-header grid gap-6">
         <div>
           <h1 className="max-w-[var(--ve-shell-title-measure)] text-balance text-[length:var(--ve-shell-title-size)] leading-[var(--ve-shell-title-leading)] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
@@ -268,6 +277,7 @@ export function ExplainerShell({
       data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
       data-ve-preset={preset}
     >
+      <a className="ve-skip-link" href="#ve-content">Skip to content</a>
       {hasChapters ? <div className="ve-shell-frame"><ChapterRail chapters={chapters} />{content}</div> : content}
       {reviewTools ? <AnnotationLayer /> : null}
     </main>

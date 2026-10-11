@@ -16,11 +16,13 @@ Read this only when the selected card does not show the component or prop you ne
 - `DecisionMatrix(rows)`
 - `RiskLedger(risks)`
 - `DefinitionList(children)` with `Definition(term, tone?, children)`
-- `Subsection(title, id?, level?, marker?, children)`
-- `Disclosure(summary, meta?, id?, open?, children)`
+- `Subsection(title, id?, level?, marker?, share?, children)`
+- `Disclosure(summary, meta?, id?, open?, share?, lazy?, contains?, children)`
+- `Term(definition, expansion?, children)`
+- `Steps(label?, children)` with `Step(id?, children)`
 - `ChipLinks(items, label)`
 - `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?, legend?)`
-- `DiagramModes(simple, detailed, layout?, direction?, title?, description?)`
+- `DiagramModes(simple, detailed, layout?, direction?, title?, description?)`; `direction="wrap"` sets a long flow in rows that fit the column
 - `DiagramWalkthrough(nodes, edges, steps, layout?, direction?, lanes?, dates?, title?, description?)`
 - `LieflatChart(spec, title, description?, source?)`
 - `DataChart(data, kind?, title, description?, valueLabel?, formatValue?, source?)`
@@ -39,7 +41,7 @@ Read this only when the selected card does not show the component or prop you ne
 
 A `Section` body has a default reading rhythm: 1rem between blocks, unclassed `h3` and `h4` headings, and list markers. `Subsection` groups content under a rule; its `title` can hold code and pills, a `marker` (such as a step number) goes before the title, `level={4}` nests it, and an `id` makes it a rail anchor. `DefinitionList` sets term and detail pairs in two columns that stack below 640px; a `Definition` `tone` colors one pair, so keep a word such as "Warning" in the term. Use these before page CSS.
 
-`Disclosure` keeps detail (code, evidence, long lists) behind a 44px summary row; `meta` holds a count or a pill at the end of the row. A fragment link to a `Disclosure`, or to an element inside it, opens it and each enclosing block. `DiagramModes` shows one architecture diagram in two modes. `simple` holds about four to six boxes in plain words; `detailed` names the same boxes by their real modules and may add a few. Each simple node id is also a detailed node id, so a node keeps its place when the reader switches. The Simple / Detailed control switches every `DiagramModes` on the page, and the page remembers the choice. `ChipLinks` shows in-page links as 44px chips, each with an optional `status` word and `tone`. A plain text link in a `Section` body also gets a 44px target.
+`Disclosure` keeps detail (code, evidence, long lists) behind a 44px summary row; `meta` holds a count or a pill at the end of the row. A fragment link to a `Disclosure`, or to an element inside it, opens it and each enclosing block, and scrolls the target under its headline. Opening a block that has an `id` writes its fragment to the address, and the page keeps the open blocks for the session. `share` adds a copy-link control to a `Disclosure` or a `Subsection`. `lazy` renders the body only after the first open; list in `contains` each id inside it that a link can target. `Term` marks a glossary word in running text: hover, focus or tap shows its `definition`, and `expansion` spells out an abbreviation at its first use. Give `StatusPill` and a `ChipLinks` item a `meaning`, so each state word has a tooltip and screen-reader text. `Steps` numbers run steps that hold rich content, in two columns from 1024px. `Legend layout="list"` sets one swatch, word and sentence per line. `DataTable density="compact"` makes each row a short card below 640px. Diagrams shrink to fit their column, to three quarters of their size at most, and render only the variant that the screen shows. Edges with one label that merge into one node, or fan out from one node, carry the label once. `DiagramModes` shows one architecture diagram in two modes. `simple` holds about four to six boxes in plain words; `detailed` names the same boxes by their real modules and may add a few. Each simple node id is also a detailed node id, so a node keeps its place when the reader switches. The Simple / Detailed control switches every `DiagramModes` on the page, and the page remembers the choice. `ChipLinks` shows in-page links as 44px chips, each with an optional `status` word and `tone`. A plain text link in a `Section` body also gets a 44px target.
 
 `CodeBlock` and `DiffBlock` highlight with Shiki at export. Token colors come from the preset's `--ve-syntax-*` ramp on the code surface. Diff rows use `--ve-code-add` and `--ve-code-remove` with a `+`/`-` gutter. Escape `<` and `>` in code strings as `\u003c` and `\u003e`; the preflight decodes them before highlighting, and Shiki escapes the output. The preflight also runs on each `.mdx` module that the entry imports from its own directory tree, so a long explainer can keep one self-contained chapter per file.
 

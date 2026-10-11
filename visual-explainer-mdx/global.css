@@ -87,6 +87,39 @@
     outline-offset: 3px;
   }
 
+  .ve-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Skip link: the first tab stop; it shows only while it has focus. */
+  .ve-skip-link {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: var(--ve-heading);
+    color: var(--ve-bg) !important;
+    font: 600 1rem/1.2 var(--ve-font-body);
+    text-decoration: none;
+    transform: translateY(calc(-100% - 1rem));
+  }
+
+  .ve-skip-link:focus-visible {
+    transform: none;
+  }
+
+  .ve-shell-inner:focus {
+    outline: none;
+  }
+
   .ve-shell,
   [data-ve-poster] {
     --ve-copy-measure: 56ch;

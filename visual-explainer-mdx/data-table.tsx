@@ -7,14 +7,15 @@ export type StatusTone = 'ok' | 'info' | 'warn' | 'err' | 'neutral';
 export type KeyStroke = 'solid' | 'dashed';
 export type KeyGlyph = 'rect' | 'oval' | 'diamond';
 
-export type StatusPillProps = { tone: StatusTone; children: ReactNode };
+export type StatusPillProps = { tone: StatusTone; /** What the state means, in one sentence: a tooltip, and text for a screen reader. */ meaning?: string; children: ReactNode };
 
-/** A state label: one tone color, a tone dot and the visible text, so color is never the only cue. */
-export function StatusPill({ tone, children }: StatusPillProps) {
+/** A state label: one tone color, a tone dot and the visible text, so color is never the only cue. A meaning shows on hover and is read after the word. */
+export function StatusPill({ tone, meaning, children }: StatusPillProps) {
   return (
-    <span className="ve-status-pill" data-ve-tone={tone}>
+    <span className="ve-status-pill" data-ve-tone={tone} title={meaning}>
       <span aria-hidden="true" className="ve-status-dot" />
       {children}
+      {meaning ? <span className="ve-visually-hidden">: {meaning}</span> : null}
     </span>
   );
 }
@@ -32,12 +33,13 @@ export function Badge({ tone = 'neutral', stroke = 'solid', glyph, children }: B
 }
 
 export type LegendItem = { label: string; tone?: StatusTone; stroke?: KeyStroke; glyph?: KeyGlyph; detail?: string };
-export type LegendProps = { title?: string; items: readonly LegendItem[] };
+/** `list` sets one item per line, for a key whose details are sentences. */
+export type LegendProps = { title?: string; items: readonly LegendItem[]; layout?: 'inline' | 'list' };
 
 /** A compact key. Each swatch repeats the exact tone, stroke and glyph that the figure uses. */
-export function Legend({ title = 'Key', items }: LegendProps) {
+export function Legend({ title = 'Key', items, layout = 'inline' }: LegendProps) {
   return (
-    <div className="ve-legend" data-ve-legend>
+    <div className="ve-legend" data-ve-layout={layout} data-ve-legend>
       <p className="ve-legend-title">{title}</p>
       <ul>
         {items.map((item) => (
@@ -80,16 +82,17 @@ export type DataTableValue = string | number | null | DataTableCell;
  */
 export type DataTableColumn = { key: string; label: string; kind?: 'text' | 'id' | 'number' | 'status' | 'tags'; width?: string };
 export type DataTableRow = { id?: string; cells: Readonly<Partial<Record<string, DataTableValue>>> };
-export type DataTableProps = { columns: readonly DataTableColumn[]; rows: readonly DataTableRow[]; caption?: string; label?: string };
+/** `compact`: below 640px a row is a short card (the first cell as its title, numbers on one line, no column labels). */
+export type DataTableProps = { columns: readonly DataTableColumn[]; rows: readonly DataTableRow[]; caption?: string; label?: string; density?: 'default' | 'compact' };
 
 /**
  * A table built for scanning: a sticky header, subtle zebra rows, right-aligned numbers,
  * monospace identifiers, state pills and flag badges. Below 640px each row becomes a labelled card,
  * so it never scrolls sideways.
  */
-export function DataTable({ columns, rows, caption, label }: DataTableProps) {
+export function DataTable({ columns, rows, caption, label, density = 'default' }: DataTableProps) {
   return (
-    <div className="ve-data-table" data-ve-data-table>
+    <div className="ve-data-table" data-ve-data-table data-ve-density={density === 'compact' ? 'compact' : undefined}>
       <table aria-label={caption ? undefined : label}>
         {caption ? <caption>{caption}</caption> : null}
         <colgroup>

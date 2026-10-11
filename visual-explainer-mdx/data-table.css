@@ -91,6 +91,28 @@
   color: var(--ve-muted);
 }
 
+/* A key with sentence details: one item per line, the swatch and its word before the sentence. */
+.ve-legend[data-ve-layout="list"] {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ve-legend[data-ve-layout="list"] ul {
+  display: grid;
+  grid-template-columns: auto max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.375rem 0.625rem;
+}
+
+/* The items share the list's columns, so every word and sentence lines up. */
+.ve-legend[data-ve-layout="list"] li {
+  display: contents;
+}
+
+.ve-legend[data-ve-layout="list"] .ve-legend-label {
+  font-weight: 600;
+}
+
 /* Data table. No wrapper overflow, so the header can stick to the page while it scrolls. */
 .ve-data-table {
   min-width: 0;
@@ -263,5 +285,43 @@
 
   .ve-data-table td > * {
     min-width: 0;
+  }
+
+  /* Compact cards: the first cell is the title, the numbers share one line, the rest follows. */
+  .ve-data-table[data-ve-density="compact"] td {
+    display: block;
+    padding: 0.125rem 0;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td::before {
+    content: none;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td:first-child {
+    font-weight: 600;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td[data-ve-kind="number"] {
+    display: inline-block;
+    margin-right: 0.75rem;
+    color: var(--ve-muted);
+    font-size: 0.875rem;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td:not([data-ve-kind="number"]):not(:first-child) {
+    color: var(--ve-muted);
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ve-legend[data-ve-layout="list"] ul {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.125rem;
+  }
+
+  .ve-legend[data-ve-layout="list"] .ve-legend-detail {
+    grid-column: 2;
+    margin-bottom: 0.375rem;
   }
 }

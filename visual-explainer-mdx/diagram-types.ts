@@ -34,7 +34,8 @@ export type DiagramCanvasProps = {
   nodes: DiagramNode[];
   edges: DiagramEdge[];
   layout?: 'flow' | 'tree' | 'swimlane' | 'timeline';
-  direction?: 'auto' | 'horizontal' | 'vertical';
+  /** `wrap` lays the ranks out left to right in rows that fit the figure width, so a long flow reads across a wide screen; below 600px it falls back to vertical. */
+  direction?: 'auto' | 'horizontal' | 'vertical' | 'wrap';
   lanes?: DiagramLane[];
   dates?: string[];
   title?: string;

@@ -1,10 +1,10 @@
-import { Badge, ChipLinks, DataTable, Definition, DefinitionList, DiagramCanvas, DiagramModes, Disclosure, ExplainerShell, Section, StatusPill, Subsection } from '../../visual-explainer-mdx/components';
+import { Badge, ChipLinks, DataTable, Definition, DefinitionList, DiagramCanvas, DiagramModes, Disclosure, ExplainerShell, Section, StatusPill, Subsection, Term } from '../../visual-explainer-mdx/components';
 import ReviewScanCode from './review-scan-code.mdx';
 
 <ExplainerShell title="Overdraft guard review" summary="A synthetic review of one wallet change: the claims, the checks behind them, and the code." chapterNav appearance="auto" reviewTools={false}>
 
 <Section id="verdicts" title="Every claim and its state" navLabel="Verdicts" anchors={[{id: 'verdicts-table', label: 'Claim table'}]}>
-  <p>Four claims. <StatusPill tone="ok">2 Proven</StatusPill> <StatusPill tone="info">1 Backed</StatusPill> <StatusPill tone="err">1 Gap</StatusPill></p>
+  <p>Four claims about one <Term definition="PR: pull request, a set of changes that a team reviews before it merges them." expansion="pull request">PR</Term>. <StatusPill tone="ok" meaning="Proven: a check backs the claim, and a planted bug proved that the check can fail.">2 Proven</StatusPill> <StatusPill tone="info">1 Backed</StatusPill> <StatusPill tone="err">1 Gap</StatusPill></p>
   <div id="verdicts-table" data-ve-anchor="true">
     <DataTable label="Claims" columns={[
       {key: 'id', label: 'ID', kind: 'id', width: '4.5rem'},
@@ -37,6 +37,9 @@ import ReviewScanCode from './review-scan-code.mdx';
     {label: 'guess tier', stroke: 'dashed'},
     {label: 'model judge', glyph: 'diamond'},
   ]} />
+  <DiagramCanvas title="Two sources, one label" description="Both sources feed the same target with the same label." nodes={[
+    {id: 'a', label: 'Unit test'}, {id: 'b', label: 'Type check'}, {id: 'c', label: 'The claim'},
+  ]} edges={[{from: 'a', to: 'c', label: 'backs'}, {from: 'b', to: 'c', label: 'backs'}]} />
   <DiagramModes title="The wallet change" simple={{nodes: [
     {id: 'call', label: 'A withdraw call'},
     {id: 'guard', label: 'Check the balance', shape: 'diamond'},
@@ -55,7 +58,7 @@ import ReviewScanCode from './review-scan-code.mdx';
       <Definition term="Warning" tone="warn">A second control was not found by any check.</Definition>
     </DefinitionList>
     <ChipLinks label="Evidence" items={[{label: 'The control for C2', href: '#claim-c2-control', tone: 'ok', status: 'Proven'}]} />
-    <Disclosure summary="Show the control and its output" meta="1 control">
+    <Disclosure id="claim-c2-evidence" share lazy contains={['claim-c2-control']} summary="Show the control and its output" meta="1 control">
       <p id="claim-c2-control">The control changed the subtraction to an addition. The unit test went red.</p>
     </Disclosure>
   </Subsection>

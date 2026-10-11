@@ -89,9 +89,12 @@ for (const scheme of ['light', 'dark']) {
       await page.evaluate(() => document.getElementById('code').scrollIntoView());
       await page.waitForFunction(() => document.querySelector('.ve-chapter-list a[aria-current="location"]')?.getAttribute('href') === '#code');
 
-      // Keyboard, from a fresh load: Tab reaches the first chapter link, and Enter moves to its section.
+      // Keyboard, from a fresh load: the skip link comes first, then the first chapter link, and Enter moves to its section.
       await page.goto(pathToFileURL(artifact).href, { waitUntil: 'load' });
       await page.waitForSelector('[data-ve-chapter-rail]');
+      await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Skip to content');
+      assert.ok(await page.evaluate(() => document.activeElement.getBoundingClientRect().top >= 0));
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('href')), '#verdicts');
       await page.keyboard.press('Tab');
@@ -136,13 +139,33 @@ for (const scheme of ['light', 'dark']) {
       assert.equal(await page.$eval('#claim-c2', (element) => element.dataset.veAnchor), 'true');
       assert.equal(await page.$eval('.ve-definition-list', (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length), 2);
 
+      // Term: focus shows the definition; the first use spells out the abbreviation. Pills carry their meaning.
+      assert.ok((await page.locator('#verdicts p').first().textContent()).includes('pull request (PR'));
+      await page.locator('.ve-term').first().focus();
+      assert.ok(await page.locator('.ve-term [role="tooltip"]').first().isVisible());
+      assert.match(await page.getAttribute('#verdicts .ve-status-pill', 'title'), /planted bug/);
+
+      // Diagrams fit their column, and edges that merge with one label carry it once.
+      assert.ok(await page.$$eval('[data-ve-variant="desktop"]', (variants) => variants.every((v) => v.scrollWidth <= v.clientWidth + 1)));
+      assert.equal(await page.locator('svg text', { hasText: 'backs' }).count(), 1);
+
       // Disclosure and ChipLinks: closed by default, 44px targets, and a link into the block opens it.
       assert.equal(await page.$eval('.ve-disclosure', (element) => element.open), false);
+      // A lazy block has no body until it opens; opening it writes its link, and a reload keeps it open.
+      assert.equal(await page.locator('#claim-c2-control').count(), 0);
+      await page.click('#claim-c2-evidence > summary .ve-disclosure-label');
+      await page.waitForFunction(() => location.hash === '#claim-c2-evidence' && document.getElementById('claim-c2-control'));
+      assert.ok(await page.locator('#claim-c2-evidence .ve-copy-link').isVisible());
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForFunction(() => document.getElementById('claim-c2-evidence')?.open);
+      await page.evaluate(() => { sessionStorage.clear(); history.replaceState(null, '', location.pathname); });
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForSelector('[data-ve-chapter-rail]');
       for (const selector of ['.ve-disclosure-summary', '.ve-chip-link']) {
         assert.ok(await page.$eval(selector, (element) => element.getBoundingClientRect().height >= 44), `${selector} is under 44px`);
       }
       await page.click('.ve-chip-link');
-      await page.waitForFunction(() => document.querySelector('.ve-disclosure').open);
+      await page.waitForFunction(() => document.getElementById('claim-c2-evidence').open && document.getElementById('claim-c2-control'));
 
       // DiagramModes: Simple first, a labelled switch, the same place for a shared node, and a remembered choice.
       const modes = page.locator('[data-ve-diagram-modes]');
