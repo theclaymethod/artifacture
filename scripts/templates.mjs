@@ -87,8 +87,10 @@ export async function installSkill(directory) {
   await mkdir(path.dirname(destination), { recursive: true });
   await mkdir(destination);
   await mkdir(path.join(destination, 'scripts'));
+  await mkdir(path.join(destination, 'references'));
   const source = path.join(packageRoot, 'plugins/visual-explainer');
   await cp(path.join(source, 'SKILL.md'), path.join(destination, 'SKILL.md'), { force: false, errorOnExist: true });
   await cp(path.join(source, 'scripts/artifacture.mjs'), path.join(destination, 'scripts/artifacture.mjs'), { force: false, errorOnExist: true });
+  await cp(path.join(source, 'references/animation-skills.md'), path.join(destination, 'references/animation-skills.md'), { force: false, errorOnExist: true });
   console.log(`Installed the entry skill at ${destination}. Native skills are fetched only for selected templates.`);
 }

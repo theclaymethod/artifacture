@@ -42,10 +42,12 @@ artifacture list --kind reference --json
 artifacture info iso-glow
 artifacture info hairline
 artifacture info frankenmanim
+artifacture list --kind reference --query animation
+artifacture info emil-animation
 artifacture skills install .agents/skills/visual-explainer
 ```
 
-The entry skill installation copies only the entry and CLI launcher. A selected template installs its declared native skills using the native skills CLI. Optional references are discovered on demand; they are not all installed. `--no-skills` skips skill installation; `--no-install` skips packages and skills. Existing destinations are refused to preserve edits.
+The entry skill installation copies the entry, CLI launcher and a small animation routing reference. A selected template installs its declared native skills using the native skills CLI. Optional references are discovered on demand; they are not all installed. `--no-skills` skips skill installation; `--no-install` skips packages and skills. Existing destinations are refused to preserve edits.
 
 Native package manifests, lockfiles and caches own versions. Commit your project lockfiles and use native update commands. ISO Glow, Hairline, iso-figure, Diagram Design, Anatomy, Manim, ManimGL and FrankenManim are discoverable references. FrankenManim is experimental, with current output and license qualifications in its catalog entry.
 
@@ -68,3 +70,5 @@ Existing external `ve:export` callers remain available through source scripts in
 Use a clean checkout, `npm ci`, then `npm pack`. Scaffold with the checkout CLI and `--no-install`, install the resulting tarball in the generated project as a dev dependency, then install that project's dependencies. This avoids relying on an unpublished npm version. Set `ARTIFACTURE_REPO` to this checkout when running the skill launcher in development.
 
 No new tests are required to adopt a template. Verify actual browser behavior, relevant presentation states, startup errors, missing assets and rendered output. Contributor work should use existing tests and direct probes unless new test files have been authorized.
+
+Animation references distinguish interactive UI craft, film continuity and native renderer APIs. The entry skill links an on-demand routing guide for installed house skills and Emil skills. FFrames remains preferred; HyperFrames animation/keyframe/audio contracts apply only to browser-native projects. Optional Motionmaxxing guidance does not install a runtime or replace the chosen theme.

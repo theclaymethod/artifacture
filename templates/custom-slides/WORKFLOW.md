@@ -9,3 +9,5 @@ Run `npm run dev`, `npm run build`, `npm run export` and `npm run typecheck` in 
 Use native figures through direct imports. Consult Hairline and ISO Glow for isometric work, Anatomy for mechanisms, and Manim for mathematical animation. Use ordinary media paths for rendered outputs. FFrames is the preferred video route; adapt the narrative and assets into native scenes rather than assuming every interactive React figure is deterministic film source.
 
 Before delivery inspect navigation, stable links/history, every meaningful state, keyboard interaction, reduced motion, console errors, overflow and the actual export. This starter proves a small presenter contract; it does not yet establish parity with the entire Function Intelligence deck.
+
+For new interactive motion, use the installed `animate` skill. Use `find-animation-opportunities` for proposals, `improve-animations` for an audit, or `review-animations` for a concrete change. Discover the upstream collection with `artifacture info emil-animation`; load only the relevant skill.

@@ -116,6 +116,7 @@
     "templates/",
     "plugins/visual-explainer/SKILL.md",
     "plugins/visual-explainer/scripts/artifacture.mjs",
-    "docs/workspaces.md"
+    "docs/workspaces.md",
+    "plugins/visual-explainer/references/animation-skills.md"
   ]
 }

@@ -24,6 +24,8 @@ The ISO theme combines **Hairline** fine neutral geometry with **ISO Glow** caus
 
 Shape the story around a question, a visible mechanism and a consequence. PR reviews require inspected diffs and observed behavior. A sizzle reel and an explanation need different structures. Motion should preserve the subject and show what changed; align visual events to narration. Templates supply taste and choreography while remaining fully editable.
 
+For animation work, consult [animation skill routing](references/animation-skills.md): installed motion-doctrine and cut-the-curve for continuity, Emil skills for interactive motion, and the selected renderer's native animation skill for implementation. Load only the relevant skill; preserve FFrames as the preferred video route. Discover upstream collections with `list --kind reference --query animation`.
+
 Use white space, readable typography and purposeful interactions. Omit decorative labels, badges, numbering and metadata that add no meaning. Preserve reduced motion and keyboard access.
 
 Deliver editable source and the built artifact. Check startup errors, missing assets, relevant slide states and actual output; use native renderer inspection. Review representative visuals. Ordinary image/video files are valid reusable assets; rich receipts are optional. State verification limits plainly. Do not claim arbitrary interactive figures can be rendered deterministically without a demonstrated native timing contract.
