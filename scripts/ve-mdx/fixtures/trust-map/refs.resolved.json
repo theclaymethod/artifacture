@@ -1488,5 +1488,245 @@
    "summary": "Each changed test backs a claim.",
    "action": ""
   }
- }
+ },
+ "examples": [
+  {
+   "id": "overdraft-before-after",
+   "title": "One overdraft, with and without the guard",
+   "diagram": "story",
+   "claims": [
+    "C01"
+   ],
+   "lead": "A planted bug takes the guard out of the withdraw function, and the test of the PR runs on it. Then the same test runs on the code of the PR. The values are the recorded control run and the calls that the test makes.",
+   "sources": {
+    "control": {
+     "kind": "controls",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "ids": [
+      "K01"
+     ],
+     "from": "the controls of the map and their recorded results (understando controls)",
+     "sha256": "sha256:fa321c1632f1624c7c321d6d03db278fcd5cfdb54417e86648b1dc3e769b53e9",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    },
+    "after": {
+     "kind": "run",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "cwd": ".",
+     "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_core"
+     ],
+     "record": [
+      {
+       "name": "withdraw",
+       "target": "wallet.core:withdraw",
+       "args": true
+      }
+     ],
+     "setup": [],
+     "sha256": "sha256:012e61a4a8a435eb530f5714064ce60075b24a976b94475fd566c626558a9c3f",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    }
+   },
+   "steps": [
+    {
+     "n": 1,
+     "station": "before",
+     "name": "Without the guard, the wallet pays out",
+     "in": [],
+     "decision": [
+      {
+       "label": "control result",
+       "value": "red",
+       "from": "control:/K01/result/status"
+      }
+     ],
+     "out": [
+      {
+       "label": "test output",
+       "value": "AssertionError: OverdraftError not raised",
+       "from": "control:/K01/result/output_tail lines=[-6,-5]"
+      }
+     ],
+     "reason": "The control takes out the line that raises the error. The test asks for more than the balance, and no error comes, so the test fails.",
+     "diff": {
+      "path": "wallet/core.py",
+      "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n",
+      "from": [
+       "control:/K01/patch/0/path",
+       "control:/K01/patch/0/patch"
+      ]
+     },
+     "provenance": [
+      "control:/K01/result/status",
+      "control:/K01/result/output_tail lines=[-6,-5]",
+      "control:/K01/patch/0/path",
+      "control:/K01/patch/0/patch"
+     ]
+    },
+    {
+     "n": 2,
+     "station": "refuse",
+     "name": "With the guard, the wallet refuses the overdraft",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 11
+       },
+       "from": "after:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [
+      {
+       "label": "error",
+       "value": {
+        "raised": "OverdraftError: 11 is above the balance"
+       },
+       "from": "after:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+      }
+     ],
+     "out": [
+      {
+       "label": "test exit code",
+       "value": 0,
+       "from": "after:/exit"
+      }
+     ],
+     "reason": "The code of the PR compares the amount with the balance first. The amount is above the balance, so the function raises an error and pays out nothing.",
+     "code": {
+      "path": "wallet/core.py",
+      "symbol": "withdraw"
+     },
+     "provenance": [
+      "after:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}",
+      "after:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}",
+      "after:/exit"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "one-withdrawal",
+   "title": "Two withdrawals through the wallet",
+   "diagram": "loop",
+   "claims": [
+    "C01"
+   ],
+   "lead": "The test of the PR asks the wallet for two amounts. The values are the calls that it makes, at the head.",
+   "sources": {
+    "run": {
+     "kind": "run",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "cwd": ".",
+     "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_core"
+     ],
+     "record": [
+      {
+       "name": "withdraw",
+       "target": "wallet.core:withdraw",
+       "args": true
+      }
+     ],
+     "setup": [],
+     "sha256": "sha256:012e61a4a8a435eb530f5714064ce60075b24a976b94475fd566c626558a9c3f",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    }
+   },
+   "steps": [
+    {
+     "n": 1,
+     "station": "ask",
+     "name": "A caller asks for an amount",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 3
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [],
+     "out": [],
+     "reason": "The balance test asks for a small amount.",
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+     ]
+    },
+    {
+     "n": 2,
+     "station": "pay",
+     "name": "The wallet pays it out",
+     "in": [
+      {
+       "label": "amount",
+       "value": {
+        "amount": 3
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [],
+     "out": [
+      {
+       "label": "new balance",
+       "value": {
+        "new balance": 7
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"new balance\":\"/result\"}"
+      }
+     ],
+     "reason": "The amount is not above the balance, so the wallet pays it and gives the new balance.",
+     "code": {
+      "path": "wallet/core.py",
+      "symbol": "withdraw"
+     },
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"amount\":\"/args/1\"}",
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"new balance\":\"/result\"}"
+     ]
+    },
+    {
+     "n": 3,
+     "station": "refuse",
+     "name": "A caller asks for too much",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 11
+       },
+       "from": "run:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [
+      {
+       "label": "error",
+       "value": {
+        "raised": "OverdraftError: 11 is above the balance"
+       },
+       "from": "run:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+      }
+     ],
+     "out": [],
+     "reason": "The amount is above the balance, so the wallet refuses it.",
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}",
+      "run:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+     ]
+    }
+   ]
+  }
+ ]
 }

@@ -120,8 +120,50 @@ export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
     const target = decodeURIComponent(a.getAttribute('href').slice(1));
     if (target && !ids.has(target)) errors.push(`the link #${target} has no target`);
   }
+  errors.push(...checkWorkedExamples(body));
   errors.push(...checkCopy(body));
   if (steLint) errors.push(...lintSte(body, steLint));
+  return errors;
+}
+
+// ---- The worked examples --------------------------------------------------------------------
+
+/**
+ * A how-it-works level (the problem and the change, how it works, and any chapter that steps
+ * through a run) leads with a worked example of real data (WorkedExample): the example comes
+ * before the first diagram of the chapter. Each example step names the source pointers of its
+ * values, and its reason holds no claim, check or control ID.
+ */
+function checkWorkedExamples(body) {
+  const errors = [];
+  const sections = new Set();
+  for (const id of ['ch-1', 'ch-2']) {
+    const s = body.querySelector(`section.ve-section#${id}`);
+    if (s) sections.add(s);
+  }
+  for (const stepper of body.querySelectorAll('section.ve-section [data-ve-stepper]')) sections.add(stepper.closest('section.ve-section'));
+  for (const section of sections) {
+    const example = section.querySelector('[data-ve-example]');
+    const label = section.id || 'a chapter';
+    if (!example) {
+      errors.push(`${label}: a how-it-works level has no worked example. Lead with <WorkedExample refs={refs} id="..." />: one run of real values from a fixture, a trace or a vector (understando scripts/example.py). The abstract diagram comes after it.`);
+      continue;
+    }
+    // In document order: the first example or diagram of the chapter must be the example.
+    const first = section.querySelector('[data-ve-example], [data-ve-diagram-modes], [data-ve-stations], figure[data-ve-typed]');
+    if (first !== example) {
+      errors.push(`${label}: the worked example "${example.getAttribute('data-ve-example')}" comes after a diagram. Lead with the example; the abstract diagram is the overview after it.`);
+    }
+  }
+  for (const step of body.querySelectorAll('[data-ve-example-step]')) {
+    const ex = step.closest('[data-ve-example]')?.getAttribute('data-ve-example') ?? '?';
+    const items = [...step.querySelectorAll('[data-ve-provenance] li')].filter((li) => li.textContent.trim());
+    if (!items.length) errors.push(`the example "${ex}", step ${step.getAttribute('data-ve-example-step')}: no provenance. Each step names the source pointers of its values.`);
+    for (const reason of step.querySelectorAll('.ve-example-reason')) {
+      const hit = reason.textContent.match(ID);
+      if (hit) errors.push(`the example "${ex}", step ${step.getAttribute('data-ve-example-step')}: the ID ${hit[0]} is in its reason. Name the thing in plain words.`);
+    }
+  }
   return errors;
 }
 

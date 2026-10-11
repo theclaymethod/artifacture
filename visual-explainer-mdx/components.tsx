@@ -86,6 +86,8 @@ export { TypedDiagram } from './typed-diagrams';
 export type { TypedDiagramSpec, SequenceSpec, StateSpec, ChangeStatus } from './typed-diagrams';
 export { ApproveChecks, ChapterProgress, ClaimTimeline, DiffSpine, EvidenceGuide, ExportReview, FileCard, FullDiff, ReviewChecklist, ReviewProgress, ReviewStart, ReviewVerdict, UnderstandingCheck, VerifierView, questionsFor, reviewKey, reviewMarkdown } from './guided-review';
 export { ArchitectureDiagram, BarCard, BarChip, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, CodeRef, Glossary, Glossed, Invariants, MergeVerdict, PromiseChips, PromiseLink, PromiseList, UnclaimedChanges, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, WhatChanged, promiseAnchors } from './trust-map';
+export { ExamplesFor, WorkedExample, exampleOf } from './worked-example';
+export type { WorkedExampleData, ExampleStep, ExampleValue } from './worked-example';
 export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 

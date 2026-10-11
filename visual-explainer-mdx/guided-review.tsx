@@ -12,6 +12,7 @@ import { Disclosure, Subsection } from './content-blocks';
 import { StatusPill, ToneMark, type StatusTone } from './data-table';
 import { ArchitectureDiagram, BarCard, BrowserVideo, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, controlEdits, CountMarks, Defs, MarkKey, maybeRef, Rich, risksOf, useTerms, VerdictLegend, VerdictPill, VerifierTable } from './trust-map';
 import { TypedDiagram, type TypedDiagramSpec } from './typed-diagrams';
+import { ExamplesFor } from './worked-example';
 import {
   assertAreas, assertRefs, assertTrustMap, capital, changeDiagram, claimAnchor, claimLabel, claimOf, derivedClaim, MERGE_WORDS, promiseAnchor, promiseRows,
   reviewItems, slug, STRONG, strengthOf, TONE, TrustMapError,
@@ -882,6 +883,7 @@ function ReviewItemCard({ data, refs, explain, item, h }: All & { item: ReviewIt
         </span>
       }>
         <div className="ve-review-body">
+          <ExamplesFor claims={c ? [c.id] : promiseFor(data, item)?.claims ?? []} refs={refs} />
           <ItemEvidence data={data} explain={explain} h={h} item={item} refs={refs} />
           <CallControls head={data.head} item={item} />
         </div>

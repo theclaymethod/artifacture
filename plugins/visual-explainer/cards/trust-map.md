@@ -9,7 +9,7 @@ The MDX imports three JSON files from its own folder:
 | File | Written by | Holds |
 |---|---|---|
 | `trust-map.json` | the map, the controls and the verdicts | `schema_version` 1 or 2 (promise, claim, check), `head`, `claims`, `verifiers`, `controls`, `promises`, `flags`, `summary`, `glossary`, `invariants`. Each claim lists `checks` (verifier ids), and can have `legacy_ids` and `parts`. Each promise, claim and check has a plain `name`. |
-| `refs.resolved.json` | `understando explain` (it resolves each ref at the head; `derive.py` writes `derived`) | `schema` 2, `head`, `derived`, `refs` (each `{ref, path, start, end, span, language, excerpt, permalink, changes}`; `changes` is the diff status of the excerpt lines: `added` and `modified` head lines, and `removed` base lines `{at, base, text}` that show before head line `at`), `controls` (the patch of each control), `diff` (`files`, `deleted`, `created`, `added`, `symbols`, `imports`). |
+| `refs.resolved.json` | `understando explain` (it resolves each ref at the head; `derive.py` writes `derived`) | `schema` 2, `head`, `derived`, `refs` (each `{ref, path, start, end, span, language, excerpt, permalink, changes}`; `changes` is the diff status of the excerpt lines: `added` and `modified` head lines, and `removed` base lines `{at, base, text}` that show before head line `at`), `controls` (the patch of each control), `diff` (`files`, `deleted`, `created`, `added`, `symbols`, `imports`), `examples` (the worked examples, below). |
 | `explain.json` | you, in strict STE | `diagrams` (architecture diagrams `{title, description, eli5, detailed}` and typed diagrams `{kind, ...}`), `walkthroughs`, `change.areas`, `change.chapters`, `unclaimed` (`notes`, `roles`, `core`), `risks`, `verdict.checks`, `control_walkthroughs`, `bullets`. |
 
 `derived` holds each value that the review CLI, the PR body and the page share:
@@ -20,6 +20,18 @@ The MDX imports three JSON files from its own folder:
 - A **flag** ("look closely") is `{level, source, path, line, text, trigger, ref}`: `risk`, `question` or `nit`, from a verified source only: a find-bugs finding, a check that missed or cannot fail (at the line its planted bug changed), or risky code with no claim. Zero flags is valid.
 - `checks`: per check `{name, kind, result, claims (with the parts it backs), tests, controls, ref}`. `tests`: the changed test files as the checks they provide, and the changed tests that back no claim (`orphans`, `summary`, `action`).
 
+## Worked examples (`examples`)
+
+Lead with a real example moving through the flow; abstract diagrams come after. Examples come only from synthetic fixtures, traces or vectors, with provenance.
+
+Where a chapter explains how something works, it first shows one run of real data: the actual values, the actual decision at each step and the actual result. The station diagram and the general steps come after it, as the overview. understando's `scripts/example.py` reads each value from a source: a scripted test or session of the repo (it records the calls of the functions that the spec names), a TLC trace, a replay or conformance vector, a planted-bug control run, or a claim of the map with its derived bar. Never member or patient data. The agent writes only the spec (`examples.spec.json`: the sources, the station of each step, the pointer of each value, the reason in plain words, and asserts that the reason needs); the spec holds no value.
+
+Each example in `refs.resolved.json` is `{id, title, lead, diagram, claims, sources, steps}`. A source records its kind, the full commit, what it ran and the sha256 of its document. A step is `{n, station, name, in, decision, out, reason, diff?, code?, provenance}`: `in`, `decision` and `out` are lists of `{label, value, from}`, and `provenance` lists each source pointer that the step read.
+
+- `<WorkedExample refs={refs} id="..." explain={explain} />` shows one row per step: the step name, then in, the decision and out with the values in code, the reason, the diff that the step made and a link to the line that decided. `explain` gives the station strip of the example's `diagram`. With JavaScript one row shows at a time, with Previous and Next above it, and the strip lights the station of the row. Without JavaScript every row shows in order.
+- A checklist item shows the examples of its claims (the claims of its promise), with a link to each.
+- Write the reason in strict STE. Put no value and no ID in it: the values are in the rows.
+
 ## The chapters
 
 The page is an `ExplainerShell paged`: one `Section` per chapter, ids `ch-0` to `ch-9`. With JavaScript, one chapter shows at a time, with previous and next links, a "you are here" marker in the rail, and "Read as one page". Without JavaScript, every chapter renders in sequence.
@@ -27,10 +39,10 @@ The page is an `ExplainerShell paged`: one `Section` per chapter, ids `ch-0` to 
 | Chapter | Content |
 |---|---|
 | `ch-0` Start | A `Lead` of about three plain lines, then `ReviewStart`: "Not ready: N things to review", the progress, the riskiest three, the ways in. |
-| `ch-1` The problem and the change | A `DefinitionList` (before, after, the main risk) and the story diagram in Simple and Detailed. |
-| `ch-2` How it works | A `StepThrough` around a numbered `ArchitectureDiagram` and its `Steps`: one finding (or one request) through the loop, one step at a time, its station lit. |
+| `ch-1` The problem and the change | A `WorkedExample` of the change (the same input before and after), then a `DefinitionList` (before, after, the main risk) and the story diagram in Simple and Detailed. |
+| `ch-2` How it works | A `WorkedExample`: one real finding (or one request) through the loop, its station lit. Then the overview: a `StepThrough` around a numbered `ArchitectureDiagram` and its `Steps`. |
 | `ch-3` What changed | `DiffSpine`: the chapters of the change, the map of how they connect, and each file with its claims, its flags and its main change. |
-| `ch-4` Reading the evidence | `EvidenceGuide`: promise to claim (parts) to check; surface to bar to met or below; one bug with two results; can the checks catch a bug; the marks. |
+| `ch-4` Reading the evidence | A `WorkedExample` of one evidence bar and of one planted bug, then `EvidenceGuide`: promise to claim (parts) to check; surface to bar to met or below; one bug with two results; can the checks catch a bug; the marks. |
 | `ch-5` The checks | `VerifierView`: the checks by promise, each a check row; the tests that back no claim; the test files as the checks they provide. |
 | `ch-6` Check yourself | `UnderstandingCheck`: two or three questions from the data, answered at once, never stored. |
 | `ch-7` The review | `ReviewChecklist`: each item, its evidence inline, the reviewer's call (OK, Needs a fix, Accept the risk) and a note, kept in this browser. |
@@ -75,7 +87,7 @@ Each check is a thing to do: `check` (a verifier id: the page shows its real com
 ## Stable anchors
 
 - The chapters `#ch-0` to `#ch-9`. The old level anchors still land, as aliases: `#story`, `#why`, `#loop`, `#changed`, `#change`, `#unclaimed`, `#verifiers`, `#checks`, `#exercises`, `#promises`, `#tradeoffs`, `#glossary`.
-- `#merge` for the merge state; `#promise-<id>` and `#claim-<id>`, lowercased; an old claim id of `legacy_ids` opens the claim that joins it; `#file-<path>` and `#spine-<chapter>`.
+- `#merge` for the merge state; `#promise-<id>` and `#claim-<id>`, lowercased; an old claim id of `legacy_ids` opens the claim that joins it; `#file-<path>` and `#spine-<chapter>`; `#example-<id>` and `#example-<id>-<n>` (a link to a step opens it).
 
 A link to a target in another chapter shows that chapter and opens each block around the target. Each claim's full detail shows once on the page: in its checklist item, else in its promise. Every other place shows its claim row.
 
@@ -112,6 +124,7 @@ The earlier level ladder (`MergeVerdict`, `PromiseList`, `VerifyTheVerifiers`, `
 - **Data:** the trust map and the refs are valid and at the map head; the change areas, the chapters (paragraph length, titles, the diagrams that they name) and the typed diagrams (their elements and Diagram Design's budgets) are valid; each verdict check is concrete.
 - **Narrative prose:** no `[CVK]\d+` ID and no backticked code name outside a `Disclosure` body, a table, a `CodeRef` or a data component.
 - **Glossary:** each `Term` and each abbreviation of the prose has an entry. `Glossed` marks a term once per chapter, at most eight per chapter, and never an everyday word (draft, check, editor, loop, document, test: `glossary-policy.mjs`); the export fails on more. It spells out each abbreviation once on the page, so count those words against the 25-word sentence cap, and do not put an abbreviation inside parentheses.
+- **Worked examples:** `ch-1`, `ch-2` and each chapter with a `StepThrough` lead with a `WorkedExample`, before the first diagram. Each example step names its source pointers (`provenance`), and its reason holds no ID.
 - **Links and anchors:** each `#fragment` link has a target, and no id shows twice (so each claim's detail renders once).
 - **Actions:** the evidence chapter opens its checks with the result line; each weak check, the weakest check of each claim and each unclaimed file has an action.
 - **No hand copy:** with `--guard-repo` and `--guard-head`, two or more lines of the MDX that match two lines of a tracked file at the head fail the export.

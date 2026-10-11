@@ -1,5 +1,5 @@
 {/* The fixture explainer, as the explain step writes it: a guided review. The narrative is Markdown; the chapters from data are components. The card trust-map of visual-explainer holds the contract. */}
-import { ApproveChecks, ArchitectureDiagram, CodeRef, Definition, DefinitionList, DiffSpine, Disclosure, EvidenceGuide, ExplainerShell, FullDiff, Glossary, Glossed, Lead, PromiseLink, ReviewChecklist, ReviewStart, ReviewVerdict, Section, Step, Steps, StepThrough, UnderstandingCheck, VerifierView } from 'visual-explainer-mdx/components';
+import { ApproveChecks, ArchitectureDiagram, CodeRef, Definition, DefinitionList, DiffSpine, Disclosure, EvidenceGuide, ExplainerShell, FullDiff, Glossary, Glossed, Lead, PromiseLink, ReviewChecklist, ReviewStart, ReviewVerdict, Section, Step, StepThrough, Steps, UnderstandingCheck, VerifierView, WorkedExample } from 'visual-explainer-mdx/components';
 import trust from './trust-map.json';
 import refs from './refs.resolved.json';
 import explain from './explain.json';
@@ -23,6 +23,8 @@ The wallet now refuses an overdraft. A planted bug proves the overdraft rule. So
 </Section>
 
 <Section id="ch-1" title="What was wrong, and what changed?" navLabel="The problem and the change" aliases={['why']}>
+
+<WorkedExample refs={refs} id="overdraft-before-after" explain={explain} />
 
 <Glossed data={trust}>
 
@@ -50,6 +52,8 @@ A caller asks the wallet for an amount, and the wallet pays it or refuses it.
 </Lead>
 
 </Glossed>
+
+<WorkedExample refs={refs} id="one-withdrawal" explain={explain} />
 
 <StepThrough label="One withdrawal">
 

@@ -1,0 +1,326 @@
+/* A worked example: the station strip, the step controls above the row, and one row per step with
+   in, the decision and out. The values are code (Commit Mono), the reason is prose (Newsreader). */
+.ve-example {
+  display: grid;
+  gap: var(--ve-space-4);
+  min-width: 0;
+  margin: var(--ve-space-5) 0 var(--ve-space-6);
+  container-type: inline-size;
+}
+
+.ve-example-title {
+  margin: 0;
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) 1.125rem/1.3 var(--ve-font-display);
+}
+
+.ve-example-lead,
+.ve-example-reason {
+  max-width: 68ch;
+  margin: 0;
+  font-family: var(--ve-font-prose);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+.ve-example-stations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-example-station > span,
+.ve-example-station > button {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--ve-space-2) var(--ve-space-3);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.3 var(--ve-font-ui);
+  text-align: left;
+}
+
+.ve-example-station[data-ve-used="true"] > span,
+.ve-example-station[data-ve-used="true"] > button {
+  color: var(--ve-heading);
+}
+
+.ve-example-station > button {
+  cursor: pointer;
+}
+
+.ve-example-station > button:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-example-station-n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font: var(--ve-weight-strong) 0.75rem/1 var(--ve-font-ui);
+}
+
+.ve-example-station[data-ve-active="true"] > button {
+  border-color: var(--ve-accent);
+  box-shadow: 0 0 0 1px var(--ve-accent);
+  background: color-mix(in srgb, var(--ve-accent) 7%, var(--ve-bg));
+}
+
+.ve-example-station[data-ve-active="true"] .ve-example-station-n {
+  border-color: var(--ve-accent);
+  background: var(--ve-accent);
+  color: var(--ve-accent-contrast, var(--ve-bg));
+}
+
+.ve-example-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-3);
+}
+
+.ve-example-count {
+  margin: 0;
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.3 var(--ve-font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-example-steps {
+  display: grid;
+  gap: var(--ve-space-5);
+}
+
+.ve-example-step {
+  display: grid;
+  gap: var(--ve-space-3);
+  min-width: 0;
+  padding: var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-card-radius, 0.5rem);
+}
+
+.ve-example-step[hidden] {
+  display: none;
+}
+
+.ve-example-step-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+  margin: 0;
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) 1rem/1.35 var(--ve-font-ui);
+}
+
+.ve-example-step-n {
+  font-variant-numeric: tabular-nums;
+  color: var(--ve-muted);
+}
+
+.ve-example-step-at {
+  color: var(--ve-muted);
+  font-weight: var(--ve-weight-regular);
+  font-size: 0.8125rem;
+}
+
+/* In, decision, out: a row with arrows from 48rem, when no value is a table or a block; else a
+   column, the arrows turned down. */
+.ve-example-flow {
+  display: grid;
+  gap: var(--ve-space-2);
+  min-width: 0;
+}
+
+.ve-example-arrow {
+  justify-self: start;
+  padding-left: var(--ve-space-3);
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) 1rem/1 var(--ve-font-ui);
+  transform: rotate(90deg);
+}
+
+@container (min-width: 48rem) {
+  .ve-example-flow:not([data-ve-wide]) {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ve-space-3);
+  }
+
+  .ve-example-flow:not([data-ve-wide]) .ve-example-arrow {
+    padding: 1.25rem 0 0;
+    transform: none;
+  }
+}
+
+.ve-example-part {
+  min-width: 0;
+}
+
+.ve-example-part-label {
+  margin: 0 0 var(--ve-space-1);
+  color: var(--ve-muted);
+  font: var(--ve-weight-strong) 0.75rem/1.2 var(--ve-font-ui);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ve-example-part[data-ve-example-part="decision"] .ve-example-part-label {
+  color: var(--ve-heading);
+}
+
+.ve-example-values {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+}
+
+.ve-example-value {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.ve-example-value dt {
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) 0.8125rem/1.3 var(--ve-font-ui);
+}
+
+.ve-example-value dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.ve-example-value code,
+.ve-example-code code,
+.ve-example-provenance code,
+.ve-example-sources code,
+.ve-example-brief code,
+.ve-example-line code {
+  font-family: var(--ve-font-mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.ve-example-code {
+  max-height: 14rem;
+  margin: 0;
+  padding: var(--ve-space-2) var(--ve-space-3);
+  overflow: auto;
+  border-radius: var(--ve-control-radius);
+  background: color-mix(in srgb, var(--ve-heading) 5%, var(--ve-bg));
+  white-space: pre-wrap;
+}
+
+.ve-example-line {
+  margin: 0;
+  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+}
+
+.ve-example-provenance,
+.ve-example-sources {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding-left: var(--ve-space-4);
+}
+
+.ve-example-sources p {
+  margin: 0 0 var(--ve-space-1);
+}
+
+.ve-example-brief {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0 0 var(--ve-space-3);
+  padding: var(--ve-space-3);
+  border-left: 3px solid var(--ve-rule);
+}
+
+.ve-example-brief-title {
+  margin: 0;
+  font: var(--ve-weight-strong) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+}
+
+.ve-example-brief-steps {
+  display: grid;
+  gap: var(--ve-space-1);
+  margin: 0;
+  padding-left: var(--ve-space-5);
+  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+}
+
+.ve-example-brief-steps li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-1) var(--ve-space-3);
+}
+
+.ve-example-brief-name {
+  color: var(--ve-heading);
+}
+
+.ve-example-brief-value {
+  color: var(--ve-muted);
+}
+
+.ve-example-record {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-1) var(--ve-space-3);
+}
+
+.ve-example-record[data-ve-column="true"] {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ve-example-key {
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) 0.8125rem/1.3 var(--ve-font-ui);
+}
+
+.ve-example-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.ve-example-table {
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.ve-example-table th {
+  padding: var(--ve-space-1) var(--ve-space-3) var(--ve-space-1) 0;
+  border-bottom: 1px solid var(--ve-rule);
+  color: var(--ve-muted);
+  font: var(--ve-weight-strong) 0.75rem/1.3 var(--ve-font-ui);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ve-example-table td {
+  padding: var(--ve-space-1) var(--ve-space-3) var(--ve-space-1) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ve-rule) 60%, transparent);
+  vertical-align: top;
+}
+
+.ve-example-table code {
+  font-family: var(--ve-font-mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
