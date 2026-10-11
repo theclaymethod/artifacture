@@ -122,8 +122,12 @@ const packageAlias = [{ find: /^visual-explainer-mdx\//, replacement: `${path.jo
  * throws, for example on bad trust-map data, fails the export here.
  */
 async function prerender(source, draft, seen, stamps) {
+  const cacheRoot = path.join(repoRoot, '.ve-mdx-tmp');
+  await fs.mkdir(cacheRoot, { recursive: true });
+  const cacheDir = await fs.mkdtemp(path.join(cacheRoot, 'prerender-'));
   const server = await createServer({
     root: repoRoot,
+    cacheDir,
     configFile: false,
     appType: 'custom',
     logLevel: 'warn',
@@ -140,6 +144,7 @@ async function prerender(source, draft, seen, stamps) {
     throw new Error(`the static pre-render failed: ${error instanceof Error ? error.message : error}`);
   } finally {
     await server.close();
+    await fs.rm(cacheDir, { recursive: true, force: true });
   }
 }
 

@@ -1,0 +1,16 @@
+{
+  "id": "custom-slides",
+  "kind": "slides",
+  "purpose": "Present arbitrary React slides with MDX, stable links and progressive states.",
+  "type": "project",
+  "references": [
+    "hairline",
+    "iso-glow",
+    "anatomy",
+    "manim",
+    "frankenmanim"
+  ],
+  "skills": [],
+  "output": "HTML",
+  "preview": "templates/custom-slides/preview.png"
+}

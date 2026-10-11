@@ -1,98 +1,70 @@
-# Create a workspace from editable blocks
+# Template workspaces
 
-Create a React, TypeScript, and Vite workspace:
+Artifacture 1.0 starts from ordinary editable projects. The CLI has no runtime dependencies; the selected project installs its own tools. This branch is an unpublished prerelease.
 
-```bash
-npx artifacture init ./explainer
-cd explainer
+```sh
+artifacture list --json
+artifacture info custom-slides --json
+artifacture init ./my-talk --template custom-slides
+cd my-talk
 npm run dev
-```
-
-The starter uses ISO and includes a scene composition, finite motion, and a time scrubber. Edit the authored scene and sequence in `src`. The copied modules in `src/artifacture` belong to the new workspace.
-
-`init` installs the starter dependencies. `add` installs missing packages and adds stylesheet imports to the app entry. The installed skill uses the same CLI automatically; its user only needs the skill install command.
-
-## Discover blocks before authoring
-
-The CLI reads one explicit component registry for both discovery and copying.
-Agents can search capabilities, primitive names, and public APIs:
-
-```bash
-npx artifacture list --query circle --json
-npx artifacture list --query focus --json
-npx artifacture list --query threads --json
-npx artifacture list --query sequence --json
-npx artifacture list --query split --json
-```
-
-`list --json` returns the complete current catalog. Each entry includes capabilities,
-primitive names, reuse levels, delivery formats, module exports, supported variants, constraints,
-working example paths, the transitive copy files, package requirements,
-stylesheets, and the exact add command. Search is case-insensitive and matches
-all words in the query. An empty result means the requested capability is not
-indexed; candidate research is separate from the available catalog.
-
-`entryPoints[].defaultImport` is relative to the generated `src` directory.
-`files[].destination` is relative to the configured component directory,
-which defaults to `src/artifacture`. Adapt import paths when authoring elsewhere
-or using another `artifacture.json` destination.
-
-Before creating a custom block, read its closest existing entry and example,
-then run its `addCommand` in the consumer project. The release audit checks
-indexed module exports, example files, dependency closure, and package advice.
-Generated workspace `AGENTS.md` includes this discovery workflow. Proposed
-additions live in [primitive candidates](research/primitive-candidates-2026-10-04.md).
-
-The [component catalog](component-catalog.md) groups the named APIs and supported
-variants. Its [editable preview source](../examples/visual-explainer-mdx/component-catalog.tsx)
-shows the actual components in all four themes, with direct authored-time seeking.
-
-## Add blocks
-
-From any directory, add blocks to an existing workspace:
-
-```bash
-npx artifacture add charts slides video --cwd ./explainer
-```
-
-Required packages and stylesheet imports are added automatically. Import the copied leaf module you use, such as `./artifacture/lieflat-charts` or `./artifacture/graphic-slides`. Keep the Artifacture license beside those files.
-
-The `authored-values` and `narration-cues` leaves copy parameter sampling and subtitle tools without npm dependencies. Keep their copied `LEMO-LICENSE` notice as well. Sample parameters with the same authored time as the scene; compile narration cues against the actual audio duration before serialization.
-
-The `charts` block supplies five independently authored Lieflat-inspired encodings. The `hairline` block automatically installs the official 27-figure React package and also includes the separate prepared-path scene adapter. Original Diagram Design, PR Lens, Chalkboarding and native f-explainer wrappers retain upstream rendering and accept explicit time where supported. See [source libraries](source-libraries.md). The `iso` block adds reusable projected faces and live details; `motion-eases` extends the shared finite sampler. The `video` block adds the existing paused GSAP playback runtime and supports one video host per document. See [graphics and video](graphics-and-video.md) for the source contracts.
-
-The original `video-frames` leaf defines frame rounding explicitly and separates the last encoded sample from the authored endpoint. Await detached snapshots when inspecting a loop; frame closure does not prove audio or velocity continuity.
-
-## Inspect a copy before writing
-
-Use a dry run to inspect the planned files:
-
-```bash
-npx artifacture init ./explainer --dry-run
-npx artifacture add charts --cwd ./explainer --dry-run
-npx artifacture list --json
-```
-
-Exact component copies preserve existing bytes and modification times. Required dependencies and stylesheet imports are added only when missing. Changed destination files cause the whole preflight to fail. Reconcile local edits before retrying. There is no overwrite flag.
-
-Paths must have no symlink ancestors. On macOS, use canonical temporary paths such as `/private/var` instead of the `/var` alias. A failed write removes only files created by that invocation whose ownership and bytes still match. If that cannot be confirmed, the error reports the remaining paths.
-
-`artifacture.json` records the relative source destination. A new workspace uses `src/artifacture`. Adding blocks to an existing React project uses that destination unless its config selects another confined directory. The CLI retains existing dependency ranges. Use `--no-install` to manage packages yourself, or `--entry <file>` for a custom app entry.
-
-## Reuse a scene across formats
-
-Author geometry as a `GraphicScene`. Combine complete scenes with `composeGraphics`, then render that composition directly for a diagram or poster. Wrap it in slides and a finite sequence for video.
-
-Motion uses the same explicit time at every level. The existing sampler supports opacity, path reveal, focus handoff, and translation of illustration objects. Keep diagram movement in the diagram layout owner so labels and connections stay together. Use `linear` or `smooth` easing and hold the completed state for reading.
-
-Inspect the start, transitions, holds, and end. Seek backward and forward to the same time and compare the frame. Compose narrow and wide layouts deliberately. Use the [component references](component-references.md) for new blocks and motion ideas.
-
-Run the generated project's build after changes:
-
-```bash
 npm run build
+npm run export
 ```
 
-For 3D figures, discover `model-view`, `shape-ascii`, `particle-object`, `living-forms` and `procedural-props`. Generated workspace guidance includes the img2threejs authoring workflow, fresh-factory ownership and awaitable capture. The copied `MODEL-AUTHORING.md` travels with model blocks. See [model visuals](model-visuals.md) for source-to-figure reuse; `orbital-text` and `trace-path` remain independently copyable SVG leaves.
+`build` and `export` both write `dist/`; export uses the same Vite configuration in standalone mode. Custom aliases, plugins, CSS, React dependencies and content therefore have one owner. The small `artifacture/vite` helper composes native MDX/React/Tailwind plugins. You can replace or extend it directly. `vite-plugin-singlefile` handles standalone delivery; Artifacture does not maintain another HTML inliner.
 
-Workspace `AGENTS.md` records source ownership, theme rules, reuse across formats, and the opt-in rule for new test files.
+Import assets from source for bundling. Remote URLs and arbitrary `public/` files are not automatically embedded. Check the actual delivered HTML offline if that is a requirement.
+
+The `iso-diagram` project imports Hairline directly. Its authoring skill is installed only for that template. `custom-slides` supplies a small editable presenter with stable IDs/history and progressive states; replace it with your own presenter or arbitrary TSX. Figure primitives are native imports.
+
+## Native video
+
+FFrames is the preferred video route. Install its native scaffolder using the upstream instructions, then:
+
+```sh
+cargo install cargo-fframes --locked
+artifacture init ./my-film --template fframes-explainer
+cd my-film
+cargo run --release -- timeline
+cargo run --release -- inspect
+cargo run --release -- render
+```
+
+Artifacture calls `cargo-fframes new` and adds a narrative workflow. The generated project owns Rust, media, scenes, audio, inspection and rendering. Follow the official FFrames skill for platform/toolchain requirements. `--no-install` still needs the native scaffolder but skips package/skill installation. There is no engine-switch flag.
+
+Use the `hyperframes-browser` recipe when the requested composition depends on DOM/CSS or a browser-only visual. PR reviews have a separate evidence/narrative recipe. Use ordinary media files to compose outputs across tools.
+
+## References and skills
+
+```sh
+artifacture list --kind reference --json
+artifacture info iso-glow
+artifacture info hairline
+artifacture info frankenmanim
+artifacture skills install .agents/skills/visual-explainer
+```
+
+The entry skill installation copies only the entry and CLI launcher. A selected template installs its declared native skills using the native skills CLI. Optional references are discovered on demand; they are not all installed. `--no-skills` skips skill installation; `--no-install` skips packages and skills. Existing destinations are refused to preserve edits.
+
+Native package manifests, lockfiles and caches own versions. Commit your project lockfiles and use native update commands. ISO Glow, Hairline, iso-figure, Diagram Design, Anatomy, Manim, ManimGL and FrankenManim are discoverable references. FrankenManim is experimental, with current output and license qualifications in its catalog entry.
+
+## Breaking migration
+
+| Previous route | New workspace route |
+| --- | --- |
+| `artifacture list` component API dump | Compact template list; `info` loads one workflow and native references |
+| `artifacture init` copies core components | Explicit `--template`; dependencies come from that project |
+| `artifacture add <block>` | Native package installation and direct imports; editable local composition |
+| `artifacture export <source>` | Workspace `npm run export`; MDX and arbitrary TSX enter through the ordinary React entry |
+| `artifacture fframes <sequence>` | Native FFrames project; no mandatory SVG frame bank |
+| Universal `verify` routing | Build checks, native renderer inspection and template-specific visual review |
+| Skill runtime snapshot | Small entry skill plus selected native tools |
+
+Existing external `ve:export` callers remain available through source scripts in a contributor checkout while they migrate. Keep their existing presenter, CSS and assets in a native workspace. Do not assume this initial slice proves parity with every downstream Function deck or every old component. The old implementation is excluded from the new npm package but retained in source until its callers are assessed.
+
+## Developing the prerelease
+
+Use a clean checkout, `npm ci`, then `npm pack`. Scaffold with the checkout CLI and `--no-install`, install the resulting tarball in the generated project as a dev dependency, then install that project's dependencies. This avoids relying on an unpublished npm version. Set `ARTIFACTURE_REPO` to this checkout when running the skill launcher in development.
+
+No new tests are required to adopt a template. Verify actual browser behavior, relevant presentation states, startup errors, missing assets and rendered output. Contributor work should use existing tests and direct probes unless new test files have been authorized.

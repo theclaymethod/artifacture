@@ -1,0 +1,13 @@
+{
+  "id": "hyperframes-browser",
+  "kind": "video",
+  "purpose": "Use native browser composition when DOM, CSS or browser-only figures are essential.",
+  "type": "recipe",
+  "references": [
+    "hyperframes",
+    "hairline",
+    "anatomy"
+  ],
+  "output": "MP4",
+  "preview": null
+}
