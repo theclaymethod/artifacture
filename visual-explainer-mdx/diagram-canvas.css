@@ -98,18 +98,26 @@
   outline-offset: 3px;
 }
 
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone] {
-  padding-left: 0.875rem;
-  border-left: 3px solid var(--ve-status-neutral);
+/* A toned node carries its tone as a mark before its name, never as a thick side stripe. */
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone] h3::before {
+  content: "";
+  display: inline-block;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-right: 0.5rem;
+  border: 1.5px solid var(--ve-status-neutral);
+  border-radius: 2px;
+  background: var(--ve-status-neutral);
 }
 
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="ok"] { border-left-color: var(--ve-status-ok); }
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="info"] { border-left-color: var(--ve-status-info); }
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="warn"] { border-left-color: var(--ve-status-warn); }
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="err"] { border-left-color: var(--ve-status-err); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="ok"] h3::before { border-color: var(--ve-status-ok); background: var(--ve-status-ok); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="info"] h3::before { border-color: var(--ve-status-info); background: var(--ve-status-info); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="warn"] h3::before { border-color: var(--ve-status-warn); background: var(--ve-status-warn); }
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-tone="err"] h3::before { border-color: var(--ve-status-err); background: var(--ve-status-err); }
 
-.ve-diagram-shell .ve-diagram-mobile-node[data-ve-stroke="dashed"] {
-  border-left-style: dashed;
+.ve-diagram-shell .ve-diagram-mobile-node[data-ve-stroke="dashed"] h3::before {
+  background: transparent;
+  border-style: dashed;
 }
 
 @media (max-width: 640px) {

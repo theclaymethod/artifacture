@@ -36,6 +36,12 @@ Use the host's paper, text, and accent roles. ISO replaces the former Lieflat pa
 
 Open space separates sections. Fine rules connect related rows. Charts use direct labels, honest scales, and marks tied to actual observations. Bars start at zero; a missing observation remains missing. Use the one accent for the focal record or relationship. Separate other series with direct labels, position, or line style.
 
+## Explainer pages
+
+An explainer is a reading path, not a dashboard. Each level answers one question, which is its heading; a `Lead` gives the answer in plain words; a figure follows; detail waits behind openers (a boxed row with a caret). The shell sets 17px Inter at 1.6, prose capped at `--ve-measure` (about 68 characters), headings at 34, 22 and 17px in weight 600, body in 400. Every gap comes from the `--ve-space-*` scale on a 4px base: 16px between blocks, 48px before a subsection, 64px between levels (48px on a phone), one hairline above each level and none below. A card has one hairline, a 12px radius and the `--ve-card-pad`; an opener has an 8px radius.
+
+States use one mark language. Each tone pairs its ink with a shape: a check for met, caught, Proven and Formal; a half disc for Backed; a warning bar for below the bar, missed and Asserted; a cross for Gap, cannot fail and risky below the bar. Every "N of M" also shows countable squares, filled for an item that holds and hollow for one below its bar. A run of steps is drawn as numbered stations whose numbers match the `Steps` list. In the ISO light theme, explainer code sits on a quiet light plate; decks, posters and dark mode keep the dark plate.
+
 ## Typography
 
 Treat text as blocks, following [Pierrick Calvez’s typography guide](https://www.pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography). Start with the preset’s type family; establish hierarchy through scale, distinct weights, and spacing. Body copy is at least 16px and figure labels at least 14px at rendered scale.

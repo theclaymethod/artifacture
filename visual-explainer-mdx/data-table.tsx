@@ -9,11 +9,28 @@ export type KeyGlyph = 'rect' | 'oval' | 'diamond';
 
 export type StatusPillProps = { tone: StatusTone; /** What the state means, in one sentence: a tooltip, and text for a screen reader. */ meaning?: string; children: ReactNode };
 
-/** A state label: one tone color, a tone dot and the visible text, so color is never the only cue. A meaning shows on hover and is read after the word. */
+/**
+ * The mark of each tone: a check for ok, a half disc for info, a warning bar for warn, a cross for
+ * err and a dot for neutral. The shape repeats the tone, so color is never the only cue.
+ */
+export function ToneMark({ tone }: { tone: StatusTone }) {
+  return (
+    <svg aria-hidden="true" className="ve-tone-mark" data-ve-tone={tone} height="14" viewBox="0 0 14 14" width="14">
+      {tone === 'neutral' ? <circle cx="7" cy="7" fill="currentColor" r="3" />
+        : <circle cx="7" cy="7" fill={tone === 'info' ? 'none' : 'currentColor'} r="6.25" stroke="currentColor" strokeWidth="1.5" />}
+      {tone === 'ok' ? <path d="M4.2 7.2l1.9 1.9 3.7-4" fill="none" stroke="var(--ve-tone-on, #fff)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" /> : null}
+      {tone === 'info' ? <path d="M7 0.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor" /> : null}
+      {tone === 'warn' ? <path d="M7 3.6v4.1M7 10.1v0.2" fill="none" stroke="var(--ve-tone-on, #fff)" strokeLinecap="round" strokeWidth="1.7" /> : null}
+      {tone === 'err' ? <path d="M4.9 4.9l4.2 4.2M9.1 4.9l-4.2 4.2" fill="none" stroke="var(--ve-tone-on, #fff)" strokeLinecap="round" strokeWidth="1.6" /> : null}
+    </svg>
+  );
+}
+
+/** A state label: one tone color, the tone mark and the visible text, so color is never the only cue. A meaning shows on hover and is read after the word. */
 export function StatusPill({ tone, meaning, children }: StatusPillProps) {
   return (
     <span className="ve-status-pill" data-ve-tone={tone} title={meaning}>
-      <span aria-hidden="true" className="ve-status-dot" />
+      <ToneMark tone={tone} />
       {children}
       {meaning ? <span className="ve-visually-hidden">: {meaning}</span> : null}
     </span>

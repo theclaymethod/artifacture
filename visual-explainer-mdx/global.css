@@ -122,8 +122,25 @@
 
   .ve-shell,
   [data-ve-poster] {
-    --ve-copy-measure: 56ch;
+    --ve-copy-measure: var(--ve-measure);
     font-kerning: normal;
+  }
+
+  /* The reading column: 17px text at 1.6, prose capped at the measure wherever it sits. */
+  .ve-shell {
+    --ve-heading-weight: var(--ve-weight-strong);
+    font-size: var(--ve-text-body);
+    line-height: var(--ve-leading-body);
+  }
+
+  /* The default presets space levels with their own padding, so the shell adds no gap. */
+  .ve-shell:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) {
+    --ve-section-gap: 0px;
+  }
+
+  /* The first level follows the title closely: the title and the merge answer share a screen. */
+  .ve-shell .ve-shell-header + .ve-section {
+    padding-top: var(--ve-space-6);
   }
 
   .ve-shell p,
@@ -131,42 +148,66 @@
     text-wrap: pretty;
   }
 
-  .ve-section-body > p,
+  .ve-section-body :is(p, li, dd, blockquote, figcaption),
   .ve-section-body > :is(ul, ol):not([class]),
   .ve-section-body > .ve-callout {
-    max-width: var(--ve-copy-measure, 56ch);
+    max-width: var(--ve-copy-measure);
   }
 
+  .ve-section-body :is(li, dd) :is(p, li) {
+    max-width: none;
+  }
+
+  /* One rhythm: 16px between blocks, 48px before a subsection, more above a heading than below. */
   .ve-section-body > * + * {
-    margin-top: 1rem;
+    margin-top: var(--ve-space-4);
   }
 
-  .ve-section-body > * + :is(h3:not([class]), .ve-subsection) {
-    margin-top: 2.5rem;
+  .ve-section-body > * + :is(h3, .ve-subsection, [data-ve-trust]) {
+    margin-top: var(--ve-space-7);
+  }
+
+  .ve-section-body > .ve-lead + * {
+    margin-top: var(--ve-space-6);
+  }
+
+  /* A bare subsection heading in MDX takes the Subsection type. */
+  .ve-section-body > h3.ve-subsection-title {
+    color: var(--ve-heading);
+    font-family: var(--ve-font-display);
+    font-size: var(--ve-text-h3);
+    font-weight: var(--ve-weight-strong);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .ve-section-body > * + h3.ve-subsection-title {
+    margin-top: var(--ve-space-7);
   }
 
   .ve-section-body :is(h3, h4):not([class]) {
     color: var(--ve-heading);
     font-family: var(--ve-font-display);
-    font-weight: 600;
-    line-height: 1.35;
+    font-weight: var(--ve-weight-strong);
+    line-height: 1.3;
     text-wrap: balance;
   }
 
   .ve-section-body h3:not([class]) {
-    font-size: 1.25rem;
+    font-size: var(--ve-text-h3);
   }
 
   .ve-section-body h4:not([class]) {
-    font-size: 1.0625rem;
+    font-size: var(--ve-text-h4);
   }
 
   .ve-section-body * + h4:not([class]) {
-    margin-top: 1.75rem;
+    margin-top: var(--ve-space-6);
   }
 
   .ve-section-body :is(ul, ol):not([class]) {
-    padding-left: 1.25rem;
+    padding-left: var(--ve-space-5);
   }
 
   .ve-section-body ul:not([class]) {
@@ -178,18 +219,28 @@
   }
 
   .ve-section-body :is(ul, ol):not([class]) > li + li {
-    margin-top: 0.375rem;
+    margin-top: var(--ve-space-2);
+  }
+
+  .ve-section-body :is(ul, ol):not([class]) > li::marker {
+    color: var(--ve-muted);
   }
 
   /* A text link in a Section body is a 44px target that keeps the line height. */
   .ve-section-body :is(p, li, dd) > a:not([class]) {
     display: inline-block;
-    padding-block: calc((44px - 1.5em) / 2);
-    margin-block: calc((1.5em - 44px) / 2);
+    padding-block: calc((44px - 1.6em) / 2);
+    margin-block: calc((1.6em - 44px) / 2);
     color: var(--ve-heading);
     text-decoration: underline;
-    text-decoration-color: var(--ve-muted);
-    text-underline-offset: 0.2em;
+    text-decoration-color: color-mix(in srgb, var(--ve-heading) 40%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  .ve-section-body :is(p, li, dd) > a:not([class]):hover {
+    text-decoration-color: var(--ve-accent);
+    text-decoration-thickness: 2px;
   }
 
   .ve-section-body :is(p, li, dd) code {
@@ -198,9 +249,57 @@
     overflow-wrap: anywhere;
   }
 
+  /* Inline code: quiet, distinct, never a pill. */
+  .ve-shell code:not([data-ve-code-block] code, .ve-cell-id) {
+    border: 0;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--ve-text) 7%, transparent);
+    padding: 0.06em 0.32em;
+    font-size: 0.86em;
+  }
+
+  .ve-section-body blockquote {
+    margin: 0;
+    padding: var(--ve-space-3) var(--ve-space-4);
+    border-radius: var(--ve-control-radius);
+    background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+    font-size: var(--ve-text-lead);
+    line-height: var(--ve-leading-lead);
+  }
+
+  .ve-section-body blockquote > * + * {
+    margin-top: var(--ve-space-2);
+  }
+
+  /* Level openers: a lead in plain words, and a short aside on why a thing matters. */
+  .ve-lead {
+    color: var(--ve-heading);
+    font-size: var(--ve-text-lead);
+    line-height: var(--ve-leading-lead);
+  }
+
+  .ve-lead-label {
+    font-weight: var(--ve-weight-strong);
+  }
+
+  .ve-aside {
+    max-width: var(--ve-copy-measure);
+    padding: var(--ve-space-4) var(--ve-space-5);
+    border-radius: var(--ve-card-radius);
+    background: var(--ve-accent-soft);
+  }
+
+  .ve-aside > * + * {
+    margin-top: var(--ve-space-2);
+  }
+
+  .ve-aside-label {
+    font-weight: var(--ve-weight-strong);
+  }
+
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-inner {
     gap: 0;
-    padding-block: clamp(1rem, 3vw, 2.5rem) clamp(4rem, 8vw, 8rem);
+    padding-block: var(--ve-space-5) var(--ve-space-9);
   }
 
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-table-shell,
@@ -213,27 +312,27 @@
 
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
     align-items: end;
-    padding: clamp(2rem, 5vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(1.5rem, 4vw, 3rem) 0 var(--ve-space-5);
     border: 0;
-    border-top: 1px solid var(--ve-rule);
-    border-bottom: 1px solid var(--ve-rule);
     border-radius: 0;
     background: transparent;
     box-shadow: none;
   }
 
 
+  /* A level: one rule above it, 64px of air (48px on a phone), its question as the heading. */
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section {
-    gap: clamp(1rem, 3vw, 2.5rem);
-    padding: clamp(2rem, 5vw, 4.75rem) 0;
-    border-bottom: 1px solid var(--ve-rule);
+    gap: var(--ve-space-5);
+    padding: var(--ve-space-8) 0;
+    border-top: 1px solid var(--ve-rule);
   }
 
   :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section-heading h2 {
-    max-width: 24ch;
-    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+    max-width: 30ch;
+    font-size: var(--ve-text-h2);
+    font-weight: var(--ve-weight-strong);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
@@ -299,7 +398,11 @@
 
   @media (max-width: 1023px) {
     :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-shell-header {
-      padding: 2rem 0;
+      padding: var(--ve-space-6) 0 var(--ve-space-5);
+    }
+
+    :is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-section {
+      padding: var(--ve-space-7) 0;
     }
 
     }

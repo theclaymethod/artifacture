@@ -1,6 +1,36 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&family=STIX+Two+Math&display=swap");
 
 @layer base {
+  /* The reading system of explainer pages: one spacing scale on a 4px base, a reading measure and
+     a type scale with two weights. Components take every gap, pad and size from these tokens. */
+  :root,
+  [data-ve-preset] {
+    --ve-space-1: 0.25rem;
+    --ve-space-2: 0.5rem;
+    --ve-space-3: 0.75rem;
+    --ve-space-4: 1rem;
+    --ve-space-5: 1.5rem;
+    --ve-space-6: 2rem;
+    --ve-space-7: 3rem;
+    --ve-space-8: 4rem;
+    --ve-space-9: 6rem;
+    --ve-measure: 54ch;
+    --ve-text-body: 1.0625rem;
+    --ve-leading-body: 1.6;
+    --ve-text-lead: 1.1875rem;
+    --ve-leading-lead: 1.55;
+    --ve-text-small: 0.875rem;
+    --ve-leading-small: 1.5;
+    --ve-text-h2: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
+    --ve-text-h3: 1.375rem;
+    --ve-text-h4: 1.0625rem;
+    --ve-weight-regular: 400;
+    --ve-weight-strong: 600;
+    --ve-card-pad: clamp(1.125rem, 2.4vw, 1.5rem);
+    --ve-card-radius: 12px;
+    --ve-control-radius: 8px;
+  }
+
   :root,
   [data-ve-preset] {
     --ve-shell-title-size: clamp(1.875rem, 1.25rem + 2vw, 2.5rem);
@@ -546,6 +576,27 @@
     --ve-syntax-punctuation: var(--ve-code-text);
     --ve-code-add: var(--ve-code-text);
     --ve-code-remove: var(--ve-code-text);
+  }
+
+
+  /* Explainer pages set code on a quiet light plate in the ISO light theme, so code and
+     identifiers stay distinct without a black slab in the reading column. Decks, posters and
+     dark mode keep the dark plate. */
+  .ve-shell[data-ve-preset="iso"]:not([data-ve-appearance="dark"]) {
+    --ve-code-bg: #f6f7f9;
+    --ve-code-text: #1f2328;
+    --ve-code-muted: #57606a;
+    --ve-code-rule: color-mix(in srgb, #1f2328 12%, transparent);
+    --ve-code-accent: #05697b;
+    --ve-syntax-keyword: #8250df;
+    --ve-syntax-string: #0a3069;
+    --ve-syntax-constant: #0550ae;
+    --ve-syntax-function: #953800;
+    --ve-syntax-parameter: #0550ae;
+    --ve-syntax-comment: #57606a;
+    --ve-syntax-punctuation: #1f2328;
+    --ve-code-add: #116329;
+    --ve-code-remove: #a40e26;
   }
 
 }

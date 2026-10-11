@@ -148,6 +148,11 @@
   min-width: 0;
 }
 
+/* Chapter headings already live in the rail: a level is one reading column at every width. */
+.ve-has-chapters .ve-section {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 @media (min-width: 1200px) {
   .ve-has-chapters {
     --ve-sticky-top: 0px;
@@ -189,11 +194,6 @@
     display: block;
     max-height: calc(100vh - 8rem);
     padding: 0;
-  }
-
-  /* Chapter headings already live in the rail: give each section body the full measure. */
-  .ve-has-chapters .ve-section {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   /* With a rail, the review tool docks under it instead of reserving a right gutter. */

@@ -1,4 +1,4 @@
-import { type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { Children, cloneElement, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { StatusPill, type StatusTone } from './data-table';
 import './content-blocks.css';
 
@@ -285,6 +285,42 @@ export function Term({ definition, expansion, children }: TermProps) {
       </span>
       {expansion ? ')' : null}
     </>
+  );
+}
+
+export type LeadProps = { label?: string; children: ReactNode };
+
+/**
+ * The opener of a level: its answer in plain words, one step larger than body text, with a
+ * run-in label. Write one or two sentences that a newcomer can hold.
+ */
+export function Lead({ label = 'In plain words', children }: LeadProps) {
+  return (
+    <div className="ve-lead" data-ve-lead>
+      <LeadBody label={label}>{children}</LeadBody>
+    </div>
+  );
+}
+
+// MDX wraps the text in a paragraph: the label runs into the first one.
+function LeadBody({ label, children }: { label: string; children: ReactNode }) {
+  const items = Children.toArray(children);
+  const first = items[0];
+  const run = <strong className="ve-lead-label">{label}. </strong>;
+  if (isValidElement<{ children?: ReactNode }>(first) && first.type === 'p') {
+    return <>{cloneElement(first, undefined, run, first.props.children)}{items.slice(1)}</>;
+  }
+  return <p>{run}{children}</p>;
+}
+
+export type AsideProps = { label?: string; children: ReactNode };
+
+/** A short aside, such as why a thing matters. Keep it to two sentences. */
+export function Aside({ label = 'Why this matters', children }: AsideProps) {
+  return (
+    <aside className="ve-aside" data-ve-aside>
+      <LeadBody label={label}>{children}</LeadBody>
+    </aside>
   );
 }
 
