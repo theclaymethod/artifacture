@@ -3,7 +3,9 @@
 // these components drop in the levels that come from data. Each one validates its input and
 // throws on bad data, so the static pre-render of `ve:export` fails the export.
 // The card plugins/visual-explainer/cards/trust-map.md holds the data contract.
-import { Children, cloneElement, Fragment, isValidElement, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { Children, cloneElement, Fragment, isValidElement, useContext, useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
+import { ChapterContext } from './chapter-context';
+import { isPlainWord, MAX_TERMS_PER_CHAPTER } from './glossary-policy.mjs';
 import { CodeBlock, DiffBlock, TerminalBlock, type DiffRow } from './code-blocks';
 import { ChipLinks, Disclosure, Subsection, Term } from './content-blocks';
 import { DataTable, Legend, StatusPill, ToneMark, type LegendItem, type StatusTone } from './data-table';
@@ -28,13 +30,58 @@ type WithRefs = Data & { refs: Refs };
 
 // ---- Glossary terms in running text ----------------------------------------------------------
 
-export type TermState = { entries: Array<GlossaryEntry & { expansion: string | null }>; pattern: RegExp | null; seen: Set<string>; expand: boolean; expanded: Set<string> };
+type Base = { entries: Array<GlossaryEntry & { expansion: string | null }>; pattern: RegExp | null };
 
-export function termState(data: TrustMap, expand = false): TermState {
+/**
+ * The glossary words of one text block. `seen` holds the words that this chapter has marked before
+ * the block, `expanded` the abbreviations that the page has spelled out before it. A block adds its
+ * own words to `shared` too, so the next block of the chapter (and of the page) skips them.
+ */
+export type TermState = Base & { seen: Set<string>; expanded: Set<string>; expand: boolean; shared: { seen: Set<string>; expanded: Set<string> } };
+
+const BASES = new WeakMap<TrustMap, Base>();
+
+function termBase(data: TrustMap): Base {
+  const hit = BASES.get(data);
+  if (hit) return hit;
   const entries = glossaryEntries(data).map((g) => ({ ...g, expansion: expansion(g.term, g.meaning) }));
-  const forms = [...new Set(entries.flatMap((g) => [g.term, ...(g.aliases ?? [])]).filter((f) => f.length >= 2))].sort((a, b) => b.length - a.length);
+  const forms = [...new Set(entries.flatMap((g) => [g.term, ...(g.aliases ?? [])]).filter((f) => f.length >= 2 && !isPlainWord(f)))].sort((a, b) => b.length - a.length);
   const alts = forms.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-  return { entries, pattern: alts ? new RegExp(`(?<![\\w-])(${alts})(?:s|es)?(?![\\w-])`, 'gi') : null, seen: new Set(), expand, expanded: new Set() };
+  const base = { entries, pattern: alts ? new RegExp(`(?<![\\w-])(${alts})(?:s|es)?(?![\\w-])`, 'gi') : null };
+  BASES.set(data, base);
+  return base;
+}
+
+/** A state of its own, outside any chapter: each word marked once in the block, nothing shared. */
+export function termState(data: TrustMap, expand = false): TermState {
+  const shared = { seen: new Set<string>(), expanded: new Set<string>() };
+  return { ...termBase(data), seen: new Set(), expanded: new Set(), expand, shared };
+}
+
+type PageTerms = { chapters: Map<string, Set<string>>; expanded: Set<string>; blocks: Map<string, { seen: string[]; expanded: string[] }> };
+const PAGES = new WeakMap<TrustMap, PageTerms>();
+
+/**
+ * The glossary words of a block in a chapter: the chapter marks each word once, at its first use,
+ * and at most MAX_TERMS_PER_CHAPTER words; the page spells out each abbreviation once (`expand`).
+ * A block keeps the state that it started with, so a re-render marks the same words.
+ */
+export function useTerms(data: TrustMap, expand = false): TermState {
+  const chapter = useContext(ChapterContext) ?? '';
+  const id = useId();
+  let page = PAGES.get(data);
+  if (!page) {
+    page = { chapters: new Map(), expanded: new Set(), blocks: new Map() };
+    PAGES.set(data, page);
+  }
+  const seen = page.chapters.get(chapter) ?? new Set<string>();
+  page.chapters.set(chapter, seen);
+  let start = page.blocks.get(id);
+  if (!start) {
+    start = { seen: [...seen], expanded: [...page.expanded] };
+    page.blocks.set(id, start);
+  }
+  return { ...termBase(data), seen: new Set(start.seen), expanded: new Set(start.expanded), expand, shared: { seen, expanded: page.expanded } };
 }
 
 function findTerm(state: TermState, word: string) {
@@ -42,18 +89,22 @@ function findTerm(state: TermState, word: string) {
   return state.entries.find((g) => [g.term, ...(g.aliases ?? [])].some((f) => (isAcronym(f) ? f === word : f.toLowerCase() === word.toLowerCase() || norm(f) === w)));
 }
 
-/** Text with a Term at the first use of each glossary word in this level; an abbreviation is spelled out at its first use when `expand` is on. */
+/** Text with a Term at the first use of each glossary word; an abbreviation is spelled out at its first use on the page when `expand` is on. */
 function glossed(text: string, state: TermState | null, key = 't'): ReactNode {
   if (!state?.pattern || !text) return text;
   const out: ReactNode[] = [];
   let last = 0;
   for (const m of text.matchAll(state.pattern)) {
     const hit = findTerm(state, m[1]);
-    if (!hit || state.seen.has(hit.term)) continue;
-    if (m[1] === hit.term || !hit.expansion || state.expanded.has(hit.term)) state.seen.add(hit.term);
+    if (!hit || isPlainWord(hit.term) || state.seen.has(hit.term) || state.seen.size >= MAX_TERMS_PER_CHAPTER) continue;
+    state.seen.add(hit.term);
+    state.shared.seen.add(hit.term);
     if (m.index! > last) out.push(text.slice(last, m.index));
     const spell = state.expand && hit.expansion && m[1] === hit.term && !state.expanded.has(hit.term);
-    if (spell) state.expanded.add(hit.term);
+    if (spell) {
+      state.expanded.add(hit.term);
+      state.shared.expanded.add(hit.term);
+    }
     out.push(<Term definition={`${hit.term}: ${hit.meaning}`} expansion={spell ? hit.expansion! : undefined} key={`${key}-${m.index}`}>{m[0]}</Term>);
     last = m.index! + m[0].length;
   }
@@ -81,13 +132,14 @@ function glossChildren(node: ReactNode, state: TermState): ReactNode {
 }
 
 /**
- * Narrative prose with glossary terms: the first use of each word of the glossary in this block
- * shows its definition on hover, focus or tap. Wrap the Markdown of one level in it. `expand`
- * spells out each abbreviation at its first use; set it on the first level of the page.
+ * Narrative prose with glossary terms: the first use of each word of the glossary in this chapter
+ * shows its definition on hover, focus or tap. Everyday words (glossary-policy.mjs) stay plain, and a
+ * chapter marks at most MAX_TERMS_PER_CHAPTER words. Wrap the Markdown of one level in it. Each
+ * abbreviation is spelled out once, at its first use on the page; `expand={false}` turns that off.
  */
-export function Glossed({ data, expand = false, children }: Data & { expand?: boolean; children: ReactNode }) {
+export function Glossed({ data, expand = true, children }: Data & { expand?: boolean; children: ReactNode }) {
   assertTrustMap(data);
-  return <>{glossChildren(children, termState(data, expand))}</>;
+  return <>{glossChildren(children, useTerms(data, expand))}</>;
 }
 
 // ---- Small pieces ----------------------------------------------------------------------------
@@ -208,7 +260,7 @@ export function ArchitectureDiagram({ spec, name = spec?.title, numbered = false
   const number = (g: DiagramSpec['eli5']) => (numbered ? { ...g, nodes: g.nodes.map((n) => (station.has(n.id) ? { ...n, label: `${station.get(n.id)}. ${n.label}` } : n)) } : g);
   if (numbered && chainOrder(graph(spec.eli5))) return <StationFlow description={spec.description} detailed={graph(spec.detailed)} simple={graph(spec.eli5)} title={spec.title} />;
   return (
-    <DiagramModes description={spec.description} detailed={graph(number(spec.detailed))} direction={spec.direction as 'wrap' | undefined} layout={(spec.layout ?? 'flow') as 'flow'} modes={spec.modes} simple={graph(number(spec.eli5))} title={spec.title} />
+    <DiagramModes description={spec.description} detailed={graph(number(spec.detailed))} direction={spec.direction as 'wrap' | undefined} layout={(spec.layout ?? 'flow') as 'flow'} modes={spec.modes} showTitle simple={graph(number(spec.eli5))} title={spec.title} />
   );
 }
 
@@ -251,7 +303,7 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
   const [word, tone, lead] = MERGE_WORDS[form];
   const shown = items.slice(0, MAX_MERGE_ITEMS);
   const rest = items.slice(MAX_MERGE_ITEMS);
-  const terms = termState(data);
+  const terms = useTerms(data);
   return (
     <div data-ve-trust="merge">
       <Subsection id="merge" title="Can you merge it?">
@@ -299,11 +351,12 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
 export function PromiseChips({ data, refs }: WithRefs) {
   assertTrustMap(data);
   assertRefs(data, refs);
+  const terms = useTerms(data);
   const chips = promiseRows(data, refs).map(({ promise: p, strength }) => ({ label: p.label, href: '#' + promiseAnchor(p.id), tone: TONE[strength], status: strength, meaning: `${strength}: ${VERDICT_MEANING[strength]}` }));
   return (
     <div data-ve-trust="chips">
       <Subsection id="story-promises" title="What the PR promises">
-        <p><Rich terms={termState(data)} text="Each row is one promise, weakest first. The pill shows its weakest claim: a promise is only as strong as that claim. Select a promise to see the proof." /></p>
+        <p><Rich terms={terms} text="Each row is one promise, weakest first. The pill shows its weakest claim: a promise is only as strong as that claim. Select a promise to see the proof." /></p>
         <ChipLinks items={chips} label="The promises, weakest first" />
         <MarkKey />
         <Disclosure id="story-legend" summary="What each verdict means">
@@ -561,7 +614,7 @@ export function ClaimBody({ data, refs, claim, explain = {}, said = false }: Wit
   const d = derivedClaim(refs, c.id);
   const risk = risksOf(data, explain, c)[0];
   const plain = c.plain ?? { what: c.text, proof: c.reason ?? '' };
-  const terms = termState(data);
+  const terms = useTerms(data);
   const items: Array<[ReactNode, ReactNode, ('ok' | 'warn' | 'err' | undefined)?]> = [];
   items.push(['Checks', <span data-ve-checks>{d.summary}</span>]);
   if (d.weakest) {
@@ -648,7 +701,7 @@ export function PromiseList({ data, refs, explain = {} }: WithRefs & { explain?:
   assertTrustMap(data);
   assertRefs(data, refs);
   const risks = explain.risks ?? [];
-  const terms = termState(data);
+  const terms = useTerms(data);
   for (const r of risks) for (const id of r.claims) if (!claimOf(data, id)) throw new TrustMapError(`explain.json risks name the claim ${id}, which the map does not have`);
   const rows = promiseRows(data, refs);
   return (

@@ -19,6 +19,8 @@ export type DiagramModesProps = {
   /** `wrap` sets the flow left to right in rows that fit the column (below 600px it is vertical). */
   direction?: 'auto' | 'horizontal' | 'vertical' | 'wrap';
   title?: string;
+  /** Show the title in the figure's header, beside the view switch. */
+  showTitle?: boolean;
   description?: string;
   /**
    * `shared` (the default) lays both modes out on one grid, so a box keeps its place when the
@@ -79,7 +81,7 @@ export function useDiagramMode(): [DiagramMode, (mode: DiagramMode) => void] {
  * reader switches. A labelled two-option control switches every DiagramModes on the page, and the
  * page remembers the choice. The switch fades only when the reader allows motion.
  */
-export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'auto', title = 'Diagram', description, modes = 'shared' }: DiagramModesProps) {
+export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'auto', title = 'Diagram', description, modes = 'shared', showTitle = false }: DiagramModesProps) {
   const rawId = useId().replace(/:/g, '');
   const figureRef = useRef<HTMLElement>(null);
   const [mode, setMode] = useDiagramMode();
@@ -119,15 +121,18 @@ export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'a
   const label = { simple: 'Simple', detailed: 'Detailed' } as const;
   return (
     <figure className="ve-diagram-shell ve-diagram-has-mobile ve-diagram-modes" data-ve-diagram-modes data-ve-mode={mode} data-ve-shown-variant={variant} ref={figureRef}>
-      <fieldset className="ve-diagram-mode-switch">
-        <legend><span className="ve-visually-hidden">{title}: </span>View</legend>
-        {(['simple', 'detailed'] as const).map((option) => (
-          <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
-            <input checked={mode === option} name={`ve-diagram-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
-            <span>{label[option]}</span>
-          </label>
-        ))}
-      </fieldset>
+      <div className="ve-figure-head">
+        {showTitle ? <p className="ve-figure-title">{title}</p> : null}
+        <fieldset className="ve-diagram-mode-switch">
+          <legend>{title}: view</legend>
+          {(['simple', 'detailed'] as const).map((option) => (
+            <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
+              <input checked={mode === option} name={`ve-diagram-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
+              <span>{label[option]}</span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
       {variant === 'desktop' ? (
         <div aria-label={`${title}, ${label[mode].toLowerCase()} view, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" key={`desktop-${mode}`} role="region" tabIndex={0}>
           <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={`${rawId}-${mode}`} style={fittedCanvasStyle(diagram.viewBox)} />

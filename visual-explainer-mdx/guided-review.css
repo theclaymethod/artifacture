@@ -672,6 +672,10 @@ html[data-ve-js] [data-ve-nojs-only] {
   padding-block: var(--ve-space-3);
 }
 
+.ve-review-item > .ve-disclosure > .ve-disclosure-summary > :is(.ve-disclosure-caret, .ve-disclosure-meta) {
+  margin-top: 0.6rem;
+}
+
 .ve-review-summary {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -694,8 +698,7 @@ html[data-ve-js] [data-ve-nojs-only] {
 
 .ve-review-item[data-ve-blocks="true"] .ve-review-n {
   border-color: var(--ve-status-err);
-  background: var(--ve-status-err);
-  color: var(--ve-bg);
+  color: var(--ve-status-err);
 }
 
 .ve-review-title {
@@ -726,12 +729,8 @@ html[data-ve-js] [data-ve-nojs-only] {
 .ve-review-todo {
   display: inline-flex;
   align-items: center;
-  padding: 0.0625rem var(--ve-space-2);
-  border: 1px dashed var(--ve-rule);
-  border-radius: 999px;
   color: var(--ve-muted);
-  font-size: 0.8125rem;
-  font-weight: var(--ve-weight-strong);
+  font-size: var(--ve-text-small);
 }
 
 html:not([data-ve-js]) .ve-review-todo {
@@ -914,21 +913,53 @@ html:not([data-ve-js]) .ve-review-todo {
 }
 
 .ve-change-toc-flags {
-  color: var(--ve-status-warn);
+  color: var(--ve-muted);
   font-size: var(--ve-text-small);
-  font-weight: var(--ve-weight-strong);
 }
 
-[data-ve-trust="spine"] > .ve-change-chapter {
-  margin-top: var(--ve-space-8);
-  padding-top: var(--ve-space-5);
-  border-top: 1px solid var(--ve-rule);
+/* The chapters of the change: a run of openers, the first one open. */
+.ve-change-chapters {
+  margin-top: var(--ve-space-7);
 }
 
-.ve-change-chapter {
+.ve-change-chapters > .ve-change-chapter + .ve-change-chapter {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-change-summary {
+  display: grid;
+  gap: var(--ve-space-1);
+  min-width: 0;
+}
+
+.ve-change-title {
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-body)/1.35 var(--ve-font-ui);
+}
+
+.ve-change-line {
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-small) var(--ve-font-ui);
+}
+
+.ve-change-chapter > .ve-disclosure > .ve-disclosure-summary {
+  align-items: start;
+  padding-block: var(--ve-space-4);
+}
+
+.ve-change-chapter > .ve-disclosure > .ve-disclosure-summary :is(.ve-disclosure-caret, .ve-disclosure-meta) {
+  margin-top: 0.4rem;
+}
+
+.ve-change-grid {
   display: grid;
   gap: var(--ve-space-5);
   grid-template-columns: minmax(0, 1fr);
+  padding-top: var(--ve-space-2);
+}
+
+.ve-change-grid > .ve-spine-meta {
+  margin: 0;
 }
 
 .ve-change-chapter > h3,
@@ -947,7 +978,7 @@ html:not([data-ve-js]) .ve-review-todo {
 }
 
 @media (min-width: 1024px) {
-  .ve-change-head,
+  .ve-change-grid > .ve-spine-meta,
   .ve-change-diagrams {
     grid-column: 1 / -1;
   }
@@ -977,7 +1008,7 @@ html:not([data-ve-js]) .ve-review-todo {
 }
 
 @media (min-width: 1024px) {
-  .ve-change-chapter:not([data-ve-tier="tests"]):not([data-ve-tier="generated"]) {
+  .ve-change-grid {
     grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.4fr);
     gap: var(--ve-space-6);
   }

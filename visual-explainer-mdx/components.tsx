@@ -2,6 +2,7 @@ import React, { Children, isValidElement, useCallback, useContext, useEffect, us
 import { ChapterRail, chapterSlug, ShellContext, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance, type ReadMode, type ShellState } from './explainer-nav';
 import { wrapWords } from './diagram-layout';
 import { scrollToTarget } from './content-blocks';
+import { ChapterContext } from './chapter-context';
 import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
 export { DiagramCanvas } from './diagram-canvas';
 export { DataTable, StatusPill, Badge, Legend } from './data-table';
@@ -376,7 +377,7 @@ export function Section({ title, id, aliases, children }: SectionProps) {
         <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]" id={`${sectionId}-title`} tabIndex={-1}>{title}</h2>
       </div>
       <div className="ve-section-body min-w-0">
-        {children}
+        <ChapterContext.Provider value={sectionId}>{children}</ChapterContext.Provider>
         {shell && at >= 0 ? (
           <nav aria-label="Chapters" className="ve-pager" data-ve-pager>
             {prev ? <a className="ve-pager-link" data-ve-pager-prev href={`#${prev.id}`} rel="prev"><span className="ve-pager-key"><PagerArrow back />Previous</span><span>{prev.label}</span></a> : <span />}

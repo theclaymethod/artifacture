@@ -553,6 +553,73 @@ for (const scheme of ['light', 'dark']) {
   });
 }
 
+test('guided review: embedded type, quiet glossary marks, the reading measure and the chapters of the change as openers', async () => {
+  // A hand-written mark on an everyday word fails the export.
+  const plain = await exportTrustCase(path.join(workDir, 'plain-term'), (dir) => {
+    const mdx = path.join(dir, 'explainer.mdx');
+    const text = readFileSync(mdx, 'utf8').replace('Glossary, Glossed,', 'Glossary, Glossed, Term,').replace('A planted bug proves the overdraft rule.', 'A planted bug proves the overdraft rule in the <Term definition="the files of one document">draft</Term>.');
+    writeFileSync(mdx, text);
+  });
+  assert.notEqual(plain.status, 0);
+  assert.match(plain.out, /the everyday words draft are marked as glossary terms/);
+
+  // The page embeds its fonts and asks no font service for anything.
+  const html = readFileSync(trust.html, 'utf8');
+  assert.ok(!html.includes('fonts.googleapis.com') && !html.includes('fonts.gstatic.com'), 'the explainer still loads a font service');
+  assert.match(html, /<style data-ve-explainer-type="\w+">/);
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
+  try {
+    const page = await context.newPage();
+    const remote = [];
+    page.on('request', (r) => { if (!/^(file|data):/.test(r.url())) remote.push(r.url()); });
+    await page.goto(pathToFileURL(trust.html).href + '#ch-1', { waitUntil: 'load' });
+    await page.evaluate(() => document.fonts.ready);
+    assert.deepEqual(remote, [], 'the page made a network request');
+    const type = await page.evaluate(() => ({
+      prose: getComputedStyle(document.querySelector('#ch-1 .ve-definition-list > dd')).fontFamily,
+      ui: getComputedStyle(document.querySelector('.ve-chapter-rail') ?? document.body).fontFamily,
+      loaded: [...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family.replace(/"/g, '')),
+      ink: getComputedStyle(document.querySelector('main')).color,
+    }));
+    const prose = type.prose.split(',')[0].replace(/"/g, '').trim();
+    const ui = type.ui.split(',')[0].replace(/"/g, '').trim();
+    assert.notEqual(prose, ui, 'prose and rows share one face');
+    for (const face of [prose, ui]) assert.ok(type.loaded.includes(face), `${face} did not load: ${type.loaded}`);
+    assert.notEqual(type.ink, 'rgb(255, 255, 255)', 'dark mode uses pure white text');
+
+    // Each chapter marks a term once, and few terms; the definition list keeps the reading measure.
+    const marks = await page.$$eval('section.ve-section[id]', (sections) => sections.map((s) => [...s.querySelectorAll('.ve-term')].map((t) => t.firstChild.textContent.toLowerCase())));
+    for (const words of marks) {
+      assert.ok(words.length <= 8, `a chapter marks ${words.length} terms`);
+      assert.equal(new Set(words).size, words.length, `a chapter marks a term twice: ${words}`);
+    }
+    const perLine = await page.$eval('#ch-1 .ve-definition-list', (dl) => {
+      const r = document.createRange(); const tops = new Map();
+      for (const dd of dl.querySelectorAll('dd')) {
+        const w = document.createTreeWalker(dd, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          if (n.parentElement.closest('[role="tooltip"]')) continue;
+          for (let i = 0; i < n.length; i += 1) { r.setStart(n, i); r.setEnd(n, i + 1); const box = r.getClientRects()[0]; if (box) tops.set(Math.round(box.top), (tops.get(Math.round(box.top)) ?? 0) + 1); }
+        }
+      }
+      return Math.max(...tops.values());
+    });
+    assert.ok(perLine <= 72, `a definition line has ${perLine} characters`);
+
+    // What changed: the first chapter of the change is open, the others are closed openers with their counts; a link opens one.
+    await page.goto(pathToFileURL(trust.html).href + '#ch-3', { waitUntil: 'load' });
+    const chapters = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all.map((d) => [d.open, d.querySelector('.ve-disclosure-meta')?.textContent ?? '']));
+    assert.ok(chapters.length >= 2);
+    assert.deepEqual(chapters.map(([open]) => open), chapters.map((_, i) => i === 0));
+    for (const [, meta] of chapters) assert.match(meta, /^\d+ files?/);
+    const second = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all[1].id);
+    await page.goto(pathToFileURL(trust.html).href + '#' + second, { waitUntil: 'load' });
+    await page.waitForFunction((id) => document.getElementById(id)?.open, second);
+  } finally {
+    await context.close();
+  }
+});
+
 test('the trust-map PR-body section comes from the same rules as the page', async () => {
   const old = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {

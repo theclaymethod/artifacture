@@ -45,15 +45,18 @@ export function StationFlow({ simple, detailed, title, description }: StationFlo
   const label = { simple: 'Simple', detailed: 'Detailed' } as const;
   return (
     <figure aria-label={title} className="ve-diagram-modes ve-stations" data-ve-diagram-modes data-ve-mode={mode} data-ve-stations>
-      <fieldset className="ve-diagram-mode-switch">
-        <legend><span className="ve-visually-hidden">{title}: </span>View</legend>
-        {(['simple', 'detailed'] as const).map((option) => (
-          <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
-            <input checked={mode === option} name={`ve-stations-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
-            <span>{label[option]}</span>
-          </label>
-        ))}
-      </fieldset>
+      <div className="ve-figure-head">
+        <p className="ve-figure-title">{title}</p>
+        <fieldset className="ve-diagram-mode-switch">
+          <legend>{title}: view</legend>
+          {(['simple', 'detailed'] as const).map((option) => (
+            <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
+              <input checked={mode === option} name={`ve-stations-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
+              <span>{label[option]}</span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
       <div className="ve-stations-track" style={{ gridTemplateColumns: `${'minmax(0, 1fr) 1.25rem '.repeat(nodes.length - 1)}minmax(0, 1fr)` }}>
         <ol className="ve-stations-row">
           {nodes.map((n, i) => {

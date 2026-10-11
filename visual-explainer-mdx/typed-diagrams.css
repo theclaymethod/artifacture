@@ -20,9 +20,13 @@
   gap: var(--ve-space-1);
 }
 
+.ve-typed > figcaption > .ve-figure-head {
+  margin: 0;
+}
+
 .ve-typed-title {
   color: var(--ve-heading);
-  font-weight: var(--ve-weight-strong);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-typed-caption {
@@ -34,7 +38,7 @@
 .ve-typed-switches {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ve-space-2) var(--ve-space-5);
+  gap: var(--ve-space-2);
 }
 
 .ve-typed-body {

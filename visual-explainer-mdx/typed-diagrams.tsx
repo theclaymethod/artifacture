@@ -486,7 +486,7 @@ function Switch<T extends string>({ title, legend, value, options, onChange }: {
   const id = `ve-typed-${useId().replace(/:/g, '')}`;
   return (
     <fieldset className="ve-diagram-mode-switch ve-typed-switch">
-      <legend><span className="ve-visually-hidden">{title}: </span>{legend}</legend>
+      <legend>{title}: {legend.toLowerCase()}</legend>
       {options.map(([v, label]) => (
         <label data-ve-checked={value === v ? 'true' : undefined} key={v}>
           <input checked={value === v} name={id} onChange={() => onChange(v)} type="radio" value={v} />
@@ -529,15 +529,17 @@ export function TypedDiagram({ spec, name: fallback, chapters = {} }: { spec: Ty
   return (
     <figure className="ve-typed" data-ve-typed={spec.kind} data-ve-view={view}>
       <figcaption>
-        <span className="ve-typed-title">{title}</span>
+        <span className="ve-figure-head">
+          <span className="ve-typed-title">{title}</span>
+          {changes || coded ? (
+            <span className="ve-typed-switches">
+              {changes ? <Switch legend="Show" onChange={setView} options={[['before', 'Before the PR'], ['after', 'After the PR']]} title={title} value={view} /> : null}
+              {coded ? <Switch legend="View" onChange={setMode} options={[['simple', 'Simple'], ['detailed', 'Detailed']]} title={title} value={mode} /> : null}
+            </span>
+          ) : null}
+        </span>
         {spec.caption ? <span className="ve-typed-caption">{spec.caption}</span> : null}
       </figcaption>
-      {changes || coded ? (
-        <div className="ve-typed-switches">
-          {changes ? <Switch legend="Show" onChange={setView} options={[['before', 'Before the PR'], ['after', 'After the PR']]} title={title} value={view} /> : null}
-          {coded ? <Switch legend="View" onChange={setMode} options={[['simple', 'Simple'], ['detailed', 'Detailed']]} title={title} value={mode} /> : null}
-        </div>
-      ) : null}
       <div aria-label={`${title}, scroll to see all of it`} className="ve-typed-body" role="region" tabIndex={0}>{figure}</div>
       <div className="ve-typed-text">{textList(spec, c)}</div>
       {used.has('added') || used.has('changed') || used.has('removed') ? (

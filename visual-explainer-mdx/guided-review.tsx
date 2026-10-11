@@ -10,7 +10,7 @@ import { useExplainerShell } from './explainer-nav';
 import { CodeBlock } from './code-blocks';
 import { Disclosure, Subsection } from './content-blocks';
 import { StatusPill, ToneMark, type StatusTone } from './data-table';
-import { ArchitectureDiagram, BarCard, BrowserVideo, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, controlEdits, CountMarks, Defs, MarkKey, maybeRef, Rich, risksOf, termState, VerdictLegend, VerdictPill, VerifierTable } from './trust-map';
+import { ArchitectureDiagram, BarCard, BrowserVideo, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, controlEdits, CountMarks, Defs, MarkKey, maybeRef, Rich, risksOf, useTerms, VerdictLegend, VerdictPill, VerifierTable } from './trust-map';
 import { TypedDiagram, type TypedDiagramSpec } from './typed-diagrams';
 import {
   assertAreas, assertRefs, assertTrustMap, capital, changeDiagram, claimAnchor, claimLabel, claimOf, derivedClaim, MERGE_WORDS, promiseAnchor, promiseRows,
@@ -143,7 +143,7 @@ export function ReviewStart({ data, refs, start = '#ch-1', checklist = '#ch-7' }
   assertRefs(assertTrustMap(data), refs);
   const shell = useExplainerShell();
   const { word, tone, what, split, items, form } = mergeLine(refs);
-  const terms = termState(data);
+  const terms = useTerms(data);
   return (
     <div data-ve-trust="start">
       <div className="ve-verdict ve-review-state" data-ve-tone={tone} id="merge">
@@ -319,8 +319,15 @@ function typedSpec(explain: Explain, name: string): TypedDiagramSpec {
   return spec as TypedDiagramSpec;
 }
 
-/** One chapter of the change: the idea on the left (sticky from 1024px), its diagrams and files on the right. */
-function ChangeChapterBlock({ data, refs, explain = {}, g, first }: All & { g: SpineGroup; first: SpineFile[] }) {
+/** The first sentence of a paragraph: the one-line summary of a closed chapter. */
+const firstSentence = (text = '') => /^.*?[.!?](?=\s|$)/.exec(text.trim())?.[0] ?? text.trim();
+
+/**
+ * One chapter of the change, as an opener: closed, it shows its title, its first sentence and its
+ * file and flag counts; open, the idea on the left (sticky from 1024px), its diagrams and files on
+ * the right. Only the first chapter starts open; a link into a chapter opens it.
+ */
+function ChangeChapterBlock({ data, refs, explain = {}, g, first, open = false }: All & { g: SpineGroup; first: SpineFile[]; open?: boolean }) {
   const chapter = (explain.change?.chapters ?? []).find((c) => c.id === g.id);
   const titles = Object.fromEntries((explain.change?.chapters ?? []).map((c) => [c.id, c.title]));
   const flags = g.files.flatMap((f) => f.flags ?? []);
@@ -330,7 +337,7 @@ function ChangeChapterBlock({ data, refs, explain = {}, g, first }: All & { g: S
   const rest = g.files.filter((f) => !cards.includes(f));
   const visible = cards.length ? [] : rest.slice(0, VISIBLE_ROWS);
   const hidden = rest.slice(visible.length);
-  const terms = termState(data);
+  const terms = useTerms(data);
   if (g.tier === 'tests' || g.tier === 'generated') {
     return (
       <section className="ve-change-chapter" data-ve-change-chapter={g.id} data-ve-tier={g.tier} id={chapterAnchor(g.id)}>
@@ -345,12 +352,18 @@ function ChangeChapterBlock({ data, refs, explain = {}, g, first }: All & { g: S
       </section>
     );
   }
+  const summary = (
+    <span className="ve-change-summary">
+      <span className="ve-change-title">{g.name}</span>
+      {g.explain?.length ? <span className="ve-change-line">{firstSentence(g.explain[0])}</span> : null}
+    </span>
+  );
+  const counts = `${g.files.length} ${g.files.length === 1 ? 'file' : 'files'}${flags.length ? ` · ${flags.length} ${flags.length === 1 ? 'flag' : 'flags'}` : ''}`;
   return (
-    <section className="ve-change-chapter" data-ve-change-chapter={g.id} data-ve-tier={g.tier} id={chapterAnchor(g.id)}>
-      <header className="ve-change-head">
-        <h3 className="ve-subsection-title">{g.name}</h3>
-        <p className="ve-spine-meta">{g.files.length} {g.files.length === 1 ? 'file' : 'files'} · <Churn added={g.added} removed={g.removed} />{g.unclaimed ? ` · ${g.unclaimed} with no claim` : ''}</p>
-      </header>
+    <div className="ve-change-chapter" data-ve-change-chapter={g.id} data-ve-tier={g.tier}>
+      <Disclosure id={chapterAnchor(g.id)} meta={counts} open={open} summary={summary}>
+      <div className="ve-change-grid">
+      <p className="ve-spine-meta"><Churn added={g.added} removed={g.removed} />{g.unclaimed ? ` · ${g.unclaimed} with no claim` : ''}</p>
       {chapter?.diagrams?.length ? <div className="ve-change-diagrams">{chapter.diagrams.map((d) => <TypedDiagram chapters={titles} key={d} name={d} spec={typedSpec(explain, d)} />)}</div> : null}
       <div className="ve-change-side">
         {(g.explain ?? []).map((p, i) => <p className="ve-change-explain" key={i}><Rich terms={terms} text={p} /></p>)}
@@ -373,7 +386,9 @@ function ChangeChapterBlock({ data, refs, explain = {}, g, first }: All & { g: S
           </Disclosure>
         ) : null}
       </div>
-    </section>
+      </div>
+      </Disclosure>
+    </div>
   );
 }
 
@@ -453,7 +468,9 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5' }: All & 
           <ArchitectureDiagram name="before and after (from the diff)" spec={changeDiagram(areas, refs)} />
         </Disclosure>
       ) : null}
-      {spine.groups.filter((g) => g.tier !== 'tests').map((g) => <ChangeChapterBlock data={data} explain={explain} first={first} g={g} key={g.id} refs={refs} />)}
+      <div className="ve-change-chapters">
+        {spine.groups.filter((g) => g.tier !== 'tests').map((g, i) => <ChangeChapterBlock data={data} explain={explain} first={first} g={g} key={g.id} open={i === 0} refs={refs} />)}
+      </div>
       {spine.groups.filter((g) => g.tier === 'tests').map((g) => (
         <p className="ve-spine-tests" data-ve-spine-tests key={g.id}>The PR also changes {g.files.length} test {g.files.length === 1 ? 'file' : 'files'}. They show as the checks they provide: <a href={checks}>see the checks</a>.</p>
       ))}
@@ -526,7 +543,7 @@ const pairOf = (refs: Refs): DerivedWeak | undefined => refs.derived.verify.weak
  */
 export function EvidenceGuide({ data, refs }: All) {
   assertRefs(assertTrustMap(data), refs);
-  const terms = termState(data);
+  const terms = useTerms(data);
   const rows = promiseRows(data, refs);
   const first = rows.find((r) => !STRONG.includes(r.strength)) ?? rows[0];
   const weakestClaim = first ? first.claims.find((c) => strengthOf(refs, c.id) === first.strength) ?? first.claims[0] : undefined;
@@ -791,7 +808,7 @@ function PromiseClaims({ data, refs, explain, claims, h }: All & { claims: Claim
 }
 
 function ItemEvidence({ data, refs, explain = {}, item, h }: All & { item: ReviewItem; h: Homes }) {
-  const terms = termState(data);
+  const terms = useTerms(data);
   const c = claimFor(data, item);
   const p = promiseFor(data, item);
   if (p) {
@@ -932,7 +949,7 @@ export function ReviewChecklist({ data, refs, explain = {} }: All) {
   const blocks = items.filter((i) => i.blocks);
   const accept = items.filter((i) => !i.blocks);
   const rest = promiseRows(data, refs).filter((r) => !h.promiseItem.has(r.promise.id));
-  const terms = termState(data);
+  const terms = useTerms(data);
   return (
     <div data-ve-trust="review">
       <div className="ve-review-bar">

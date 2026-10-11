@@ -637,3 +637,82 @@
     }
   }
 }
+
+/* ---- Explainer reading system ---------------------------------------------------------------
+   Outside the layers on purpose: a component that resets its own margin (a figure, a details) must
+   not undo the rhythm of the column it sits in. Every value comes from the 4px scale. */
+
+/* The reading column is a container: blocks in it adapt to its width, not the window's. */
+.ve-shell .ve-section-body {
+  container: ve-column / inline-size;
+}
+
+/* Type roles: prose in the reading face, everything else (rows, labels, controls, the rail) in
+   the UI face. Both follow the preset body face unless the page sets a pairing. */
+.ve-shell {
+  font-family: var(--ve-font-ui);
+  letter-spacing: var(--ve-ui-tracking);
+}
+
+.ve-shell :where(
+  .ve-shell-header p,
+  .ve-section-body > p,
+  .ve-section-body > :is(ul, ol):not([class]),
+  .ve-section-body > blockquote,
+  .ve-lead,
+  .ve-section-body > .ve-definition-list:not([data-ve-glossary]) > dd,
+  .ve-step > p,
+  .ve-change-explain,
+  .ve-disclosure-body > p,
+  .ve-disclosure-body > :is(ul, ol):not([class]),
+  .ve-subsection > p
+) {
+  font-family: var(--ve-font-prose);
+  font-size: var(--ve-text-prose, var(--ve-text-body));
+  letter-spacing: var(--ve-prose-tracking);
+  line-height: var(--ve-leading-body);
+}
+
+.ve-shell .ve-lead {
+  font-size: var(--ve-text-lead);
+  line-height: var(--ve-leading-lead);
+}
+
+/* Code keeps its own face inside prose. */
+.ve-shell :is(p, li, dd) code {
+  font-family: var(--ve-font-mono);
+  letter-spacing: 0;
+}
+
+/* Headings: weight and size, never capitals or tracking for emphasis. */
+.ve-shell :is(.ve-shell-header h1, .ve-section-heading h2, .ve-subsection-title, .ve-section-body h3:not([class])) {
+  font-family: var(--ve-font-display);
+  font-weight: var(--ve-weight-strong);
+  text-transform: none;
+}
+
+.ve-shell :is(.ve-subsection-title, .ve-section-body h3:not([class])) {
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+
+/* The flow of a level: 16px between blocks, 32px after the lead, 48px around a figure or a
+   stepper and before a subsection, 64px between levels (the section padding). */
+.ve-shell .ve-section-body > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-shell .ve-section-body > .ve-lead + * {
+  margin-top: var(--ve-space-6);
+}
+
+.ve-shell .ve-section-body > * + :is(figure, .ve-stepper, .ve-subsection, h3, [data-ve-trust]),
+.ve-shell .ve-section-body > :is(figure, .ve-stepper) + * {
+  margin-top: var(--ve-space-7);
+}
+
+/* A paged chapter shows alone: no rule above it, and its heading starts the page. */
+.ve-shell[data-ve-paged="pages"]:not([data-ve-page="0"]) .ve-section {
+  border-top: 0;
+  padding-top: var(--ve-space-6);
+}

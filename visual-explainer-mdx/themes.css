@@ -26,6 +26,8 @@
     --ve-text-h4: 1.0625rem;
     --ve-weight-regular: 400;
     --ve-weight-strong: 600;
+    --ve-leading-ui: 1.4;
+    --ve-label-column: 9rem;
     --ve-card-pad: clamp(1.125rem, 2.4vw, 1.5rem);
     --ve-card-radius: 12px;
     --ve-control-radius: 8px;
@@ -42,6 +44,12 @@
     --ve-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --ve-display-weight: 500;
     --ve-heading-weight: 500;
+    /* Explainer type roles. Prose and UI follow the preset body face; a trust-map explainer sets
+       its own pairing (explainer-type.mjs). */
+    --ve-font-prose: var(--ve-font-body);
+    --ve-font-ui: var(--ve-font-body);
+    --ve-prose-tracking: 0;
+    --ve-ui-tracking: 0;
     --ve-page-max: 76rem;
     --ve-section-gap: 3rem;
     --ve-radius: 12px;
@@ -563,6 +571,31 @@
     --ve-code-bg: #16171a;
     --ve-code-text: #f5f5f5;
     --ve-code-muted: #b6bac4;
+  }
+
+  /* Explainer pages in dark mode: off-white text on a lifted ground, never #fff on near-black.
+     Each text pair keeps AA on #141519: text 14.4:1, muted 7.9:1, faint 5.8:1. */
+  .ve-shell[data-ve-preset="iso"][data-ve-appearance="dark"] {
+    --ve-bg: #141519;
+    --ve-text: #e3e4e8;
+    --ve-heading: #eceef1;
+    --ve-muted: #a7abb4;
+    --ve-faint: #8d919b;
+    --ve-rule: color-mix(in srgb, var(--ve-text) 14%, transparent);
+    --ve-row: color-mix(in srgb, var(--ve-text) 4%, transparent);
+    --ve-panel: var(--ve-bg);
+    --ve-panel-strong: #1b1c21;
+    --ve-nav-bg: var(--ve-bg);
+    --ve-review-bg: var(--ve-bg);
+    --ve-diagram-bg: var(--ve-bg);
+    --ve-node-bg: var(--ve-bg);
+    --ve-diagram-ink: var(--ve-text);
+    --ve-diagram-muted: var(--ve-muted);
+    --ve-accent-soft: color-mix(in srgb, var(--ve-accent) 9%, var(--ve-bg));
+    --ve-code-bg: #1b1c21;
+    --ve-code-text: #e3e4e8;
+    --ve-code-muted: #a7abb4;
+    --ve-status-neutral-soft: color-mix(in srgb, var(--ve-text) 6%, var(--ve-bg));
   }
 
   /* Mono Color sets code on cobalt: keep its syntax monochrome and let the +/- gutter carry diffs. */

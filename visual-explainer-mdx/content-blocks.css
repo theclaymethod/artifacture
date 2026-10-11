@@ -154,22 +154,39 @@
    its glyph, so the sentence stays in body ink. */
 .ve-definition-list {
   display: grid;
-  grid-template-columns: minmax(7.5rem, max-content) minmax(0, 1fr);
-  gap: var(--ve-space-3) var(--ve-space-5);
-  max-width: calc(var(--ve-measure) + 12rem);
+  grid-template-columns: var(--ve-label-column) minmax(0, var(--ve-copy-measure, var(--ve-measure)));
+  gap: var(--ve-space-4) var(--ve-space-5);
   margin: 0;
   padding: 0;
 }
 
-.ve-definition-list[data-ve-size="lead"] {
-  gap: var(--ve-space-4) var(--ve-space-6);
-  font-size: var(--ve-text-lead);
-  line-height: var(--ve-leading-lead);
+/* The lead size gives the labels the heading ink; the sentences stay at body size, so the lead
+   above stays the one larger block. */
+.ve-definition-list[data-ve-size="lead"] > dt {
+  color: var(--ve-heading);
+}
+
+/* Below 900px of column, each label sits above its sentence. */
+@container ve-column (max-width: 56rem) {
+  .ve-definition-list,
+  .ve-definition-list[data-ve-size="lead"] {
+    grid-template-columns: minmax(0, var(--ve-copy-measure, var(--ve-measure)));
+    row-gap: 0;
+  }
+
+  .ve-definition-list > dt + dd {
+    margin-top: var(--ve-space-1);
+  }
+
+  .ve-definition-list > dd + dt {
+    margin-top: var(--ve-space-4);
+  }
 }
 
 .ve-definition-list > dt {
   color: var(--ve-heading);
   font-weight: var(--ve-weight-strong);
+  line-height: var(--ve-leading-body);
 }
 
 .ve-definition-list:not([data-ve-size]) > dt {
@@ -313,13 +330,25 @@
   display: none;
 }
 
-/* Term: a dotted underline marks a word with a definition; hover, focus or tap shows it. */
+/* Term: a faint dotted underline, set low, marks a word with a definition; hover, focus or tap
+   shows it and brings the underline to full ink. */
 .ve-term {
   position: relative;
-  text-decoration: underline dotted;
-  text-decoration-color: var(--ve-muted);
-  text-underline-offset: 0.2em;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.32em;
   cursor: help;
+}
+
+/* A one-word term (CR-33, 4H) never breaks at its hyphen. */
+.ve-term[data-ve-word] {
+  white-space: nowrap;
+}
+
+.ve-term:is(:hover, :focus-visible, [data-ve-shown="true"]) {
+  text-decoration-color: currentColor;
 }
 
 .ve-term:focus-visible {
@@ -357,11 +386,15 @@
   .ve-definition-list,
   .ve-definition-list[data-ve-size="lead"] {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--ve-space-1);
+    row-gap: 0;
+  }
+
+  .ve-definition-list > dt + dd {
+    margin-top: var(--ve-space-1);
   }
 
   .ve-definition-list > dd + dt {
-    margin-top: var(--ve-space-3);
+    margin-top: var(--ve-space-4);
   }
 }
 

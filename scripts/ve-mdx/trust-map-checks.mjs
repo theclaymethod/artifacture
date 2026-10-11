@@ -6,6 +6,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
+import { isPlainWord, MAX_TERMS_PER_CHAPTER } from '../../visual-explainer-mdx/glossary-policy.mjs';
 
 const ID = /(?<![\w-])[CVK]\d+[a-z]?(?![\w-])/;
 const ACRONYM = /(?<![\w$#.-])([0-9]*[A-Z][A-Z0-9]*(?:-[0-9A-Z]+)*)(?![\w-])/g;
@@ -80,6 +81,15 @@ export function checkTrustMapPage(markup) {
       if (token.length < 2 || STOP.has(token) || /^[CVKG]\d+[a-z]?$/.test(token) || !/[A-Z]/.test(token)) continue;
       if (!defined.has(norm(token))) missing.add(token);
     }
+  }
+  // Term marks: few per chapter, and never on an everyday word (visual-explainer-mdx/glossary-policy.mjs).
+  for (const section of body.querySelectorAll('section.ve-section[id]')) {
+    const marks = [...section.querySelectorAll('.ve-term')].map((term) => textNodes(term, '[role="tooltip"]').map((n) => n.textContent).join('').trim());
+    if (marks.length > MAX_TERMS_PER_CHAPTER) errors.push(`${section.id}: ${marks.length} glossary terms are marked (${marks.join(', ')}); a chapter marks at most ${MAX_TERMS_PER_CHAPTER}. Mark only the jargon and the abbreviations, once per chapter.`);
+    const plain = [...new Set(marks.filter((word) => isPlainWord(word)))];
+    const twice = [...new Set(marks.map(norm).filter((word, i, all) => all.indexOf(word) !== i))];
+    if (twice.length) errors.push(`${section.id}: the glossary terms ${twice.join(', ')} are marked more than once; mark a term at its first use in the chapter only.`);
+    if (plain.length) errors.push(`${section.id}: the everyday words ${plain.join(', ')} are marked as glossary terms. Leave everyday words plain.`);
   }
   if (missing.size) errors.push(`the page uses terms that the glossary does not define: ${[...missing].sort().join(', ')}. Add each to the glossary of the trust map.`);
   const verify = body.querySelector('[data-ve-trust="verifiers"]');

@@ -273,6 +273,7 @@ export function Term({ definition, expansion, children }: TermProps) {
         aria-describedby={tipId}
         className="ve-term"
         data-ve-shown={shown ? 'true' : undefined}
+        data-ve-word={typeof children === 'string' && !/\s/.test(children) ? 'true' : undefined}
         onBlur={() => setShown(false)}
         onClick={() => setShown((value) => !value)}
         onFocus={() => setShown(true)}
