@@ -55,8 +55,10 @@ function currentTarget(ids: readonly string[]) {
 
 /**
  * A persistent chapter rail: a sticky side rail on wide screens and a compact sticky top bar
- * with a disclosure list on narrow screens. Links are plain fragment anchors, so the rail works
- * without script, with the keyboard, and with reduced motion (smooth scrolling is CSS-gated).
+ * with a disclosure list on narrow screens (the list lies over the page, so opening it moves
+ * nothing). Links are plain fragment anchors, so the rail works without script and with the
+ * keyboard; every jump is instant. The rail follows the scroll quietly: it never scrolls itself
+ * or the page.
  */
 export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMode }: {
   chapters: readonly Chapter[];
@@ -73,8 +75,11 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
   const [active, setActive] = useState(chapters[0]?.id ?? '');
   const targets = chapters.flatMap((chapter) => [chapter.id, ...(chapter.anchors ?? []).map((anchor) => anchor.id)]);
   const targetKey = targets.join('\n');
+  const follow = current === undefined;
 
   useEffect(() => {
+    // A paged shell names the current chapter itself; the rail then has no scroll to follow.
+    if (!follow) return undefined;
     const ids = targetKey.split('\n').filter(Boolean);
     let frame = 0;
     const update = () => {
@@ -94,7 +99,7 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
       window.removeEventListener('resize', schedule);
       window.removeEventListener('hashchange', schedule);
     };
-  }, [targetKey]);
+  }, [targetKey, follow]);
 
   useEffect(() => {
     if (!open) return;
@@ -125,35 +130,37 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
         <span className="ve-chapter-current">{activeChapter?.label ?? label}</span>
         <span aria-hidden="true" className="ve-chapter-caret">{open ? '−' : '+'}</span>
       </button>
-      <p className="ve-chapter-heading">{label}</p>
-      <ol className="ve-chapter-list" id={listId}>
-        {chapters.map((chapter, index) => {
-          const isCurrent = chapter === activeChapter;
-          const here = current !== undefined && isCurrent;
-          return (
-            <li data-ve-current={isCurrent ? 'true' : undefined} data-ve-here={here ? 'true' : undefined} key={chapter.id}>
-              <a aria-current={here ? 'page' : current === undefined && active === chapter.id ? 'location' : undefined} href={`#${chapter.id}`} onClick={() => setOpen(false)}>
-                <span aria-hidden="true" className="ve-chapter-index">{String(index + 1).padStart(2, '0')}</span>
-                <span className="ve-chapter-label">{chapter.label}{here ? <span className="ve-chapter-here">You are here</span> : null}</span>
-              </a>
-              {chapter.anchors?.length ? (
-                <ol className="ve-chapter-anchors">
-                  {chapter.anchors.map((anchor) => (
-                    <li key={anchor.id}>
-                      <a aria-current={current === undefined && active === anchor.id ? 'location' : undefined} href={`#${anchor.id}`} onClick={() => setOpen(false)}>{anchor.label}</a>
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-      {mode && onMode ? (
-        <button className="ve-read-mode" data-ve-read-mode={mode} onClick={() => { onMode(mode === 'pages' ? 'one' : 'pages'); setOpen(false); }} type="button">
-          {mode === 'pages' ? 'Read as one page' : 'Read by chapter'}
-        </button>
-      ) : null}
+      <div className="ve-chapter-panel">
+        <p className="ve-chapter-heading">{label}</p>
+        <ol className="ve-chapter-list" id={listId}>
+          {chapters.map((chapter, index) => {
+            const isCurrent = chapter === activeChapter;
+            const here = current !== undefined && isCurrent;
+            return (
+              <li data-ve-current={isCurrent ? 'true' : undefined} data-ve-here={here ? 'true' : undefined} key={chapter.id}>
+                <a aria-current={here ? 'page' : current === undefined && active === chapter.id ? 'location' : undefined} href={`#${chapter.id}`} onClick={() => setOpen(false)}>
+                  <span aria-hidden="true" className="ve-chapter-index">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="ve-chapter-label">{chapter.label}{here ? <span className="ve-chapter-here">You are here</span> : null}</span>
+                </a>
+                {chapter.anchors?.length ? (
+                  <ol className="ve-chapter-anchors">
+                    {chapter.anchors.map((anchor) => (
+                      <li key={anchor.id}>
+                        <a aria-current={current === undefined && active === anchor.id ? 'location' : undefined} href={`#${anchor.id}`} onClick={() => setOpen(false)}>{anchor.label}</a>
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+              </li>
+            );
+          })}
+        </ol>
+        {mode && onMode ? (
+          <button className="ve-read-mode" data-ve-read-mode={mode} onClick={() => { onMode(mode === 'pages' ? 'one' : 'pages'); setOpen(false); }} type="button">
+            {mode === 'pages' ? 'Read as one page' : 'Read by chapter'}
+          </button>
+        ) : null}
+      </div>
     </nav>
   );
 }

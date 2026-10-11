@@ -1,7 +1,8 @@
 import React, { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChapterRail, chapterSlug, ShellContext, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance, type ReadMode, type ShellState } from './explainer-nav';
 import { wrapWords } from './diagram-layout';
-import { scrollToTarget } from './content-blocks';
+import { flushSync } from 'react-dom';
+import { installCalmScroll, keepInPlace, landOn } from './calm-scroll';
 import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
 export { DiagramCanvas } from './diagram-canvas';
 export { DataTable, StatusPill, Badge, Legend } from './data-table';
@@ -285,32 +286,53 @@ export function ExplainerShell({
   const [current, setCurrent] = useState(chapters[0]?.id ?? '');
   const chapterIds = chapters.map((c) => c.id).join('\n');
   const setMode = useCallback((next: ReadMode) => {
-    setModeState(next);
+    // The reader keeps their place: the chapter at the reading line stays where it is on the
+    // screen, and reading by chapter opens that chapter.
+    const shown = [...document.querySelectorAll<HTMLElement>('section.ve-section[id]:not([hidden])')];
+    const line = window.innerHeight * 0.32;
+    const here = shown.filter((section) => section.getBoundingClientRect().top <= line).at(-1) ?? shown[0];
+    const top = here?.getBoundingClientRect().top ?? 0;
+    flushSync(() => {
+      if (here && next === 'pages') setCurrent(here.id);
+      setModeState(next);
+    });
+    if (here) {
+      const drift = here.getBoundingClientRect().top - top;
+      if (Math.abs(drift) >= 1) window.scrollBy({ top: drift, behavior: 'instant' });
+      // The chapters that now show measure their figures in the next frames: hold the place through them.
+      keepInPlace(here);
+      const target = hashTarget();
+      if (next === 'pages' && !(target && here.contains(target))) window.history.replaceState(window.history.state, '', `#${here.id}`);
+    }
     try { window.localStorage.setItem(modeKey(), next); } catch { /* storage can be off: the mode lasts for this view */ }
   }, []);
   useEffect(() => {
+    installCalmScroll();
     const ids = chapterIds.split('\n');
-    const land = (focus: boolean) => {
+    // On load the chapter shows with the hydrated page; in the page it shows at once, in the same
+    // task as the jump, so no frame paints the new chapter at the old scroll position.
+    const land = (initial: boolean) => {
       const target = hashTarget();
       const section = target?.closest<HTMLElement>('section.ve-section') ?? null;
-      if (paged && section && ids.includes(section.id)) setCurrent(section.id);
-      else if (paged && !target) setCurrent(ids[0] ?? '');
-      // A page renders after load, so the browser's own jump to the fragment found nothing, or a
-      // hidden chapter: land it once the chapter shows. A Disclosure lands the fragments inside it.
-      if (target && !target.closest('details')) {
-        requestAnimationFrame(() => {
-          scrollToTarget(target);
-          if (focus && target === section) section.querySelector<HTMLElement>('.ve-section-heading h2')?.focus({ preventScroll: true });
-        });
+      const show = (id: string) => (initial ? setCurrent(id) : flushSync(() => setCurrent(id)));
+      if (paged && section && ids.includes(section.id)) show(section.id);
+      else if (paged && !target) show(ids[0] ?? '');
+      if (!target) {
+        if (paged && !initial) window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
       }
+      // The browser's own jump found a hidden chapter, or a page that was not yet rendered: land
+      // the target once, on load when the layout has settled, in the page at once.
+      landOn(target, initial ? 'load' : 'now');
+      if (!initial && target === section) section.querySelector<HTMLElement>('.ve-section-heading h2')?.focus({ preventScroll: true });
     };
     if (paged) {
       setModeState(readMode());
       setLive(true);
     }
-    land(false);
+    land(true);
     if (!paged) return undefined;
-    const onHash = () => land(true);
+    const onHash = () => land(false);
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, [paged, chapterIds]);
@@ -335,6 +357,7 @@ export function ExplainerShell({
       <main
         className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}${hasChapters ? ' ve-has-chapters' : ''}`}
         data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
+        data-ve-live={paged && live ? 'true' : undefined}
         data-ve-page={pages ? String(index) : undefined}
         data-ve-paged={paged ? (pages ? 'pages' : 'one') : undefined}
         data-ve-preset={preset}
@@ -377,13 +400,13 @@ export function Section({ title, id, aliases, children }: SectionProps) {
       </div>
       <div className="ve-section-body min-w-0">
         {children}
-        {shell && at >= 0 ? (
-          <nav aria-label="Chapters" className="ve-pager" data-ve-pager>
-            {prev ? <a className="ve-pager-link" data-ve-pager-prev href={`#${prev.id}`} rel="prev"><span className="ve-pager-key"><PagerArrow back />Previous</span><span>{prev.label}</span></a> : <span />}
-            {next ? <a className="ve-pager-link" data-ve-pager-next href={`#${next.id}`} rel="next"><span className="ve-pager-key">Next<PagerArrow /></span><span>{next.label}</span></a> : null}
-          </nav>
-        ) : null}
       </div>
+      {shell && at >= 0 ? (
+        <nav aria-label="Chapters" className="ve-pager" data-ve-pager>
+          {prev ? <a className="ve-pager-link" data-ve-pager-prev href={`#${prev.id}`} rel="prev"><span className="ve-pager-key"><PagerArrow back />Previous</span><span className="ve-pager-label">{prev.label}</span></a> : <span />}
+          {next ? <a className="ve-pager-link" data-ve-pager-next href={`#${next.id}`} rel="next"><span className="ve-pager-key">Next<PagerArrow /></span><span className="ve-pager-label">{next.label}</span></a> : null}
+        </nav>
+      ) : null}
     </section>
   );
 }

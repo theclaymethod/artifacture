@@ -1,6 +1,7 @@
 import { Children, cloneElement, createContext, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { StatusPill, type StatusTone } from './data-table';
 import type React from 'react';
+import { installCalmScroll, landOn } from './calm-scroll';
 import './content-blocks.css';
 
 export type PipelineProps = {
@@ -99,26 +100,6 @@ function writeOpen(id: string, open: boolean) {
   }
 }
 
-// Scroll a deep-link target under its headline, then keep it there while the page above it
-// settles (diagrams and fonts change height after load). Any reader input stops the correction.
-let settling: (() => void) | null = null;
-export function scrollToTarget(target: HTMLElement) {
-  settling?.();
-  // A jump, not a smooth scroll: the correction below would restart a smooth scroll on each resize.
-  const place = () => target.scrollIntoView({ block: 'start', behavior: 'instant' });
-  requestAnimationFrame(place);
-  const observer = new ResizeObserver(place);
-  observer.observe(document.body);
-  const stop = () => {
-    observer.disconnect();
-    for (const name of ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const) window.removeEventListener(name, stop);
-    if (settling === stop) settling = null;
-  };
-  for (const name of ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const) window.addEventListener(name, stop, { passive: true });
-  window.setTimeout(stop, 1500);
-  settling = stop;
-}
-
 function currentHash() {
   try {
     return decodeURIComponent(window.location.hash.slice(1));
@@ -130,7 +111,8 @@ function currentHash() {
 /**
  * A native details block for detail that waits until the reader asks for it. The summary row is
  * a 44px target. A fragment link to the block, or to an element inside it, opens it (and each
- * enclosing Disclosure) and scrolls the target under its headline. Opening a block with an id
+ * enclosing Disclosure, and no other) and scrolls the target under its headline once. Opening or
+ * closing a block keeps its summary where it is on the screen. Opening a block with an id
  * writes its fragment to the address, so the address is a link to it, and the page keeps the
  * open blocks for the session.
  */
@@ -140,7 +122,10 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
   const quiet = useRef(false);
   const [rendered, setRendered] = useState(!lazy || open);
   const containsKey = (contains ?? []).join('\n');
+  // A link to an id in the body of a lazy block: the target exists once the body renders.
+  const awaiting = useRef<boolean | null>(null);
   useEffect(() => {
+    installCalmScroll();
     const element = ref.current;
     if (!element) return;
     if (id && readOpen().has(id) && !element.open) {
@@ -148,7 +133,7 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
       quiet.current = true;
       element.open = true;
     }
-    const reveal = () => {
+    const reveal = (initial: boolean) => {
       const hash = currentHash();
       if (!hash) return;
       const target = document.getElementById(hash);
@@ -159,13 +144,22 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
         quiet.current = true;
         element.open = true;
       }
-      // The innermost block scrolls once every enclosing block is open.
-      if (target && (target === element || target.closest('details') === element)) scrollToTarget(target);
+      // Every enclosing block asks for the same landing; it scrolls once, after they are all open.
+      if (target) landOn(target, initial ? 'load' : 'frame');
+      else awaiting.current = initial;
     };
-    reveal();
-    window.addEventListener('hashchange', reveal);
-    return () => window.removeEventListener('hashchange', reveal);
-  }, [id, containsKey, rendered]);
+    reveal(true);
+    const onHash = () => reveal(false);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [id, containsKey]);
+  useEffect(() => {
+    if (!rendered || awaiting.current === null) return;
+    const initial = awaiting.current;
+    awaiting.current = null;
+    const target = document.getElementById(currentHash());
+    if (target && ref.current?.contains(target)) landOn(target, initial ? 'load' : 'frame');
+  }, [rendered]);
   const onToggle = (event: SyntheticEvent<HTMLDetailsElement>) => {
     const element = ref.current;
     // React passes a nested block's toggle up the tree; each block handles only its own.
@@ -177,9 +171,14 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
       quiet.current = false;
       return;
     }
-    // The address follows the reader: an open block is the link to share; a closed one hands it back to its parent.
-    if (element.open && currentHash() !== id) window.history.replaceState(window.history.state, '', `#${id}`);
-    if (!element.open && currentHash() === id) {
+    // The address follows the reader: an open block is the link to share; a closed one hands it
+    // back to its parent. A block that opens around the address's target (the browser opens the
+    // blocks around a fragment before the page runs) keeps the address on that target.
+    const hash = currentHash();
+    const target = hash ? document.getElementById(hash) : null;
+    const holds = Boolean(target && element.contains(target));
+    if (element.open && hash !== id && !holds) window.history.replaceState(window.history.state, '', `#${id}`);
+    if (!element.open && holds) {
       const parent = element.parentElement?.closest<HTMLElement>('details[id], section[id]');
       window.history.replaceState(window.history.state, '', parent ? `#${parent.id}` : window.location.pathname + window.location.search);
     }
