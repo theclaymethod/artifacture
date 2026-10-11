@@ -1,9 +1,41 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Fira+Code:wght@400;600&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&family=STIX+Two+Math&display=swap");
 
 @layer base {
+  /* The reading system of explainer pages: one spacing scale on a 4px base, a reading measure and
+     a type scale with two weights. Components take every gap, pad and size from these tokens. */
   :root,
   [data-ve-preset] {
-    --ve-shell-title-size: clamp(2.25rem, 9.6vw, 4.5rem);
+    --ve-space-1: 0.25rem;
+    --ve-space-2: 0.5rem;
+    --ve-space-3: 0.75rem;
+    --ve-space-4: 1rem;
+    --ve-space-5: 1.5rem;
+    --ve-space-6: 2rem;
+    --ve-space-7: 3rem;
+    --ve-space-8: 4rem;
+    --ve-space-9: 6rem;
+    --ve-measure: 54ch;
+    --ve-text-body: 1.0625rem;
+    --ve-leading-body: 1.6;
+    --ve-text-lead: 1.1875rem;
+    --ve-leading-lead: 1.55;
+    --ve-text-small: 0.875rem;
+    --ve-leading-small: 1.5;
+    --ve-text-h2: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
+    --ve-text-h3: 1.375rem;
+    --ve-text-h4: 1.0625rem;
+    --ve-weight-regular: 400;
+    --ve-weight-strong: 600;
+    --ve-card-pad: clamp(1.125rem, 2.4vw, 1.5rem);
+    --ve-card-radius: 12px;
+    --ve-control-radius: 8px;
+  }
+
+  :root,
+  [data-ve-preset] {
+    --ve-shell-title-size: clamp(1.875rem, 1.25rem + 2vw, 2.5rem);
+    --ve-shell-title-measure: 28ch;
+    --ve-shell-title-leading: 1.1;
     --ve-shell-summary-size: 1.125rem;
     --ve-font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
     --ve-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -129,7 +161,6 @@
   }
 
   [data-ve-preset="algebrica"] {
-    --ve-shell-title-size: clamp(2.25rem, 4.5vw, 3.5rem);
     --ve-shell-title-measure: 24ch;
     --ve-shell-summary-size: 1.25rem;
     --ve-font-display: "EB Garamond", Georgia, serif;
@@ -474,6 +505,98 @@
       --ve-illustration-ink: var(--ve-surface-ink);
       --ve-illustration-muted: color-mix(in srgb, var(--ve-surface-ink) 60%, var(--ve-surface));
     }
+  }
+
+  /* State ramp. One tone per factual state, each with an AA ink and a soft fill.
+     Components pair every tone with a text label, a glyph or a line style; color is never the
+     only cue. Syntax and diff roles color code on the code surface. */
+  :root,
+  [data-ve-preset] {
+    --ve-accent-text: var(--ve-accent);
+    --ve-status-ok: #116b3a;
+    --ve-status-ok-soft: #e5f3ea;
+    --ve-status-info: #1f4fb5;
+    --ve-status-info-soft: #e7eefb;
+    --ve-status-warn: #8a4f00;
+    --ve-status-warn-soft: #fbefd9;
+    --ve-status-err: #b0261c;
+    --ve-status-err-soft: #fbe6e3;
+    --ve-status-neutral: var(--ve-muted);
+    --ve-status-neutral-soft: color-mix(in srgb, var(--ve-text) 6%, var(--ve-bg));
+    --ve-syntax-keyword: #d2a8ff;
+    --ve-syntax-string: #a5d6ff;
+    --ve-syntax-constant: #f2cc60;
+    --ve-syntax-function: #ffa657;
+    --ve-syntax-parameter: #ffb3a7;
+    --ve-syntax-comment: #9aa1ab;
+    --ve-syntax-punctuation: #c9d1d9;
+    --ve-code-add: #56d364;
+    --ve-code-remove: #ff8f84;
+    --ve-code-add-bg: color-mix(in srgb, var(--ve-code-add) 16%, var(--ve-code-bg));
+    --ve-code-remove-bg: color-mix(in srgb, var(--ve-code-remove) 16%, var(--ve-code-bg));
+  }
+
+  :root:not([data-ve-preset]),
+  [data-ve-preset="iso"] {
+    --ve-accent-text: #05697b;
+  }
+
+  :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="3b1b"],
+  [data-ve-preset="mono-industrial"] {
+    --ve-accent-text: #3ccae2;
+    --ve-status-ok: #5fcb8c;
+    --ve-status-ok-soft: #10281a;
+    --ve-status-info: #8db4ff;
+    --ve-status-info-soft: #132140;
+    --ve-status-warn: #eeb45c;
+    --ve-status-warn-soft: #2c210f;
+    --ve-status-err: #ff8f84;
+    --ve-status-err-soft: #361715;
+  }
+
+  /* The light code surface remaps to the page background in dark mode; keep code on a dark plate. */
+  :root:not([data-ve-preset]):is([data-ve-appearance="dark"], [data-motion-theme="dark"]),
+  [data-ve-preset="iso"]:is([data-ve-appearance="dark"], [data-motion-theme="dark"]) {
+    color-scheme: dark;
+    --ve-code-bg: #16171a;
+    --ve-code-text: #f5f5f5;
+    --ve-code-muted: #b6bac4;
+  }
+
+  /* Mono Color sets code on cobalt: keep its syntax monochrome and let the +/- gutter carry diffs. */
+  [data-ve-preset="mono-color"] {
+    --ve-syntax-keyword: var(--ve-code-text);
+    --ve-syntax-string: var(--ve-code-text);
+    --ve-syntax-constant: var(--ve-code-text);
+    --ve-syntax-function: var(--ve-code-text);
+    --ve-syntax-parameter: var(--ve-code-text);
+    --ve-syntax-comment: var(--ve-code-muted);
+    --ve-syntax-punctuation: var(--ve-code-text);
+    --ve-code-add: var(--ve-code-text);
+    --ve-code-remove: var(--ve-code-text);
+  }
+
+
+  /* Explainer pages set code on a quiet light plate in the ISO light theme, so code and
+     identifiers stay distinct without a black slab in the reading column. Decks, posters and
+     dark mode keep the dark plate. */
+  .ve-shell[data-ve-preset="iso"]:not([data-ve-appearance="dark"]) {
+    --ve-code-bg: #f6f7f9;
+    --ve-code-text: #1f2328;
+    --ve-code-muted: #57606a;
+    --ve-code-rule: color-mix(in srgb, #1f2328 12%, transparent);
+    --ve-code-accent: #05697b;
+    --ve-syntax-keyword: #8250df;
+    --ve-syntax-string: #0a3069;
+    --ve-syntax-constant: #0550ae;
+    --ve-syntax-function: #953800;
+    --ve-syntax-parameter: #0550ae;
+    --ve-syntax-comment: #57606a;
+    --ve-syntax-punctuation: #1f2328;
+    --ve-code-add: #116329;
+    --ve-code-remove: #a40e26;
   }
 
 }

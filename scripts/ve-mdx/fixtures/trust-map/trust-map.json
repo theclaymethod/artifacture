@@ -1,0 +1,726 @@
+{
+  "schema_version": 2,
+  "repo": "fixture/wallet",
+  "pr": 1,
+  "title": "Refuse overdrafts in the wallet",
+  "base": "6a569a9a223f9a0dffc8129e6e19fa0a70e7f676",
+  "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+  "author_family": "anthropic",
+  "narrative": "tests/fixture/PR.md",
+  "setup": [],
+  "claims": [
+    {
+      "id": "C01",
+      "cc_id": "no-overdraft",
+      "text": "The withdraw function refuses an amount that is more than the balance.",
+      "stated": true,
+      "source": "PR.md bullet 1 and the no-overdraft contract",
+      "layer": "Wallet core",
+      "code": [
+        {
+          "path": "wallet/core.py",
+          "symbol": "withdraw"
+        }
+      ],
+      "plain": {
+        "what": "The withdraw function stops when the amount is more than the balance. It raises OverdraftError.",
+        "proof": "A unit test (V01) calls withdraw with a large amount. We deleted the guard line, and the test went red."
+      },
+      "name": "the overdraft refusal",
+      "checks": [
+        "V01",
+        "V03"
+      ],
+      "tier": 3,
+      "verdict": "Proven",
+      "reason": "V01 went red on control K01. It is the weakest of the 2 checks."
+    },
+    {
+      "id": "C02",
+      "cc_id": null,
+      "text": "The withdraw function returns the balance minus the amount.",
+      "stated": true,
+      "source": "PR.md bullet 2",
+      "layer": "Wallet core",
+      "code": [
+        {
+          "path": "wallet/core.py",
+          "symbol": "withdraw",
+          "match": "return balance - amount"
+        }
+      ],
+      "plain": {
+        "what": "The withdraw function gives the balance minus the amount.",
+        "proof": "It is not proven. A test (V02) exists, but it checks only the type of the result. We changed the result, and the test stayed green.",
+        "warning": "The test cannot find a wrong result. Thus, it is weaker than it looks."
+      },
+      "name": "the new balance",
+      "checks": [
+        "V02"
+      ],
+      "tier": null,
+      "verdict": "Asserted",
+      "reason": "Only the PR text states this claim. V02 is cannot-fail."
+    },
+    {
+      "id": "C04",
+      "cc_id": null,
+      "text": "Many threads can call the wallet module at the same time.",
+      "stated": true,
+      "source": "PR.md bullet 3",
+      "layer": "Wallet core",
+      "plain": {
+        "what": "Many threads can use the wallet at the same time.",
+        "proof": "It is not proven. Only the PR text says it."
+      },
+      "name": "the thread safety",
+      "checks": [
+        "V09"
+      ],
+      "tier": null,
+      "verdict": "Asserted",
+      "reason": "Only the PR text states this claim."
+    },
+    {
+      "id": "C05",
+      "cc_id": null,
+      "text": "A denial message does not show the account number.",
+      "stated": true,
+      "source": "PR.md bullet 4",
+      "layer": "Messages",
+      "code": [
+        {
+          "path": "wallet/messages.py",
+          "symbol": "denial"
+        }
+      ],
+      "plain": {
+        "what": "A denial message does not show the account number.",
+        "proof": "A model reviewer (V05) read each message. This is a model opinion, not a tool check."
+      },
+      "name": "the hidden account number",
+      "checks": [
+        "V05"
+      ],
+      "tier": null,
+      "verdict": "Backed",
+      "reason": "V05 backs this claim, but the evidence is recorded, not run again."
+    },
+    {
+      "id": "C06",
+      "cc_id": null,
+      "text": "No wallet module imports a network library.",
+      "stated": true,
+      "source": "PR.md bullet 5",
+      "layer": "Messages",
+      "plain": {
+        "what": "The wallet sends nothing over the network: no wallet module imports a network library.",
+        "proof": "A grep (V06) finds no import of a network library in the wallet modules."
+      },
+      "name": "the network ban",
+      "checks": [
+        "V06"
+      ],
+      "tier": null,
+      "verdict": "Backed",
+      "reason": "V06 backs this claim, but it is a mechanical check (a grep or a line count) with no control."
+    },
+    {
+      "id": "C07",
+      "cc_id": null,
+      "text": "A denial message names the amount.",
+      "stated": true,
+      "source": "PR.md bullet 6",
+      "layer": "Messages",
+      "code": [
+        {
+          "path": "wallet/messages.py",
+          "symbol": "denial"
+        }
+      ],
+      "plain": {
+        "what": "A denial message tells the person the amount.",
+        "proof": "A unit test (V07) reads the amount in the message. We removed the amount, and the test went red."
+      },
+      "name": "the amount in the denial",
+      "checks": [
+        "V07"
+      ],
+      "tier": 1,
+      "verdict": "Proven",
+      "reason": "V07 went red on control K07."
+    },
+    {
+      "id": "C08",
+      "cc_id": null,
+      "text": "The withdraw function never returns a negative balance.",
+      "stated": true,
+      "source": "PR.md bullet 7",
+      "layer": "Wallet core",
+      "code": [
+        {
+          "path": "wallet/core.py",
+          "symbol": "withdraw",
+          "match": "if amount > balance:",
+          "context": [
+            0,
+            2
+          ]
+        }
+      ],
+      "plain": {
+        "what": "The new balance is never below zero.",
+        "proof": "A Lean proof (V08) shows it for a model of the function. A recorded conformance run shows that the model and the code agree. We removed the guard in the model, and the proof failed.",
+        "warning": "The proof run is recorded. We did not run Lean again."
+      },
+      "name": "the never-negative balance",
+      "checks": [
+        "V08"
+      ],
+      "tier": 5,
+      "verdict": "Formal",
+      "reason": "V08 is a rung 5 lean check. Its conformance link (a recorded conformance run of 200 cases through the model and the code) passes, and control K08 broke it."
+    },
+    {
+      "id": "C03",
+      "cc_id": null,
+      "stated": false,
+      "layer": "Unstated changes",
+      "text": "The change to fees.py keeps the intended behavior.",
+      "source": "scan: wallet/fees.py changed, and no test names it",
+      "code": [
+        {
+          "path": "wallet/fees.py"
+        }
+      ],
+      "plain": {
+        "what": "The new fee function adds one to each hundredth of the amount.",
+        "proof": "It is not proven. No test calls the fee function, and the PR text does not state it."
+      },
+      "name": "the fee rounding",
+      "checks": [
+        "V10"
+      ],
+      "tier": null,
+      "verdict": "Gap",
+      "reason": "No verifier backs this claim, and the PR text does not state it."
+    }
+  ],
+  "verifiers": [
+    {
+      "id": "V01",
+      "kind": "unit",
+      "claims": [
+        "C01"
+      ],
+      "tier": "fact",
+      "description": "OverdraftTest calls withdraw with an amount above the balance and expects OverdraftError.",
+      "command": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "-q",
+          "tests.test_core.OverdraftTest"
+        ],
+        "timeout_s": 60
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "unittest"
+      },
+      "cost": {
+        "usd": 0,
+        "seconds": 1
+      },
+      "provenance": "tests/test_core.py in the PR",
+      "name": "the overdraft test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:46+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      },
+      "state": "proven"
+    },
+    {
+      "id": "V02",
+      "kind": "unit",
+      "claims": [
+        "C02"
+      ],
+      "tier": "fact",
+      "description": "BalanceTest calls withdraw and expects an int.",
+      "command": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "-q",
+          "tests.test_core.BalanceTest"
+        ],
+        "timeout_s": 60
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "unittest"
+      },
+      "cost": {
+        "usd": 0,
+        "seconds": 1
+      },
+      "provenance": "tests/test_core.py in the PR",
+      "name": "the balance type test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.05,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:46+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      },
+      "state": "cannot-fail"
+    },
+    {
+      "id": "V03",
+      "kind": "contract-format",
+      "claims": [
+        "C01"
+      ],
+      "tier": "fact",
+      "description": "cc-check format reads the @cc syntax in wallet/core.py.",
+      "command": {
+        "argv": [
+          "npx",
+          "--no-install",
+          "@spolu/cc-check@0.2.0",
+          "format",
+          "wallet/core.py"
+        ],
+        "timeout_s": 120
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "cc-check"
+      },
+      "cost": {
+        "usd": 0,
+        "seconds": 2
+      },
+      "provenance": "Code Contracts cc-check 0.2.0",
+      "name": "the contract format check",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 1.12,
+        "output_tail": "",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      },
+      "state": "proven"
+    },
+    {
+      "id": "V05",
+      "kind": "model",
+      "claims": [
+        "C05"
+      ],
+      "tier": "guess",
+      "description": "A gpt reviewer read each denial message in a fresh context and looked for an account number.",
+      "recorded": {
+        "source": "PR.md bullet 4",
+        "result": "No finding. The reviewer found no account number in the denial messages.",
+        "at": "2026-10-09"
+      },
+      "independence": {
+        "by": "model",
+        "family": "openai",
+        "context": "fresh"
+      },
+      "cost": {
+        "usd": 0.01,
+        "note": "recorded, not run again"
+      },
+      "provenance": "The PR author ran the reviewer. understando recorded the result and did not run it.",
+      "name": "the message review",
+      "state": "recorded"
+    },
+    {
+      "id": "V06",
+      "kind": "boundary",
+      "claims": [
+        "C06"
+      ],
+      "tier": "fact",
+      "description": "A grep at the head looks for an import of socket, urllib or http in the wallet modules.",
+      "mechanical": {
+        "op": "grep-absent",
+        "pattern": "^[[:space:]]*(import|from)[[:space:]]+(socket|urllib|http)",
+        "paths": [
+          "wallet/"
+        ],
+        "result": {
+          "status": "pass",
+          "detail": "No match in 4 files under wallet/ at ad4d049fa9.",
+          "command": "git grep -n -E '^[[:space:]]*(import|from)[[:space:]]+(socket|urllib|http)' ad4d049fa962c81958626dc83583cf9f3b82e5eb -- wallet/ ':(exclude,glob)**/.env*'",
+          "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+          "ran_at": "2026-10-11T17:50:45+00:00"
+        }
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "git grep"
+      },
+      "cost": {
+        "usd": 0,
+        "seconds": 1
+      },
+      "provenance": "understando runs it at the PR head (scripts/mechanical.py).",
+      "name": "the network import search",
+      "state": "checked"
+    },
+    {
+      "id": "V07",
+      "kind": "unit",
+      "claims": [
+        "C07"
+      ],
+      "tier": "fact",
+      "description": "DenialTest calls denial and expects the amount in the text.",
+      "command": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "-q",
+          "tests.test_messages.DenialTest"
+        ],
+        "timeout_s": 60
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "unittest"
+      },
+      "cost": {
+        "usd": 0,
+        "seconds": 1
+      },
+      "provenance": "tests/test_messages.py in the PR",
+      "name": "the denial amount test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      },
+      "state": "proven"
+    },
+    {
+      "id": "V08",
+      "kind": "lean",
+      "ladder": 5,
+      "claims": [
+        "C08"
+      ],
+      "tier": "fact",
+      "description": "A Lean proof shows that the model of withdraw never gives a negative balance.",
+      "recorded": {
+        "source": "lake build in proofs/, run by the PR author",
+        "result": "proofs/Withdraw.lean: withdraw_nonneg checked, 0 errors.",
+        "at": "2026-10-09"
+      },
+      "formal": {
+        "tool": "lean",
+        "artifact": "proofs/Withdraw.lean",
+        "conformance": {
+          "status": "pass",
+          "source": "a recorded conformance run of 200 cases through the model and the code",
+          "detail": "The model and withdraw gave the same result for each of the 200 cases.",
+          "at": "2026-10-09"
+        }
+      },
+      "independence": {
+        "by": "tool",
+        "tool": "lean"
+      },
+      "cost": {
+        "usd": 0,
+        "note": "recorded, not run again"
+      },
+      "provenance": "The PR author ran the proof and the conformance cases. understando recorded both.",
+      "name": "the balance proof",
+      "state": "proven"
+    },
+    {
+      "id": "V09",
+      "kind": "none",
+      "claims": [
+        "C04"
+      ],
+      "tier": "guess",
+      "name": "the PR text alone",
+      "description": "No tool checks this claim. Only the PR text states it.",
+      "independence": {
+        "by": "human"
+      },
+      "cost": {
+        "usd": 0
+      },
+      "provenance": "understando map: a placeholder until a check exists (understando close).",
+      "state": "absent"
+    },
+    {
+      "id": "V10",
+      "kind": "none",
+      "claims": [
+        "C03"
+      ],
+      "tier": "guess",
+      "name": "no check yet",
+      "description": "No tool checks this claim, and the PR text does not state it.",
+      "independence": {
+        "by": "human"
+      },
+      "cost": {
+        "usd": 0
+      },
+      "provenance": "understando map: a placeholder until a check exists (understando close).",
+      "state": "absent"
+    }
+  ],
+  "controls": [
+    {
+      "id": "K01",
+      "verifier": "V01",
+      "recipe": "remove-guard-line",
+      "description": "Remove the line that raises OverdraftError.",
+      "edits": [
+        {
+          "op": "replace-with",
+          "path": "wallet/core.py",
+          "symbol": "withdraw",
+          "match": "raise OverdraftError",
+          "with": "pass",
+          "span": "statement"
+        }
+      ],
+      "expect": {
+        "status": "red",
+        "pattern": "OverdraftError not raised"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.03,
+        "matched": true,
+        "output_tail": "======================================================================\nFAIL: test_withdraw_refuses_an_overdraft (tests.test_core.OverdraftTest.test_withdraw_refuses_an_overdraft)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private<worktree>/tests/test_core.py\", line 10, in test_withdraw_refuses_an_overdraft\n    with self.assertRaises(OverdraftError):\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\nAssertionError: OverdraftError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n"
+      }
+    },
+    {
+      "id": "K02",
+      "verifier": "V02",
+      "recipe": "invert-condition",
+      "description": "Add the amount to the balance, not take it away.",
+      "edits": [
+        {
+          "op": "replace-with",
+          "path": "wallet/core.py",
+          "symbol": "withdraw",
+          "match": "/balance (-) amount/",
+          "with": "+"
+        }
+      ],
+      "expect": {
+        "status": "red",
+        "pattern": "AssertionError"
+      },
+      "result": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "matched": null,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..21b526c 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -13,3 +13,3 @@ def withdraw(balance: int, amount: int) -> int:\n     if amount > balance:\n         raise OverdraftError(f\"{amount} is above the balance\")\n-    return balance - amount\n+    return balance + amount\n"
+      }
+    },
+    {
+      "id": "K03",
+      "verifier": "V03",
+      "recipe": "plant-violation",
+      "description": "Put a colon into the contract ID, which the grammar does not permit.",
+      "edits": [
+        {
+          "op": "replace-with",
+          "path": "wallet/core.py",
+          "symbol": "withdraw",
+          "match": "no-overdraft",
+          "with": "no-over:draft"
+        }
+      ],
+      "expect": {
+        "status": "red",
+        "pattern": "Invalid @cc directive"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.65,
+        "matched": true,
+        "output_tail": "cc-check: wallet/core.py:10:5: error: Invalid @cc directive",
+        "ran_at": "2026-10-11T17:50:48+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..5f89aed 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -8,5 +8,5 @@ class OverdraftError(ValueError):\n def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n-    @cc [owner:fixture,label:product] no-overdraft\n+    @cc [owner:fixture,label:product] no-over:draft\n     `withdraw` refuses an amount above the balance with `OverdraftError`.\n     \"\"\"\n"
+      }
+    },
+    {
+      "id": "K07",
+      "verifier": "V07",
+      "recipe": "remove-guard-line",
+      "description": "Remove the amount from the denial message.",
+      "edits": [
+        {
+          "op": "replace-with",
+          "path": "wallet/messages.py",
+          "symbol": "denial",
+          "match": "/out( \\{amount\\})\\./",
+          "with": ""
+        }
+      ],
+      "expect": {
+        "status": "red",
+        "pattern": "AssertionError"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.03,
+        "matched": true,
+        "output_tail": "======================================================================\nFAIL: test_denial_names_the_amount (tests.test_messages.DenialTest.test_denial_names_the_amount)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private<worktree>/tests/test_messages.py\", line 10, in test_denial_names_the_amount\n    self.assertIn(\"250\", denial(\"ACC-1\", 250))\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: '250' not found in 'We cannot pay out. The balance is too low.'\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)",
+        "ran_at": "2026-10-11T17:50:48+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/messages.py b/wallet/messages.py\nindex 9938bb1..ec3eba5 100644\n--- a/wallet/messages.py\n+++ b/wallet/messages.py\n@@ -3,3 +3,3 @@\n \n def denial(account: str, amount: int) -> str:\n-    return f\"We cannot pay out {amount}. The balance is too low.\"\n+    return f\"We cannot pay out. The balance is too low.\"\n"
+      }
+    },
+    {
+      "id": "K08",
+      "verifier": "V08",
+      "recipe": "remove-guard-line",
+      "description": "Remove the guard from the Lean model, so a withdrawal can go below zero.",
+      "edits": [
+        {
+          "op": "replace-with",
+          "path": "proofs/Withdraw.lean",
+          "symbol": "withdraw",
+          "match": "if a > b then none else ",
+          "with": ""
+        }
+      ],
+      "expect": {
+        "status": "red",
+        "pattern": "unsolved goals|type mismatch"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "matched": true,
+        "recorded": true,
+        "output_tail": "proofs/Withdraw.lean:4:0: error: type mismatch\n  withdraw b a = some r",
+        "ran_at": "2026-10-09T12:00:00+00:00"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Overdraft",
+      "meaning": "an amount that is more than the balance."
+    },
+    {
+      "term": "Control",
+      "meaning": "a bug that we put in the code on purpose, to see if a check finds it."
+    },
+    {
+      "term": "Balance",
+      "meaning": "the amount of money in an account."
+    },
+    {
+      "term": "Lean",
+      "meaning": "a language in which a machine checks each step of a proof."
+    }
+  ],
+  "verdict_intros": {
+    "Proven": "For each claim here, a tool check went red on a planted bug.",
+    "Backed": "For each claim here, evidence exists, but no control went red.",
+    "Asserted": "For each claim here, only the PR text says it.",
+    "Gap": "For each claim here, no check exists, and the PR does not state the claim."
+  },
+  "promises": [
+    {
+      "id": "P1",
+      "label": "No overdraft",
+      "sentence": "The wallet never pays out more than the balance, and it gives the right new balance.",
+      "claims": [
+        "C01",
+        "C02",
+        "C08"
+      ],
+      "reviewer_action": "Do not trust the new balance yet: its test cannot fail. Check the subtraction yourself.",
+      "name": "the overdraft rules"
+    },
+    {
+      "id": "P2",
+      "label": "Safe with many threads",
+      "sentence": "The wallet stays correct when many threads use it.",
+      "claims": [
+        "C04"
+      ],
+      "reviewer_action": "Do not use the wallet from many threads: only the PR text says that it is safe.",
+      "name": "the thread safety"
+    },
+    {
+      "id": "P3",
+      "label": "No leaks",
+      "sentence": "A denial message names the amount and shows no account number, and the wallet sends nothing over the network.",
+      "claims": [
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "reviewer_action": "Treat the message check as one model opinion. No planted bug tested it.",
+      "name": "the private messages"
+    },
+    {
+      "id": "P4",
+      "label": "Correct fees",
+      "sentence": "Each fee is correct.",
+      "claims": [
+        "C03"
+      ],
+      "reviewer_action": "Read the fee function yourself: no test calls it, and the PR text does not mention it.",
+      "name": "the fees"
+    }
+  ],
+  "flags": [
+    {
+      "flag": "cannot-fail",
+      "subject": "V02",
+      "loud": true,
+      "detail": "V02 stayed green on control K02. It checks nothing that the control broke."
+    }
+  ],
+  "summary": {
+    "Formal": 1,
+    "Proven": 2,
+    "Backed": 2,
+    "Asserted": 2,
+    "Gap": 1
+  }
+}

@@ -1,0 +1,65 @@
+/* The Simple / Detailed switch: a labelled two-option control with 44px targets. */
+.ve-diagram-modes .ve-diagram-mode-switch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.ve-diagram-modes .ve-diagram-mode-switch legend {
+  float: left;
+  margin-right: 0.5rem;
+  padding: 0;
+  color: var(--ve-muted);
+  font-size: 0.875rem;
+  line-height: 44px;
+}
+
+.ve-diagram-modes .ve-diagram-mode-switch label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--ve-rule);
+  border-radius: 999px;
+  color: var(--ve-text);
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.ve-diagram-modes .ve-diagram-mode-switch label[data-ve-checked="true"] {
+  border-color: var(--ve-heading);
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+}
+
+.ve-diagram-modes .ve-diagram-mode-switch input {
+  position: absolute;
+  inset: -1px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ve-diagram-modes .ve-diagram-mode-switch label:has(input:focus-visible) {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ve-diagram-modes :is(.ve-diagram-variant-desktop, .ve-diagram-variant-mobile) {
+    animation: ve-diagram-mode-in 180ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+@keyframes ve-diagram-mode-in {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}

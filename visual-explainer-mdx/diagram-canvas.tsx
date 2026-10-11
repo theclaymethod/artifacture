@@ -1,13 +1,44 @@
-import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { layoutDiagram } from './diagram-layout';
 import { GraphicCanvas } from './graphics';
 import { diagramSceneFromLayout } from './diagram-scene';
 import type { DiagramCanvasProps } from './diagram-types';
+import { Legend } from './data-table';
 import './diagram-canvas.css';
 
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 
-export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
+const narrowQuery = '(max-width: 640px)';
+function subscribeNarrow(onChange: () => void) {
+  const media = window.matchMedia(narrowQuery);
+  media.addEventListener('change', onChange);
+  return () => media.removeEventListener('change', onChange);
+}
+
+/**
+ * Which variant a diagram renders: the SVG above 640px, the linked list below. Only one is in the
+ * DOM, so a page of diagrams does not pay for both. Print and static renders get the SVG.
+ */
+export function useDiagramVariant(): 'desktop' | 'mobile' {
+  const narrow = useSyncExternalStore(subscribeNarrow, () => window.matchMedia(narrowQuery).matches && !window.matchMedia('print').matches, () => false);
+  return narrow ? 'mobile' : 'desktop';
+}
+
+/** The smallest scale a diagram may take to fit its column; below it the figure scrolls. */
+export const minDiagramScale = 0.75;
+
+/** The SVG size: it shrinks with its column down to minDiagramScale, and never grows past its own width. */
+export function fittedCanvasStyle(viewBox: { width: number; height: number }): CSSProperties {
+  return { aspectRatio: `${viewBox.width} / ${viewBox.height}`, width: '100%', minWidth: Math.round(viewBox.width * minDiagramScale), maxWidth: viewBox.width, marginInline: 'auto' };
+}
+
+/** Pick the auto direction: horizontal when it fits the column at a readable scale, else the narrower one. */
+export function pickDirection<T extends { viewBox: { width: number } }>(horizontal: T, vertical: T, available: number) {
+  if (horizontal.viewBox.width * 0.9 <= available) return horizontal;
+  return vertical.viewBox.width < horizontal.viewBox.width ? vertical : horizontal;
+}
+
+export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description, legend }: DiagramCanvasProps) {
   const rawId = useId().replace(/:/g, '');
   const figureRef = useRef<HTMLElement>(null);
   const [availableWidth, setAvailableWidth] = useState<number | null>(null);
@@ -35,24 +66,25 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto
     observer.observe(figure);
     return () => observer.disconnect();
   }, [layout, direction]);
+  const variant = useDiagramVariant();
   const diagram = useMemo(() => {
     if (availableWidth === null || layout !== 'flow' || direction !== 'auto') return candidates.initial;
-    const { horizontal, vertical } = candidates;
-    if (horizontal.viewBox.width <= availableWidth) return horizontal;
-    return vertical.viewBox.width < horizontal.viewBox.width ? vertical : horizontal;
+    return pickDirection(candidates.horizontal, candidates.vertical, availableWidth);
   }, [availableWidth, candidates, layout, direction]);
   const scene = useMemo(() => diagramSceneFromLayout(diagram, { id: 'diagram', title, description }), [diagram, title, description]);
   return (
-    <figure className="ve-diagram-shell ve-diagram-has-mobile" ref={figureRef}>
-      <div aria-label={`${title}, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" role="region" tabIndex={0}>
-        <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={rawId} style={{ aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`, minWidth: diagram.viewBox.width, maxWidth: diagram.viewBox.width, marginInline: 'auto' }} />
-      </div>
-      <MobileSwimlaneVariant diagram={diagram} idPrefix={rawId} title={title} />
+    <figure className="ve-diagram-shell ve-diagram-has-mobile" data-ve-shown-variant={variant} ref={figureRef}>
+      {variant === 'desktop' ? (
+        <div aria-label={`${title}, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" role="region" tabIndex={0}>
+          <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={rawId} style={fittedCanvasStyle(diagram.viewBox)} />
+        </div>
+      ) : <MobileSwimlaneVariant diagram={diagram} idPrefix={rawId} title={title} />}
+      {legend?.length ? <Legend items={legend} /> : null}
     </figure>
   );
 }
 
-function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
+export function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
   const sortedNodes = [...diagram.nodes].sort((a, b) => a.rank - b.rank || a.order - b.order);
   return (
     <div aria-label={title} className="ve-diagram-variant ve-diagram-variant-mobile" data-diagram-role="diagram-mobile" data-ve-variant="mobile" role="group">
@@ -61,7 +93,7 @@ function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnTy
           const connections = diagram.edges.filter(({ edge }) => edge.from === node.id || (edge.style === 'bidirectional' && edge.to === node.id && edge.from !== node.id));
           const context = [node.lane ? diagram.laneLabels.get(node.lane) ?? node.lane : undefined, node.date].filter(Boolean).join(' · ');
           return (
-            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
+            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} data-ve-stroke={node.stroke} data-ve-tone={node.tone} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
               {context ? <p className="ve-diagram-mobile-lane">{context}</p> : null}
               <h3>{node.label}</h3>
               {node.detail ? <p>{node.detail}</p> : null}

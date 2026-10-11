@@ -25,6 +25,7 @@ const outputs = [
   ['examples/visual-explainer-mdx/code-walkthrough.mdx', 'dist/visual-explainer-mdx/code-walkthrough.html'],
   ['examples/visual-explainer-mdx/mermaid-block.mdx', 'dist/visual-explainer-mdx/mermaid-block.html'],
   ['examples/visual-explainer-mdx/diff-terminal-json.mdx', 'dist/visual-explainer-mdx/diff-terminal-json.html'],
+  ['examples/visual-explainer-mdx/review-scan.mdx', 'dist/visual-explainer-mdx/review-scan.html'],
   ['examples/visual-explainer-mdx/explain-diff-demo.mdx', 'dist/visual-explainer-mdx/explain-diff-demo.html'],
   ['examples/visual-explainer-mdx/presentation-deck.tsx', 'dist/visual-explainer-mdx/presentation-deck.html'],
 ];

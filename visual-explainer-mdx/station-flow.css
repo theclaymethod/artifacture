@@ -1,0 +1,211 @@
+/* Numbered stations: a row of boxes at 48rem and up, a numbered column below that. A loop back is a
+   return band under the boxes it repeats; the same words sit in the box it leaves, for a screen
+   reader and for the narrow layout. */
+.ve-stations {
+  min-width: 0;
+  margin: 0;
+  container-type: inline-size;
+}
+
+.ve-stations-track {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-items: stretch;
+  row-gap: var(--ve-space-2);
+}
+
+.ve-stations-row {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-station {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ve-space-1);
+  grid-row: 1;
+  min-width: 0;
+}
+
+.ve-station-via {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ve-space-1);
+  min-height: 2.8em;
+  color: var(--ve-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.ve-station-box {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--ve-space-1);
+  padding: var(--ve-space-3);
+  border: 1px solid var(--ve-diagram-frame, var(--ve-rule));
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+}
+
+/* An input or a result: a softer corner, as the diagrams draw an oval. */
+.ve-station[data-ve-shape="oval"] .ve-station-box {
+  border-radius: 1.25rem;
+}
+
+.ve-station-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font: var(--ve-weight-strong) 0.8125rem/1 var(--ve-font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-station-number[data-ve-extra="true"] {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: 0.375rem;
+  border: 1.5px solid var(--ve-muted);
+  background: transparent;
+}
+
+.ve-station-label {
+  color: var(--ve-heading);
+  font-size: 0.9375rem;
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.ve-station-label[data-ve-code="true"] {
+  font-family: var(--ve-font-mono);
+  font-size: 0.8125rem;
+  font-weight: var(--ve-weight-regular);
+}
+
+.ve-station-detail {
+  color: var(--ve-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.ve-station-back {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ve-station-via > svg {
+  flex: none;
+  margin-bottom: 0.3em;
+}
+
+.ve-station-arrow {
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  margin-top: 2.8em;
+  color: var(--ve-muted);
+}
+
+/* The return band: down from the box it leaves, back along the row, up into the box it repeats. */
+.ve-station-return {
+  position: relative;
+  grid-row: 2;
+  height: 1.75rem;
+  margin-inline: 1.25rem;
+  border: 1.5px solid var(--ve-muted);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+.ve-station-return::before {
+  content: "";
+  position: absolute;
+  top: -0.4375rem;
+  left: -0.4375rem;
+  width: 0;
+  height: 0;
+  border-inline: 0.375rem solid transparent;
+  border-bottom: 0.4375rem solid var(--ve-muted);
+}
+
+.ve-station-return > span {
+  position: absolute;
+  left: 50%;
+  bottom: -0.75rem;
+  padding-inline: var(--ve-space-2);
+  background: var(--ve-bg);
+  color: var(--ve-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.ve-stations .ve-stations-track + * {
+  margin-top: var(--ve-space-4);
+}
+
+@container (max-width: 47.99rem) {
+  .ve-stations-track {
+    display: block;
+  }
+
+  .ve-stations-row {
+    display: grid;
+    gap: var(--ve-space-2);
+  }
+
+  .ve-station {
+    grid-row: auto;
+    grid-column: auto !important;
+  }
+
+  .ve-station-box {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--ve-space-3);
+  }
+
+  .ve-station-detail {
+    grid-column: 2;
+  }
+
+  .ve-station[data-ve-shape="oval"] .ve-station-box {
+    border-radius: var(--ve-card-radius);
+    padding-inline: var(--ve-space-3);
+  }
+
+  .ve-station-via {
+    min-height: 0;
+    padding-left: calc(1.5rem + var(--ve-space-3) + var(--ve-space-3));
+  }
+
+  .ve-station-back {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    padding-left: calc(1.5rem + var(--ve-space-3) + var(--ve-space-3));
+    color: var(--ve-muted);
+    font-size: 0.8125rem;
+  }
+
+  .ve-station-arrow,
+  .ve-station-return {
+    display: none;
+  }
+}

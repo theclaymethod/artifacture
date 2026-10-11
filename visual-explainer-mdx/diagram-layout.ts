@@ -14,6 +14,8 @@ export type LaidOutNode = DiagramNode & {
   labelLines: string[];
   detailLines: string[];
   textHeight: number;
+  /** The row of a wrapped layout. */
+  line?: number;
 };
 
 type Point = { x: number; y: number };
@@ -34,7 +36,9 @@ export function layoutDiagram(
   lanes?: DiagramCanvasProps['lanes'],
   dates?: string[],
   direction: NonNullable<DiagramCanvasProps['direction']> = 'auto',
+  wrapWidth = 0,
 ) {
+  const wrap = direction === 'wrap' && wrapWidth > 0;
   const rankMap = computeRanks(nodes, edges);
   const orderedDates = [...new Set([...(dates ?? []), ...nodes.flatMap((node) => node.date ? [node.date] : [])])];
   const dateIndex = new Map(orderedDates.map((date, index) => [date, index]));
@@ -49,11 +53,12 @@ export function layoutDiagram(
     isAccented: Boolean(node.accent),
   }));
   const ranks = [...new Set(measured.map((node) => node.rank))].sort((a, b) => a - b);
-  const orientation: Orientation = direction !== 'auto' ? direction
+  const orientation: Orientation = wrap ? 'horizontal' : direction === 'horizontal' || direction === 'vertical' ? direction
     : layout === 'timeline' ? 'horizontal'
       : layout === 'tree' || ranks.length > 4 ? 'vertical' : 'horizontal';
-  const edgeLabels = edges.flatMap((edge) => edge.label ? [measureEdgeLabel(edge.label)] : []);
-  const rankGap = Math.max(88, ...edgeLabels.map((label) => (orientation === 'horizontal' ? label.width : label.height) + 48));
+  const labelWidth = wrap ? wrapLabelWidth : 200;
+  const edgeLabels = edges.flatMap((edge) => edge.label ? [measureEdgeLabel(edge.label, labelWidth)] : []);
+  const rankGap = Math.max(88, ...edgeLabels.map((label) => (orientation === 'horizontal' ? label.width + (wrap ? 24 : 48) : label.height + 48)));
   const laneList = layout === 'swimlane' ? [...(lanes ?? [])] : [];
   if (layout === 'swimlane') {
     const declared = new Set(laneList.map((lane) => lane.id));
@@ -68,6 +73,8 @@ export function layoutDiagram(
   const laneRects: LaneLayout[] = [];
   if (layout === 'swimlane') {
     placeSwimlanes(measured, ranks, laneList, orientation, rankGap, laneRects);
+  } else if (wrap) {
+    placeWrapped(measured, ranks, edges, rankGap, Math.max(88, ...edgeLabels.map((label) => label.height + 56)), wrapWidth);
   } else {
     const header = layout === 'timeline' ? Math.max(48, ...orderedDates.map((date) => wrapDiagramText(date, 152, 14).length * 20 + 24)) : 0;
     placeRanks(measured, ranks, edges, orientation, rankGap, header);
@@ -92,7 +99,7 @@ export function layoutDiagram(
     const width = Math.max(...tick.lines.map((line) => textWidth(line, 14)));
     return { x: tick.x - width / 2, y: tick.y - 16, width, height: tick.lines.length * 20 };
   });
-  const connectedEdges = placeEdgeLabels(routed, measured, laneRects, timelineRects);
+  const connectedEdges = placeEdgeLabels(routed, measured, laneRects, timelineRects, labelWidth);
   const content: Rect[] = [
     ...measured.map(nodeRect),
     ...laneRects,
@@ -116,6 +123,60 @@ export function layoutDiagram(
     orientation,
     viewBox: { x: minX, y: minY, width: maxX - minX, height: maxY - minY },
   };
+}
+
+/**
+ * Lay out a two-mode diagram on one grid. The detailed mode sets every position. The simple mode
+ * puts each of its nodes where the detailed node with the same id sits, so a reader can map one
+ * mode to the other; it routes its own edges and keeps the detailed frame.
+ */
+export function layoutDiagramModes(
+  simple: { nodes: DiagramNode[]; edges: DiagramEdge[] },
+  detailed: { nodes: DiagramNode[]; edges: DiagramEdge[] },
+  layout: 'flow' | 'tree' = 'flow',
+  direction: NonNullable<DiagramCanvasProps['direction']> = 'auto',
+  wrapWidth = 0,
+) {
+  // Size each box for the longer of its two labels, so neither mode overflows a box or moves one.
+  const simpleById = new Map(simple.nodes.map((node) => [node.id, node]));
+  for (const node of simple.nodes) {
+    if (!detailed.nodes.some((other) => other.id === node.id)) throw new Error(`DiagramModes: the simple node "${node.id}" has no detailed node with the same id.`);
+  }
+  const longer = (a?: string, b?: string) => (textWidth(b ?? '', 16) > textWidth(a ?? '', 16) ? b : a);
+  const sized = detailed.nodes.map((node) => {
+    const other = simpleById.get(node.id);
+    return other ? { ...node, label: longer(node.label, other.label) ?? node.label, detail: longer(node.detail, other.detail) } : node;
+  });
+  const base = layoutDiagram(sized, detailed.edges, layout, undefined, undefined, direction, wrapWidth);
+  const wrapped = direction === 'wrap' && wrapWidth > 0;
+  const place = (graph: { nodes: DiagramNode[]; edges: DiagramEdge[] }) => {
+    const byId = new Map(base.nodes.map((node) => [node.id, node]));
+    const measured = graph.nodes.map((node, order): LaidOutNode => {
+      const at = byId.get(node.id)!;
+      const glyph = nodeGlyph(node);
+      const contentWidth = glyph === 'diamond' ? at.width / 2 - 16 : at.width - 40;
+      const labelLines = wrapDiagramText(node.label, contentWidth, 16);
+      const detailLines = node.detail ? wrapDiagramText(node.detail, contentWidth, 14) : [];
+      const textHeight = labelLines.length * 22 + (detailLines.length ? 8 + detailLines.length * 20 : 0);
+      return { ...node, x: at.x, y: at.y, width: at.width, height: at.height, rank: at.rank, row: at.row, line: at.line, order, isAccented: Boolean(node.accent), labelLines, detailLines, textHeight };
+    });
+    const ids = new Map(measured.map((node) => [node.id, node]));
+    const routed = graph.edges.flatMap((edge) => {
+      const from = ids.get(edge.from);
+      const to = ids.get(edge.to);
+      return from && to ? [{ edge, from, to, path: edgeRoute(from, to, base.orientation, measured) }] : [];
+    });
+    const edges = placeEdgeLabels(routed, measured, [], [], wrapped ? wrapLabelWidth : 200);
+    return { ...base, nodes: measured, edges, dense: measured.length >= 7 || edges.length >= 10 };
+  };
+  const modes = { simple: place(simple), detailed: place(detailed) };
+  const content: Rect[] = [modes.simple, modes.detailed].flatMap((mode) => [...mode.nodes.map(nodeRect), ...mode.edges.flatMap(({ label }) => label ? [labelRect(label)] : [])]);
+  const minX = Math.min(base.viewBox.x, ...content.map((rect) => rect.x - padding));
+  const minY = Math.min(base.viewBox.y, ...content.map((rect) => rect.y - padding));
+  const maxX = Math.max(base.viewBox.x + base.viewBox.width, ...content.map((rect) => rect.x + rect.width + padding));
+  const maxY = Math.max(base.viewBox.y + base.viewBox.height, ...content.map((rect) => rect.y + rect.height + padding));
+  const viewBox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  return { simple: { ...modes.simple, viewBox }, detailed: { ...modes.detailed, viewBox } };
 }
 
 function measureDiagramNode(node: DiagramNode) {
@@ -162,6 +223,43 @@ function placeRanks(nodes: LaidOutNode[], ranks: number[], edges: DiagramEdge[],
       cross += crossSize(node) + nodeGap;
     });
     main += extent + rankGap;
+  });
+}
+
+/** Ranks left to right, in rows no wider than `wrapWidth`; each row starts again at the left. */
+function placeWrapped(nodes: LaidOutNode[], ranks: number[], edges: DiagramEdge[], rankGap: number, lineGap: number, wrapWidth: number) {
+  placeRanks(nodes, ranks, edges, 'horizontal', rankGap, 0);
+  const groups = ranks.map((rank) => nodes.filter((node) => node.rank === rank));
+  const extent = groups.map((group) => Math.max(...group.map((node) => node.width)));
+  const lines: number[][] = [];
+  let width = padding * 2;
+  groups.forEach((_, index) => {
+    const add = extent[index]! + (lines.at(-1)?.length ? rankGap : 0);
+    if (!lines.length || (width + add > wrapWidth && lines.at(-1)!.length)) {
+      lines.push([index]);
+      width = padding * 2 + extent[index]!;
+    } else {
+      lines.at(-1)!.push(index);
+      width += add;
+    }
+  });
+  let top = padding;
+  lines.forEach((members, line) => {
+    const tallest = Math.max(...members.map((index) => groups[index]!.reduce((sum, node) => sum + node.height, 0) + (groups[index]!.length - 1) * nodeGap));
+    let left = padding;
+    for (const index of members) {
+      const group = groups[index]!;
+      const size = group.reduce((sum, node) => sum + node.height, 0) + (group.length - 1) * nodeGap;
+      let cross = top + (tallest - size) / 2;
+      for (const node of group) {
+        node.x = snap(left + (extent[index]! - node.width) / 2);
+        node.y = snap(cross);
+        node.line = line;
+        cross += node.height + nodeGap;
+      }
+      left += extent[index]! + rankGap;
+    }
+    top += tallest + lineGap;
   });
 }
 
@@ -232,7 +330,9 @@ function computeRanks(nodes: DiagramNode[], edges: DiagramEdge[]) {
 
 function edgeRoute(from: LaidOutNode, to: LaidOutNode, orientation: Orientation, nodes: LaidOutNode[]): Point[] {
   const sameRank = from.rank === to.rank;
-  const horizontal = sameRank ? orientation === 'vertical' : orientation === 'horizontal';
+  // In a wrapped layout an edge between two rows leaves from the bottom or the top.
+  const acrossLines = from.line !== undefined && to.line !== undefined && from.line !== to.line;
+  const horizontal = acrossLines ? false : sameRank ? orientation === 'vertical' : orientation === 'horizontal';
   const positive = horizontal ? to.x + to.width / 2 >= from.x + from.width / 2 : to.y + to.height / 2 >= from.y + from.height / 2;
   const startSide = from.id === to.id ? 'right' : horizontal ? positive ? 'right' : 'left' : positive ? 'bottom' : 'top';
   const endSide = from.id === to.id ? nodeGlyph(to) === 'dot' ? 'left' : 'bottom' : horizontal ? positive ? 'left' : 'right' : positive ? 'top' : 'bottom';
@@ -357,25 +457,54 @@ function simplifyPath(path: Point[]) {
   return result;
 }
 
-function measureEdgeLabel(label: string) {
-  const lines = wrapDiagramText(label, 200, diagramTypography.edgeSize);
+const wrapLabelWidth = 112;
+
+function measureEdgeLabel(label: string, maxWidth = 200) {
+  const lines = wrapDiagramText(label, maxWidth, diagramTypography.edgeSize);
   return { lines, width: snap(Math.max(...lines.map((line) => textWidth(line, 14))) + 20), height: lines.length * 20 + 12 };
 }
 
-function placeEdgeLabels(edges: LaidOutEdge[], nodes: LaidOutNode[], lanes: LaneLayout[], headers: Rect[]) {
+/**
+ * Edges that merge into one target, or fan out from one source, with the same label carry that
+ * label once: on the edge in the middle of the bundle, next to the shared node. Returns, for each
+ * edge index, 'none' (no label), 'end' or 'start' (the label goes near that end), or 'any'.
+ */
+function labelPlan(edges: LaidOutEdge[]) {
+  const plan: Array<'any' | 'none' | 'start' | 'end'> = edges.map(() => 'any');
+  for (const [key, side] of [['to', 'end'], ['from', 'start']] as const) {
+    const groups = new Map<string, number[]>();
+    edges.forEach((item, index) => {
+      if (!item.edge.label || plan[index] === 'none') return;
+      const id = `${item.edge[key]}\n${item.edge.label}`;
+      groups.set(id, [...(groups.get(id) ?? []), index]);
+    });
+    for (const members of groups.values()) {
+      if (members.length < 2) continue;
+      const other = key === 'to' ? 'from' : 'to';
+      const sorted = [...members].sort((a, b) => edges[a]![other].y - edges[b]![other].y || edges[a]![other].x - edges[b]![other].x);
+      const keep = sorted[Math.floor((sorted.length - 1) / 2)]!;
+      for (const index of members) plan[index] = index === keep ? side : 'none';
+    }
+  }
+  return plan;
+}
+
+function placeEdgeLabels(edges: LaidOutEdge[], nodes: LaidOutNode[], lanes: LaneLayout[], headers: Rect[], labelWidth = 200) {
+  const plan = labelPlan(edges);
   const occupied = [
     ...headers.map((rect) => expandRect(rect, 4)),
     ...nodes.map((node) => expandRect(nodeRect(node), 8)),
     ...lanes.map((lane) => ({ x: lane.x, y: lane.y, width: lane.width, height: lane.lines.length * 20 + 24 })),
   ];
   return edges.map((item, index) => {
-    if (!item.edge.label) return item;
-    const size = measureEdgeLabel(item.edge.label);
+    if (!item.edge.label || plan[index] === 'none') return item;
+    const size = measureEdgeLabel(item.edge.label, labelWidth);
     const others = edges.flatMap((other, otherIndex) => otherIndex === index ? [] : other.path.slice(1).map((point, i) => {
       const start = other.path[i]!;
       return { x: Math.min(start.x, point.x) - 2, y: Math.min(start.y, point.y) - 2, width: Math.abs(point.x - start.x) + 4, height: Math.abs(point.y - start.y) + 4 };
     }));
-    const label = findLabelSlot(item.path, size, [...occupied, ...others]);
+    const ends = plan[index] === 'end' ? item.path.slice(-3) : plan[index] === 'start' ? item.path.slice(0, 3) : item.path;
+    const label = findLabelSlot(ends.length > 1 ? ends : item.path, size, [...occupied, ...others]);
     occupied.push(expandRect(labelRect(label), 8));
     return { ...item, label };
   });

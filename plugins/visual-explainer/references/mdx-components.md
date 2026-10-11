@@ -4,13 +4,27 @@ Read this only when the selected card does not show the component or prop you ne
 
 ## Long-form artifacts
 
-- `ExplainerShell(title, summary?, preset?, reviewTools?)`
-- `Section(title, kicker?)`
+- `ExplainerShell(title, summary?, preset?, reviewTools?, chapterNav?, appearance?)`
+- `Section(title, kicker?, id?, navLabel?, anchors?)`
+- `ChapterRail(chapters, label?)`
+- `DataTable(columns, rows, caption?, label?)`
+- `StatusPill(tone, children)`
+- `Badge(tone?, stroke?, glyph?, children)`
+- `Legend(items, title?)`
 - `Callout(children)`
 - `Pipeline(steps)`
 - `DecisionMatrix(rows)`
 - `RiskLedger(risks)`
-- `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?)`
+- `DefinitionList(children)` with `Definition(term, tone?, children)`
+- `Subsection(title, id?, level?, marker?, share?, children)`
+- `Disclosure(summary, meta?, id?, open?, share?, lazy?, contains?, children)`
+- `Term(definition, expansion?, children)`
+- `Steps(label?, children)` with `Step(id?, children)`
+- `ChipLinks(items, label)`
+- `Lead(children, label?)`
+- `Aside(children, label?)`
+- `DiagramCanvas(nodes, edges, layout?, direction?, lanes?, dates?, title?, description?, legend?)`
+- `DiagramModes(simple, detailed, layout?, direction?, title?, description?)`; `direction="wrap"` sets a long flow in rows that fit the column
 - `DiagramWalkthrough(nodes, edges, steps, layout?, direction?, lanes?, dates?, title?, description?)`
 - `LieflatChart(spec, title, description?, source?)`
 - `DataChart(data, kind?, title, description?, valueLabel?, formatValue?, source?)`
@@ -20,6 +34,18 @@ Read this only when the selected card does not show the component or prop you ne
 - `JsonTree(data, collapsedDepth?)`
 - `Quiz(questions)`
 - `MermaidBlock(chart, caption?)`
+
+`chapterNav` builds a chapter rail from the direct `Section` children: a sticky side rail at 1200px and wider, and a compact sticky top bar with a disclosure list below that. It marks the current chapter with `aria-current` while the reader scrolls. Links are fragment anchors, so they work from the keyboard and without script; smooth scrolling runs only without a reduced-motion preference. Give a `Section` an `id` for stable links, a short `navLabel`, and `anchors={[{id, label}]}` for the in-section targets the rail lists. With a rail, the review tool docks under it. `appearance="auto"` follows `prefers-color-scheme`; the default stays light.
+
+`DataTable` is the scan-first table: a sticky header, subtle zebra rows, and no wrapper overflow. Column `kind` sets the treatment: `id` (monospace, unwrapped), `number` (right-aligned, tabular figures), `status` (a `StatusPill`), `tags` (badges only), or `text` (wraps). A cell is a string, a number, `null`, or `{text, href?, status?, badges?, note?}`. Give a row an `id` to make it a link target. Below 640px each row becomes a labelled card.
+
+`StatusPill`, `Badge`, `Legend` and diagram node `tone` share one state ramp: `ok`, `info`, `warn`, `err` and `neutral`, from the `--ve-status-*` tokens, each AA in light and dark. Pair every tone with a word; color is never the only cue. A `stroke="dashed"` badge, node or key swatch is dashed and hatched: use it for a weaker evidence tier. `glyph` (`rect`, `oval`, `diamond`) carries a third category, such as a verifier kind. A `DiagramCanvas` `legend` repeats the exact tone, stroke and glyph that its nodes use.
+
+A `Section` body has a default reading rhythm: 1rem between blocks, unclassed `h3` and `h4` headings, and list markers. `Subsection` groups content under a rule; its `title` can hold code and pills, a `marker` (such as a step number) goes before the title, `level={4}` nests it, and an `id` makes it a rail anchor. `DefinitionList` sets term and detail pairs in two columns that stack below 640px; a `Definition` `tone` colors one pair, so keep a word such as "Warning" in the term. Use these before page CSS.
+
+`Disclosure` keeps detail (code, evidence, long lists) behind a 44px summary row; `meta` holds a count or a pill at the end of the row. A fragment link to a `Disclosure`, or to an element inside it, opens it and each enclosing block, and scrolls the target under its headline. Opening a block that has an `id` writes its fragment to the address, and the page keeps the open blocks for the session. `share` adds a copy-link control to a `Disclosure` or a `Subsection`. `lazy` renders the body only after the first open; list in `contains` each id inside it that a link can target. `Term` marks a glossary word in running text: hover, focus or tap shows its `definition`, and `expansion` spells out an abbreviation at its first use. Give `StatusPill` and a `ChipLinks` item a `meaning`, so each state word has a tooltip and screen-reader text. `Steps` numbers run steps that hold rich content, in two columns from 1024px. `Legend layout="list"` sets one swatch, word and sentence per line. `DataTable density="compact"` makes each row a short card below 640px. Diagrams shrink to fit their column, to three quarters of their size at most, and render only the variant that the screen shows. Edges with one label that merge into one node, or fan out from one node, carry the label once. `DiagramModes` shows one architecture diagram in two modes. `simple` holds about four to six boxes in plain words; `detailed` names the same boxes by their real modules and may add a few. Each simple node id is also a detailed node id, so a node keeps its place when the reader switches. The Simple / Detailed control switches every `DiagramModes` on the page, and the page remembers the choice. `ChipLinks` shows in-page links as 44px chips, each with an optional `status` word and `tone`. A plain text link in a `Section` body also gets a 44px target. `Lead` opens a level with its answer in plain words: one or two sentences, one step larger than body text, after the run-in label "In plain words". `Aside` holds a two-sentence note, by default "Why this matters". Explainer pages take their spacing, measure and type sizes from the `--ve-space-*`, `--ve-measure` and `--ve-text-*` tokens of themes.css; a page never sets its own CSS.
+
+`CodeBlock` and `DiffBlock` highlight with Shiki at export. Token colors come from the preset's `--ve-syntax-*` ramp on the code surface. Diff rows use `--ve-code-add` and `--ve-code-remove` with a `+`/`-` gutter. Escape `<` and `>` in code strings as `\u003c` and `\u003e`; the preflight decodes them before highlighting, and Shiki escapes the output. The preflight also runs on each `.mdx` module that the entry imports from its own directory tree, so a long explainer can keep one self-contained chapter per file.
 
 `DiagramCanvas` supports `flow`, `tree`, `swimlane`, and `timeline` layouts. Set `direction="auto" | "horizontal" | "vertical"` to control flow. Timeline dates order milestones; their spacing does not encode elapsed duration. Nodes support `rect`, `oval`, `diamond`, and `dot` shapes; edges support `solid`, `dashed`, and `bidirectional` styles.
 

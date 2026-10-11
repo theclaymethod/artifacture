@@ -1,0 +1,506 @@
+/* Trust-map explainer. Every gap, pad and size comes from the reading tokens of themes.css
+   (--ve-space-*, --ve-text-*, --ve-measure); every state uses the tone ramp (--ve-status-*) with
+   its mark, so a reader learns one language for met, below, caught, missed and cannot fail. */
+
+.ve-section-body > [data-ve-trust] + * {
+  margin-top: var(--ve-space-7);
+}
+
+[data-ve-trust] > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+[data-ve-trust] > * + .ve-subsection,
+[data-ve-trust] > * + .ve-card-stack {
+  margin-top: var(--ve-space-7);
+}
+
+[data-ve-trust] > .ve-subsection > * + .ve-subsection {
+  margin-top: var(--ve-space-7);
+}
+
+[data-ve-trust] :is(p, li, dd) {
+  max-width: var(--ve-measure);
+}
+
+/* A card: one elevation (a hairline), one radius and one pad, for every card of the page. */
+.ve-card {
+  min-width: 0;
+  padding: var(--ve-card-pad);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-card-radius);
+  background: var(--ve-bg);
+}
+
+.ve-card > * + *,
+.ve-card > .ve-subsection > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-card-stack {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+.ve-section-body .ve-weak-check > :is(h3, h4) {
+  margin: 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: var(--ve-text-h4);
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.35;
+}
+
+.ve-weak-check > :is(h3, h4) code {
+  font-weight: var(--ve-weight-regular);
+}
+
+/* A quieter line under a result line. */
+.ve-quiet {
+  color: var(--ve-muted);
+}
+
+/* ---- The merge verdict: the clearest thing on the first screen ---------------------------- */
+
+.ve-verdict {
+  --ve-tone-ink: var(--ve-status-neutral);
+  --ve-tone-soft: var(--ve-status-neutral-soft);
+  padding: var(--ve-card-pad);
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 55%, var(--ve-bg));
+}
+
+.ve-verdict[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
+.ve-verdict[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
+.ve-verdict[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
+
+.ve-verdict > * + * {
+  margin-top: var(--ve-space-3);
+}
+
+.ve-verdict > [data-merge-verdict] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+.ve-verdict-word {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-size: var(--ve-text-h3);
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.ve-verdict-word > .ve-tone-mark {
+  --ve-tone-on: var(--ve-tone-soft);
+  width: 1.25rem;
+  height: 1.25rem;
+  align-self: center;
+}
+
+.ve-verdict-lead {
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-verdict > ol {
+  margin: 0;
+  padding-left: var(--ve-space-5);
+  list-style: decimal;
+}
+
+.ve-verdict > ol > li + li {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-verdict > ol > li::marker {
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-verdict-more {
+  color: var(--ve-text);
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-body);
+}
+
+.ve-verdict :is(p, li) > a {
+  font-weight: var(--ve-weight-strong);
+}
+
+/* The rest of the items: a run of plain inline links in small text. */
+.ve-section-body .ve-verdict :is(.ve-verdict-more, ol > li) > a:not([class]) {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  font-weight: var(--ve-weight-regular);
+}
+
+/* ---- Countable marks ------------------------------------------------------------------------- */
+
+.ve-count-marks {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 100%;
+  vertical-align: -0.05em;
+}
+
+.ve-count-marks > span {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border: 1.5px solid var(--ve-tone-ink);
+  border-radius: 2px;
+  background: var(--ve-tone-ink);
+}
+
+.ve-count-marks > [data-ve-hollow="true"] {
+  background: transparent;
+}
+
+:is(.ve-count-marks > span, .ve-mark-key li, [data-ve-guide] li)[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
+:is(.ve-count-marks > span, .ve-mark-key li, [data-ve-guide] li)[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); --ve-tone-soft: var(--ve-status-info-soft); }
+:is(.ve-count-marks > span, .ve-mark-key li, [data-ve-guide] li)[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
+:is(.ve-count-marks > span, .ve-mark-key li, [data-ve-guide] li)[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
+
+[data-ve-result] .ve-count-marks {
+  display: flex;
+  margin-top: var(--ve-space-3);
+}
+
+/* The bar lines: marks in a fixed column, then the sentence. */
+.ve-bar-lines {
+  display: grid;
+  gap: var(--ve-space-3);
+  margin: var(--ve-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-bar-lines > li {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: var(--ve-space-1) var(--ve-space-4);
+  align-items: baseline;
+  max-width: calc(var(--ve-measure) + 12rem);
+}
+
+.ve-bar-lines > li[data-ve-bar-line="note"] {
+  display: block;
+  padding-left: calc(14rem + var(--ve-space-4));
+  color: var(--ve-muted);
+}
+
+.ve-bar-lines .ve-count-marks {
+  padding-top: 0.3rem;
+}
+
+/* ---- The key of the marks -------------------------------------------------------------------- */
+
+.ve-mark-key {
+  display: grid;
+  gap: var(--ve-space-2);
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-mark-key .ve-legend-title {
+  margin: 0;
+  color: var(--ve-muted);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-mark-key ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2) var(--ve-space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-mark-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  max-width: none;
+}
+
+.ve-mark-key li > .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+}
+
+/* ---- Promises -------------------------------------------------------------------------------- */
+
+[data-ve-trust="chips"] .ve-chip-links {
+  display: grid;
+  gap: var(--ve-space-2);
+}
+
+[data-ve-trust="chips"] .ve-chip-link {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: calc(var(--ve-measure) + 4rem);
+}
+
+.ve-promise .ve-subsection-title {
+  font-size: var(--ve-text-h3);
+}
+
+.ve-promise-sentence {
+  font-size: var(--ve-text-lead);
+  line-height: var(--ve-leading-lead);
+}
+
+.ve-evidence-lines {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--ve-space-2) var(--ve-space-4);
+  margin: 0;
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-evidence-lines > dt {
+  color: var(--ve-muted);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-evidence-lines > dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+  margin: 0;
+}
+
+.ve-todo {
+  padding: var(--ve-space-4);
+  border-radius: var(--ve-control-radius);
+  background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+}
+
+.ve-promise > .ve-subsection > .ve-disclosure {
+  margin-top: var(--ve-space-5);
+}
+
+/* A promise link in a step: a quiet tag that names what protects the step. */
+.ve-section-body > .ve-stations + * {
+  margin-top: var(--ve-space-6);
+}
+
+.ve-section-body a.ve-promise-link {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: var(--ve-space-2);
+  min-height: 44px;
+  color: var(--ve-heading);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ve-heading) 35%, transparent);
+  text-underline-offset: 0.22em;
+}
+
+.ve-promise-link-key {
+  padding: 0.0625rem var(--ve-space-2);
+  border-radius: 4px;
+  background: var(--ve-accent-soft);
+  color: var(--ve-accent-text);
+  font-weight: var(--ve-weight-strong);
+  text-decoration: none;
+}
+
+/* ---- How to read a promise: the worked example ----------------------------------------------- */
+
+.ve-guide {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+.ve-guide-step {
+  display: grid;
+  gap: var(--ve-space-3);
+  margin: 0;
+  padding: var(--ve-card-pad);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+}
+
+.ve-guide-step > figcaption {
+  max-width: var(--ve-measure);
+}
+
+.ve-guide-claims {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-guide-claims > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+.ve-guide-claims > li[data-ve-weakest-claim="true"] {
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-guide-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.ve-guide-path > li {
+  display: grid;
+  flex: 1 1 8rem;
+  gap: var(--ve-space-1);
+  min-width: 0;
+  padding: var(--ve-space-3) var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+}
+
+.ve-guide-path > li[data-ve-tone] {
+  flex: 1 1 16rem;
+  border-color: color-mix(in srgb, var(--ve-tone-ink) 40%, transparent);
+  color: var(--ve-tone-ink);
+}
+
+.ve-guide-path > li[data-ve-tone] > span:last-child {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-guide-path .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  align-self: center;
+}
+
+.ve-guide-key {
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+/* ---- Claims ---------------------------------------------------------------------------------- */
+
+[data-ve-trust="claim"] > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+[data-ve-code-ref] > p {
+  margin-top: var(--ve-space-2);
+  font-size: var(--ve-text-small);
+}
+
+[data-ve-tiers] {
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+[data-ve-tiers] strong {
+  color: var(--ve-heading);
+}
+
+@media (max-width: 640px) {
+  .ve-bar-lines > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ve-bar-lines > li[data-ve-bar-line="note"] {
+    padding-left: 0;
+  }
+
+  .ve-evidence-lines {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ve-space-1);
+  }
+
+  .ve-evidence-lines > dd + dt {
+    margin-top: var(--ve-space-2);
+  }
+}
+
+.ve-todo > * + * {
+  margin-top: var(--ve-space-3);
+}
+
+/* The key under a row of marks: the same squares, each with its word. */
+.ve-mark-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-1) var(--ve-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+[data-ve-trust] > .ve-mark-inline {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-mark-inline > li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+}
+
+.ve-mark-inline > li > span {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 2px;
+  background: var(--ve-tone-ink);
+}
+
+.ve-mark-inline > li[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); }
+.ve-mark-inline > li[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); }
+.ve-mark-inline > li[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); }
+
+/* The glossary: term over meaning, in two columns where the column is wide enough. */
+.ve-definition-list[data-ve-glossary] {
+  display: block;
+  max-width: none;
+}
+
+.ve-definition-list[data-ve-glossary] > dt {
+  padding-top: 0;
+  color: var(--ve-heading);
+  font-size: var(--ve-text-body);
+  break-after: avoid;
+}
+
+.ve-definition-list[data-ve-glossary] > dd {
+  margin: var(--ve-space-1) 0 var(--ve-space-4);
+  color: var(--ve-text);
+  break-inside: avoid;
+}
+
+@media (min-width: 64rem) {
+  .ve-definition-list[data-ve-glossary] {
+    columns: 2;
+    column-gap: var(--ve-space-7);
+  }
+}

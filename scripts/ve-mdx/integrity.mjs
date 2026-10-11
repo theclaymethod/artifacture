@@ -1,4 +1,4 @@
-import { codeToHtml } from 'shiki';
+import { codeToHtml, createCssVariablesTheme } from 'shiki';
 import { diffLines } from '../../visual-explainer-mdx/diff-lines.mjs';
 
 const diagramComponents = new Set(['DiagramCanvas', 'DiagramWalkthrough']);
@@ -11,7 +11,11 @@ export const sharedComponents = new Set([
   'Pipeline',
   'DecisionMatrix',
   'RiskLedger',
+  'DefinitionList', 'Definition', 'Subsection', 'Disclosure', 'CopyLink', 'Term', 'Steps', 'Step', 'ChipLinks', 'Lead', 'Aside',
   'DiagramCanvas',
+  'DataTable', 'StatusPill', 'Badge', 'Legend', 'ChapterRail',
+  'ArchitectureDiagram', 'ClaimDetail', 'CodeRef', 'Glossary', 'Glossed', 'Invariants', 'MergeVerdict', 'PromiseChips', 'PromiseLink',
+  'PromiseList', 'UnclaimedChanges', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough', 'WhatChanged',
   'GraphicCanvas',
   'PunctumReadout',
   'GraphicSlide',
@@ -20,7 +24,7 @@ export const sharedComponents = new Set([
   'DagCanvas',
   'AsciiImage', 'AsciiSweep', 'AsciiObject', 'VhsEffect',
   'ModelView', 'OrbitalText', 'TracePath',
-  'DiagramWalkthrough', 'DiagramDesignFigure', 'NativeLivingForm', 'NativeProceduralProp', 'PrLensFigure', 'ChalkboardFigure', 'SourceFigure',
+  'DiagramWalkthrough', 'DiagramModes', 'DiagramDesignFigure', 'NativeLivingForm', 'NativeProceduralProp', 'PrLensFigure', 'ChalkboardFigure', 'SourceFigure',
   'DataChart',
   'LieflatChart',
   'CodeBlock',
@@ -576,8 +580,21 @@ function unescapeLiteralChar(state) {
     case '`': return '`';
     case '\\': return '\\';
     case '\n': return '';
+    case 'u': return unescapeCodePoint(state, /^(?:\{([0-9a-fA-F]{1,6})\}|([0-9a-fA-F]{4}))/);
+    case 'x': return unescapeCodePoint(state, /^([0-9a-fA-F]{2})/);
     default: return esc;
   }
+}
+
+// \uXXXX, \u{X...} and \xXX, as JavaScript decodes them. Authors escape "<" as \u003c so the
+// integrity scan never reads code text as a component tag; the highlighter needs the real text.
+function unescapeCodePoint(state, pattern) {
+  const match = pattern.exec(state.input.slice(state.pos));
+  if (!match) throw new Error(`non-literal expression: invalid escape sequence at position ${state.pos}`);
+  state.pos += match[0].length;
+  const codePoint = Number.parseInt(match[1] ?? match[2], 16);
+  if (codePoint > 0x10ffff) throw new Error(`non-literal expression: invalid code point at position ${state.pos}`);
+  return String.fromCodePoint(codePoint);
 }
 
 function parseLiteralNumber(state) {
@@ -613,11 +630,9 @@ function computeSimpleLayout(nodes) {
 }
 
 async function injectCodeBlockHtml(code) {
-  const pattern = /<CodeBlock\b[\s\S]*?\/>/g;
-  const matches = [...code.matchAll(pattern)];
   let output = code;
-  for (const match of matches) {
-    const tag = match[0];
+  // Quote- and brace-aware: a "/>" inside the code string does not end the tag.
+  for (const { source: tag } of findComponentTags(code, new Set(['CodeBlock']))) {
     if (/\bhtml\s*=/.test(tag)) continue;
     const codeExpr = getPropExpression(tag, 'code');
     const languageExpr = getPropExpression(tag, 'language');
@@ -627,18 +642,15 @@ async function injectCodeBlockHtml(code) {
     const language = readLiteralText(evaluateLiteral(languageExpr, 'CodeBlock', 'language', diagnostics));
     if (diagnostics.length || rawCode === null || language === null) continue;
     const html = await highlightCode(rawCode, language);
-    const injected = tag.replace(/\s*\/>$/, ` html={${JSON.stringify(html)}} />`);
-    output = output.replace(tag, injected);
+    const injected = tag.replace(/\s*\/>$/, ` html={${jsxString(html)}} />`);
+    output = output.replace(tag, () => injected);
   }
   return output;
 }
 
 async function injectDiffBlockRows(code) {
-  const pattern = /<DiffBlock\b[\s\S]*?\/>/g;
-  const matches = [...code.matchAll(pattern)];
   let output = code;
-  for (const match of matches) {
-    const tag = match[0];
+  for (const { source: tag } of findComponentTags(code, new Set(['DiffBlock']))) {
     if (/\brows\s*=/.test(tag)) continue;
     const rows = buildRowsFromDiffTag(tag);
     if (!rows) continue;
@@ -652,8 +664,8 @@ async function injectDiffBlockRows(code) {
         html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, language),
       });
     }
-    const injected = tag.replace(/\s*\/>$/, ` rows={${JSON.stringify(highlightedRows)}} />`);
-    output = output.replace(tag, injected);
+    const injected = tag.replace(/\s*\/>$/, ` rows={${jsxString(highlightedRows)}} />`);
+    output = output.replace(tag, () => injected);
   }
   return output;
 }
@@ -678,6 +690,29 @@ function buildRowsFromDiffTag(tag) {
   return null;
 }
 
+/**
+ * Highlight the code of a resolved-refs file (refs.resolved.json, schema 1) at export time: each
+ * excerpt gets `html`, and each control patch gets highlighted diff `rows`. The data components
+ * then render the same markup in the static pre-render and in the browser.
+ */
+export async function highlightRefs(refs) {
+  for (const ref of refs.refs ?? []) if (ref.html === undefined && !ref.link_only) ref.html = await highlightCode(ref.excerpt, ref.language ?? 'text');
+  for (const edits of Object.values(refs.controls ?? {})) {
+    for (const edit of edits) {
+      if (edit.rows || (edit.patch === undefined && edit.before === undefined)) continue;
+      let rows = null;
+      if (edit.patch !== undefined) {
+        const parsed = parseUnifiedDiff(edit.patch);
+        rows = parsed.errors.length ? null : parsed.rows;
+      } else rows = diffLines(edit.before, edit.after ?? '');
+      if (!rows) continue;
+      edit.rows = [];
+      for (const row of rows) edit.rows.push({ ...row, html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, edit.language ?? 'text') });
+    }
+  }
+  return refs;
+}
+
 async function highlightCode(code, language) {
   const lang = normalizeLanguage(language);
   try {
@@ -697,22 +732,24 @@ async function highlightSnippet(code, language) {
   return match ? match[1].replace(/\n$/, '') : escapeHtml(code);
 }
 
-const veCodeTheme = {
-  name: 'visual-explainer-mono',
-  type: 'dark',
-  settings: [
-    { settings: { background: '#0a0a0a', foreground: '#f4f4f5' } },
-    { scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: '#a1a1aa', fontStyle: 'italic' } },
-    { scope: ['keyword', 'storage', 'entity.name.function', 'entity.name.tag'], settings: { foreground: '#fafafa' } },
-    { scope: ['string', 'constant.numeric', 'constant.language', 'support.type'], settings: { foreground: '#d4d4d8' } },
-  ],
-};
+// Token colors resolve from --ve-syntax-* on the code surface (code-blocks.css), so every
+// preset and appearance keeps its own AA palette.
+const veCodeTheme = createCssVariablesTheme({ name: 'visual-explainer-tokens', variablePrefix: '--shiki-', fontStyle: true });
+
+// JSON for a JSX attribute expression. Escape angle brackets so the integrity scan never reads
+// highlighted markup or source text as a component tag; the literal parser decodes \\u escapes.
+function jsxString(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+}
+
+const languageAliases = new Map([
+  ['mdx', 'jsx'], ['shell', 'bash'], ['sh', 'bash'], ['zsh', 'bash'], ['console', 'bash'],
+  ['typescript', 'ts'], ['javascript', 'js'], ['py', 'python'], ['yml', 'yaml'], ['jsonc', 'json'],
+]);
 
 function normalizeLanguage(language) {
-  if (language === 'mdx') return 'jsx';
-  if (language === 'tsx') return 'tsx';
-  if (language === 'shell') return 'bash';
-  return language;
+  const lang = String(language).trim().toLowerCase();
+  return languageAliases.get(lang) ?? lang;
 }
 
 function parseUnifiedDiff(patch) {

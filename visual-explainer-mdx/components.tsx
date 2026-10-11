@@ -1,7 +1,13 @@
-import React, { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import React, { Children, isValidElement, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ChapterRail, chapterSlug, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance } from './explainer-nav';
 import { wrapWords } from './diagram-layout';
+import { scrollToTarget } from './content-blocks';
 import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
 export { DiagramCanvas } from './diagram-canvas';
+export { DataTable, StatusPill, Badge, Legend } from './data-table';
+export type { DataTableProps, DataTableColumn, DataTableRow, DataTableCell, DataTableValue, DataTableBadge, StatusTone, StatusPillProps, BadgeProps, LegendProps, LegendItem, KeyStroke, KeyGlyph } from './data-table';
+export { ChapterRail } from './explainer-nav';
+export type { Chapter, ChapterAnchor, ExplainerAppearance } from './explainer-nav';
 export { AsciiImage, AsciiSweep } from './ascii-effects';
 export { AsciiObject } from './ascii-object';
 export { VhsEffect } from './vhs-effect';
@@ -19,8 +25,8 @@ export type { AsciiModel, AsciiObjectProps } from './ascii-object';
 export type { VhsEffectProps } from './vhs-effect';
 export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
 export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
-export { Pipeline, DecisionMatrix, RiskLedger } from './content-blocks';
-export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps } from './content-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, CopyLink, Term, Steps, Step, ChipLinks, Lead, Aside } from './content-blocks';
+export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, TermProps, StepsProps, StepProps, ChipLinksProps, ChipLinkItem, LeadProps, AsideProps } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
 export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
@@ -73,6 +79,9 @@ export type { ChartDatum, DataChartProps } from './charts';
 export { LieflatChart } from './lieflat-charts';
 export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
 export { DiagramWalkthrough } from './diagram-walkthrough';
+export { DiagramModes, useDiagramMode } from './diagram-modes';
+export { ArchitectureDiagram, ClaimDetail, CodeRef, Glossary, Glossed, Invariants, MergeVerdict, PromiseChips, PromiseLink, PromiseList, UnclaimedChanges, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, WhatChanged, promiseAnchors } from './trust-map';
+export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 
 declare global {
@@ -172,12 +181,22 @@ type ShellProps = {
   summary?: string;
   preset?: VisualPreset;
   reviewTools?: boolean;
+  /** Add a chapter rail built from the direct Section children. */
+  chapterNav?: boolean;
+  /** `auto` follows prefers-color-scheme. The default stays light. */
+  appearance?: ExplainerAppearance;
   children: ReactNode;
 };
 
 type SectionProps = {
   title: string;
   kicker?: string;
+  /** Fragment id. Defaults to a slug of the title. */
+  id?: string;
+  /** A short label for the chapter rail. Defaults to the title. */
+  navLabel?: string;
+  /** In-section targets that the chapter rail lists under this chapter. */
+  anchors?: readonly ChapterAnchor[];
   children: ReactNode;
 };
 
@@ -224,32 +243,64 @@ export function ExplainerShell({
   summary,
   preset = 'iso',
   reviewTools = true,
+  chapterNav = false,
+  appearance = 'light',
   children,
 }: ShellProps) {
   assertSupportedPreset(preset);
+  const resolved = useResolvedAppearance(appearance);
+  // The page renders after load, so the browser's own jump to the fragment finds nothing; land it
+  // here. A Disclosure lands the fragments inside it.
+  useEffect(() => {
+    let hash = window.location.hash.slice(1);
+    try { hash = decodeURIComponent(hash); } catch { /* keep the raw fragment */ }
+    const target = hash ? document.getElementById(hash) : null;
+    if (target && !target.closest('details')) scrollToTarget(target);
+  }, []);
+  const chapters = chapterNav ? collectChapters(children) : [];
+  const hasChapters = chapters.length > 0;
+  const content = (
+    <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10" id="ve-content" tabIndex={-1}>
+      <header className="ve-shell-header grid gap-6">
+        <div>
+          <h1 className="max-w-[var(--ve-shell-title-measure)] text-balance text-[length:var(--ve-shell-title-size)] leading-[var(--ve-shell-title-leading)] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+            {title}
+          </h1>
+          {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}
+        </div>
+      </header>
+      {children}
+    </div>
+  );
   return (
-    <main className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
-      <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
-        <header className="ve-shell-header grid gap-6">
-          <div>
-            <h1 className="max-w-[var(--ve-shell-title-measure,18ch)] text-balance text-[length:var(--ve-shell-title-size)] leading-[1.04] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
-              {title}
-            </h1>
-            {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}
-          </div>
-        </header>
-        {children}
-      </div>
+    <main
+      className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}${hasChapters ? ' ve-has-chapters' : ''}`}
+      data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
+      data-ve-preset={preset}
+    >
+      <a className="ve-skip-link" href="#ve-content">Skip to content</a>
+      {hasChapters ? <div className="ve-shell-frame"><ChapterRail chapters={chapters} />{content}</div> : content}
       {reviewTools ? <AnnotationLayer /> : null}
     </main>
   );
 }
 
-export function Section({ title, children }: SectionProps) {
+function collectChapters(children: ReactNode): Chapter[] {
+  const chapters: Chapter[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement<SectionProps>(child) || child.type !== Section) return;
+    const { id, title, navLabel, anchors } = child.props;
+    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors });
+  });
+  return chapters;
+}
+
+export function Section({ title, id, children }: SectionProps) {
+  const sectionId = id ?? chapterSlug(title);
   return (
-    <section className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+    <section aria-labelledby={`${sectionId}-title`} className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]" id={sectionId}>
       <div className="ve-section-heading">
-        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{title}</h2>
+        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]" id={`${sectionId}-title`}>{title}</h2>
       </div>
       <div className="ve-section-body min-w-0">{children}</div>
     </section>
@@ -556,7 +607,7 @@ function AnnotationLayer() {
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">review</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-accent-text)] [font-family:var(--ve-font-mono)]">review</p>
           <p className="mt-1 text-[var(--ve-muted)]">{enabled ? 'Click the page to annotate.' : 'Point-and-click feedback is off.'}</p>
         </div>
         <button
@@ -572,7 +623,7 @@ function AnnotationLayer() {
 
       {target ? (
         <div className="rounded-[var(--ve-radius)] border border-[color:var(--ve-accent)] bg-[var(--ve-accent-soft)] p-3">
-          <p className="text-xs text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{target.path}</p>
+          <p className="text-xs text-[var(--ve-accent-text)] [font-family:var(--ve-font-mono)]">{target.path}</p>
           <p className="mt-2 max-h-16 overflow-y-auto text-xs leading-5 text-[var(--ve-muted)]">{target.text}</p>
           <textarea
             className="mt-3 min-h-24 w-full resize-y border border-[color:var(--ve-rule)] bg-[var(--ve-bg)] p-3 text-sm text-[var(--ve-text)] outline-none focus:border-[var(--ve-accent)]"
