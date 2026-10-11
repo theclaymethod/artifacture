@@ -2,7 +2,7 @@
 
 ## Set up the repository
 
-- Node >= 22.
+- Node >= 22.12.
 - `npm ci`
 - `npx playwright install chromium`. The verifier's browser stage uses
   `playwright-core`, which never downloads browsers itself.
@@ -44,8 +44,8 @@ criteria remain registered in
 Two suites check the PresentationDeck engine (`visual-explainer-mdx/presentation.tsx` and
 `presentation-core.ts`). Run both after changing it:
 
-- `npm test` — unit tests for the pure logic (scale-to-fit math, the
-  click-anywhere-to-close guard, tint helpers).
+- `npm test` — existing CLI and browser tests for export, verification,
+  evidence binding, preview editing, PDF output and presentation states.
 - `npm run ve:eval-presentation` — the behavioral eval suite
   (`evals/run-presentation.mjs`, a documented sibling of `evals/run.mjs`):
   exports `examples/visual-explainer-mdx/presentation-deck.tsx` through the
@@ -81,12 +81,32 @@ values against the fixture source.
 
 ## Before you open a PR
 
-- Run `npm run check`. It runs the local CI checks: unit and browser
+- Run `npm run check`. It runs the local CI checks: CLI and browser
   behavior, manifests, export integrity, deterministic mechanics, design-system
   cases, and PresentationDeck behavior. The checked-in runtime budget is 120
   seconds; diagnose a regression before raising it.
-- During iteration, use `npm run check:fast`; it omits the seeded mechanics and
-  PresentationDeck browser suites.
+- For quick feedback, use `npm run check:static` for types and manifest
+  consistency. `npm run check:fast` runs those first, then all existing tests
+  and export/integrity checks; it omits only the seeded mechanics and
+  PresentationDeck eval suites. The browser portion is also available as
+  `npm run check:browser`. CI runs the static checks before installing
+  Chromium, then runs the same browser command. Superseded CI runs on the
+  same branch are cancelled.
+- After static checks pass, machines with eight or more available CPUs run
+  three lanes: exports, seeded evaluations, and tests followed by presentation
+  evaluations. Machines with four to seven CPUs run two lanes; smaller
+  machines run sequentially. All lanes finish cleanup before failure is reported.
+- Export checks use a shared queue with isolated Vite caches: up to three
+  workers on machines with eight or more CPUs, otherwise at most two.
+  The longer integrity sequence starts early. Seeded and clean evaluations
+  share four workers by default (fewer on smaller machines), without waiting
+  for every violation case to finish before starting clean cases.
+  Independent slide-ID and recapture rejection cases overlap, but
+  evidence-mutation and overwrite checks remain ordered.
+  Presentation evaluations use up to two isolated browser contexts; each
+  case's interactions stay ordered, and the console-error check runs last.
+  All child operations finish before their temporary files are removed.
+  `npm run check` reports each stage's elapsed time to locate regressions.
 - For changes intended to improve artifact quality, generate baseline and
   candidate runs and complete `npm run check:release -- --judgments
   <reviewed-judgments.json>`. The reviewed manifests cryptographically bind the

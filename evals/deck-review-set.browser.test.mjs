@@ -1,35 +1,39 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { describe } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = path.join(ROOT, 'evals/fixtures/deck-review/presentation-states.html');
 const CLI = path.join(ROOT, 'plugins/visual-explainer/scripts/verify/ve-verify.mjs');
 
-function verify(artifact, reportPath, args = [], stateFilter) {
-  const result = spawnSync(process.execPath, [CLI, artifact, '--json', reportPath, '--quiet', ...args], {
-    cwd: ROOT, encoding: 'utf8',
-    env: { ...process.env, ARTIFACTURE_DECK_REVIEW_STATES: stateFilter || '' },
-  });
-  assert.notEqual(result.status, 2, result.stderr);
+async function verify(artifact, reportPath, args = [], stateFilter) {
+  try {
+    await promisify(execFile)(process.execPath, [CLI, artifact, '--json', reportPath, '--quiet', ...args], {
+      cwd: ROOT, encoding: 'utf8', timeout: 60_000, maxBuffer: 4 * 1024 * 1024,
+      env: { ...process.env, ARTIFACTURE_DECK_REVIEW_STATES: stateFilter || '' },
+    });
+  } catch (error) {
+    assert.equal(error.code, 1, error.stderr || error.message);
+  }
   return JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 }
 
-test('public verifier runs keep separately bound screenshot evidence', () => {
+test('public verifier runs keep separately bound screenshot evidence', async () => {
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-browser-evidence-'));
   const evidenceDirs = [];
   try {
     const artifact = path.join(workDir, 'poster.html');
     fs.writeFileSync(artifact, '<!doctype html><html><body><main><h1>Poster</h1></main></body></html>');
-    const first = verify(artifact, path.join(workDir, 'first.json'), ['--profile', 'poster']);
+    const first = await verify(artifact, path.join(workDir, 'first.json'), ['--profile', 'poster']);
     evidenceDirs.push(first.review_contract.capture_root);
     const firstPath = first.review_contract.evidence.find((entry) => entry.kind === 'screenshot').path;
     const firstEvidence = fs.readFileSync(firstPath);
-    const second = verify(artifact, path.join(workDir, 'second.json'), ['--profile', 'poster']);
+    const second = await verify(artifact, path.join(workDir, 'second.json'), ['--profile', 'poster']);
     evidenceDirs.push(second.review_contract.capture_root);
     const secondPath = second.review_contract.evidence.find((entry) => entry.kind === 'screenshot').path;
     assert.equal(first.review_contract.inventory_provenance, 'browser-rendered');
@@ -44,44 +48,46 @@ test('public verifier runs keep separately bound screenshot evidence', () => {
   }
 });
 
-for (const slideId of ['slide-two', 'a'.repeat(80)]) {
-  test(`public verifier captures presentation base, drill and progressive states with a ${slideId.length}-character slide id`, () => {
-    const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));
-    try {
-      const artifact = path.join(workDir, 'deck.html');
-      fs.writeFileSync(artifact, fs.readFileSync(FIXTURE, 'utf8').replaceAll('slide-two', slideId));
-      const report = verify(artifact, path.join(workDir, 'report.json'), ['--screens', path.join(workDir, 'screens')]);
-      const reviewSets = report.review_contract.evidence.filter((entry) => entry.kind === 'deck-manifest')
-        .map((entry) => JSON.parse(fs.readFileSync(entry.path, 'utf8')));
-      assert.ok(reviewSets.some((manifest) => manifest.scheme === 'light'));
-      assert.ok(reviewSets.some((manifest) => manifest.scheme === 'dark'));
-      for (const reviewSet of reviewSets) {
-        assert.deepEqual(reviewSet.units.map((unit) => unit.state_id), [
-          'slide-one--base', 'slide-one--drill--evidence', `${slideId}--base`, `${slideId}--state--1`,
-          `${slideId}--drill--state-1-progressive-evidence`,
-        ]);
-        assert.ok(reviewSet.units.every((unit) => fs.statSync(unit.screenshot_path).size > 0));
-        assert.deepEqual(reviewSet.review_groups.map((group) => [group.purpose, group.state_ids]), [
-          ['state-continuity', ['slide-one--base', 'slide-one--drill--evidence']],
-          ['state-continuity', [`${slideId}--base`, `${slideId}--state--1`]],
-          ['state-continuity', [`${slideId}--base`, `${slideId}--drill--state-1-progressive-evidence`]],
-          ['adjacent-slide-variety', ['slide-one--base', `${slideId}--base`]],
-        ]);
+describe('presentation capture with short and long slide IDs', { concurrency: 2 }, () => {
+  for (const slideId of ['slide-two', 'a'.repeat(80)]) {
+    test(`public verifier captures presentation base, drill and progressive states with a ${slideId.length}-character slide id`, async () => {
+      const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-review-'));
+      try {
+        const artifact = path.join(workDir, 'deck.html');
+        fs.writeFileSync(artifact, fs.readFileSync(FIXTURE, 'utf8').replaceAll('slide-two', slideId));
+        const report = await verify(artifact, path.join(workDir, 'report.json'), ['--screens', path.join(workDir, 'screens')]);
+        const reviewSets = report.review_contract.evidence.filter((entry) => entry.kind === 'deck-manifest')
+          .map((entry) => JSON.parse(fs.readFileSync(entry.path, 'utf8')));
+        assert.ok(reviewSets.some((manifest) => manifest.scheme === 'light'));
+        assert.ok(reviewSets.some((manifest) => manifest.scheme === 'dark'));
+        for (const reviewSet of reviewSets) {
+          assert.deepEqual(reviewSet.units.map((unit) => unit.state_id), [
+            'slide-one--base', 'slide-one--drill--evidence', `${slideId}--base`, `${slideId}--state--1`,
+            `${slideId}--drill--state-1-progressive-evidence`,
+          ]);
+          assert.ok(reviewSet.units.every((unit) => fs.statSync(unit.screenshot_path).size > 0));
+          assert.deepEqual(reviewSet.review_groups.map((group) => [group.purpose, group.state_ids]), [
+            ['state-continuity', ['slide-one--base', 'slide-one--drill--evidence']],
+            ['state-continuity', [`${slideId}--base`, `${slideId}--state--1`]],
+            ['state-continuity', [`${slideId}--base`, `${slideId}--drill--state-1-progressive-evidence`]],
+            ['adjacent-slide-variety', ['slide-one--base', `${slideId}--base`]],
+          ]);
+        }
+        assert.deepEqual(reviewSets[0].review_groups, reviewSets.at(-1).review_groups);
+      } finally {
+        fs.rmSync(workDir, { recursive: true, force: true });
       }
-      assert.deepEqual(reviewSets[0].review_groups, reviewSets.at(-1).review_groups);
-    } finally {
-      fs.rmSync(workDir, { recursive: true, force: true });
-    }
-  });
-}
+    });
+  }
+});
 
-test('public bounded recapture retains paired context and rejects stale or unpaired requests', () => {
+test('public bounded recapture retains paired context and rejects stale or unpaired requests', async () => {
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-deck-recapture-'));
   try {
     const artifact = path.join(workDir, 'deck.html');
     fs.copyFileSync(FIXTURE, artifact);
     const validFilter = 'slide-two--base,slide-two--drill--state-1-progressive-evidence';
-    const report = verify(artifact, path.join(workDir, 'paired.json'), ['--screens', path.join(workDir, 'screens')], validFilter);
+    const report = await verify(artifact, path.join(workDir, 'paired.json'), ['--screens', path.join(workDir, 'screens')], validFilter);
     const manifests = report.review_contract.evidence.filter((entry) => entry.kind === 'deck-manifest')
       .map((entry) => JSON.parse(fs.readFileSync(entry.path, 'utf8')));
     assert.ok(manifests.length > 0);
@@ -89,15 +95,18 @@ test('public bounded recapture retains paired context and rejects stale or unpai
       assert.deepEqual(manifest.units.map((unit) => unit.state_id), validFilter.split(','));
       assert.deepEqual(manifest.review_groups.map((group) => group.state_ids), [validFilter.split(',')]);
     }
-    for (const [name, filter, reason] of [
+    const rejections = await Promise.allSettled([
       ['stale', 'slide-two--base,missing--state', /did not capture requested states: missing--state/],
       ['unpaired', 'slide-two--base', /requires paired evidence/],
       ['orphan', 'slide-two--drill--state-1-progressive-evidence', /requires two distinct states/],
-    ]) {
-      const rejected = verify(artifact, path.join(workDir, `${name}.json`), ['--screens', path.join(workDir, 'screens')], filter);
+    ].map(async ([name, filter, reason]) => {
+      const rejected = await verify(artifact, path.join(workDir, `${name}.json`), ['--screens', path.join(workDir, 'screens')], filter);
       assert.equal(rejected.review_contract.complete, false);
       assert.match(rejected.review_contract.missing.join('\n'), reason);
       assert.ok(rejected.checks.some((check) => check.status === 'fail'), 'a capture failure must retain its mechanics report');
+    }));
+    for (const result of rejections) {
+      if (result.status === 'rejected') throw result.reason;
     }
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });

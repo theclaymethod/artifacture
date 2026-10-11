@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { spawn } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import { parseHTML } from 'linkedom';
 import { checkComponentRegistry } from '../components/check.mjs';
 import { sharedComponents } from './integrity.mjs';
@@ -36,9 +37,10 @@ function run(args, exporter = 'export') {
       cwd: repoRoot,
       stdio: 'inherit',
     });
-    child.on('exit', (code) => {
+    child.on('error', reject);
+    child.on('close', (code, signal) => {
       if (code === 0) resolve();
-      else reject(new Error(`${exporter} failed with exit code ${code}`));
+      else reject(new Error(`${exporter} failed (${signal ?? code})`));
     });
   });
 }
@@ -176,39 +178,50 @@ console.log('component copy closures in sync');
 await assertRosterInSync();
 console.log('component roster in sync');
 
-for (const [source, out] of outputs) {
-  await run([source, '--out', out]);
-  await assertGenerated(out);
-  await assertSourceRendersContent(source);
-}
-
-const staticExample = [
-  'examples/visual-explainer-mdx/video-longform.tsx',
-  'dist/visual-explainer-mdx/video-longform-static.html',
+const staticSource = 'examples/visual-explainer-mdx/video-longform.tsx';
+const jobs = [
+  // This longer sequence owns its canary and temporary outputs; start it early.
+  () => run([], 'check-integrity'),
+  ...outputs.map(([source, out]) => async () => {
+    await run([source, '--out', out]);
+    await assertGenerated(out);
+    await assertSourceRendersContent(source);
+  }),
+  async () => {
+    const out = 'dist/visual-explainer-mdx/video-longform-static.html';
+    await run([staticSource, '--out', out], 'export-static');
+    await assertStaticGenerated(out);
+    console.log('static export ok');
+  },
+  async () => {
+    const out = 'dist/visual-explainer-mdx/video-longform/index.html';
+    await run([staticSource, '--out', out], 'graphic-video');
+    await assertStaticGenerated(out, true);
+    console.log('bundled graphic video export ok');
+  },
+  async () => {
+    const out = 'dist/visual-explainer-mdx/math-activation/index.html';
+    await run(['examples/visual-explainer-mdx/math-activation.tsx', '--out', out], 'graphic-video');
+    await assertStaticGenerated(out, true);
+    console.log('mathematical graphic video export ok');
+  },
 ];
-await run([staticExample[0], '--out', staticExample[1]], 'export-static');
-await assertStaticGenerated(staticExample[1]);
-console.log('static export ok');
 
-const graphicVideoOut = 'dist/visual-explainer-mdx/video-longform/index.html';
-await run([staticExample[0], '--out', graphicVideoOut], 'graphic-video');
-await assertStaticGenerated(graphicVideoOut, true);
-console.log('bundled graphic video export ok');
-
-const mathVideoOut = 'dist/visual-explainer-mdx/math-activation/index.html';
-await run(['examples/visual-explainer-mdx/math-activation.tsx', '--out', mathVideoOut], 'graphic-video');
-await assertStaticGenerated(mathVideoOut, true);
-console.log('mathematical graphic video export ok');
-
-await new Promise((resolve, reject) => {
-  const child = spawn(process.execPath, ['scripts/ve-mdx/check-integrity.mjs'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
-  child.on('exit', (code) => {
-    if (code === 0) resolve();
-    else reject(new Error(`integrity fixture check failed with exit code ${code}`));
-  });
-});
+let failed = false;
+const exportJobs = availableParallelism() >= 8 ? 3 : Math.min(2, availableParallelism());
+const results = await Promise.allSettled(Array.from({ length: exportJobs }, async () => {
+  while (!failed && jobs.length) {
+    const job = jobs.shift();
+    try {
+      await job();
+    } catch (error) {
+      failed = true;
+      throw error;
+    }
+  }
+}));
+for (const result of results) {
+  if (result.status === 'rejected') throw result.reason;
+}
 
 console.log('ve:check passed');
