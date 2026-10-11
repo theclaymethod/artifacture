@@ -1,0 +1,13 @@
+{
+  "id": "pr-review",
+  "kind": "video",
+  "purpose": "Review a change through evidence, before/after behavior and its tradeoffs.",
+  "type": "recipe",
+  "references": [
+    "fframes",
+    "diagram-design",
+    "manim"
+  ],
+  "output": "MP4",
+  "preview": null
+}

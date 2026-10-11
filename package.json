@@ -1,16 +1,15 @@
 {
   "name": "artifacture",
-  "version": "0.10.0",
+  "version": "1.0.0-next.0",
   "type": "module",
-  "description": "Charts, diagrams, and presentations from editable source, exported as standalone HTML.",
+  "description": "Opinionated MDX, slide and native video templates with project-owned rendering.",
   "keywords": [
     "claude-code-plugin",
     "agent-skill"
   ],
   "license": "MIT",
   "bin": {
-    "artifacture": "scripts/artifacture.mjs",
-    "artifacture-preview": "plugins/visual-explainer/scripts/preview.mjs"
+    "artifacture": "scripts/artifacture.mjs"
   },
   "engines": {
     "node": ">=22.12.0"
@@ -19,7 +18,7 @@
     "components": "node scripts/artifacture.mjs",
     "build:skill-runtime": "node scripts/build-skill-runtime.mjs",
     "check:skill-runtime": "node scripts/build-skill-runtime.mjs --check",
-    "prepack": "npm run check:diagram-examples && npm run check:pr-lens-examples && npm run check:chalkboard-examples && node scripts/components/check.mjs && npm run build:skill-runtime",
+    "prepack": "node --check scripts/artifacture.mjs && node --check scripts/templates.mjs && node scripts/check-manifests.mjs",
     "lint": "oxlint .",
     "ve:export": "node scripts/ve-mdx/export.mjs",
     "ve:export-static": "node scripts/ve-mdx/export-static.mjs",
@@ -40,7 +39,7 @@
     "ve:select-visual-model-policy": "node evals/visual-model-policy/select.mjs",
     "check:manifests": "node scripts/check-manifests.mjs",
     "typecheck": "tsc --noEmit",
-    "check:fast": "npm run check:skill-runtime && npm test && npm run typecheck && npm run check:manifests && npm run ve:check",
+    "check:fast": "npm test && npm run typecheck && npm run check:manifests && npm run ve:check",
     "check": "node evals/check-with-budget.mjs",
     "check:release": "npm run check && node evals/product-benchmark/check.mjs --json",
     "ve:learn": "node scripts/ve-mdx/learn.mjs",
@@ -57,7 +56,13 @@
     "build:chalkboard-examples": "node scripts/build-chalkboard-examples.mjs",
     "check:chalkboard-examples": "node scripts/build-chalkboard-examples.mjs --check"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@oxlint/plugins": "^1.79.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "0.186.0",
+    "oxlint": "^1.79.0",
+    "typescript": "^6.0.3",
     "@coldtea/pr-lens-cli": "0.13.0",
     "@coldtea/pr-lens-renderer": "0.3.2",
     "@coldtea/pr-lens-schema": "0.7.0",
@@ -78,18 +83,40 @@
     "svg-path-properties": "2.1.0",
     "tailwindcss": "^4.3.0",
     "three": "0.186.1",
-    "vite": "^8.0.12"
-  },
-  "devDependencies": {
-    "@oxlint/plugins": "^1.79.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@types/three": "0.186.0",
-    "oxlint": "^1.79.0",
-    "typescript": "^6.0.3"
+    "vite": "^8.0.12",
+    "vite-plugin-singlefile": "2.3.3"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/theclaymethod/artifacture.git"
-  }
+  },
+  "peerDependencies": {
+    "@mdx-js/rollup": "^3.1.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@tailwindcss/vite": "^4.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@mdx-js/rollup": {
+      "optional": true
+    },
+    "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "@tailwindcss/vite": {
+      "optional": true
+    }
+  },
+  "exports": {
+    "./vite": "./scripts/vite.mjs"
+  },
+  "files": [
+    "scripts/artifacture.mjs",
+    "scripts/templates.mjs",
+    "scripts/vite.mjs",
+    "templates/",
+    "plugins/visual-explainer/SKILL.md",
+    "plugins/visual-explainer/scripts/artifacture.mjs",
+    "docs/workspaces.md",
+    "plugins/visual-explainer/references/animation-skills.md"
+  ]
 }

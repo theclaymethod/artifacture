@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+public/media/*.mp4
+public/media/*.jpg
+public/media/*.zip
+public/vendor/

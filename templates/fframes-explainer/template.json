@@ -1,0 +1,19 @@
+{
+  "id": "fframes-explainer",
+  "kind": "video",
+  "purpose": "Compose an explainer in an editable native FFrames multi-scene project.",
+  "type": "fframes",
+  "references": [
+    "fframes",
+    "iso-glow",
+    "hairline",
+    "manim",
+    "frankenmanim",
+    "motionmaxxing"
+  ],
+  "skills": [
+    "https://fframes.studio"
+  ],
+  "output": "MP4",
+  "preview": null
+}
