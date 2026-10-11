@@ -13,6 +13,7 @@ import { highlightRefs, preflightSource } from './integrity.mjs';
 import { checkTrustMapPage, handCopied } from './trust-map-checks.mjs';
 import { injectDesignSystemCss, presetNamesInSource, resolvePresetCssForExport } from './design-systems.mjs';
 import { DEFAULT_PRESET } from '../../visual-explainer-mdx/preset-policy.mjs';
+import { explainerTypeCss, explainerTypeName } from '../../visual-explainer-mdx/explainer-type.mjs';
 
 // The web fonts that each built-in preset sets. themes.css imports every family for every preset;
 // an MDX export keeps only the families its presets use, as variable weight ranges, so the page
@@ -227,7 +228,13 @@ async function main() {
       generated = injectDesignSystemCss(generated, designSystemCss);
     }
 
-    if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
+    if (trustMap) {
+      // A trust-map explainer embeds its own fonts (visual-explainer-mdx/explainer-type.mjs) and
+      // loads nothing from a font service, so it reads the same offline.
+      const type = explainerTypeName();
+      generated = generated.replace(FONT_IMPORT, '').replace(/<link rel="preconnect" href="https:\/\/fonts\.(?:googleapis|gstatic)\.com"(?: crossorigin)?>/g, '');
+      generated = generated.replace('</head>', () => `<style data-ve-explainer-type="${type}">\n${explainerTypeCss(type)}\n</style>\n</head>`);
+    } else if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
     if (markup !== null) generated = generated.replace('<div id="root"></div>', () => `<div id="root">${markup}</div>`);
     // The trust map that the page was built from: its head and the SHA-256 of the file, so a
     // reader (or understando review) can tell when the explainer is stale.

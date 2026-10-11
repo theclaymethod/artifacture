@@ -181,5 +181,11 @@
     "revision": "8c8ec0f2a6f6c9a0da15cd24f7b1298ab298368c",
     "license": "Apache-2.0",
     "integration": "Eight monotone curves adapted from runtime/motion.js into the existing absolute-time sampler. No playback runtime, reference footage or third-party bundled libraries copied. MOTIONMAXXING-LICENSE and MOTIONMAXXING-NOTICE accompany the copyable leaf."
+  },
+  "explainer-fonts": {
+    "repository": "https://github.com/fontsource/font-files",
+    "revision": "@fontsource 5.3.x (source-serif-4 5.3.1)",
+    "license": "OFL-1.1",
+    "integration": "Subset woff2 files (Latin, Latin-1 and used punctuation; 400 and 600, mono 400) of Source Serif 4 (renamed Reading Serif for its Reserved Font Name), IBM Plex Sans and Mono, Literata, Atkinson Hyperlegible Next, JetBrains Mono, Newsreader, Public Sans and Commit Mono in visual-explainer-mdx/fonts, each with its OFL text; see fonts/NOTICE.md. Trust-map explainer exports embed one pairing as data URLs."
   }
 }
