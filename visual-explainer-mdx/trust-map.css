@@ -414,6 +414,92 @@
   font-size: var(--ve-text-small);
 }
 
+/* ---- The lines of a code ref: a gutter with the line number and the diff sign ------------------- */
+
+/* Each line is a row: the gutter holds its number (at the head; a removed line has its number at the
+   base) and a sign (+ added, ~ changed, - removed), so a change never shows by color alone. The
+   added and removed tints keep each syntax token at AA. :where() keeps these rules below a "look
+   closely" flag, which marks its line on top. */
+[data-ve-code-lines] .ve-code-block .ve-code-shiki pre {
+  padding-inline: 0;
+}
+
+/* A column of lines: a flex container drops the newline text between them, so tinted rows touch. */
+[data-ve-code-lines] .ve-code-block .ve-code-shiki code {
+  display: flex;
+  flex-direction: column;
+}
+
+:where([data-ve-code-lines]) .ve-code-shiki .line {
+  display: block;
+  position: relative;
+  padding-right: 1rem;
+  padding-left: calc(var(--ve-line-digits, 3) * 1ch + 3.5ch);
+}
+
+:where([data-ve-code-lines]) .ve-line-gutter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 0.75ch;
+  padding-left: 1ch;
+  color: var(--ve-code-muted);
+  user-select: none;
+}
+
+:where([data-ve-code-lines]) .ve-line-no {
+  width: calc(var(--ve-line-digits, 3) * 1ch);
+  text-align: right;
+}
+
+:where([data-ve-code-lines]) .ve-line-sign {
+  width: 1ch;
+  font-weight: var(--ve-weight-strong);
+}
+
+:where([data-ve-code-lines]) .line:is([data-ve-line="add"], [data-ve-line="mod"]) {
+  background: var(--ve-code-add-bg);
+  box-shadow: inset 3px 0 0 var(--ve-code-add);
+}
+
+:where([data-ve-code-lines]) .line[data-ve-line="mod"] {
+  box-shadow: inset 3px 0 0 var(--ve-code-change);
+}
+
+:where([data-ve-code-lines]) .line[data-ve-line="remove"] {
+  background: var(--ve-code-remove-bg);
+  box-shadow: inset 3px 0 0 var(--ve-code-remove);
+}
+
+:where([data-ve-code-lines]) .line[data-ve-line="add"] .ve-line-sign { color: var(--ve-code-add); }
+:where([data-ve-code-lines]) .line[data-ve-line="mod"] .ve-line-sign { color: var(--ve-code-change); }
+:where([data-ve-code-lines]) .line[data-ve-line="remove"] .ve-line-sign { color: var(--ve-code-remove); }
+
+/* The key of the signs under the code, on the page surface. */
+.ve-line-key {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 var(--ve-space-3);
+  margin-right: var(--ve-space-3);
+  color: var(--ve-muted);
+}
+
+.ve-line-key .ve-line-sign {
+  display: inline-block;
+  min-width: 2ch;
+  border-radius: 2px;
+  font-family: var(--ve-font-mono);
+  font-weight: var(--ve-weight-strong);
+  text-align: center;
+  color: var(--ve-key-ink);
+  background: color-mix(in srgb, var(--ve-key-ink) 14%, transparent);
+}
+
+.ve-line-key [data-ve-line="add"] { --ve-key-ink: var(--ve-status-ok); }
+.ve-line-key [data-ve-line="mod"] { --ve-key-ink: var(--ve-status-info); }
+.ve-line-key [data-ve-line="remove"] { --ve-key-ink: var(--ve-status-err); }
+
 [data-ve-tiers] {
   color: var(--ve-muted);
   font-size: var(--ve-text-small);

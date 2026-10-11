@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { setupRuntime } from './setup-runtime.mjs';
+import { access } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-try {
-  const command = process.argv[2];
-  const root = await setupRuntime({ install: ['path', 'export', 'export-static', 'video', 'fframes', 'pr-lens', 'source-video', 'chart', 'archify', 'verify', 'finalize', 'pdf'].includes(command) });
-  if (command === 'path') console.log(root);
-  else await import(pathToFileURL(join(root, 'scripts/artifacture.mjs')).href);
-} catch (error) {
-  console.error(`artifacture: ${error.message}`);
-  process.exitCode = 1;
-}
+const checkout = process.env.ARTIFACTURE_REPO || resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const cli = resolve(checkout, 'scripts/artifacture.mjs');
+const local = await access(cli).then(() => true, () => false);
+const command = local ? process.execPath : process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const args = local ? [cli, ...process.argv.slice(2)] : ['--yes', 'artifacture@1.0.0-next.0', ...process.argv.slice(2)];
+const child = spawn(command, args, { stdio: 'inherit', shell: false });
+child.on('error', error => { console.error(error.message); process.exitCode = 1; });
+child.on('exit', (code, signal) => { process.exitCode = signal ? 1 : code ?? 1; });

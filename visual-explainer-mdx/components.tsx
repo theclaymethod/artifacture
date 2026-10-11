@@ -191,9 +191,11 @@ type ShellProps = {
   /** `auto` follows prefers-color-scheme. The default stays light. */
   appearance?: ExplainerAppearance;
   /**
-   * Chapters as pages: one Section at a time, with previous and next links, a "you are here"
-   * marker in the rail, and a "Read as one page" switch. A fragment link shows the chapter that
+   * Chapters as pages: one Section at a time, with previous and next links, the current chapter
+   * marked in the rail, and a switch to read as one page. A fragment link shows the chapter that
    * holds its target. Without JavaScript, every chapter renders in sequence. Implies chapterNav.
+   * A block in a chapter whose component has a static `chapterMark(props)` gives the chapter its
+   * review mark in the rail.
    */
   paged?: boolean;
   children: ReactNode;
@@ -376,12 +378,26 @@ export function ExplainerShell({
   );
 }
 
+/** A component that gives the rail the review state of the chapter that holds it. */
+type ChapterMarkSource = { chapterMark?: (props: unknown) => ReactNode };
+
+/** The rail mark of a chapter: from the first of its blocks whose component has a static `chapterMark`. */
+function chapterMark(children: ReactNode): ReactNode {
+  let mark: ReactNode = null;
+  Children.forEach(children, (child) => {
+    if (mark !== null || !isValidElement(child) || typeof child.type === 'string') return;
+    const source = (child.type as ChapterMarkSource).chapterMark;
+    if (source) mark = source(child.props);
+  });
+  return mark;
+}
+
 function collectChapters(children: ReactNode): Chapter[] {
   const chapters: Chapter[] = [];
   Children.forEach(children, (child) => {
     if (!isValidElement<SectionProps>(child) || child.type !== Section) return;
     const { id, title, navLabel, anchors } = child.props;
-    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors });
+    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors, mark: chapterMark(child.props.children) });
   });
   return chapters;
 }

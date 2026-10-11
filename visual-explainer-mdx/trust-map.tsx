@@ -3,7 +3,7 @@
 // these components drop in the levels that come from data. Each one validates its input and
 // throws on bad data, so the static pre-render of `ve:export` fails the export.
 // The card plugins/visual-explainer/cards/trust-map.md holds the data contract.
-import { Children, cloneElement, Fragment, isValidElement, useContext, useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
+import { Children, cloneElement, Fragment, isValidElement, useContext, useEffect, useId, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react';
 import { ChapterContext } from './chapter-context';
 import { isPlainWord, MAX_TERMS_PER_CHAPTER } from './glossary-policy.mjs';
 import { CodeBlock, DiffBlock, TerminalBlock, type DiffRow } from './code-blocks';
@@ -19,7 +19,7 @@ import {
   FLAG_TONE, GLYPH_FAMILY, glossaryEntries, isAcronym, isTool, KIND_GLYPH, ladder, LADDER_NAMES, lines, MAX_MERGE_ITEMS, MERGE_WORDS,
   norm, OUTCOME, promiseAnchor, promiseRows, reader, repeats, replacedRows, slug, STATE_TONE, strengthOf, strongestTier, STRONG, TIER_WORD,
   TONE, TrustMapError, VERDICT_MEANING, VERDICTS, VISIBLE_UNCLAIMED, weakest,
-  type Claim, type CheckResult, type CodeRefSpec, type DerivedBar, type DerivedClaim, type Tone, type UnclaimedFile, type Control, type DiagramSpec, type Explain, type GlossaryEntry, type Ready, type Refs, type TrustMap, type Verdict, type Verifier,
+  type Claim, type CheckResult, type CodeRefSpec, type ResolvedRef, type DerivedBar, type DerivedClaim, type Tone, type UnclaimedFile, type Control, type DiagramSpec, type Explain, type GlossaryEntry, type Ready, type Refs, type TrustMap, type Verdict, type Verifier,
 } from './trust-map-rules';
 import './trust-map.css';
 
@@ -214,12 +214,66 @@ const languageOf = (path: string) => LANGUAGE[path.slice(path.lastIndexOf('.'))]
 /** The lines of a code ref at the PR head, from refs.resolved.json, with a link to them. Code never comes from typed text. */
 export function CodeRef({ refs, ...ref }: { refs: Refs } & CodeRefSpec) {
   if (!refs?.refs) throw new TrustMapError('CodeRef needs refs={refs} (refs.resolved.json)');
-  const r = findRef(refs, ref);
-  const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
+  return <RefCode r={findRef(refs, ref)} refs={refs} />;
+}
+
+type LineKind = 'add' | 'mod' | 'remove' | 'same';
+const LINE_SIGN: Record<LineKind, string> = { add: '+', mod: '~', remove: '-', same: ' ' };
+const LINE_WORD: Record<LineKind, string> = { add: 'added', mod: 'changed', remove: 'removed', same: '' };
+const escapeCode = (text: string) => text.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]!));
+
+/**
+ * The highlighted lines of a ref with their diff status: a gutter with the line number and a sign
+ * (+ added, ~ changed, - removed), and the removed base lines inline. A head line has its number at
+ * the head, a removed line its number at the base. An older refs.resolved.json, with no `changes`,
+ * marks the added lines of `diff.added` only. A "look closely" flag marks its own line.
+ */
+function refLines(refs: Refs, r: ResolvedRef, mark?: { line: number; level: string }) {
+  const range = (spans: Array<[number, number]>) => spans.flatMap(([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i));
+  const changes = r.changes ?? { added: range(refs.diff.added[r.path] ?? []), modified: [], removed: [] };
+  const added = new Set(changes.added);
+  const modified = new Set(changes.modified);
+  const html = r.html ?? `<pre class="shiki"><code>${r.excerpt.split('\n').map((l) => `<span class="line">${escapeCode(l)}</span>`).join('\n')}</code></pre>`;
+  const parts = /^([\s\S]*?<code[^>]*>)([\s\S]*)(<\/code>[\s\S]*)$/.exec(html) ?? ['', '<pre class="shiki"><code>', escapeCode(r.excerpt), '</code></pre>'];
+  const inner = (line: string) => line.replace(/^<span class="line">/, '').replace(/<\/span>$/, '');
+  const row = (kind: LineKind, no: number, code: string, flag = '') =>
+    `<span class="line" data-ve-line="${kind}"${flag}><span class="ve-line-gutter"><span class="ve-line-no">${no}</span><span class="ve-line-sign"${kind === 'same' ? '' : ` title="${LINE_WORD[kind]}"`}>${LINE_SIGN[kind]}</span></span>${code}</span>`;
+  const removedBefore = (test: (at: number) => boolean) => changes.removed.filter((x) => test(x.at)).map((x) => row('remove', x.base, x.html ?? escapeCode(x.text)));
+  const kinds = new Set<LineKind>(changes.removed.length ? ['remove'] : []);
+  const out: string[] = [];
+  parts[2].split('\n').forEach((line, i) => {
+    const no = r.start + i;
+    out.push(...removedBefore((at) => (i === 0 ? at <= no : at === no)));
+    const kind: LineKind = modified.has(no) ? 'mod' : added.has(no) ? 'add' : 'same';
+    kinds.add(kind);
+    out.push(row(kind, no, inner(line), mark && mark.line === no ? ` data-ve-flag="${mark.level}"` : ''));
+  });
+  out.push(...removedBefore((at) => at > r.end));
+  const digits = String(Math.max(r.end, ...changes.removed.map((x) => x.base))).length;
+  return { html: parts[1] + out.join('\n') + parts[3], kinds, digits };
+}
+
+/** The key of the signs that a ref shows: each sign in its own gutter style, with its word. */
+function LineKey({ kinds }: { kinds: Set<LineKind> }) {
+  const shown = (['add', 'mod', 'remove'] as const).filter((k) => kinds.has(k));
+  if (!shown.length) return null;
   return (
-    <div className="ve-code-ref" data-ve-code-ref>
-      <CodeBlock code={r.excerpt} filename={name} html={r.html} language={r.language} />
-      {r.permalink ? <p><a href={r.permalink}>Open these lines at the PR head</a></p> : null}
+    <span className="ve-line-key">
+      {shown.map((k) => <span data-ve-line={k} key={k}><span className="ve-line-sign">{LINE_SIGN[k]}</span> {LINE_WORD[k]}{k === 'remove' ? ' (its number is before the PR)' : ''}</span>)}
+    </span>
+  );
+}
+
+/** A resolved ref as code: its highlighted lines with their diff status, a key of the signs, and a link to the lines at the PR head. */
+function RefCode({ refs, r, mark }: { refs: Refs; r: ResolvedRef; mark?: { line: number; level: string } }) {
+  const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
+  const created = refs.diff.created.includes(r.path);
+  const { html, kinds, digits } = refLines(refs, r, mark);
+  const some = kinds.has('add') || kinds.has('mod') || kinds.has('remove');
+  return (
+    <div className="ve-code-ref" data-ve-changed={created ? 'new' : some ? 'changed' : 'context'} data-ve-code-lines data-ve-code-ref data-ve-marked={mark ? 'true' : undefined} style={{ '--ve-line-digits': digits } as CSSProperties}>
+      <CodeBlock code={r.excerpt} filename={name} html={html} language={r.language} />
+      <p>{mark ? `Line ${mark.line} is the one to look at. ` : ''}{created ? 'A new file: each line is new. ' : ''}<LineKey kinds={kinds} />{r.permalink ? <a href={r.permalink}>Open these lines at the PR head</a> : null}</p>
     </div>
   );
 }
@@ -520,30 +574,15 @@ export function BarCard({ bar }: { bar: DerivedBar }) {
 }
 
 /**
- * The lines of a ref at the PR head, as the diff spine shows them: a + marks each line that this
- * PR adds (a new file is all new, so it shows plain). A ref with no lines is a link to read.
+ * The lines of a ref at the PR head, as the diff spine shows them, with their diff status (RefCode).
+ * A ref with no lines is a link to read.
  */
 export function ChangedCode({ refs, codeRef, label, mark }: { refs: Refs; codeRef: CodeRefSpec; label?: string; mark?: { line: number; level: string } }) {
   const r = findRef(refs, codeRef);
-  const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
   if (r.link_only || !r.excerpt) {
     return <p className="ve-changed-link" data-ve-code-link>{r.permalink ? <a href={r.permalink}>{label ?? `Read ${codeRef.symbol ?? 'the change'} at the PR head`}</a> : label}<span className="ve-quiet"> Lines {r.start} to {r.end}.</span></p>;
   }
-  const created = refs.diff.created.includes(r.path);
-  const added = new Set((refs.diff.added[r.path] ?? []).flatMap(([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i)));
-  let n = r.start;
-  // A "look closely" flag marks its own line, with its level in words for a screen reader.
-  const tag = (at: number) => (mark && mark.line === at ? ` data-ve-flag="${mark.level}"` : '');
-  const open = (at: number) => `<span class="line"${!created && added.has(at) ? ' data-ve-added="true"' : ''}${tag(at)}>`;
-  const base = r.html ?? `<pre class="shiki"><code>${r.excerpt.split('\n').map((l) => `<span class="line">${l.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]!))}</span>`).join('\n')}</code></pre>`;
-  const html = base.replace(/<span class="line">/g, () => open(n++));
-  const some = !created && [...Array(r.end - r.start + 1).keys()].some((i) => added.has(r.start + i));
-  return (
-    <div className="ve-code-ref" data-ve-changed={created ? 'new' : some ? 'changed' : 'context'} data-ve-code-ref data-ve-marked={mark ? 'true' : undefined}>
-      <CodeBlock code={r.excerpt} filename={name} html={html} language={r.language} />
-      <p>{mark ? `Line ${mark.line} is the one to look at. ` : ''}{created ? 'A new file: each line is new. ' : some ? 'A + marks each line that this PR adds. ' : ''}{r.permalink ? <a href={r.permalink}>Open these lines at the PR head</a> : null}</p>
-    </div>
-  );
+  return <RefCode mark={mark} r={r} refs={refs} />;
 }
 
 /** A resolved ref, or null when the build did not resolve it (an older refs.resolved.json). */

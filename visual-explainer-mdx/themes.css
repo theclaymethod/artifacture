@@ -540,6 +540,7 @@
     --ve-syntax-punctuation: #c9d1d9;
     --ve-code-add: #56d364;
     --ve-code-remove: #ff8f84;
+    --ve-code-change: #8db4ff;
     --ve-code-add-bg: color-mix(in srgb, var(--ve-code-add) 16%, var(--ve-code-bg));
     --ve-code-remove-bg: color-mix(in srgb, var(--ve-code-remove) 16%, var(--ve-code-bg));
   }
@@ -609,6 +610,7 @@
     --ve-syntax-punctuation: var(--ve-code-text);
     --ve-code-add: var(--ve-code-text);
     --ve-code-remove: var(--ve-code-text);
+    --ve-code-change: var(--ve-code-text);
   }
 
 
@@ -621,7 +623,8 @@
     --ve-code-muted: #57606a;
     --ve-code-rule: color-mix(in srgb, #1f2328 12%, transparent);
     --ve-code-accent: #05697b;
-    --ve-syntax-keyword: #8250df;
+    /* Each token keeps AA on the plate and on the added and removed tints (lowest: comment 5.6:1 on #ffebe9). */
+    --ve-syntax-keyword: #6639ba;
     --ve-syntax-string: #0a3069;
     --ve-syntax-constant: #0550ae;
     --ve-syntax-function: #953800;
@@ -630,6 +633,9 @@
     --ve-syntax-punctuation: #1f2328;
     --ve-code-add: #116329;
     --ve-code-remove: #a40e26;
+    --ve-code-change: #0550ae;
+    --ve-code-add-bg: #dafbe1;
+    --ve-code-remove-bg: #ffebe9;
   }
 
 }

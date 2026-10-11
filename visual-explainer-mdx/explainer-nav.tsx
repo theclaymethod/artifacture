@@ -1,8 +1,13 @@
-import { createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import './explainer-nav.css';
 
 export type ChapterAnchor = { id: string; label: string };
-export type Chapter = { id: string; label: string; anchors?: readonly ChapterAnchor[] };
+/**
+ * One chapter of the rail. `mark` is its review state, shown after the label in the page's mark
+ * language (a tone mark or a count). A component in a chapter gives it with a static
+ * `chapterMark(props)`; see ExplainerShell.
+ */
+export type Chapter = { id: string; label: string; anchors?: readonly ChapterAnchor[]; mark?: ReactNode };
 export type ExplainerAppearance = 'light' | 'dark' | 'auto';
 
 export type ReadMode = 'pages' | 'one';
@@ -65,7 +70,7 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
   label?: string;
   /** A paged shell names its current chapter; the rail then marks it instead of following the scroll. */
   current?: string;
-  /** The reading mode of a paged shell, and its switch: "Read as one page" or "Read by chapter". */
+  /** The reading mode of a paged shell, and its switch: read by chapter, or as one page. */
   mode?: 'pages' | 'one';
   onMode?: (mode: 'pages' | 'one') => void;
 }) {
@@ -115,6 +120,7 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
   const shown = current ?? active;
   const activeChapter = chapters.find((chapter) => chapter.id === shown || chapter.anchors?.some((anchor) => anchor.id === shown)) ?? chapters[0];
   const position = activeChapter ? chapters.indexOf(activeChapter) + 1 : 0;
+  const modeId = `${listId}-mode`;
 
   return (
     <nav aria-label={label} className="ve-chapter-rail" data-ve-chapter-rail data-ve-open={open ? 'true' : 'false'}>
@@ -126,21 +132,25 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
         ref={toggleRef}
         type="button"
       >
-        <span className="ve-chapter-count">{position}/{chapters.length}</span>
+        <span className="ve-chapter-count">{position} of {chapters.length}</span>
         <span className="ve-chapter-current">{activeChapter?.label ?? label}</span>
-        <span aria-hidden="true" className="ve-chapter-caret">{open ? '−' : '+'}</span>
+        <svg aria-hidden="true" className="ve-chapter-caret" height="12" viewBox="0 0 12 12" width="12">
+          <path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+        </svg>
       </button>
       <div className="ve-chapter-panel">
-        <p className="ve-chapter-heading">{label}</p>
+        <p aria-hidden="true" className="ve-chapter-heading">{label}</p>
         <ol className="ve-chapter-list" id={listId}>
           {chapters.map((chapter, index) => {
             const isCurrent = chapter === activeChapter;
-            const here = current !== undefined && isCurrent;
+            // A paged shell names its page; one page follows the scroll. Only a screen reader hears "current".
+            const currentKind = current !== undefined ? (isCurrent ? 'page' : undefined) : active === chapter.id ? 'location' : undefined;
             return (
-              <li data-ve-current={isCurrent ? 'true' : undefined} data-ve-here={here ? 'true' : undefined} key={chapter.id}>
-                <a aria-current={here ? 'page' : current === undefined && active === chapter.id ? 'location' : undefined} href={`#${chapter.id}`} onClick={() => setOpen(false)}>
+              <li data-ve-current={isCurrent ? 'true' : undefined} key={chapter.id}>
+                <a aria-current={currentKind} href={`#${chapter.id}`} onClick={() => setOpen(false)}>
                   <span aria-hidden="true" className="ve-chapter-index">{String(index + 1).padStart(2, '0')}</span>
-                  <span className="ve-chapter-label">{chapter.label}{here ? <span className="ve-chapter-here">You are here</span> : null}</span>
+                  <span className="ve-chapter-label">{chapter.label}</span>
+                  {chapter.mark ?? null}
                 </a>
                 {chapter.anchors?.length ? (
                   <ol className="ve-chapter-anchors">
@@ -156,9 +166,21 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
           })}
         </ol>
         {mode && onMode ? (
-          <button className="ve-read-mode" data-ve-read-mode={mode} onClick={() => { onMode(mode === 'pages' ? 'one' : 'pages'); setOpen(false); }} type="button">
-            {mode === 'pages' ? 'Read as one page' : 'Read by chapter'}
-          </button>
+          // A quiet two-way switch at the foot of the rail, like the view switches of the figures.
+          <div aria-labelledby={modeId} className="ve-read-mode" data-ve-read-mode={mode} role="group">
+            <span className="ve-read-mode-label" id={modeId}>Read</span>
+            {(['pages', 'one'] as const).map((value) => (
+              <button
+                aria-pressed={mode === value}
+                data-ve-read-mode-option={value}
+                key={value}
+                onClick={() => { if (mode !== value) onMode(value); setOpen(false); }}
+                type="button"
+              >
+                {value === 'pages' ? 'by chapter' : 'as one page'}
+              </button>
+            ))}
+          </div>
         ) : null}
       </div>
     </nav>
