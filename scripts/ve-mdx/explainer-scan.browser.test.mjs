@@ -284,83 +284,289 @@ test('review-scan at 375px: compact top bar, keyboard disclosure, card rows, red
   }
 });
 
-test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, and the export checks', async () => {
+// ---- The guided review: the trust-map explainer as chapters ----------------------------------
+
+const derivedOf = (dir) => JSON.parse(readFileSync(path.join(dir, 'refs.resolved.json'), 'utf8')).derived;
+const visibleChapters = (page) => page.$$eval('section.ve-section[id^="ch-"]', (s) => s.filter((x) => !x.hidden && x.getBoundingClientRect().height > 0).map((x) => x.id));
+
+test('guided review: the export checks, the stamp, and the page without JavaScript', async () => {
   // The export fails on bad data and on an ID in the narrative prose.
   assert.notEqual(trust.noAction.status, 0);
   assert.match(trust.noAction.out, /needs a reviewer_action/);
   assert.notEqual(trust.idInProse.status, 0);
   assert.match(trust.idInProse.out, /the ID K01 is in the narrative prose/);
 
-  // The page names the trust map that it was built from.
   const html = readFileSync(trust.html, 'utf8');
   assert.ok(html.includes(`<meta name="ve-trust-map-head" content="${trust.map.head}">`));
   const sha = createHash('sha256').update(readFileSync(path.join(trust.dir, 'trust-map.json'))).digest('hex');
   assert.ok(html.includes(`<meta name="ve-trust-map-sha256" content="${sha}">`));
 
-  // Without JavaScript: the merge verdict, the promises, the claims and the verify result show, and a deep link shows its claim.
+  // Without JavaScript: every chapter renders in sequence, readable, with no call control; a deep link shows its claim.
   const off = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
   try {
     const page = await off.newPage();
     await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
+    assert.deepEqual(await visibleChapters(page), ['ch-0', 'ch-1', 'ch-2', 'ch-3', 'ch-4', 'ch-5', 'ch-6', 'ch-7', 'ch-8', 'ch-9']);
     const text = await page.innerText('main');
-    for (const want of ['Can you merge it?', trust.map.promises[0].label, 'checks caught their planted bug', 'changed file']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
-    assert.ok(await page.$eval('#claim-c02 .ve-disclosure-body', (body) => body.getBoundingClientRect().height > 0), 'the no-JS deep link does not show its claim');
+    for (const want of ['Not ready', 'things to review', trust.map.promises[0].label, 'checks caught their planted bug', 'Show the answer', 'wallet/core.py']) assert.ok(text.includes(want), `no-JS text lacks ${want}`);
+    assert.equal(await page.locator('[data-ve-review-call]').first().isVisible(), false, 'a call control shows without JavaScript');
+    assert.ok(await page.$eval('#claim-c02 > .ve-disclosure-body', (body) => body.getBoundingClientRect().height > 0), 'the no-JS deep link does not show its claim');
+    // Each step of the run shows, with no step buttons.
+    assert.equal(await page.locator('.ve-step').count(), 3);
+    assert.equal(await page.locator('[data-ve-step-next]').count(), 0);
   } finally {
     await off.close();
   }
+});
 
-  // With JavaScript: the page hydrates without an error, and a deep link opens the claim and its promise.
-  const on = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+test('guided review: chapters as pages, the rail, the pager, one page, the anchors and the stepper', async () => {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
-    const page = await on.newPage();
+    const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-    await page.goto(pathToFileURL(trust.html).href + '#claim-c02', { waitUntil: 'load' });
-    await page.waitForFunction(() => { const c = document.getElementById('claim-c02'); return c?.open && c.parentElement.closest('details').open; });
-    assert.deepEqual(errors, []);
-    const derived = JSON.parse(readFileSync(path.join(trust.dir, 'refs.resolved.json'), 'utf8')).derived;
-    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), new RegExp(`\\d+ of ${derived.verify.ran} checks caught their planted bug`));
-    assert.ok(await page.$('[data-ve-weak-check] [data-ve-action]'), 'a weak check has no action');
+    const url = pathToFileURL(trust.html).href;
+    await page.goto(url, { waitUntil: 'load' });
+    await page.waitForSelector('main[data-ve-paged="pages"]');
+    assert.deepEqual(await visibleChapters(page), ['ch-0']);
+    assert.equal(await page.textContent('[data-ve-here="true"] .ve-chapter-label'), 'StartYou are here');
 
-    // A claim card: the derived check summary with its count, then the weakest check with an action, then the checks, collapsed.
-    const claim = page.locator('#claim-c01');
-    assert.equal(await claim.locator('[data-ve-checks]').textContent(), derived.claims.C01.summary);
-    assert.match(derived.claims.C01.summary, /^2 checks: /);
-    assert.ok((await claim.locator('[data-ve-weakest] [data-ve-action]').textContent()).trim(), 'the weakest check has no action');
-    assert.equal(await page.locator('#claim-c02 [data-ve-weakest] [data-ve-action]').textContent(), derived.claims.C02.weakest.action);
-    assert.ok(await claim.locator('summary:has-text("Show the 2 checks")').count());
-    // "What we broke" is the full derived sentence, never cut.
-    assert.equal(await page.locator('[data-ve-weak-check] dd').first().textContent(), derived.verify.weak[0].broke);
-    assert.equal(await page.locator('text=...').count(), 0);
+    // Next and previous, with the rail marker following.
+    await page.click('#ch-0 [data-ve-pager-next]');
+    await page.waitForFunction(() => location.hash === '#ch-1' && !document.getElementById('ch-1').hidden);
+    assert.deepEqual(await visibleChapters(page), ['ch-1']);
+    assert.match(await page.textContent('[data-ve-here="true"]'), /The problem and the change/);
+    await page.click('#ch-1 [data-ve-pager-prev]');
+    await page.waitForFunction(() => !document.getElementById('ch-0').hidden);
+    await page.click('.ve-chapter-list a[href="#ch-7"]');
+    await page.waitForFunction(() => !document.getElementById('ch-7').hidden);
+    assert.equal(await page.getAttribute('.ve-chapter-list a[href="#ch-7"]', 'aria-current'), 'page');
 
-    // An old claim id finds the claim that joins it: the deep link opens that claim and its promise.
-    await page.goto(pathToFileURL(trust.html).href + '#claim-c09', { waitUntil: 'load' });
-    await page.waitForFunction(() => { const c = document.getElementById('claim-c02'); return c?.open && c.parentElement.closest('details').open && document.getElementById('claim-c09'); });
-    assert.ok(await page.locator('#claim-c02 summary:has-text("Show the 2 statements that this claim joins")').count());
+    // The old anchors land on the chapter that holds them, and a claim link opens its block.
+    const lands = { merge: 'ch-0', story: 'ch-0', loop: 'ch-2', changed: 'ch-3', unclaimed: 'ch-3', verifiers: 'ch-4', checks: 'ch-5', exercises: 'ch-6', promises: 'ch-7', glossary: 'ch-8', 'promise-p4': 'ch-7', 'claim-c01': 'ch-7', 'claim-c09': 'ch-7' };
+    for (const [anchor, chapter] of Object.entries(lands)) {
+      await page.goto(`${url}#${anchor}`, { waitUntil: 'load' });
+      await page.waitForFunction((c) => document.getElementById(c) && !document.getElementById(c).hidden, chapter);
+      assert.deepEqual(await visibleChapters(page), [chapter], `#${anchor}`);
+      if (anchor.startsWith('claim-') || anchor.startsWith('promise-')) await page.waitForFunction((a) => document.getElementById(a)?.closest('details')?.open, anchor);
+    }
+    await page.waitForFunction(() => document.getElementById('claim-c02').open);
+
+    // Read as one page: every chapter in sequence; the choice stays after a reload.
+    await page.click('.ve-read-mode');
+    await page.waitForSelector('main[data-ve-paged="one"]');
+    assert.equal((await visibleChapters(page)).length, 10);
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForSelector('main[data-ve-paged="one"]');
+    await page.click('.ve-read-mode');
+    await page.waitForSelector('main[data-ve-paged="pages"]');
+
+    // The stepper: one step at a time, Next shows the next.
+    await page.goto(`${url}#ch-2`, { waitUntil: 'load' });
+    await page.waitForSelector('[data-ve-stepping]');
+    assert.equal(await page.locator('.ve-step:visible').count(), 1);
+    await page.click('[data-ve-step-next]');
+    assert.equal(await page.getAttribute('.ve-step:visible', 'id'), 'loop-step-2');
+    assert.equal(await page.textContent('.ve-stepper-count'), 'Step 2 of 3');
     assert.deepEqual(errors, []);
   } finally {
-    await on.close();
+    await context.close();
   }
+});
 
-  // The old shape still exports and renders the claim cards, from the same derived block.
+test('guided review: the checklist order, the calls in local storage, the export, each claim once, and the questions', async () => {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  try {
+    // The export only copies: catch what it writes to the clipboard.
+    await context.addInitScript(() => {
+      window.__copied = [];
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text) => { window.__copied.push(text); } }, configurable: true });
+    });
+    const page = await context.newPage();
+    const sent = [];
+    page.on('request', (r) => { if (r.method() !== 'GET') sent.push(`${r.method()} ${r.url()}`); });
+    await page.goto(pathToFileURL(trust.html).href + '#ch-7', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-7').hidden);
+    const derived = derivedOf(trust.dir);
+
+    // The order is derive.py's: each blocker, then each risk to accept.
+    const want = [...(derived.merge.form === 'not-ready' ? derived.merge.items : []), ...derived.merge.accept].map((i) => i.label.toLowerCase());
+    const got = await page.$$eval('[data-ve-review-item] .ve-review-label', (labels) => labels.map((l) => l.textContent.toLowerCase()));
+    assert.deepEqual(got, want);
+    assert.match(await page.textContent('#merge'), new RegExp(`${want.length} things to review`));
+
+    // Each claim's full detail shows exactly once; every other place shows its row.
+    for (const c of trust.map.claims) {
+      assert.equal(await page.locator(`[id="claim-${c.id.toLowerCase()}"]`).count(), 1, c.id);
+      assert.equal(await page.locator(`[id="claim-${c.id.toLowerCase()}"] [data-ve-trust="claim"]`).count() - await page.locator(`[id="claim-${c.id.toLowerCase()}"] details[id^="claim-"] [data-ve-trust="claim"]`).count(), 1, `${c.id} has one body`);
+    }
+    assert.equal(await page.locator('[data-ve-trust="claim"]').count(), trust.map.claims.length);
+
+    // A call and a note: stored in localStorage under the PR head and the trust-map hash, kept after a reload.
+    const first = page.locator('[data-ve-review-item]').first();
+    await first.locator('summary .ve-disclosure-label').click();
+    await first.getByLabel('Needs a fix').check();
+    await first.locator('textarea').fill('Add the missing fee test.');
+    const sha = createHash('sha256').update(readFileSync(path.join(trust.dir, 'trust-map.json'))).digest('hex');
+    const key = `understando-review:${trust.map.head}:${sha}`;
+    const stored = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), key));
+    const firstKey = await first.getAttribute('data-ve-review-item');
+    assert.deepEqual(stored.calls[firstKey], { call: 'fix', note: 'Add the missing fee test.' });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => document.querySelector('[data-ve-reviewed]')?.textContent.startsWith('1 of'));
+    assert.equal(await page.locator('[data-ve-call-badge="fix"]').count(), 1);
+
+    // Export: Markdown for a PR comment, copied, never sent.
+    await page.locator('#ch-7 [data-ve-export]').click();
+    const copied = await page.evaluate(() => window.__copied.at(-1));
+    assert.match(copied, /^## My review of PR #\d+: Refuse overdrafts in the wallet\n/);
+    assert.match(copied, /### Needs a fix \(1\)\n\n- \*\*Correct fees\*\* \(blocks the merge\): .+\n  - Note: Add the missing fee test\./);
+    assert.match(copied, new RegExp(`### Not reviewed yet \\(${want.length - 1}\\)`));
+    assert.deepEqual(sent, []);
+
+    // The questions come from the derived data: the weakest claim of a weak promise, a bar, a missed check.
+    await page.goto(pathToFileURL(trust.html).href + '#ch-6', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-6').hidden);
+    const q = page.locator('[data-ve-question="q-weakest"]');
+    const row = derived.promises.find((p) => !['Formal', 'Proven'].includes(p.strength) && p.claims.length > 1 && p.claims.filter((c) => derived.claims[c].strength === p.strength).length === 1);
+    const promise = trust.map.promises.find((p) => p.id === row.id);
+    const weakest = trust.map.claims.find((c) => c.id === row.claims[0]);
+    assert.match(await q.locator('h3').textContent(), new RegExp(`"${promise.label}" is ${row.strength}`));
+    await q.getByRole('button', { name: weakest.name, exact: false }).first().click();
+    assert.match(await q.locator('[data-ve-why]').textContent(), /^Right\./);
+    const bar = page.locator('[data-ve-question="q-bar"]');
+    const askedName = /"(.+?)"/.exec(await bar.locator('h3').textContent())?.[1];
+    const asked = trust.map.claims.find((c) => c.name === askedName);
+    const met = derived.claims[asked.id].bar.met;
+    await bar.getByRole('button', { name: 'Yes, it meets its bar' }).click();
+    assert.match(await bar.locator('[data-ve-why]').textContent(), met ? /^Right\./ : /^Not quite: the answer is No, it is below its bar\./);
+    assert.equal(await bar.locator('[data-ve-why] a').first().getAttribute('href'), `#claim-${asked.id.toLowerCase()}`);
+  } finally {
+    await context.close();
+  }
+});
+
+test('guided review: the chapters of the change, the flags, Reviewed, the typed diagram, the full diff and the checks before you approve', async () => {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  try {
+    const page = await context.newPage();
+    const url = pathToFileURL(trust.html).href;
+    await page.goto(url + '#ch-3', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-3').hidden);
+    const derived = derivedOf(trust.dir);
+    const explain = JSON.parse(readFileSync(path.join(trust.dir, 'explain.json'), 'utf8'));
+
+    // The chapters come in derive.py's reading order, each non-test file in exactly one; the tests are no chapter: they show as checks.
+    const chapters = await page.$$eval('[data-ve-change-chapter]', (s) => s.map((x) => x.dataset.veChangeChapter));
+    assert.deepEqual(chapters, derived.spine.groups.filter((g) => g.tier !== 'tests').map((g) => g.id));
+    assert.deepEqual(derived.spine.unassigned, []);
+    for (const f of Object.keys(JSON.parse(readFileSync(path.join(trust.dir, 'refs.resolved.json'), 'utf8')).diff.files)) {
+      assert.equal(await page.locator(`#ch-3 [data-ve-spine-file="${f}"]`).count(), f.startsWith('tests/') ? 0 : 1, f);
+    }
+    assert.match(await page.textContent('[data-ve-spine-tests]'), /2 test files\. They show as the checks they provide/);
+    // Each chapter of the explain step explains its idea in one or two paragraphs.
+    for (const c of explain.change.chapters) assert.equal(await page.locator(`[data-ve-change-chapter="${c.id}"] .ve-change-explain`).count(), c.explain.length);
+
+    // "Look closely": each derived flag shows once in its file, pinned to its line, with its level and its trigger.
+    const flags = derived.spine.groups.flatMap((g) => g.files.flatMap((f) => f.flags));
+    assert.ok(flags.length, 'the fixture has a check that cannot fail, so it has a flag');
+    for (const x of flags) {
+      const block = page.locator(`[data-ve-spine-file="${x.path}"] .ve-flag-block`);
+      assert.match(await block.first().textContent(), new RegExp(`${x.level === 'risk' ? 'Risk' : x.level === 'question' ? 'Question' : 'Nit'}.*When:`));
+    }
+
+    // Reviewed: a box per chapter, stored with the calls, counted in the chapter progress.
+    await page.locator('[data-ve-chapter-reviewed="refuse"] input').check();
+    await page.waitForFunction(() => document.querySelector('[data-ve-chapter-progress]')?.textContent.startsWith('1 of'));
+    const sha = createHash('sha256').update(readFileSync(path.join(trust.dir, 'trust-map.json'))).digest('hex');
+    const stored = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), `understando-review:${trust.map.head}:${sha}`));
+    assert.deepEqual(stored.calls['chapter:refuse'], { reviewed: true });
+
+    // The typed diagram: After shows the steps the PR adds, Before hides them; an actor links to its chapter.
+    const seq = page.locator('[data-ve-typed="sequence"]').first();
+    const added = explain.diagrams.withdrawal.steps.filter((x) => x.status === 'added').length;
+    const all = explain.diagrams.withdrawal.steps.filter((x) => x.from).length;
+    assert.equal(await seq.locator('.ve-dd-msg').count(), all);
+    await seq.getByLabel('Before the PR').check();
+    assert.equal(await seq.locator('.ve-dd-msg').count(), all - added);
+    assert.equal(await seq.locator('svg a').first().getAttribute('href'), '#spine-refuse');
+
+    // The checks: verifiers, not tests. Each claim lists its checks as check rows; each test file shows as the checks it provides.
+    await page.goto(url + '#ch-5', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-5').hidden);
+    for (const c of trust.map.claims) {
+      const n = derived.claims[c.id].checks.filter((x) => x.kind !== 'none').length;
+      assert.equal(await page.locator(`#ch-5 [data-ve-checks-promise] .ve-checks-claim:has([data-ve-claim-row="${c.id.toLowerCase()}"]) > .ve-check-rows > [data-ve-check-row]`).count(), n, c.id);
+    }
+    assert.equal(await page.locator('#ch-5 [data-ve-check-row="v02"][data-ve-result="cannot-fail"]').count() > 0, true);
+    assert.match(await page.textContent('#ch-5'), new RegExp(derived.tests.summary.replace('.', '\\.')));
+    await page.locator('#ch-5 summary:has-text("Show the checks by test file")').click();
+    assert.match(await page.textContent('#ch-5 .ve-checks-file'), /tests\/test_core\.py provides 2 checks/);
+    // A check row keeps its test and its planted bug behind it until the reviewer opens it.
+    const row = page.locator('#ch-5 [data-ve-check-row="v02"]').first();
+    assert.equal(await row.locator('.ve-disclosure-body [data-ve-diff-block]').count(), 0);
+    await row.locator('summary').first().click();
+    await page.waitForFunction(() => document.querySelector('#ch-5 [data-ve-check-row="v02"] .ve-disclosure-body [data-ve-diff-block]'));
+
+    // The full diff: every changed file, in GitHub's order, each with its chapter.
+    await page.goto(url + '#ch-9', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-9').hidden);
+    const order = await page.$$eval('[data-ve-full-diff] > li .ve-file-path', (c) => c.map((x) => x.textContent));
+    assert.equal(order.length, derived.spine.files);
+    assert.deepEqual(order, [...order].sort());
+
+    // Before you approve: each check is a command, lines to read or real inputs, never generic.
+    await page.goto(url + '#verdict-approve', { waitUntil: 'load' });
+    await page.waitForFunction(() => !document.getElementById('ch-8').hidden);
+    const v = trust.map.verifiers.find((x) => x.id === explain.verdict.checks[0].check);
+    assert.match(await page.textContent('[data-ve-approve-item="0"]'), new RegExp(v.command.argv.join(' ').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(await page.textContent('[data-ve-approve-item="1"]'), /Inputs:/);
+  } finally {
+    await context.close();
+  }
+});
+
+for (const scheme of ['light', 'dark']) {
+  test(`guided review at 375px in ${scheme} mode: AA contrast of the review marks, no sideways scroll`, async () => {
+    const context = await browser.newContext({ viewport: { width: 375, height: 812 }, colorScheme: scheme });
+    try {
+      const page = await context.newPage();
+      await page.goto(pathToFileURL(trust.html).href, { waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-paged="pages"]');
+      await page.evaluate(() => { localStorage.setItem('ve-read-mode:' + location.pathname, 'one'); });
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForSelector('main[data-ve-paged="one"]');
+      await page.evaluate(() => document.querySelectorAll('details').forEach((d) => { d.open = true; }));
+      // Buttons ease their colour for 160ms after the theme applies: read the settled colours.
+      await page.waitForTimeout(400);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'the page scrolls sideways');
+      for (const selector of ['.ve-claim-row-note', '.ve-file-row-status', '.ve-review-why', '.ve-review-label', '.ve-bar-card-state', '.ve-churn span', '.ve-review-todo', '.ve-question-option', '.ve-result-card-state', '.ve-pager-key', '.ve-timeline-tag', '.ve-check-row-result', '.ve-check-row-kind', '.ve-check-row-name', '.ve-flag-when', '.ve-chapter-here', '.ve-spine-meta', '.ve-typed-key li']) {
+        for (const pair of await colorPairs(page, selector)) {
+          if (!pair.text) continue;
+          assert.ok(contrast(pair.fg, pair.bg) >= 4.5, `${selector} "${pair.text}" contrast ${contrast(pair.fg, pair.bg).toFixed(2)} in ${scheme}`);
+        }
+      }
+    } finally {
+      await context.close();
+    }
+  });
+}
+
+test('the trust-map PR-body section comes from the same rules as the page', async () => {
   const old = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
+    // The old shape still exports and renders each claim once, from the same derived block.
     const page = await old.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
     await page.goto(pathToFileURL(trust.oldHtml).href + '#claim-c01', { waitUntil: 'load' });
     await page.waitForFunction(() => document.getElementById('claim-c01')?.open);
     assert.deepEqual(errors, []);
     assert.equal(await page.locator('[data-ve-trust="claim"]').count(), trust.map.claims.length);
-    assert.match(await page.textContent('#claim-c01 [data-ve-checks]'), /^2 checks: /);
-    assert.match(await page.textContent('#verifiers [data-ve-trust="verifiers"] > :first-child'), /\d+ of \d+ checks caught their planted bug/);
   } finally {
     await old.close();
   }
-
-  // The PR-body section comes from the same rules as the page.
   const section = path.join(trust.dir, 'pr-section.md');
   const result = spawnSync(process.execPath, ['scripts/ve-mdx/trust-map.mjs', 'pr-section', '--map', path.join(trust.dir, 'trust-map.json'), '--refs', path.join(trust.dir, 'refs.resolved.json'), '--explain', path.join(trust.dir, 'explain.json'), '--out', section], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
@@ -369,4 +575,5 @@ test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, an
   assert.match(body, /\| Claim \| Surface \| Bar \| Strength \| Checks \| Weakest check \|/);
   assert.match(body, /No overdraft: Asserted\. Its 3 claims: 1 Formal, 1 Proven, 1 Asserted\./);
   assert.doesNotMatch(body, /\b(red|green)\b/);
+  assert.doesNotMatch(body, /\btier \d/);
 });

@@ -144,6 +144,50 @@
      }
     ]
    }
+  },
+  "withdrawal": {
+   "kind": "sequence",
+   "title": "One withdrawal",
+   "caption": "Who calls whom when a caller asks for an amount.",
+   "actors": [
+    {
+     "id": "caller",
+     "label": "The caller",
+     "status": "same"
+    },
+    {
+     "id": "wallet",
+     "label": "The withdraw function",
+     "status": "changed",
+     "chapter": "refuse"
+    }
+   ],
+   "steps": [
+    {
+     "from": "caller",
+     "to": "wallet",
+     "label": "take an amount"
+    },
+    {
+     "from": "wallet",
+     "to": "wallet",
+     "label": "compare with the balance",
+     "status": "added"
+    },
+    {
+     "from": "wallet",
+     "to": "caller",
+     "label": "overdraft error",
+     "reply": true,
+     "status": "added"
+    },
+    {
+     "from": "wallet",
+     "to": "caller",
+     "label": "the new balance",
+     "reply": true
+    }
+   ]
   }
  },
  "unclaimed": {
@@ -159,5 +203,65 @@
    "why": "The balance test checks only the type of the result.",
    "fix": "Assert the exact new balance in the test."
   }
- ]
+ ],
+ "change": {
+  "chapters": [
+   {
+    "id": "refuse",
+    "tier": "core",
+    "title": "Refuse an overdraft before paying out",
+    "explain": [
+     "A withdrawal now compares the amount with the balance first. When the amount is larger, the wallet raises an overdraft error and pays nothing, so the balance can never go below zero.",
+     "The contract of the withdraw function states this rule, and a Lean proof checks the same rule for every balance and amount, not only for the test cases."
+    ],
+    "files": [
+     "wallet/core.py",
+     "proofs/"
+    ],
+    "diagrams": [
+     "withdrawal"
+    ]
+   },
+   {
+    "id": "extras",
+    "tier": "supporting",
+    "title": "Add a fee and a denial message",
+    "explain": [
+     "The PR adds a fee function and a message that tells the caller the amount that the wallet refused. The withdraw function does not call either one yet, so they change nothing at run time today.",
+     "No test calls the fee function, and the PR text does not mention it, so its rounding is a gap that you must decide on."
+    ],
+    "files": [
+     "wallet/fees.py",
+     "wallet/messages.py"
+    ]
+   },
+   {
+    "id": "report",
+    "tier": "wiring",
+    "title": "Print the balances from a script",
+    "explain": [
+     "A small script reads the balances and prints a report. It has no claim and no test, and it runs only when a person starts it, so a bug in it shows in the report and not in a payment."
+    ],
+    "files": [
+     "bin/"
+    ]
+   }
+  ]
+ },
+ "verdict": {
+  "checks": [
+   {
+    "text": "Run the balance type test with the overdraft guard removed. It must fail; today it passes, because it only checks that the result is an integer.",
+    "check": "V02"
+   },
+   {
+    "text": "Read the fee function, then work out the fee for 0, 99 and 100: it adds 1 to each, so a withdrawal of 0 pays a fee of 1.",
+    "ref": {
+     "path": "wallet/fees.py",
+     "symbol": "fee"
+    },
+    "inputs": "the amounts 0, 99 and 100"
+   }
+  ]
+ }
 }
