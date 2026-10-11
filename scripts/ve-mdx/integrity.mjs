@@ -18,7 +18,7 @@ export const sharedComponents = new Set([
   'PromiseList', 'UnclaimedChanges', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough', 'WhatChanged',
   // The guided review (guided-review.tsx, typed-diagrams.tsx) and the shared trust-map rows.
   'StepThrough', 'TypedDiagram', 'ApproveChecks', 'ChapterProgress', 'ClaimTimeline', 'DiffSpine', 'EvidenceGuide', 'ExportReview', 'FileCard',
-  'ReviewChecklist', 'ReviewProgress', 'ReviewStart', 'ReviewVerdict', 'UnderstandingCheck', 'VerifierView', 'BarCard', 'BarChip', 'ChangedCode', 'CheckRow', 'ClaimBody', 'ClaimRow',
+  'ReviewChecklist', 'WorkedExample', 'ExamplesFor', 'ReviewProgress', 'ReviewStart', 'ReviewVerdict', 'UnderstandingCheck', 'VerifierView', 'BarCard', 'BarChip', 'ChangedCode', 'CheckRow', 'ClaimBody', 'ClaimRow',
   'GraphicCanvas',
   'PunctumReadout',
   'GraphicSlide',
