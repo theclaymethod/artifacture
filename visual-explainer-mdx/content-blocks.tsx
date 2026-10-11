@@ -289,38 +289,29 @@ export function Term({ definition, expansion, children }: TermProps) {
   );
 }
 
-export type LeadProps = { label?: string; children: ReactNode };
+export type LeadProps = { children: ReactNode };
 
 /**
- * The opener of a level: its answer in plain words, one step larger than body text, with a
- * run-in label. Write one or two sentences that a newcomer can hold.
+ * The opener of a level: its answer, one step larger than body text. Write one or two plain
+ * sentences that a newcomer can hold, with no label in front of them.
  */
-export function Lead({ label = 'In plain words', children }: LeadProps) {
-  return (
-    <div className="ve-lead" data-ve-lead>
-      <LeadBody label={label}>{children}</LeadBody>
-    </div>
-  );
+export function Lead({ children }: LeadProps) {
+  return <div className="ve-lead" data-ve-lead>{children}</div>;
 }
 
-// MDX wraps the text in a paragraph: the label runs into the first one.
-function LeadBody({ label, children }: { label: string; children: ReactNode }) {
+export type AsideProps = { label: string; children: ReactNode };
+
+/** A short note beside the text, at most two sentences. `label` names its subject, such as "Limits". */
+export function Aside({ label, children }: AsideProps) {
   const items = Children.toArray(children);
   const first = items[0];
-  const run = <strong className="ve-lead-label">{label}. </strong>;
-  if (isValidElement<{ children?: ReactNode }>(first) && first.type === 'p') {
-    return <>{cloneElement(first, undefined, run, first.props.children)}{items.slice(1)}</>;
-  }
-  return <p>{run}{children}</p>;
-}
-
-export type AsideProps = { label?: string; children: ReactNode };
-
-/** A short aside, such as why a thing matters. Keep it to two sentences. */
-export function Aside({ label = 'Why this matters', children }: AsideProps) {
+  // MDX wraps the text in a paragraph: the label runs into the first one.
+  const run = <strong className="ve-aside-label">{label}. </strong>;
   return (
     <aside className="ve-aside" data-ve-aside>
-      <LeadBody label={label}>{children}</LeadBody>
+      {isValidElement<{ children?: ReactNode }>(first) && first.type === 'p'
+        ? <>{cloneElement(first, undefined, run, first.props.children)}{items.slice(1)}</>
+        : <p>{run}{children}</p>}
     </aside>
   );
 }

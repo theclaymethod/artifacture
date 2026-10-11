@@ -271,15 +271,11 @@
     margin-top: var(--ve-space-2);
   }
 
-  /* Level openers: a lead in plain words, and a short aside on why a thing matters. */
+  /* Level openers: a lead one step larger than body text, and a short labelled aside. */
   .ve-lead {
     color: var(--ve-heading);
     font-size: var(--ve-text-lead);
     line-height: var(--ve-leading-lead);
-  }
-
-  .ve-lead-label {
-    font-weight: var(--ve-weight-strong);
   }
 
   .ve-aside {

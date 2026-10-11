@@ -166,15 +166,15 @@ export const MAX_MERGE_ITEMS = 3;
 
 // The one definition of each verdict. The glossary, the legend and every pill tooltip read it.
 export const VERDICT_MEANING: Record<Verdict, string> = {
-  Formal: 'a proof or a model check backs the claim, a planted bug broke it, and a conformance run ties it to the code.',
+  Formal: 'a proof or a model check backs the claim, and a planted bug broke it. A conformance run ties the proof or the model to the code.',
   Proven: 'a check backs the claim, and a planted bug proved that the check can fail.',
-  Backed: 'evidence backs the claim, but no planted bug proved that the check can fail, or the evidence is a recorded run that we did not run again.',
+  Backed: 'evidence backs the claim, but no planted bug proved that its check can fail. A recorded run that we did not run again is Backed too.',
   Asserted: 'only the PR text says the claim. No check backs it.',
-  Gap: 'no check backs the claim, and the PR text does not state it. You decide if it is important.',
+  Gap: 'no check backs the claim, and the PR text does not state it.',
 };
 export type Outcome = 'caught' | 'missed' | 'cannot-fail';
 export const OUTCOME: Record<Outcome, [string, Tone, string]> = {
-  caught: ['Caught the bug', 'ok', 'the check failed on the planted bug. This is the good result: the check works.'],
+  caught: ['Caught the bug', 'ok', 'the check failed on the planted bug, so it can find that bug.'],
   missed: ['Missed the bug', 'warn', 'the check passed on the planted bug. It did not find the bug.'],
   'cannot-fail': ['Cannot fail', 'err', 'the check passed on each planted bug. It checks nothing that the bugs broke, so it backs no claim.'],
 };
@@ -182,10 +182,10 @@ export const OUTCOME: Record<Outcome, [string, Tone, string]> = {
 // understando's own words. The glossary shows them after the words of the map.
 export const BUILTIN_GLOSSARY: GlossaryEntry[] = [
   { term: 'Surface', meaning: 'the kind of work that a claim is about: frontend, backend, LLM or other. The surface sets the evidence bar.' },
-  { term: 'Bar', meaning: 'the evidence that a claim needs for its surface: a browser video for frontend, a proof for risky backend code, an eval with a degraded variant for LLM work.', aliases: ['evidence bar'] },
+  { term: 'Bar', meaning: 'the evidence that a claim needs for its surface. Frontend work needs a browser video, and LLM work needs an eval with a degraded variant. Risky backend code needs a proof.', aliases: ['evidence bar'] },
   { term: 'Met', meaning: 'each part of the claim has the evidence that its bar needs.' },
   { term: 'Below the bar', meaning: 'a part of the claim does not have the evidence that its bar needs. A risky claim below its bar blocks the merge.' },
-  { term: 'Degraded variant', meaning: 'a planted-worse version of an eval run, for example a prompt with a rule removed. It must score worse, to show that the eval can fail.' },
+  { term: 'Degraded variant', meaning: 'a planted-worse version of an eval run, for example a prompt without one of its rules. It must score worse, to show that the eval can fail.' },
   { term: 'Recorded run', meaning: 'a run of a check that we did not run again, for example an eval. Its record and its source show the result.' },
   { term: 'UI', meaning: 'user interface: the screens and controls that a person uses.' },
   { term: 'LLM', meaning: 'large language model: a model that writes or grades text, for example a judge or a generator.' },
@@ -195,8 +195,8 @@ export const BUILTIN_GLOSSARY: GlossaryEntry[] = [
   { term: 'Verifier', meaning: 'a check that backs a claim, for example a test, a type check or an eval.', aliases: ['check'] },
   { term: 'Control', meaning: 'a bug that we put in a scratch copy of the code on purpose, to see if a verifier finds it.' },
   ...VERDICTS.map((v) => ({ term: v, meaning: VERDICT_MEANING[v] })),
-  { term: 'Tier', meaning: 'the kind of the strongest check that caught a planted bug, from an end-to-end test, through a property test, a type or contract check and a model check, up to a proof that matches the code.' },
-  { term: 'Waived', meaning: 'the author chose not to verify the claim, and wrote the reason.' },
+  { term: 'Tier', meaning: 'the kind of the strongest check that caught a planted bug. From weakest to strongest: an end-to-end test, a property test, a type or contract check, a model check, a proof that matches the code.' },
+  { term: 'Waived', meaning: 'the author chose not to check the claim, and wrote the reason.' },
   { term: 'Caught the bug', meaning: OUTCOME.caught[2], aliases: ['caught'] },
   { term: 'Missed the bug', meaning: OUTCOME.missed[2], aliases: ['missed'] },
   { term: 'Cannot fail', meaning: OUTCOME['cannot-fail'][2], aliases: ['cannot-fail'] },

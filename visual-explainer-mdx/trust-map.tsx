@@ -266,7 +266,7 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
         </div>
         {refs.derived.bars ? (
           <div data-ve-bars>
-            <p><strong>Why you can trust it, by evidence bar.</strong> {refs.derived.bars.summary}</p>
+            <p>By evidence bar: {refs.derived.bars.summary}</p>
             <ul className="ve-bar-lines">{refs.derived.bars.story.map((line, n) => <BarLine key={n} line={line} terms={terms} />)}</ul>
           </div>
         ) : null}
@@ -284,7 +284,7 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
       </Subsection>
       {gates ? (
         <Subsection id="story-ready" title="Ready checklist">
-          <p>Four gates decide if the PR is ready to review. Each gate passes or fails.</p>
+          <p>Four gates decide if the PR is ready to review.</p>
           <Defs items={gates.gates.map((g) => [`Gate ${g.n}: ${g.name}`, <Rich key={g.n} text={(g.pass ? 'Pass. ' : 'Fail. ') + g.detail} />, g.pass ? 'ok' : 'err'])} />
           {gates.gates.some((g) => g.items?.length) ? (
             <Disclosure summary="Show what each gate found"><ul>{gates.gates.flatMap((g) => (g.items ?? []).map((item, n) => <li key={`${g.n}-${n}`}>Gate {g.n}: {item}</li>))}</ul></Disclosure>
@@ -303,7 +303,7 @@ export function PromiseChips({ data, refs }: WithRefs) {
   return (
     <div data-ve-trust="chips">
       <Subsection id="story-promises" title="What the PR promises">
-        <p><Rich terms={termState(data)} text="Each row is one promise, weakest first. The pill shows its weakest claim: a promise is only as strong as that claim. Select a promise to see the proof." /></p>
+        <p><Rich terms={termState(data)} text="Each row is one promise, weakest first. The pill shows the strength of its weakest claim. Select a promise to see the proof." /></p>
         <ChipLinks items={chips} label="The promises, weakest first" />
         <MarkKey />
         <Disclosure id="story-legend" summary="What each verdict means">
@@ -717,7 +717,7 @@ function ReadingGuide({ data, refs, rows, terms }: WithRefs & { rows: ReturnType
     <Subsection id="promises-guide" title="How to read a promise">
       <div className="ve-guide">
         <figure className="ve-guide-step" data-ve-guide="strength">
-          <figcaption><strong>A promise is as strong as its weakest claim.</strong> <Rich terms={terms} text={`Take "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. The weakest is ${claimLabel(weakestClaim)}, so the promise is ${first.strength}.`} /></figcaption>
+          <figcaption><Rich terms={terms} text={`Take "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. The weakest is ${claimLabel(weakestClaim)}, so the promise is ${first.strength}.`} /></figcaption>
           <ul className="ve-guide-claims">
             {first.claims.map((c) => {
               const v = strengthOf(refs, c.id);
@@ -866,7 +866,7 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
           );
         })}
       </Subsection>
-      <p data-ve-tiers><strong>The checks per tier.</strong> {verify.tiers.map((t) => `${t.label}: ${t.n}`).join(' · ')}</p>
+      <p data-ve-tiers>The checks per tier: {verify.tiers.map((t) => `${t.label}: ${t.n}.`).join(' ')}</p>
       {(explain.control_walkthroughs ?? []).map((spec, i) => {
         const motion = controlWalkthrough(data, refs, spec);
         const key = [...(['caught', 'missed'] as const).map((o) => ({ label: OUTCOME[o][0], tone: OUTCOME[o][1] })), { label: 'planted bug', glyph: 'oval' }, { label: 'check', glyph: 'rect' }] as LegendItem[];

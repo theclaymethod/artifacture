@@ -378,7 +378,7 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
 test('guided review: the checklist order, the calls in local storage, the export, each claim once, and the questions', async () => {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
-    // The export only copies: catch what it writes to the clipboard.
+    // Catch what the export writes to the clipboard.
     await context.addInitScript(() => {
       window.__copied = [];
       Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text) => { window.__copied.push(text); } }, configurable: true });
@@ -434,13 +434,13 @@ test('guided review: the checklist order, the calls in local storage, the export
     const weakest = trust.map.claims.find((c) => c.id === row.claims[0]);
     assert.match(await q.locator('h3').textContent(), new RegExp(`"${promise.label}" is ${row.strength}`));
     await q.getByRole('button', { name: weakest.name, exact: false }).first().click();
-    assert.match(await q.locator('[data-ve-why]').textContent(), /^Right\./);
+    assert.match(await q.locator('[data-ve-why]').textContent(), /^Your answer is right\./);
     const bar = page.locator('[data-ve-question="q-bar"]');
     const askedName = /"(.+?)"/.exec(await bar.locator('h3').textContent())?.[1];
     const asked = trust.map.claims.find((c) => c.name === askedName);
     const met = derived.claims[asked.id].bar.met;
     await bar.getByRole('button', { name: 'Yes, it meets its bar' }).click();
-    assert.match(await bar.locator('[data-ve-why]').textContent(), met ? /^Right\./ : /^Not quite: the answer is No, it is below its bar\./);
+    assert.match(await bar.locator('[data-ve-why]').textContent(), met ? /^Your answer is right\./ : /^The answer is No, it is below its bar\./);
     assert.equal(await bar.locator('[data-ve-why] a').first().getAttribute('href'), `#claim-${asked.id.toLowerCase()}`);
   } finally {
     await context.close();

@@ -212,7 +212,7 @@
     "title": "Refuse an overdraft before paying out",
     "explain": [
      "A withdrawal now compares the amount with the balance first. When the amount is larger, the wallet raises an overdraft error and pays nothing, so the balance can never go below zero.",
-     "The contract of the withdraw function states this rule, and a Lean proof checks the same rule for every balance and amount, not only for the test cases."
+     "The contract of the withdraw function states this rule. A Lean proof checks the same rule for every balance and amount, not only for the test cases."
     ],
     "files": [
      "wallet/core.py",
@@ -240,7 +240,7 @@
     "tier": "wiring",
     "title": "Print the balances from a script",
     "explain": [
-     "A small script reads the balances and prints a report. It has no claim and no test, and it runs only when a person starts it, so a bug in it shows in the report and not in a payment."
+     "A small script reads the balances and prints a report. It has no claim and no test. It runs only when a person starts it, so a bug in it shows in the report and not in a payment."
     ],
     "files": [
      "bin/"
@@ -251,7 +251,7 @@
  "verdict": {
   "checks": [
    {
-    "text": "Run the balance type test with the overdraft guard removed. It must fail; today it passes, because it only checks that the result is an integer.",
+    "text": "Run the balance type test with the overdraft guard removed. It must fail. Today it passes, because it only checks that the result is an integer.",
     "check": "V02"
    },
    {
