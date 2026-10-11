@@ -224,7 +224,7 @@ export const componentRegistry = Object.freeze({
   __content: {
     hidden: true,
     dependsOn: ['__theme', 'data-table'],
-    files: [source('content-blocks.tsx'), source('content-blocks.css')],
+    files: [source('content-blocks.tsx'), source('content-blocks.css'), source('calm-scroll.ts')],
     dependencies: ['react'],
     devDependencies: ['@types/react'],
   },

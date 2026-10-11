@@ -584,11 +584,14 @@ async function clickInPlace(page, selector, index = 0) {
 // Put an element at a height on the screen, at once.
 const placeAt = (page, selector, y, index = 0) => page.$$eval(selector, (elements, [i, at]) => window.scrollTo({ top: elements[i].getBoundingClientRect().top + window.scrollY - at, behavior: 'instant' }), [index, y]);
 
-for (const [width, height] of [[1280, 900], [375, 812]]) {
+// The four runs share no state, so they run at the same time, each in its own browser context.
+test('guided review: calm navigation at 1280px and 375px', { concurrency: true }, async (t) => {
+  const runs = [];
+  for (const [width, height] of [[1280, 900], [375, 812]]) {
   // The target lands under the sticky top bar (56px below 1200px wide) with 1rem to spare.
   const offset = width >= 1200 ? 16 : 72;
 
-  test(`guided review at ${width}px: Next, Previous, deep links and one page each land once, at once`, async () => {
+  runs.push(t.test(`guided review at ${width}px: Next, Previous, deep links and one page each land once, at once`, async () => {
     const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
     await context.addInitScript({ content: SCROLL_WATCH });
     try {
@@ -671,9 +674,9 @@ for (const [width, height] of [[1280, 900], [375, 812]]) {
     } finally {
       await context.close();
     }
-  });
+  }));
 
-  test(`guided review at ${width}px: a disclosure or a view switch keeps its place, and the rail follows quietly`, async () => {
+  runs.push(t.test(`guided review at ${width}px: a disclosure or a view switch keeps its place, and the rail follows quietly`, async () => {
     const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
     await context.addInitScript({ content: SCROLL_WATCH });
     try {
@@ -747,8 +750,10 @@ for (const [width, height] of [[1280, 900], [375, 812]]) {
     } finally {
       await context.close();
     }
-  });
-}
+  }));
+  }
+  await Promise.all(runs);
+});
 
 for (const scheme of ['light', 'dark']) {
   test(`guided review at 375px in ${scheme} mode: AA contrast of the review marks, no sideways scroll`, async () => {
