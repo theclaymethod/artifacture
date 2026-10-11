@@ -273,7 +273,8 @@ function veDataPlugin(stamps) {
         stamps.set(file, { head: value.head, sha256: createHash('sha256').update(await fs.readFile(file)).digest('hex') });
         return null;
       }
-      if (value && typeof value === 'object' && value.schema === 1 && Array.isArray(value.refs) && value.diff) {
+      // Any schema of refs.resolved.json: the components check the schema and fail an unknown one.
+      if (value && typeof value === 'object' && Number.isInteger(value.schema) && Array.isArray(value.refs) && value.diff) {
         return { code: JSON.stringify(await highlightRefs(value)), map: null };
       }
       return null;

@@ -9,7 +9,7 @@ The MDX imports three JSON files from its own folder:
 | File | Written by | Holds |
 |---|---|---|
 | `trust-map.json` | the map, the controls and the verdicts | `schema_version` 1 or 2 (promise, claim, check), `head`, `claims`, `verifiers`, `controls`, `promises`, `flags`, `summary`, `glossary`, `invariants`. Each claim lists `checks` (verifier ids), and can have `legacy_ids` and `parts`. Each promise, claim and check has a plain `name`. |
-| `refs.resolved.json` | `understando explain` (it resolves each ref at the head; `derive.py` writes `derived`) | `schema` 2, `head`, `derived`, `refs` (each `{ref, path, start, end, span, language, excerpt, permalink}`), `controls` (the patch of each control), `diff` (`files`, `deleted`, `created`, `added`, `symbols`, `imports`). |
+| `refs.resolved.json` | `understando explain` (it resolves each ref at the head; `derive.py` writes `derived`) | `schema` 2, `head`, `derived`, `refs` (each `{ref, path, start, end, span, language, excerpt, permalink, changes}`; `changes` is the diff status of the excerpt lines: `added` and `modified` head lines, and `removed` base lines `{at, base, text}` that show before head line `at`), `controls` (the patch of each control), `diff` (`files`, `deleted`, `created`, `added`, `symbols`, `imports`). |
 | `explain.json` | you, in strict STE | `diagrams` (architecture diagrams `{title, description, eli5, detailed}` and typed diagrams `{kind, ...}`), `walkthroughs`, `change.areas`, `change.chapters`, `unclaimed` (`notes`, `roles`, `core`), `risks`, `verdict.checks`, `control_walkthroughs`, `bullets`. |
 
 `derived` holds each value that the review CLI, the PR body and the page share:

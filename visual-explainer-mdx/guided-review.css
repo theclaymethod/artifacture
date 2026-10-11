@@ -271,27 +271,6 @@ html[data-ve-js] [data-ve-nojs-only] {
   align-content: start;
 }
 
-/* ---- Changed code: a + marks each line that the PR adds ------------------------------------------ */
-
-[data-ve-changed="changed"] .ve-code-shiki .line {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  padding-left: 1.25rem;
-}
-
-[data-ve-changed="changed"] .ve-code-shiki .line[data-ve-added="true"] {
-  background: color-mix(in srgb, var(--ve-status-ok) 11%, transparent);
-}
-
-[data-ve-changed="changed"] .ve-code-shiki .line[data-ve-added="true"]::before {
-  content: "+";
-  position: absolute;
-  left: 0.25rem;
-  color: var(--ve-status-ok);
-  font-weight: var(--ve-weight-strong);
-}
-
 .ve-changed-link {
   font-size: var(--ve-text-small);
 }

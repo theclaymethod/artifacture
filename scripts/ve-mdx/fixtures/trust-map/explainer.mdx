@@ -65,6 +65,10 @@ A caller asks the wallet to take an amount from the balance. <PromiseLink data={
 </Step>
 <Step id="loop-step-2">
 The wallet refuses an amount above the balance, and else it gives the balance minus the amount. <PromiseLink data={trust} id="P1" />
+
+<Disclosure summary="Show the code for this step">
+<CodeRef refs={refs} path="wallet/core.py" start={1} end={5} />
+</Disclosure>
 </Step>
 <Step id="loop-step-3">
 The PR also adds a fee function and a denial message, but the withdraw function does not call them yet. <PromiseLink data={trust} id="P4" />

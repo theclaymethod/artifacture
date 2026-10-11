@@ -17,7 +17,19 @@
    ],
    "language": "python",
    "excerpt": "def withdraw(balance: int, amount: int) -> int:\n    \"\"\"\n    @cc [owner:fixture,label:product] no-overdraft\n    `withdraw` refuses an amount above the balance with `OverdraftError`.\n    \"\"\"\n    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L8-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L8-L15",
+   "changes": {
+    "added": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14
+    ],
+    "modified": [],
+    "removed": []
+   }
   },
   {
    "ref": {
@@ -34,7 +46,12 @@
    ],
    "language": "python",
    "excerpt": "    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L15",
+   "changes": {
+    "added": [],
+    "modified": [],
+    "removed": []
+   }
   },
   {
    "ref": {
@@ -50,7 +67,15 @@
    ],
    "language": "python",
    "excerpt": "def denial(account: str, amount: int) -> str:\n    return f\"We cannot pay out {amount}. The balance is too low.\"",
-   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/messages.py#L4-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/messages.py#L4-L5",
+   "changes": {
+    "added": [
+     4,
+     5
+    ],
+    "modified": [],
+    "removed": []
+   }
   },
   {
    "ref": {
@@ -71,7 +96,15 @@
    ],
    "language": "python",
    "excerpt": "    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L13-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L13-L15",
+   "changes": {
+    "added": [
+     13,
+     14
+    ],
+    "modified": [],
+    "removed": []
+   }
   },
   {
    "ref": {
@@ -86,7 +119,18 @@
    ],
    "language": "python",
    "excerpt": "\"\"\"Added by the PR. No test names this module, and the PR text does not mention it.\"\"\"\n\n\ndef fee(amount: int) -> int:\n    return amount // 100 + 1",
-   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L1-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L1-L5",
+   "changes": {
+    "added": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "modified": [],
+    "removed": []
+   }
   },
   {
    "ref": {
@@ -155,6 +199,41 @@
    "excerpt": "",
    "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L4-L5",
    "link_only": true
+  },
+  {
+   "ref": {
+    "end": 5,
+    "path": "wallet/core.py",
+    "start": 1
+   },
+   "path": "wallet/core.py",
+   "start": 1,
+   "end": 5,
+   "span": [
+    1,
+    5
+   ],
+   "language": "python",
+   "excerpt": "\"\"\"A small wallet. The head commit of the understando fixture: the PR under review.\"\"\"\n\n\nclass OverdraftError(ValueError):\n    pass",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L1-L5",
+   "changes": {
+    "added": [
+     2,
+     3,
+     4,
+     5
+    ],
+    "modified": [
+     1
+    ],
+    "removed": [
+     {
+      "at": 1,
+      "base": 1,
+      "text": "\"\"\"A small wallet. The base commit of the understando fixture.\"\"\""
+     }
+    ]
+   }
   }
  ],
  "controls": {

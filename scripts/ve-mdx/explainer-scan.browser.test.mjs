@@ -345,6 +345,12 @@ test('guided review: the export checks (data, IDs, copy, STE), the stamp, and th
     // Each step of the run shows, with no step buttons.
     assert.equal(await page.locator('.ve-step').count(), 3);
     assert.equal(await page.locator('[data-ve-step-next]').count(), 0);
+    // The code of a step, highlighted at export time, with its diff marks from the resolved refs: the
+    // removed base line 1 inline, the line that replaces it, the added lines, and neutral context.
+    const rows = (step) => page.$$eval(`#${step} [data-ve-code-lines] .line`, (lines) => lines.map((l) => [l.dataset.veLine, l.querySelector('.ve-line-no').textContent, l.querySelector('.ve-line-sign').textContent]));
+    assert.deepEqual(await rows('loop-step-2'), [['remove', '1', '-'], ['mod', '1', '~'], ['add', '2', '+'], ['add', '3', '+'], ['add', '4', '+'], ['add', '5', '+']]);
+    assert.deepEqual((await rows('loop-step-1')).map(([kind, , sign]) => kind + sign), ['same ', 'add+', 'add+', 'add+', 'add+', 'add+', 'add+', 'same ']);
+    assert.ok(await page.locator('#loop-step-2 [data-ve-line="remove"] span[style*="--shiki-token"]').count() > 0, 'the removed line is not highlighted');
   } finally {
     await off.close();
   }
@@ -400,6 +406,11 @@ test('guided review: chapters as pages, the rail, the pager, one page, the ancho
     await page.click('[data-ve-step-next]');
     assert.equal(await page.getAttribute('.ve-step:visible', 'id'), 'loop-step-2');
     assert.equal(await page.textContent('.ve-stepper-count'), 'Step 2 of 3');
+    // After hydration the step keeps its highlighted code and its diff tints.
+    await page.click('#loop-step-2 summary');
+    const tint = (kind) => page.$eval(`#loop-step-2 [data-ve-line="${kind}"]`, (l) => getComputedStyle(l).backgroundColor);
+    assert.ok(await page.locator('#loop-step-2 .ve-code-shiki span[style*="--shiki-token"]:visible').count() > 0, 'the step code is not highlighted');
+    assert.notEqual(await tint('add'), await tint('remove'));
     assert.deepEqual(errors, []);
   } finally {
     await context.close();
@@ -769,7 +780,7 @@ for (const scheme of ['light', 'dark']) {
       // Buttons ease their colour for 160ms after the theme applies: read the settled colours.
       await page.waitForTimeout(400);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'the page scrolls sideways');
-      for (const selector of ['.ve-claim-row-note', '.ve-file-row-status', '.ve-review-why', '.ve-review-label', '.ve-bar-card-state', '.ve-churn span', '.ve-review-todo', '.ve-question-option', '.ve-result-card-state', '.ve-pager-key', '.ve-timeline-tag', '.ve-check-row-result', '.ve-check-row-kind', '.ve-check-row-name', '.ve-flag-when', '.ve-chapter-here', '.ve-spine-meta', '.ve-typed-key li']) {
+      for (const selector of ['.ve-claim-row-note', '.ve-file-row-status', '.ve-review-why', '.ve-review-label', '.ve-bar-card-state', '.ve-churn span', '.ve-review-todo', '.ve-question-option', '.ve-result-card-state', '.ve-pager-key', '.ve-timeline-tag', '.ve-check-row-result', '.ve-check-row-kind', '.ve-check-row-name', '.ve-flag-when', '.ve-chapter-here', '.ve-spine-meta', '.ve-typed-key li', '[data-ve-code-lines] .line span[style*="--shiki-token"]', '.ve-line-gutter', '.ve-line-key', '.ve-line-key .ve-line-sign']) {
         for (const pair of await colorPairs(page, selector)) {
           if (!pair.text) continue;
           assert.ok(contrast(pair.fg, pair.bg) >= 4.5, `${selector} "${pair.text}" contrast ${contrast(pair.fg, pair.bg).toFixed(2)} in ${scheme}`);

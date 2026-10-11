@@ -42,7 +42,13 @@ export type TrustMap = {
   claims: Claim[]; verifiers: Verifier[]; controls: Control[]; promises: Promise_[]; flags?: Array<{ flag: string; subject: string; detail: string; loud?: boolean }>;
   summary?: Record<string, number>; glossary?: GlossaryEntry[]; invariants?: Array<{ id: string; text: string; author: string; status: string }>;
 };
-export type ResolvedRef = { link_only?: boolean; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string };
+/**
+ * The diff status of the lines of an excerpt, from `git diff base..head`: the head lines that the PR
+ * adds, the head lines that replace removed lines, and the removed base lines (each shows before the
+ * head line `at`). The export adds `html` to each removed line.
+ */
+export type LineChanges = { added: number[]; modified: number[]; removed: Array<{ at: number; base: number; text: string; html?: string }> };
+export type ResolvedRef = { link_only?: boolean; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string; changes?: LineChanges };
 export type ControlEdit = { path: string; language: string; patch?: string; before?: string; after?: string; note?: string; rows?: unknown[] };
 /** The values that understando derives once (scripts/derive.py), so the review CLI, the PR body and the page agree. The components render them. */
 export type CheckResult = 'none' | 'broken' | 'cannot-fail' | 'missed' | 'no-bug' | 'checked' | 'recorded' | 'caught';

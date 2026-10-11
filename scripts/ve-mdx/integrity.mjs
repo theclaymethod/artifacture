@@ -694,12 +694,16 @@ function buildRowsFromDiffTag(tag) {
 }
 
 /**
- * Highlight the code of a resolved-refs file (refs.resolved.json, schema 1) at export time: each
- * excerpt gets `html`, and each control patch gets highlighted diff `rows`. The data components
+ * Highlight the code of a resolved-refs file (refs.resolved.json) at export time: each excerpt gets
+ * `html`, each removed line of an excerpt gets `html`, and each control patch gets highlighted diff `rows`. The data components
  * then render the same markup in the static pre-render and in the browser.
  */
 export async function highlightRefs(refs) {
-  for (const ref of refs.refs ?? []) if (ref.html === undefined && !ref.link_only) ref.html = await highlightCode(ref.excerpt, ref.language ?? 'text');
+  for (const ref of refs.refs ?? []) {
+    if (ref.link_only) continue;
+    if (ref.html === undefined) ref.html = await highlightCode(ref.excerpt, ref.language ?? 'text');
+    if (ref.changes?.removed?.length) await highlightRemoved(ref);
+  }
   for (const edits of Object.values(refs.controls ?? {})) {
     for (const edit of edits) {
       if (edit.rows || (edit.patch === undefined && edit.before === undefined)) continue;
@@ -714,6 +718,30 @@ export async function highlightRefs(refs) {
     }
   }
   return refs;
+}
+
+/**
+ * The removed lines of an excerpt (changes.removed), highlighted in their base context: the
+ * unchanged lines of the excerpt and the removed lines, in base order, as one block. So a removed
+ * line inside a docstring stays a string. Each removed line gets the markup of its own line.
+ */
+async function highlightRemoved(ref) {
+  const { added = [], modified = [], removed } = ref.changes;
+  const changed = new Set([...added, ...modified]);
+  const base = [];
+  const take = (test) => { for (const line of removed) if (test(line.at)) base.push({ text: line.text, line }); };
+  ref.excerpt.split('\n').forEach((text, i) => {
+    const no = ref.start + i;
+    take((at) => (i === 0 ? at <= no : at === no));
+    if (!changed.has(no)) base.push({ text });
+  });
+  take((at) => at > ref.end);
+  const html = await highlightCode(base.map((b) => b.text).join('\n'), ref.language ?? 'text');
+  const body = html.match(/<code[^>]*>([\s\S]*)<\/code>/)?.[1] ?? '';
+  const lines = body.split('\n').map((line) => line.replace(/^<span class="line">/, '').replace(/<\/span>$/, ''));
+  base.forEach((b, i) => {
+    if (b.line && b.line.html === undefined) b.line.html = lines.length === base.length ? lines[i] : escapeHtml(b.text);
+  });
 }
 
 async function highlightCode(code, language) {
