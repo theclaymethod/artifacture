@@ -10,7 +10,7 @@ import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
 import { highlightRefs, preflightSource } from './integrity.mjs';
-import { checkTrustMapPage, handCopied } from './trust-map-checks.mjs';
+import { checkTrustMapPage, defaultSteLint, handCopied } from './trust-map-checks.mjs';
 import { injectDesignSystemCss, presetNamesInSource, resolvePresetCssForExport } from './design-systems.mjs';
 import { DEFAULT_PRESET } from '../../visual-explainer-mdx/preset-policy.mjs';
 
@@ -45,18 +45,20 @@ function parseArgs(argv) {
   let prerender = false;
   let guardRepo = process.env.VE_GUARD_REPO || null;
   let guardHead = process.env.VE_GUARD_HEAD || null;
+  let steLint = defaultSteLint();
   for (let i = 0; i < args.length; i += 1) {
     if (args[i] === '--out') out = args[++i];
     else if (args[i] === '--draft') draft = true;
     else if (args[i] === '--prerender') prerender = true;
     else if (args[i] === '--guard-repo') guardRepo = args[++i];
     else if (args[i] === '--guard-head') guardHead = args[++i];
+    else if (args[i] === '--ste-lint') steLint = args[++i] === 'off' ? false : path.resolve(args[i]);
     else throw new Error(`Unknown argument: ${args[i]}`);
   }
-  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft] [--prerender] [--guard-repo <repo> --guard-head <sha>]');
+  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft] [--prerender] [--guard-repo <repo> --guard-head <sha>] [--ste-lint <ste-lint.py|off>]');
   if (!out) throw new Error('Missing --out <output.html>');
   if (Boolean(guardRepo) !== Boolean(guardHead)) throw new Error('The no-hand-copy guard needs both --guard-repo and --guard-head (or VE_GUARD_REPO and VE_GUARD_HEAD).');
-  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft, prerender, guard: guardRepo ? { repo: path.resolve(guardRepo), head: guardHead } : null };
+  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft, prerender, guard: guardRepo ? { repo: path.resolve(guardRepo), head: guardHead } : null, steLint };
 }
 
 function viteFsPath(filePath) {
@@ -144,7 +146,7 @@ async function prerender(source, draft, seen, stamps) {
 }
 
 async function main() {
-  const { source, out, draft, prerender: wantPrerender, guard } = parseArgs(process.argv.slice(2));
+  const { source, out, draft, prerender: wantPrerender, guard, steLint } = parseArgs(process.argv.slice(2));
   if (!(await exists(source))) throw new Error(`Source not found: ${source}`);
   if (!/\.(mdx|tsx|jsx)$/.test(source)) throw new Error('Source must end in .mdx, .tsx, or .jsx');
   const sourceCode = await fs.readFile(source, 'utf8');
@@ -154,7 +156,7 @@ async function main() {
   let markup = null;
   if (wantPrerender || trustMap) {
     markup = await prerender(source, draft, seen, stamps);
-    const errors = checkTrustMapPage(markup);
+    const errors = checkTrustMapPage(markup, { steLint });
     if (errors.length) throw new Error(`visual-explainer trust-map checks failed:\n  ${errors.join('\n  ')}`);
   }
   if (guard) {

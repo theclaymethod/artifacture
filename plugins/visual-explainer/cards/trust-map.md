@@ -39,6 +39,16 @@ The page is an `ExplainerShell paged`: one `Section` per chapter, ids `ch-0` to 
 
 Title each chapter with the question it answers. Open it with a `Lead` where it helps. Write no CSS.
 
+## Copy
+
+Write the narrative and the text of `explain.json` with the asd-ste100 skill: apply its rules as you write, and do not only make the lint pass. Each sentence states a fact that the reader needs.
+
+- No slogans and no reassurance. "It only copies. Nothing is posted." → delete it. "Bad edits never ship." → "The accept rule undoes an edit that adds a severe finding."
+- No label in front of a paragraph or a `Lead`. "**In plain words.** The wallet refuses an overdraft." → "The wallet refuses an overdraft."
+- A control's label says what it does, and nothing else: "Copy as Markdown", not "Copy my review (nothing is sent)".
+- Say a fact once, where it matters. Where the review calls are stored goes in the `ch-7` `Lead`: "This browser stores your calls and notes for this PR head." Never under each control.
+- No stock phrases: "only as strong as its weakest claim" → "A promise takes the strength of its weakest claim."
+
 ## The chapters of the change (`change.chapters`)
 
 - One idea each, titled as a plain action ("Gate every finding before the editor sees it"), never a file name.
@@ -105,5 +115,7 @@ The earlier level ladder (`MergeVerdict`, `PromiseList`, `VerifyTheVerifiers`, `
 - **Links and anchors:** each `#fragment` link has a target, and no id shows twice (so each claim's detail renders once).
 - **Actions:** the evidence chapter opens its checks with the result line; each weak check, the weakest check of each claim and each unclaimed file has an action.
 - **No hand copy:** with `--guard-repo` and `--guard-head`, two or more lines of the MDX that match two lines of a tracked file at the head fail the export.
+- **Copy:** no sentence that matches a slogan rule of `scripts/ve-mdx/copy-rules.mjs`, no label run-in, and no sentence twice. A repeat counts in the narrative and in a component outside its records; the same value in two claims, checks or files is data.
+- **STE:** `ste-lint.py` of the asd-ste100 skill finds no hard violation in the narrative and the component text (records excluded). `--ste-lint <path>` or `VE_STE_LINT` points at another lint; `off` turns the check off.
 
-The reviewer's calls, the Reviewed boxes and the done boxes stay in `localStorage` under `understando-review:<head>:<trust-map sha256>`. The export button only copies Markdown for a PR comment; nothing is posted.
+The reviewer's calls, the Reviewed boxes and the done boxes stay in `localStorage` under `understando-review:<head>:<trust-map sha256>`. The export button copies them as Markdown for a PR comment.
