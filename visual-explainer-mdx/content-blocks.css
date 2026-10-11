@@ -592,3 +592,85 @@ html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) >
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---- Stepper: one step at a time, its station lit ------------------------------------------- */
+
+.ve-stepper > * + * {
+  margin-top: var(--ve-space-5);
+}
+
+.ve-steps[data-ve-stepping] {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 9rem;
+}
+
+.ve-steps[data-ve-stepping] > .ve-step[hidden] {
+  display: none;
+}
+
+.ve-steps[data-ve-stepping] > .ve-step::before {
+  content: attr(data-ve-step-number);
+  background: var(--ve-accent);
+  color: var(--ve-accent-contrast, var(--ve-bg));
+}
+
+.ve-steps[data-ve-stepping] > .ve-step {
+  max-width: var(--ve-measure);
+}
+
+.ve-stepper-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-3);
+  margin-top: var(--ve-space-4);
+}
+
+.ve-stepper-count {
+  margin: 0;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-stepper-button {
+  min-height: 44px;
+  padding: 0 var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/1.2 var(--ve-font-body);
+  cursor: pointer;
+}
+
+.ve-stepper-button[data-ve-primary] {
+  border-color: var(--ve-heading);
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+}
+
+.ve-stepper-button:hover:not(:disabled) {
+  border-color: var(--ve-heading);
+}
+
+.ve-stepper-button:disabled {
+  border-color: var(--ve-rule);
+  background: transparent;
+  color: var(--ve-faint, var(--ve-muted));
+  cursor: default;
+}
+
+.ve-stepper-button:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+/* A definition list resets its margin, so it takes the block rhythm of the section body here. */
+.ve-section-body > * + .ve-definition-list {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-section-body > .ve-lead + .ve-definition-list {
+  margin-top: var(--ve-space-6);
+}

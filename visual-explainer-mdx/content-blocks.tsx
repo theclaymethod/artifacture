@@ -1,5 +1,6 @@
-import { Children, cloneElement, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { Children, cloneElement, createContext, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { StatusPill, type StatusTone } from './data-table';
+import type React from 'react';
 import './content-blocks.css';
 
 export type PipelineProps = {
@@ -332,11 +333,72 @@ export type StepProps = { id?: string; children: ReactNode };
  * 1024px the steps sit in two columns, so a five- or six-step run fits one screen.
  */
 export function Steps({ label, children }: StepsProps) {
-  return <ol aria-label={label} className="ve-steps">{children}</ol>;
+  const stepper = useContext(StepperContext);
+  const steps = Children.toArray(children).filter(isValidElement);
+  useEffect(() => { stepper?.setCount(steps.length); }, [stepper, steps.length]);
+  if (!stepper?.live) return <ol aria-label={label} className="ve-steps">{children}</ol>;
+  const at = Math.min(stepper.current, steps.length - 1);
+  // SAFETY: Steps holds Step elements, which take `hidden` and `number`.
+  const shown = steps.map((step, i) => cloneElement(step as ReactElementWithHidden, { hidden: i !== at, number: i + 1 }));
+  return (
+    <div className="ve-stepper-steps">
+      <ol aria-label={label} className="ve-steps" data-ve-stepping>
+        {shown}
+      </ol>
+      <div className="ve-stepper-controls">
+        <button className="ve-stepper-button" data-ve-step-prev disabled={at === 0} onClick={() => stepper.set(at - 1)} type="button">Previous step</button>
+        <p aria-live="polite" className="ve-stepper-count">Step {at + 1} of {steps.length}</p>
+        <button className="ve-stepper-button" data-ve-step-next data-ve-primary disabled={at === steps.length - 1} onClick={() => stepper.set(at + 1)} type="button">Next step</button>
+      </div>
+    </div>
+  );
 }
 
-export function Step({ id, children }: StepProps) {
-  return <li className="ve-step" id={id}>{children}</li>;
+type ReactElementWithHidden = React.ReactElement<{ hidden?: boolean; number?: number }>;
+
+export function Step({ id, children, hidden, number }: StepProps & { hidden?: boolean; number?: number }) {
+  return <li className="ve-step" data-ve-step-number={number} hidden={hidden} id={id} value={number}>{children}</li>;
+}
+
+type StepperState = { live: boolean; current: number; count: number; set: (n: number) => void; setCount: (n: number) => void };
+const StepperContext = createContext<StepperState | null>(null);
+
+/** The step state of a StepThrough: the current step (0-based), the count and the switch. Null outside one. */
+export function useStepThrough() {
+  return useContext(StepperContext);
+}
+
+export type StepThroughProps = { label?: string; children: ReactNode };
+
+/**
+ * A run, one step at a time: wrap a numbered ArchitectureDiagram and its Steps. With JavaScript,
+ * the Steps show one step with Previous and Next, and the station with the same number lights up;
+ * a station is also a button to its step. A link to a step opens it. Without JavaScript, each step
+ * shows in sequence.
+ */
+export function StepThrough({ label = 'One run, step by step', children }: StepThroughProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [live, setLive] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setLive(true);
+    const land = () => {
+      const target = document.getElementById(currentHash());
+      const step = target?.closest('.ve-step');
+      const all = ref.current ? [...ref.current.querySelectorAll('.ve-step')] : [];
+      if (step && all.includes(step)) setCurrent(all.indexOf(step));
+    };
+    land();
+    window.addEventListener('hashchange', land);
+    return () => window.removeEventListener('hashchange', land);
+  }, []);
+  const set = (n: number) => setCurrent(Math.max(0, Math.min(n, Math.max(count - 1, 0))));
+  return (
+    <div aria-label={label} className="ve-stepper" data-ve-step={live ? String(current + 1) : undefined} data-ve-stepper ref={ref} role="group">
+      <StepperContext.Provider value={{ live, current, count, set, setCount }}>{children}</StepperContext.Provider>
+    </div>
+  );
 }
 
 export type ChipLinkItem = { label: ReactNode; href: string; tone?: StatusTone; status?: string; meaning?: string };

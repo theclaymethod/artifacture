@@ -1,5 +1,5 @@
 /* The Simple / Detailed switch: a labelled two-option control with 44px targets. */
-.ve-diagram-modes .ve-diagram-mode-switch {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -10,7 +10,7 @@
   min-width: 0;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch legend {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch legend {
   float: left;
   margin-right: 0.5rem;
   padding: 0;
@@ -19,7 +19,7 @@
   line-height: 44px;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -34,13 +34,13 @@
   font-weight: 500;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label[data-ve-checked="true"] {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label[data-ve-checked="true"] {
   border-color: var(--ve-heading);
   background: var(--ve-heading);
   color: var(--ve-bg);
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch input {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch input {
   position: absolute;
   inset: -1px;
   margin: 0;
@@ -48,7 +48,7 @@
   cursor: pointer;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label:has(input:focus-visible) {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label:has(input:focus-visible) {
   outline: 3px solid var(--ve-accent);
   outline-offset: 2px;
 }
