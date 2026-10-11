@@ -111,7 +111,7 @@ The earlier level ladder (`MergeVerdict`, `PromiseList`, `VerifyTheVerifiers`, `
 
 - **Data:** the trust map and the refs are valid and at the map head; the change areas, the chapters (paragraph length, titles, the diagrams that they name) and the typed diagrams (their elements and Diagram Design's budgets) are valid; each verdict check is concrete.
 - **Narrative prose:** no `[CVK]\d+` ID and no backticked code name outside a `Disclosure` body, a table, a `CodeRef` or a data component.
-- **Glossary:** each `Term` and each abbreviation of the prose has an entry.
+- **Glossary:** each `Term` and each abbreviation of the prose has an entry. `Glossed` marks a term once per chapter, at most eight per chapter, and never an everyday word (draft, check, editor, loop, document, test: `glossary-policy.mjs`); the export fails on more. It spells out each abbreviation once on the page, so count those words against the 25-word sentence cap, and do not put an abbreviation inside parentheses.
 - **Links and anchors:** each `#fragment` link has a target, and no id shows twice (so each claim's detail renders once).
 - **Actions:** the evidence chapter opens its checks with the result line; each weak check, the weakest check of each claim and each unclaimed file has an action.
 - **No hand copy:** with `--guard-repo` and `--guard-head`, two or more lines of the MDX that match two lines of a tracked file at the head fail the export.

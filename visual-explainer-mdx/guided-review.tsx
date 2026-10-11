@@ -431,7 +431,10 @@ function FileMapFigure({ refs, explain = {} }: { refs: Refs; explain?: Explain }
  * Each file says what protects it, from derive.py: the claim code refs, the claim texts, the coverage
  * record of the checks and the control edits.
  */
-export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5' }: All & { checks?: string }) {
+/** Up to this many chapters of the change, each starts open; with more, only the first does. */
+const OPEN_CHAPTERS = 3;
+
+export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5', open }: All & { checks?: string; open?: 'first' | 'all' }) {
   assertRefs(assertTrustMap(data), refs);
   const spine = refs.derived.spine;
   if (!spine) throw new TrustMapError('refs.resolved.json has no derived spine (the changed files and what protects them); run understando explain again');
@@ -439,6 +442,8 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5' }: All & 
   assertAreas(areas, refs);
   assertChapters(explain, refs);
   const first = spine.groups.flatMap((g) => g.files.filter((f) => ['check', 'ask', 'read'].includes(f.status.kind)));
+  const ideas = spine.groups.filter((g) => g.tier !== 'tests');
+  const opened = open ?? (ideas.length > OPEN_CHAPTERS ? 'first' : 'all');
   return (
     <div data-ve-trust="spine">
       <p data-ve-result><strong>{spine.summary}</strong></p>
@@ -469,7 +474,7 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5' }: All & 
         </Disclosure>
       ) : null}
       <div className="ve-change-chapters">
-        {spine.groups.filter((g) => g.tier !== 'tests').map((g, i) => <ChangeChapterBlock data={data} explain={explain} first={first} g={g} key={g.id} open={i === 0} refs={refs} />)}
+        {ideas.map((g, i) => <ChangeChapterBlock data={data} explain={explain} first={first} g={g} key={g.id} open={i === 0 || opened === 'all'} refs={refs} />)}
       </div>
       {spine.groups.filter((g) => g.tier === 'tests').map((g) => (
         <p className="ve-spine-tests" data-ve-spine-tests key={g.id}>The PR also changes {g.files.length} test {g.files.length === 1 ? 'file' : 'files'}. They show as the checks they provide: <a href={checks}>see the checks</a>.</p>

@@ -592,6 +592,13 @@ test('guided review: embedded type, quiet glossary marks, the reading measure an
   });
   assert.notEqual(plain.status, 0);
   assert.match(plain.out, /the everyday words draft are marked as glossary terms/);
+  // A change with more than three chapters opens only the first; the fixture asks for that with open="first".
+  const firstOnly = await exportTrustCase(path.join(workDir, 'first-open'), (dir) => {
+    const mdx = path.join(dir, 'explainer.mdx');
+    writeFileSync(mdx, readFileSync(mdx, 'utf8').replace(/<DiffSpine ([^/]*)\/>/, '<DiffSpine $1open="first" />'));
+  });
+  assert.equal(firstOnly.status, 0, firstOnly.out);
+  const firstHtml = path.join(workDir, 'first-open', 'explainer.html');
 
   // The page embeds its fonts and asks no font service for anything.
   const html = readFileSync(trust.html, 'utf8');
@@ -637,13 +644,13 @@ test('guided review: embedded type, quiet glossary marks, the reading measure an
     assert.ok(perLine <= 72, `a definition line has ${perLine} characters`);
 
     // What changed: the first chapter of the change is open, the others are closed openers with their counts; a link opens one.
-    await page.goto(pathToFileURL(trust.html).href + '#ch-3', { waitUntil: 'load' });
+    await page.goto(pathToFileURL(firstHtml).href + '#ch-3', { waitUntil: 'load' });
     const chapters = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all.map((d) => [d.open, d.querySelector('.ve-disclosure-meta')?.textContent ?? '']));
     assert.ok(chapters.length >= 2);
     assert.deepEqual(chapters.map(([open]) => open), chapters.map((_, i) => i === 0));
     for (const [, meta] of chapters) assert.match(meta, /^\d+ files?/);
     const second = await page.$$eval('[data-ve-change-chapter]:not([data-ve-tier="tests"]) > details', (all) => all[1].id);
-    await page.goto(pathToFileURL(trust.html).href + '#' + second, { waitUntil: 'load' });
+    await page.goto(pathToFileURL(firstHtml).href + '#' + second, { waitUntil: 'load' });
     await page.waitForFunction((id) => document.getElementById(id)?.open, second);
   } finally {
     await context.close();

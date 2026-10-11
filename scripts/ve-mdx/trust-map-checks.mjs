@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { isPlainWord, MAX_TERMS_PER_CHAPTER } from '../../visual-explainer-mdx/glossary-policy.mjs';
 import { REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES } from './copy-rules.mjs';
@@ -210,12 +211,16 @@ function checkCopy(body) {
 
 // ---- The STE lint (asd-ste100) --------------------------------------------------------------
 
-/** ste-lint.py of the asd-ste100 skill: VE_STE_LINT (a path, or "off"), else the installed skill. */
+// A copy of ste-lint.py (MIT, see vendor/asd-ste100/LICENSE) for a machine without the skill, such
+// as CI or a run with its own HOME.
+const VENDORED_STE_LINT = fileURLToPath(new URL('./vendor/asd-ste100/ste-lint.py', import.meta.url));
+
+/** ste-lint.py of the asd-ste100 skill: VE_STE_LINT (a path, or "off"), else the installed skill, else the vendored copy. */
 export function defaultSteLint() {
   const env = process.env.VE_STE_LINT;
   if (env) return env === 'off' ? false : path.resolve(env);
   const installed = ['.agents', '.claude'].map((dir) => path.join(os.homedir(), dir, 'skills/asd-ste100/scripts/ste-lint.py'));
-  return installed.find((file) => existsSync(file)) ?? installed[0];
+  return installed.find((file) => existsSync(file)) ?? VENDORED_STE_LINT;
 }
 
 /**
