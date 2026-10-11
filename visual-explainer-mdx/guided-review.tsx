@@ -10,7 +10,7 @@ import { useExplainerShell } from './explainer-nav';
 import { CodeBlock } from './code-blocks';
 import { Disclosure, Subsection } from './content-blocks';
 import { StatusPill, ToneMark, type StatusTone } from './data-table';
-import { ArchitectureDiagram, BarCard, BrowserVideo, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, controlEdits, CountMarks, Defs, MarkKey, maybeRef, Rich, risksOf, useTerms, VerdictLegend, VerdictPill, VerifierTable } from './trust-map';
+import { ArchitectureDiagram, BarCard, BrowserVideo, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, controlEdits, CountMarks, Defs, MarkKey, maybeRef, Rich, risksOf, useTerms, VerdictLegend, VerdictPill } from './trust-map';
 import { TypedDiagram, type TypedDiagramSpec } from './typed-diagrams';
 import {
   assertAreas, assertRefs, assertTrustMap, capital, changeDiagram, claimAnchor, claimLabel, claimOf, derivedClaim, MERGE_WORDS, promiseAnchor, promiseRows,
@@ -172,8 +172,9 @@ export function ReviewStart({ data, refs, start = '#ch-1', checklist = '#ch-7' }
 
 const KIND_TONE = { check: 'err', ask: 'warn', read: 'warn', partial: 'info', protected: 'ok', skim: 'neutral', test: 'neutral', other: 'neutral', deleted: 'neutral' } satisfies Record<SpineKind, StatusTone>;
 const READ_KINDS: SpineKind[] = ['check', 'ask', 'read', 'partial', 'protected'];
+/** A status label that already says the action ("No claim: read it"): the row shows no action after it. */
+const SAYS_ACTION: SpineKind[] = ['ask', 'read'];
 const VISIBLE_CARDS = 3;
-const VISIBLE_ROWS = 5;
 const FLAG_TONE = { risk: 'err', question: 'warn', nit: 'info' } satisfies Record<LookFlag['level'], StatusTone>;
 const FLAG_WORD = { risk: 'Risk', question: 'Question', nit: 'Nit' } satisfies Record<LookFlag['level'], string>;
 const WORDS = [25, 60];
@@ -192,12 +193,12 @@ function Churn({ added, removed }: { added: number; removed: number }) {
 }
 
 /** One "look closely" flag: its level, what to look at, and the condition that triggers it. */
-function FlagLine({ flag, link }: { flag: LookFlag; link?: boolean }) {
+function FlagLine({ flag }: { flag: LookFlag }) {
   return (
     <li className="ve-flag" data-ve-flag-level={flag.level}>
       <StatusPill tone={FLAG_TONE[flag.level]}>{FLAG_WORD[flag.level]}</StatusPill>
       <span>
-        {link ? <a href={'#' + flagAnchor(flag)}><Rich text={flag.text} /></a> : <Rich text={flag.text} />}
+        <Rich text={flag.text} />
         {flag.trigger ? <span className="ve-flag-when"> When: <Rich text={flag.trigger} />.</span> : null}
       </span>
     </li>
@@ -209,10 +210,11 @@ function FlagLine({ flag, link }: { flag: LookFlag; link?: boolean }) {
  * as claim rows, what replaced it when it is deleted, its "look closely" flags on their lines, and
  * its main change at the PR head. `anchored` gives it its anchors; a copy elsewhere has none.
  */
-export function FileCard({ data, refs, file: f, group, anchored = true }: WithRefs & { file: SpineFile; group?: SpineGroup; anchored?: boolean }) {
+export function FileCard({ data, refs, file: f, group, anchored = true, claims = f.claims }: WithRefs & { file: SpineFile; group?: SpineGroup; anchored?: boolean; claims?: string[] }) {
   const tone = fileTone(refs, f);
-  const shown = f.claims.slice(0, 3);
-  const more = f.claims.slice(3);
+  const shown = claims.slice(0, 3);
+  const more = claims.slice(3);
+  const above = f.claims.length - claims.length;
   const flags = f.flags ?? [];
   return (
     <article className="ve-file" data-ve-kind={f.status.kind} data-ve-spine-file={f.path} data-ve-tone={tone} id={anchored ? fileAnchor(f.path) : undefined}>
@@ -227,11 +229,11 @@ export function FileCard({ data, refs, file: f, group, anchored = true }: WithRe
       {f.deleted && group?.replaced_by ? <p>Replaced by <strong>{group.replaced_by.name.charAt(0).toLowerCase() + group.replaced_by.name.slice(1)}</strong>.{group.note ? <> <Rich text={group.note} />.</> : null}</p> : null}
       {shown.length ? (
         <div className="ve-claim-rows" data-ve-file-claims>
-          <p className="ve-file-claims-title">{f.status.kind === 'partial' ? 'Claims that cover part of it' : 'Claims that protect it'}</p>
+          <p className="ve-file-claims-title">{above ? 'Its other claims' : f.status.kind === 'partial' ? 'Claims that cover part of it' : 'Claims that protect it'}</p>
           {shown.map((id) => <ClaimRow claim={id} data={data} key={id} refs={refs} />)}
           {more.length ? <Disclosure summary={`Show ${more.length} more ${more.length === 1 ? 'claim' : 'claims'}`}><div className="ve-claim-rows">{more.map((id) => <ClaimRow claim={id} data={data} key={id} refs={refs} />)}</div></Disclosure> : null}
         </div>
-      ) : null}
+      ) : above ? <p className="ve-quiet" data-ve-claims-above>The claims of the file above cover it too.</p> : null}
       {flags.length ? (
         <div className="ve-file-flags" data-ve-file-flags>
           <p className="ve-file-claims-title">Look closely</p>
@@ -252,7 +254,7 @@ export function FileCard({ data, refs, file: f, group, anchored = true }: WithRe
   );
 }
 
-function FileRows({ refs, files, tests = false }: { refs: Refs; files: SpineFile[]; tests?: boolean }) {
+function FileRows({ refs, files }: { refs: Refs; files: SpineFile[] }) {
   const link = (f: SpineFile) => (f.main ? maybeRef(refs, f.main)?.permalink : null);
   return (
     <ul className="ve-file-rows" data-ve-file-rows>
@@ -261,7 +263,6 @@ function FileRows({ refs, files, tests = false }: { refs: Refs; files: SpineFile
           <code className="ve-file-path">{f.file}</code>
           <Churn added={f.added} removed={f.removed} />
           <span className="ve-file-row-status"><ToneMark tone={fileTone(refs, f)} />{f.status.label}</span>
-          {tests && f.tests?.length ? <span className="ve-file-row-tests">{f.tests.length === 1 ? 'Test' : 'Tests'}: {f.tests.map((t, i) => <Fragment key={t}>{i ? ', ' : ''}<code>{t.split('.').at(-1)}</code></Fragment>)}</span> : null}
           {link(f) ? <a className="ve-file-row-link" href={link(f)!}>Read it at the PR head</a> : null}
         </li>
       ))}
@@ -322,33 +323,56 @@ function typedSpec(explain: Explain, name: string): TypedDiagramSpec {
 /** The first sentence of a paragraph: the one-line summary of a closed chapter. */
 const firstSentence = (text = '') => /^.*?[.!?](?=\s|$)/.exec(text.trim())?.[0] ?? text.trim();
 
+/** The files of a chapter that need no reading first, in words: "Of the other 62 files, a claim protects 39, and 23 are low risk." */
+const QUIET_WORDS = {
+  protected: [(one) => `${one ? 'has a claim that protects it' : 'have a claim that protects them'}`, (n) => `a claim protects ${n}`],
+  skim: [(one) => `${one ? 'is' : 'are'} low risk`, (n) => `${n} ${n === 1 ? 'is' : 'are'} low risk`],
+  other: [(one) => `${one ? 'is' : 'are'} docs, data or config`, (n) => `${n} ${n === 1 ? 'is' : 'are'} docs, data or config`],
+  deleted: [(one) => `${one ? 'is' : 'are'} deleted`, (n) => `${n} ${n === 1 ? 'is' : 'are'} deleted`],
+  test: [(one) => (one ? 'is a test' : 'are tests'), (n) => `${n} ${n === 1 ? 'is a test' : 'are tests'}`],
+} satisfies Partial<Record<SpineKind, [whole: (one: boolean) => string, part: (n: number) => string]>>;
+const QUIET_KINDS = ['protected', 'skim', 'other', 'deleted', 'test'] as const satisfies ReadonlyArray<keyof typeof QUIET_WORDS>;
+function quietLine(files: SpineFile[], all: boolean) {
+  const kinds = QUIET_KINDS.map((k) => [k, files.filter((f) => f.status.kind === k).length] as const).filter(([, n]) => n);
+  const one = files.length === 1;
+  if (kinds.length === 1) return `${all ? 'Its' : 'The other'} ${one ? 'file' : `${files.length} files`} ${QUIET_WORDS[kinds[0][0]][0](one)}.`;
+  const parts = kinds.map(([k, n]) => QUIET_WORDS[k][1](n));
+  return `Of ${all ? 'its' : 'the other'} ${files.length} files, ${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}.`;
+}
+/** A file that a reviewer must act on: no claim, or a claim that covers only part of it. */
+const ACT_KINDS: SpineKind[] = ['check', 'ask', 'read', 'partial'];
+
 /**
  * One chapter of the change, as an opener: closed, it shows its title, its first sentence and its
- * file and flag counts; open, the idea on the left (sticky from 1024px), its diagrams and files on
- * the right. Only the first chapter starts open; a link into a chapter opens it.
+ * flags; open, the idea on the left (sticky from 1024px), its diagrams and files on the right. Each
+ * flagged file is a card, so each flag has its line in view; then the riskiest files to read, up to
+ * a few. A card lists only the claims that no card above it lists. The other files that need an
+ * action are rows; the rest is one line, with a link to the diff. Only the first chapter starts open;
+ * a link into a chapter opens it.
  */
-function ChangeChapterBlock({ data, refs, explain = {}, g, first, open = false }: All & { g: SpineGroup; first: SpineFile[]; open?: boolean }) {
+function ChangeChapterBlock({ data, refs, explain = {}, g, open = false }: All & { g: SpineGroup; open?: boolean }) {
   const chapter = (explain.change?.chapters ?? []).find((c) => c.id === g.id);
   const titles = Object.fromEntries((explain.change?.chapters ?? []).map((c) => [c.id, c.title]));
   const flags = g.files.flatMap((f) => f.flags ?? []);
-  // Each file with a flag is a card, so each flag has its line in view; then the riskiest files to read, up to a few.
   const flagged = g.files.filter((f) => (f.flags ?? []).length);
   const cards = [...flagged, ...g.files.filter((f) => !flagged.includes(f) && READ_KINDS.includes(f.status.kind)).slice(0, Math.max(0, VISIBLE_CARDS - flagged.length))];
   const rest = g.files.filter((f) => !cards.includes(f));
-  const visible = cards.length ? [] : rest.slice(0, VISIBLE_ROWS);
-  const hidden = rest.slice(visible.length);
+  const rows = rest.filter((f) => ACT_KINDS.includes(f.status.kind));
+  const quiet = rest.filter((f) => !rows.includes(f));
+  const seen = new Set<string>();
+  const own = new Map(cards.map((f) => {
+    const mine = f.claims.filter((id) => !seen.has(id));
+    for (const id of f.claims) seen.add(id);
+    return [f.path, mine] as const;
+  }));
+  const diff = data.repo && data.pr ? `https://github.com/${data.repo}/pull/${data.pr}/files` : null;
   const terms = useTerms(data);
-  if (g.tier === 'tests' || g.tier === 'generated') {
+  if (g.tier === 'generated') {
     return (
       <section className="ve-change-chapter" data-ve-change-chapter={g.id} data-ve-tier={g.tier} id={chapterAnchor(g.id)}>
         <h3 className="ve-subsection-title">{g.name}</h3>
-        <p className="ve-spine-meta">{g.files.length} {g.files.length === 1 ? 'file' : 'files'} · <Churn added={g.added} removed={g.removed} /> · not part of the review progress</p>
-        <p>{g.tier === 'tests'
-          ? 'The checks of this PR. The chapters above link the ones that back a claim. Here each test file lists the tests that it changes, with its diff collapsed.'
-          : 'Files that a tool writes. Review the generator instead: a change here follows from it.'}</p>
-        <Disclosure contains={g.files.map((f) => fileAnchor(f.path))} summary={`Show the ${g.files.length} ${g.tier === 'tests' ? 'test' : 'generated'} files`}>
-          <FileRows files={g.files} refs={refs} tests={g.tier === 'tests'} />
-        </Disclosure>
+        <p className="ve-spine-meta"><Churn added={g.added} removed={g.removed} /> · not part of the review progress</p>
+        <p>A tool writes these {g.files.length} files. Review the generator instead: a change here follows from it.</p>
       </section>
     );
   }
@@ -358,67 +382,26 @@ function ChangeChapterBlock({ data, refs, explain = {}, g, first, open = false }
       {g.explain?.length ? <span className="ve-change-line">{firstSentence(g.explain[0])}</span> : null}
     </span>
   );
-  const counts = `${g.files.length} ${g.files.length === 1 ? 'file' : 'files'}${flags.length ? ` · ${flags.length} ${flags.length === 1 ? 'flag' : 'flags'}` : ''}`;
+  const meta = flags.length ? `${flags.length} to look at closely` : undefined;
   return (
     <div className="ve-change-chapter" data-ve-change-chapter={g.id} data-ve-tier={g.tier}>
-      <Disclosure id={chapterAnchor(g.id)} meta={counts} open={open} summary={summary}>
+      <Disclosure id={chapterAnchor(g.id)} meta={meta} open={open} summary={summary}>
       <div className="ve-change-grid">
       <p className="ve-spine-meta"><Churn added={g.added} removed={g.removed} />{g.unclaimed ? ` · ${g.unclaimed} with no claim` : ''}</p>
       {chapter?.diagrams?.length ? <div className="ve-change-diagrams">{chapter.diagrams.map((d) => <TypedDiagram chapters={titles} key={d} name={d} spec={typedSpec(explain, d)} />)}</div> : null}
       <div className="ve-change-side">
         {(g.explain ?? []).map((p, i) => <p className="ve-change-explain" key={i}><Rich terms={terms} text={p} /></p>)}
-        {g.id === 'unassigned' ? <p data-ve-action data-ve-unassigned>The explain step put these changed files in no chapter of the change. Add each one to the chapter of its idea, then build the page again.</p> : null}
+        {g.id === 'unassigned' ? <p data-ve-unassigned>No chapter of the change explains these files, so read each one with its diff.</p> : null}
         {g.replaced_by ? <p>Replaced by <strong>{g.replaced_by.name.charAt(0).toLowerCase() + g.replaced_by.name.slice(1)}</strong>.{g.note ? <> <Rich text={g.note} />.</> : null}</p> : g.note ? <p><Rich text={g.note} /></p> : null}
-        {flags.length ? (
-          <div className="ve-change-flags">
-            <p className="ve-file-claims-title">Look closely ({flags.length})</p>
-            <ul className="ve-flag-list">{flags.map((x) => <FlagLine flag={x} key={flagAnchor(x) + x.source} link />)}</ul>
-          </div>
-        ) : null}
         {reviewable(g) ? <ChapterReviewed head={data.head} id={g.id} title={g.name} /> : null}
       </div>
       <div className="ve-change-files">
-        {cards.length ? <div className="ve-file-stack">{cards.map((f) => <FileCard data={data} file={f} group={g} key={f.path} refs={refs} />)}</div> : null}
-        {visible.length ? <FileRows files={visible} refs={refs} /> : null}
-        {hidden.length ? (
-          <Disclosure contains={hidden.map((f) => fileAnchor(f.path))} summary={`Show ${hidden.length} more ${hidden.length === 1 ? 'file' : 'files'}`}>
-            <FileRows files={hidden} refs={refs} />
-          </Disclosure>
-        ) : null}
+        {cards.length ? <div className="ve-file-stack">{cards.map((f) => <FileCard claims={own.get(f.path)} data={data} file={f} group={g} key={f.path} refs={refs} />)}</div> : null}
+        {rows.length ? <FileRows files={rows} refs={refs} /> : null}
+        {quiet.length ? <p className="ve-quiet" data-ve-quiet-files>{quietLine(quiet, !cards.length && !rows.length)}{diff ? <> <a href={diff}>Skim {quiet.length === 1 ? 'it' : 'them'} in the diff on GitHub</a>.</> : null}</p> : null}
       </div>
       </div>
       </Disclosure>
-    </div>
-  );
-}
-
-const MAP_EDGES = 8;
-
-/** How the changed files connect: the chapters as boxes and their imports of each other, from derive.py. */
-function FileMapFigure({ refs, explain = {} }: { refs: Refs; explain?: Explain }) {
-  const spine = refs.derived.spine;
-  const groups = (spine?.groups ?? []).filter((g) => g.tier !== 'tests');
-  const ids = new Set(groups.map((g) => g.id));
-  const all = (spine?.links ?? []).filter((l) => ids.has(l.from) && ids.has(l.to));
-  if (!all.length) return null;
-  const edges = [...all].sort((a, b) => b.n - a.n).slice(0, MAP_EDGES);
-  const used = new Set(edges.flatMap((e) => [e.from, e.to]));
-  const nodes = groups.filter((g) => used.has(g.id)).slice(0, 9).map((g) => ({ id: g.id, label: g.name, chapter: g.id }));
-  const kept = new Set(nodes.map((n) => n.id));
-  const spec: TypedDiagramSpec = {
-    kind: 'map', title: 'How the changed files connect',
-    caption: `Each box is a chapter of the change. An arrow shows the imports of its files from another chapter. The badge counts the chapters that import it.${all.length > edges.length ? ` The map shows the ${edges.length} links with the most imports. The list below holds all ${all.length}.` : ''}`,
-    nodes, edges: edges.filter((e) => kept.has(e.from) && kept.has(e.to)),
-  };
-  const name = new Map(groups.map((g) => [g.id, g.name]));
-  return (
-    <div className="ve-file-map" id="spine-map">
-      <TypedDiagram chapters={Object.fromEntries((explain.change?.chapters ?? []).map((c) => [c.id, c.title]))} name="map" spec={spec} />
-      {all.length > edges.length ? (
-        <Disclosure summary={`Show all ${all.length} links`}>
-          <ul className="ve-typed-list">{all.map((l) => <li key={l.from + l.to}>{name.get(l.from)} imports {name.get(l.to)}: {l.n} {l.n === 1 ? 'import' : 'imports'}.</li>)}</ul>
-        </Disclosure>
-      ) : null}
     </div>
   );
 }
@@ -449,20 +432,16 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5', open }: 
       <p data-ve-result><strong>{spine.summary}</strong></p>
       {refs.derived.unclaimed.summary.lead ? <p className="ve-quiet">{refs.derived.unclaimed.summary.lead} {refs.derived.unclaimed.summary.quiet}</p> : null}
       <ChapterProgress data={data} refs={refs} />
-      <nav aria-label="The chapters of the change" className="ve-change-toc">
-        <ol>{spine.groups.filter((g) => g.tier !== 'tests').map((g) => <li data-ve-tier={g.tier} key={g.id}><a href={'#' + chapterAnchor(g.id)}>{g.name}</a>{g.flags ? <span className="ve-change-toc-flags"> · {g.flags} to look at closely</span> : null}</li>)}</ol>
-      </nav>
-      <FileMapFigure explain={explain} refs={refs} />
       {first.length ? (
         <Subsection id="spine-first" title="Read these first">
-          <p>No claim covers these changed files. Each one has its action.</p>
+          <p>No claim covers these changed files.</p>
           <ul className="ve-file-rows" data-ve-read-first>
             {first.map((f) => (
               <li data-ve-kind={f.status.kind} data-ve-tone={fileTone(refs, f)} key={f.path}>
                 <a className="ve-file-path" href={`#${fileAnchor(f.path)}`}><code>{f.file}</code></a>
                 <Churn added={f.added} removed={f.removed} />
                 <span className="ve-file-row-status"><ToneMark tone={fileTone(refs, f)} />{f.status.label}</span>
-                {f.status.text ? <span className="ve-file-row-action" data-ve-action>{f.status.text}</span> : null}
+                {f.status.text && !SAYS_ACTION.includes(f.status.kind) ? <span className="ve-file-row-action" data-ve-action>{f.status.text}</span> : null}
               </li>
             ))}
           </ul>
@@ -474,43 +453,11 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5', open }: 
         </Disclosure>
       ) : null}
       <div className="ve-change-chapters">
-        {ideas.map((g, i) => <ChangeChapterBlock data={data} explain={explain} first={first} g={g} key={g.id} open={i === 0 || opened === 'all'} refs={refs} />)}
+        {ideas.map((g, i) => <ChangeChapterBlock data={data} explain={explain} g={g} key={g.id} open={i === 0 || opened === 'all'} refs={refs} />)}
       </div>
       {spine.groups.filter((g) => g.tier === 'tests').map((g) => (
         <p className="ve-spine-tests" data-ve-spine-tests key={g.id}>The PR also changes {g.files.length} test {g.files.length === 1 ? 'file' : 'files'}. They show as the checks they provide: <a href={checks}>see the checks</a>.</p>
       ))}
-    </div>
-  );
-}
-
-/**
- * Every changed file in GitHub's order (by path), for completeness: its chapter, its line counts,
- * its protection, its flags, and a link to its diff on GitHub. The chapters above read the change in
- * the order of its ideas; this list is the whole diff.
- */
-export function FullDiff({ data, refs, checks = '#ch-5' }: WithRefs & { checks?: string }) {
-  assertRefs(assertTrustMap(data), refs);
-  const spine = refs.derived.spine;
-  if (!spine) throw new TrustMapError('refs.resolved.json has no derived spine; run understando explain again');
-  const where = new Map(spine.groups.flatMap((g) => g.files.map((f) => [f.path, { f, g }] as const)));
-  const order = spine.github ?? [...where.keys()].sort();
-  const base = data.repo && data.pr ? `https://github.com/${data.repo}/pull/${data.pr}/files` : null;
-  return (
-    <div data-ve-trust="full-diff">
-      <p>{order.length} changed files, in the order GitHub shows them. Each one links to its chapter and to its diff on GitHub.</p>
-      <ol className="ve-full-diff" data-ve-full-diff>
-        {order.map((p) => {
-          const { f, g } = where.get(p)!;
-          return (
-            <li data-ve-kind={f.status.kind} data-ve-tone={fileTone(refs, f)} key={p}>
-              <code className="ve-file-path">{f.file}</code>
-              <Churn added={f.added} removed={f.removed} />
-              <span className="ve-file-row-status"><ToneMark tone={fileTone(refs, f)} />{f.status.label}{f.flags?.length ? ` · ${f.flags.length} to look at` : ''}</span>
-              <span className="ve-full-diff-links"><a href={g.tier === 'tests' ? checks : '#' + chapterAnchor(g.id)}>{g.tier === 'tests' ? 'The checks' : g.name}</a>{base && f.diff ? <> · <a href={`${base}#diff-${f.diff}`}>Its diff on GitHub</a></> : null}</span>
-            </li>
-          );
-        })}
-      </ol>
     </div>
   );
 }
@@ -559,6 +506,12 @@ export function EvidenceGuide({ data, refs }: All) {
   const pair = pairOf(refs);
   const verify = refs.derived.verify;
   const controls = new Map(data.controls.map((k) => [k.id, k]));
+  // Evals with the same finding and action show as one line: "The note agent eval and the non-inferiority eval".
+  const evals: Array<{ checks: string[]; names: string[]; claim: string; text: string; action?: string | null; flagged?: boolean }> = [];
+  for (const e of verify.evals ?? []) {
+    const same = evals.find((x) => x.claim === e.claim && x.text === e.text && x.action === e.action);
+    if (same) { same.checks.push(e.check); same.names.push(e.name); } else evals.push({ checks: [e.check], names: [e.name], claim: e.claim, text: e.text, action: e.action, flagged: e.flagged });
+  }
   return (
     <div data-ve-trust="evidence">
       {first && weakestClaim && wd ? (
@@ -626,12 +579,12 @@ export function EvidenceGuide({ data, refs }: All) {
           <p>For each check, we broke the code on purpose and ran the check. A good check fails when the code is wrong: it caught the bug. Each kind of work has its own way to break it.</p>
           <dl className="ve-definition-list" data-ve-control-kinds>
             <dt>Planted bugs and mutants (backend)</dt>
-            <dd data-ve-planted>{verify.caught + verify.missed + verify.cannot} checks ran on a planted bug or a mutant.</dd>
+            <dd data-ve-planted>We change one line of the code, for example a condition or a type, and run the check again.</dd>
             <dt>Degraded variants for evals (LLM)</dt>
             <dd>
-              {verify.evals?.length ? (
-                <ul data-ve-evals>{verify.evals.map((e) => (
-                  <li data-ve-eval={e.flagged ? 'flagged' : 'degraded'} key={e.check}><strong>{capital(e.name)}</strong> ({e.claim}): <Rich text={e.text} />{e.action ? <> <span data-ve-action><Rich text={e.action} /></span></> : null}</li>
+              {evals.length ? (
+                <ul data-ve-evals>{evals.map((e) => (
+                  <li data-ve-eval={e.flagged ? 'flagged' : 'degraded'} key={e.checks.join()}><strong>{capital(e.names.join(' and '))}</strong> ({e.claim}): <Rich text={e.text} />{e.action ? <> <span data-ve-action><Rich text={e.action} /></span></> : null}</li>
                 ))}</ul>
               ) : <span>No eval backs a claim of this PR.</span>}
             </dd>
@@ -645,7 +598,6 @@ export function EvidenceGuide({ data, refs }: All) {
               ) : <span>No frontend claim in this PR.</span>}
             </dd>
           </dl>
-          <p data-ve-tiers>The checks by kind: {verify.tiers.map((t) => `${t.label}: ${t.n}.`).join(' ')}</p>
           <p><a href="#ch-5">See every check, by promise</a></p>
         </div>
       </Subsection>
@@ -984,6 +936,15 @@ export function ReviewChecklist({ data, refs, explain = {} }: All) {
 
 // ---- Chapter 7: the verdict ------------------------------------------------------------------------
 
+/** "1 verified bug." or "2 verified bugs and 1 lead.": each count that is not zero. */
+function bugLine(bugs: Array<{ verified?: boolean }>) {
+  const v = bugs.filter((b) => b.verified).length;
+  const l = bugs.length - v;
+  return capital([v ? `${v} verified ${v === 1 ? 'bug' : 'bugs'}` : '', l ? `${l} ${l === 1 ? 'lead' : 'leads'}` : ''].filter(Boolean).join(' and ')) + '.';
+}
+/** A bug heading without a bracket of ratings that are all "not rated". */
+const unrated = (heading: string) => heading.replace(/\s*\[([^\]]*)\]/, (all, inner: string) => (inner.split(',').every((x) => /not rated$/.test(x.trim())) ? '' : all));
+
 /** The merge state again, with what is left after the reviewer's calls: each item that needs a fix and each item not reviewed yet. */
 export function ReviewVerdict({ data, refs }: WithRefs) {
   assertRefs(assertTrustMap(data), refs);
@@ -1015,8 +976,8 @@ export function ReviewVerdict({ data, refs }: WithRefs) {
       ) : null}
       {bugs.length ? (
         <div data-ve-bugs data-ve-lint="skip">
-          <p><strong>Bugs found: {bugs.length}.</strong> {bugs.filter((b) => b.verified).length} verified, {bugs.filter((b) => !b.verified).length} {bugs.filter((b) => !b.verified).length === 1 ? 'lead' : 'leads'}.</p>
-          {bugs.map((b, i) => <Disclosure key={i} summary={b.heading}><div data-ve-lint="skip"><ul>{b.lines.map((line, j) => <li key={j}>{line}</li>)}</ul></div></Disclosure>)}
+          <p><strong>{bugLine(bugs)}</strong></p>
+          {bugs.map((b, i) => <Disclosure key={i} summary={unrated(b.heading)}><div data-ve-lint="skip"><ul>{b.lines.map((line, j) => <li key={j}>{line}</li>)}</ul></div></Disclosure>)}
         </div>
       ) : null}
     </div>
@@ -1073,10 +1034,10 @@ export function ApproveChecks({ data, refs, explain = {} }: All) {
 // ---- The checks: verifiers, not tests --------------------------------------------------------------
 
 /**
- * The checks of the PR, by promise: each claim, then the checks that back it, each a check row with
- * its result (caught, missed, cannot fail) and, behind it, its test and its planted bugs. Then the
- * changed tests that back no claim, by file, with one action, and the changed test files as the
- * checks they provide. A test shows through what it verifies, never as a list of test names alone.
+ * The checks of the PR, by promise: first how many changed tests back no claim, with one action;
+ * then each claim and the checks that back it, each a check row with its result (caught, missed,
+ * cannot fail) and, behind it, its test and its planted bugs. A test shows through what it
+ * verifies, never as a list of test names.
  */
 export function VerifierView({ data, refs }: WithRefs) {
   assertRefs(assertTrustMap(data), refs);
@@ -1088,11 +1049,6 @@ export function VerifierView({ data, refs }: WithRefs) {
       {tests.orphan_tests ? (
         <div className="ve-orphans" data-ve-orphans>
           <p><strong data-ve-orphan-count>{tests.summary}</strong> <span data-ve-action>{tests.action}</span></p>
-          <Disclosure summary={`Show them by file (${tests.orphans.length} ${tests.orphans.length === 1 ? 'file' : 'files'})`}>
-            <ul className="ve-orphan-files">{tests.orphans.map((o) => (
-              <li key={o.path}><code className="ve-file-path">{o.file}</code>: {o.tests.map((t, i) => <Fragment key={t}>{i ? ', ' : ''}<code>{t.split('.').at(-1)}</code></Fragment>)}</li>
-            ))}</ul>
-          </Disclosure>
         </div>
       ) : <p className="ve-quiet">{tests.summary}</p>}
       {rows.map(({ promise: p, strength, claims }) => (
@@ -1109,17 +1065,6 @@ export function VerifierView({ data, refs }: WithRefs) {
           })}
         </section>
       ))}
-      {tests.files.length ? (
-        <Disclosure summary={`Show the checks by test file (${tests.files.length} changed test ${tests.files.length === 1 ? 'file' : 'files'})`}>
-          {tests.files.map((f) => (
-            <div className="ve-checks-file" key={f.path}>
-              <p><code className="ve-file-path">{f.file}</code> provides {f.checks.length} {f.checks.length === 1 ? 'check' : 'checks'}:</p>
-              <div className="ve-check-rows">{f.checks.map((id) => <CheckRow data={data} id={id} key={id} lazy refs={refs} />)}</div>
-            </div>
-          ))}
-        </Disclosure>
-      ) : null}
-      <VerifierTable data={data} id="checks-table" refs={refs} />
     </div>
   );
 }

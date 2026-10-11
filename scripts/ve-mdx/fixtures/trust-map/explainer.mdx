@@ -1,5 +1,5 @@
 {/* The fixture explainer, as the explain step writes it: a guided review. The narrative is Markdown; the chapters from data are components. The card trust-map of visual-explainer holds the contract. */}
-import { ApproveChecks, ArchitectureDiagram, CodeRef, Definition, DefinitionList, DiffSpine, Disclosure, EvidenceGuide, ExplainerShell, FullDiff, Glossary, Glossed, Lead, PromiseLink, ReviewChecklist, ReviewStart, ReviewVerdict, Section, Step, Steps, StepThrough, UnderstandingCheck, VerifierView } from 'visual-explainer-mdx/components';
+import { ApproveChecks, ArchitectureDiagram, CodeRef, Definition, DefinitionList, DiffSpine, Disclosure, EvidenceGuide, ExplainerShell, Glossary, Glossed, Lead, PromiseLink, ReviewChecklist, ReviewStart, ReviewVerdict, Section, Step, Steps, StepThrough, UnderstandingCheck, VerifierView } from 'visual-explainer-mdx/components';
 import trust from './trust-map.json';
 import refs from './refs.resolved.json';
 import explain from './explain.json';
@@ -131,12 +131,6 @@ Each item is a blocker or a risk to accept, the riskiest first. This browser sto
 <h3 className="ve-subsection-title" id="verdict-glossary">The words on this page</h3>
 
 <Glossary data={trust} only="used" />
-
-</Section>
-
-<Section id="ch-9" title="Every changed file, in GitHub's order" navLabel="Every changed file">
-
-<FullDiff data={trust} refs={refs} />
 
 </Section>
 

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { isPlainWord, MAX_TERMS_PER_CHAPTER } from '../../visual-explainer-mdx/glossary-policy.mjs';
-import { REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES } from './copy-rules.mjs';
+import { EXPLAIN_MIN_WORDS, MAX_BARE_ITEMS, REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES, TITLE_MIN_WORDS } from './copy-rules.mjs';
 
 const ID = /(?<![\w-])[CVK]\d+[a-z]?(?![\w-])/;
 const ACRONYM = /(?<![\w$#.-])([0-9]*[A-Z][A-Z0-9]*(?:-[0-9A-Z]+)*)(?![\w-])/g;
@@ -52,6 +52,8 @@ const where = (node) => node.parentElement?.closest('section[id]')?.id ?? 'page'
  *  - Each #fragment link has a target, and no id shows twice.
  *  - The copy has no slogan, no label run-in and no sentence twice (copy-rules.mjs), and the
  *    asd-ste100 lint finds no hard violation in it (`steLint`: the path of ste-lint.py, or false).
+ *  - Every block answers a reader question: no two titles joined by a bare word ("<Title> imports
+ *    <Title>"), and no opener whose body is only a long list with no explanation.
  */
 export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
   const { document } = parseHTML(`<!doctype html><html><body>${markup}</body></html>`);
@@ -121,6 +123,7 @@ export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
     if (target && !ids.has(target)) errors.push(`the link #${target} has no target`);
   }
   errors.push(...checkCopy(body));
+  errors.push(...checkEnumerations(body));
   if (steLint) errors.push(...lintSte(body, steLint));
   return errors;
 }
@@ -205,6 +208,51 @@ function checkCopy(body) {
     if (at.length > 1 && (roles.includes('narrative') || roles.filter((r) => r === 'component').length > 1)) {
       errors.push(`the sentence "${sentence}" shows ${at.length} times (${[...new Set(at)].join(', ')}). Say it once, where it matters most.`);
     }
+  }
+  return errors;
+}
+
+// ---- Raw enumerations ------------------------------------------------------------------------
+
+const TITLES = 'h2, h3, h4, .ve-change-title, .ve-review-label, .ve-typed-title, .ve-path-name';
+const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const letterWords = (text) => text.split(/\s+/).filter((w) => /[A-Za-z]/.test(w)).length;
+
+/**
+ * Mechanical text that answers no reader question (copy-rules.mjs):
+ *  - a title join: two titles of the page (chapter titles, headings, promise labels) joined by one
+ *    or two bare words, as in "Run it all from one command imports Trim the old pipelines: 27 imports.";
+ *  - a raw enumeration: an opener (a Disclosure) whose body is only a list of more than
+ *    MAX_BARE_ITEMS items, with fewer than EXPLAIN_MIN_WORDS words that say why to read it.
+ */
+function checkEnumerations(body) {
+  const errors = [];
+  const titles = [...new Set([...body.querySelectorAll(TITLES)].map((el) => textNodes(el, '[role="tooltip"], .ve-visually-hidden').map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim().replace(/[.:]$/, '')))]
+    .filter((t) => letterWords(t) >= TITLE_MIN_WORDS).sort((a, b) => b.length - a.length);
+  if (titles.length > 1) {
+    const any = titles.map(escape).join('|');
+    // The titles match in any case; the joining words are lower case, as a template writes them.
+    const join = new RegExp(`(?<![\\w-])(${any})\\s+([a-z]+(?:\\s+[a-z]+)?)\\s+(${any})(?![\\w-])`, 'gi');
+    const joins = new Map();
+    for (const { text, where: at } of textBlocks(body, NOT_COPY)) {
+      const m = [...text.matchAll(join)].find((x) => /^[a-z]+(?:\s+[a-z]+)?$/.test(x[2]));
+      if (m) joins.set(at, [...(joins.get(at) ?? []), m]);
+    }
+    for (const [at, all] of joins) {
+      const m = all[0];
+      errors.push(`${at}: ${all.length === 1 ? 'a block joins' : `${all.length} blocks join`} two titles with a bare word, for example "${m[1]}" ${m[2]} "${m[3]}". A title join answers no reader question: say in one sentence what the reader learns, or cut it.`);
+    }
+  }
+  for (const details of body.querySelectorAll('details')) {
+    const inner = details.querySelector(':scope > .ve-disclosure-body');
+    if (!inner || details.closest('[data-ve-lint="skip"]')) continue;
+    const lists = [...inner.querySelectorAll('ul, ol, dl')].filter((l) => l.closest('details') === details && !l.parentElement.closest('ul, ol, dl'));
+    const items = Math.max(0, ...lists.map((l) => [...l.children].filter((c) => c.matches(l.matches('dl') ? 'dt' : 'li')).length));
+    if (items <= MAX_BARE_ITEMS) continue;
+    const words = letterWords(textNodes(inner, 'ul, ol, dl, details, pre, code, svg, table, script, style').map((n) => n.textContent).join(' '));
+    if (words >= EXPLAIN_MIN_WORDS) continue;
+    const summary = details.querySelector(':scope > summary .ve-disclosure-label')?.textContent.trim() ?? details.querySelector(':scope > summary')?.textContent.trim() ?? '?';
+    errors.push(`${where(details)}: the opener "${summary}" holds only a list of ${items} items, with no explanation. A raw enumeration answers no reader question: say what the reader learns from it in one sentence, or cut it.`);
   }
   return errors;
 }
