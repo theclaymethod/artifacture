@@ -51,32 +51,33 @@ Import them from `visual-explainer-mdx/components` (the export resolves the bare
 | Component | Level | Renders |
 |---|---|---|
 | `MergeVerdict` (refs) | story, first | "Can you merge it?" from `derived.merge`: Not ready, Ready if you accept, or Ready, with up to three items, each a link. (derive.py: a Gap or Asserted promise with a reviewer action blocks unless each weak claim is waived; a failed ready gate blocks; a Backed promise with an action, a waived claim and changed code with risk and no claim are risks to accept.) Then the bugs found, in the find-bugs heading format, each with its detail collapsed, and the ready checklist when ready.json is at the map head. |
-| `PromiseChips` (refs), `VerdictLegend` | story | One chip per promise, weakest first, with its strength; the verdict key (`#story-legend`). |
-| `ArchitectureDiagram spec={explain.diagrams.x}` | any | A diagram in a Simple and a Detailed mode. The export fails when a mode is missing, when Detailed has more than 1.5 times the boxes, or when Simple shows a code name. |
+| `PromiseChips` (refs), `VerdictLegend` | story | One row per promise, weakest first, with its strength; the key of the marks (`MarkKey`); the verdict meanings, collapsed (`#story-legend`). |
+| `ArchitectureDiagram spec={explain.diagrams.x} [numbered]` | any | A diagram in a Simple and a Detailed mode. The export fails when a mode is missing, when Detailed has more than 1.5 times the boxes, or when Simple shows a code name. `numbered` draws a chain (each forward edge goes to the next box) as numbered stations in one row, with each loop back as a return band; the numbers match a `Steps` list. |
 | `Walkthrough spec={...}` | loop | A step-by-step motion figure, collapsed. |
 | `PromiseLink id="G1"` | loop | "Promise: <label>", a link to the promise. |
 | `CodeRef refs={refs} path=... symbol=... [match, context, part]` | any | The lines of a ref at the head with their permalink. Write the attributes as strings or JSON, so `understando explain` can read the ref from the MDX. |
 | `Invariants` | why | The invariants, confirmed or proposed, collapsed. |
 | `WhatChanged` (refs, explain) | changed | The before-and-after diagram and the "replaced by" table, from the diff. |
-| `PromiseList` (refs, explain) | promises | Each promise, weakest first: sentence, strongest tier, strength pill, the claim count and tally of `derived.promises` ("Its 4 claims: 3 Proven, 1 Gap."), reviewer action, cheapest fix. Its claims are collapsed, each a `ClaimDetail`. A risk can name an old claim id. |
+| `PromiseList` (refs, explain) | promises | First "How to read a promise", worked on the weakest promise: its claims and the weakest one, and one claim through surface, bar and result. Then each promise as a card, weakest first: sentence, strongest tier, strength pill, the claim count and tally of `derived.promises` ("Its 4 claims: 3 Proven, 1 Gap."), reviewer action, cheapest fix. Its claims are collapsed, each a `ClaimDetail`. A risk can name an old claim id. |
 | `ClaimDetail` (refs, claim) | promises | The summary row: the strength pill and the claim name. The body: the `summary` of `derived.claims`, the weakest check with its action, the plain what and proof, the verdict, tier, source and invariant. Then the statements that the claim joins (collapsed), the code from refs, and all checks in one collapsed block. A kind `none` check is one plain line. |
 | `VerifyTheVerifiers` (refs, explain) | verifiers | From `derived.verify`. It opens with `result` ("42 of 44 checks caught their planted bug.") and a tone, then `other` in a quieter line. Then one card per `weak` entry (what we broke, what happened, why it matters, one reviewer action, the planted bug collapsed), the checks that caught their bug by promise, the checks per tier, and the example motion, the map and the full table, collapsed. Each "what we broke" text is a sentence of `broke`. Title the level "Can these checks catch a bug?". |
 | `UnclaimedChanges` (refs, explain) | unclaimed | From `derived.unclaimed`. It opens with `summary.lead`, then `summary.quiet` in a quieter line. Then each file that no claim covers, riskiest first (five cards, the rest collapsed), with its role, what changed, why it is risky and one action. Then the commands for the author and the core files, covered in part. |
 | `Glossary` | glossary | The map's words, then understando's words. |
+| `Lead`, `Aside` | any | `Lead` opens a level with its answer in plain words ("In plain words."). `Aside` is a two-sentence note ("Why this matters."). |
 | `Glossed` | any | Wrap narrative Markdown in it: the first use of each glossary word shows its definition. `expand` spells out each abbreviation at its first use; set it on the first level. |
 | `promiseAnchors(trust, refs)` | promises | The rail anchors of the promises, for `<Section anchors={...}>`. |
 
 ## The page
 
 ```mdx
-import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, ExplainerShell, Glossary, Glossed, MergeVerdict, PromiseChips, PromiseLink, PromiseList, Section, Step, Steps, UnclaimedChanges, VerifyTheVerifiers, WhatChanged, promiseAnchors } from 'visual-explainer-mdx/components';
+import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, ExplainerShell, Glossary, Glossed, Lead, MergeVerdict, PromiseChips, PromiseLink, PromiseList, Section, Step, Steps, UnclaimedChanges, VerifyTheVerifiers, WhatChanged, promiseAnchors } from 'visual-explainer-mdx/components';
 import trust from './trust-map.json';
 import refs from './refs.resolved.json';
 import explain from './explain.json';
 
 <ExplainerShell title="PR #7: Refuse overdrafts in the wallet" summary="One sentence." chapterNav appearance="auto" reviewTools={false}>
 
-<Section id="story" title="The story: what changed, and why you can trust it" navLabel="The story" anchors={[{ id: 'merge', label: 'Can you merge it?' }, { id: 'story-promises', label: 'What the PR promises' }]}>
+<Section id="story" title="What does this PR do?" navLabel="The story" anchors={[{ id: 'merge', label: 'Can you merge it?' }, { id: 'story-promises', label: 'What the PR promises' }]}>
 
 <MergeVerdict data={trust} refs={refs} explain={explain} />
 
@@ -94,7 +95,15 @@ import explain from './explain.json';
 
 </Section>
 
-<Section id="loop" title="The loop: one run, step by step" navLabel="The loop">
+<Section id="loop" title="How does one run work?" navLabel="The loop">
+
+<Lead>
+
+A caller asks for an amount, and the wallet pays it or refuses it.
+
+</Lead>
+
+<ArchitectureDiagram spec={explain.diagrams.loop} name="loop" numbered />
 
 <Steps label="The steps of one run">
 <Step id="loop-step-1">
@@ -113,7 +122,7 @@ A caller asks the wallet to take an amount. <PromiseLink data={trust} id="P1" />
 </ExplainerShell>
 ```
 
-Write the story, the why, the loop and the trade-offs in plain Markdown, in strict STE. The why level quotes the user's requests from the journal as `<blockquote data-quote="user">`, each with the claims it asked for in a `Disclosure`.
+Write the story, the why, the loop and the trade-offs in plain Markdown, in strict STE. Title each level with the question that it answers, and open it with a `Lead`; on the story level the merge verdict comes first. Put a second figure of a level in a `Disclosure`. The components set the type, the measure and the spacing from the reading tokens of `themes.css`; a page has no CSS. The why level quotes the user's requests from the journal as `<blockquote data-quote="user">`, each with the claims it asked for in a `Disclosure`.
 
 ## The export checks
 

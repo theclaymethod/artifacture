@@ -1,5 +1,5 @@
 {/* The fixture explainer, as the explain step writes it: the narrative in Markdown, the levels from data. The card trust-map of visual-explainer holds the contract. */}
-import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, ExplainerShell, Glossary, Glossed, MergeVerdict, PromiseChips, PromiseLink, PromiseList, Section, Step, Steps, UnclaimedChanges, VerifyTheVerifiers, WhatChanged, promiseAnchors } from 'visual-explainer-mdx/components';
+import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, ExplainerShell, Glossary, Glossed, Lead, MergeVerdict, PromiseChips, PromiseLink, PromiseList, Section, Step, Steps, UnclaimedChanges, VerifyTheVerifiers, WhatChanged, promiseAnchors } from 'visual-explainer-mdx/components';
 import trust from './trust-map.json';
 import refs from './refs.resolved.json';
 import explain from './explain.json';
@@ -38,7 +38,13 @@ Next: [see one run of the change, step by step](#loop).
 
 </Section>
 
-<Section id="loop" title="The loop: one run, step by step" navLabel="The loop">
+<Section id="loop" title="How does one run work?" navLabel="The loop">
+
+<Lead>
+
+A caller asks the wallet for an amount, and the wallet pays it or refuses it.
+
+</Lead>
 
 <Glossed data={trust}>
 
@@ -46,7 +52,7 @@ One call takes an amount from a balance. Each step links to the promise that pro
 
 </Glossed>
 
-<ArchitectureDiagram spec={explain.diagrams.loop} name="loop" />
+<ArchitectureDiagram spec={explain.diagrams.loop} name="loop" numbered />
 
 <Steps label="The steps of one run">
 <Step id="loop-step-1">
