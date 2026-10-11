@@ -96,7 +96,9 @@ function glossed(text: string, state: TermState | null, key = 't'): ReactNode {
   let last = 0;
   for (const m of text.matchAll(state.pattern)) {
     const hit = findTerm(state, m[1]);
-    if (!hit || isPlainWord(hit.term) || state.seen.has(hit.term) || state.seen.size >= MAX_TERMS_PER_CHAPTER) continue;
+    // The cap holds for the whole chapter: blocks that started from the same snapshot share it.
+    const full = state.seen.size >= MAX_TERMS_PER_CHAPTER || (!state.shared.seen.has(hit?.term ?? '') && state.shared.seen.size >= MAX_TERMS_PER_CHAPTER);
+    if (!hit || isPlainWord(hit.term) || state.seen.has(hit.term) || full) continue;
     state.seen.add(hit.term);
     state.shared.seen.add(hit.term);
     if (m.index! > last) out.push(text.slice(last, m.index));
@@ -314,7 +316,11 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
               {shown.map((i) => <li key={i.href + i.text}><a href={i.href}>{i.label}</a>: <Rich terms={terms} text={i.text} /></li>)}
             </ol>
           ) : null}
-          {rest.length ? <p className="ve-verdict-more">And {rest.length} more: {rest.map((i, n) => <Fragment key={i.href + n}>{n ? ', ' : ''}<a href={i.href}>{i.label}</a></Fragment>)}.</p> : null}
+          {rest.length ? (
+            <Disclosure summary={`Show the other ${rest.length}`}>
+              <ol data-merge-more start={shown.length + 1}>{rest.map((i) => <li key={i.href + i.text}><a href={i.href}>{i.label}</a>: <Rich terms={terms} text={i.text} /></li>)}</ol>
+            </Disclosure>
+          ) : null}
         </div>
         {refs.derived.bars ? (
           <div data-ve-bars>
@@ -637,8 +643,8 @@ export function ClaimBody({ data, refs, claim, explain = {}, said = false }: Wit
   for (const id of [c.invariant, ...(c.invariants ?? [])].filter(Boolean)) {
     const inv = (data.invariants ?? []).find((i) => i.id === id);
     if (!inv) continue;
-    const confirmed = inv.author === 'user' && inv.status === 'accepted';
-    items.push(['Invariant', (confirmed ? 'Confirmed by the user: ' : 'Proposed, not confirmed by the user: ') + inv.text, confirmed ? undefined : 'warn']);
+    const accepted = inv.author === 'user' && inv.status === 'accepted';
+    items.push(['Invariant', (accepted ? 'Accepted by the user: ' : 'Proposed, not accepted by the user: ') + inv.text, accepted ? undefined : 'warn']);
   }
   const verifiers = new Map(data.verifiers.map((v) => [v.id, v]));
   const evals = (refs.derived.verify.evals ?? []).filter((e) => d.checks.some((x) => x.id === e.check));
@@ -862,7 +868,7 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
       <Subsection id="verifiers-kinds" title="Three ways to break the code">
         <dl className="ve-definition-list">
           <dt id="verifiers-planted">Planted bugs and mutants (backend)</dt>
-          <dd data-ve-planted>{verify.result}</dd>
+          <dd data-ve-planted>We change one line of the code, for example a condition or a type, and run the check again.</dd>
           <dt id="verifiers-evals">Degraded variants for evals (LLM)</dt>
           <dd>
             {verify.evals?.length ? (
@@ -1040,12 +1046,15 @@ export function Invariants({ data }: Data) {
   assertTrustMap(data);
   const rows = (data.invariants ?? []).filter((i) => i.status === 'accepted' || i.status === 'proposed');
   if (!rows.length) return null;
+  const accepted = (i: (typeof rows)[number]) => i.author === 'user' && i.status === 'accepted';
+  const n = rows.filter(accepted).length;
   return (
     <div data-ve-trust="invariants">
       <Subsection id="why-invariants" title="The invariants">
-        <p>An invariant is a rule that must always hold. Only a rule that the user confirmed can make a claim Proven or Formal.</p>
+        <p>An invariant is a rule that must always hold. Only a rule that the user accepted can make a claim Proven or Formal.</p>
         <Disclosure summary={`Show the ${rows.length} invariants`}>
-          <ul>{rows.map((i) => <li key={i.id}>{(i.author === 'user' && i.status === 'accepted' ? 'Confirmed by the user: ' : 'Proposed, not confirmed: ') + i.text}</li>)}</ul>
+          <p>{n === rows.length ? 'The user accepted each of these rules, so each one can back a claim.' : `The user accepted ${n} of these rules. A proposed rule cannot make a claim Proven or Formal until the user accepts it.`}</p>
+          <ul>{rows.map((i) => <li key={i.id}>{(accepted(i) ? 'Accepted by the user: ' : 'Proposed, not accepted: ') + i.text}</li>)}</ul>
         </Disclosure>
       </Subsection>
     </div>
@@ -1056,14 +1065,13 @@ export function Invariants({ data }: Data) {
 
 /**
  * Each word of the map's glossary, then understando's own words. A word in the text shows the same
- * definition. With `only="used"`, the running page keeps the words that its text uses (the server
- * render and the no-JS page keep them all, so the export checks see each one).
+ * definition. With `only="used"`, the running page keeps only the words that its text uses (the
+ * server render and the no-JS page keep them all, so the export checks see each one).
  */
 export function Glossary({ data, only }: Data & { only?: 'used' }) {
   assertTrustMap(data);
   const entries = glossaryEntries(data);
   const [used, setUsed] = useState<Set<string> | null>(null);
-  const [all, setAll] = useState(false);
   useEffect(() => {
     if (only !== 'used') return;
     const main = document.querySelector('main');
@@ -1073,7 +1081,7 @@ export function Glossary({ data, only }: Data & { only?: 'used' }) {
     const has = (form: string) => (isAcronym(form) ? new RegExp(`(?<![\\w-])${form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?(?![\\w-])`) : new RegExp(`(?<![\\w-])${form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:s|es)?(?![\\w-])`, 'i')).test(text);
     setUsed(new Set(entries.filter((g) => [g.term, ...(g.aliases ?? [])].some(has)).map((g) => g.term)));
   }, [only]); // eslint-disable-line react-hooks/exhaustive-deps
-  const shown = used && !all ? entries.filter((g) => used.has(g.term)) : entries;
+  const shown = used ? entries.filter((g) => used.has(g.term)) : entries;
   return (
     <div data-ve-trust="glossary">
       <p>Each word below has one meaning on this page. In the text, a word with a dotted line shows its meaning when you point to it, focus it or tap it.</p>
@@ -1085,11 +1093,6 @@ export function Glossary({ data, only }: Data & { only?: 'used' }) {
           </Fragment>
         ))}
       </dl>
-      {used && used.size < entries.length ? (
-        <button className="ve-button" data-ve-glossary-all onClick={() => setAll((v) => !v)} type="button">
-          {all ? `Show only the ${used.size} words of this page` : `Show all ${entries.length} words`}
-        </button>
-      ) : null}
     </div>
   );
 }
