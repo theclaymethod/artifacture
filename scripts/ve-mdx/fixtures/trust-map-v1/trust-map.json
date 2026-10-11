@@ -3,8 +3,8 @@
   "repo": "fixture/wallet",
   "pr": 1,
   "title": "Refuse overdrafts in the wallet",
-  "base": "cc4a8edbb011bb7014300e80daed1dc74d29403e",
-  "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
+  "base": "6a569a9a223f9a0dffc8129e6e19fa0a70e7f676",
+  "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
   "author_family": "anthropic",
   "narrative": "tests/fixture/PR.md",
   "setup": [],
@@ -185,7 +185,15 @@
         "seconds": 1
       },
       "provenance": "tests/test_core.py in the PR",
-      "name": "the overdraft test"
+      "name": "the overdraft test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:46+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      }
     },
     {
       "id": "V02",
@@ -214,7 +222,15 @@
         "seconds": 1
       },
       "provenance": "tests/test_core.py in the PR",
-      "name": "the balance type test"
+      "name": "the balance type test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.05,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:46+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      }
     },
     {
       "id": "V03",
@@ -243,7 +259,15 @@
         "seconds": 2
       },
       "provenance": "Code Contracts cc-check 0.2.0",
-      "name": "the contract format check"
+      "name": "the contract format check",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 1.12,
+        "output_tail": "",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      }
     },
     {
       "id": "V05",
@@ -286,10 +310,10 @@
         ],
         "result": {
           "status": "pass",
-          "detail": "No match in 4 files under wallet/ at 412290b8a5.",
-          "command": "git grep -n -E '^[[:space:]]*(import|from)[[:space:]]+(socket|urllib|http)' 412290b8a5222731efba1fc9e7753e6dfd8fdce6 -- wallet/ ':(exclude,glob)**/.env*'",
-          "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
-          "ran_at": "2026-10-11T14:51:44+00:00"
+          "detail": "No match in 4 files under wallet/ at ad4d049fa9.",
+          "command": "git grep -n -E '^[[:space:]]*(import|from)[[:space:]]+(socket|urllib|http)' ad4d049fa962c81958626dc83583cf9f3b82e5eb -- wallet/ ':(exclude,glob)**/.env*'",
+          "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+          "ran_at": "2026-10-11T17:50:45+00:00"
         }
       },
       "independence": {
@@ -330,7 +354,15 @@
         "seconds": 1
       },
       "provenance": "tests/test_messages.py in the PR",
-      "name": "the denial amount test"
+      "name": "the denial amount test",
+      "baseline": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb"
+      }
     },
     {
       "id": "V08",
@@ -387,6 +419,16 @@
       "expect": {
         "status": "red",
         "pattern": "OverdraftError not raised"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.03,
+        "matched": true,
+        "output_tail": "======================================================================\nFAIL: test_withdraw_refuses_an_overdraft (tests.test_core.OverdraftTest.test_withdraw_refuses_an_overdraft)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private<worktree>/tests/test_core.py\", line 10, in test_withdraw_refuses_an_overdraft\n    with self.assertRaises(OverdraftError):\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\nAssertionError: OverdraftError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n"
       }
     },
     {
@@ -406,6 +448,16 @@
       "expect": {
         "status": "red",
         "pattern": "AssertionError"
+      },
+      "result": {
+        "status": "green",
+        "exit": 0,
+        "seconds": 0.03,
+        "matched": null,
+        "output_tail": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK",
+        "ran_at": "2026-10-11T17:50:47+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..21b526c 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -13,3 +13,3 @@ def withdraw(balance: int, amount: int) -> int:\n     if amount > balance:\n         raise OverdraftError(f\"{amount} is above the balance\")\n-    return balance - amount\n+    return balance + amount\n"
       }
     },
     {
@@ -425,6 +477,16 @@
       "expect": {
         "status": "red",
         "pattern": "Invalid @cc directive"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.65,
+        "matched": true,
+        "output_tail": "cc-check: wallet/core.py:10:5: error: Invalid @cc directive",
+        "ran_at": "2026-10-11T17:50:48+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..5f89aed 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -8,5 +8,5 @@ class OverdraftError(ValueError):\n def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n-    @cc [owner:fixture,label:product] no-overdraft\n+    @cc [owner:fixture,label:product] no-over:draft\n     `withdraw` refuses an amount above the balance with `OverdraftError`.\n     \"\"\"\n"
       }
     },
     {
@@ -444,6 +506,16 @@
       "expect": {
         "status": "red",
         "pattern": "AssertionError"
+      },
+      "result": {
+        "status": "red",
+        "exit": 1,
+        "seconds": 0.03,
+        "matched": true,
+        "output_tail": "======================================================================\nFAIL: test_denial_names_the_amount (tests.test_messages.DenialTest.test_denial_names_the_amount)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private<worktree>/tests/test_messages.py\", line 10, in test_denial_names_the_amount\n    self.assertIn(\"250\", denial(\"ACC-1\", 250))\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: '250' not found in 'We cannot pay out. The balance is too low.'\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)",
+        "ran_at": "2026-10-11T17:50:48+00:00",
+        "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+        "diff": "diff --git a/wallet/messages.py b/wallet/messages.py\nindex 9938bb1..ec3eba5 100644\n--- a/wallet/messages.py\n+++ b/wallet/messages.py\n@@ -3,3 +3,3 @@\n \n def denial(account: str, amount: int) -> str:\n-    return f\"We cannot pay out {amount}. The balance is too low.\"\n+    return f\"We cannot pay out. The balance is too low.\"\n"
       }
     },
     {
@@ -508,8 +580,7 @@
         "C02",
         "C08"
       ],
-      "reviewer_action": "Do not trust the new balance yet: its test cannot fail. Check the subtraction yourself.",
-      "name": "the overdraft rules"
+      "reviewer_action": "Do not trust the new balance yet: its test cannot fail. Check the subtraction yourself."
     },
     {
       "id": "P2",
@@ -518,8 +589,7 @@
       "claims": [
         "C04"
       ],
-      "reviewer_action": "Do not use the wallet from many threads: only the PR text says that it is safe.",
-      "name": "the thread safety"
+      "reviewer_action": "Do not use the wallet from many threads: only the PR text says that it is safe."
     },
     {
       "id": "P3",
@@ -530,8 +600,7 @@
         "C06",
         "C07"
       ],
-      "reviewer_action": "Treat the message check as one model opinion. No planted bug tested it.",
-      "name": "the private messages"
+      "reviewer_action": "Treat the message check as one model opinion. No planted bug tested it."
     },
     {
       "id": "P4",
@@ -540,8 +609,7 @@
       "claims": [
         "C03"
       ],
-      "reviewer_action": "Read the fee function yourself: no test calls it, and the PR text does not mention it.",
-      "name": "the fees"
+      "reviewer_action": "Read the fee function yourself: no test calls it, and the PR text does not mention it."
     }
   ]
 }

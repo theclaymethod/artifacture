@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
+ "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
  "repo": "fixture/wallet",
  "refs": [
   {
@@ -17,7 +17,7 @@
    ],
    "language": "python",
    "excerpt": "def withdraw(balance: int, amount: int) -> int:\n    \"\"\"\n    @cc [owner:fixture,label:product] no-overdraft\n    `withdraw` refuses an amount above the balance with `OverdraftError`.\n    \"\"\"\n    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L8-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L8-L15"
   },
   {
    "ref": {
@@ -34,7 +34,7 @@
    ],
    "language": "python",
    "excerpt": "    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L15"
   },
   {
    "ref": {
@@ -50,7 +50,7 @@
    ],
    "language": "python",
    "excerpt": "def denial(account: str, amount: int) -> str:\n    return f\"We cannot pay out {amount}. The balance is too low.\"",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/messages.py#L4-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/messages.py#L4-L5"
   },
   {
    "ref": {
@@ -71,7 +71,7 @@
    ],
    "language": "python",
    "excerpt": "    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/core.py#L13-L15"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L13-L15"
   },
   {
    "ref": {
@@ -86,7 +86,7 @@
    ],
    "language": "python",
    "excerpt": "\"\"\"Added by the PR. No test names this module, and the PR text does not mention it.\"\"\"\n\n\ndef fee(amount: int) -> int:\n    return amount // 100 + 1",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/fees.py#L1-L5"
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L1-L5"
   },
   {
    "ref": {
@@ -102,7 +102,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/bin/report.py#L7-L11",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/bin/report.py#L7-L11",
    "link_only": true
   },
   {
@@ -119,7 +119,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/tests/test_core.py#L6-L11",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/tests/test_core.py#L6-L11",
    "link_only": true
   },
   {
@@ -136,7 +136,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/tests/test_messages.py#L6-L10",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/tests/test_messages.py#L6-L10",
    "link_only": true
   },
   {
@@ -153,7 +153,7 @@
    ],
    "language": "python",
    "excerpt": "",
-   "permalink": "https://github.com/fixture/wallet/blob/412290b8a5222731efba1fc9e7753e6dfd8fdce6/wallet/fees.py#L4-L5",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L4-L5",
    "link_only": true
   }
  ],
@@ -348,7 +348,7 @@
  },
  "derived": {
   "schema": 2,
-  "head": "412290b8a5222731efba1fc9e7753e6dfd8fdce6",
+  "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
   "promises": [
    {
     "id": "P4",
@@ -357,7 +357,9 @@
      "C03"
     ],
     "count": 1,
-    "tally": "1 Gap"
+    "tally": "1 Gap",
+    "bars_met": 0,
+    "tier": null
    },
    {
     "id": "P1",
@@ -368,7 +370,9 @@
      "C08"
     ],
     "count": 3,
-    "tally": "1 Formal, 1 Proven, 1 Asserted"
+    "tally": "1 Formal, 1 Proven, 1 Asserted",
+    "bars_met": 2,
+    "tier": 5
    },
    {
     "id": "P2",
@@ -377,7 +381,9 @@
      "C04"
     ],
     "count": 1,
-    "tally": "1 Asserted"
+    "tally": "1 Asserted",
+    "bars_met": 0,
+    "tier": null
    },
    {
     "id": "P3",
@@ -388,7 +394,9 @@
      "C07"
     ],
     "count": 3,
-    "tally": "1 Proven, 2 Backed"
+    "tally": "1 Proven, 2 Backed",
+    "bars_met": 1,
+    "tier": 1
    }
   ],
   "claims": {
@@ -421,8 +429,25 @@
      "name": "the overdraft test",
      "result": "caught",
      "strength": "Proven",
-     "text": "The weakest check is the overdraft test. It caught its planted bug.",
-     "action": "No action: it caught its planted bug."
+     "text": "The strongest check is the overdraft test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: property test or static rule · met"
     }
    },
    "C02": {
@@ -447,8 +472,31 @@
      "name": "the balance type test",
      "result": "cannot-fail",
      "strength": "Asserted",
-     "text": "The weakest check is the balance type test. It cannot fail: it passed on each planted bug.",
-     "action": "Fix this check so that it can fail, or replace it (understando close). The cheapest fix: Assert the exact new balance in the test."
+     "text": "The strongest check is the balance type test. It cannot fail: it passed on each planted bug.",
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test.",
+     "part": null
+    },
+    "flagged": {
+     "text": "1 of 1 check cannot fail: the balance type test. Fix it or drop it.",
+     "checks": [
+      "V02"
+     ],
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test."
+    },
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "no check caught a planted bug",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: no check caught a planted bug"
     }
    },
    "C04": {
@@ -471,8 +519,25 @@
      "name": "the PR text alone",
      "result": "none",
      "strength": "Asserted",
-     "text": "No tool checks this claim. Only the PR text states it.",
-     "action": "Only the PR text states it. Add a check (understando close), or accept the risk."
+     "text": "No tool checks it. Only the PR text states it.",
+     "action": "Only the PR text states it. Add a check (understando close), or accept the risk.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "other",
+     "surfaces": [
+      "other"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "check",
+     "need": "a check",
+     "met": false,
+     "why": "no check",
+     "part": null,
+     "text": "Bar: a check · below the bar: no check"
     }
    },
    "C05": {
@@ -497,8 +562,26 @@
      "name": "the message review",
      "result": "recorded",
      "strength": "Backed",
-     "text": "The weakest check is the message review. It is a record of a past run, and we did not run it again.",
-     "action": "Treat it as one opinion. Ask a model of another family to check it, or read the evidence yourself."
+     "text": "The strongest check is the message review. It is a record of a past run, and we did not run it again.",
+     "action": "Treat it as one opinion. Ask a model of another family to check it, or read the evidence yourself.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "llm",
+     "surfaces": [
+      "backend",
+      "llm"
+     ],
+     "mixed": true,
+     "risky": false,
+     "level": "degraded-eval",
+     "need": "eval with a degraded control",
+     "met": false,
+     "why": "only a model judgment, no eval",
+     "part": null,
+     "text": "Bar: eval with a degraded control · below the bar: only a model judgment, no eval"
     }
    },
    "C06": {
@@ -523,8 +606,25 @@
      "name": "the network import search",
      "result": "checked",
      "strength": "Backed",
-     "text": "The weakest check is the network import search. It is a mechanical check with no planted bug.",
-     "action": "Plant a bug for this mechanical check, or add a CI rule that keeps it true."
+     "text": "The strongest check is the network import search. It is a mechanical check with no planted bug.",
+     "action": "Plant a bug for this mechanical check, or add a CI rule that keeps it true.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "other",
+     "surfaces": [
+      "other"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "check",
+     "need": "a check",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: a check · met"
     }
    },
    "C07": {
@@ -549,8 +649,25 @@
      "name": "the denial amount test",
      "result": "caught",
      "strength": "Proven",
-     "text": "The weakest check is the denial amount test. It caught its planted bug.",
-     "action": "No action: it caught its planted bug."
+     "text": "The strongest check is the denial amount test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "only example tests",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: only example tests"
     }
    },
    "C08": {
@@ -575,8 +692,25 @@
      "name": "the balance proof",
      "result": "caught",
      "strength": "Formal",
-     "text": "The weakest check is the balance proof. It caught its planted bug.",
-     "action": "No action: it caught its planted bug."
+     "text": "The strongest check is the balance proof. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: property test or static rule · met"
     }
    },
    "C03": {
@@ -599,10 +733,40 @@
      "name": "no check yet",
      "result": "none",
      "strength": "Gap",
-     "text": "No tool checks this claim, and the PR text does not state it.",
-     "action": "No check exists, and the PR text does not state it. Decide if it matters; to close it, add a check (understando close)."
+     "text": "No tool checks it, and the PR text does not state it.",
+     "action": "No check exists, and the PR text does not state it. Decide if it matters. To close it, add a check (understando close).",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "no check",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: no check"
     }
    }
+  },
+  "bars": {
+   "met": 3,
+   "total": 8,
+   "risky_below": [],
+   "risky_below_names": [],
+   "summary": "3 of 8 claims meet their bar. No risky claim is below it.",
+   "story": [
+    "2 of 5 backend claims meet their bar: a proof, or a property test, type or static rule that caught a planted bug.",
+    "0 of 1 LLM claims meet their bar: a recorded eval with a degraded variant.",
+    "1 of 2 other claims meet their bar: a check that backs it.",
+    "Below the bar: the new balance, the thread safety, the hidden account number, the amount in the denial and 1 more."
+   ]
   },
   "verify": {
    "result": "4 of 5 checks caught their planted bug. 1 cannot fail.",
@@ -611,6 +775,8 @@
    "checks": 7,
    "ran": 5,
    "caught": 4,
+   "evals": [],
+   "ui": [],
    "missed": 0,
    "cannot": 1,
    "weak": [
@@ -621,7 +787,7 @@
      "broke": "Add the amount to the balance, not take it away.",
      "happened": "The check passed on each planted bug, so it can fail on nothing.",
      "why": "So this check does not protect the new balance.",
-     "action": "Fix this check so that it can fail, or replace it (understando close). The cheapest fix: Assert the exact new balance in the test.",
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test.",
      "ids": "K02 · V02 · C02"
     }
    ],
@@ -755,6 +921,7 @@
    "core": [],
    "summary": {
     "risky": 0,
+    "partial_risky": 0,
     "rest": 1,
     "lead": "No risky file is without a claim.",
     "quiet": "1 other changed file has no claim. It is low risk: skim it."

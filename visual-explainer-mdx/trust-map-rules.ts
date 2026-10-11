@@ -31,6 +31,8 @@ export type Verifier = {
   ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[] }; baseline?: { status?: string; output_tail?: string };
   recorded?: { source: string; result: string }; formal?: { tool: string; artifact: string; conformance: { status: string; source: string; detail?: string } };
   mechanical?: { result?: { status: string; command: string; detail: string } };
+  /** A browser e2e run: the recorded video, its screenshots, captions and a text summary. */
+  artifact?: { video?: string; screenshots?: string[]; captions?: string; summary?: string };
 };
 export type Control = { id: string; name?: string; verifier: string; description: string; edits?: unknown[]; result?: { status?: string; output_tail?: string; note?: string } };
 export type Promise_ = { id: string; name?: string; label: string; sentence: string; claims: string[]; reviewer_action?: string };
@@ -45,10 +47,19 @@ export type ControlEdit = { path: string; language: string; patch?: string; befo
 /** The values that understando derives once (scripts/derive.py), so the review CLI, the PR body and the page agree. The components render them. */
 export type CheckResult = 'none' | 'broken' | 'cannot-fail' | 'missed' | 'no-bug' | 'checked' | 'recorded' | 'caught';
 export type DerivedCheck = { id: string; name: string; kind: string; strength: Verdict; result: CheckResult };
-/** One claim: its strength (its weakest check), its checks, "5 checks: 4 caught their bug, 1 missed.", and the weakest check with its action. */
+/** The evidence bar of a claim: what its surface (frontend, backend, llm, other) needs, and whether each part meets it. */
+export type DerivedBar = { surface: string; surfaces: string[]; mixed: boolean; risky: boolean; level: string; need: string; met: boolean; why: string; part: string | null; text: string };
+/**
+ * One claim: its strength (its weakest part; a part is as strong as its strongest check), its checks,
+ * "5 checks: 4 caught their bug, 1 missed.", the evidence of its weakest part with its action, the
+ * flagged checks (a warning, not a score), its parts, and its evidence bar.
+ */
 export type DerivedClaim = {
   strength: Verdict; tier: number | null; checks: DerivedCheck[]; n: number; counts: Partial<Record<CheckResult, number>>; summary: string;
-  weakest: { id: string; name: string; result: CheckResult; strength: Verdict; text: string; action: string } | null;
+  weakest: { id: string; name: string; result: CheckResult; strength: Verdict; text: string; action: string; part?: string | null } | null;
+  flagged?: { text: string; checks: string[]; action: string } | null;
+  parts?: Array<{ id: string; text: string; strength: Verdict; check: string | null }>;
+  bar?: DerivedBar;
 };
 export type DerivedWeak = { check: string; control: string; name: string; broke: string; happened: string; why: string; action: string; ids: string };
 /** Can these checks catch a bug? It counts checks, not controls. `broke` holds the full "what we broke" sentence of each control. */
@@ -56,10 +67,17 @@ export type DerivedVerify = {
   result: string; other: string; tone: Tone; checks: number; ran: number; caught: number; missed: number; cannot: number; weak: DerivedWeak[];
   by_promise: Array<{ id: string; rows: Array<{ check: string; name: string; claim: string; broke: string[]; ids: string }> }>;
   tiers: Array<{ label: string; n: number }>; broke: Record<string, string>;
+  /** Degraded variants for evals: the real score against the degraded score, or a flag when no degraded run exists. */
+  evals?: Array<{ check: string; name: string; claim: string; real: string; degraded: { variant: string; score: number; baseline: number } | null; flagged: boolean; text: string; action: string }>;
+  /** Broken-UI runs for frontend claims, with the recorded video. */
+  ui?: Array<{ check: string; name: string; claim: string; video?: string | null; poster?: string | null; screenshots: string[]; captions?: string | null; summary: string; caught: boolean; text: string }>;
 };
+/** The evidence bars of the whole PR (references/evidence-bars.md in understando). */
+export type DerivedBars = { met: number; total: number; risky_below: string[]; risky_below_names: string[]; summary: string; story: string[] };
 export type Derived = {
   schema: number; head: string;
-  promises: Array<{ id: string; strength: Verdict; claims: string[]; count: number; tally: string }>;
+  promises: Array<{ id: string; strength: Verdict; claims: string[]; count: number; tally: string; bars_met?: number }>;
+  bars?: DerivedBars;
   claims: Record<string, DerivedClaim>;
   verify: DerivedVerify;
   merge: { form: MergeForm; items: MergeItem[]; blockers: number };
@@ -127,6 +145,14 @@ export const OUTCOME: Record<Outcome, [string, Tone, string]> = {
 
 // understando's own words. The glossary shows them after the words of the map.
 export const BUILTIN_GLOSSARY: GlossaryEntry[] = [
+  { term: 'Surface', meaning: 'the kind of work that a claim is about: frontend, backend, LLM or other. The surface sets the evidence bar.' },
+  { term: 'Bar', meaning: 'the evidence that a claim needs for its surface: a browser video for frontend, a proof for risky backend code, an eval with a degraded variant for LLM work.', aliases: ['evidence bar'] },
+  { term: 'Met', meaning: 'each part of the claim has the evidence that its bar needs.' },
+  { term: 'Below the bar', meaning: 'a part of the claim does not have the evidence that its bar needs. A risky claim below its bar blocks the merge.' },
+  { term: 'Degraded variant', meaning: 'a planted-worse version of an eval run, for example a prompt with a rule removed. It must score worse, to show that the eval can fail.' },
+  { term: 'Recorded run', meaning: 'a run of a check that we did not run again, for example an eval. Its record and its source show the result.' },
+  { term: 'UI', meaning: 'user interface: the screens and controls that a person uses.' },
+  { term: 'LLM', meaning: 'large language model: a model that writes or grades text, for example a judge or a generator.' },
   { term: 'PR', meaning: 'pull request: a set of changes that a team reviews before it merges them.' },
   { term: 'Claim', meaning: 'one thing that the PR says is true about its code.' },
   { term: 'Promise', meaning: 'a plain sentence that groups the claims about one property of the PR.' },
@@ -532,7 +558,8 @@ export function prSection(data: TrustMap, refs: Refs, explain: Explain = {}, exp
     for (const g of ready.gates) out.push(`- [${g.pass ? 'x' : ' '}] **Gate ${g.n}, ${g.name}:** ${g.pass ? 'pass' : 'fail'}. ${g.detail}`);
     out.push('');
   }
-  out.push(mermaid(data, refs), '', '| Claim | Strength | Checks | Weakest check |', '|---|---|---|---|');
+  if (refs.derived.bars) out.push(`**Evidence bars:** ${refs.derived.bars.summary}`, '');
+  out.push(mermaid(data, refs), '', '| Claim | Surface | Bar | Strength | Checks | Weakest check |', '|---|---|---|---|---|---|');
   const esc = (t: string) => t.replaceAll('|', '\\|');
   for (const c of data.claims) {
     const d = derivedClaim(refs, c.id);
@@ -541,7 +568,8 @@ export function prSection(data: TrustMap, refs: Refs, explain: Explain = {}, exp
     const id = permalink ? `[${c.id}](${permalink})` : c.id;
     const strength = `**${d.strength}**` + (c.waiver ? ` (waived: ${esc(c.waiver.reason)})` : '');
     const weak = d.weakest ? `${capital(d.weakest.name)}. ${d.weakest.action}` : '-';
-    out.push(`| ${id}: ${esc(capital(claimLabel(c)))} | ${strength} | ${esc(d.summary)} | ${esc(weak)} |`);
+    const bar = d.bar ? `${d.bar.need}: ${d.bar.met ? 'met' : 'below'}` : '-';
+    out.push(`| ${id}: ${esc(capital(claimLabel(c)))} | ${d.bar?.surface ?? '-'} | ${esc(bar)} | ${strength} | ${esc(d.summary)} | ${esc(weak)} |`);
   }
   out.push('');
   if (data.summary) out.push('- **Verdicts:** ' + VERDICTS.map((v) => `${data.summary![v] ?? 0} ${v}`).join(', ') + '.');

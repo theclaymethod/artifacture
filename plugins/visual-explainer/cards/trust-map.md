@@ -22,6 +22,18 @@ The MDX imports three JSON files from its own folder:
 
 At export, the pipeline highlights the code of `refs.resolved.json` and stamps the page with `<meta name="ve-trust-map-head">` and `<meta name="ve-trust-map-sha256">` (the SHA-256 of `trust-map.json`), so a reader can tell when the page is stale.
 
+## Parts and evidence bars
+
+A claim holds parts, one for each statement. A part is as strong as its strongest check, and a claim is as strong as its weakest part (`derived.claims[id].parts`, `weakest`, `flagged`). A check that missed its bug is a flag with an action, not a score.
+
+Each claim has an evidence bar for its surface (`derived.claims[id].bar`), and the PR has a bar summary (`derived.bars`). understando's `references/evidence-bars.md` is the only source of the bars: do not restate them in a page or a card. The components show the bars from the derived data:
+
+- The merge verdict lists each risky claim below its bar. "Why you can trust it, by evidence bar" names the bars that the PR met.
+- Each claim summary has a bar chip ("Bar: proof · met"). Each promise shows "N of M claims meet their bar".
+- "Can these checks catch a bug?" has one part for each kind of control. The parts are degraded variants for evals (`derived.verify.evals`), broken-UI runs (`derived.verify.ui`), and planted bugs and mutants.
+- A frontend check with `artifact.video` shows the recorded video in a Disclosure, with its screenshots. The video has controls, a poster frame, and captions or a summary. It never plays by itself. Without JavaScript, the poster frame and a link show.
+- the PR section has a Surface and a Bar column, and the bar summary line.
+
 ## Stable anchors
 
 Other tools deep-link into the page, so keep these ids:

@@ -366,7 +366,7 @@ test('trust-map explainer: pre-rendered without JavaScript, hydrated with it, an
   assert.equal(result.status, 0, result.stderr);
   const body = readFileSync(section, 'utf8');
   assert.match(body, /\*\*Merge verdict: Not ready\.\*\*/);
-  assert.match(body, /\| Claim \| Strength \| Checks \| Weakest check \|/);
+  assert.match(body, /\| Claim \| Surface \| Bar \| Strength \| Checks \| Weakest check \|/);
   assert.match(body, /No overdraft: Asserted\. Its 3 claims: 1 Formal, 1 Proven, 1 Asserted\./);
   assert.doesNotMatch(body, /\b(red|green)\b/);
 });

@@ -211,6 +211,12 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
           </ol>
         ) : null}
         {rest.length ? <p>And {rest.length} more: {rest.map((i, n) => <Fragment key={i.href + n}>{n ? ', ' : ''}<a href={i.href}>{i.label}</a></Fragment>)}.</p> : null}
+        {refs.derived.bars ? (
+          <div data-ve-bars>
+            <p><strong>Why you can trust it, by evidence bar:</strong> {refs.derived.bars.summary}</p>
+            <ul>{refs.derived.bars.story.map((line, n) => <li key={n}><Rich terms={terms} text={line} /></li>)}</ul>
+          </div>
+        ) : null}
         {bugs.length ? (
           // The find-bugs heading format (P1, P2, P3) is fixed, so the prose checks skip it.
           <div data-ve-bugs data-ve-lint="skip">
@@ -283,6 +289,26 @@ function controlEdits(refs: Refs, k: Control) {
   });
 }
 
+/**
+ * The recorded e2e video of a frontend check, with its controls, poster frame, captions or text
+ * summary and key screenshots, behind a Disclosure. It never plays by itself. With JavaScript off,
+ * the browser still shows the poster frame, and a link opens the video.
+ */
+function BrowserVideo({ artifact, name }: { artifact: NonNullable<Verifier['artifact']>; name: string }) {
+  const shots = artifact.screenshots ?? [];
+  return (
+    <Disclosure summary={`Show the recorded browser run of ${name}`}>
+      <figure data-ve-video>
+        <video controls poster={shots[0]} preload="metadata" src={artifact.video}>
+          {artifact.captions ? <track default kind="captions" label="Captions" src={artifact.captions} /> : null}
+        </video>
+        <figcaption>{artifact.summary || 'The recorded e2e run in a real browser.'} <a href={artifact.video}>Open the video</a></figcaption>
+      </figure>
+      {shots.length ? <div data-ve-screenshots>{shots.map((src, i) => <img alt={`Screenshot ${i + 1} of the browser run`} key={src} loading="lazy" src={src} />)}</div> : null}
+    </Disclosure>
+  );
+}
+
 function VerifierBlock({ v, data, refs }: { v: Verifier; data: TrustMap; refs: Refs }) {
   const rung = ladder(v);
   const label = `${v.name ? v.name + '. ' : ''}${v.kind} check, ${TIER_WORD[v.tier] ?? v.tier}${rung ? `, rung ${rung}` : ''}, ${v.state ?? 'unknown'} (${v.id}):`;
@@ -292,6 +318,7 @@ function VerifierBlock({ v, data, refs }: { v: Verifier; data: TrustMap; refs: R
     <div data-ve-lint="skip">
       <p><strong>{label}</strong> {reader(`${v.description} Provenance: ${v.provenance}`)}</p>
       {v.recorded ? <TerminalBlock content={v.recorded.result} title={'Recorded: ' + v.recorded.source} /> : null}
+      {v.artifact?.video ? <BrowserVideo artifact={v.artifact} name={v.name ?? v.id} /> : null}
       {v.formal ? <TerminalBlock content={[`${v.formal.tool} ${v.formal.artifact}`, v.formal.conformance.source, v.formal.conformance.detail].filter(Boolean).join('\n')} title={'Conformance link: ' + v.formal.conformance.status} /> : null}
       {m ? <TerminalBlock content={`$ ${m.command}\n${m.detail}`} title={'Mechanical check at the PR head: ' + m.status} /> : null}
       {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={'At the PR head: ' + (b.status ?? 'not run')} language="bash" /> : null}
@@ -329,10 +356,13 @@ export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { cl
   const risk = risksOf(data, explain, c)[0];
   const plain = c.plain ?? { what: c.text, proof: c.reason ?? '' };
   const terms = termState(data);
-  const items: Array<[ReactNode, ReactNode, ('ok' | 'warn' | undefined)?]> = [['Checks', <span data-ve-checks>{d.summary}</span>]];
+  const items: Array<[ReactNode, ReactNode, ('ok' | 'warn' | undefined)?]> = [];
+  if (d.bar) items.push(['Evidence bar', <span data-ve-bar={d.bar.met ? 'met' : 'below'}>{d.bar.text}{d.bar.mixed ? ` The claim touches ${d.bar.surfaces.join(' and ')} code: set its surface.` : ''}</span>, d.bar.met ? 'ok' : 'warn']);
+  items.push(['Checks', <span data-ve-checks>{d.summary}</span>]);
   if (d.weakest) {
-    items.push(['Weakest check', <span data-ve-weakest><Rich text={d.weakest.text} /> <span data-ve-action><Rich text={d.weakest.action} /></span></span>, d.weakest.result === 'caught' && STRONG.includes(d.weakest.strength as Verdict) ? 'ok' : 'warn']);
+    items.push([d.parts?.length ? 'Weakest part' : 'Evidence', <span data-ve-weakest><Rich text={d.weakest.text} /> <span data-ve-action><Rich text={d.weakest.action} /></span></span>, d.weakest.result === 'caught' && STRONG.includes(d.weakest.strength as Verdict) ? 'ok' : 'warn']);
   }
+  if (d.flagged) items.push(['Flagged check', <span data-ve-flagged><Rich text={d.flagged.text} /> <span data-ve-action><Rich text={d.flagged.action} /></span></span>, 'warn']);
   if (plain.what && c.name) items.push(['What it says', <Rich terms={terms} text={plain.what} />]);
   if (plain.proof) items.push(['How it is proven', <Rich terms={terms} text={plain.proof} />]);
   if (plain.warning) items.push(['Warning', <Rich terms={terms} text={plain.warning} />, 'warn']);
@@ -353,13 +383,16 @@ export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { cl
   const verifiers = new Map(data.verifiers.map((v) => [v.id, v]));
   const n = d.checks.length;
   return (
-    <Disclosure id={claimAnchor(c.id)} meta={c.id} share summary={<><VerdictPill verdict={d.strength} /> <Rich text={capital(claimLabel(c))} /></>}>
+    <Disclosure id={claimAnchor(c.id)} meta={c.id} share summary={<><VerdictPill verdict={d.strength} /> <Rich text={capital(claimLabel(c))} />{d.bar ? <> <span data-ve-bar-chip={d.bar.met ? 'met' : 'below'}><StatusPill tone={d.bar.met ? 'ok' : d.bar.risky ? 'err' : 'warn'}>{`Bar: ${d.bar.need} · ${d.bar.met ? 'met' : 'below'}`}</StatusPill></span></> : null}</>}>
       <div data-ve-trust="claim">
         {(c.legacy_ids ?? []).filter((old) => old !== c.id).map((old) => <span data-ve-legacy-anchor id={claimAnchor(old)} key={old} />)}
         <Defs items={items} />
         {c.parts?.length ? (
           <Disclosure summary={`Show the ${c.parts.length} statements that this claim joins`}>
-            <ul data-ve-claim-parts>{c.parts.map((part) => <li key={part.id}><Rich text={part.text} /></li>)}</ul>
+            <ul data-ve-claim-parts>{c.parts.map((part) => {
+              const row = d.parts?.find((x) => x.id === part.id);
+              return <li key={part.id}>{row ? <><VerdictPill verdict={row.strength} /> </> : null}<Rich text={part.text} />{row?.check ? ` (${row.check})` : ''}</li>;
+            })}</ul>
           </Disclosure>
         ) : null}
         {(c.code ?? []).map((ref, i) => <CodeRef key={i} refs={refs} {...ref} />)}
@@ -406,6 +439,7 @@ export function PromiseList({ data, refs, explain = {} }: WithRefs & { explain?:
             <p><Rich terms={terms} text={p.sentence} /></p>
             <p><strong>{strongestTier(refs, claims)}</strong></p>
             <p data-ve-promise-tally><VerdictPill verdict={strength} /> This is the verdict of its weakest claim. Its {count} {word}: {tally}.</p>
+            {refs.derived.promises.find((x) => x.id === p.id)?.bars_met !== undefined ? <p data-ve-promise-bars>{refs.derived.promises.find((x) => x.id === p.id)!.bars_met} of {count} {word} meet their bar.</p> : null}
             {claims.filter((c) => c.waiver).map((c) => <p key={c.id}>Waived: {capital(claimLabel(c))}. Reason: {c.waiver!.reason}</p>)}
             {defs.length ? <Defs items={defs} /> : null}
             <Disclosure id={promiseAnchor(p.id) + '-claims'} summary={`Show the ${count} ${word} behind this promise`}>
@@ -492,7 +526,25 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
     <div data-ve-trust="verifiers">
       <p data-ve-result data-ve-tone={verify.tone}><StatusPill tone={verify.tone}>{verify.tone === 'ok' ? 'All caught' : verify.tone === 'warn' ? 'Some missed' : 'Some cannot fail'}</StatusPill> <strong>{verify.result}</strong></p>
       {verify.other ? <p className="ve-quiet" data-ve-other>{verify.other}</p> : null}
-      <p>For each check, we broke the code on purpose and ran the check. A good check fails when the code is wrong.</p>
+      <p>For each check, we broke the code on purpose and ran the check. A good check fails when the code is wrong. There are three kinds of control: planted bugs for code, degraded variants for evals, and broken-UI runs for the frontend.</p>
+      <Subsection id="verifiers-evals" title="Degraded variants for evals (LLM)">
+        {verify.evals?.length ? (
+          <ul data-ve-evals>{verify.evals.map((e) => (
+            <li data-ve-eval={e.flagged ? 'flagged' : 'degraded'} key={e.check}><strong>{capital(e.name)}</strong> ({e.claim}): <Rich text={e.text} />{e.action ? <> <span data-ve-action><Rich text={e.action} /></span></> : null}</li>
+          ))}</ul>
+        ) : <p><em>No eval backs a claim of this PR.</em></p>}
+      </Subsection>
+      <Subsection id="verifiers-ui" title="Broken-UI runs (frontend)">
+        {verify.ui?.length ? (
+          <ul data-ve-ui>{verify.ui.map((u) => (
+            <li key={u.check}><strong>{capital(u.name)}</strong> ({u.claim}): {u.text}
+              {u.video ? <BrowserVideo artifact={{ video: u.video, screenshots: u.screenshots, captions: u.captions ?? undefined, summary: u.summary }} name={u.name} /> : null}</li>
+          ))}</ul>
+        ) : <p><em>No frontend claim in this PR.</em></p>}
+      </Subsection>
+      <Subsection id="verifiers-planted" title="Planted bugs and mutants (backend)">
+        <p data-ve-planted>{verify.result}</p>
+      </Subsection>
       {verify.weak.length ? (
         <Subsection id="verifiers-weak" title={verify.weak.length === 1 ? 'The check that did not catch its bug' : `The ${verify.weak.length} checks that did not catch their bug`}>
           {verify.weak.map((w) => {
