@@ -1299,3 +1299,8 @@ html:not([data-ve-js]) .ve-approve > li {
   margin-top: var(--ve-space-7);
   color: var(--ve-text);
 }
+
+/* What changed: a figure in the spine gets the air of a figure. */
+[data-ve-trust="spine"] > * + :is(.ve-file-map, .ve-change-chapters, .ve-subsection) {
+  margin-top: var(--ve-space-7);
+}

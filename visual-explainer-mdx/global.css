@@ -687,6 +687,10 @@
   text-transform: none;
 }
 
+.ve-shell .ve-section-heading h2 {
+  max-width: 40ch;
+}
+
 .ve-shell :is(.ve-subsection-title, .ve-section-body h3:not([class])) {
   letter-spacing: -0.005em;
   line-height: 1.3;
