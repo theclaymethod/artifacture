@@ -12,6 +12,8 @@
 - The review panel label uses `--ve-accent-text`, which passes AA on ISO light and dark.
 - The cover title is smaller for long titles: `--ve-shell-title-size` is `clamp(1.875rem, 1.25rem + 2vw, 2.5rem)` (30px on a phone, 40px on a desktop), with a 28ch measure and 1.1 leading. All presets use the same token; the ISO, Algebrica and Mono Color headers no longer override it.
 - Added `DefinitionList`, `Definition` and `Subsection`, and a default reading rhythm in a `Section` body (block spacing, `h3`/`h4`, list markers), so an explainer needs no page CSS.
+- Added `DiagramModes`: one architecture diagram in a Simple and a Detailed mode on one grid, with a labelled two-option switch that the whole page shares and remembers.
+- Added `Disclosure` (a native details block with a 44px summary row that opens on a fragment link into it) and `ChipLinks` (in-page links as 44px chips with a state pill). Plain text links in a `Section` body get a 44px target.
 - `ve:export` now runs the MDX preflight (integrity checks and code highlighting) on each MDX module that the entry imports from its own directory tree, so an explainer can keep one chapter per file.
 
 ### Narrated films

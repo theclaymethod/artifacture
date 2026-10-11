@@ -1,4 +1,4 @@
-import { Badge, DataTable, Definition, DefinitionList, DiagramCanvas, ExplainerShell, Section, StatusPill, Subsection } from '../../visual-explainer-mdx/components';
+import { Badge, ChipLinks, DataTable, Definition, DefinitionList, DiagramCanvas, DiagramModes, Disclosure, ExplainerShell, Section, StatusPill, Subsection } from '../../visual-explainer-mdx/components';
 import ReviewScanCode from './review-scan-code.mdx';
 
 <ExplainerShell title="Overdraft guard review" summary="A synthetic review of one wallet change: the claims, the checks behind them, and the code." chapterNav appearance="auto" reviewTools={false}>
@@ -37,6 +37,16 @@ import ReviewScanCode from './review-scan-code.mdx';
     {label: 'guess tier', stroke: 'dashed'},
     {label: 'model judge', glyph: 'diamond'},
   ]} />
+  <DiagramModes title="The wallet change" simple={{nodes: [
+    {id: 'call', label: 'A withdraw call'},
+    {id: 'guard', label: 'Check the balance', shape: 'diamond'},
+    {id: 'pay', label: 'Pay out'},
+  ], edges: [{from: 'call', to: 'guard', label: 'asks'}, {from: 'guard', to: 'pay', label: 'allows'}]}} detailed={{nodes: [
+    {id: 'call', label: 'wallet.withdraw'},
+    {id: 'guard', label: 'amount > balance?', shape: 'diamond'},
+    {id: 'error', label: 'OverdraftError', shape: 'oval'},
+    {id: 'pay', label: 'return balance - amount'},
+  ], edges: [{from: 'call', to: 'guard'}, {from: 'guard', to: 'error', label: 'yes'}, {from: 'guard', to: 'pay', label: 'no'}]}} />
   <p>Tier badges use the same cue: <Badge stroke="solid">fact</Badge> <Badge stroke="dashed">guess</Badge></p>
   <Subsection id="claim-c2" level={4} marker="2" title={<><code>C2</code> <StatusPill tone="ok">Proven</StatusPill> withdraw returns the balance minus the amount.</>}>
     <DefinitionList>
@@ -44,6 +54,10 @@ import ReviewScanCode from './review-scan-code.mdx';
       <Definition term="How it is proven">One unit test. A control changed the subtraction, and the test went red.</Definition>
       <Definition term="Warning" tone="warn">A second control was not found by any check.</Definition>
     </DefinitionList>
+    <ChipLinks label="Evidence" items={[{label: 'The control for C2', href: '#claim-c2-control', tone: 'ok', status: 'Proven'}]} />
+    <Disclosure summary="Show the control and its output" meta="1 control">
+      <p id="claim-c2-control">The control changed the subtraction to an addition. The unit test went red.</p>
+    </Disclosure>
   </Subsection>
 </Section>
 

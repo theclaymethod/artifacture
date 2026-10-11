@@ -136,6 +136,33 @@ for (const scheme of ['light', 'dark']) {
       assert.equal(await page.$eval('#claim-c2', (element) => element.dataset.veAnchor), 'true');
       assert.equal(await page.$eval('.ve-definition-list', (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length), 2);
 
+      // Disclosure and ChipLinks: closed by default, 44px targets, and a link into the block opens it.
+      assert.equal(await page.$eval('.ve-disclosure', (element) => element.open), false);
+      for (const selector of ['.ve-disclosure-summary', '.ve-chip-link']) {
+        assert.ok(await page.$eval(selector, (element) => element.getBoundingClientRect().height >= 44), `${selector} is under 44px`);
+      }
+      await page.click('.ve-chip-link');
+      await page.waitForFunction(() => document.querySelector('.ve-disclosure').open);
+
+      // DiagramModes: Simple first, a labelled switch, the same place for a shared node, and a remembered choice.
+      const modes = page.locator('[data-ve-diagram-modes]');
+      const places = () => page.evaluate(() => {
+        const svg = document.querySelector('[data-ve-diagram-modes] [data-ve-variant="desktop"] svg').getBoundingClientRect();
+        return [...document.querySelectorAll('[data-ve-diagram-modes] [data-ve-variant="desktop"] [data-diagram-role="node"]')].map((n) => { const b = n.getBoundingClientRect(); return [Math.round(b.x - svg.x), Math.round(b.y - svg.y)]; });
+      });
+      assert.equal(await modes.getAttribute('data-ve-mode'), 'simple');
+      assert.ok(await modes.locator('text=Check the balance').count());
+      const before = await places();
+      await modes.getByLabel('Detailed').check();
+      assert.equal(await modes.getAttribute('data-ve-mode'), 'detailed');
+      assert.ok(await modes.locator('text=OverdraftError').count());
+      const after = await places();
+      for (const point of before) assert.ok(after.some((p) => p[0] === point[0] && p[1] === point[1]), `node at ${point} moved`);
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForSelector('[data-ve-diagram-modes]');
+      assert.equal(await page.getAttribute('[data-ve-diagram-modes]', 'data-ve-mode'), 'detailed');
+      await page.getByLabel('Simple').check();
+
       // AA: pills, badges, key labels, rail links, definitions and code tokens on their real backgrounds.
       for (const selector of ['.ve-status-pill', '.ve-badge', '.ve-legend-label', '.ve-chapter-list a', '.ve-definition-list > *', '.ve-code-shiki span[style*="--shiki-token"]', '.ve-diff-mark']) {
         for (const pair of await colorPairs(page, selector)) {

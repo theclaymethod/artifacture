@@ -54,7 +54,7 @@ export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto
   );
 }
 
-function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
+export function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
   const sortedNodes = [...diagram.nodes].sort((a, b) => a.rank - b.rank || a.order - b.order);
   return (
     <div aria-label={title} className="ve-diagram-variant ve-diagram-variant-mobile" data-diagram-role="diagram-mobile" data-ve-variant="mobile" role="group">

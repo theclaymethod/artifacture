@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
+import { StatusPill, type StatusTone } from './data-table';
 import './content-blocks.css';
 
 export type PipelineProps = {
@@ -15,7 +16,11 @@ export type RiskLedgerProps = {
   risks: Array<{ risk: string; signal: string; mitigation: string; level?: 'low' | 'medium' | 'high' }>;
 };
 
-export type DefinitionListProps = { children: ReactNode };
+export type DefinitionListProps = {
+  /** `lead` sets the pairs one step larger, for the first ideas a reader meets. */
+  size?: 'lead';
+  children: ReactNode;
+};
 
 export type DefinitionProps = { term: ReactNode; tone?: 'ok' | 'info' | 'warn' | 'err' | 'neutral'; children: ReactNode };
 
@@ -28,8 +33,8 @@ export type SubsectionProps = {
 };
 
 /** Term and detail pairs in two columns. The columns stack below 640px. */
-export function DefinitionList({ children }: DefinitionListProps) {
-  return <dl className="ve-definition-list">{children}</dl>;
+export function DefinitionList({ size, children }: DefinitionListProps) {
+  return <dl className="ve-definition-list" data-ve-size={size}>{children}</dl>;
 }
 
 /** One term and its detail. A tone colors both; keep a word in the term, so color is never the only cue. */
@@ -53,6 +58,70 @@ export function Subsection({ title, id, level = 3, marker, children }: Subsectio
       </Heading>
       {children}
     </section>
+  );
+}
+
+export type DisclosureProps = {
+  /** The always-visible line. Say what the reader gets when they open it. */
+  summary: ReactNode;
+  /** Short trailing text or a pill, such as a count or a verdict. */
+  meta?: ReactNode;
+  id?: string;
+  open?: boolean;
+  children: ReactNode;
+};
+
+/**
+ * A native details block for detail that waits until the reader asks for it. The summary row is
+ * a 44px target. A fragment link to the block, or to an element inside it, opens it (and each
+ * enclosing Disclosure), so a link into collapsed detail always lands.
+ */
+export function Disclosure({ summary, meta, id, open = false, children }: DisclosureProps) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const reveal = () => {
+      const element = ref.current;
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      const target = hash ? document.getElementById(hash) : null;
+      if (!element || !target || !(element === target || element.contains(target))) return;
+      element.open = true;
+      // The innermost block scrolls once every enclosing block is open.
+      if (target === element || target.closest('details') === element) {
+        requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }));
+      }
+    };
+    reveal();
+    window.addEventListener('hashchange', reveal);
+    return () => window.removeEventListener('hashchange', reveal);
+  }, []);
+  return (
+    <details className="ve-disclosure" data-ve-anchor={id ? 'true' : undefined} id={id} open={open || undefined} ref={ref}>
+      <summary className="ve-disclosure-summary">
+        <span aria-hidden="true" className="ve-disclosure-caret" />
+        <span className="ve-disclosure-label">{summary}</span>
+        {meta === undefined || meta === null ? null : <span className="ve-disclosure-meta">{meta}</span>}
+      </summary>
+      <div className="ve-disclosure-body">{children}</div>
+    </details>
+  );
+}
+
+export type ChipLinkItem = { label: ReactNode; href: string; tone?: StatusTone; status?: string };
+export type ChipLinksProps = { items: readonly ChipLinkItem[]; label: string };
+
+/** A row of link chips, each a 44px target: a label and, when given, a state pill with its word. */
+export function ChipLinks({ items, label }: ChipLinksProps) {
+  return (
+    <ul aria-label={label} className="ve-chip-links">
+      {items.map((item) => (
+        <li key={item.href}>
+          <a className="ve-chip-link" href={item.href}>
+            <span className="ve-chip-link-label">{item.label}</span>
+            {item.status ? <StatusPill tone={item.tone ?? 'neutral'}>{item.status}</StatusPill> : null}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -24,8 +24,8 @@ export type { AsciiModel, AsciiObjectProps } from './ascii-object';
 export type { VhsEffectProps } from './vhs-effect';
 export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
 export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
-export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection } from './content-blocks';
-export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps } from './content-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, ChipLinks } from './content-blocks';
+export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, ChipLinksProps, ChipLinkItem } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
 export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
@@ -78,6 +78,8 @@ export type { ChartDatum, DataChartProps } from './charts';
 export { LieflatChart } from './lieflat-charts';
 export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
 export { DiagramWalkthrough } from './diagram-walkthrough';
+export { DiagramModes, useDiagramMode } from './diagram-modes';
+export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 
 declare global {

@@ -153,7 +153,13 @@
   white-space: nowrap;
 }
 
+/* A long identifier, such as a file path, wraps inside its cell; a short one never breaks. */
+.ve-data-table td[data-ve-kind="id"] {
+  white-space: normal;
+}
+
 .ve-data-table .ve-cell-id {
+  overflow-wrap: anywhere;
   padding: 0;
   border: 0;
   border-radius: 0;

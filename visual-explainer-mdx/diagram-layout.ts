@@ -118,6 +118,58 @@ export function layoutDiagram(
   };
 }
 
+/**
+ * Lay out a two-mode diagram on one grid. The detailed mode sets every position. The simple mode
+ * puts each of its nodes where the detailed node with the same id sits, so a reader can map one
+ * mode to the other; it routes its own edges and keeps the detailed frame.
+ */
+export function layoutDiagramModes(
+  simple: { nodes: DiagramNode[]; edges: DiagramEdge[] },
+  detailed: { nodes: DiagramNode[]; edges: DiagramEdge[] },
+  layout: 'flow' | 'tree' = 'flow',
+  direction: NonNullable<DiagramCanvasProps['direction']> = 'auto',
+) {
+  // Size each box for the longer of its two labels, so neither mode overflows a box or moves one.
+  const simpleById = new Map(simple.nodes.map((node) => [node.id, node]));
+  for (const node of simple.nodes) {
+    if (!detailed.nodes.some((other) => other.id === node.id)) throw new Error(`DiagramModes: the simple node "${node.id}" has no detailed node with the same id.`);
+  }
+  const longer = (a?: string, b?: string) => (textWidth(b ?? '', 16) > textWidth(a ?? '', 16) ? b : a);
+  const sized = detailed.nodes.map((node) => {
+    const other = simpleById.get(node.id);
+    return other ? { ...node, label: longer(node.label, other.label) ?? node.label, detail: longer(node.detail, other.detail) } : node;
+  });
+  const base = layoutDiagram(sized, detailed.edges, layout, undefined, undefined, direction);
+  const place = (graph: { nodes: DiagramNode[]; edges: DiagramEdge[] }) => {
+    const byId = new Map(base.nodes.map((node) => [node.id, node]));
+    const measured = graph.nodes.map((node, order): LaidOutNode => {
+      const at = byId.get(node.id)!;
+      const glyph = nodeGlyph(node);
+      const contentWidth = glyph === 'diamond' ? at.width / 2 - 16 : at.width - 40;
+      const labelLines = wrapDiagramText(node.label, contentWidth, 16);
+      const detailLines = node.detail ? wrapDiagramText(node.detail, contentWidth, 14) : [];
+      const textHeight = labelLines.length * 22 + (detailLines.length ? 8 + detailLines.length * 20 : 0);
+      return { ...node, x: at.x, y: at.y, width: at.width, height: at.height, rank: at.rank, row: at.row, order, isAccented: Boolean(node.accent), labelLines, detailLines, textHeight };
+    });
+    const ids = new Map(measured.map((node) => [node.id, node]));
+    const routed = graph.edges.flatMap((edge) => {
+      const from = ids.get(edge.from);
+      const to = ids.get(edge.to);
+      return from && to ? [{ edge, from, to, path: edgeRoute(from, to, base.orientation, measured) }] : [];
+    });
+    const edges = placeEdgeLabels(routed, measured, [], []);
+    return { ...base, nodes: measured, edges, dense: measured.length >= 7 || edges.length >= 10 };
+  };
+  const modes = { simple: place(simple), detailed: place(detailed) };
+  const content: Rect[] = [modes.simple, modes.detailed].flatMap((mode) => [...mode.nodes.map(nodeRect), ...mode.edges.flatMap(({ label }) => label ? [labelRect(label)] : [])]);
+  const minX = Math.min(base.viewBox.x, ...content.map((rect) => rect.x - padding));
+  const minY = Math.min(base.viewBox.y, ...content.map((rect) => rect.y - padding));
+  const maxX = Math.max(base.viewBox.x + base.viewBox.width, ...content.map((rect) => rect.x + rect.width + padding));
+  const maxY = Math.max(base.viewBox.y + base.viewBox.height, ...content.map((rect) => rect.y + rect.height + padding));
+  const viewBox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  return { simple: { ...modes.simple, viewBox }, detailed: { ...modes.detailed, viewBox } };
+}
+
 function measureDiagramNode(node: DiagramNode) {
   const glyph = nodeGlyph(node);
   const preferred = Math.max(textWidth(node.label, 16), textWidth(node.detail ?? '', 14));
