@@ -5,13 +5,9 @@
   --ve-sticky-top: var(--ve-topbar-height);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html:has(.ve-has-chapters) {
-    scroll-behavior: smooth;
-  }
-}
-
-.ve-has-chapters :is(.ve-section, [data-ve-anchor], [data-ve-data-table] tr[id]) {
+/* Every jump is instant (no smooth scrolling): a smooth scroll moves the page under the reader's
+   eyes. Every fragment target lands under the sticky top bar, not behind it. */
+.ve-shell.ve-has-chapters [id] {
   scroll-margin-top: calc(var(--ve-sticky-top) + 1rem);
 }
 
@@ -74,12 +70,29 @@
   font-weight: 600;
 }
 
+/* Narrow screens: the open list lies over the page under the top bar, so opening it moves nothing. */
+.ve-chapter-panel {
+  display: none;
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-chapter-panel {
+  display: block;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: calc(100vh - var(--ve-topbar-height));
+  max-height: calc(100dvh - var(--ve-topbar-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid var(--ve-rule);
+  background: var(--ve-nav-bg);
+}
+
 .ve-chapter-list {
   display: none;
-  max-height: calc(100vh - var(--ve-topbar-height));
   margin: 0;
   padding: 0.5rem 1.25rem 1rem;
-  overflow-y: auto;
   list-style: none;
 }
 
@@ -185,6 +198,16 @@
     display: none;
   }
 
+  .ve-chapter-panel,
+  .ve-chapter-rail[data-ve-open="true"] .ve-chapter-panel {
+    display: block;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border-bottom: 0;
+    background: transparent;
+  }
+
   .ve-chapter-heading {
     display: block;
   }
@@ -194,6 +217,7 @@
     display: block;
     max-height: calc(100vh - 8rem);
     padding: 0;
+    overflow-y: auto;
   }
 
   /* With a rail, the review tool docks under it instead of reserving a right gutter. */
@@ -269,6 +293,23 @@
   outline-offset: 2px;
 }
 
+/* Before the page runs, a paged shell already shows one chapter: the one the address names, or
+   the first. The browser's own jump to the fragment then lands where the page lands it, and the
+   page does not jump again when it starts. Without script every chapter shows in sequence. */
+@media (scripting: enabled) {
+  .ve-shell[data-ve-paged]:not([data-ve-live]) .ve-section:not(:target, :has(:target)) {
+    display: none;
+  }
+
+  .ve-shell[data-ve-paged]:not([data-ve-live]):not(:has(.ve-section:target, .ve-section :target)) .ve-section:first-of-type {
+    display: grid;
+  }
+
+  .ve-shell[data-ve-paged]:not([data-ve-live]):has(.ve-section:not(:first-of-type):target, .ve-section:not(:first-of-type) :target) .ve-shell-header {
+    display: none;
+  }
+}
+
 /* A page of a paged shell: the title and summary show on the first chapter only. */
 .ve-shell[data-ve-paged="pages"]:not([data-ve-page="0"]) .ve-shell-header {
   display: none;
@@ -288,17 +329,45 @@
   height: 0;
 }
 
-/* Previous and next: two 44px targets at the foot of each chapter. */
+/* Previous and next: two 44px targets at the foot of each chapter, in the same place on every
+   chapter. The pager follows the chapter body (the section gap plus this margin make 48px). */
 .ve-pager {
   display: flex;
   justify-content: space-between;
   gap: var(--ve-space-4, 1rem);
-  margin-top: var(--ve-space-7, 3rem);
+  margin-top: calc(var(--ve-space-7, 3rem) - var(--ve-space-5, 1.5rem));
   padding-top: var(--ve-space-4, 1rem);
   border-top: 1px solid var(--ve-rule);
 }
 
-.ve-section-body a.ve-pager-link {
+/* A page fills the screen at least, so a short chapter puts the pager where a long one ends:
+   at the foot of the screen once the chapter is read (1rem landing margin, 2rem page foot). */
+.ve-shell[data-ve-paged="pages"] .ve-section:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--ve-sticky-top) - 3rem);
+  min-height: calc(100svh - var(--ve-sticky-top) - 3rem);
+}
+
+.ve-shell[data-ve-paged="pages"] .ve-section > .ve-section-body {
+  margin-bottom: calc(var(--ve-space-7, 3rem) - var(--ve-space-5, 1.5rem));
+}
+
+.ve-shell[data-ve-paged="pages"] .ve-section > .ve-pager {
+  margin-top: auto;
+}
+
+/* Each label holds two lines, so the pager is one height on every chapter. */
+.ve-pager-label {
+  display: -webkit-box;
+  min-height: calc(2em * 1.3);
+  overflow: hidden;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ve-pager a.ve-pager-link {
   display: grid;
   gap: 0.125rem;
   min-height: 44px;
@@ -330,12 +399,12 @@
   justify-content: flex-end;
 }
 
-.ve-section-body a.ve-pager-link:hover > span:last-child {
+.ve-pager a.ve-pager-link:hover > span:last-child {
   text-decoration: underline;
   text-underline-offset: 0.22em;
 }
 
-.ve-section-body a.ve-pager-link:focus-visible {
+.ve-pager a.ve-pager-link:focus-visible {
   outline: 3px solid var(--ve-accent);
   outline-offset: 2px;
 }
