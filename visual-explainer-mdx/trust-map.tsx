@@ -331,7 +331,7 @@ export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { cl
   const terms = termState(data);
   const items: Array<[ReactNode, ReactNode, ('ok' | 'warn' | undefined)?]> = [['Checks', <span data-ve-checks>{d.summary}</span>]];
   if (d.weakest) {
-    items.push(['Weakest check', <span data-ve-weakest><Rich text={d.weakest.text} /> <span data-ve-action><Rich text={d.weakest.action} /></span></span>, d.weakest.result === 'caught' ? 'ok' : 'warn']);
+    items.push(['Weakest check', <span data-ve-weakest><Rich text={d.weakest.text} /> <span data-ve-action><Rich text={d.weakest.action} /></span></span>, d.weakest.result === 'caught' && STRONG.includes(d.weakest.strength as Verdict) ? 'ok' : 'warn']);
   }
   if (plain.what && c.name) items.push(['What it says', <Rich terms={terms} text={plain.what} />]);
   if (plain.proof) items.push(['How it is proven', <Rich terms={terms} text={plain.proof} />]);
