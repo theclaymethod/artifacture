@@ -711,8 +711,17 @@
   margin-top: var(--ve-space-7);
 }
 
-/* A paged chapter shows alone: no rule above it, and its heading starts the page. */
+/* A paged chapter shows alone: no rule above it, and its heading starts the page. Before the
+   page runs, the chapter that the address names shows the same way (explainer-nav.css), so a deep
+   link lands where it stays. */
 .ve-shell[data-ve-paged="pages"]:not([data-ve-page="0"]) .ve-section {
   border-top: 0;
   padding-top: var(--ve-space-6);
+}
+
+@media (scripting: enabled) {
+  .ve-shell[data-ve-paged]:not([data-ve-live]):has(.ve-section:not(:first-of-type):target, .ve-section:not(:first-of-type) :target) .ve-section {
+    border-top: 0;
+    padding-top: var(--ve-space-6);
+  }
 }

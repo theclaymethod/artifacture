@@ -649,7 +649,8 @@ for (const [width, height] of [[1280, 900], [375, 812]]) {
       assert.equal(watched.calls.length, 1, `deep link: ${watched.calls}`);
       assert.ok(new Set(watched.moves).size <= 1, `deep link moved ${watched.moves}`);
       near(await topOf(page, '#claim-c01'), offset, 'deep-link claim top');
-      assert.deepEqual(await page.$$eval('details[open]', (blocks) => blocks.map((block) => block.id)), ['promise-p1', 'claim-c01']);
+      // A short change's chapters start open; besides them, the deep link opens only its block and its parent.
+      assert.deepEqual(await page.$$eval('details[open]:not([data-ve-change-chapter] > details)', (blocks) => blocks.map((block) => block.id)), ['promise-p1', 'claim-c01']);
       assert.equal(await page.evaluate(() => location.hash), '#claim-c01');
 
       // Read as one page, and back: the chapter at the reading line keeps its place on the screen.
