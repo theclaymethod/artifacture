@@ -104,14 +104,14 @@ Copy selected model/vector blocks with `artifacture add shape-ascii particle-obj
 
 Copy these with `artifacture add ascii-image ascii-sweep ascii-object vhs`. See `docs/media-effects.md` for the source contracts, video decoding ownership, CORS/WebGL constraints, and Blender authoring/export instructions. Keep teaching text after the effect.
 
-## Trust-map explainers (understando)
+## Verification explainers (understando)
 
-The card [trust-map](../cards/trust-map.md) holds the data contract and the page; these render the derived data of a trust map and never compute it again.
+The card [trust-map](../cards/trust-map.md) holds the data contract and the page; these render the exported data of a trust map (invariants, claims, checks, planted-bug controls, results and code refs) and never compute it again.
 
-- The guided review: `ReviewStart` (the merge state, the progress, the ways in), `DiffSpine` (the chapters of the change, their flags and the files to act on), `EvidenceGuide` (how to read a promise, a bar and one bug with two results), `VerifierView` (the checks by promise), `UnderstandingCheck` (questions from the data), `ReviewChecklist` (blockers, then risks to accept, each with its evidence and the reviewer's call), `ReviewVerdict`, `ApproveChecks`, `ReviewProgress`, `ChapterProgress`, `ExportReview` (copies the calls as Markdown).
-- Shared rows: `ClaimRow`, `CheckRow`, `ClaimTimeline`, `FileCard`, `BarCard`, `BarChip`, `ChangedCode`, `ClaimBody`, `ClaimDetail`, `VerdictPill`, `CodeRef`, `PromiseLink`, `Glossary`, `Glossed`, `Invariants`, `VerdictLegend`.
+- The parts: `Invariants` (the rules that must always hold), `EvidenceGuide` (how to read a promise, a bar and one bug with two results, and whether the checks can catch a bug), `VerifierView` (each claim once, with its checks, planted bugs and formal links), `WorkedExample` and `ExamplesFor` (real values through the flow, with their sources).
+- Shared rows: `ClaimRow`, `CheckRow`, `ClaimTimeline`, `BarCard`, `BarChip`, `ChangedCode`, `ClaimBody`, `ClaimDetail`, `VerdictPill`, `CodeRef`, `PromiseLink`, `Glossary`, `Glossed`, `VerdictLegend`.
 - Figures: `ArchitectureDiagram` (Simple and Detailed), `TypedDiagram` (sequence, state, schema and flow, in Diagram Design's grammar, with Before / After), `Walkthrough`, `StepThrough` (one step at a time, its station lit).
-- The earlier level ladder: `MergeVerdict`, `PromiseChips`, `PromiseList`, `VerifyTheVerifiers`, `UnclaimedChanges`, `WhatChanged`.
+- One long level each, for a page that is not paged: `PromiseChips`, `PromiseList`, `VerifyTheVerifiers`.
 - `CopyLink`: a 44px control that copies the address of a fragment.
 
 ## Original source figures
