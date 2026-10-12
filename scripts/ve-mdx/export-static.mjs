@@ -29,23 +29,27 @@ function viteFsPath(filePath) {
 
 async function main() {
   const { source, out } = parseArgs(process.argv.slice(2));
-  const server = await createServer({
-    root: repoRoot,
-    appType: 'custom',
-    logLevel: 'warn',
-    plugins: [mdx(), react()],
-    optimizeDeps: { noDiscovery: true, include: [] },
-    server: {
-      middlewareMode: true,
-      hmr: false,
-      ws: false,
-      fs: {
-        allow: [repoRoot],
-      },
-    },
-  });
-
+  const cacheRoot = path.join(repoRoot, '.ve-mdx-tmp');
+  await fs.mkdir(cacheRoot, { recursive: true });
+  const cacheDir = await fs.mkdtemp(path.join(cacheRoot, 'static-cache-'));
+  let server;
   try {
+    server = await createServer({
+      root: repoRoot,
+      cacheDir,
+      appType: 'custom',
+      logLevel: 'warn',
+      plugins: [mdx(), react()],
+      optimizeDeps: { noDiscovery: true, include: [] },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        ws: false,
+        fs: {
+          allow: [repoRoot],
+        },
+      },
+    });
     const mod = await server.ssrLoadModule(viteFsPath(source));
     if (!(mod.default instanceof Function)) throw new Error('Static source must export a default React component.');
     const markup = renderToStaticMarkup(React.createElement(mod.default));
@@ -54,7 +58,11 @@ async function main() {
     await fs.writeFile(out, html);
     console.log(`Generated static ${out}`);
   } finally {
-    await server.close();
+    try {
+      await server?.close();
+    } finally {
+      await fs.rm(cacheDir, { recursive: true, force: true });
+    }
   }
 }
 

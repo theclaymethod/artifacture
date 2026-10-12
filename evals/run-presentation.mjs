@@ -19,6 +19,7 @@
  * Run: npm run ve:eval-presentation   (CI: evals job, after ve:eval)
  */
 import { spawnSync } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,18 +30,21 @@ const REPO_ROOT = resolve(EVAL_ROOT, '..');
 const DEMO_SOURCE = 'examples/visual-explainer-mdx/presentation-deck.tsx';
 const SECOND_PRESET = 'algebrica';
 
+const cases = [];
 const results = [];
 const consoleErrors = [];
 
-function record(group, id, run) {
-  return (async () => {
-    try {
-      await run();
-      results.push({ group, id, status: 'pass' });
-    } catch (error) {
-      results.push({ group, id, status: 'fail', detail: error instanceof Error ? error.message : String(error) });
-    }
-  })();
+function schedule(group, id, run) {
+  cases.push(() => record(group, id, run));
+}
+
+async function record(group, id, run) {
+  try {
+    await run();
+    results.push({ group, id, status: 'pass' });
+  } catch (error) {
+    results.push({ group, id, status: 'fail', detail: error instanceof Error ? error.message : String(error) });
+  }
 }
 
 function assert(condition, message) {
@@ -143,7 +147,7 @@ async function main() {
     /* interaction                                                   */
     /* ------------------------------------------------------------ */
 
-    await record('interaction', 'keyboard-nav-matrix', () =>
+    schedule('interaction', 'keyboard-nav-matrix', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         const steps = [
           ['ArrowRight', 1],
@@ -169,7 +173,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'edge-click-zones', () =>
+    schedule('interaction', 'edge-click-zones', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await page.locator('[data-edge-next]').click({ position: { x: 40, y: 450 }, force: true });
         assert((await slideIndex(page)) === 1, 'right edge zone should advance');
@@ -178,7 +182,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'vertical-fallthrough-without-click-ins', () =>
+    schedule('interaction', 'vertical-fallthrough-without-click-ins', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         assert((await slideIndex(page)) === 0, 'fallthrough fixture must start on slide 0');
         await page.locator('[data-stage] [data-drill-target]').evaluateAll((triggers) => {
@@ -197,7 +201,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'vertical-drill-navigation', () =>
+    schedule('interaction', 'vertical-drill-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         const label = () => sheetOpen(page).getAttribute('aria-label');
@@ -239,7 +243,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'vertical-custom-state-navigation', () =>
+    schedule('interaction', 'vertical-custom-state-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 3);
         const stateIndex = () =>
@@ -274,7 +278,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'vertical-layer-explorer-navigation', () =>
+    schedule('interaction', 'vertical-layer-explorer-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 2);
         const pressedId = () =>
@@ -307,7 +311,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'drill-dismiss-guard-matrix', () =>
+    schedule('interaction', 'drill-dismiss-guard-matrix', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -326,7 +330,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'drill-escape-and-x-close', () =>
+    schedule('interaction', 'drill-escape-and-x-close', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -340,7 +344,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'drill-cta-open-contract', () =>
+    schedule('interaction', 'drill-cta-open-contract', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // Every sheet-opening trigger must open via click AND Enter AND Space.
         const triggers = [
@@ -369,7 +373,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'drill-cta-variant-styles', () =>
+    schedule('interaction', 'drill-cta-variant-styles', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         const styleOf = (selector) =>
           page.locator(selector).evaluate((el) => {
@@ -388,7 +392,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'layer-explorer-selection', () =>
+    schedule('interaction', 'layer-explorer-selection', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 2);
         assert((await sheetOpen(page).count()) === 0, 'explorer starts on the initial layer (no drill-open)');
@@ -401,7 +405,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'keyboard-guard-typing-and-modifiers', () =>
+    schedule('interaction', 'keyboard-guard-typing-and-modifiers', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // Modifier chords are browser/OS shortcuts — the deck must not steal
         // them. (Playwright still delivers the keydown, so a missing guard
@@ -430,7 +434,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'nav-gated-while-sheet-open', () =>
+    schedule('interaction', 'nav-gated-while-sheet-open', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -452,7 +456,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'light-tone-primary-cta-contrast', () =>
+    schedule('interaction', 'light-tone-primary-cta-contrast', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // On light-tone slides --ve-accent remaps to the ink color, so a
         // primary CTA filled with it must flip its text to the slide surface
@@ -473,7 +477,7 @@ async function main() {
       }),
     );
 
-    await record('interaction', 'reduced-motion-disables-animation', () =>
+    schedule('interaction', 'reduced-motion-disables-animation', () =>
       withPage(browser, { url: primaryUrl, reducedMotion: 'reduce' }, async (page) => {
         const animation = await page
           .locator('[data-stage] > div')
@@ -498,7 +502,7 @@ async function main() {
       { width: 1024, height: 768 },
       { width: 800, height: 1000 },
     ]) {
-      await record('geometry', `scale-to-fit-${viewport.width}x${viewport.height}`, () =>
+      schedule('geometry', `scale-to-fit-${viewport.width}x${viewport.height}`, () =>
         withPage(browser, { url: primaryUrl, viewport }, async (page) => {
           const { container, stage } = await page.evaluate(() => {
             const bounds = (element) => {
@@ -522,7 +526,7 @@ async function main() {
       );
     }
 
-    await record('geometry', 'letterbox-on-mismatched-ratio', () =>
+    schedule('geometry', 'letterbox-on-mismatched-ratio', () =>
       withPage(browser, { url: primaryUrl, viewport: { width: 800, height: 1000 } }, async (page) => {
         const { top, availH, scale } = await page.evaluate(() => {
           const main = document.querySelector('main');
@@ -537,7 +541,7 @@ async function main() {
       }),
     );
 
-    await record('geometry', 'rail-collapse-and-hover-expand', () =>
+    schedule('geometry', 'rail-collapse-and-hover-expand', () =>
       withPage(browser, { url: primaryUrl, reducedMotion: 'reduce' }, async (page) => {
         const rail = page.locator('[data-rail]');
         await page.waitForFunction(
@@ -563,7 +567,7 @@ async function main() {
       }),
     );
 
-    await record('geometry', 'slide-text-readable-and-contained', async () => {
+    schedule('geometry', 'slide-text-readable-and-contained', async () => {
       for (const url of [primaryUrl, secondUrl]) {
         await withPage(browser, { url }, async (page) => {
           const text = await page.locator('[data-stage] p, [data-stage] h1, [data-stage] h2, [data-stage] h3').evaluateAll((els) =>
@@ -592,7 +596,7 @@ async function main() {
     /* tokens                                                        */
     /* ------------------------------------------------------------ */
 
-    await record('tokens', 'preset-reskin-changes-computed-colors', async () => {
+    schedule('tokens', 'preset-reskin-changes-computed-colors', async () => {
       const sample = (url) =>
         withPage(browser, { url }, async (page) => ({
           slideBg: await page.locator('[data-ve-slide]').evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -608,6 +612,9 @@ async function main() {
       assert(a.font !== b.font, `display font must reskin per preset (both ${a.font})`);
     });
 
+    await Promise.all(Array.from({ length: Math.min(2, availableParallelism()) }, async () => {
+      while (cases.length) await cases.shift()();
+    }));
     await record('interaction', 'no-console-errors', async () => {
       assert(consoleErrors.length === 0, `console errors during evals:\n${consoleErrors.join('\n')}`);
     });
