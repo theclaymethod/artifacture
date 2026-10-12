@@ -114,6 +114,9 @@
   color: var(--ve-muted);
   font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
   font-variant-numeric: tabular-nums;
+  /* A fixed width, so the pager does not move when the count changes, also with a fallback font that has no tabular figures. */
+  min-inline-size: 10ch;
+  text-align: center;
 }
 
 .ve-example-steps {
