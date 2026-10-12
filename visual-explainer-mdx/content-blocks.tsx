@@ -339,7 +339,7 @@ export function Steps({ label, children }: StepsProps) {
       <div className="ve-stepper-controls">
         <button className="ve-stepper-button" data-ve-step-prev disabled={at === 0} onClick={() => stepper.set(at - 1)} type="button">Previous step</button>
         <p aria-live="polite" className="ve-stepper-count">Step {at + 1} of {steps.length}</p>
-        <button className="ve-stepper-button" data-ve-step-next data-ve-primary disabled={at === steps.length - 1} onClick={() => stepper.set(at + 1)} type="button">Next step</button>
+        <button className="ve-stepper-button" data-ve-step-next disabled={at === steps.length - 1} onClick={() => stepper.set(at + 1)} type="button">Next step</button>
       </div>
     </div>
   );

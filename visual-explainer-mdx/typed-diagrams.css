@@ -108,7 +108,7 @@
 
 .ve-dd-name[data-ve-mono="true"] {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .ve-dd-status {
@@ -204,7 +204,6 @@ text[data-ve-struck="true"] {
 .ve-dd-frame-op {
   fill: var(--ve-dd-muted);
   font-size: 12px;
-  letter-spacing: 0.12em;
 }
 
 .ve-dd-guard {
@@ -240,8 +239,7 @@ text[data-ve-struck="true"] {
 
 .ve-dd-tag {
   fill: var(--ve-dd-muted);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 12px;
 }
 
 .ve-dd-rule {

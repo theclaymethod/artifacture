@@ -98,7 +98,7 @@
   border-bottom: 1px solid var(--ve-rule);
   padding: 0.75rem 1rem;
   text-align: inherit;
-  font-weight: 500;
+  font-weight: var(--ve-weight-strong);
 }
 
 .ve-decision-matrix .ve-decision-row:nth-child(odd) {
@@ -198,7 +198,6 @@
 
 .ve-definition-list > dd {
   margin: 0;
-  line-height: inherit;
 }
 
 .ve-definition-list > dt[data-ve-tone] {
@@ -321,7 +320,7 @@
   border-radius: 4px;
   background: var(--ve-heading);
   color: var(--ve-bg);
-  font: 500 0.75rem/1.4 var(--ve-font-body);
+  font: var(--ve-weight-strong) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
   white-space: nowrap;
   pointer-events: none;
 }
@@ -421,8 +420,8 @@
   color: var(--ve-heading);
   cursor: pointer;
   list-style: none;
-  font-size: var(--ve-text-body);
-  line-height: 1.4;
+  font-size: var(--ve-text-ui);
+  line-height: var(--ve-leading-ui);
 }
 
 .ve-disclosure > .ve-disclosure-summary:hover {
@@ -604,7 +603,7 @@ html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) >
   border-radius: 999px;
   background: var(--ve-heading);
   color: var(--ve-bg);
-  font: var(--ve-weight-strong) 0.875rem/1 var(--ve-font-body);
+  font: var(--ve-weight-strong) var(--ve-text-small)/1 var(--ve-font-ui, var(--ve-font-body));
   font-variant-numeric: tabular-nums;
 }
 
@@ -647,7 +646,8 @@ html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) >
   color: var(--ve-accent-contrast, var(--ve-bg));
 }
 
-.ve-steps[data-ve-stepping] > .ve-step {
+/* A step's text keeps the measure; its code takes the column (code wider than prose). */
+.ve-steps[data-ve-stepping] > .ve-step > :is(p, ul, ol) {
   max-width: var(--ve-measure);
 }
 
@@ -662,25 +662,20 @@ html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) >
 .ve-stepper-count {
   margin: 0;
   color: var(--ve-muted);
-  font-size: var(--ve-text-small);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
   font-variant-numeric: tabular-nums;
 }
 
+/* Previous and Next: one quiet control style, one height. */
 .ve-stepper-button {
-  min-height: 44px;
+  min-height: var(--ve-control-height);
   padding: 0 var(--ve-space-4);
   border: 1px solid var(--ve-rule);
   border-radius: var(--ve-control-radius);
   background: var(--ve-bg);
   color: var(--ve-heading);
-  font: var(--ve-weight-strong) var(--ve-text-small)/1.2 var(--ve-font-body);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
   cursor: pointer;
-}
-
-.ve-stepper-button[data-ve-primary] {
-  border-color: var(--ve-heading);
-  background: var(--ve-heading);
-  color: var(--ve-bg);
 }
 
 .ve-stepper-button:hover:not(:disabled) {

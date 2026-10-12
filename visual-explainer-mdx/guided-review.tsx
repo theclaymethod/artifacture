@@ -7,6 +7,7 @@
 // Patterns adapted from the MIT `guided-review` plugin: see GUIDED-REVIEW-NOTICE.md.
 import { Fragment, useEffect, useId, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { useExplainerShell } from './explainer-nav';
+import { Breakable } from './breakable';
 import { CodeBlock } from './code-blocks';
 import { Disclosure, Subsection } from './content-blocks';
 import { StatusPill, ToneMark, type StatusTone } from './data-table';
@@ -220,7 +221,7 @@ export function FileCard({ data, refs, file: f, group, anchored = true, claims =
   return (
     <article className="ve-file" data-ve-kind={f.status.kind} data-ve-spine-file={f.path} data-ve-tone={tone} id={anchored ? fileAnchor(f.path) : undefined}>
       <header className="ve-file-head">
-        <code className="ve-file-path">{f.file}</code>
+        <code className="ve-file-path"><Breakable text={f.file} /></code>
         <Churn added={f.added} removed={f.removed} />
         <StatusPill tone={tone}>{f.status.label}</StatusPill>
       </header>
@@ -261,7 +262,7 @@ function FileRows({ refs, files }: { refs: Refs; files: SpineFile[] }) {
     <ul className="ve-file-rows" data-ve-file-rows>
       {files.map((f) => (
         <li data-ve-kind={f.status.kind} data-ve-spine-file={f.path} data-ve-tone={fileTone(refs, f)} id={fileAnchor(f.path)} key={f.path}>
-          <code className="ve-file-path">{f.file}</code>
+          <code className="ve-file-path"><Breakable text={f.file} /></code>
           <Churn added={f.added} removed={f.removed} />
           <span className="ve-file-row-status"><ToneMark tone={fileTone(refs, f)} />{f.status.label}</span>
           {link(f) ? <a className="ve-file-row-link" href={link(f)!}>Read it at the PR head</a> : null}
@@ -439,7 +440,7 @@ export function DiffSpine({ data, refs, explain = {}, checks = '#ch-5', open }: 
           <ul className="ve-file-rows" data-ve-read-first>
             {first.map((f) => (
               <li data-ve-kind={f.status.kind} data-ve-tone={fileTone(refs, f)} key={f.path}>
-                <a className="ve-file-path" href={`#${fileAnchor(f.path)}`}><code>{f.file}</code></a>
+                <a className="ve-file-path" href={`#${fileAnchor(f.path)}`}><code><Breakable text={f.file} /></code></a>
                 <Churn added={f.added} removed={f.removed} />
                 <span className="ve-file-row-status"><ToneMark tone={fileTone(refs, f)} />{f.status.label}</span>
                 {f.status.text && !SAYS_ACTION.includes(f.status.kind) ? <span className="ve-file-row-action" data-ve-action>{f.status.text}</span> : null}

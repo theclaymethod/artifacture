@@ -255,6 +255,7 @@
 }
 
 .ve-promise-sentence {
+  font-family: var(--ve-font-prose, var(--ve-font-body));
   font-size: var(--ve-text-lead);
   line-height: var(--ve-leading-lead);
 }
@@ -303,8 +304,10 @@
   gap: var(--ve-space-2);
   min-height: 44px;
   color: var(--ve-heading);
+  font-family: var(--ve-font-ui, var(--ve-font-body));
   font-size: var(--ve-text-small);
   font-weight: var(--ve-weight-strong);
+  line-height: var(--ve-leading-ui);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--ve-heading) 35%, transparent);
   text-underline-offset: 0.22em;
@@ -418,34 +421,47 @@
 
 /* Each line is a row: the gutter holds its number (at the head; a removed line has its number at the
    base) and a sign (+ added, ~ changed, - removed), so a change never shows by color alone. The
-   added and removed tints keep each syntax token at AA. :where() keeps these rules below a "look
-   closely" flag, which marks its line on top. */
+   added and removed tints keep each syntax token at AA. Code never wraps: a long line scrolls
+   sideways, and the gutter stays in place while it scrolls. :where() keeps these rules below a
+   "look closely" flag, which marks its line on top. */
 [data-ve-code-lines] .ve-code-block .ve-code-shiki pre {
   padding-inline: 0;
 }
 
-/* A column of lines: a flex container drops the newline text between them, so tinted rows touch. */
+/* A column of lines as wide as the longest one: a flex container drops the newline text between
+   them, so tinted rows touch, and each row spans the scroll width. */
 [data-ve-code-lines] .ve-code-block .ve-code-shiki code {
   display: flex;
   flex-direction: column;
+  width: max-content;
+  min-width: 100%;
 }
 
 :where([data-ve-code-lines]) .ve-code-shiki .line {
-  display: block;
-  position: relative;
-  padding-right: 1rem;
-  padding-left: calc(var(--ve-line-digits, 3) * 1ch + 3.5ch);
+  --ve-line-bg: var(--ve-code-bg);
+  --ve-line-edge: transparent;
+  display: flex;
+  background: var(--ve-line-bg);
 }
 
 :where([data-ve-code-lines]) .ve-line-gutter {
-  position: absolute;
-  top: 0;
+  position: sticky;
   left: 0;
+  z-index: 1;
   display: flex;
+  flex: none;
   gap: 0.75ch;
-  padding-left: 1ch;
+  padding: 0 1.5ch 0 1ch;
+  background: var(--ve-line-bg);
+  box-shadow: inset 3px 0 0 var(--ve-line-edge);
   color: var(--ve-code-muted);
   user-select: none;
+}
+
+:where([data-ve-code-lines]) .ve-line-code {
+  flex: none;
+  padding-right: 1rem;
+  white-space: pre;
 }
 
 :where([data-ve-code-lines]) .ve-line-no {
@@ -455,21 +471,20 @@
 
 :where([data-ve-code-lines]) .ve-line-sign {
   width: 1ch;
-  font-weight: var(--ve-weight-strong);
 }
 
 :where([data-ve-code-lines]) .line:is([data-ve-line="add"], [data-ve-line="mod"]) {
-  background: var(--ve-code-add-bg);
-  box-shadow: inset 3px 0 0 var(--ve-code-add);
+  --ve-line-bg: var(--ve-code-add-bg);
+  --ve-line-edge: var(--ve-code-add);
 }
 
 :where([data-ve-code-lines]) .line[data-ve-line="mod"] {
-  box-shadow: inset 3px 0 0 var(--ve-code-change);
+  --ve-line-edge: var(--ve-code-change);
 }
 
 :where([data-ve-code-lines]) .line[data-ve-line="remove"] {
-  background: var(--ve-code-remove-bg);
-  box-shadow: inset 3px 0 0 var(--ve-code-remove);
+  --ve-line-bg: var(--ve-code-remove-bg);
+  --ve-line-edge: var(--ve-code-remove);
 }
 
 :where([data-ve-code-lines]) .line[data-ve-line="add"] .ve-line-sign { color: var(--ve-code-add); }
@@ -490,7 +505,7 @@
   min-width: 2ch;
   border-radius: 2px;
   font-family: var(--ve-font-mono);
-  font-weight: var(--ve-weight-strong);
+  font-weight: var(--ve-weight-regular);
   text-align: center;
   color: var(--ve-key-ink);
   background: color-mix(in srgb, var(--ve-key-ink) 14%, transparent);
@@ -574,7 +589,7 @@
 .ve-definition-list[data-ve-glossary] > dt {
   padding-top: 0;
   color: var(--ve-heading);
-  font-size: var(--ve-text-body);
+  font-size: var(--ve-text-ui);
   break-after: avoid;
 }
 

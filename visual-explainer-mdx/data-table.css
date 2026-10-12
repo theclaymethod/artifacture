@@ -9,7 +9,7 @@
   background: var(--ve-tone-soft);
   color: var(--ve-tone-ink);
   max-width: 100%;
-  font: var(--ve-weight-strong, 600) 0.875rem/1.3 var(--ve-font-body);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
   white-space: nowrap;
 }
 
@@ -28,7 +28,7 @@
   border-radius: 4px;
   background: transparent;
   font-family: var(--ve-font-mono);
-  font-weight: 500;
+  font-weight: var(--ve-weight-regular);
 }
 
 .ve-badge[data-ve-stroke="dashed"] {
@@ -62,13 +62,13 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--ve-rule);
   color: var(--ve-text);
-  font: 0.875rem/1.4 var(--ve-font-body);
+  font: var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
 }
 
 .ve-legend-title {
   margin: 0;
   color: var(--ve-muted);
-  font-weight: 600;
+  font-weight: var(--ve-weight-strong);
 }
 
 .ve-legend ul {
@@ -109,7 +109,7 @@
 }
 
 .ve-legend[data-ve-layout="list"] .ve-legend-label {
-  font-weight: 600;
+  font-weight: var(--ve-weight-strong);
 }
 
 /* Data table. No wrapper overflow, so the header can stick to the page while it scrolls. */
@@ -123,13 +123,13 @@
   border-collapse: separate;
   border-spacing: 0;
   color: var(--ve-text);
-  font: 0.9375rem/1.45 var(--ve-font-body);
+  font: var(--ve-text-ui)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
 }
 
 .ve-data-table caption {
   margin-bottom: 0.5rem;
   color: var(--ve-muted);
-  font-size: 0.875rem;
+  font-size: var(--ve-text-small);
   text-align: left;
 }
 
@@ -141,8 +141,8 @@
   border-bottom: 1px solid var(--ve-heading);
   background: var(--ve-bg);
   color: var(--ve-muted);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
   text-align: left;
   vertical-align: bottom;
   white-space: nowrap;
@@ -187,7 +187,7 @@
   background: transparent;
   color: inherit;
   font-family: var(--ve-font-mono);
-  font-size: 0.875rem;
+  font-size: var(--ve-text-small);
 }
 
 .ve-data-table .ve-cell-code {
@@ -232,7 +232,7 @@
   display: block;
   margin-top: 0.25rem;
   color: var(--ve-muted);
-  font-size: 0.875rem;
+  font-size: var(--ve-text-small);
 }
 
 .ve-data-table .ve-cell-empty {
@@ -274,8 +274,8 @@
   .ve-data-table td::before {
     content: attr(data-label);
     color: var(--ve-muted);
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--ve-text-small);
+    font-weight: var(--ve-weight-strong);
   }
 
   .ve-data-table td[data-ve-kind="number"] {
@@ -297,19 +297,19 @@
   }
 
   .ve-data-table[data-ve-density="compact"] td:first-child {
-    font-weight: 600;
+    font-weight: var(--ve-weight-strong);
   }
 
   .ve-data-table[data-ve-density="compact"] td[data-ve-kind="number"] {
     display: inline-block;
     margin-right: 0.75rem;
     color: var(--ve-muted);
-    font-size: 0.875rem;
+    font-size: var(--ve-text-small);
   }
 
   .ve-data-table[data-ve-density="compact"] td:not([data-ve-kind="number"]):not(:first-child) {
     color: var(--ve-muted);
-    font-size: 0.875rem;
+    font-size: var(--ve-text-small);
   }
 }
 

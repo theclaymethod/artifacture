@@ -148,7 +148,7 @@
     text-wrap: pretty;
   }
 
-  .ve-section-body :is(p, li, dd, blockquote, figcaption),
+  .ve-section-body :is(p, li, dd, blockquote, figcaption:not(.ve-code-caption)),
   .ve-section-body > :is(ul, ol):not([class]),
   .ve-section-body > .ve-callout {
     max-width: var(--ve-copy-measure);
@@ -647,7 +647,14 @@
    the UI face. Both follow the preset body face unless the page sets a pairing. */
 .ve-shell {
   font-family: var(--ve-font-ui);
+  font-size: var(--ve-text-ui);
+  line-height: var(--ve-leading-ui);
   letter-spacing: var(--ve-ui-tracking);
+}
+
+/* Two weights only: 400 and 600. */
+.ve-shell :is(strong, b) {
+  font-weight: var(--ve-weight-strong);
 }
 
 .ve-shell :where(
@@ -655,6 +662,7 @@
   .ve-section-body > p,
   .ve-section-body > :is(ul, ol):not([class]),
   .ve-section-body > blockquote,
+  .ve-disclosure-body > blockquote,
   .ve-lead,
   .ve-section-body > .ve-definition-list:not([data-ve-glossary]) > dd,
   .ve-step > p,
@@ -674,10 +682,56 @@
   line-height: var(--ve-leading-lead);
 }
 
-/* Code keeps its own face inside prose. */
-.ve-shell :is(p, li, dd) code {
+/* Code keeps its own face everywhere, at its one weight (the code face has 400 only). Inline code
+   follows the text around it, between 14 and 15px. */
+.ve-shell :is(code, kbd, samp, pre) {
   font-family: var(--ve-font-mono);
+  font-weight: var(--ve-weight-regular);
   letter-spacing: 0;
+}
+
+.ve-shell code:not(pre code) {
+  font-size: clamp(var(--ve-text-code), 0.86em, 0.9375rem);
+}
+
+/* Code and tables are wider than prose: an item that holds one takes the column, and only its
+   text keeps the measure. */
+.ve-shell :is(li, dd):has(:is([data-ve-code-block], [data-ve-diff-block], table, pre)) {
+  max-width: none;
+}
+
+.ve-shell :is(li, dd):has(:is([data-ve-code-block], [data-ve-diff-block], table, pre)) > :is(p, ul, ol) {
+  max-width: var(--ve-copy-measure);
+}
+
+/* Figures: tabular in the UI face (counts, tables, steps), proportional in the prose. */
+.ve-shell {
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-shell :where(
+  .ve-shell-header p,
+  .ve-section-body > p,
+  .ve-section-body > :is(ul, ol):not([class]),
+  .ve-section-body > blockquote,
+  .ve-lead,
+  .ve-step > p,
+  .ve-change-explain,
+  .ve-disclosure-body > p,
+  .ve-subsection > p,
+  .ve-example-lead,
+  .ve-example-reason
+) {
+  font-variant-numeric: normal;
+}
+
+/* No widow in a heading; no lone last word in a paragraph. */
+.ve-shell :is(h1, h2, h3, h4, h5, h6) {
+  text-wrap: balance;
+}
+
+.ve-shell :is(p, li, dd, blockquote) {
+  text-wrap: pretty;
 }
 
 /* Headings: weight and size, never capitals or tracking for emphasis. */
@@ -689,6 +743,9 @@
 
 .ve-shell .ve-section-heading h2 {
   max-width: 40ch;
+  font-size: var(--ve-text-h2);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .ve-shell :is(.ve-subsection-title, .ve-section-body h3:not([class])) {

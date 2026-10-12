@@ -119,7 +119,7 @@ function Sequence({ spec, c }: { spec: SequenceSpec; c: Ctx }) {
         <g className="ve-dd-frame" key={`f${i}`}>
           <rect height={f.y2 - f.y1} rx="4" width={f.x2 - f.x1} x={f.x1} y={f.y1} />
           <rect className="ve-dd-frame-tab" height="20" rx="2" width="52" x={f.x1} y={f.y1} />
-          <text className="ve-dd-frame-op" textAnchor="middle" x={f.x1 + 26} y={f.y1 + 14}>LOOP</text>
+          <text className="ve-dd-frame-op" textAnchor="middle" x={f.x1 + 26} y={f.y1 + 14}>loop</text>
           <text className="ve-dd-guard" x={f.x1 + 60} y={f.y1 + 14}>[{f.guard}]</text>
         </g>
       ))}
@@ -395,7 +395,7 @@ function Schema({ spec, c }: { spec: SchemaSpec; c: Ctx }) {
           <g data-ve-focal={e.focal ? 'true' : undefined} data-ve-status={e.status ?? 'same'} key={e.name}>
             <Linked chapter={e.chapter}>
               <rect className="ve-dd-node" height={heights[i]} rx="6" width={boxW} x={X(i)} y="16" />
-              <text className="ve-dd-tag" x={X(i) + 16} y="36">ENTITY{word(e.status) ? ` · ${word(e.status).toUpperCase()}` : ''}</text>
+              <text className="ve-dd-tag" x={X(i) + 16} y="36">Entity{word(e.status) ? ` · ${word(e.status)}` : ''}</text>
               <text className="ve-dd-name" data-ve-mono={c.detailed && e.code ? 'true' : undefined} x={X(i) + 16} y="56">{name({ label: e.name, code: e.code }, c)}</text>
               <line className="ve-dd-rule" x1={X(i)} x2={X(i) + boxW} y1="66" y2="66" />
             </Linked>

@@ -3,8 +3,8 @@
 // trace, a replay vector, a control run, a claim of the map) and sits in refs.resolved.json
 // `examples`. The page shows the values; it never makes one. Each step names its source pointers,
 // so a reviewer can run the source again and compare.
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { DiffBlock } from './code-blocks';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Breakable, DiffBlock } from './code-blocks';
 import { Disclosure } from './content-blocks';
 import { maybeRef } from './trust-map';
 import { TrustMapError, type CodeRefSpec, type Explain, type Refs } from './trust-map-rules';
@@ -53,6 +53,40 @@ function show(value: unknown): string {
   return JSON.stringify(value);
 }
 
+/** A value as code that wraps only at a `/`, `_` or `-`, never inside a word. */
+const Code = ({ text }: { text: string }) => <code><Breakable text={text} /></code>;
+
+/**
+ * Text that a tool wrote for a person (a review file, a message): words and sentences, not code.
+ * It shows as a quote in the UI face; only its names (snake_case, camelCase) stay in code.
+ */
+function isProse(text: string): boolean {
+  const t = text.trim();
+  if (t.split(/\s+/).length < 8 || /^[ \t]{2,}\S/m.test(text) || !/[.!?]["')]?$/.test(t)) return false;
+  const other = t.replace(/[\p{L}\p{N}\s.,;:'"’()!?%–—_\-/]/gu, '');
+  return other.length <= t.length * 0.02;
+}
+
+const NAME = /\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b|\b[a-z]+[A-Z][A-Za-z0-9]*\b/g;
+
+function ProseQuote({ text }: { text: string }) {
+  const paragraphs = text.trim().split(/\n\s*\n|\n/);
+  return (
+    <blockquote className="ve-example-quote" data-quote="output" data-ve-lint="skip">
+      {paragraphs.map((para, i) => {
+        const out: ReactNode[] = [];
+        let last = 0;
+        for (const m of para.matchAll(NAME)) {
+          out.push(para.slice(last, m.index), <code key={m.index}>{m[0]}</code>);
+          last = m.index! + m[0].length;
+        }
+        out.push(para.slice(last));
+        return <p key={i}>{out}</p>;
+      })}
+    </blockquote>
+  );
+}
+
 const isRecord = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
 const cell = (v: unknown) => (v === null || v === undefined ? '' : show(v));
 
@@ -68,7 +102,7 @@ function ValueView({ value }: { value: unknown }) {
       <div className="ve-example-table-wrap">
         <table className="ve-example-table">
           <thead><tr>{keys.map((k) => <th key={k} scope="col">{k}</th>)}</tr></thead>
-          <tbody>{value.map((r, i) => <tr key={i}>{keys.map((k) => <td key={k}>{cell(r[k]) ? <code>{cell(r[k])}</code> : null}</td>)}</tr>)}</tbody>
+          <tbody>{value.map((r, i) => <tr key={i}>{keys.map((k) => <td key={k}>{cell(r[k]) ? <Code text={cell(r[k])} /> : null}</td>)}</tr>)}</tbody>
         </table>
       </div>
     );
@@ -76,16 +110,17 @@ function ValueView({ value }: { value: unknown }) {
   if (isRecord(value)) {
     return (
       <span className="ve-example-record">
-        {Object.entries(value).map(([k, v]) => <span key={k}><span className="ve-example-key">{k}</span> <code>{show(v)}</code></span>)}
+        {Object.entries(value).map(([k, v]) => <span key={k}><span className="ve-example-key">{k}</span> <Code text={show(v)} /></span>)}
       </span>
     );
   }
   if (Array.isArray(value) && value.length && value.every((v) => !isRecord(v) && !Array.isArray(v))) {
     const long = value.some((v) => show(v).length > 24);
-    return <span className="ve-example-record" data-ve-column={long ? 'true' : undefined}>{value.map((v, i) => <code key={i}>{show(v)}</code>)}</span>;
+    return <span className="ve-example-record" data-ve-column={long ? 'true' : undefined}>{value.map((v, i) => <Code key={i} text={show(v)} />)}</span>;
   }
   const text = show(value);
-  return text.includes('\n') || text.length > 72 ? <pre className="ve-example-code"><code>{text}</code></pre> : <code>{text}</code>;
+  if (isProse(text) && (text.includes('\n') || text.length > 72)) return <ProseQuote text={text} />;
+  return text.includes('\n') || text.length > 72 ? <pre className="ve-example-code"><code>{text}</code></pre> : <Code text={text} />;
 }
 
 const wide = (v: unknown) => (Array.isArray(v) && v.length > 0 && v.every(isRecord)) || (typeof v === 'string' && (v.includes('\n') || v.length > 72));
@@ -163,12 +198,13 @@ export function WorkedExample({ refs, id, explain }: WorkedExampleProps) {
   const current = ex.steps[at];
   const label = (station?: string | null) => {
     const i = stations.findIndex((s) => s.id === station);
-    return i < 0 ? null : `${i + 1}. ${stations[i].label}`;
+    return i < 0 ? null : `Station ${i + 1}: ${stations[i].label}`;
   };
   return (
     <section aria-labelledby={`example-${ex.id}`} className="ve-example" data-ve-example={ex.id} data-ve-trust="example">
       <h3 className="ve-example-title" id={`example-${ex.id}`}>{ex.title}</h3>
       {ex.lead ? <p className="ve-example-lead">{ex.lead}</p> : null}
+      {stations.length || live ? <div className="ve-example-nav">
       {stations.length ? (
         <ol aria-label={`${diagram!.title}: the station of each step`} className="ve-example-stations">
           {stations.map((s, i) => {
@@ -188,9 +224,10 @@ export function WorkedExample({ refs, id, explain }: WorkedExampleProps) {
         <div className="ve-example-controls">
           <button className="ve-stepper-button" data-ve-example-prev disabled={at === 0} onClick={() => setAt(at - 1)} type="button">Previous step</button>
           <p aria-live="polite" className="ve-example-count">Step {at + 1} of {ex.steps.length}</p>
-          <button className="ve-stepper-button" data-ve-example-next data-ve-primary disabled={at === ex.steps.length - 1} onClick={() => setAt(at + 1)} type="button">Next step</button>
+          <button className="ve-stepper-button" data-ve-example-next disabled={at === ex.steps.length - 1} onClick={() => setAt(at + 1)} type="button">Next step</button>
         </div>
       ) : null}
+      </div> : null}
       <div className="ve-example-steps" ref={ref} role="list">
         {ex.steps.map((st, i) => {
           const r = st.code ? maybeRef(refs, st.code) : null;
@@ -198,11 +235,13 @@ export function WorkedExample({ refs, id, explain }: WorkedExampleProps) {
           const at_ = label(st.station);
           return (
             <div className="ve-example-step" data-ve-example-step={st.n} data-ve-station={st.station ?? undefined} hidden={live && i !== at} id={rowId(st.n)} key={st.n} role="listitem">
-              <h4 className="ve-example-step-name">
-                <span aria-hidden="true" className="ve-example-step-n">{st.n}</span>
-                <span>{st.name}</span>
-                {at_ ? <span className="ve-example-step-at">Station {at_}</span> : null}
-              </h4>
+              <div className="ve-example-step-head">
+                <h4 className="ve-example-step-name">
+                  <span aria-hidden="true" className="ve-example-step-n">{st.n}</span>
+                  <span>{st.name}</span>
+                </h4>
+                {at_ ? <p className="ve-example-step-at">{at_}</p> : null}
+              </div>
               <div className="ve-example-flow" data-ve-wide={[...st.in, ...st.decision, ...st.out].some((v) => wide(v.value)) ? 'true' : undefined}>
                 {parts(st).flatMap((part, i) => [
                   i ? <Fragment key={`a${i}`}>{ARROW}</Fragment> : null,
@@ -211,7 +250,7 @@ export function WorkedExample({ refs, id, explain }: WorkedExampleProps) {
               </div>
               {st.diff ? <DiffBlock after={st.diff.after} before={st.diff.before} filename={st.diff.path} patch={st.diff.patch} /> : null}
               <p className="ve-example-reason">{st.reason}</p>
-              {r ? <p className="ve-example-line"><a href={r.permalink ?? undefined} rel="noreferrer" target="_blank">The code that decides: <code>{`${r.path}:${r.start}`}</code></a></p> : null}
+              {r ? <p className="ve-example-line"><a href={r.permalink ?? undefined} rel="noreferrer" target="_blank">The code that decides: <Code text={`${r.path}:${r.start}`} /></a></p> : null}
               <Disclosure id={`${rowId(st.n)}-from`} summary="Where these values come from">
                 <ul className="ve-example-provenance" data-ve-provenance>
                   {st.provenance.map((p) => <li key={p}><code>{p}</code></li>)}

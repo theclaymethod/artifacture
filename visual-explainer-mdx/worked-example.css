@@ -1,7 +1,10 @@
 /* A worked example: the station strip, the step controls above the row, and one row per step with
-   in, the decision and out. The values are code (Commit Mono), the reason is prose (Newsreader). */
+   in, the decision and out. The values are code (Commit Mono) that wraps only at a `/`, `_` or `-`;
+   text that a tool wrote for a person is a quote in the UI face; the reason is prose (Newsreader).
+   Every size comes from the type scale (themes.css). */
 .ve-example {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-4);
   min-width: 0;
   margin: var(--ve-space-5) 0 var(--ve-space-6);
@@ -11,21 +14,29 @@
 .ve-example-title {
   margin: 0;
   color: var(--ve-heading);
-  font: var(--ve-weight-strong) 1.125rem/1.3 var(--ve-font-display);
+  font: var(--ve-weight-strong) var(--ve-text-h3)/1.3 var(--ve-font-display);
 }
 
 .ve-example-lead,
 .ve-example-reason {
-  max-width: 68ch;
+  max-width: var(--ve-copy-measure, var(--ve-measure));
   margin: 0;
   font-family: var(--ve-font-prose);
-  font-size: 1.0625rem;
-  line-height: 1.55;
+  font-size: var(--ve-text-prose, var(--ve-text-body));
+  line-height: var(--ve-leading-body);
+}
+
+/* The stations and the step controls: one group, one control height, one gap. */
+.ve-example-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ve-space-3);
 }
 
 .ve-example-stations {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  grid-auto-rows: 1fr;
   gap: var(--ve-space-2);
   margin: 0;
   padding: 0;
@@ -38,13 +49,14 @@
   align-items: center;
   gap: var(--ve-space-2);
   width: 100%;
-  min-height: 44px;
-  padding: var(--ve-space-2) var(--ve-space-3);
+  height: 100%;
+  min-height: var(--ve-control-height);
+  padding: var(--ve-space-1) var(--ve-space-3);
   border: 1px solid var(--ve-rule);
   border-radius: var(--ve-control-radius);
   background: var(--ve-bg);
   color: var(--ve-muted);
-  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.3 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui);
   text-align: left;
 }
 
@@ -70,7 +82,8 @@
   height: 1.5rem;
   border: 1px solid currentColor;
   border-radius: 999px;
-  font: var(--ve-weight-strong) 0.75rem/1 var(--ve-font-ui);
+  font: var(--ve-weight-strong) var(--ve-text-label)/1 var(--ve-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 .ve-example-station[data-ve-active="true"] > button {
@@ -92,20 +105,26 @@
   gap: var(--ve-space-3);
 }
 
+.ve-example-controls .ve-stepper-button {
+  min-height: var(--ve-control-height);
+}
+
 .ve-example-count {
   margin: 0;
   color: var(--ve-muted);
-  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.3 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
   font-variant-numeric: tabular-nums;
 }
 
 .ve-example-steps {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-5);
 }
 
 .ve-example-step {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-3);
   min-width: 0;
   padding: var(--ve-space-4);
@@ -117,31 +136,41 @@
   display: none;
 }
 
+/* The step: its number and name as the heading, its station on a muted line under it. */
+.ve-example-step-head {
+  display: grid;
+  gap: var(--ve-space-1);
+}
+
 .ve-example-step-name {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--ve-space-2);
   margin: 0;
   color: var(--ve-heading);
-  font: var(--ve-weight-strong) 1rem/1.35 var(--ve-font-ui);
+  font: var(--ve-weight-strong) var(--ve-text-h4)/1.3 var(--ve-font-display);
+  text-wrap: balance;
 }
 
 .ve-example-step-n {
-  font-variant-numeric: tabular-nums;
+  flex: none;
+  min-width: 1ch;
   color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .ve-example-step-at {
+  margin: 0;
+  padding-left: calc(1ch + var(--ve-space-2));
   color: var(--ve-muted);
-  font-weight: var(--ve-weight-regular);
-  font-size: 0.8125rem;
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 /* In, decision, out: a row with arrows from 48rem, when no value is a table or a block; else a
    column, the arrows turned down. */
 .ve-example-flow {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-2);
   min-width: 0;
 }
@@ -150,7 +179,7 @@
   justify-self: start;
   padding-left: var(--ve-space-3);
   color: var(--ve-muted);
-  font: var(--ve-weight-regular) 1rem/1 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-ui)/1 var(--ve-font-ui);
   transform: rotate(90deg);
 }
 
@@ -171,33 +200,30 @@
   min-width: 0;
 }
 
+/* In, Decision, Out: a small sentence-case label, the same size and colour in every part. */
 .ve-example-part-label {
   margin: 0 0 var(--ve-space-1);
-  color: var(--ve-muted);
-  font: var(--ve-weight-strong) 0.75rem/1.2 var(--ve-font-ui);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.ve-example-part[data-ve-example-part="decision"] .ve-example-part-label {
   color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-values {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-2);
   margin: 0;
 }
 
 .ve-example-value {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.125rem;
   min-width: 0;
 }
 
 .ve-example-value dt {
   color: var(--ve-muted);
-  font: var(--ve-weight-regular) 0.8125rem/1.3 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-value dd {
@@ -205,6 +231,7 @@
   margin: 0;
 }
 
+/* A value never breaks inside a word: Breakable gives it a break only at a `/`, `_` or `-`. */
 .ve-example-value code,
 .ve-example-code code,
 .ve-example-provenance code,
@@ -212,10 +239,12 @@
 .ve-example-brief code,
 .ve-example-line code {
   font-family: var(--ve-font-mono);
-  font-size: 0.8125rem;
-  overflow-wrap: anywhere;
+  font-size: var(--ve-text-code);
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
+/* Code output keeps its lines; a long one scrolls. */
 .ve-example-code {
   max-height: 14rem;
   margin: 0;
@@ -223,17 +252,51 @@
   overflow: auto;
   border-radius: var(--ve-control-radius);
   background: color-mix(in srgb, var(--ve-heading) 5%, var(--ve-bg));
-  white-space: pre-wrap;
+  font-size: var(--ve-text-code);
+  line-height: var(--ve-leading-code);
+  white-space: pre;
+}
+
+/* Text that a tool wrote for a person: a quote in the UI face, a hairline rule, muted. */
+.ve-example-quote {
+  max-width: var(--ve-copy-measure, var(--ve-measure));
+  margin: 0;
+  padding: var(--ve-space-1) 0 var(--ve-space-1) var(--ve-space-3);
+  border-left: 1px solid var(--ve-rule);
+  border-radius: 0;
+  background: none;
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-ui)/var(--ve-leading-ui) var(--ve-font-ui);
+}
+
+.ve-example-quote > p {
+  margin: 0;
+}
+
+.ve-example-quote > p + p {
+  margin-top: var(--ve-space-2);
+}
+
+/* The line that decides is a path, not prose: it takes the width of the step. */
+.ve-example .ve-example-line {
+  max-width: none;
+}
+
+/* A source pointer is a machine string in a collapsed block: it may break anywhere. */
+.ve-example-provenance code,
+.ve-example-sources p code {
+  overflow-wrap: anywhere;
 }
 
 .ve-example-line {
   margin: 0;
-  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-provenance,
 .ve-example-sources {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ve-space-2);
   margin: 0;
   padding-left: var(--ve-space-4);
@@ -247,13 +310,13 @@
   display: grid;
   gap: var(--ve-space-2);
   margin: 0 0 var(--ve-space-3);
-  padding: var(--ve-space-3);
-  border-left: 3px solid var(--ve-rule);
+  padding: var(--ve-space-1) 0 var(--ve-space-1) var(--ve-space-3);
+  border-left: 1px solid var(--ve-rule);
 }
 
 .ve-example-brief-title {
   margin: 0;
-  font: var(--ve-weight-strong) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-brief-steps {
@@ -261,7 +324,7 @@
   gap: var(--ve-space-1);
   margin: 0;
   padding-left: var(--ve-space-5);
-  font: var(--ve-weight-regular) var(--ve-text-small, 0.875rem)/1.4 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-brief-steps li {
@@ -291,7 +354,7 @@
 
 .ve-example-key {
   color: var(--ve-muted);
-  font: var(--ve-weight-regular) 0.8125rem/1.3 var(--ve-font-ui);
+  font: var(--ve-weight-regular) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui);
 }
 
 .ve-example-table-wrap {
@@ -299,28 +362,33 @@
   overflow-x: auto;
 }
 
+/* The table sizes its columns to their values: a `true` column stays narrow, and a long value
+   wraps only at its joints. */
 .ve-example-table {
+  width: auto;
   border-collapse: collapse;
-  font-size: 0.8125rem;
+  font-size: var(--ve-text-label);
+  font-variant-numeric: tabular-nums;
 }
 
 .ve-example-table th {
-  padding: var(--ve-space-1) var(--ve-space-3) var(--ve-space-1) 0;
+  padding: var(--ve-space-1) var(--ve-space-4) var(--ve-space-1) 0;
   border-bottom: 1px solid var(--ve-rule);
   color: var(--ve-muted);
-  font: var(--ve-weight-strong) 0.75rem/1.3 var(--ve-font-ui);
+  font: var(--ve-weight-strong) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui);
   text-align: left;
   white-space: nowrap;
 }
 
 .ve-example-table td {
-  padding: var(--ve-space-1) var(--ve-space-3) var(--ve-space-1) 0;
+  padding: var(--ve-space-1) var(--ve-space-4) var(--ve-space-1) 0;
   border-bottom: 1px solid color-mix(in srgb, var(--ve-rule) 60%, transparent);
   vertical-align: top;
 }
 
 .ve-example-table code {
   font-family: var(--ve-font-mono);
-  font-size: 0.8125rem;
-  overflow-wrap: anywhere;
+  font-size: var(--ve-text-code);
+  overflow-wrap: normal;
+  word-break: normal;
 }

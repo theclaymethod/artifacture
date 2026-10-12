@@ -237,7 +237,7 @@ function refLines(refs: Refs, r: ResolvedRef, mark?: { line: number; level: stri
   const parts = /^([\s\S]*?<code[^>]*>)([\s\S]*)(<\/code>[\s\S]*)$/.exec(html) ?? ['', '<pre class="shiki"><code>', escapeCode(r.excerpt), '</code></pre>'];
   const inner = (line: string) => line.replace(/^<span class="line">/, '').replace(/<\/span>$/, '');
   const row = (kind: LineKind, no: number, code: string, flag = '') =>
-    `<span class="line" data-ve-line="${kind}"${flag}><span class="ve-line-gutter"><span class="ve-line-no">${no}</span><span class="ve-line-sign"${kind === 'same' ? '' : ` title="${LINE_WORD[kind]}"`}>${LINE_SIGN[kind]}</span></span>${code}</span>`;
+    `<span class="line" data-ve-line="${kind}"${flag}><span class="ve-line-gutter"><span class="ve-line-no">${no}</span><span class="ve-line-sign"${kind === 'same' ? '' : ` title="${LINE_WORD[kind]}"`}>${LINE_SIGN[kind]}</span></span><span class="ve-line-code">${code}</span></span>`;
   const removedBefore = (test: (at: number) => boolean) => changes.removed.filter((x) => test(x.at)).map((x) => row('remove', x.base, x.html ?? escapeCode(x.text)));
   const kinds = new Set<LineKind>(changes.removed.length ? ['remove'] : []);
   const out: string[] = [];

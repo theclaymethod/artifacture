@@ -23,7 +23,7 @@ export const PAIRINGS = {
     prose: { family: 'Literata', file: 'literata', weights: [400, 600], fallback: { local: 'Georgia', sizeAdjust: 110.81, ascent: 106.22, descent: 27.8 }, generic: 'serif' },
     ui: { family: 'Atkinson Hyperlegible Next', file: 'atkinson-hyperlegible-next', weights: [400, 600], fallback: { local: 'Arial', sizeAdjust: 99.9, ascent: 98.5, descent: 31.63 }, generic: 'sans-serif' },
     code: { family: 'JetBrains Mono', file: 'jetbrains-mono', weights: [400], fallback: { local: 'Menlo', sizeAdjust: 99.66, ascent: 102.35, descent: 30.1 }, generic: 'monospace' },
-    tokens: { '--ve-text-prose': '1.0625rem', '--ve-text-lead': '1.1875rem', '--ve-measure': '55ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0.005em' },
+    tokens: { '--ve-text-prose': '1.0625rem', '--ve-text-lead': '1.1875rem', '--ve-text-h3': '1.375rem', '--ve-text-h4': '1.1875rem', '--ve-measure': '55ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0.005em' },
   },
   // Source Serif 4 (renamed Reading Serif in the subset: its licence reserves the name "Source"),
   // IBM Plex Sans and IBM Plex Mono: a neutral, compact engineering set with tabular figures.
@@ -32,7 +32,7 @@ export const PAIRINGS = {
     prose: { family: 'Reading Serif', file: 'source-serif-4', weights: [400, 600], fallback: { local: 'Georgia', sizeAdjust: 109.52, ascent: 94.59, descent: 30.59 }, generic: 'serif' },
     ui: { family: 'IBM Plex Sans', file: 'ibm-plex-sans', weights: [400, 600], fallback: { local: 'Arial', sizeAdjust: 103.31, ascent: 99.22, descent: 26.62 }, generic: 'sans-serif' },
     code: { family: 'IBM Plex Mono', file: 'ibm-plex-mono', weights: [400], fallback: { local: 'Menlo', sizeAdjust: 99.66, ascent: 102.85, descent: 27.59 }, generic: 'monospace' },
-    tokens: { '--ve-text-prose': '1.125rem', '--ve-text-lead': '1.25rem', '--ve-measure': '60ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0' },
+    tokens: { '--ve-text-prose': '1.125rem', '--ve-text-lead': '1.25rem', '--ve-text-h3': '1.4375rem', '--ve-text-h4': '1.25rem', '--ve-measure': '60ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0' },
   },
   // Newsreader, Public Sans and Commit Mono: an editorial set; Newsreader has a small x-height, so
   // its body size is one step up.
@@ -41,7 +41,7 @@ export const PAIRINGS = {
     prose: { family: 'Newsreader', file: 'newsreader', weights: [400, 600], fallback: { local: 'Georgia', sizeAdjust: 96.17, ascent: 76.43, descent: 27.56 }, generic: 'serif' },
     ui: { family: 'Public Sans', file: 'public-sans', weights: [400, 600], fallback: { local: 'Arial', sizeAdjust: 107.5, ascent: 88.37, descent: 20.93 }, generic: 'sans-serif' },
     code: { family: 'Commit Mono', file: 'commit-mono', weights: [400], fallback: { local: 'Menlo', sizeAdjust: 99.66, ascent: 90.31, descent: 20.07 }, generic: 'monospace' },
-    tokens: { '--ve-text-prose': '1.1875rem', '--ve-text-lead': '1.3125rem', '--ve-measure': '50ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0' },
+    tokens: { '--ve-text-prose': '1.1875rem', '--ve-text-lead': '1.3125rem', '--ve-text-h3': '1.5rem', '--ve-text-h4': '1.25rem', '--ve-measure': '50ch', '--ve-prose-tracking': '0', '--ve-ui-tracking': '0' },
   },
 };
 

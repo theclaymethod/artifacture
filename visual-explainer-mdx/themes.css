@@ -15,18 +15,26 @@
     --ve-space-8: 4rem;
     --ve-space-9: 6rem;
     --ve-measure: 54ch;
+    /* One type scale. Prose: body and lead at 1.6. Headings h2 to h4, set by size and weight.
+       UI (rows, controls, summaries) at 15 and 14px and labels at 13px, all at 1.4. Code at 14px
+       and 1.5. Two weights: 400 and 600. */
     --ve-text-body: 1.0625rem;
     --ve-leading-body: 1.6;
     --ve-text-lead: 1.1875rem;
-    --ve-leading-lead: 1.55;
+    --ve-leading-lead: 1.6;
+    --ve-text-ui: 0.9375rem;
     --ve-text-small: 0.875rem;
-    --ve-leading-small: 1.5;
+    --ve-leading-small: 1.4;
+    --ve-text-label: 0.8125rem;
+    --ve-text-code: 0.875rem;
+    --ve-leading-code: 1.5;
     --ve-text-h2: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
     --ve-text-h3: 1.375rem;
-    --ve-text-h4: 1.0625rem;
+    --ve-text-h4: 1.125rem;
     --ve-weight-regular: 400;
     --ve-weight-strong: 600;
     --ve-leading-ui: 1.4;
+    --ve-control-height: 2.75rem;
     --ve-label-column: 9rem;
     --ve-card-pad: clamp(1.125rem, 2.4vw, 1.5rem);
     --ve-card-radius: 12px;
