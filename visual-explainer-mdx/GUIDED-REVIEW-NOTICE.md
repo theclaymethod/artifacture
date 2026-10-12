@@ -1,16 +1,8 @@
 # The guided-review plugin
 
-The guided review of the trust-map explainer (`guided-review.tsx`, `typed-diagrams.tsx` and their CSS) adapts patterns from the `guided-review` plugin by Samyak Jain, <https://github.com/samyakjain0606/awesome-learning-material> (folder `guided-review`), which its plugin manifest licenses as MIT. No code was copied. The adapted patterns:
+The typed diagrams of the verification explainer (`typed-diagrams.tsx` and its CSS) adapt patterns from the `guided-review` plugin by Samyak Jain, <https://github.com/samyakjain0606/awesome-learning-material> (folder `guided-review`), which its plugin manifest licenses as MIT. No code was copied. The adapted patterns:
 
-- the chapters of the change: one idea each, titled as a plain action, in reading order (core, supporting, wiring, data, docs, then generated files and tests); every changed non-test file in one chapter; an automatic Tests chapter outside the review progress; generated files in their own chapter;
-- the chapter layout: the explanation beside the files, sticky on a wide screen, stacked on a phone; one or two paragraphs of 25 to 60 words;
-- "look closely" flags pinned to a line, at three levels (risk, question, nit), each with its trigger, and none when there is nothing verified to flag;
-- a Reviewed box per chapter, kept per PR head in the browser;
-- concrete checks before you approve: a command, lines to read, a file to compare or real inputs;
-- a list of every changed file in GitHub's order;
-- the shapes of the sequence and state diagrams, with added, changed, removed and same statuses behind a Before / After switch, and elements that link to their chapter.
-
-Artifacture's version takes every flag and every file status from understando's derived data, never from a model's reading of the diff.
+- the shapes of the sequence and state diagrams, with added, changed, removed and same statuses behind a Before / After switch, and elements that link to a part of the page.
 
 MIT License
 

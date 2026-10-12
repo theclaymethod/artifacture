@@ -579,8 +579,7 @@
         "C01",
         "C02",
         "C08"
-      ],
-      "reviewer_action": "Do not trust the new balance yet: its test cannot fail. Check the subtraction yourself."
+      ]
     },
     {
       "id": "P2",
@@ -588,8 +587,7 @@
       "sentence": "The wallet stays correct when many threads use it.",
       "claims": [
         "C04"
-      ],
-      "reviewer_action": "Do not use the wallet from many threads: only the PR text says that it is safe."
+      ]
     },
     {
       "id": "P3",
@@ -599,8 +597,7 @@
         "C05",
         "C06",
         "C07"
-      ],
-      "reviewer_action": "Treat the message check as one model opinion. No planted bug tested it."
+      ]
     },
     {
       "id": "P4",
@@ -608,8 +605,7 @@
       "sentence": "Each fee is correct.",
       "claims": [
         "C03"
-      ],
-      "reviewer_action": "Read the fee function yourself: no test calls it, and the PR text does not mention it."
+      ]
     }
   ]
 }

@@ -47,6 +47,12 @@ export const REPEAT_MIN_WORDS = 4;
 /** A title counts for the title-join rule from this many words: a chapter title, a promise label, a heading. */
 export const TITLE_MIN_WORDS = 4;
 
+/** A run of this many words that shows twice in one sentence is a name pasted into a sentence that already holds it: fields glued together. */
+export const GLUE_REPEAT_WORDS = 3;
+
+/** A sentence with this many "label: value" colons is a list of fields, not a sentence. */
+export const GLUE_MAX_COLONS = 1;
+
 /** An opener (a Disclosure) whose body is only a list of more than this many items, with fewer than EXPLAIN_MIN_WORDS words besides, is a raw enumeration. */
 export const MAX_BARE_ITEMS = 10;
 export const EXPLAIN_MIN_WORDS = 8;

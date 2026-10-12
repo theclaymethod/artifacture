@@ -1,13 +1,9 @@
-import { createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import './explainer-nav.css';
 
 export type ChapterAnchor = { id: string; label: string };
-/**
- * One chapter of the rail. `mark` is its review state, shown after the label in the page's mark
- * language (a tone mark or a count). A component in a chapter gives it with a static
- * `chapterMark(props)`; see ExplainerShell.
- */
-export type Chapter = { id: string; label: string; anchors?: readonly ChapterAnchor[]; mark?: ReactNode };
+/** One chapter of the rail: its fragment id, its label and the in-chapter targets listed under it. */
+export type Chapter = { id: string; label: string; anchors?: readonly ChapterAnchor[] };
 export type ExplainerAppearance = 'light' | 'dark' | 'auto';
 
 export type ReadMode = 'pages' | 'one';
@@ -150,7 +146,6 @@ export function ChapterRail({ chapters, label = 'Chapters', current, mode, onMod
                 <a aria-current={currentKind} href={`#${chapter.id}`} onClick={() => setOpen(false)}>
                   <span aria-hidden="true" className="ve-chapter-index">{String(index + 1).padStart(2, '0')}</span>
                   <span className="ve-chapter-label">{chapter.label}</span>
-                  {chapter.mark ?? null}
                 </a>
                 {chapter.anchors?.length ? (
                   <ol className="ve-chapter-anchors">

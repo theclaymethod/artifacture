@@ -2,7 +2,7 @@
 // comes from a synthetic source that understando read (scripts/example.py: a scripted test, a TLC
 // trace, a replay vector, a control run, a claim of the map) and sits in refs.resolved.json
 // `examples`. The page shows the values; it never makes one. Each step names its source pointers,
-// so a reviewer can run the source again and compare.
+// so a reader can run the source again and compare.
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Breakable, DiffBlock } from './code-blocks';
 import { Disclosure } from './content-blocks';
@@ -142,7 +142,7 @@ function Values({ part, label, values }: { part: 'in' | 'decision' | 'out'; labe
   );
 }
 
-/** A value short enough for one line of the checklist: a number, a flag or a short word. */
+/** A value short enough for one line of a brief: a number, a flag or a short word. */
 const scalar = (v: unknown) => typeof v === 'number' || typeof v === 'boolean' || (typeof v === 'string' && v.length <= 40 && !v.includes('\n'));
 
 type Part = { part: 'in' | 'decision' | 'out'; word: string; values: ExampleValue[] };
@@ -275,7 +275,7 @@ export function WorkedExample({ refs, id, explain }: WorkedExampleProps) {
 }
 
 /**
- * The examples that show one of `claims`, for a checklist item: each step name and its short
+ * The examples that show one of `claims`, for the detail of a claim: each step name and its short
  * values, with a link to the full example. The reasons stay in the example's own chapter.
  */
 export function ExamplesFor({ refs, claims }: { refs: Refs; claims: readonly string[] }) {

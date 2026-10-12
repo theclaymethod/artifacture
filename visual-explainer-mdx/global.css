@@ -138,7 +138,7 @@
     --ve-section-gap: 0px;
   }
 
-  /* The first level follows the title closely: the title and the merge answer share a screen. */
+  /* The first level follows the title closely: the title and the first answer share a screen. */
   .ve-shell .ve-shell-header + .ve-section {
     padding-top: var(--ve-space-6);
   }

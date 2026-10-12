@@ -1,4 +1,4 @@
-// Typed diagrams for a guided review, drawn in the grammar of Diagram Design (Cathryn Lavery, MIT;
+// Typed diagrams for an explainer, drawn in the grammar of Diagram Design (Cathryn Lavery, MIT;
 // see DIAGRAM-DESIGN-LICENSE and plugins/visual-explainer/vendor/diagram-design): a sequence
 // (lifelines, activation bars, dashed returns, U-shaped self calls, one loop frame), a state machine
 // (rounded states, a start dot, ringed end dots, labelled transitions, self-loops above), a schema
@@ -6,8 +6,8 @@
 // upstream skin, and its type floor (14px) replaces the 8px mono labels.
 // On top of that grammar sit our own layers: a change status on each element (added, changed,
 // removed, same) in colour and in words, a Before / After switch, the page's Simple / Detailed mode
-// (a `code` name per element) and links from elements to their chapter. The chapter shapes follow
-// the guide schema of the MIT `guided-review` plugin (see GUIDED-REVIEW-NOTICE.md).
+// (a `code` name per element) and links from elements to an anchor of the page. The sequence and
+// state shapes and the status layers follow the MIT `guided-review` plugin (see GUIDED-REVIEW-NOTICE.md).
 import { Fragment, useId, useState, type ReactNode } from 'react';
 import { useDiagramMode } from './diagram-modes';
 import { TrustMapError } from './trust-map-rules';
@@ -44,7 +44,8 @@ const textWidth = (text: string, mono = false) => text.length * (mono ? MONO : C
 /** Shown in this view? Before hides what the PR adds; After keeps what it removes, struck through. */
 const shown = (status: ChangeStatus | undefined, view: View) => !(view === 'before' && status === 'added');
 const word = (status?: ChangeStatus) => (status && status !== 'same' ? STATUS_WORD[status] : '');
-export const chapterHref = (chapter?: string) => (chapter ? `#spine-${chapter.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` : undefined);
+/** The link of an element: `chapter` names the fragment id of a part of the page, for example a chapter or a claim. */
+export const chapterHref = (chapter?: string) => (chapter ? `#${chapter.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` : undefined);
 
 type Ctx = { view: View; detailed: boolean; markers: string };
 const name = (x: { label: string; code?: string }, c: Ctx) => (c.detailed && x.code ? x.code : x.label);
@@ -485,9 +486,9 @@ function elements(spec: TypedDiagramSpec): Array<{ status?: ChangeStatus; code?:
 
 /**
  * A typed diagram from explain.json, in Diagram Design's
- * grammar, with the guided review's layers: Before / After (Before hides what the PR adds; After shows
- * what it removes, struck through), Simple / Detailed when an element names its code, and links to the
- * chapters. Each status also shows as a word, so colour is never the only cue. The same steps show as
+ * grammar, with our layers: Before / After (Before hides what the change adds; After shows
+ * what it removes, struck through), Simple / Detailed when an element names its code, and links to
+ * anchors of the page (`chapters` maps an anchor id to its title, for the line of links). Each status also shows as a word, so colour is never the only cue. The same steps show as
  * a list for a screen reader, and in place of the figure on a narrow column.
  */
 export function TypedDiagram({ spec, name: fallback, chapters = {} }: { spec: TypedDiagramSpec; name: string; chapters?: Record<string, string> }) {

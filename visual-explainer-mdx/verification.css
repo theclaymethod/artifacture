@@ -1,0 +1,416 @@
+/* The verification explainer. Every gap and size comes from the reading tokens of themes.css,
+   every state from the tone ramp with its mark: the same language as the trust-map components. */
+
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-result-card, .ve-path-checks > li, .ve-claim-row-note)[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-result-card, .ve-path-checks > li, .ve-claim-row-note)[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); --ve-tone-soft: var(--ve-status-info-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-result-card, .ve-path-checks > li, .ve-claim-row-note)[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-result-card, .ve-path-checks > li, .ve-claim-row-note)[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-result-card, .ve-path-checks > li, .ve-claim-row-note)[data-ve-tone="neutral"] { --ve-tone-ink: var(--ve-status-neutral); --ve-tone-soft: var(--ve-status-neutral-soft); }
+
+[data-ve-trust] .ve-timeline,
+[data-ve-trust] :is(.ve-timeline, .ve-path-checks, .ve-path-parts) > li {
+  max-width: none;
+}
+
+.ve-claim-row .ve-count-marks > span[data-ve-tone="neutral"] {
+  --ve-tone-ink: var(--ve-muted);
+}
+
+/* ---- A claim row ---------------------------------------------------------------------------- */
+
+.ve-claim-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-1) var(--ve-space-3);
+  min-width: 0;
+  padding: var(--ve-space-2) 0;
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-section-body .ve-claim-row a.ve-claim-row-name {
+  color: var(--ve-heading);
+  font-size: var(--ve-text-ui);
+  font-weight: var(--ve-weight-strong);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ve-heading) 30%, transparent);
+  text-underline-offset: 0.22em;
+}
+
+.ve-section-body .ve-claim-row a.ve-claim-row-name:hover {
+  text-decoration-color: currentColor;
+}
+
+.ve-claim-row-checks {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-claim-row-checks .ve-count-marks > span {
+  border-radius: 50%;
+}
+
+.ve-claim-row-note {
+  flex-basis: 100%;
+  color: var(--ve-tone-ink);
+}
+
+.ve-claim-details {
+  display: grid;
+  gap: var(--ve-space-2);
+}
+
+/* ---- The claims of a promise: one line, a checkpoint per claim -------------------------------- */
+
+.ve-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-timeline::before {
+  content: "";
+  position: absolute;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  left: 0.4375rem;
+  width: 1px;
+  background: var(--ve-rule);
+}
+
+.ve-timeline > li {
+  position: relative;
+  padding-left: var(--ve-space-6);
+}
+
+.ve-timeline > li::before {
+  content: "";
+  position: absolute;
+  top: 1.0625rem;
+  left: 0.125rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 2px solid var(--ve-bg);
+  border-radius: 50%;
+  background: var(--ve-tone-ink);
+  box-shadow: 0 0 0 1px var(--ve-tone-ink);
+}
+
+.ve-timeline-tag {
+  display: block;
+  padding-top: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-timeline > li:has(.ve-timeline-tag)::before {
+  top: 2.375rem;
+}
+
+/* ---- The bar card: the state, a gauge, the surface and the bar --------------------------------- */
+
+.ve-claim-evidence {
+  display: grid;
+  gap: var(--ve-space-4);
+  align-items: start;
+}
+
+@media (min-width: 56rem) {
+  .ve-claim-evidence {
+    grid-template-columns: minmax(0, 1fr) 13.5rem;
+  }
+}
+
+.ve-bar-card {
+  display: grid;
+  gap: var(--ve-space-2);
+  padding: var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 45%, var(--ve-bg));
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-bar-card > p {
+  display: grid;
+  margin: 0;
+}
+
+.ve-bar-card > .ve-bar-card-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-size: var(--ve-text-ui);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-bar-card .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+}
+
+.ve-bar-gauge {
+  display: block;
+  height: 0.5rem;
+  border: 1.5px solid var(--ve-tone-ink);
+  border-radius: 2px;
+  background: var(--ve-tone-ink);
+}
+
+.ve-bar-card[data-ve-bar="below"] .ve-bar-gauge {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ve-bar-card-why {
+  color: var(--ve-text);
+}
+
+.ve-bar-pair {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+@media (min-width: 56rem) {
+  .ve-bar-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ve-bar-example {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  align-content: start;
+}
+
+.ve-changed-link {
+  font-size: var(--ve-text-small);
+}
+
+/* ---- How to read the evidence ------------------------------------------------------------------ */
+
+.ve-path {
+  display: grid;
+  gap: var(--ve-space-3);
+  padding: var(--ve-card-pad);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+}
+
+.ve-path-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+.ve-path-step[data-ve-path="checks"] {
+  display: grid;
+  margin-left: var(--ve-space-6);
+}
+
+.ve-path-name {
+  color: var(--ve-heading);
+  font-size: var(--ve-text-h4);
+  line-height: 1.3;
+  font-weight: var(--ve-weight-strong);
+}
+
+:is(.ve-path-parts, .ve-path-checks, .ve-weak-lines) {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(.ve-path-parts, .ve-path-checks) > li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+}
+
+.ve-path-checks .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+  align-self: center;
+  color: var(--ve-tone-ink);
+}
+
+.ve-two-results {
+  display: grid;
+  gap: var(--ve-space-3);
+}
+
+@media (min-width: 48rem) {
+  .ve-two-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ve-result-card {
+  display: grid;
+  gap: var(--ve-space-1);
+  padding: var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 45%, var(--ve-bg));
+}
+
+.ve-result-card > p {
+  margin: 0;
+}
+
+.ve-result-card-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-result-card .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+}
+
+.ve-weak-lines > li {
+  max-width: var(--ve-measure);
+}
+
+/* A grid column holds wide code by scrolling it, never by widening the page. */
+.ve-claim-evidence,
+.ve-path,
+.ve-bar-example {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ve-claim-evidence > * {
+  min-width: 0;
+}
+
+@media (min-width: 56rem) {
+  .ve-claim-evidence {
+    grid-template-columns: minmax(0, 1fr) 13.5rem;
+  }
+}
+
+/* A long bar name wraps inside its pill on a narrow column. */
+.ve-claim-row .ve-status-pill {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* A flagged line: the level's tint across the line, and its level as a word in the gutter. */
+[data-ve-code-ref] .ve-code-shiki .line[data-ve-flag] {
+  --ve-line-bg: color-mix(in srgb, var(--ve-flag-ink) 14%, var(--ve-code-bg));
+  position: relative;
+  box-shadow: inset 0 0 0 1.5px var(--ve-flag-ink);
+}
+
+[data-ve-code-ref] .line[data-ve-flag="risk"] { --ve-flag-ink: var(--ve-status-err); }
+[data-ve-code-ref] .line[data-ve-flag="question"] { --ve-flag-ink: var(--ve-status-warn); }
+[data-ve-code-ref] .line[data-ve-flag="nit"] { --ve-flag-ink: var(--ve-status-info); }
+
+/* ---- A check row: the same everywhere a check shows ------------------------------------------- */
+
+.ve-check-rows {
+  display: grid;
+  gap: var(--ve-space-1);
+  min-width: 0;
+}
+
+.ve-check-rows-title {
+  margin: 0;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row {
+  min-width: 0;
+}
+
+.ve-check-row[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); }
+.ve-check-row[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); }
+.ve-check-row[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); }
+.ve-check-row[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); }
+
+.ve-check-row > .ve-disclosure > .ve-disclosure-summary {
+  min-height: 44px;
+  padding-block: var(--ve-space-2);
+}
+
+.ve-check-row-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-1) var(--ve-space-3);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-regular);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-check-row-line .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+  color: var(--ve-tone-ink);
+}
+
+.ve-check-row-name {
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row-kind {
+  color: var(--ve-muted);
+}
+
+.ve-check-row-result {
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row-backs {
+  margin: var(--ve-space-1) 0 0 calc(1.25rem + var(--ve-space-3));
+  font-size: var(--ve-text-small);
+}
+
+/* ---- The claims and their checks ---------------------------------------------------------------- */
+
+[data-ve-trust="checks"] > .ve-checks-promise {
+  margin-top: var(--ve-space-7);
+}
+
+.ve-checks-promise {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+.ve-checks-promise > h3 {
+  font-size: var(--ve-text-h4);
+  line-height: 1.3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+  margin: 0;
+}
+
+.ve-orphans {
+  padding: var(--ve-space-3) var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-status-warn) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-status-warn-soft) 45%, var(--ve-bg));
+}
+
+.ve-orphans > p {
+  margin: 0;
+}
