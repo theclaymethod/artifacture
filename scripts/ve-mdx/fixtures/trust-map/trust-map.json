@@ -33,7 +33,11 @@
       ],
       "tier": 3,
       "verdict": "Proven",
-      "reason": "V01 went red on control K01. It is the weakest of the 2 checks."
+      "reason": "V01 went red on control K01. It is the weakest of the 2 checks.",
+      "invariants": [
+        "I1",
+        "I2"
+      ]
     },
     {
       "id": "C02",
@@ -179,7 +183,8 @@
       ],
       "tier": 5,
       "verdict": "Formal",
-      "reason": "V08 is a rung 5 lean check. Its conformance link (a recorded conformance run of 200 cases through the model and the code) passes, and control K08 broke it."
+      "reason": "V08 is a rung 5 lean check. Its conformance link (a recorded conformance run of 200 cases through the model and the code) passes, and control K08 broke it.",
+      "invariant": "I1"
     },
     {
       "id": "C03",
@@ -672,7 +677,6 @@
         "C02",
         "C08"
       ],
-      "reviewer_action": "Do not trust the new balance yet: its test cannot fail. Check the subtraction yourself.",
       "name": "the overdraft rules"
     },
     {
@@ -682,7 +686,6 @@
       "claims": [
         "C04"
       ],
-      "reviewer_action": "Do not use the wallet from many threads: only the PR text says that it is safe.",
       "name": "the thread safety"
     },
     {
@@ -694,7 +697,6 @@
         "C06",
         "C07"
       ],
-      "reviewer_action": "Treat the message check as one model opinion. No planted bug tested it.",
       "name": "the private messages"
     },
     {
@@ -704,7 +706,6 @@
       "claims": [
         "C03"
       ],
-      "reviewer_action": "Read the fee function yourself: no test calls it, and the PR text does not mention it.",
       "name": "the fees"
     }
   ],
@@ -722,5 +723,19 @@
     "Backed": 2,
     "Asserted": 2,
     "Gap": 1
-  }
+  },
+  "invariants": [
+    {
+      "id": "I1",
+      "text": "The balance is never below zero.",
+      "author": "user",
+      "status": "accepted"
+    },
+    {
+      "id": "I2",
+      "text": "A refused withdrawal leaves the balance as it was.",
+      "author": "understando",
+      "status": "proposed"
+    }
+  ]
 }

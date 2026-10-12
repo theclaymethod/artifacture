@@ -48,7 +48,7 @@ const where = (node) => node.parentElement?.closest('section[id]')?.id ?? 'page'
  *  - Narrative prose shows no claim, verifier or control ID and no code (a backticked name)
  *    outside a Disclosure body, a table and a CodeRef. The data components keep their own rules.
  *  - Each Term and each abbreviation in the prose has a glossary entry.
- *  - The verify level opens with its result line; each weak check and the weakest check of each claim has an action.
+ *  - The verify block opens with its result line; each weak check and the weakest check of each claim has an action.
  *  - Each #fragment link has a target, and no id shows twice.
  *  - The copy has no slogan, no label run-in and no sentence twice (copy-rules.mjs), and the
  *    asd-ste100 lint finds no hard violation in it (`steLint`: the path of ste-lint.py, or false).
@@ -100,20 +100,13 @@ export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
   if (missing.size) errors.push(`the page uses terms that the glossary does not define: ${[...missing].sort().join(', ')}. Add each to the glossary of the trust map.`);
   const verify = body.querySelector('[data-ve-trust="verifiers"]');
   if (verify && !(verify.firstElementChild?.hasAttribute('data-ve-result') && /\d+ of \d+ checks caught their planted bug/.test(verify.firstElementChild.textContent))) {
-    errors.push('the verify level must open with its result line from derived.verify.result, for example "41 of 44 checks caught their planted bug."');
+    errors.push('the verify block must open with its result line from derived.verify.result, for example "41 of 44 checks caught their planted bug."');
   }
   for (const card of body.querySelectorAll('[data-ve-weak-check]')) {
-    if (!card.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the weak check "${card.querySelector('h4')?.textContent ?? card.id}" has no reviewer action`);
+    if (!card.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the weak check "${card.querySelector('h4')?.textContent ?? card.id}" has no action`);
   }
   for (const weak of body.querySelectorAll('[data-ve-weakest]')) {
     if (!weak.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the weakest check of the claim ${weak.closest('details[id]')?.id ?? '?'} has no action`);
-  }
-  for (const card of body.querySelectorAll('[data-ve-unclaimed-file]')) {
-    if (!card.querySelector('[data-ve-action]')?.textContent.trim()) errors.push(`the unclaimed file "${card.querySelector('code')?.textContent ?? card.id}" has no action`);
-  }
-  for (const row of body.querySelectorAll('[data-ve-trust="unclaimed"] tr[id^="unclaimed-"]')) {
-    const cells = row.querySelectorAll('td');
-    if (!cells.length || !cells[cells.length - 1].textContent.trim()) errors.push(`the unclaimed file in row ${row.id.slice(10)} has no action`);
   }
   const ids = new Map();
   for (const el of body.querySelectorAll('[id]')) ids.set(el.id, (ids.get(el.id) ?? 0) + 1);
@@ -132,19 +125,15 @@ export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
 // ---- The worked examples --------------------------------------------------------------------
 
 /**
- * A how-it-works level (the problem and the change, how it works, and any chapter that steps
- * through a run) leads with a worked example of real data (WorkedExample): the example comes
- * before the first diagram of the chapter. Each example step names the source pointers of its
- * values, and its reason holds no claim, check or control ID.
+ * A how-it-works chapter (one that steps through a run, or that shows a worked example) leads with
+ * a worked example of real data (WorkedExample): the example comes before the first diagram of the
+ * chapter. Each example step names the source pointers of its values, and its reason holds no
+ * claim, check or control ID.
  */
 function checkWorkedExamples(body) {
   const errors = [];
   const sections = new Set();
-  for (const id of ['ch-1', 'ch-2']) {
-    const s = body.querySelector(`section.ve-section#${id}`);
-    if (s) sections.add(s);
-  }
-  for (const stepper of body.querySelectorAll('section.ve-section [data-ve-stepper]')) sections.add(stepper.closest('section.ve-section'));
+  for (const el of body.querySelectorAll('section.ve-section [data-ve-stepper], section.ve-section [data-ve-example]')) sections.add(el.closest('section.ve-section'));
   for (const section of sections) {
     const example = section.querySelector('[data-ve-example]');
     const label = section.id || 'a chapter';
@@ -174,11 +163,11 @@ function checkWorkedExamples(body) {
 
 // Not copy: code, diagrams, the user's own words and the tooltip of a Term (the glossary holds its words).
 const NOT_COPY = 'script, style, pre, code, svg, blockquote[data-quote], [role="tooltip"], [data-ve-code-block], [data-ve-code-ref], [data-ve-diff-block], [data-ve-lint="skip"]';
-// Text that shows more than once by its role: controls, links, navigation, state pills and the
-// merge state, screen-reader text, the no-JS twin of a control, tables and the glossary.
-const NOT_REPEAT = `${NOT_COPY}, nav, button, summary, label, legend, option, a, table, .ve-visually-hidden, .ve-status-pill, .ve-verdict, [data-ve-review-progress], [data-ve-nojs-only], [data-ve-glossary], .ve-chapter-rail`;
-// One record of a data component: a claim, a check, a file, a review item or a glossary word. Its
-// values are data that understando derives from the map.
+// Text that shows more than once by its role: controls, links, navigation, state pills,
+// screen-reader text, tables and the glossary.
+const NOT_REPEAT = `${NOT_COPY}, nav, button, summary, label, legend, option, a, table, .ve-visually-hidden, .ve-status-pill, [data-ve-glossary], .ve-chapter-rail`;
+// One record of a data component: a claim, a check, an invariant or a glossary word. Its values
+// are data that understando derives from the map.
 const RECORD = 'li, details, article, tr, [data-ve-glossary] > dd, [data-ve-record]';
 // Inline elements join the text of their block; any other element starts a block of its own.
 const INLINE = 'span, strong, em, b, i, a, abbr, sup, sub, small, mark, kbd, q, cite, time, data, s, u, br, wbr';
@@ -233,7 +222,7 @@ function checkCopy(body) {
     }
   }
   // A sentence twice: the narrative says it again, or a component outside its records does. The
-  // same value in several records (claims, checks, files, review items) is data, not copy.
+  // same value in several records (claims, checks, invariants) is data, not copy.
   const seen = new Map();
   for (const { text, where: at, role } of textBlocks(body, NOT_REPEAT)) {
     for (const sentence of sentencesOf(text)) {
@@ -256,7 +245,7 @@ function checkCopy(body) {
 
 // ---- Raw enumerations ------------------------------------------------------------------------
 
-const TITLES = 'h2, h3, h4, .ve-change-title, .ve-review-label, .ve-typed-title, .ve-path-name';
+const TITLES = 'h2, h3, h4, .ve-typed-title, .ve-path-name';
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const letterWords = (text) => text.split(/\s+/).filter((w) => /[A-Za-z]/.test(w)).length;
 
@@ -316,7 +305,7 @@ export function defaultSteLint() {
 /**
  * One run of the STE lint over the copy, one block per line; each hard violation is an error. The
  * copy is the narrative and the text of the components outside their records. A record (a claim,
- * a check, a file, a review item) holds the values that understando derives from the map.
+ * a check, an invariant) holds the values that understando derives from the map.
  */
 function lintSte(body, script) {
   const off = 'Install the asd-ste100 skill, point --ste-lint (or VE_STE_LINT) at ste-lint.py, or turn the check off with --ste-lint off.';

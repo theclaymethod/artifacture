@@ -12,7 +12,7 @@
 }
 
 /* The rail speaks the UI face at one size: a muted number column with tabular figures, the title
-   wrapping under its own text, the review mark at the end of the row. Every gap comes from the
+   wrapping under its own text. Every gap comes from the
    4px scale; each row is a 44px target. The current chapter is accent text in weight 600, with no
    tint, and a screen reader hears it from aria-current. */
 .ve-chapter-rail {
@@ -134,7 +134,7 @@
   padding: 0;
 }
 
-/* A chapter row: the number, the title wrapping under itself, and the review mark when there is one. */
+/* A chapter row: the number and the title wrapping under itself. */
 .ve-chapter-list > li > a {
   display: grid;
   grid-template-columns: var(--ve-rail-index) minmax(0, 1fr);
@@ -149,10 +149,6 @@
   text-decoration: none;
 }
 
-.ve-chapter-list > li > a:has(> .ve-chapter-mark) {
-  grid-template-columns: var(--ve-rail-index) minmax(0, 1fr) auto;
-}
-
 .ve-chapter-index {
   color: var(--ve-muted);
   font-variant-numeric: tabular-nums;
@@ -163,27 +159,6 @@
   min-width: 0;
   text-wrap: pretty;
 }
-
-/* The review mark sits on the first line of the title, in the page's mark language. */
-.ve-chapter-mark {
-  display: inline-flex;
-  align-self: start;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--ve-space-1, 0.25rem);
-  height: calc(1em * var(--ve-rail-leading));
-  color: var(--ve-muted);
-  font-size: var(--ve-text-small, 0.875rem);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--ve-weight-regular, 400);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.ve-chapter-mark[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
-.ve-chapter-mark[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); --ve-tone-soft: var(--ve-status-info-soft); }
-.ve-chapter-mark[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
-.ve-chapter-mark[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
 
 /* The in-chapter targets: only under the current chapter, smaller and muted, set under its title. */
 .ve-chapter-anchors {

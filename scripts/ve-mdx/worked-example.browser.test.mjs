@@ -70,10 +70,10 @@ test.after(async () => {
 
 test('worked example: the export fails on a how-it-works level with no example, an example after the diagram, and a step with no provenance', () => {
   assert.notEqual(cases.noExample.status, 0);
-  assert.match(cases.noExample.out, /ch-2: a how-it-works level has no worked example/);
-  assert.doesNotMatch(cases.noExample.out, /ch-1: a how-it-works level/);
+  assert.match(cases.noExample.out, /ch-1: a how-it-works level has no worked example/);
+  assert.doesNotMatch(cases.noExample.out, /ch-0: a how-it-works level/);
   assert.notEqual(cases.after.status, 0);
-  assert.match(cases.after.out, /ch-2: the worked example "one-withdrawal" comes after a diagram/);
+  assert.match(cases.after.out, /ch-1: the worked example "one-withdrawal" comes after a diagram/);
   assert.notEqual(cases.noProvenance.status, 0);
   assert.match(cases.noProvenance.out, /the example "one-withdrawal", step 1 \(A caller asks for an amount\): no provenance/);
 });
@@ -103,14 +103,14 @@ test('worked example: without JavaScript every step shows in order, with the rea
   }
 });
 
-test('worked example: one step at a time, the station lit, values in the code face, reasons in the prose face, deep links and the checklist', async () => {
+test('worked example: one step at a time, the station lit, values in the code face, reasons in the prose face, deep links and the claim brief', async () => {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   try {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     const url = pathToFileURL(html).href;
-    await page.goto(`${url}#ch-2`, { waitUntil: 'load' });
+    await page.goto(`${url}#ch-1`, { waitUntil: 'load' });
     const ex = page.locator('[data-ve-example="one-withdrawal"]');
     await ex.locator('[data-ve-example-next]').waitFor();
     const shown = () => ex.locator('[data-ve-example-step]:visible').evaluateAll((r) => r.map((x) => x.id));
@@ -138,9 +138,9 @@ test('worked example: one step at a time, the station lit, values in the code fa
     await page.goto(`${url}#example-overdraft-before-after-2`, { waitUntil: 'load' });
     await page.waitForFunction(() => !document.getElementById('example-overdraft-before-after-2').hidden);
     assert.equal(await page.locator('#example-overdraft-before-after-1').isHidden(), true);
-    // The checklist item of the promise that holds the overdraft claim shows the examples and links to them.
-    await page.goto(`${url}#ch-7`, { waitUntil: 'load' });
-    const brief = page.locator('[data-ve-review-item] [data-ve-example-for]');
+    // The detail of the overdraft claim shows its examples and links to them.
+    await page.goto(`${url}#claim-c01`, { waitUntil: 'load' });
+    const brief = page.locator('#claim-c01 [data-ve-example-for]');
     assert.equal(await brief.count(), 1);
     assert.equal(await brief.getAttribute('data-ve-example-for'), 'overdraft-before-after one-withdrawal');
     assert.deepEqual(await brief.locator('.ve-example-brief-title a').evaluateAll((a) => a.map((x) => x.getAttribute('href'))), ['#example-overdraft-before-after', '#example-one-withdrawal']);

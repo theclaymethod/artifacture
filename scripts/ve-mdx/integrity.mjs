@@ -14,11 +14,11 @@ export const sharedComponents = new Set([
   'DefinitionList', 'Definition', 'Subsection', 'Disclosure', 'CopyLink', 'Term', 'Steps', 'Step', 'ChipLinks', 'Lead', 'Aside',
   'DiagramCanvas',
   'DataTable', 'StatusPill', 'Badge', 'Legend', 'ChapterRail',
-  'ArchitectureDiagram', 'ClaimDetail', 'CodeRef', 'Glossary', 'Glossed', 'Invariants', 'MergeVerdict', 'PromiseChips', 'PromiseLink',
-  'PromiseList', 'UnclaimedChanges', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough', 'WhatChanged',
-  // The guided review (guided-review.tsx, typed-diagrams.tsx) and the shared trust-map rows.
-  'StepThrough', 'TypedDiagram', 'ApproveChecks', 'ChapterProgress', 'ClaimTimeline', 'DiffSpine', 'EvidenceGuide', 'ExportReview', 'FileCard',
-  'ReviewChecklist', 'WorkedExample', 'ExamplesFor', 'ReviewProgress', 'ReviewStart', 'ReviewVerdict', 'UnderstandingCheck', 'VerifierView', 'BarCard', 'BarChip', 'ChangedCode', 'CheckRow', 'ClaimBody', 'ClaimRow',
+  'ArchitectureDiagram', 'ClaimDetail', 'CodeRef', 'Glossary', 'Glossed', 'Invariants', 'PromiseChips', 'PromiseLink',
+  'PromiseList', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough',
+  // The verification explainer (verification.tsx, typed-diagrams.tsx, worked-example.tsx) and the shared trust-map rows.
+  'StepThrough', 'TypedDiagram', 'ClaimTimeline', 'EvidenceGuide', 'WorkedExample', 'ExamplesFor', 'VerifierView',
+  'BarCard', 'BarChip', 'ChangedCode', 'CheckRow', 'ClaimBody', 'ClaimRow',
   'GraphicCanvas',
   'PunctumReadout',
   'GraphicSlide',

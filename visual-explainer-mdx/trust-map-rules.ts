@@ -1,13 +1,13 @@
-// The rules of a trust-map explainer, as plain data functions: no JSX, no imports, and only
-// erasable TypeScript, so Node runs this file directly (scripts/ve-mdx/trust-map.mjs) and the
-// components in trust-map.tsx render from the same rules.
+// The rules of a verification explainer, as plain data functions: no JSX, no imports, and only
+// erasable TypeScript. The components in trust-map.tsx and verification.tsx render from them.
 //
 // Inputs (the data contract, see plugins/visual-explainer/cards/trust-map.md):
-//   trust    trust-map.json, schema_version 1 or 2 (promise -> claim -> check)
+//   trust    trust-map.json, schema_version 1 or 2: invariants, claims, checks (verifiers) and
+//            planted-bug controls; promises (groups of claims) are optional
 //   refs     refs.resolved.json, schema 2: resolved code refs, control patches, the diff and the
-//            derived block (scripts/derive.py). Each strength, count, summary and action comes
+//            derived results (scripts/derive.py). Each strength, count, summary and action comes
 //            from the derived block; these rules render it and never compute it again.
-//   explain  explain.json: diagrams, change areas, unclaimed notes, risks, control walkthroughs
+//   explain  explain.json: diagrams, risks, control walkthroughs
 
 export const TRUST_MAP_SCHEMAS = [1, 2];
 export const REFS_SCHEMAS = [2];
@@ -35,11 +35,11 @@ export type Verifier = {
   artifact?: { video?: string; screenshots?: string[]; captions?: string; summary?: string };
 };
 export type Control = { id: string; name?: string; verifier: string; description: string; edits?: unknown[]; result?: { status?: string; output_tail?: string; note?: string } };
-export type Promise_ = { id: string; name?: string; label: string; sentence: string; claims: string[]; reviewer_action?: string };
+export type Promise_ = { id: string; name?: string; label: string; sentence: string; claims: string[] };
 export type GlossaryEntry = { term: string; meaning: string; aliases?: string[] };
 export type TrustMap = {
   schema_version: number; repo: string; pr?: number; title?: string; base: string; head: string;
-  claims: Claim[]; verifiers: Verifier[]; controls: Control[]; promises: Promise_[]; flags?: Array<{ flag: string; subject: string; detail: string; loud?: boolean }>;
+  claims: Claim[]; verifiers: Verifier[]; controls: Control[]; promises?: Promise_[]; flags?: Array<{ flag: string; subject: string; detail: string; loud?: boolean }>;
   summary?: Record<string, number>; glossary?: GlossaryEntry[]; invariants?: Array<{ id: string; text: string; author: string; status: string }>;
 };
 /**
@@ -50,7 +50,7 @@ export type TrustMap = {
 export type LineChanges = { added: number[]; modified: number[]; removed: Array<{ at: number; base: number; text: string; html?: string }> };
 export type ResolvedRef = { link_only?: boolean; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string; changes?: LineChanges };
 export type ControlEdit = { path: string; language: string; patch?: string; before?: string; after?: string; note?: string; rows?: unknown[] };
-/** The values that understando derives once (scripts/derive.py), so the review CLI, the PR body and the page agree. The components render them. */
+/** The values that understando derives once (scripts/derive.py), so its CLI and the page agree. The components render them. */
 export type CheckResult = 'none' | 'broken' | 'cannot-fail' | 'missed' | 'no-bug' | 'checked' | 'recorded' | 'caught';
 export type DerivedCheck = { id: string; name: string; kind: string; strength: Verdict; result: CheckResult };
 /** The evidence bar of a claim: what its surface (frontend, backend, llm, other) needs, and whether each part meets it. */
@@ -75,29 +75,25 @@ export type DerivedWeak = {
 /** Can these checks catch a bug? It counts checks, not controls. `broke` holds the full "what we broke" sentence of each control. */
 export type DerivedVerify = {
   result: string; other: string; tone: Tone; checks: number; ran: number; caught: number; missed: number; cannot: number; weak: DerivedWeak[];
-  by_promise: Array<{ id: string; rows: Array<{ check: string; name: string; claim: string; broke: string[]; ids: string }> }>;
-  tiers: Array<{ label: string; n: number }>; broke: Record<string, string>;
+  by_promise?: Array<{ id: string; rows: Array<{ check: string; name: string; claim: string; broke: string[]; ids: string }> }>;
+  tiers?: Array<{ label: string; n: number }>; broke: Record<string, string>;
   /** Degraded variants for evals: the real score against the degraded score, or a flag when no degraded run exists. */
   evals?: Array<{ check: string; name: string; claim: string; real: string; degraded: { variant: string; score: number; baseline: number } | null; flagged: boolean; text: string; action: string }>;
   /** Broken-UI runs for frontend claims, with the recorded video. */
   ui?: Array<{ check: string; name: string; claim: string; video?: string | null; poster?: string | null; screenshots: string[]; captions?: string | null; summary: string; caught: boolean; text: string }>;
 };
-/** The evidence bars of the whole PR (references/evidence-bars.md in understando). */
+/** The evidence bars of the whole change (references/evidence-bars.md in understando). */
 export type DerivedBars = { met: number; total: number; risky_below: string[]; risky_below_names: string[]; summary: string; story: string[] };
+/**
+ * The minimal derived block: `head`, `claims` (the result of each claim) and `verify` (can the
+ * checks catch a bug). `promises` is there when the map has promises; the rest is optional.
+ */
 export type Derived = {
   schema: number; head: string;
-  promises: Array<{ id: string; strength: Verdict; claims: string[]; count: number; tally: string; bars_met?: number }>;
+  promises?: Array<{ id: string; strength: Verdict; claims: string[]; count: number; tally: string; bars_met?: number }>;
   bars?: DerivedBars;
   claims: Record<string, DerivedClaim>;
   verify: DerivedVerify;
-  /** `items` are the blockers (not ready) or the risks to accept; `accept` holds the risks to accept in each form, in the order of the review. */
-  merge: { form: MergeForm; items: MergeItem[]; blockers: number; accept?: MergeItem[] };
-  ready: Ready | null;
-  unclaimed: { files: UnclaimedFile[]; core: UnclaimedFile[]; summary: { risky: number; rest: number; lead: string; quiet: string } };
-  risky_unclaimed: number;
-  bugs: Array<{ heading: string; lines: string[]; verified: boolean }>;
-  /** The diff spine: each changed file by its change area, riskiest first, with what protects it. */
-  spine?: DerivedSpine;
   /** Each check: its result, the claims and parts that it backs, and the test that it runs. */
   checks?: Record<string, DerivedCheckRow>;
   /** The changed test files as the checks they provide, and the changed tests that back no claim. */
@@ -107,23 +103,10 @@ export type DerivedCheckRow = {
   id: string; name: string; kind: string; result: CheckResult; claims: Array<{ id: string; name: string; parts: string[] }>;
   tests: Array<{ path: string; file: string; symbol: string | null }>; controls: string[]; ref: CodeRefSpec | null;
 };
-export type SpineKind = 'check' | 'ask' | 'read' | 'partial' | 'protected' | 'skim' | 'test' | 'other' | 'deleted';
-/** A "look closely" flag, pinned to a line at the head, from a verified source: a bug that find-bugs found, a check that missed or cannot fail, or risky code with no claim. */
-export type LookFlag = { level: 'risk' | 'question' | 'nit'; source: 'bug' | 'check' | 'unclaimed'; path: string; line: number; text: string; trigger: string | null; ref: CodeRefSpec };
-export type SpineFile = {
-  path: string; file: string; added: number; removed: number; created: boolean; deleted: boolean; role: string | null; note: string | null;
-  main: CodeRefSpec | null; claims: string[]; status: { kind: SpineKind; label: string; text: string | null };
-  flags?: LookFlag[]; tests?: string[]; diff?: string;
-};
-export type ChangeTier = 'core' | 'supporting' | 'wiring' | 'data' | 'docs' | 'generated' | 'tests';
-export type SpineGroup = {
-  id: string; name: string; note: string | null; replaced_by: { id: string; name: string } | null; files: SpineFile[]; added: number; removed: number; unclaimed: number;
-  tier?: ChangeTier; explain?: string[]; flags?: number; reviewable?: boolean;
-};
-export type DerivedSpine = { groups: SpineGroup[]; files: number; protected: number; partial: number; summary: string; unassigned?: string[]; flags?: number };
 export type Refs = {
   schema: number; head: string; repo?: string; refs: ResolvedRef[]; controls: Record<string, ControlEdit[]>; derived: Derived;
-  diff: {
+  /** The diff of the change, for the line marks of a code ref. Without it, a ref shows its lines with no marks. */
+  diff?: {
     files: Record<string, [number, number]>; deleted: string[]; created: string[]; added: Record<string, Array<[number, number]>>;
     /** Per changed code file: the changed symbols, most added lines first, and the ref of the main one. */
     symbols?: Record<string, { names: string[]; main: CodeRefSpec | null }>;
@@ -132,20 +115,11 @@ export type Refs = {
 export type DiagramGraph = { nodes: Array<{ id: string; label?: string; detail?: string; shape?: string; [k: string]: unknown }>; edges: Array<{ from: string; to: string; label?: string; [k: string]: unknown }>; legend?: unknown[] };
 /** `modes: 'independent'` is a per-PR layout hint: each mode gets its own grid, so the Simple mode has no dead space. */
 export type DiagramSpec = { title: string; description: string; layout?: string; direction?: string; modes?: 'shared' | 'independent'; eli5: DiagramGraph; detailed: DiagramGraph };
-export type Area = { id: string; name: string; paths?: string[]; replaced_by?: string; note?: string; rollup?: boolean };
-/** One chapter of the change: one idea, titled as a plain action, with its files in reading order (a path or a path prefix). */
-export type ChangeChapter = { id: string; title: string; tier?: ChangeTier; explain: string[]; files: Array<string | { path: string; note?: string }>; diagrams?: string[]; note?: string };
-/** A check before you approve: something to do, with a command, a check of the map, a file to read, or real inputs for a manual test. */
-export type ApproveCheck = { text: string; run?: string; cwd?: string; check?: string; ref?: CodeRefSpec; file?: string; inputs?: string };
+/** The agent's part, in strict STE: the diagrams (architecture and typed), why a claim is weak and its cheapest fix, and walkthroughs of planted bugs. */
 export type Explain = {
   diagrams?: Record<string, DiagramSpec>;
-  change?: { areas?: Area[]; chapters?: ChangeChapter[] };
-  verdict?: { checks?: ApproveCheck[] };
-  /** notes: why a file matters; roles: its job in plain words; core: path prefixes of the core files, shown as covered in part. */
-  unclaimed?: { notes?: Record<string, string>; roles?: Record<string, string>; core?: string[] };
   risks?: Array<{ claims: string[]; why: string; fix?: string }>;
   control_walkthroughs?: Array<{ title: string; description: string; controls: string[] }>;
-  bullets?: string[];
 };
 
 export const VERDICTS: Verdict[] = ['Formal', 'Proven', 'Backed', 'Asserted', 'Gap'];
@@ -167,8 +141,6 @@ export const LADDER_NAMES: Record<number, string> = {
   1: 'an end-to-end or integration test', 2: 'a property or fuzz test', 3: 'types, contracts or static rules', 4: 'a model check that matches the code', 5: 'a proof that matches the code',
 };
 export const TIER_WORD: Record<string, string> = { fact: 'a tool check, run again at the PR head', guess: 'a model judgment' };
-export const VISIBLE_UNCLAIMED = 5;
-export const MAX_MERGE_ITEMS = 3;
 
 // The one definition of each verdict. The glossary, the legend and every pill tooltip read it.
 export const VERDICT_MEANING: Record<Verdict, string> = {
@@ -190,7 +162,7 @@ export const BUILTIN_GLOSSARY: GlossaryEntry[] = [
   { term: 'Surface', meaning: 'the kind of work that a claim is about: frontend, backend, LLM or other. The surface sets the evidence bar.' },
   { term: 'Bar', meaning: 'the evidence that a claim needs for its surface. Frontend work needs a browser video, and LLM work needs an eval with a degraded variant. Risky backend code needs a proof.', aliases: ['evidence bar'] },
   { term: 'Met', meaning: 'each part of the claim has the evidence that its bar needs.' },
-  { term: 'Below the bar', meaning: 'a part of the claim does not have the evidence that its bar needs. A risky claim below its bar blocks the merge.' },
+  { term: 'Below the bar', meaning: 'a part of the claim does not have the evidence that its bar needs. A risky claim below its bar needs more evidence before you rely on it.' },
   { term: 'Degraded variant', meaning: 'a planted-worse version of an eval run, for example a prompt without one of its rules. It must score worse, to show that the eval can fail.' },
   { term: 'Recorded run', meaning: 'a run of a check that we did not run again, for example an eval. Its record and its source show the result.' },
   { term: 'UI', meaning: 'user interface: the screens and controls that a person uses.' },
@@ -244,11 +216,21 @@ export const ladder = (v: Verifier) => v.ladder ?? KIND_LADDER[v.kind] ?? null;
 
 export type PromiseRow = { promise: Promise_; strength: Verdict; claims: Claim[]; count: number; tally: string };
 
-/** Each promise with its strength (the verdict of its weakest claim), its claims, weakest first, its claim count and tally, as derive.py derived them. */
+/** Each promise with its strength (the verdict of its weakest claim), its claims, weakest first, its claim count and tally, as derive.py derived them. None when the map has no promises. */
 export function promiseRows(data: TrustMap, refs: Refs): PromiseRow[] {
   const claims = new Map(data.claims.map((c) => [c.id, c]));
-  const promises = new Map(data.promises.map((p) => [p.id, p]));
-  return refs.derived.promises.map((d) => ({ promise: promises.get(d.id)!, strength: d.strength, claims: d.claims.map((id) => claims.get(id)!), count: d.count, tally: d.tally }));
+  const promises = new Map((data.promises ?? []).map((p) => [p.id, p]));
+  return (refs.derived.promises ?? []).map((d) => ({ promise: promises.get(d.id)!, strength: d.strength, claims: d.claims.map((id) => claims.get(id)!), count: d.count, tally: d.tally }));
+}
+
+export type ClaimGroup = { promise: Promise_ | null; strength: Verdict | null; claims: Claim[] };
+
+/** The claims by promise, weakest first; a map with no promises gives one group of every claim, weakest first. */
+export function claimGroups(data: TrustMap, refs: Refs): ClaimGroup[] {
+  const rows = promiseRows(data, refs);
+  if (rows.length) return rows.map(({ promise, strength, claims }) => ({ promise, strength, claims }));
+  const rank = (c: Claim) => VERDICTS.indexOf(strengthOf(refs, c.id));
+  return [{ promise: null, strength: null, claims: [...data.claims].sort((a, b) => rank(b) - rank(a)) }];
 }
 
 /** The derived values of a claim (scripts/derive.py claim_rows). */
@@ -282,30 +264,6 @@ export function repeats(action: string | undefined, fix: string | undefined): bo
   return Boolean(f) && (a === f || a.includes(f) || f.includes(a));
 }
 
-export type ReviewItem = MergeItem & { n: number; key: string; blocks: boolean; kind: 'promise' | 'claim' | 'other'; id: string | null };
-/**
- * The guided review's checklist, in derive.py's order: each blocker, then each risk to accept.
- * The page shows this order; it never sorts the items again.
- */
-export function reviewItems(refs: Refs): ReviewItem[] {
-  const m = refs.derived.merge;
-  const blockers = m.form === 'not-ready' ? m.items : [];
-  const accept = m.accept ?? (m.form === 'accept' ? m.items : []);
-  return [...blockers.map((i) => ({ i, blocks: true })), ...accept.map((i) => ({ i, blocks: false }))].map(({ i, blocks }, n) => {
-    const hit = /^#(promise|claim)-(.+)$/.exec(i.href);
-    return { ...i, n: n + 1, blocks, key: `${blocks ? 'b' : 'a'}:${i.href}:${i.text}`, kind: (hit ? hit[1] : 'other') as ReviewItem['kind'], id: hit ? hit[2] : null };
-  });
-}
-
-export type Ready = { head: string; gates: Array<{ n: number; name: string; pass: boolean; detail: string; items?: string[] }> };
-export type MergeForm = 'not-ready' | 'accept' | 'ready';
-export type MergeItem = { label: string; text: string; href: string };
-export const MERGE_WORDS: Record<MergeForm, [string, Tone, string]> = {
-  'not-ready': ['Not ready', 'err', 'Do these first:'],
-  accept: ['Ready if you accept', 'warn', 'these risks:'],
-  ready: ['Ready', 'ok', 'Each promise is Proven, and no gate fails.'],
-};
-
 // ---- Validation: an export fails on bad data -------------------------------------------------
 
 export class TrustMapError extends Error {}
@@ -318,23 +276,27 @@ export function assertTrustMap(data: TrustMap): TrustMap {
   const errors: string[] = [];
   if (!data || typeof data !== 'object') throw new TrustMapError('trust map: the data is missing; pass data={trust}');
   if (!TRUST_MAP_SCHEMAS.includes(data.schema_version)) errors.push(`schema_version ${data.schema_version} is not supported (supported: ${TRUST_MAP_SCHEMAS.join(', ')})`);
-  for (const key of ['claims', 'verifiers', 'controls', 'promises'] as const) if (!Array.isArray(data[key])) errors.push(`${key} must be a list`);
+  for (const key of ['claims', 'verifiers', 'controls'] as const) if (!Array.isArray(data[key])) errors.push(`${key} must be a list`);
+  // Promises group the claims; a map without them is valid.
+  if (data.promises !== undefined && !Array.isArray(data.promises)) errors.push('promises must be a list');
+  if (data.invariants !== undefined && !Array.isArray(data.invariants)) errors.push('invariants must be a list');
   // The verdict step writes the flags; a map without a verdict run has none.
   if (data.flags !== undefined && !Array.isArray(data.flags)) errors.push('flags must be a list');
   if (errors.length) throw new TrustMapError('trust map is invalid:\n  ' + errors.join('\n  '));
   const claims = new Set(data.claims.map((c) => c.id));
   const member = new Map<string, string[]>();
-  for (const p of data.promises) {
+  const promises = data.promises ?? [];
+  for (const p of promises) {
     for (const id of p.claims) {
       if (!claims.has(id)) errors.push(`promise ${p.id} names the claim ${id}, which the map does not have`);
       member.set(id, [...(member.get(id) ?? []), p.id]);
     }
-    for (const field of ['name', 'label', 'sentence', 'reviewer_action'] as const) {
+    for (const field of ['name', 'label', 'sentence'] as const) {
       const hit = (p[field] ?? '').match(ID_PATTERN);
       if (hit) errors.push(`promise ${p.id}: its ${field} shows the ID ${hit[0]}; a reader sees it without opening anything`);
     }
   }
-  for (const c of data.claims) {
+  for (const c of promises.length ? data.claims : []) {
     const n = member.get(c.id)?.length ?? 0;
     if (n !== 1) errors.push(`claim ${c.id} is in ${n} promises (${(member.get(c.id) ?? []).join(', ') || 'none'}); it must be in exactly one`);
   }
@@ -372,13 +334,11 @@ export function assertRefs(data: TrustMap, refs: Refs): Refs {
   const d = refs.derived;
   if (!d || d.head !== data.head) throw new TrustMapError('refs.resolved.json has no derived block for the map head; run understando explain again');
   if (!d.claims || !d.verify) throw new TrustMapError('refs.resolved.json has no derived claims or verify block; run understando explain again');
-  const ids = new Set(data.promises.map((p) => p.id));
-  if (d.promises.length !== ids.size || d.promises.some((p) => !ids.has(p.id))) throw new TrustMapError('the derived promises do not match the promises of the map; run understando explain again');
+  const ids = new Set((data.promises ?? []).map((p) => p.id));
+  const derived = d.promises ?? [];
+  if (derived.length !== ids.size || derived.some((p) => !ids.has(p.id))) throw new TrustMapError('the derived promises do not match the promises of the map; run understando explain again');
   const missing = data.claims.filter((c) => !d.claims[c.id]).map((c) => c.id);
   if (missing.length) throw new TrustMapError(`the derived block has no row for the claims ${missing.join(', ')}; run understando explain again`);
-  const promises = new Map(data.promises.map((p) => [p.id, p]));
-  const errors = d.promises.filter((p) => !STRONG.includes(p.strength) && !promises.get(p.id)!.reviewer_action).map((p) => `promise ${p.id} is ${p.strength}, so it needs a reviewer_action`);
-  if (errors.length) throw new TrustMapError('trust map is invalid:\n  ' + errors.join('\n  '));
   checked.set(refs, true);
   return refs;
 }
@@ -418,122 +378,6 @@ export function glossaryEntries(data: TrustMap): GlossaryEntry[] {
   const builtin = BUILTIN_GLOSSARY.filter((g) => !have.has(norm(g.term)) && (g.term !== 'Formal' || used.has('Formal')));
   return [...own, ...builtin].sort((a, b) => a.term.toLowerCase().localeCompare(b.term.toLowerCase()));
 }
-
-// ---- The diff --------------------------------------------------------------------------------
-
-const CODE_EXT = new Set(['.py', '.ts', '.tsx', '.js', '.mjs', '.cjs', '.jsx', '.sh', '.go', '.rs', '.java', '.kt', '.rb', '.swift', '.c', '.h', '.cc', '.cpp', '.cs', '.php', '.scala']);
-const ext = (path: string) => { const name = path.split('/').pop() ?? ''; const i = name.lastIndexOf('.'); return i > 0 ? name.slice(i) : ''; };
-export function isTest(path: string): boolean {
-  const parts = path.split('/');
-  const name = parts[parts.length - 1];
-  return parts.slice(0, -1).some((p) => ['tests', 'test', '__tests__', 'spec'].includes(p)) || name.startsWith('test_') || /(_test|\.test|\.spec)\.\w+$/.test(name);
-}
-export const isCode = (path: string) => CODE_EXT.has(ext(path)) && !isTest(path);
-export const lines = (n: number, sign: string) => (n ? `${sign}${n.toLocaleString('en-US')}` : '0');
-
-export function diffRoot(refs: Refs): string {
-  const code = Object.keys(refs.diff.files).filter(isCode);
-  if (code.length < 2) return '';
-  let parts = code[0].split('/');
-  for (const p of code.slice(1)) {
-    const q = p.split('/');
-    let i = 0;
-    while (i < parts.length && i < q.length && parts[i] === q[i]) i += 1;
-    parts = parts.slice(0, i);
-  }
-  return parts.length ? parts.join('/') + '/' : '';
-}
-export const shortPath = (root: string, path: string) => (root && path.startsWith(root) ? path.slice(root.length) : path);
-const under = (refs: Refs, prefixes: string[]) => Object.keys(refs.diff.files).filter((p) => prefixes.some((x) => p === x || p.startsWith(x.replace(/\/$/, '') + '/')));
-
-/** Each changed file and the area with the longest path prefix that holds it. */
-export function areaOwner(areas: Area[], refs: Refs): Map<string, string> {
-  const owner = new Map<string, [number, string]>();
-  for (const a of areas) for (const prefix of a.paths ?? []) for (const p of under(refs, [prefix])) if (prefix.length > (owner.get(p)?.[0] ?? -1)) owner.set(p, [prefix.length, a.id]);
-  return new Map([...owner].map(([p, [, id]]) => [p, id]));
-}
-
-export function assertAreas(areas: Area[], refs: Refs) {
-  const ids = new Set(areas.map((a) => a.id));
-  const errors: string[] = [];
-  for (const a of areas) {
-    if (a.paths?.length && !under(refs, a.paths).length) errors.push(`change area ${a.id}: no changed file is under ${a.paths.join(', ')}`);
-    if (a.replaced_by && !ids.has(a.replaced_by)) errors.push(`change area ${a.id}: replaced_by names ${a.replaced_by}, which is not an area`);
-  }
-  if (errors.length) throw new TrustMapError('explain.json change areas are invalid:\n  ' + errors.join('\n  '));
-}
-
-/** The before-and-after diagram, from the diff: plain area names in the Simple mode, the paths in the Detailed mode. */
-export function changeDiagram(areas: Area[], refs: Refs): DiagramSpec {
-  const { files, deleted, created } = refs.diff;
-  const root = diffRoot(refs);
-  if (!areas.length) {
-    const gone = deleted.filter(isCode).sort();
-    const added = created.filter(isCode).sort();
-    const nodes: DiagramGraph['nodes'] = [];
-    const edges: DiagramGraph['edges'] = [];
-    if (gone.length) nodes.push({ id: 'gone', label: 'Deleted code', detail: `${lines(gone.reduce((s, p) => s + files[p][1], 0), '-')} lines in ${gone.length} files` });
-    if (added.length) nodes.push({ id: 'new', label: 'New code', detail: `${lines(added.reduce((s, p) => s + files[p][0], 0), '+')} lines in ${added.length} files` });
-    if (gone.length && added.length) edges.push({ from: 'gone', to: 'new', label: 'replaced by' });
-    if (!nodes.length) nodes.push({ id: 'edits', label: 'Edits to existing code', detail: `${Object.keys(files).length} files` });
-    const detailed = nodes.map((n) => (n.id === 'gone' || n.id === 'new' ? { ...n, label: `${n.label} (${(n.id === 'gone' ? gone : added).slice(0, 3).map((p) => shortPath(root, p)).join(', ')})` } : n));
-    return { title: 'Before and after', description: 'The code that the PR deletes and the code that it adds.', eli5: { nodes, edges }, detailed: { nodes: detailed, edges } };
-  }
-  const owner = areaOwner(areas, refs);
-  const nodes: DiagramGraph['nodes'] = [];
-  const detailed: DiagramGraph['nodes'] = [];
-  const edges: DiagramGraph['edges'] = [];
-  for (const a of areas) {
-    const own = [...owner].filter(([, id]) => id === a.id).map(([p]) => p);
-    const added = own.reduce((s, p) => s + files[p][0], 0);
-    const removed = own.reduce((s, p) => s + files[p][1], 0);
-    const before = Boolean(a.replaced_by || a.note);
-    const node = { id: a.id, label: a.name, ...(a.paths?.length ? { detail: before ? `${lines(removed, '-')} lines` : `${lines(added, '+')} lines` } : { shape: 'oval' }) };
-    nodes.push(node);
-    const short = (a.paths ?? []).map((p) => shortPath(root, p));
-    const label = short.slice(0, 3).join(', ') + (short.length > 3 ? ` and ${short.length - 3} more` : '');
-    detailed.push({ ...node, label: label || a.name });
-    if (a.replaced_by) edges.push({ from: a.id, to: a.replaced_by, label: 'replaced by' });
-  }
-  return {
-    title: 'Before and after',
-    description: 'Each box is a group of changed files, with its line count from the diff. An arrow points from deleted code to the code that replaces it.',
-    // The Detailed boxes hold paths: a shared grid would leave the Simple boxes wide and far apart.
-    modes: 'independent',
-    eli5: { nodes, edges }, detailed: { nodes: detailed, edges },
-  };
-}
-
-export type ChangeRow = { file: string; removed: number; by: string };
-/** The deleted or replaced code, largest first: each deleted code file of 100 lines or more, or one row for a rolled-up area. */
-export function replacedRows(areas: Area[], refs: Refs): ChangeRow[] {
-  const { files, deleted } = refs.diff;
-  const root = diffRoot(refs);
-  const byId = new Map(areas.map((a) => [a.id, a]));
-  if (!areas.length) return deleted.filter(isCode).map((p) => ({ file: shortPath(root, p), removed: files[p][1], by: 'Not stated' })).sort((a, b) => b.removed - a.removed);
-  const owner = areaOwner(areas, refs);
-  const rows: ChangeRow[] = [];
-  for (const a of areas) {
-    if (!a.replaced_by && !a.note) continue;
-    const target = a.note || byId.get(a.replaced_by!)!.name;
-    const own = [...owner].filter(([, id]) => id === a.id).map(([p]) => p);
-    if (a.rollup) {
-      rows.push({ file: `${(a.paths ?? []).map((p) => shortPath(root, p)).join(', ')} (${own.length} files)`, removed: own.reduce((s, p) => s + files[p][1], 0), by: target });
-      continue;
-    }
-    rows.push(...own.filter((p) => deleted.includes(p) && isCode(p) && files[p][1] >= 100).sort((x, y) => files[y][1] - files[x][1]).map((p) => ({ file: shortPath(root, p), removed: files[p][1], by: target })));
-  }
-  return rows.sort((a, b) => b.removed - a.removed);
-}
-
-export type UnclaimedAction = { kind: 'read' | 'ask' | 'check' | 'skim'; text: string };
-/** A changed file outside the claims, as derive.py derived it: its risks and one action. */
-export type UnclaimedFile = {
-  path: string; file: string; role: string; change: string; added: number; removed: number; created: boolean;
-  risks: string[]; note: string | null; action: UnclaimedAction; main: CodeRefSpec | null; claims: number; cited: number; total: number;
-  /** The claims that cover the file, by how: cited by a code ref, named in the text, exercised by a check, edited by a control. */
-  by?: { cited: string[]; named: string[]; exercised: string[]; edited: string[] };
-};
 
 // ---- Verify the verifiers -----------------------------------------------------------------------
 
@@ -581,76 +425,3 @@ export function checksOf(data: TrustMap, c: Claim): Verifier[] {
 }
 /** A tool check: each verifier but a kind none placeholder. */
 export const isTool = (v: Verifier) => v.kind !== 'none';
-
-// ---- The PR-body section (markdown) ----------------------------------------------------------
-
-function mermaid(data: TrustMap, refs: Refs): string {
-  const layers = new Map<string, Record<string, number>>();
-  for (const c of data.claims) {
-    const layer = c.layer ?? 'Claims';
-    if (!layers.has(layer)) layers.set(layer, Object.fromEntries(VERDICTS.map((v) => [v, 0])));
-    layers.get(layer)![strengthOf(refs, c.id)] += 1;
-  }
-  const out = ['```mermaid', 'flowchart LR'];
-  [...layers].forEach(([layer, counts], i) => {
-    out.push(`  L${i}["${layer}"]`);
-    for (const v of VERDICTS) if (counts[v]) out.push(`  L${i} -->|${counts[v]}| ${v}`);
-  });
-  for (const v of VERDICTS) out.push(`  ${v}(["${v}"])`);
-  out.push('  classDef proven fill:#d7f0dd,stroke:#2f7d46', '  classDef gap fill:#fbe0dc,stroke:#b3402f', '  class Proven proven', '  class Gap gap', '```');
-  return out.join('\n');
-}
-
-/** The trust-map section of the PR body: the same merge answer, promises and verdicts as the page. */
-export function prSection(data: TrustMap, refs: Refs, explain: Explain = {}, explainerUrl?: string | null): string {
-  assertTrustMap(data);
-  assertRefs(data, refs);
-  let ready: Ready | null;
-  const { form, items } = refs.derived.merge;
-  ready = refs.derived.ready;
-  const [word, , lead] = MERGE_WORDS[form];
-  const link = (i: MergeItem) => (explainerUrl ? `[${i.label}](${explainerUrl}${i.href})` : `**${i.label}**`);
-  const out = ['## Trust map', ''];
-  if (!items.length) out.push(`**Merge verdict: ${word}.** ${lead}`);
-  else {
-    out.push(`**Merge verdict: ${word}.** ${capital(lead)}`, '');
-    items.slice(0, MAX_MERGE_ITEMS).forEach((i, n) => out.push(`${n + 1}. ${link(i)}. ${reader(i.text)}`));
-    const rest = items.slice(MAX_MERGE_ITEMS);
-    if (rest.length) out.push('', `And ${rest.length} more: ${rest.map(link).join(', ')}.`);
-  }
-  out.push('');
-  if (ready) {
-    out.push('### Ready checklist', '');
-    for (const g of ready.gates) out.push(`- [${g.pass ? 'x' : ' '}] **Gate ${g.n}, ${g.name}:** ${g.pass ? 'pass' : 'fail'}. ${g.detail}`);
-    out.push('');
-  }
-  if (refs.derived.bars) out.push(`**Evidence bars:** ${refs.derived.bars.summary}`, '');
-  out.push(mermaid(data, refs), '', '| Claim | Surface | Bar | Strength | Checks | Weakest check |', '|---|---|---|---|---|---|');
-  const esc = (t: string) => t.replaceAll('|', '\\|');
-  for (const c of data.claims) {
-    const d = derivedClaim(refs, c.id);
-    const first = c.code?.[0];
-    const permalink = first ? findRef(refs, first).permalink : null;
-    const id = permalink ? `[${c.id}](${permalink})` : c.id;
-    const strength = `**${d.strength}**` + (c.waiver ? ` (waived: ${esc(c.waiver.reason)})` : '');
-    const weak = d.weakest ? `${capital(d.weakest.name)}. ${d.weakest.action}` : '-';
-    const bar = d.bar ? `${d.bar.need}: ${d.bar.met ? 'met' : 'below'}` : '-';
-    out.push(`| ${id}: ${esc(capital(claimLabel(c)))} | ${d.bar?.surface ?? '-'} | ${esc(bar)} | ${strength} | ${esc(d.summary)} | ${esc(weak)} |`);
-  }
-  out.push('');
-  if (data.summary) out.push('- **Verdicts:** ' + VERDICTS.map((v) => `${data.summary![v] ?? 0} ${v}`).join(', ') + '.');
-  out.push('- **Promises:** ' + promiseRows(data, refs).map(({ promise: p, strength, claims, count, tally }) => {
-    const t = strongestTier(refs, claims);
-    return `${p.label}: ${strength}. Its ${count} ${count === 1 ? 'claim' : 'claims'}: ${tally}. ${t}`;
-  }).join(' '));
-  const waived = data.claims.filter((c) => c.waiver);
-  if (waived.length) out.push('- **Waived:** ' + waived.map((c) => `${c.id}: ${c.waiver!.reason}`).join(' '));
-  const loud = (data.flags ?? []).filter((f) => f.loud);
-  const dead = loud.filter((f) => f.flag === 'cannot-fail').map((f) => reader(f.detail));
-  out.push('- **Cannot fail:** ' + (dead.length ? dead.join(' ') : 'none.'));
-  for (const f of loud) if (f.flag !== 'cannot-fail') out.push(`- **${f.flag}:** ${reader(f.detail)}`);
-  out.push(`- **Checks:** ${refs.derived.verify.result}${refs.derived.verify.other ? ' ' + refs.derived.verify.other : ''} The planted bugs ran in scratch worktrees. Cost: $0, with no model call.`);
-  for (const b of explain.bullets ?? []) out.push(`- ${b}`);
-  if (explainerUrl) out.push(`- **Explainer:** ${explainerUrl}`);
-  return out.join('\n') + '\n';
-}
