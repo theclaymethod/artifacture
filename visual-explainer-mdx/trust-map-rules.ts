@@ -28,7 +28,7 @@ export type Claim = {
 /** A verifier of kind `none` is a placeholder check: no tool checks the claim. */
 export type Verifier = {
   id: string; name?: string; kind: string; claims: string[]; tier: string; description: string; provenance: string; state?: string;
-  ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[]; cwd?: string }; baseline?: { status?: string; output_tail?: string };
+  ladder?: number; at?: string; independence?: { tool?: string }; command?: { argv: string[]; cwd?: string }; baseline?: { status?: string; output_tail?: string; head?: string };
   recorded?: { source: string; result: string }; formal?: { tool: string; artifact: string; conformance: { status: string; source: string; detail?: string } };
   mechanical?: { result?: { status: string; command: string; detail: string } };
   /** A browser e2e run: the recorded video, its screenshots, captions and a text summary. */
@@ -48,7 +48,7 @@ export type TrustMap = {
  * head line `at`). The export adds `html` to each removed line.
  */
 export type LineChanges = { added: number[]; modified: number[]; removed: Array<{ at: number; base: number; text: string; html?: string }> };
-export type ResolvedRef = { link_only?: boolean; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string; changes?: LineChanges };
+export type ResolvedRef = { link_only?: boolean; on_ready_branch?: boolean; branch?: string; ref: CodeRefSpec; path: string; start: number; end: number; span: [number, number]; language: string; excerpt: string; permalink: string | null; html?: string; changes?: LineChanges };
 export type ControlEdit = { path: string; language: string; patch?: string; before?: string; after?: string; note?: string; rows?: unknown[] };
 /** The values that understando derives once (scripts/derive.py), so its CLI and the page agree. The components render them. */
 export type CheckResult = 'none' | 'broken' | 'cannot-fail' | 'missed' | 'no-bug' | 'checked' | 'recorded' | 'caught';
@@ -140,7 +140,21 @@ export const KIND_LADDER: Record<string, number> = {
 export const LADDER_NAMES: Record<number, string> = {
   1: 'an end-to-end or integration test', 2: 'a property or fuzz test', 3: 'types, contracts or static rules', 4: 'a model check that matches the code', 5: 'a proof that matches the code',
 };
-export const TIER_WORD: Record<string, string> = { fact: 'a tool check, run again at the PR head', guess: 'a model judgment' };
+
+/** The first 8 characters of a commit: how a page names the commit it ran or read. */
+export const sha8 = (sha?: string) => (sha ?? '').slice(0, 8);
+/** The status of a run in plain words: a run is green or red in the data. */
+export const runWord = (status?: string) => (status === 'green' ? 'passed' : status === 'red' ? 'failed' : status ?? 'not run');
+/**
+ * One plain sentence for a check: what it does, then where it comes from, as in "Runs the
+ * overdraft refusal test (a contract check) from tests/test_core.py." Its ID is not in it.
+ */
+export function checkSentence(v: Verifier): string {
+  const what = v.description.trim().replace(/[.:;]+$/, '');
+  const from = (v.provenance ?? '').trim().replace(/\.+$/, '');
+  if (!from || from === 'none') return `${what}.`;
+  return /^(the |[\w@./-]+(, [\w@./-]+)*$)/i.test(from) ? `${what} from ${from}.` : `${what}. ${capital(from)}.`;
+}
 
 // The one definition of each verdict. The glossary, the legend and every pill tooltip read it.
 export const VERDICT_MEANING: Record<Verdict, string> = {

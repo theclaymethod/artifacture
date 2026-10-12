@@ -86,7 +86,7 @@ Write the narrative and the text of `explain.json` with the asd-ste100 skill. Ea
 - No slogans and no reassurance. "Bad edits never ship." → "The accept rule undoes an edit that adds a severe finding."
 - No label in front of a paragraph or a `Lead`. "**In plain words.** The wallet refuses an overdraft." → "The wallet refuses an overdraft."
 - Say a fact once, where it matters. No stock phrases: "only as strong as its weakest claim" → "A promise takes the strength of its weakest claim."
-- Every block answers a reader question: no raw list of every file or test, and no two titles joined by a bare word.
+- Every block answers a reader question: no raw list of every file or test, no two titles joined by a bare word, and no fields glued into one line. A check reads as one plain sentence: "Runs the overdraft refusal test (a contract check) from tests/test_core.py."
 
 ## The export checks
 
@@ -98,7 +98,7 @@ Write the narrative and the text of `explain.json` with the asd-ste100 skill. Ea
 - **Worked examples:** a chapter with a `StepThrough` or a `WorkedExample` leads with the example, and each step names its sources.
 - **Links:** each `#fragment` has a target, and no id shows twice.
 - **Actions:** the verify block opens with its result line ("4 of 5 checks caught their planted bug."), and each weak check and the weakest check of each claim has an action.
-- **Copy:** no slogan of `scripts/ve-mdx/copy-rules.mjs`, no label run-in, no sentence twice, no title join, no opener that holds only a long list, and no hard violation of `ste-lint.py` (`--ste-lint <path>` or `VE_STE_LINT`; `off` turns it off).
+- **Copy:** no slogan of `scripts/ve-mdx/copy-rules.mjs`, no label run-in, no sentence twice, no title join, no glued fields (a name that shows twice in one block, or a colon-joined list of fields), no opener that holds only a long list, and no hard violation of `ste-lint.py` (`--ste-lint <path>` or `VE_STE_LINT`; `off` turns it off).
 - **No hand copy:** with `--guard-repo` and `--guard-head`, two lines of the MDX that match two lines of a tracked file at the head fail the export.
 
 The export stamps the head and the SHA-256 of the map in `<meta name="ve-trust-map-head">` and `<meta name="ve-trust-map-sha256">`, so a reader can tell when the page is stale.

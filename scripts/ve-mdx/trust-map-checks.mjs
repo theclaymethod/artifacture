@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { isPlainWord, MAX_TERMS_PER_CHAPTER } from '../../visual-explainer-mdx/glossary-policy.mjs';
-import { EXPLAIN_MIN_WORDS, MAX_BARE_ITEMS, REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES, TITLE_MIN_WORDS } from './copy-rules.mjs';
+import { EXPLAIN_MIN_WORDS, GLUE_MAX_COLONS, GLUE_REPEAT_WORDS, MAX_BARE_ITEMS, REPEAT_MIN_WORDS, RUN_IN_LABELS, SLOGAN_PHRASES, SLOGAN_SENTENCES, TITLE_MIN_WORDS } from './copy-rules.mjs';
 
 const ID = /(?<![\w-])[CVK]\d+[a-z]?(?![\w-])/;
 const ACRONYM = /(?<![\w$#.-])([0-9]*[A-Z][A-Z0-9]*(?:-[0-9A-Z]+)*)(?![\w-])/g;
@@ -53,7 +53,8 @@ const where = (node) => node.parentElement?.closest('section[id]')?.id ?? 'page'
  *  - The copy has no slogan, no label run-in and no sentence twice (copy-rules.mjs), and the
  *    asd-ste100 lint finds no hard violation in it (`steLint`: the path of ste-lint.py, or false).
  *  - Every block answers a reader question: no two titles joined by a bare word ("<Title> imports
- *    <Title>"), and no opener whose body is only a long list with no explanation.
+ *    <Title>"), no opener whose body is only a long list with no explanation, and no sentence of
+ *    glued fields (a name that shows twice in one block, or a colon-joined list of fields).
  */
 export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
   const { document } = parseHTML(`<!doctype html><html><body>${markup}</body></html>`);
@@ -118,6 +119,7 @@ export function checkTrustMapPage(markup, { steLint = defaultSteLint() } = {}) {
   errors.push(...checkWorkedExamples(body));
   errors.push(...checkCopy(body));
   errors.push(...checkEnumerations(body));
+  errors.push(...checkGlue(body));
   if (steLint) errors.push(...lintSte(body, steLint));
   return errors;
 }
@@ -284,6 +286,35 @@ function checkEnumerations(body) {
     if (words >= EXPLAIN_MIN_WORDS) continue;
     const summary = details.querySelector(':scope > summary .ve-disclosure-label')?.textContent.trim() ?? details.querySelector(':scope > summary')?.textContent.trim() ?? '?';
     errors.push(`${where(details)}: the opener "${summary}" holds only a list of ${items} items, with no explanation. A raw enumeration answers no reader question: say what the reader learns from it in one sentence, or cut it.`);
+  }
+  return errors;
+}
+
+// ---- Glued fields ----------------------------------------------------------------------------
+
+/**
+ * Fields of a record joined into one "sentence" (copy-rules.mjs): the name of a thing pasted
+ * twice into one block ("the overdraft refusal test. contract check ... (V2): the overdraft
+ * refusal test: a contract check"), or a list of "label: value" fields in one sentence. Say what
+ * the thing does in one plain sentence ("Runs the overdraft refusal test (a contract check) from
+ * tests/test_core.py.").
+ */
+function checkGlue(body) {
+  const errors = [];
+  for (const { text, where: at } of textBlocks(body, NOT_REPEAT)) {
+    for (const sentence of sentencesOf(text)) {
+      const tokens = sentence.toLowerCase().split(/[^\p{L}\p{N}']+/u).filter(Boolean);
+      const seen = new Map();
+      let repeat = null;
+      for (let i = 0; i + GLUE_REPEAT_WORDS <= tokens.length && !repeat; i++) {
+        const key = tokens.slice(i, i + GLUE_REPEAT_WORDS).join(' ');
+        if (seen.has(key) && i - seen.get(key) >= GLUE_REPEAT_WORDS) repeat = key;
+        else if (!seen.has(key)) seen.set(key, i);
+      }
+      if (repeat) errors.push(`${at}: a sentence says "${repeat}" twice, as if fields were glued together: "${around(sentence, 0)}". Say it once, in one plain sentence.`);
+      // A numbered tag ("Station 1: <title>") is one field; the colons after it count.
+      if ((sentence.replace(/^\p{L}+ \d+: /u, '').match(/:\s/g) ?? []).length > GLUE_MAX_COLONS) errors.push(`${at}: a sentence joins fields with colons: "${around(sentence, 0)}". A list of "label: value" fields is not a sentence: say in one plain sentence what the reader learns.`);
+    }
   }
   return errors;
 }

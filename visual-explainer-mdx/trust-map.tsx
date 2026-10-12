@@ -17,7 +17,7 @@ import { chainOrder, StationFlow } from './station-flow';
 import {
   assertRefs, assertTrustMap, brokeOf, capital, claimAnchor, claimLabel, claimOf, controlWalkthrough, derivedClaim, expansion, findRef,
   FLAG_TONE, GLYPH_FAMILY, glossaryEntries, isAcronym, isTool, KIND_GLYPH, LADDER_NAMES,
-  norm, OUTCOME, promiseAnchor, promiseRows, reader, repeats, slug, STATE_TONE, strengthOf, strongestTier, STRONG, TIER_WORD,
+  norm, OUTCOME, promiseAnchor, promiseRows, reader, repeats, runWord, sha8, slug, STATE_TONE, strengthOf, strongestTier, STRONG, checkSentence,
   TONE, TrustMapError, VERDICT_MEANING, VERDICTS, weakest,
   type Claim, type CheckResult, type CodeRefSpec, type ResolvedRef, type DerivedBar, type DerivedClaim, type Control, type DiagramSpec, type Explain, type GlossaryEntry, type Refs, type TrustMap, type Verdict, type Verifier,
 } from './trust-map-rules';
@@ -195,7 +195,7 @@ export function Defs({ items }: { items: Array<[ReactNode, ReactNode, ('ok' | 'i
 const LANGUAGE: Record<string, string> = { '.py': 'python', '.ts': 'ts', '.tsx': 'tsx', '.js': 'js', '.mjs': 'js', '.json': 'json', '.md': 'markdown', '.sh': 'bash', '.toml': 'toml', '.yml': 'yaml', '.yaml': 'yaml' };
 const languageOf = (path: string) => LANGUAGE[path.slice(path.lastIndexOf('.'))] ?? 'text';
 
-/** The lines of a code ref at the PR head, from refs.resolved.json, with a link to them. Code never comes from typed text. */
+/** The lines of a code ref at its commit, from refs.resolved.json, with a link to them. Code never comes from typed text. */
 export function CodeRef({ refs, ...ref }: { refs: Refs } & CodeRefSpec) {
   if (!refs?.refs) throw new TrustMapError('CodeRef needs refs={refs} (refs.resolved.json)');
   return <RefCode r={findRef(refs, ref)} refs={refs} />;
@@ -243,12 +243,12 @@ function LineKey({ kinds }: { kinds: Set<LineKind> }) {
   if (!shown.length) return null;
   return (
     <span className="ve-line-key">
-      {shown.map((k) => <span data-ve-line={k} key={k}><span className="ve-line-sign">{LINE_SIGN[k]}</span> {LINE_WORD[k]}{k === 'remove' ? ' (its number is before the PR)' : ''}</span>)}
+      {shown.map((k) => <span data-ve-line={k} key={k}><span className="ve-line-sign">{LINE_SIGN[k]}</span> {LINE_WORD[k]}{k === 'remove' ? ' (its number is in the old file)' : ''}</span>)}
     </span>
   );
 }
 
-/** A resolved ref as code: its highlighted lines with their diff status, a key of the signs, and a link to the lines at the PR head. */
+/** A resolved ref as code: its highlighted lines with their diff status, a key of the signs, and a link to the lines on GitHub. */
 function RefCode({ refs, r, mark }: { refs: Refs; r: ResolvedRef; mark?: { line: number; level: string } }) {
   const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
   const created = refs.diff?.created.includes(r.path) ?? false;
@@ -257,7 +257,7 @@ function RefCode({ refs, r, mark }: { refs: Refs; r: ResolvedRef; mark?: { line:
   return (
     <div className="ve-code-ref" data-ve-changed={created ? 'new' : some ? 'changed' : 'context'} data-ve-code-lines data-ve-code-ref data-ve-marked={mark ? 'true' : undefined} style={{ '--ve-line-digits': digits } as CSSProperties}>
       <CodeBlock code={r.excerpt} filename={name} html={html} language={r.language} />
-      <p>{mark ? `Line ${mark.line} is the one to look at. ` : ''}{created ? 'A new file: each line is new. ' : ''}<LineKey kinds={kinds} />{r.permalink ? <a href={r.permalink}>Open these lines at the PR head</a> : null}</p>
+      <p>{mark ? `Line ${mark.line} is the one to look at. ` : ''}{created ? 'A new file: each line is new. ' : ''}<LineKey kinds={kinds} />{r.permalink ? <a href={r.permalink}>{r.on_ready_branch ? `Open these lines on the ${r.branch ?? 'review'} branch` : 'Open these lines on GitHub'}</a> : null}</p>
     </div>
   );
 }
@@ -380,25 +380,24 @@ export function BrowserVideo({ artifact, name }: { artifact: NonNullable<Verifie
 }
 
 function VerifierBlock({ v, data, refs }: { v: Verifier; data: TrustMap; refs: Refs }) {
-  const label = `${v.name ? v.name + '. ' : ''}${v.kind} check, ${TIER_WORD[v.tier] ?? v.tier}, ${v.state ?? 'unknown'} (${v.id}):`;
   const m = v.mechanical?.result;
   const b = v.baseline ?? {};
   return (
-    <div data-ve-lint="skip">
-      <p><strong>{label}</strong> {reader(`${v.description} Provenance: ${v.provenance}`)}</p>
+    <div>
+      <p data-ve-check-sentence>{reader(checkSentence(v))}</p>
       {v.recorded ? <TerminalBlock content={v.recorded.result} title={'Recorded: ' + v.recorded.source} /> : null}
       {v.artifact?.video ? <BrowserVideo artifact={v.artifact} name={v.name ?? v.id} /> : null}
       {v.formal ? <TerminalBlock content={[`${v.formal.tool} ${v.formal.artifact}`, v.formal.conformance.source, v.formal.conformance.detail].filter(Boolean).join('\n')} title={'Conformance link: ' + v.formal.conformance.status} /> : null}
-      {m ? <TerminalBlock content={`$ ${m.command}\n${m.detail}`} title={'Mechanical check at the PR head: ' + m.status} /> : null}
-      {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={'At the PR head: ' + (b.status ?? 'not run')} language="bash" /> : null}
-      {v.command && b.output_tail ? <TerminalBlock content={b.output_tail} title="Output at the PR head" /> : null}
+      {m ? <TerminalBlock content={`$ ${m.command}\n${m.detail}`} title={`Mechanical check at ${sha8(data.head)}: ${m.status}`} /> : null}
+      {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={`At ${sha8(b.head ?? data.head)}: ${runWord(b.status)}`} language="bash" /> : null}
+      {v.command && b.output_tail ? <TerminalBlock content={b.output_tail} title="Output" /> : null}
       {data.controls.filter((k) => k.verifier === v.id).map((k) => {
         const status = k.result?.status ?? 'not run';
         const outcome = status === 'red' ? OUTCOME.caught[0].toLowerCase() : status === 'green' ? OUTCOME.missed[0].toLowerCase() : status;
         const tail = k.result?.output_tail ?? k.result?.note ?? '';
         return (
           <Fragment key={k.id}>
-            <p><strong>{status === 'red' || status === 'green' ? `The check ${outcome} (${k.id}).` : `Control ${k.id}: ${status}.`}</strong> {reader(k.description)}</p>
+            <p data-ve-lint="skip"><strong>{status === 'red' || status === 'green' ? `The check ${outcome} (${k.id}).` : `Control ${k.id}: ${status}.`}</strong> {reader(k.description)}</p>
             {controlEdits(refs, k)}
             {tail ? <TerminalBlock content={tail} title={`Control ${k.id} output`} /> : null}
           </Fragment>
@@ -475,13 +474,13 @@ export function BarCard({ bar }: { bar: DerivedBar }) {
 }
 
 /**
- * The lines of a ref at the PR head, with their diff status (RefCode). A ref with no lines is a
+ * The lines of a ref at its commit, with their diff status (RefCode). A ref with no lines is a
  * link to read.
  */
 export function ChangedCode({ refs, codeRef, label, mark }: { refs: Refs; codeRef: CodeRefSpec; label?: string; mark?: { line: number; level: string } }) {
   const r = findRef(refs, codeRef);
   if (r.link_only || !r.excerpt) {
-    return <p className="ve-changed-link" data-ve-code-link>{r.permalink ? <a href={r.permalink}>{label ?? `Read ${codeRef.symbol ?? 'the change'} at the PR head`}</a> : label}<span className="ve-quiet"> Lines {r.start} to {r.end}.</span></p>;
+    return <p className="ve-changed-link" data-ve-code-link>{r.permalink ? <a href={r.permalink}>{label ?? `Read ${codeRef.symbol ?? 'the change'} on GitHub`}</a> : label}<span className="ve-quiet"> Lines {r.start} to {r.end}.</span></p>;
   }
   return <RefCode mark={mark} r={r} refs={refs} />;
 }
@@ -492,7 +491,7 @@ export function maybeRef(refs: Refs, ref: CodeRefSpec) {
 }
 
 const RESULT_LONG: Record<CheckResult, string> = {
-  caught: 'caught its planted bug', missed: 'missed its planted bug', 'cannot-fail': 'cannot fail: it passed on each planted bug', broken: 'fails or does not finish at the PR head',
+  caught: 'caught its planted bug', missed: 'missed its planted bug', 'cannot-fail': 'cannot fail: it passed on each planted bug', broken: 'fails or does not finish',
   'no-bug': 'no planted bug ran', recorded: 'a record of a past run, not run again', checked: 'a mechanical check, no planted bug', none: 'no tool checks it',
 };
 
@@ -512,7 +511,7 @@ export function CheckRow({ data, refs, id, lazy = false, children, hideClaims = 
   const body = children ?? (
     <div data-ve-lint="skip">
       {test && row?.ref ? <ChangedCode codeRef={row.ref} refs={refs} /> : row?.tests.length ? <p>Runs <code>{row.tests.map((t) => t.file + (t.symbol ? `::${t.symbol}` : '')).join(', ')}</code>.</p> : null}
-      {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={'At the PR head: ' + (v.baseline?.status === 'green' ? 'passes' : v.baseline?.status ?? 'not run')} language="bash" /> : null}
+      {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={`At ${sha8(v.baseline?.head ?? data.head)}: ${runWord(v.baseline?.status)}`} language="bash" /> : null}
       {controls.map((k) => (
         <Fragment key={k.id}>
           <p><strong>{k.result?.status === 'red' ? 'The check caught this planted bug.' : k.result?.status === 'green' ? 'The check missed this planted bug.' : `Planted bug: ${k.result?.status ?? 'not run'}.`}</strong> {reader(k.description)}</p>
@@ -578,7 +577,8 @@ export function ClaimBody({ data, refs, claim, explain = {}, said = false, lead 
     if (risk.fix && !repeats(d.weakest?.action, risk.fix) && !repeats(d.flagged?.action, risk.fix)) items.push(['Cheapest fix', <Rich terms={terms} text={risk.fix} />]);
   }
   items.push(['Verdict', <Rich text={c.reason ? `${d.strength}. ${c.reason}` : `${d.strength}.`} />]);
-  if (d.tier) items.push(['Strongest check', `${capital(LADDER_NAMES[d.tier])}.`]);
+  // The evidence row names the strongest check and its result, so a tier row would say it a second time in other words.
+  if (d.tier && !d.weakest) items.push(['Strongest check', `${capital(LADDER_NAMES[d.tier])}.`]);
   if (c.waiver) items.push(['Waived', <Rich text={c.waiver.reason} />, 'warn']);
   items.push(['Source', c.source]);
   for (const id of [c.invariant, ...(c.invariants ?? [])].filter(Boolean)) {
@@ -760,7 +760,7 @@ function verifierMapFigure(data: TrustMap, refs: Refs) {
   const layerVerdict = new Map(layers.map((layer) => [layer, weakest(data.claims.filter((c) => (c.layer ?? 'Claims') === layer).map((c) => verdictOf.get(c.id)))!]));
   const kindIds = new Map([...kinds.keys()].map((kind, i) => [kind, `k${i}`]));
   const layerIds = new Map(layers.map((layer, i) => [layer, `l${i}`]));
-  const tier = (k: { n: number; guess: boolean; recorded: number; checked: number }) => (k.guess ? 'a model judgment' : k.recorded === k.n ? 'recorded, not run again' : k.checked === k.n ? 'mechanical check' : 'run again at the PR head');
+  const tier = (k: { n: number; guess: boolean; recorded: number; checked: number }) => (k.guess ? 'a model judgment' : k.recorded === k.n ? 'recorded, not run again' : k.checked === k.n ? 'mechanical check' : 'run again, not recorded');
   const nodes: Array<Record<string, string>> = [...kinds].map(([kind, k]) => ({ id: kindIds.get(kind)!, label: `${kind} (${k.n})`, shape: KIND_GLYPH[kind] ?? 'rect', detail: tier(k), ...(k.guess || k.recorded === k.n ? { stroke: 'dashed' } : {}) }));
   const covered = new Set([...links.keys()].map((key) => JSON.parse(key)[1]));
   nodes.push(...layers.map((layer) => ({ id: layerIds.get(layer)!, label: layer, tone: TONE[layerVerdict.get(layer)!], detail: `weakest: ${layerVerdict.get(layer)}` })));
@@ -772,7 +772,7 @@ function verifierMapFigure(data: TrustMap, refs: Refs) {
   const used = VERDICTS.filter((v) => [...layerVerdict.values()].includes(v));
   const glyphs = [...new Set([...kinds.keys()].map((k) => KIND_GLYPH[k] ?? 'rect'))].sort((a, b) => Object.keys(GLYPH_FAMILY).indexOf(a) - Object.keys(GLYPH_FAMILY).indexOf(b));
   const legend = [...used.map((v) => ({ label: v, tone: TONE[v] })), ...glyphs.map((g) => ({ label: GLYPH_FAMILY[g], glyph: g })),
-    { label: 'run again at the PR head', stroke: 'solid' }, { label: 'a model judgment, or recorded only', stroke: 'dashed' }] as LegendItem[];
+    { label: 'run again, not recorded', stroke: 'solid' }, { label: 'a model judgment, or recorded only', stroke: 'dashed' }] as LegendItem[];
   return { nodes: nodes as unknown as DiagramNode[], edges: edges as unknown as DiagramEdge[], legend, verdictOf };
 }
 

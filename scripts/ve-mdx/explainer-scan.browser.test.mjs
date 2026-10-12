@@ -151,7 +151,7 @@ test.before(async () => {
   const map = (dir) => JSON.parse(readFileSync(path.join(dir, 'trust-map.json'), 'utf8'));
   const oldDir = path.join(workDir, 'old-shape');
   const minimalDir = path.join(workDir, 'minimal');
-  const [scan, good, badCheck, idInProse, oldShape, minimal, slogan, repeated, ste, noLint, enumeration, plainTerm] = await Promise.all([
+  const [scan, good, badCheck, idInProse, oldShape, minimal, slogan, repeated, ste, noLint, enumeration, glued, plainTerm] = await Promise.all([
     run(['scripts/ve-mdx/export.mjs', SOURCE, '--out', artifact]),
     // One claim joins an old claim: its old id C09 must still find it.
     exportTrustCase(trustDir, (dir) => {
@@ -182,6 +182,13 @@ test.before(async () => {
       ['- The fixture is small, so each chapter is short.', '- The marks on this page explains The words on this page: 2 terms.'],
       ['<h3 className="ve-subsection-title" id="limits-glossary">', `<Disclosure summary="Show all 11 files">\n\n${Array.from({ length: 11 }, (_, i) => `- file ${i + 1}`).join('\n')}\n\n</Disclosure>\n\n<h3 className="ve-subsection-title" id="limits-glossary">`],
     )),
+    // Fields glued into one line: a check name said twice, and a colon-joined list of fields.
+    exportTrustCase(path.join(workDir, 'glued'), (dir) => {
+      const data = map(dir);
+      const v = data.verifiers[0];
+      v.description = `${v.name}. ${v.kind} check, a tool check, proven: ${v.name}: a ${v.kind} check.`;
+      writeFileSync(path.join(dir, 'trust-map.json'), JSON.stringify(data));
+    }),
     // A hand-written mark on an everyday word.
     exportTrustCase(path.join(workDir, 'plain-term'), plantInMdx(
       ['Glossary, Glossed,', 'Glossary, Glossed, Term,'],
@@ -194,7 +201,7 @@ test.before(async () => {
   assert.equal(minimal.status, 0, minimal.out);
   trust = {
     dir: trustDir, html: path.join(trustDir, 'explainer.html'), oldHtml: path.join(oldDir, 'explainer.html'), minimalHtml: path.join(minimalDir, 'explainer.html'),
-    map: map(trustDir), badCheck, idInProse, slogan, repeated, ste, noLint, enumeration, plainTerm,
+    map: map(trustDir), badCheck, idInProse, slogan, repeated, ste, noLint, enumeration, glued, plainTerm,
   };
 });
 
@@ -394,6 +401,10 @@ test('verification explainer: the export checks (data, IDs, copy, STE), the stam
   assert.notEqual(trust.enumeration.status, 0);
   assert.match(trust.enumeration.out, /ch-5: a block joins two titles with a bare word, for example "The marks on this page" explains "The words on this page"/);
   assert.match(trust.enumeration.out, /ch-5: the opener "Show all 11 files" holds only a list of 11 items, with no explanation/);
+  // The export fails on fields glued into one line: a name said twice, and a colon-joined list of fields.
+  assert.notEqual(trust.glued.status, 0);
+  assert.match(trust.glued.out, new RegExp(`a sentence says "${trust.map.verifiers[0].name}" twice, as if fields were glued together`));
+  assert.match(trust.glued.out, /a sentence joins fields with colons/);
   assert.notEqual(trust.noLint.status, 0);
   assert.match(trust.noLint.out, /the STE lint is not at .*no-such-lint\.py\. .*--ste-lint off/);
   // A hand-written mark on an everyday word fails the export.
