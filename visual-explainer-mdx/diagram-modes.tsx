@@ -19,8 +19,21 @@ export type DiagramModesProps = {
   /** `wrap` sets the flow left to right in rows that fit the column (below 600px it is vertical). */
   direction?: 'auto' | 'horizontal' | 'vertical' | 'wrap';
   title?: string;
+  /** Show the title in the figure's header, beside the view switch. */
+  showTitle?: boolean;
   description?: string;
+  /**
+   * `shared` (the default) lays both modes out on one grid, so a box keeps its place when the
+   * reader switches. `independent` lays each mode out for its own labels, so the Simple mode has no
+   * room left for the longer Detailed names: use it when the shared grid leaves dead space.
+   */
+  modes?: 'shared' | 'independent';
 };
+
+/** Each mode on its own grid and in its own frame. */
+function layoutEach(simple: DiagramModeGraph, detailed: DiagramModeGraph, layout: 'flow' | 'tree', direction: Parameters<typeof layoutDiagramModes>[3], wrapWidth = 0) {
+  return { simple: layoutDiagramModes(simple, simple, layout, direction, wrapWidth).simple, detailed: layoutDiagramModes(detailed, detailed, layout, direction, wrapWidth).detailed };
+}
 
 // One choice for the whole page: every DiagramModes on the page follows it, and a reload keeps it.
 const listeners = new Set<() => void>();
@@ -68,7 +81,7 @@ export function useDiagramMode(): [DiagramMode, (mode: DiagramMode) => void] {
  * reader switches. A labelled two-option control switches every DiagramModes on the page, and the
  * page remembers the choice. The switch fades only when the reader allows motion.
  */
-export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'auto', title = 'Diagram', description }: DiagramModesProps) {
+export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'auto', title = 'Diagram', description, modes = 'shared', showTitle = false }: DiagramModesProps) {
   const rawId = useId().replace(/:/g, '');
   const figureRef = useRef<HTMLElement>(null);
   const [mode, setMode] = useDiagramMode();
@@ -76,14 +89,15 @@ export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'a
   // Rows may be a little wider than the column: the figure then shrinks to fit, to 85% at most.
   const wrapWidth = direction === 'wrap' && availableWidth !== null && availableWidth >= 600 ? Math.floor(availableWidth / 0.85) : 0;
   const candidates = useMemo(() => {
+    const lay = modes === 'independent' ? layoutEach : layoutDiagramModes;
     if (direction === 'wrap') {
-      const initial = wrapWidth ? layoutDiagramModes(simple, detailed, layout, 'wrap', wrapWidth) : layoutDiagramModes(simple, detailed, layout, 'vertical');
+      const initial = wrapWidth ? lay(simple, detailed, layout, 'wrap', wrapWidth) : lay(simple, detailed, layout, 'vertical');
       return { initial, horizontal: initial, vertical: initial };
     }
-    const initial = layoutDiagramModes(simple, detailed, layout, direction);
+    const initial = lay(simple, detailed, layout, direction);
     if (direction !== 'auto') return { initial, horizontal: initial, vertical: initial };
-    return { initial, horizontal: layoutDiagramModes(simple, detailed, layout, 'horizontal'), vertical: layoutDiagramModes(simple, detailed, layout, 'vertical') };
-  }, [simple, detailed, layout, direction, wrapWidth]);
+    return { initial, horizontal: lay(simple, detailed, layout, 'horizontal'), vertical: lay(simple, detailed, layout, 'vertical') };
+  }, [simple, detailed, layout, direction, wrapWidth, modes]);
   useLayoutEffect(() => {
     const figure = figureRef.current;
     if (!figure || (direction !== 'auto' && direction !== 'wrap')) return;
@@ -97,23 +111,28 @@ export function DiagramModes({ simple, detailed, layout = 'flow', direction = 'a
   const pair = useMemo(() => {
     if (availableWidth === null || direction !== 'auto') return candidates.initial;
     const { horizontal, vertical } = candidates;
-    return pickDirection(horizontal.detailed, vertical.detailed, availableWidth) === horizontal.detailed ? horizontal : vertical;
-  }, [availableWidth, candidates, direction]);
+    // An independent pair picks the direction for the mode on show, so the Simple mode fits its own frame.
+    const key = modes === 'independent' ? mode : 'detailed';
+    return pickDirection(horizontal[key], vertical[key], availableWidth) === horizontal[key] ? horizontal : vertical;
+  }, [availableWidth, candidates, direction, modes, mode]);
   const diagram = pair[mode];
   const graph = mode === 'simple' ? simple : detailed;
   const scene = useMemo(() => diagramSceneFromLayout(diagram, { id: `diagram-${mode}`, title: `${title} (${mode})`, description }), [diagram, mode, title, description]);
   const label = { simple: 'Simple', detailed: 'Detailed' } as const;
   return (
     <figure className="ve-diagram-shell ve-diagram-has-mobile ve-diagram-modes" data-ve-diagram-modes data-ve-mode={mode} data-ve-shown-variant={variant} ref={figureRef}>
-      <fieldset className="ve-diagram-mode-switch">
-        <legend><span className="ve-visually-hidden">{title}: </span>View</legend>
-        {(['simple', 'detailed'] as const).map((option) => (
-          <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
-            <input checked={mode === option} name={`ve-diagram-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
-            <span>{label[option]}</span>
-          </label>
-        ))}
-      </fieldset>
+      <div className="ve-figure-head">
+        {showTitle ? <p className="ve-figure-title">{title}</p> : null}
+        <fieldset className="ve-diagram-mode-switch">
+          <legend>{title}: view</legend>
+          {(['simple', 'detailed'] as const).map((option) => (
+            <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
+              <input checked={mode === option} name={`ve-diagram-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
+              <span>{label[option]}</span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
       {variant === 'desktop' ? (
         <div aria-label={`${title}, ${label[mode].toLowerCase()} view, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" key={`desktop-${mode}`} role="region" tabIndex={0}>
           <GraphicCanvas className="ve-diagram-canvas" scene={scene} instancePrefix={`${rawId}-${mode}`} style={fittedCanvasStyle(diagram.viewBox)} />

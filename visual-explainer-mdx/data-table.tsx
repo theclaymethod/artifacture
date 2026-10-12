@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Breakable } from './breakable';
 import './data-table.css';
 
 /** Factual-state tones. Each maps to one --ve-status-* ink and soft fill. */
@@ -151,7 +152,7 @@ function TableCell({ value, kind }: { value: DataTableValue; kind: NonNullable<D
   const cell: DataTableCell = isRichCell(value) ? value : { text: String(value) };
   const text = cell.text ?? '';
   const body = cell.status ? <StatusPill tone={cell.status}>{text}</StatusPill>
-    : kind === 'id' ? <code className="ve-cell-id">{text}</code>
+    : kind === 'id' ? <code className="ve-cell-id"><Breakable text={text} /></code>
       : <InlineText text={text} />;
   return (
     <span className="ve-cell">

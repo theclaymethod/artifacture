@@ -1,5 +1,7 @@
-import { Children, cloneElement, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { Children, cloneElement, createContext, isValidElement, type MouseEvent as ReactMouseEvent, type ReactNode, type SyntheticEvent, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { StatusPill, type StatusTone } from './data-table';
+import type React from 'react';
+import { installCalmScroll, landOn } from './calm-scroll';
 import './content-blocks.css';
 
 export type PipelineProps = {
@@ -98,26 +100,6 @@ function writeOpen(id: string, open: boolean) {
   }
 }
 
-// Scroll a deep-link target under its headline, then keep it there while the page above it
-// settles (diagrams and fonts change height after load). Any reader input stops the correction.
-let settling: (() => void) | null = null;
-export function scrollToTarget(target: HTMLElement) {
-  settling?.();
-  // A jump, not a smooth scroll: the correction below would restart a smooth scroll on each resize.
-  const place = () => target.scrollIntoView({ block: 'start', behavior: 'instant' });
-  requestAnimationFrame(place);
-  const observer = new ResizeObserver(place);
-  observer.observe(document.body);
-  const stop = () => {
-    observer.disconnect();
-    for (const name of ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const) window.removeEventListener(name, stop);
-    if (settling === stop) settling = null;
-  };
-  for (const name of ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const) window.addEventListener(name, stop, { passive: true });
-  window.setTimeout(stop, 1500);
-  settling = stop;
-}
-
 function currentHash() {
   try {
     return decodeURIComponent(window.location.hash.slice(1));
@@ -129,7 +111,8 @@ function currentHash() {
 /**
  * A native details block for detail that waits until the reader asks for it. The summary row is
  * a 44px target. A fragment link to the block, or to an element inside it, opens it (and each
- * enclosing Disclosure) and scrolls the target under its headline. Opening a block with an id
+ * enclosing Disclosure, and no other) and scrolls the target under its headline once. Opening or
+ * closing a block keeps its summary where it is on the screen. Opening a block with an id
  * writes its fragment to the address, so the address is a link to it, and the page keeps the
  * open blocks for the session.
  */
@@ -139,7 +122,10 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
   const quiet = useRef(false);
   const [rendered, setRendered] = useState(!lazy || open);
   const containsKey = (contains ?? []).join('\n');
+  // A link to an id in the body of a lazy block: the target exists once the body renders.
+  const awaiting = useRef<boolean | null>(null);
   useEffect(() => {
+    installCalmScroll();
     const element = ref.current;
     if (!element) return;
     if (id && readOpen().has(id) && !element.open) {
@@ -147,7 +133,7 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
       quiet.current = true;
       element.open = true;
     }
-    const reveal = () => {
+    const reveal = (initial: boolean) => {
       const hash = currentHash();
       if (!hash) return;
       const target = document.getElementById(hash);
@@ -158,13 +144,22 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
         quiet.current = true;
         element.open = true;
       }
-      // The innermost block scrolls once every enclosing block is open.
-      if (target && (target === element || target.closest('details') === element)) scrollToTarget(target);
+      // Every enclosing block asks for the same landing; it scrolls once, after they are all open.
+      if (target) landOn(target, initial ? 'load' : 'frame');
+      else awaiting.current = initial;
     };
-    reveal();
-    window.addEventListener('hashchange', reveal);
-    return () => window.removeEventListener('hashchange', reveal);
-  }, [id, containsKey, rendered]);
+    reveal(true);
+    const onHash = () => reveal(false);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [id, containsKey]);
+  useEffect(() => {
+    if (!rendered || awaiting.current === null) return;
+    const initial = awaiting.current;
+    awaiting.current = null;
+    const target = document.getElementById(currentHash());
+    if (target && ref.current?.contains(target)) landOn(target, initial ? 'load' : 'frame');
+  }, [rendered]);
   const onToggle = (event: SyntheticEvent<HTMLDetailsElement>) => {
     const element = ref.current;
     // React passes a nested block's toggle up the tree; each block handles only its own.
@@ -176,9 +171,14 @@ export function Disclosure({ summary, meta, id, open = false, share = false, laz
       quiet.current = false;
       return;
     }
-    // The address follows the reader: an open block is the link to share; a closed one hands it back to its parent.
-    if (element.open && currentHash() !== id) window.history.replaceState(window.history.state, '', `#${id}`);
-    if (!element.open && currentHash() === id) {
+    // The address follows the reader: an open block is the link to share; a closed one hands it
+    // back to its parent. A block that opens around the address's target (the browser opens the
+    // blocks around a fragment before the page runs) keeps the address on that target.
+    const hash = currentHash();
+    const target = hash ? document.getElementById(hash) : null;
+    const holds = Boolean(target && element.contains(target));
+    if (element.open && hash !== id && !holds) window.history.replaceState(window.history.state, '', `#${id}`);
+    if (!element.open && holds) {
       const parent = element.parentElement?.closest<HTMLElement>('details[id], section[id]');
       window.history.replaceState(window.history.state, '', parent ? `#${parent.id}` : window.location.pathname + window.location.search);
     }
@@ -272,6 +272,7 @@ export function Term({ definition, expansion, children }: TermProps) {
         aria-describedby={tipId}
         className="ve-term"
         data-ve-shown={shown ? 'true' : undefined}
+        data-ve-word={typeof children === 'string' && !/\s/.test(children) ? 'true' : undefined}
         onBlur={() => setShown(false)}
         onClick={() => setShown((value) => !value)}
         onFocus={() => setShown(true)}
@@ -288,38 +289,29 @@ export function Term({ definition, expansion, children }: TermProps) {
   );
 }
 
-export type LeadProps = { label?: string; children: ReactNode };
+export type LeadProps = { children: ReactNode };
 
 /**
- * The opener of a level: its answer in plain words, one step larger than body text, with a
- * run-in label. Write one or two sentences that a newcomer can hold.
+ * The opener of a level: its answer, one step larger than body text. Write one or two plain
+ * sentences that a newcomer can hold, with no label in front of them.
  */
-export function Lead({ label = 'In plain words', children }: LeadProps) {
-  return (
-    <div className="ve-lead" data-ve-lead>
-      <LeadBody label={label}>{children}</LeadBody>
-    </div>
-  );
+export function Lead({ children }: LeadProps) {
+  return <div className="ve-lead" data-ve-lead>{children}</div>;
 }
 
-// MDX wraps the text in a paragraph: the label runs into the first one.
-function LeadBody({ label, children }: { label: string; children: ReactNode }) {
+export type AsideProps = { label: string; children: ReactNode };
+
+/** A short note beside the text, at most two sentences. `label` names its subject, such as "Limits". */
+export function Aside({ label, children }: AsideProps) {
   const items = Children.toArray(children);
   const first = items[0];
-  const run = <strong className="ve-lead-label">{label}. </strong>;
-  if (isValidElement<{ children?: ReactNode }>(first) && first.type === 'p') {
-    return <>{cloneElement(first, undefined, run, first.props.children)}{items.slice(1)}</>;
-  }
-  return <p>{run}{children}</p>;
-}
-
-export type AsideProps = { label?: string; children: ReactNode };
-
-/** A short aside, such as why a thing matters. Keep it to two sentences. */
-export function Aside({ label = 'Why this matters', children }: AsideProps) {
+  // MDX wraps the text in a paragraph: the label runs into the first one.
+  const run = <strong className="ve-aside-label">{label}. </strong>;
   return (
     <aside className="ve-aside" data-ve-aside>
-      <LeadBody label={label}>{children}</LeadBody>
+      {isValidElement<{ children?: ReactNode }>(first) && first.type === 'p'
+        ? <>{cloneElement(first, undefined, run, first.props.children)}{items.slice(1)}</>
+        : <p>{run}{children}</p>}
     </aside>
   );
 }
@@ -332,11 +324,72 @@ export type StepProps = { id?: string; children: ReactNode };
  * 1024px the steps sit in two columns, so a five- or six-step run fits one screen.
  */
 export function Steps({ label, children }: StepsProps) {
-  return <ol aria-label={label} className="ve-steps">{children}</ol>;
+  const stepper = useContext(StepperContext);
+  const steps = Children.toArray(children).filter(isValidElement);
+  useEffect(() => { stepper?.setCount(steps.length); }, [stepper, steps.length]);
+  if (!stepper?.live) return <ol aria-label={label} className="ve-steps">{children}</ol>;
+  const at = Math.min(stepper.current, steps.length - 1);
+  // SAFETY: Steps holds Step elements, which take `hidden` and `number`.
+  const shown = steps.map((step, i) => cloneElement(step as ReactElementWithHidden, { hidden: i !== at, number: i + 1 }));
+  return (
+    <div className="ve-stepper-steps">
+      <ol aria-label={label} className="ve-steps" data-ve-stepping>
+        {shown}
+      </ol>
+      <div className="ve-stepper-controls">
+        <button className="ve-stepper-button" data-ve-step-prev disabled={at === 0} onClick={() => stepper.set(at - 1)} type="button">Previous step</button>
+        <p aria-live="polite" className="ve-stepper-count">Step {at + 1} of {steps.length}</p>
+        <button className="ve-stepper-button" data-ve-step-next disabled={at === steps.length - 1} onClick={() => stepper.set(at + 1)} type="button">Next step</button>
+      </div>
+    </div>
+  );
 }
 
-export function Step({ id, children }: StepProps) {
-  return <li className="ve-step" id={id}>{children}</li>;
+type ReactElementWithHidden = React.ReactElement<{ hidden?: boolean; number?: number }>;
+
+export function Step({ id, children, hidden, number }: StepProps & { hidden?: boolean; number?: number }) {
+  return <li className="ve-step" data-ve-step-number={number} hidden={hidden} id={id} value={number}>{children}</li>;
+}
+
+type StepperState = { live: boolean; current: number; count: number; set: (n: number) => void; setCount: (n: number) => void };
+const StepperContext = createContext<StepperState | null>(null);
+
+/** The step state of a StepThrough: the current step (0-based), the count and the switch. Null outside one. */
+export function useStepThrough() {
+  return useContext(StepperContext);
+}
+
+export type StepThroughProps = { label?: string; children: ReactNode };
+
+/**
+ * A run, one step at a time: wrap a numbered ArchitectureDiagram and its Steps. With JavaScript,
+ * the Steps show one step with Previous and Next, and the station with the same number lights up;
+ * a station is also a button to its step. A link to a step opens it. Without JavaScript, each step
+ * shows in sequence.
+ */
+export function StepThrough({ label = 'One run, step by step', children }: StepThroughProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [live, setLive] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setLive(true);
+    const land = () => {
+      const target = document.getElementById(currentHash());
+      const step = target?.closest('.ve-step');
+      const all = ref.current ? [...ref.current.querySelectorAll('.ve-step')] : [];
+      if (step && all.includes(step)) setCurrent(all.indexOf(step));
+    };
+    land();
+    window.addEventListener('hashchange', land);
+    return () => window.removeEventListener('hashchange', land);
+  }, []);
+  const set = (n: number) => setCurrent(Math.max(0, Math.min(n, Math.max(count - 1, 0))));
+  return (
+    <div aria-label={label} className="ve-stepper" data-ve-step={live ? String(current + 1) : undefined} data-ve-stepper ref={ref} role="group">
+      <StepperContext.Provider value={{ live, current, count, set, setCount }}>{children}</StepperContext.Provider>
+    </div>
+  );
 }
 
 export type ChipLinkItem = { label: ReactNode; href: string; tone?: StatusTone; status?: string; meaning?: string };

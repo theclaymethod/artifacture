@@ -3,7 +3,9 @@
 // these components drop in the levels that come from data. Each one validates its input and
 // throws on bad data, so the static pre-render of `ve:export` fails the export.
 // The card plugins/visual-explainer/cards/trust-map.md holds the data contract.
-import { Children, cloneElement, Fragment, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { Children, cloneElement, Fragment, isValidElement, useContext, useEffect, useId, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react';
+import { ChapterContext } from './chapter-context';
+import { isPlainWord, MAX_TERMS_PER_CHAPTER } from './glossary-policy.mjs';
 import { CodeBlock, DiffBlock, TerminalBlock, type DiffRow } from './code-blocks';
 import { ChipLinks, Disclosure, Subsection, Term } from './content-blocks';
 import { DataTable, Legend, StatusPill, ToneMark, type LegendItem, type StatusTone } from './data-table';
@@ -15,9 +17,9 @@ import { chainOrder, StationFlow } from './station-flow';
 import {
   assertAreas, assertRefs, assertTrustMap, brokeOf, capital, changeDiagram, claimAnchor, claimLabel, claimOf, controlWalkthrough, derivedClaim, expansion, findRef,
   FLAG_TONE, GLYPH_FAMILY, glossaryEntries, isAcronym, isTool, KIND_GLYPH, ladder, LADDER_NAMES, lines, MAX_MERGE_ITEMS, MERGE_WORDS,
-  norm, OUTCOME, promiseAnchor, promiseRows, reader, replacedRows, slug, STATE_TONE, strengthOf, strongestTier, STRONG, TIER_WORD,
+  norm, OUTCOME, promiseAnchor, promiseRows, reader, repeats, replacedRows, slug, STATE_TONE, strengthOf, strongestTier, STRONG, TIER_WORD,
   TONE, TrustMapError, VERDICT_MEANING, VERDICTS, VISIBLE_UNCLAIMED, weakest,
-  type Claim, type CodeRefSpec, type Tone, type UnclaimedFile, type Control, type DiagramSpec, type Explain, type GlossaryEntry, type Ready, type Refs, type TrustMap, type Verdict, type Verifier,
+  type Claim, type CheckResult, type CodeRefSpec, type ResolvedRef, type DerivedBar, type DerivedClaim, type Tone, type UnclaimedFile, type Control, type DiagramSpec, type Explain, type GlossaryEntry, type Ready, type Refs, type TrustMap, type Verdict, type Verifier,
 } from './trust-map-rules';
 import './trust-map.css';
 
@@ -28,13 +30,58 @@ type WithRefs = Data & { refs: Refs };
 
 // ---- Glossary terms in running text ----------------------------------------------------------
 
-type TermState = { entries: Array<GlossaryEntry & { expansion: string | null }>; pattern: RegExp | null; seen: Set<string>; expand: boolean; expanded: Set<string> };
+type Base = { entries: Array<GlossaryEntry & { expansion: string | null }>; pattern: RegExp | null };
 
-function termState(data: TrustMap, expand = false): TermState {
+/**
+ * The glossary words of one text block. `seen` holds the words that this chapter has marked before
+ * the block, `expanded` the abbreviations that the page has spelled out before it. A block adds its
+ * own words to `shared` too, so the next block of the chapter (and of the page) skips them.
+ */
+export type TermState = Base & { seen: Set<string>; expanded: Set<string>; expand: boolean; shared: { seen: Set<string>; expanded: Set<string> } };
+
+const BASES = new WeakMap<TrustMap, Base>();
+
+function termBase(data: TrustMap): Base {
+  const hit = BASES.get(data);
+  if (hit) return hit;
   const entries = glossaryEntries(data).map((g) => ({ ...g, expansion: expansion(g.term, g.meaning) }));
-  const forms = [...new Set(entries.flatMap((g) => [g.term, ...(g.aliases ?? [])]).filter((f) => f.length >= 2))].sort((a, b) => b.length - a.length);
+  const forms = [...new Set(entries.flatMap((g) => [g.term, ...(g.aliases ?? [])]).filter((f) => f.length >= 2 && !isPlainWord(f)))].sort((a, b) => b.length - a.length);
   const alts = forms.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-  return { entries, pattern: alts ? new RegExp(`(?<![\\w-])(${alts})(?:s|es)?(?![\\w-])`, 'gi') : null, seen: new Set(), expand, expanded: new Set() };
+  const base = { entries, pattern: alts ? new RegExp(`(?<![\\w-])(${alts})(?:s|es)?(?![\\w-])`, 'gi') : null };
+  BASES.set(data, base);
+  return base;
+}
+
+/** A state of its own, outside any chapter: each word marked once in the block, nothing shared. */
+export function termState(data: TrustMap, expand = false): TermState {
+  const shared = { seen: new Set<string>(), expanded: new Set<string>() };
+  return { ...termBase(data), seen: new Set(), expanded: new Set(), expand, shared };
+}
+
+type PageTerms = { chapters: Map<string, Set<string>>; expanded: Set<string>; blocks: Map<string, { seen: string[]; expanded: string[] }> };
+const PAGES = new WeakMap<TrustMap, PageTerms>();
+
+/**
+ * The glossary words of a block in a chapter: the chapter marks each word once, at its first use,
+ * and at most MAX_TERMS_PER_CHAPTER words; the page spells out each abbreviation once (`expand`).
+ * A block keeps the state that it started with, so a re-render marks the same words.
+ */
+export function useTerms(data: TrustMap, expand = false): TermState {
+  const chapter = useContext(ChapterContext) ?? '';
+  const id = useId();
+  let page = PAGES.get(data);
+  if (!page) {
+    page = { chapters: new Map(), expanded: new Set(), blocks: new Map() };
+    PAGES.set(data, page);
+  }
+  const seen = page.chapters.get(chapter) ?? new Set<string>();
+  page.chapters.set(chapter, seen);
+  let start = page.blocks.get(id);
+  if (!start) {
+    start = { seen: [...seen], expanded: [...page.expanded] };
+    page.blocks.set(id, start);
+  }
+  return { ...termBase(data), seen: new Set(start.seen), expanded: new Set(start.expanded), expand, shared: { seen, expanded: page.expanded } };
 }
 
 function findTerm(state: TermState, word: string) {
@@ -42,18 +89,24 @@ function findTerm(state: TermState, word: string) {
   return state.entries.find((g) => [g.term, ...(g.aliases ?? [])].some((f) => (isAcronym(f) ? f === word : f.toLowerCase() === word.toLowerCase() || norm(f) === w)));
 }
 
-/** Text with a Term at the first use of each glossary word in this level; an abbreviation is spelled out at its first use when `expand` is on. */
+/** Text with a Term at the first use of each glossary word; an abbreviation is spelled out at its first use on the page when `expand` is on. */
 function glossed(text: string, state: TermState | null, key = 't'): ReactNode {
   if (!state?.pattern || !text) return text;
   const out: ReactNode[] = [];
   let last = 0;
   for (const m of text.matchAll(state.pattern)) {
     const hit = findTerm(state, m[1]);
-    if (!hit || state.seen.has(hit.term)) continue;
-    if (m[1] === hit.term || !hit.expansion || state.expanded.has(hit.term)) state.seen.add(hit.term);
+    // The cap holds for the whole chapter: blocks that started from the same snapshot share it.
+    const full = state.seen.size >= MAX_TERMS_PER_CHAPTER || (!state.shared.seen.has(hit?.term ?? '') && state.shared.seen.size >= MAX_TERMS_PER_CHAPTER);
+    if (!hit || isPlainWord(hit.term) || state.seen.has(hit.term) || full) continue;
+    state.seen.add(hit.term);
+    state.shared.seen.add(hit.term);
     if (m.index! > last) out.push(text.slice(last, m.index));
     const spell = state.expand && hit.expansion && m[1] === hit.term && !state.expanded.has(hit.term);
-    if (spell) state.expanded.add(hit.term);
+    if (spell) {
+      state.expanded.add(hit.term);
+      state.shared.expanded.add(hit.term);
+    }
     out.push(<Term definition={`${hit.term}: ${hit.meaning}`} expansion={spell ? hit.expansion! : undefined} key={`${key}-${m.index}`}>{m[0]}</Term>);
     last = m.index! + m[0].length;
   }
@@ -63,7 +116,7 @@ function glossed(text: string, state: TermState | null, key = 't'): ReactNode {
 }
 
 /** STE text from the data: a `backtick` span becomes code, the rest gets reader words and glossary terms. */
-function Rich({ text, terms }: { text: string; terms?: TermState | null }) {
+export function Rich({ text, terms }: { text: string; terms?: TermState | null }) {
   return <>{text.split('`').map((part, i) => (part ? (i % 2 ? <code key={i}>{part}</code> : <Fragment key={i}>{glossed(reader(part), terms ?? null, `r${i}`)}</Fragment>) : null))}</>;
 }
 
@@ -81,13 +134,14 @@ function glossChildren(node: ReactNode, state: TermState): ReactNode {
 }
 
 /**
- * Narrative prose with glossary terms: the first use of each word of the glossary in this block
- * shows its definition on hover, focus or tap. Wrap the Markdown of one level in it. `expand`
- * spells out each abbreviation at its first use; set it on the first level of the page.
+ * Narrative prose with glossary terms: the first use of each word of the glossary in this chapter
+ * shows its definition on hover, focus or tap. Everyday words (glossary-policy.mjs) stay plain, and a
+ * chapter marks at most MAX_TERMS_PER_CHAPTER words. Wrap the Markdown of one level in it. Each
+ * abbreviation is spelled out once, at its first use on the page; `expand={false}` turns that off.
  */
-export function Glossed({ data, expand = false, children }: Data & { expand?: boolean; children: ReactNode }) {
+export function Glossed({ data, expand = true, children }: Data & { expand?: boolean; children: ReactNode }) {
   assertTrustMap(data);
-  return <>{glossChildren(children, termState(data, expand))}</>;
+  return <>{glossChildren(children, useTerms(data, expand))}</>;
 }
 
 // ---- Small pieces ----------------------------------------------------------------------------
@@ -141,7 +195,7 @@ export function MarkKey({ id }: { id?: string }) {
   );
 }
 
-function Defs({ items }: { items: Array<[ReactNode, ReactNode, ('ok' | 'info' | 'warn' | 'err')?]> }) {
+export function Defs({ items }: { items: Array<[ReactNode, ReactNode, ('ok' | 'info' | 'warn' | 'err')?]> }) {
   return (
     <dl className="ve-definition-list">
       {items.map(([term, body, tone], i) => (
@@ -160,12 +214,66 @@ const languageOf = (path: string) => LANGUAGE[path.slice(path.lastIndexOf('.'))]
 /** The lines of a code ref at the PR head, from refs.resolved.json, with a link to them. Code never comes from typed text. */
 export function CodeRef({ refs, ...ref }: { refs: Refs } & CodeRefSpec) {
   if (!refs?.refs) throw new TrustMapError('CodeRef needs refs={refs} (refs.resolved.json)');
-  const r = findRef(refs, ref);
-  const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
+  return <RefCode r={findRef(refs, ref)} refs={refs} />;
+}
+
+type LineKind = 'add' | 'mod' | 'remove' | 'same';
+const LINE_SIGN: Record<LineKind, string> = { add: '+', mod: '~', remove: '-', same: ' ' };
+const LINE_WORD: Record<LineKind, string> = { add: 'added', mod: 'changed', remove: 'removed', same: '' };
+const escapeCode = (text: string) => text.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]!));
+
+/**
+ * The highlighted lines of a ref with their diff status: a gutter with the line number and a sign
+ * (+ added, ~ changed, - removed), and the removed base lines inline. A head line has its number at
+ * the head, a removed line its number at the base. An older refs.resolved.json, with no `changes`,
+ * marks the added lines of `diff.added` only. A "look closely" flag marks its own line.
+ */
+function refLines(refs: Refs, r: ResolvedRef, mark?: { line: number; level: string }) {
+  const range = (spans: Array<[number, number]>) => spans.flatMap(([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i));
+  const changes = r.changes ?? { added: range(refs.diff.added[r.path] ?? []), modified: [], removed: [] };
+  const added = new Set(changes.added);
+  const modified = new Set(changes.modified);
+  const html = r.html ?? `<pre class="shiki"><code>${r.excerpt.split('\n').map((l) => `<span class="line">${escapeCode(l)}</span>`).join('\n')}</code></pre>`;
+  const parts = /^([\s\S]*?<code[^>]*>)([\s\S]*)(<\/code>[\s\S]*)$/.exec(html) ?? ['', '<pre class="shiki"><code>', escapeCode(r.excerpt), '</code></pre>'];
+  const inner = (line: string) => line.replace(/^<span class="line">/, '').replace(/<\/span>$/, '');
+  const row = (kind: LineKind, no: number, code: string, flag = '') =>
+    `<span class="line" data-ve-line="${kind}"${flag}><span class="ve-line-gutter"><span class="ve-line-no">${no}</span><span class="ve-line-sign"${kind === 'same' ? '' : ` title="${LINE_WORD[kind]}"`}>${LINE_SIGN[kind]}</span></span><span class="ve-line-code">${code}</span></span>`;
+  const removedBefore = (test: (at: number) => boolean) => changes.removed.filter((x) => test(x.at)).map((x) => row('remove', x.base, x.html ?? escapeCode(x.text)));
+  const kinds = new Set<LineKind>(changes.removed.length ? ['remove'] : []);
+  const out: string[] = [];
+  parts[2].split('\n').forEach((line, i) => {
+    const no = r.start + i;
+    out.push(...removedBefore((at) => (i === 0 ? at <= no : at === no)));
+    const kind: LineKind = modified.has(no) ? 'mod' : added.has(no) ? 'add' : 'same';
+    kinds.add(kind);
+    out.push(row(kind, no, inner(line), mark && mark.line === no ? ` data-ve-flag="${mark.level}"` : ''));
+  });
+  out.push(...removedBefore((at) => at > r.end));
+  const digits = String(Math.max(r.end, ...changes.removed.map((x) => x.base))).length;
+  return { html: parts[1] + out.join('\n') + parts[3], kinds, digits };
+}
+
+/** The key of the signs that a ref shows: each sign in its own gutter style, with its word. */
+function LineKey({ kinds }: { kinds: Set<LineKind> }) {
+  const shown = (['add', 'mod', 'remove'] as const).filter((k) => kinds.has(k));
+  if (!shown.length) return null;
   return (
-    <div className="ve-code-ref" data-ve-code-ref>
-      <CodeBlock code={r.excerpt} filename={name} html={r.html} language={r.language} />
-      {r.permalink ? <p><a href={r.permalink}>Open these lines at the PR head</a></p> : null}
+    <span className="ve-line-key">
+      {shown.map((k) => <span data-ve-line={k} key={k}><span className="ve-line-sign">{LINE_SIGN[k]}</span> {LINE_WORD[k]}{k === 'remove' ? ' (its number is before the PR)' : ''}</span>)}
+    </span>
+  );
+}
+
+/** A resolved ref as code: its highlighted lines with their diff status, a key of the signs, and a link to the lines at the PR head. */
+function RefCode({ refs, r, mark }: { refs: Refs; r: ResolvedRef; mark?: { line: number; level: string } }) {
+  const name = `${r.path}:${r.start}` + (r.end !== r.start ? `-${r.end}` : '');
+  const created = refs.diff.created.includes(r.path);
+  const { html, kinds, digits } = refLines(refs, r, mark);
+  const some = kinds.has('add') || kinds.has('mod') || kinds.has('remove');
+  return (
+    <div className="ve-code-ref" data-ve-changed={created ? 'new' : some ? 'changed' : 'context'} data-ve-code-lines data-ve-code-ref data-ve-marked={mark ? 'true' : undefined} style={{ '--ve-line-digits': digits } as CSSProperties}>
+      <CodeBlock code={r.excerpt} filename={name} html={html} language={r.language} />
+      <p>{mark ? `Line ${mark.line} is the one to look at. ` : ''}{created ? 'A new file: each line is new. ' : ''}<LineKey kinds={kinds} />{r.permalink ? <a href={r.permalink}>Open these lines at the PR head</a> : null}</p>
     </div>
   );
 }
@@ -208,7 +316,7 @@ export function ArchitectureDiagram({ spec, name = spec?.title, numbered = false
   const number = (g: DiagramSpec['eli5']) => (numbered ? { ...g, nodes: g.nodes.map((n) => (station.has(n.id) ? { ...n, label: `${station.get(n.id)}. ${n.label}` } : n)) } : g);
   if (numbered && chainOrder(graph(spec.eli5))) return <StationFlow description={spec.description} detailed={graph(spec.detailed)} simple={graph(spec.eli5)} title={spec.title} />;
   return (
-    <DiagramModes description={spec.description} detailed={graph(number(spec.detailed))} direction={spec.direction as 'wrap' | undefined} layout={(spec.layout ?? 'flow') as 'flow'} simple={graph(number(spec.eli5))} title={spec.title} />
+    <DiagramModes description={spec.description} detailed={graph(number(spec.detailed))} direction={spec.direction as 'wrap' | undefined} layout={(spec.layout ?? 'flow') as 'flow'} modes={spec.modes} showTitle simple={graph(number(spec.eli5))} title={spec.title} />
   );
 }
 
@@ -251,7 +359,7 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
   const [word, tone, lead] = MERGE_WORDS[form];
   const shown = items.slice(0, MAX_MERGE_ITEMS);
   const rest = items.slice(MAX_MERGE_ITEMS);
-  const terms = termState(data);
+  const terms = useTerms(data);
   return (
     <div data-ve-trust="merge">
       <Subsection id="merge" title="Can you merge it?">
@@ -262,11 +370,15 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
               {shown.map((i) => <li key={i.href + i.text}><a href={i.href}>{i.label}</a>: <Rich terms={terms} text={i.text} /></li>)}
             </ol>
           ) : null}
-          {rest.length ? <p className="ve-verdict-more">And {rest.length} more: {rest.map((i, n) => <Fragment key={i.href + n}>{n ? ', ' : ''}<a href={i.href}>{i.label}</a></Fragment>)}.</p> : null}
+          {rest.length ? (
+            <Disclosure summary={`Show the other ${rest.length}`}>
+              <ol data-merge-more start={shown.length + 1}>{rest.map((i) => <li key={i.href + i.text}><a href={i.href}>{i.label}</a>: <Rich terms={terms} text={i.text} /></li>)}</ol>
+            </Disclosure>
+          ) : null}
         </div>
         {refs.derived.bars ? (
           <div data-ve-bars>
-            <p><strong>Why you can trust it, by evidence bar.</strong> {refs.derived.bars.summary}</p>
+            <p>By evidence bar: {refs.derived.bars.summary}</p>
             <ul className="ve-bar-lines">{refs.derived.bars.story.map((line, n) => <BarLine key={n} line={line} terms={terms} />)}</ul>
           </div>
         ) : null}
@@ -284,7 +396,7 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
       </Subsection>
       {gates ? (
         <Subsection id="story-ready" title="Ready checklist">
-          <p>Four gates decide if the PR is ready to review. Each gate passes or fails.</p>
+          <p>Four gates decide if the PR is ready to review.</p>
           <Defs items={gates.gates.map((g) => [`Gate ${g.n}: ${g.name}`, <Rich key={g.n} text={(g.pass ? 'Pass. ' : 'Fail. ') + g.detail} />, g.pass ? 'ok' : 'err'])} />
           {gates.gates.some((g) => g.items?.length) ? (
             <Disclosure summary="Show what each gate found"><ul>{gates.gates.flatMap((g) => (g.items ?? []).map((item, n) => <li key={`${g.n}-${n}`}>Gate {g.n}: {item}</li>))}</ul></Disclosure>
@@ -299,11 +411,12 @@ export function MergeVerdict({ data, refs }: WithRefs & { explain?: Explain }) {
 export function PromiseChips({ data, refs }: WithRefs) {
   assertTrustMap(data);
   assertRefs(data, refs);
+  const terms = useTerms(data);
   const chips = promiseRows(data, refs).map(({ promise: p, strength }) => ({ label: p.label, href: '#' + promiseAnchor(p.id), tone: TONE[strength], status: strength, meaning: `${strength}: ${VERDICT_MEANING[strength]}` }));
   return (
     <div data-ve-trust="chips">
       <Subsection id="story-promises" title="What the PR promises">
-        <p><Rich terms={termState(data)} text="Each row is one promise, weakest first. The pill shows its weakest claim: a promise is only as strong as that claim. Select a promise to see the proof." /></p>
+        <p><Rich terms={terms} text="Each row is one promise, weakest first. The pill shows the strength of its weakest claim. Select a promise to see the proof." /></p>
         <ChipLinks items={chips} label="The promises, weakest first" />
         <MarkKey />
         <Disclosure id="story-legend" summary="What each verdict means">
@@ -336,7 +449,7 @@ export function WhatChanged({ data, refs, explain = {} }: WithRefs & { explain?:
 
 // ---- Level 4: the promises -------------------------------------------------------------------
 
-function controlEdits(refs: Refs, k: Control) {
+export function controlEdits(refs: Refs, k: Control) {
   const edits = refs.controls?.[k.id];
   if (!edits) throw new TrustMapError(`control ${k.id} has no patch in refs.resolved.json; run understando explain again`);
   return edits.map((e, i) => {
@@ -350,7 +463,7 @@ function controlEdits(refs: Refs, k: Control) {
  * summary and key screenshots, behind a Disclosure. It never plays by itself. With JavaScript off,
  * the browser still shows the poster frame, and a link opens the video.
  */
-function BrowserVideo({ artifact, name }: { artifact: NonNullable<Verifier['artifact']>; name: string }) {
+export function BrowserVideo({ artifact, name }: { artifact: NonNullable<Verifier['artifact']>; name: string }) {
   const shots = artifact.screenshots ?? [];
   return (
     <Disclosure summary={`Show the recorded browser run of ${name}`}>
@@ -366,8 +479,7 @@ function BrowserVideo({ artifact, name }: { artifact: NonNullable<Verifier['arti
 }
 
 function VerifierBlock({ v, data, refs }: { v: Verifier; data: TrustMap; refs: Refs }) {
-  const rung = ladder(v);
-  const label = `${v.name ? v.name + '. ' : ''}${v.kind} check, ${TIER_WORD[v.tier] ?? v.tier}${rung ? `, rung ${rung}` : ''}, ${v.state ?? 'unknown'} (${v.id}):`;
+  const label = `${v.name ? v.name + '. ' : ''}${v.kind} check, ${TIER_WORD[v.tier] ?? v.tier}, ${v.state ?? 'unknown'} (${v.id}):`;
   const m = v.mechanical?.result;
   const b = v.baseline ?? {};
   return (
@@ -396,14 +508,150 @@ function VerifierBlock({ v, data, refs }: { v: Verifier; data: TrustMap; refs: R
 }
 
 /** A risk of explain.json names a claim by its id or by an old id that the claim joins. */
-const risksOf = (data: TrustMap, explain: Explain, c: Claim) => (explain.risks ?? []).filter((r) => r.claims.some((id) => claimOf(data, id) === c));
+export const risksOf = (data: TrustMap, explain: Explain, c: Claim) => (explain.risks ?? []).filter((r) => r.claims.some((id) => claimOf(data, id) === c));
+
+/** The words of a check result, short, for a claim row. */
+const RESULT_SHORT: Record<CheckResult, string> = {
+  caught: 'caught its bug', missed: 'missed its bug', 'cannot-fail': 'cannot fail', broken: 'fails at the head', 'no-bug': 'no planted bug ran',
+  recorded: 'a record, not run again', checked: 'a mechanical check', none: 'no check',
+};
+const RESULT_TONE: Record<CheckResult, StatusTone> = { caught: 'ok', missed: 'warn', 'cannot-fail': 'err', broken: 'err', 'no-bug': 'info', recorded: 'info', checked: 'info', none: 'err' };
+
+const barTone = (b: DerivedBar): StatusTone => (b.met ? 'ok' : b.risky ? 'err' : 'warn');
+
+/** The bar of a claim as a chip: "Bar: proof · below". */
+export function BarChip({ bar }: { bar: DerivedBar }) {
+  return <span data-ve-bar-chip={bar.met ? 'met' : 'below'}><StatusPill meaning={bar.text} tone={barTone(bar)}>{bar.met ? `Meets bar: ${bar.need}` : `Below bar: ${bar.need}`}</StatusPill></span>;
+}
+
+/** The check of a claim that a reviewer reads first: a flagged check, else a weakest check that did not catch its bug. */
+function claimNote(d: DerivedClaim): string | null {
+  if (d.flagged) return d.flagged.text.replace(/ Fix it or drop it\.$/, '');
+  if (d.weakest && d.weakest.result !== 'caught' && d.weakest.result !== 'none') return `${capital(d.weakest.name)}: ${RESULT_SHORT[d.weakest.result]}.`;
+  return null;
+}
 
 /**
- * One claim: its name as the summary row; the derived check summary and the weakest check with
- * its action; the plain what and proof; the statements that it joins; the code from resolved
- * refs; then each check, collapsed, with its controls as real diffs.
+ * One claim in one line, the same everywhere a claim shows: its strength, its name (a link to its
+ * one detail), its bar chip, one square per check (filled when the check caught its bug), and the
+ * flagged or weakest check. The full detail of a claim shows once on the page.
  */
-export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { claim: Claim | string; explain?: Explain }) {
+export function ClaimRow({ data, refs, claim }: WithRefs & { claim: Claim | string }) {
+  const c = typeof claim === 'string' ? claimOf(data, claim) : claim;
+  if (!c) throw new TrustMapError(`ClaimRow names the claim ${String(claim)}, which the map does not have`);
+  const d = derivedClaim(refs, c.id);
+  const note = claimNote(d);
+  const tools = d.checks.filter((x) => x.kind !== 'none');
+  return (
+    <div className="ve-claim-row" data-ve-claim-row={slug(c.id)} data-ve-tone={TONE[d.strength]}>
+      <VerdictPill verdict={d.strength} />
+      <a className="ve-claim-row-name" href={'#' + claimAnchor(c.id)}><Rich text={capital(claimLabel(c))} /></a>
+      {d.bar ? <BarChip bar={d.bar} /> : null}
+      <span className="ve-claim-row-checks">
+        {tools.length ? <CountMarks label={d.summary} runs={tools.map((x) => ({ n: 1, tone: RESULT_TONE[x.result], label: `${capital(x.name)}: ${RESULT_SHORT[x.result]}`, hollow: x.result !== 'caught' && x.result !== 'missed' && x.result !== 'cannot-fail' }))} /> : null}
+        <span>{tools.length ? `${tools.length} ${tools.length === 1 ? 'check' : 'checks'}` : 'No check'}</span>
+      </span>
+      {note ? <span className="ve-claim-row-note" data-ve-tone={d.flagged ? 'warn' : RESULT_TONE[d.weakest!.result]}><Rich text={note} /></span> : null}
+    </div>
+  );
+}
+
+/**
+ * The evidence bar of a claim as a card beside its detail: the state with its mark, a gauge (a
+ * full bar when it is met, an empty dashed bar when it is below), the surface and the bar, and why.
+ */
+export function BarCard({ bar }: { bar: DerivedBar }) {
+  const tone = barTone(bar);
+  return (
+    <div className="ve-bar-card" data-ve-bar={bar.met ? 'met' : 'below'} data-ve-tone={tone}>
+      <p className="ve-bar-card-state"><ToneMark tone={tone} /> {bar.met ? 'Meets its bar' : 'Below its bar'}</p>
+      <span aria-hidden="true" className="ve-bar-gauge" />
+      <p><span className="ve-guide-key">Surface</span> {capital(bar.surfaces.join(' and '))}{bar.risky ? ', risky' : ''}</p>
+      <p><span className="ve-guide-key">Bar</span> {capital(bar.need)}</p>
+      <p className="ve-bar-card-why">{bar.met ? 'Each part of the claim has this evidence.' : capital(bar.why) + '.'}</p>
+    </div>
+  );
+}
+
+/**
+ * The lines of a ref at the PR head, as the diff spine shows them, with their diff status (RefCode).
+ * A ref with no lines is a link to read.
+ */
+export function ChangedCode({ refs, codeRef, label, mark }: { refs: Refs; codeRef: CodeRefSpec; label?: string; mark?: { line: number; level: string } }) {
+  const r = findRef(refs, codeRef);
+  if (r.link_only || !r.excerpt) {
+    return <p className="ve-changed-link" data-ve-code-link>{r.permalink ? <a href={r.permalink}>{label ?? `Read ${codeRef.symbol ?? 'the change'} at the PR head`}</a> : label}<span className="ve-quiet"> Lines {r.start} to {r.end}.</span></p>;
+  }
+  return <RefCode mark={mark} r={r} refs={refs} />;
+}
+
+/** A resolved ref, or null when the build did not resolve it (an older refs.resolved.json). */
+export function maybeRef(refs: Refs, ref: CodeRefSpec) {
+  try { return findRef(refs, ref); } catch { return null; }
+}
+
+const RESULT_LONG: Record<CheckResult, string> = {
+  caught: 'caught its planted bug', missed: 'missed its planted bug', 'cannot-fail': 'cannot fail: it passed on each planted bug', broken: 'fails or does not finish at the PR head',
+  'no-bug': 'no planted bug ran', recorded: 'a record of a past run, not run again', checked: 'a mechanical check, no planted bug', none: 'no tool checks it',
+};
+
+/**
+ * One check in one row, the same everywhere a check shows: its result mark, its name and kind, the
+ * claims and parts that it backs, and what its planted bug did. Its test and its planted bugs wait
+ * behind the row; `lazy` renders them only when the reviewer opens it. `children` replaces that body.
+ */
+export function CheckRow({ data, refs, id, lazy = false, children, hideClaims = false }: WithRefs & { id: string; lazy?: boolean; children?: ReactNode; hideClaims?: boolean }) {
+  const row = refs.derived.checks?.[id];
+  const v = data.verifiers.find((x) => x.id === id);
+  if (!v) throw new TrustMapError(`CheckRow names the check ${id}, which the map does not have`);
+  const result: CheckResult = row?.result ?? (v.kind === 'none' ? 'none' : 'no-bug');
+  const tone = RESULT_TONE[result];
+  const controls = data.controls.filter((k) => k.verifier === id);
+  const test = row?.ref ? maybeRef(refs, row.ref) : null;
+  const body = children ?? (
+    <div data-ve-lint="skip">
+      {test && row?.ref ? <ChangedCode codeRef={row.ref} refs={refs} /> : row?.tests.length ? <p>Runs <code>{row.tests.map((t) => t.file + (t.symbol ? `::${t.symbol}` : '')).join(', ')}</code>.</p> : null}
+      {v.command ? <CodeBlock code={'$ ' + v.command.argv.join(' ')} filename={'At the PR head: ' + (v.baseline?.status === 'green' ? 'passes' : v.baseline?.status ?? 'not run')} language="bash" /> : null}
+      {controls.map((k) => (
+        <Fragment key={k.id}>
+          <p><strong>{k.result?.status === 'red' ? 'The check caught this planted bug.' : k.result?.status === 'green' ? 'The check missed this planted bug.' : `Planted bug: ${k.result?.status ?? 'not run'}.`}</strong> {reader(k.description)}</p>
+          {controlEdits(refs, k)}
+        </Fragment>
+      ))}
+    </div>
+  );
+  const name = capital(row?.name ?? v.name ?? id);
+  return (
+    <div className="ve-check-row" data-ve-check-row={slug(id)} data-ve-result={result} data-ve-tone={tone}>
+      <Disclosure lazy={lazy} meta={id} summary={
+        <span className="ve-check-row-line">
+          <ToneMark tone={tone} />
+          <span className="ve-check-row-name">{name}</span>
+          <span className="ve-check-row-kind">{v.kind}</span>
+          <span className="ve-check-row-result">{RESULT_LONG[result]}</span>
+        </span>
+      }>
+        {body}
+      </Disclosure>
+      {!hideClaims && row?.claims.length ? (
+        <p className="ve-check-row-backs">Backs {row.claims.map((c, i) => <Fragment key={c.id}>{i ? ', ' : ''}<a href={'#' + claimAnchor(c.id)}>{c.name}</a>{c.parts.length ? <span className="ve-quiet"> (the part: {c.parts.map((t) => t.replace(/`/g, '').replace(/\.$/, '')).join('; ')})</span> : null}</Fragment>)}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** The summary row of a claim: its strength, its name and its bar chip. */
+export function ClaimSummary({ data, refs, claim }: WithRefs & { claim: Claim }) {
+  const d = derivedClaim(refs, claim.id);
+  return <><VerdictPill verdict={d.strength} /> <Rich text={capital(claimLabel(claim))} />{d.bar ? <> <BarChip bar={d.bar} /></> : null}</>;
+}
+
+/**
+ * The body of one claim: the derived check summary and the weakest check with its action; the
+ * plain what and proof; the bar card; the statements that it joins; its code as the diff spine
+ * shows it; then each check, collapsed, with its controls as real diffs.
+ */
+export function ClaimBody({ data, refs, claim, explain = {}, said = false }: WithRefs & { claim: Claim | string; explain?: Explain; said?: boolean }) {
   assertTrustMap(data);
   assertRefs(data, refs);
   const c = typeof claim === 'string' ? data.claims.find((x) => x.id === claim) : claim;
@@ -411,58 +659,80 @@ export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { cl
   const d = derivedClaim(refs, c.id);
   const risk = risksOf(data, explain, c)[0];
   const plain = c.plain ?? { what: c.text, proof: c.reason ?? '' };
-  const terms = termState(data);
+  const terms = useTerms(data);
   const items: Array<[ReactNode, ReactNode, ('ok' | 'warn' | 'err' | undefined)?]> = [];
-  if (d.bar) items.push(['Evidence bar', <span data-ve-bar={d.bar.met ? 'met' : 'below'}>{d.bar.text}{d.bar.mixed ? ` The claim touches ${d.bar.surfaces.join(' and ')} code: set its surface.` : ''}</span>, d.bar.met ? 'ok' : d.bar.risky ? 'err' : 'warn']);
   items.push(['Checks', <span data-ve-checks>{d.summary}</span>]);
   if (d.weakest) {
     items.push([d.parts?.length ? 'Weakest part' : 'Evidence', <span data-ve-weakest><Rich text={d.weakest.text} /> <span data-ve-action><Rich text={d.weakest.action} /></span></span>, d.weakest.result === 'caught' && STRONG.includes(d.weakest.strength as Verdict) ? 'ok' : 'warn']);
   }
   if (d.flagged) items.push(['Flagged check', <span data-ve-flagged><Rich text={d.flagged.text} /> <span data-ve-action><Rich text={d.flagged.action} /></span></span>, 'warn']);
-  if (plain.what && c.name) items.push(['What it says', <Rich terms={terms} text={plain.what} />]);
+  // `said`: the item around the body says what the claim says already.
+  if (plain.what && c.name && !said) items.push(['What it says', <Rich terms={terms} text={plain.what} />]);
   if (plain.proof) items.push(['How it is proven', <Rich terms={terms} text={plain.proof} />]);
   if (plain.warning) items.push(['Warning', <Rich terms={terms} text={plain.warning} />, 'warn']);
   if (risk && !STRONG.includes(d.strength)) {
     items.push(['Why it is weak', <Rich terms={terms} text={risk.why} />, 'warn']);
-    if (risk.fix) items.push(['Cheapest fix', <Rich terms={terms} text={risk.fix} />]);
+    // The action of a weak check names its cheapest fix already: say it once.
+    if (risk.fix && !repeats(d.weakest?.action, risk.fix) && !repeats(d.flagged?.action, risk.fix)) items.push(['Cheapest fix', <Rich terms={terms} text={risk.fix} />]);
   }
   items.push(['Verdict', <Rich text={c.reason ? `${d.strength}. ${c.reason}` : `${d.strength}.`} />]);
-  if (d.tier) items.push(['Tier', `${d.tier}: ${LADDER_NAMES[d.tier]}.`]);
+  if (d.tier) items.push(['Strongest check', `${capital(LADDER_NAMES[d.tier])}.`]);
   if (c.waiver) items.push(['Waived', <Rich text={c.waiver.reason} />, 'warn']);
   items.push(['Source', c.source]);
   for (const id of [c.invariant, ...(c.invariants ?? [])].filter(Boolean)) {
     const inv = (data.invariants ?? []).find((i) => i.id === id);
     if (!inv) continue;
-    const confirmed = inv.author === 'user' && inv.status === 'accepted';
-    items.push(['Invariant', (confirmed ? 'Confirmed by the user: ' : 'Proposed, not confirmed by the user: ') + inv.text, confirmed ? undefined : 'warn']);
+    const accepted = inv.author === 'user' && inv.status === 'accepted';
+    items.push(['Invariant', (accepted ? 'Accepted by the user: ' : 'Proposed, not accepted by the user: ') + inv.text, accepted ? undefined : 'warn']);
   }
   const verifiers = new Map(data.verifiers.map((v) => [v.id, v]));
+  const evals = (refs.derived.verify.evals ?? []).filter((e) => d.checks.some((x) => x.id === e.check));
   const n = d.checks.length;
   return (
-    <Disclosure id={claimAnchor(c.id)} meta={c.id} share summary={<><VerdictPill verdict={d.strength} /> <Rich text={capital(claimLabel(c))} />{d.bar ? <> <span data-ve-bar-chip={d.bar.met ? 'met' : 'below'}><StatusPill meaning={d.bar.text} tone={d.bar.met ? 'ok' : d.bar.risky ? 'err' : 'warn'}>{d.bar.met ? `Meets bar: ${d.bar.need}` : `Below bar: ${d.bar.need}`}</StatusPill></span></> : null}</>}>
-      <div data-ve-trust="claim">
-        {(c.legacy_ids ?? []).filter((old) => old !== c.id).map((old) => <span data-ve-legacy-anchor id={claimAnchor(old)} key={old} />)}
+    <div data-ve-trust="claim">
+      {(c.legacy_ids ?? []).filter((old) => old !== c.id).map((old) => <span data-ve-legacy-anchor id={claimAnchor(old)} key={old} />)}
+      <div className="ve-claim-evidence">
         <Defs items={items} />
-        {c.parts?.length ? (
-          <Disclosure summary={`Show the ${c.parts.length} statements that this claim joins`}>
-            <ul data-ve-claim-parts>{c.parts.map((part) => {
-              const row = d.parts?.find((x) => x.id === part.id);
-              return <li key={part.id}>{row ? <><VerdictPill verdict={row.strength} /> </> : null}<Rich text={part.text} />{row?.check ? ` (${row.check})` : ''}</li>;
-            })}</ul>
-          </Disclosure>
-        ) : null}
-        {(c.code ?? []).map((ref, i) => <CodeRef key={i} refs={refs} {...ref} />)}
-        {n ? (
-          <Disclosure summary={n === 1 ? 'Show the check' : `Show the ${n} checks`}>
-            {d.checks.map((check) => {
-              if (check.kind === 'none') return <p data-ve-lint="skip" key={check.id}><strong>{capital(check.name)} ({check.id}).</strong> No tool checks this claim.</p>;
-              const v = verifiers.get(check.id);
-              if (!v) throw new TrustMapError(`the derived block names the check ${check.id} of the claim ${c.id}, which the map does not have; run understando explain again`);
-              return <VerifierBlock data={data} key={v.id} refs={refs} v={v} />;
-            })}
-          </Disclosure>
-        ) : <p><em>No check backs this claim.</em></p>}
+        {d.bar ? <BarCard bar={d.bar} /> : null}
       </div>
+      {evals.length ? (
+        <ul className="ve-eval-lines" data-ve-evals>{evals.map((e) => (
+          <li data-ve-eval={e.flagged ? 'flagged' : 'degraded'} key={e.check}><strong>{capital(e.name)}.</strong> <Rich text={e.text} />{e.action ? <> <span data-ve-action><Rich text={e.action} /></span></> : null}</li>
+        ))}</ul>
+      ) : null}
+      {c.parts?.length ? (
+        <Disclosure summary={`Show the ${c.parts.length} statements that this claim joins`}>
+          <ul data-ve-claim-parts>{c.parts.map((part) => {
+            const row = d.parts?.find((x) => x.id === part.id);
+            return <li key={part.id}>{row ? <><VerdictPill verdict={row.strength} /> </> : null}<Rich text={part.text} />{row?.check ? ` (${row.check})` : ''}</li>;
+          })}</ul>
+        </Disclosure>
+      ) : null}
+      {(c.code ?? []).map((ref, i) => <ChangedCode codeRef={ref} key={i} refs={refs} />)}
+      {n ? (
+        <div className="ve-check-rows" data-ve-claim-checks>
+          <p className="ve-check-rows-title">{n === 1 ? 'Its check' : `Its ${n} checks`}</p>
+          {d.checks.map((check) => {
+            if (check.kind === 'none') return <p data-ve-lint="skip" key={check.id}><strong>{capital(check.name)} ({check.id}).</strong> No tool checks this claim.</p>;
+            const v = verifiers.get(check.id);
+            if (!v) throw new TrustMapError(`the derived block names the check ${check.id} of the claim ${c.id}, which the map does not have; run understando explain again`);
+            return <CheckRow data={data} hideClaims id={v.id} key={v.id} refs={refs}><VerifierBlock data={data} refs={refs} v={v} /></CheckRow>;
+          })}
+        </div>
+      ) : <p><em>No check backs this claim.</em></p>}
+    </div>
+  );
+}
+
+/** One claim, collapsed: its summary row, then its body. This is the one full detail of the claim on the page. */
+export function ClaimDetail({ data, refs, claim, explain = {} }: WithRefs & { claim: Claim | string; explain?: Explain }) {
+  assertTrustMap(data);
+  assertRefs(data, refs);
+  const c = typeof claim === 'string' ? data.claims.find((x) => x.id === claim) : claim;
+  if (!c) throw new TrustMapError(`ClaimDetail names the claim ${String(claim)}, which the map does not have`);
+  return (
+    <Disclosure id={claimAnchor(c.id)} meta={c.id} share summary={<ClaimSummary claim={c} data={data} refs={refs} />}>
+      <ClaimBody claim={c} data={data} explain={explain} refs={refs} />
     </Disclosure>
   );
 }
@@ -476,7 +746,7 @@ export function PromiseList({ data, refs, explain = {} }: WithRefs & { explain?:
   assertTrustMap(data);
   assertRefs(data, refs);
   const risks = explain.risks ?? [];
-  const terms = termState(data);
+  const terms = useTerms(data);
   for (const r of risks) for (const id of r.claims) if (!claimOf(data, id)) throw new TrustMapError(`explain.json risks name the claim ${id}, which the map does not have`);
   const rows = promiseRows(data, refs);
   return (
@@ -488,13 +758,13 @@ export function PromiseList({ data, refs, explain = {} }: WithRefs & { explain?:
           const word = count === 1 ? 'claim' : 'claims';
           const defs: Array<[ReactNode, ReactNode, ('warn' | undefined)?]> = [];
           if (p.reviewer_action) defs.push(['Reviewer action', <Rich terms={terms} text={p.reviewer_action} />, STRONG.includes(strength) ? undefined : 'warn']);
-          const fixes: Array<[ReactNode, ReactNode]> = [];
+          const fixes: Array<[ReactNode, ReactNode, string?]> = [];
           for (const c of claims) {
             const fix = risksOf(data, explain, c).find((r) => r.fix)?.fix;
-            if (fix && !STRONG.includes(strengthOf(refs, c.id))) fixes.push(['Cheapest fix', <><Rich terms={terms} text={fix} /> <a href={'#' + claimAnchor(c.id)}>Open the claim</a></>]);
+            if (fix && !STRONG.includes(strengthOf(refs, c.id)) && !repeats(p.reviewer_action, fix) && !fixes.some(([, , f]) => repeats(f, fix))) fixes.push(['Cheapest fix', <><Rich terms={terms} text={fix} /> <a href={'#' + claimAnchor(c.id)}>Open the claim</a></>, fix]);
           }
-          defs.push(...fixes.slice(0, 1));
-          const moreFixes = fixes.slice(1);
+          defs.push(...fixes.slice(0, 1).map(([a, b]) => [a, b] as [ReactNode, ReactNode]));
+          const moreFixes = fixes.slice(1).map(([a, b]) => [a, b] as [ReactNode, ReactNode]);
           const met = refs.derived.promises.find((x) => x.id === p.id)?.bars_met;
           return (
             <article className="ve-card ve-promise" data-ve-tone={TONE[strength]} key={p.id}>
@@ -545,7 +815,7 @@ function ReadingGuide({ data, refs, rows, terms }: WithRefs & { rows: ReturnType
     <Subsection id="promises-guide" title="How to read a promise">
       <div className="ve-guide">
         <figure className="ve-guide-step" data-ve-guide="strength">
-          <figcaption><strong>A promise is as strong as its weakest claim.</strong> <Rich terms={terms} text={`Take "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. The weakest is ${claimLabel(weakestClaim)}, so the promise is ${first.strength}.`} /></figcaption>
+          <figcaption><Rich terms={terms} text={`Take "${first.promise.label}". Its ${first.count} ${first.count === 1 ? 'claim' : 'claims'}: ${first.tally}. The weakest is ${claimLabel(weakestClaim)}, so the promise is ${first.strength}.`} /></figcaption>
           <ul className="ve-guide-claims">
             {first.claims.map((c) => {
               const v = strengthOf(refs, c.id);
@@ -620,22 +890,6 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
   const promises = new Map(data.promises.map((p) => [p.id, p]));
   const tools = data.verifiers.filter(isTool);
   const { nodes, edges, legend, verdictOf } = verifierMapFigure(data, refs);
-  const flags = new Map<string, Array<{ label: string; tone: string }>>();
-  for (const f of data.flags ?? []) flags.set(f.subject, [...(flags.get(f.subject) ?? []), { label: f.flag, tone: FLAG_TONE[f.flag] ?? 'warn' }]);
-  const columns = [
-    { key: 'id', label: 'Verifier', kind: 'id' as const, width: '5.5rem' }, { key: 'kind', label: 'Kind', kind: 'tags' as const, width: '9.5rem' },
-    { key: 'state', label: 'State', kind: 'status' as const, width: '8.5rem' }, { key: 'claims', label: 'Claims', kind: 'tags' as const, width: '9rem' }, { key: 'controls', label: 'Controls' },
-  ];
-  const rows = tools.map((v) => ({
-    id: `verifier-${slug(v.id)}`,
-    cells: {
-      id: { text: v.id, ...(flags.has(v.id) ? { badges: flags.get(v.id) } : {}) },
-      kind: { badges: [{ label: v.kind, glyph: KIND_GLYPH[v.kind] ?? 'rect', stroke: v.tier === 'guess' ? 'dashed' : 'solid' }] },
-      state: { text: v.state ?? 'unknown', status: STATE_TONE[v.state ?? ''] ?? 'neutral' },
-      claims: { badges: v.claims.map((id) => ({ label: id, tone: TONE[verdictOf.get(id)!] ?? 'neutral' })) },
-      controls: data.controls.filter((k) => k.verifier === v.id).map((k) => `${k.id} ${brokeOf(refs, k.id)} ${k.result?.status === 'red' ? 'Caught the bug' : k.result?.status === 'green' ? 'Missed the bug' : capital(k.result?.status ?? 'not run')}.`).join(' ') || undefined,
-    },
-  }));
   const caughtColumns = [
     { key: 'check', label: 'Check', width: '12rem' }, { key: 'claim', label: 'Claim', width: '12rem' }, { key: 'broke', label: 'What we broke' },
     { key: 'result', label: 'Result', kind: 'status' as const, width: '9rem' }, { key: 'ref', label: 'Ref', kind: 'id' as const, width: '7rem' },
@@ -653,7 +907,7 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
       <Subsection id="verifiers-kinds" title="Three ways to break the code">
         <dl className="ve-definition-list">
           <dt id="verifiers-planted">Planted bugs and mutants (backend)</dt>
-          <dd data-ve-planted>{verify.result}</dd>
+          <dd data-ve-planted>We change one line of the code, for example a condition or a type, and run the check again.</dd>
           <dt id="verifiers-evals">Degraded variants for evals (LLM)</dt>
           <dd>
             {verify.evals?.length ? (
@@ -710,7 +964,7 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
           );
         })}
       </Subsection>
-      <p data-ve-tiers><strong>The checks per tier.</strong> {verify.tiers.map((t) => `${t.label}: ${t.n}`).join(' · ')}</p>
+      <p data-ve-tiers>The checks per tier: {verify.tiers.map((t) => `${t.label}: ${t.n}.`).join(' ')}</p>
       {(explain.control_walkthroughs ?? []).map((spec, i) => {
         const motion = controlWalkthrough(data, refs, spec);
         const key = [...(['caught', 'missed'] as const).map((o) => ({ label: OUTCOME[o][0], tone: OUTCOME[o][1] })), { label: 'planted bug', glyph: 'oval' }, { label: 'check', glyph: 'rect' }] as LegendItem[];
@@ -725,10 +979,34 @@ export function VerifyTheVerifiers({ data, refs, explain = {} }: WithRefs & { ex
         <p>Each kind of check, with an arrow to each group of claims that it backs. A group takes the colour and the word of its weakest claim. A group with no check is a Gap, and the box marked no verifier points to it.</p>
         <DiagramCanvas description="Each kind of check and the claim groups it backs, with every claim group shown." edges={edges} layout="flow" legend={legend} nodes={nodes} title="From checks to claims" />
       </Disclosure>
-      <Disclosure contains={rows.map((r) => r.id)} id="verifiers-table" summary={`Show all ${tools.length} checks`}>
-        <DataTable columns={columns} label="Verifiers" rows={rows as never} />
-      </Disclosure>
+      <VerifierTable data={data} id="verifiers-table" refs={refs} />
     </div>
+  );
+}
+
+/** Every check in one table, collapsed: its kind, its state, the claims it backs and what each planted bug did. */
+export function VerifierTable({ data, refs, id }: WithRefs & { id: string }) {
+  const tools = data.verifiers.filter(isTool);
+  const flags = new Map<string, Array<{ label: string; tone: string }>>();
+  for (const f of data.flags ?? []) flags.set(f.subject, [...(flags.get(f.subject) ?? []), { label: f.flag, tone: FLAG_TONE[f.flag] ?? 'warn' }]);
+  const columns = [
+    { key: 'id', label: 'Verifier', kind: 'id' as const, width: '5.5rem' }, { key: 'kind', label: 'Kind', kind: 'tags' as const, width: '9.5rem' },
+    { key: 'state', label: 'State', kind: 'status' as const, width: '8.5rem' }, { key: 'claims', label: 'Claims', kind: 'tags' as const, width: '9rem' }, { key: 'controls', label: 'Controls' },
+  ];
+  const rows = tools.map((v) => ({
+    id: `verifier-${slug(v.id)}`,
+    cells: {
+      id: { text: v.id, ...(flags.has(v.id) ? { badges: flags.get(v.id) } : {}) },
+      kind: { badges: [{ label: v.kind, glyph: KIND_GLYPH[v.kind] ?? 'rect', stroke: v.tier === 'guess' ? 'dashed' : 'solid' }] },
+      state: { text: v.state ?? 'unknown', status: STATE_TONE[v.state ?? ''] ?? 'neutral' },
+      claims: { badges: v.claims.map((cid) => ({ label: cid, tone: refs.derived.claims[cid] ? TONE[strengthOf(refs, cid)] : 'neutral' })) },
+      controls: data.controls.filter((k) => k.verifier === v.id).map((k) => `${k.id} ${brokeOf(refs, k.id)} ${k.result?.status === 'red' ? 'Caught the bug' : k.result?.status === 'green' ? 'Missed the bug' : capital(k.result?.status ?? 'not run')}.`).join(' ') || undefined,
+    },
+  }));
+  return (
+    <Disclosure contains={rows.map((r) => r.id)} id={id} summary={`Show all ${tools.length} checks`}>
+      <DataTable columns={columns} label="Verifiers" rows={rows as never} />
+    </Disclosure>
   );
 }
 
@@ -807,12 +1085,15 @@ export function Invariants({ data }: Data) {
   assertTrustMap(data);
   const rows = (data.invariants ?? []).filter((i) => i.status === 'accepted' || i.status === 'proposed');
   if (!rows.length) return null;
+  const accepted = (i: (typeof rows)[number]) => i.author === 'user' && i.status === 'accepted';
+  const n = rows.filter(accepted).length;
   return (
     <div data-ve-trust="invariants">
       <Subsection id="why-invariants" title="The invariants">
-        <p>An invariant is a rule that must always hold. Only a rule that the user confirmed can make a claim Proven or Formal.</p>
+        <p>An invariant is a rule that must always hold. Only a rule that the user accepted can make a claim Proven or Formal.</p>
         <Disclosure summary={`Show the ${rows.length} invariants`}>
-          <ul>{rows.map((i) => <li key={i.id}>{(i.author === 'user' && i.status === 'accepted' ? 'Confirmed by the user: ' : 'Proposed, not confirmed: ') + i.text}</li>)}</ul>
+          <p>{n === rows.length ? 'The user accepted each of these rules, so each one can back a claim.' : `The user accepted ${n} of these rules. A proposed rule cannot make a claim Proven or Formal until the user accepts it.`}</p>
+          <ul>{rows.map((i) => <li key={i.id}>{(accepted(i) ? 'Accepted by the user: ' : 'Proposed, not accepted: ') + i.text}</li>)}</ul>
         </Disclosure>
       </Subsection>
     </div>
@@ -821,15 +1102,30 @@ export function Invariants({ data }: Data) {
 
 // ---- Glossary --------------------------------------------------------------------------------
 
-/** Each word of the map's glossary, then understando's own words. A word in the text shows the same definition. */
-export function Glossary({ data }: Data) {
+/**
+ * Each word of the map's glossary, then understando's own words. A word in the text shows the same
+ * definition. With `only="used"`, the running page keeps only the words that its text uses (the
+ * server render and the no-JS page keep them all, so the export checks see each one).
+ */
+export function Glossary({ data, only }: Data & { only?: 'used' }) {
   assertTrustMap(data);
   const entries = glossaryEntries(data);
+  const [used, setUsed] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    if (only !== 'used') return;
+    const main = document.querySelector('main');
+    const own = document.querySelector('[data-ve-glossary]');
+    // The page text without the glossary itself (textContent reads hidden chapters too).
+    const text = (main?.textContent ?? '').replace(own?.textContent ?? '', ' ');
+    const has = (form: string) => (isAcronym(form) ? new RegExp(`(?<![\\w-])${form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?(?![\\w-])`) : new RegExp(`(?<![\\w-])${form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:s|es)?(?![\\w-])`, 'i')).test(text);
+    setUsed(new Set(entries.filter((g) => [g.term, ...(g.aliases ?? [])].some(has)).map((g) => g.term)));
+  }, [only]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = used ? entries.filter((g) => used.has(g.term)) : entries;
   return (
     <div data-ve-trust="glossary">
       <p>Each word below has one meaning on this page. In the text, a word with a dotted line shows its meaning when you point to it, focus it or tap it.</p>
       <dl className="ve-definition-list" data-ve-glossary>
-        {entries.map((g) => (
+        {shown.map((g) => (
           <Fragment key={g.term}>
             <dt data-ve-aliases={(g.aliases ?? []).join('|') || undefined}>{g.term}</dt>
             <dd>{g.meaning}</dd>
@@ -839,4 +1135,3 @@ export function Glossary({ data }: Data) {
     </div>
   );
 }
-

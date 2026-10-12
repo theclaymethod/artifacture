@@ -1,13 +1,15 @@
-import React, { Children, isValidElement, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ChapterRail, chapterSlug, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance } from './explainer-nav';
+import React, { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ChapterRail, chapterSlug, ShellContext, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance, type ReadMode, type ShellState } from './explainer-nav';
 import { wrapWords } from './diagram-layout';
-import { scrollToTarget } from './content-blocks';
+import { ChapterContext } from './chapter-context';
+import { flushSync } from 'react-dom';
+import { installCalmScroll, keepInPlace, landOn } from './calm-scroll';
 import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
 export { DiagramCanvas } from './diagram-canvas';
 export { DataTable, StatusPill, Badge, Legend } from './data-table';
 export type { DataTableProps, DataTableColumn, DataTableRow, DataTableCell, DataTableValue, DataTableBadge, StatusTone, StatusPillProps, BadgeProps, LegendProps, LegendItem, KeyStroke, KeyGlyph } from './data-table';
-export { ChapterRail } from './explainer-nav';
-export type { Chapter, ChapterAnchor, ExplainerAppearance } from './explainer-nav';
+export { ChapterRail, useExplainerShell } from './explainer-nav';
+export type { Chapter, ChapterAnchor, ExplainerAppearance, ReadMode } from './explainer-nav';
 export { AsciiImage, AsciiSweep } from './ascii-effects';
 export { AsciiObject } from './ascii-object';
 export { VhsEffect } from './vhs-effect';
@@ -25,7 +27,7 @@ export type { AsciiModel, AsciiObjectProps } from './ascii-object';
 export type { VhsEffectProps } from './vhs-effect';
 export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
 export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
-export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, CopyLink, Term, Steps, Step, ChipLinks, Lead, Aside } from './content-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, CopyLink, Term, Steps, Step, StepThrough, ChipLinks, Lead, Aside } from './content-blocks';
 export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, TermProps, StepsProps, StepProps, ChipLinksProps, ChipLinkItem, LeadProps, AsideProps } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
@@ -80,7 +82,12 @@ export { LieflatChart } from './lieflat-charts';
 export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
 export { DiagramWalkthrough } from './diagram-walkthrough';
 export { DiagramModes, useDiagramMode } from './diagram-modes';
-export { ArchitectureDiagram, ClaimDetail, CodeRef, Glossary, Glossed, Invariants, MergeVerdict, PromiseChips, PromiseLink, PromiseList, UnclaimedChanges, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, WhatChanged, promiseAnchors } from './trust-map';
+export { TypedDiagram } from './typed-diagrams';
+export type { TypedDiagramSpec, SequenceSpec, StateSpec, ChangeStatus } from './typed-diagrams';
+export { ApproveChecks, ChapterProgress, ClaimTimeline, DiffSpine, EvidenceGuide, ExportReview, FileCard, ReviewChecklist, ReviewProgress, ReviewStart, ReviewVerdict, UnderstandingCheck, VerifierView, questionsFor, reviewKey, reviewMarkdown } from './guided-review';
+export { ArchitectureDiagram, BarCard, BarChip, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, CodeRef, Glossary, Glossed, Invariants, MergeVerdict, PromiseChips, PromiseLink, PromiseList, UnclaimedChanges, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, WhatChanged, promiseAnchors } from './trust-map';
+export { ExamplesFor, WorkedExample, exampleOf } from './worked-example';
+export type { WorkedExampleData, ExampleStep, ExampleValue } from './worked-example';
 export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 
@@ -185,6 +192,14 @@ type ShellProps = {
   chapterNav?: boolean;
   /** `auto` follows prefers-color-scheme. The default stays light. */
   appearance?: ExplainerAppearance;
+  /**
+   * Chapters as pages: one Section at a time, with previous and next links, the current chapter
+   * marked in the rail, and a switch to read as one page. A fragment link shows the chapter that
+   * holds its target. Without JavaScript, every chapter renders in sequence. Implies chapterNav.
+   * A block in a chapter whose component has a static `chapterMark(props)` gives the chapter its
+   * review mark in the rail.
+   */
+  paged?: boolean;
   children: ReactNode;
 };
 
@@ -197,6 +212,8 @@ type SectionProps = {
   navLabel?: string;
   /** In-section targets that the chapter rail lists under this chapter. */
   anchors?: readonly ChapterAnchor[];
+  /** Old fragment ids that land on this chapter, so links made for an earlier layout keep working. */
+  aliases?: readonly string[];
   children: ReactNode;
 };
 
@@ -238,6 +255,21 @@ type Annotation = {
   note: string;
 };
 
+const modeKey = () => `ve-read-mode:${window.location.pathname}`;
+function readMode(): ReadMode {
+  try {
+    return window.localStorage.getItem(modeKey()) === 'one' ? 'one' : 'pages';
+  } catch {
+    return 'pages';
+  }
+}
+
+function hashTarget() {
+  let hash = window.location.hash.slice(1);
+  try { hash = decodeURIComponent(hash); } catch { /* keep the raw fragment */ }
+  return hash ? document.getElementById(hash) : null;
+}
+
 export function ExplainerShell({
   title,
   summary,
@@ -245,20 +277,72 @@ export function ExplainerShell({
   reviewTools = true,
   chapterNav = false,
   appearance = 'light',
+  paged = false,
   children,
 }: ShellProps) {
   assertSupportedPreset(preset);
   const resolved = useResolvedAppearance(appearance);
-  // The page renders after load, so the browser's own jump to the fragment finds nothing; land it
-  // here. A Disclosure lands the fragments inside it.
-  useEffect(() => {
-    let hash = window.location.hash.slice(1);
-    try { hash = decodeURIComponent(hash); } catch { /* keep the raw fragment */ }
-    const target = hash ? document.getElementById(hash) : null;
-    if (target && !target.closest('details')) scrollToTarget(target);
-  }, []);
-  const chapters = chapterNav ? collectChapters(children) : [];
+  const chapters = chapterNav || paged ? collectChapters(children) : [];
   const hasChapters = chapters.length > 0;
+  // A paged shell renders every chapter on the server (the no-JS page reads in sequence); after
+  // hydration it shows one chapter, picked from the fragment.
+  const [live, setLive] = useState(false);
+  const [mode, setModeState] = useState<ReadMode>('pages');
+  const [current, setCurrent] = useState(chapters[0]?.id ?? '');
+  const chapterIds = chapters.map((c) => c.id).join('\n');
+  const setMode = useCallback((next: ReadMode) => {
+    // The reader keeps their place: the chapter at the reading line stays where it is on the
+    // screen, and reading by chapter opens that chapter.
+    const shown = [...document.querySelectorAll<HTMLElement>('section.ve-section[id]:not([hidden])')];
+    const line = window.innerHeight * 0.32;
+    const here = shown.filter((section) => section.getBoundingClientRect().top <= line).at(-1) ?? shown[0];
+    const top = here?.getBoundingClientRect().top ?? 0;
+    flushSync(() => {
+      if (here && next === 'pages') setCurrent(here.id);
+      setModeState(next);
+    });
+    if (here) {
+      const drift = here.getBoundingClientRect().top - top;
+      if (Math.abs(drift) >= 1) window.scrollBy({ top: drift, behavior: 'instant' });
+      // The chapters that now show measure their figures in the next frames: hold the place through them.
+      keepInPlace(here);
+      const target = hashTarget();
+      if (next === 'pages' && !(target && here.contains(target))) window.history.replaceState(window.history.state, '', `#${here.id}`);
+    }
+    try { window.localStorage.setItem(modeKey(), next); } catch { /* storage can be off: the mode lasts for this view */ }
+  }, []);
+  useEffect(() => {
+    installCalmScroll();
+    const ids = chapterIds.split('\n');
+    // On load the chapter shows with the hydrated page; in the page it shows at once, in the same
+    // task as the jump, so no frame paints the new chapter at the old scroll position.
+    const land = (initial: boolean) => {
+      const target = hashTarget();
+      const section = target?.closest<HTMLElement>('section.ve-section') ?? null;
+      const show = (id: string) => (initial ? setCurrent(id) : flushSync(() => setCurrent(id)));
+      if (paged && section && ids.includes(section.id)) show(section.id);
+      else if (paged && !target) show(ids[0] ?? '');
+      if (!target) {
+        if (paged && !initial) window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+      // The browser's own jump found a hidden chapter, or a page that was not yet rendered: land
+      // the target once, on load when the layout has settled, in the page at once.
+      landOn(target, initial ? 'load' : 'now');
+      if (!initial && target === section) section.querySelector<HTMLElement>('.ve-section-heading h2')?.focus({ preventScroll: true });
+    };
+    if (paged) {
+      setModeState(readMode());
+      setLive(true);
+    }
+    land(true);
+    if (!paged) return undefined;
+    const onHash = () => land(false);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [paged, chapterIds]);
+  const index = Math.max(0, chapters.findIndex((c) => c.id === current));
+  const state = useMemo<ShellState | null>(() => (paged ? { paged, live, mode, current, chapters, setMode } : null), [paged, live, mode, current, chapterIds, setMode]); // eslint-disable-line react-hooks/exhaustive-deps
   const content = (
     <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10" id="ve-content" tabIndex={-1}>
       <header className="ve-shell-header grid gap-6">
@@ -272,17 +356,42 @@ export function ExplainerShell({
       {children}
     </div>
   );
+  const pages = paged && live && mode === 'pages';
   return (
-    <main
-      className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}${hasChapters ? ' ve-has-chapters' : ''}`}
-      data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
-      data-ve-preset={preset}
-    >
-      <a className="ve-skip-link" href="#ve-content">Skip to content</a>
-      {hasChapters ? <div className="ve-shell-frame"><ChapterRail chapters={chapters} />{content}</div> : content}
-      {reviewTools ? <AnnotationLayer /> : null}
-    </main>
+    <ShellContext.Provider value={state}>
+      <main
+        className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}${hasChapters ? ' ve-has-chapters' : ''}`}
+        data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
+        data-ve-live={paged && live ? 'true' : undefined}
+        data-ve-page={pages ? String(index) : undefined}
+        data-ve-paged={paged ? (pages ? 'pages' : 'one') : undefined}
+        data-ve-preset={preset}
+      >
+        <a className="ve-skip-link" href="#ve-content">Skip to content</a>
+        {hasChapters ? (
+          <div className="ve-shell-frame">
+            <ChapterRail chapters={chapters} current={pages ? current : undefined} mode={paged && live ? mode : undefined} onMode={paged ? setMode : undefined} />
+            {content}
+          </div>
+        ) : content}
+        {reviewTools ? <AnnotationLayer /> : null}
+      </main>
+    </ShellContext.Provider>
   );
+}
+
+/** A component that gives the rail the review state of the chapter that holds it. */
+type ChapterMarkSource = { chapterMark?: (props: unknown) => ReactNode };
+
+/** The rail mark of a chapter: from the first of its blocks whose component has a static `chapterMark`. */
+function chapterMark(children: ReactNode): ReactNode {
+  let mark: ReactNode = null;
+  Children.forEach(children, (child) => {
+    if (mark !== null || !isValidElement(child) || typeof child.type === 'string') return;
+    const source = (child.type as ChapterMarkSource).chapterMark;
+    if (source) mark = source(child.props);
+  });
+  return mark;
 }
 
 function collectChapters(children: ReactNode): Chapter[] {
@@ -290,20 +399,42 @@ function collectChapters(children: ReactNode): Chapter[] {
   Children.forEach(children, (child) => {
     if (!isValidElement<SectionProps>(child) || child.type !== Section) return;
     const { id, title, navLabel, anchors } = child.props;
-    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors });
+    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors, mark: chapterMark(child.props.children) });
   });
   return chapters;
 }
 
-export function Section({ title, id, children }: SectionProps) {
+export function Section({ title, id, aliases, children }: SectionProps) {
   const sectionId = id ?? chapterSlug(title);
+  const shell = useContext(ShellContext);
+  const at = shell ? shell.chapters.findIndex((c) => c.id === sectionId) : -1;
+  const hidden = Boolean(shell?.live && shell.mode === 'pages' && shell.current !== sectionId);
+  const prev = at > 0 ? shell!.chapters[at - 1] : null;
+  const next = shell && at >= 0 && at < shell.chapters.length - 1 ? shell.chapters[at + 1] : null;
   return (
-    <section aria-labelledby={`${sectionId}-title`} className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]" id={sectionId}>
+    <section aria-labelledby={`${sectionId}-title`} className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]" data-ve-chapter={at >= 0 ? String(at + 1) : undefined} hidden={hidden} id={sectionId}>
+      {(aliases ?? []).map((alias) => <span aria-hidden="true" className="ve-alias-anchor" id={alias} key={alias} />)}
       <div className="ve-section-heading">
-        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]" id={`${sectionId}-title`}>{title}</h2>
+        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]" id={`${sectionId}-title`} tabIndex={-1}>{title}</h2>
       </div>
-      <div className="ve-section-body min-w-0">{children}</div>
+      <div className="ve-section-body min-w-0">
+        <ChapterContext.Provider value={sectionId}>{children}</ChapterContext.Provider>
+      </div>
+      {shell && at >= 0 ? (
+        <nav aria-label="Chapters" className="ve-pager" data-ve-pager>
+          {prev ? <a className="ve-pager-link" data-ve-pager-prev href={`#${prev.id}`} rel="prev"><span className="ve-pager-key"><PagerArrow back />Previous</span><span className="ve-pager-label">{prev.label}</span></a> : <span />}
+          {next ? <a className="ve-pager-link" data-ve-pager-next href={`#${next.id}`} rel="next"><span className="ve-pager-key">Next<PagerArrow /></span><span className="ve-pager-label">{next.label}</span></a> : null}
+        </nav>
+      ) : null}
     </section>
+  );
+}
+
+function PagerArrow({ back = false }: { back?: boolean }) {
+  return (
+    <svg aria-hidden="true" className="ve-pager-arrow" height="12" viewBox="0 0 14 14" width="12">
+      <path d={back ? 'M13 7H2M6 3L2 7l4 4' : 'M1 7h11M8 3l4 4-4 4'} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+    </svg>
   );
 }
 

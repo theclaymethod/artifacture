@@ -1,0 +1,1210 @@
+/* The guided review. Every gap and size comes from the reading tokens of themes.css, every state
+   from the tone ramp with its mark: the same language as the trust-map explainer. */
+
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-file, .ve-file-rows > li, .ve-result-card, .ve-question-why, .ve-path-checks > li, .ve-claim-row-note, .ve-review-call label)[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-file, .ve-file-rows > li, .ve-result-card, .ve-question-why, .ve-path-checks > li, .ve-claim-row-note, .ve-review-call label)[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); --ve-tone-soft: var(--ve-status-info-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-file, .ve-file-rows > li, .ve-result-card, .ve-question-why, .ve-path-checks > li, .ve-claim-row-note, .ve-review-call label)[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-file, .ve-file-rows > li, .ve-result-card, .ve-question-why, .ve-path-checks > li, .ve-claim-row-note, .ve-review-call label)[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
+:is(.ve-claim-row, .ve-timeline > li, .ve-bar-card, .ve-file, .ve-file-rows > li, .ve-result-card, .ve-question-why, .ve-path-checks > li, .ve-claim-row-note, .ve-review-call label)[data-ve-tone="neutral"] { --ve-tone-ink: var(--ve-status-neutral); --ve-tone-soft: var(--ve-status-neutral-soft); }
+
+/* Controls that need the script show only with it; the no-script path shows only without it. */
+html:not([data-ve-js]) [data-ve-js-only],
+html[data-ve-js] [data-ve-nojs-only] {
+  display: none !important;
+}
+
+[data-ve-trust] :is(.ve-review-list, .ve-file-rows, .ve-timeline),
+[data-ve-trust] :is(.ve-review-list, .ve-file-rows, .ve-timeline, .ve-path-checks, .ve-path-parts) > li {
+  max-width: none;
+}
+
+/* ---- A button: one shape for a link or a control that starts something -------------------- */
+
+.ve-section-body :is(a, button).ve-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ve-section-body :is(a, button).ve-button[data-ve-primary] {
+  border-color: var(--ve-heading);
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+}
+
+.ve-section-body :is(a, button).ve-button:hover {
+  border-color: var(--ve-heading);
+}
+
+.ve-section-body :is(a, button).ve-button:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+/* ---- The start and the verdict ------------------------------------------------------------- */
+
+.ve-review-state .ve-verdict-lead {
+  font-size: var(--ve-text-h3);
+  line-height: 1.2;
+}
+
+.ve-review-first {
+  margin-top: var(--ve-space-5);
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-review-ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2) var(--ve-space-3);
+  margin-top: var(--ve-space-5);
+}
+
+.ve-review-progress {
+  display: grid;
+  gap: var(--ve-space-2);
+}
+
+.ve-review-progress > p {
+  margin: 0;
+}
+
+.ve-review-progress .ve-count-marks > span {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+:is(.ve-review-progress, .ve-file-row-status, .ve-claim-row) .ve-count-marks > span[data-ve-tone="neutral"] {
+  --ve-tone-ink: var(--ve-muted);
+}
+
+/* ---- A claim row ---------------------------------------------------------------------------- */
+
+.ve-claim-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-1) var(--ve-space-3);
+  min-width: 0;
+  padding: var(--ve-space-2) 0;
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-section-body .ve-claim-row a.ve-claim-row-name {
+  color: var(--ve-heading);
+  font-size: var(--ve-text-ui);
+  font-weight: var(--ve-weight-strong);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ve-heading) 30%, transparent);
+  text-underline-offset: 0.22em;
+}
+
+.ve-section-body .ve-claim-row a.ve-claim-row-name:hover {
+  text-decoration-color: currentColor;
+}
+
+.ve-claim-row-checks {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-claim-row-checks .ve-count-marks > span {
+  border-radius: 50%;
+}
+
+.ve-claim-row-note {
+  flex-basis: 100%;
+  color: var(--ve-tone-ink);
+}
+
+.ve-claim-rows {
+  display: grid;
+}
+
+.ve-claim-rows > .ve-claim-row + .ve-claim-row {
+  border-top: 1px solid color-mix(in srgb, var(--ve-rule) 70%, transparent);
+}
+
+.ve-claim-details {
+  display: grid;
+  gap: var(--ve-space-2);
+}
+
+/* ---- The claims of a promise: one line, a checkpoint per claim -------------------------------- */
+
+.ve-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-timeline::before {
+  content: "";
+  position: absolute;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  left: 0.4375rem;
+  width: 1px;
+  background: var(--ve-rule);
+}
+
+.ve-timeline > li {
+  position: relative;
+  padding-left: var(--ve-space-6);
+}
+
+.ve-timeline > li::before {
+  content: "";
+  position: absolute;
+  top: 1.0625rem;
+  left: 0.125rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 2px solid var(--ve-bg);
+  border-radius: 50%;
+  background: var(--ve-tone-ink);
+  box-shadow: 0 0 0 1px var(--ve-tone-ink);
+}
+
+.ve-timeline-tag {
+  display: block;
+  padding-top: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-timeline > li:has(.ve-timeline-tag)::before {
+  top: 2.375rem;
+}
+
+/* ---- The bar card: the state, a gauge, the surface and the bar --------------------------------- */
+
+.ve-claim-evidence {
+  display: grid;
+  gap: var(--ve-space-4);
+  align-items: start;
+}
+
+@media (min-width: 56rem) {
+  .ve-claim-evidence {
+    grid-template-columns: minmax(0, 1fr) 13.5rem;
+  }
+}
+
+.ve-bar-card {
+  display: grid;
+  gap: var(--ve-space-2);
+  padding: var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 45%, var(--ve-bg));
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-bar-card > p {
+  display: grid;
+  margin: 0;
+}
+
+.ve-bar-card > .ve-bar-card-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-size: var(--ve-text-ui);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-bar-card .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+}
+
+.ve-bar-gauge {
+  display: block;
+  height: 0.5rem;
+  border: 1.5px solid var(--ve-tone-ink);
+  border-radius: 2px;
+  background: var(--ve-tone-ink);
+}
+
+.ve-bar-card[data-ve-bar="below"] .ve-bar-gauge {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ve-bar-card-why {
+  color: var(--ve-text);
+}
+
+.ve-bar-pair {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+@media (min-width: 56rem) {
+  .ve-bar-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ve-bar-example {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  align-content: start;
+}
+
+.ve-changed-link {
+  font-size: var(--ve-text-small);
+}
+
+/* ---- The diff spine -------------------------------------------------------------------------- */
+
+[data-ve-trust="spine"] > .ve-spine-group {
+  margin-top: var(--ve-space-7);
+}
+
+.ve-spine-group > * + * {
+  margin-top: var(--ve-space-3);
+}
+
+.ve-spine-group > h3 {
+  margin: 0;
+}
+
+.ve-spine-meta {
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-file-stack {
+  display: grid;
+  gap: var(--ve-space-3);
+}
+
+.ve-file {
+  display: grid;
+  gap: var(--ve-space-2);
+  min-width: 0;
+  padding: var(--ve-card-pad);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-card-radius);
+  background: var(--ve-bg);
+}
+
+.ve-file > p {
+  margin: 0;
+}
+
+.ve-file-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-1) var(--ve-space-3);
+}
+
+.ve-file-path {
+  min-width: 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-mono);
+  font-size: var(--ve-text-small);
+  overflow-wrap: anywhere;
+}
+
+.ve-file-head > .ve-file-path {
+  font-size: var(--ve-text-code);
+}
+
+.ve-churn {
+  font-family: var(--ve-font-ui, var(--ve-font-body));
+  font-size: var(--ve-text-label);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ve-churn [data-ve-churn="add"] { color: var(--ve-status-ok); }
+.ve-churn [data-ve-churn="del"] { color: var(--ve-status-err); }
+
+.ve-file-role {
+  color: var(--ve-text);
+}
+
+.ve-file-claims-title {
+  margin: var(--ve-space-2) 0 0;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-file-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--ve-text-small);
+}
+
+.ve-file-rows > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem 12rem;
+  gap: var(--ve-space-1) var(--ve-space-3);
+  align-items: baseline;
+  padding: var(--ve-space-2) 0;
+  border-top: 1px solid color-mix(in srgb, var(--ve-rule) 70%, transparent);
+}
+
+.ve-file-rows > li > .ve-churn {
+  text-align: right;
+}
+
+.ve-file-row-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-file-row-status .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+}
+
+.ve-file-row-link,
+.ve-file-row-action {
+  grid-column: 1 / -1;
+}
+
+.ve-file-row-action {
+  color: var(--ve-text);
+}
+
+.ve-section-body .ve-file-rows a.ve-file-path {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ve-heading) 30%, transparent);
+  text-underline-offset: 0.22em;
+}
+
+@media (max-width: 640px) {
+  .ve-file-rows > li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ve-file-row-status {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- How to read the evidence ------------------------------------------------------------------ */
+
+.ve-path {
+  display: grid;
+  gap: var(--ve-space-3);
+  padding: var(--ve-card-pad);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+}
+
+.ve-path-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+.ve-path-step[data-ve-path="checks"] {
+  display: grid;
+  margin-left: var(--ve-space-6);
+}
+
+.ve-path-name {
+  color: var(--ve-heading);
+  font-size: var(--ve-text-h4);
+  line-height: 1.3;
+  font-weight: var(--ve-weight-strong);
+}
+
+:is(.ve-path-parts, .ve-path-checks, .ve-weak-lines) {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(.ve-path-parts, .ve-path-checks) > li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+}
+
+.ve-path-checks .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+  align-self: center;
+  color: var(--ve-tone-ink);
+}
+
+.ve-two-results {
+  display: grid;
+  gap: var(--ve-space-3);
+}
+
+@media (min-width: 48rem) {
+  .ve-two-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ve-result-card {
+  display: grid;
+  gap: var(--ve-space-1);
+  padding: var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 45%, var(--ve-bg));
+}
+
+.ve-result-card > p {
+  margin: 0;
+}
+
+.ve-result-card-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-result-card .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+}
+
+.ve-weak-lines > li {
+  max-width: var(--ve-measure);
+}
+
+/* ---- Check your understanding ------------------------------------------------------------------- */
+
+.ve-question-stack {
+  display: grid;
+  gap: var(--ve-space-6);
+  margin-top: var(--ve-space-5);
+}
+
+.ve-question {
+  display: grid;
+  gap: var(--ve-space-3);
+}
+
+.ve-section-body .ve-question-title {
+  display: flex;
+  gap: var(--ve-space-3);
+  margin: 0;
+  max-width: calc(var(--ve-measure) + 3rem);
+  color: var(--ve-heading);
+  font-size: var(--ve-text-h4);
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.4;
+}
+
+.ve-question-n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font-size: var(--ve-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-question-options {
+  display: grid;
+  gap: var(--ve-space-2);
+  max-width: calc(var(--ve-measure) + 3rem);
+  padding-left: calc(1.75rem + var(--ve-space-3));
+}
+
+.ve-question-option {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  min-height: 44px;
+  padding: var(--ve-space-2) var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-heading);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ve-question-option:hover {
+  border-color: var(--ve-heading);
+}
+
+.ve-question-option:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-question-option[data-ve-answer="right"] {
+  --ve-tone-ink: var(--ve-status-ok);
+  border-color: var(--ve-status-ok);
+  background: color-mix(in srgb, var(--ve-status-ok-soft) 60%, var(--ve-bg));
+}
+
+.ve-question-option[data-ve-answer="wrong"] {
+  --ve-tone-ink: var(--ve-status-err);
+  border-color: var(--ve-status-err);
+}
+
+.ve-question-option .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+  color: var(--ve-tone-ink);
+}
+
+.ve-question-why {
+  max-width: calc(var(--ve-measure) + 3rem);
+  margin-left: calc(1.75rem + var(--ve-space-3));
+  padding: var(--ve-space-4);
+  border-radius: var(--ve-control-radius);
+  background: color-mix(in srgb, var(--ve-tone-soft) 55%, var(--ve-bg));
+}
+
+.ve-question-why > p {
+  margin: 0;
+}
+
+.ve-question-why > p + p {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-question-list {
+  margin: 0 0 var(--ve-space-3);
+  padding-left: calc(1.75rem + var(--ve-space-5));
+}
+
+/* ---- The review --------------------------------------------------------------------------------- */
+
+.ve-review-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ve-space-4);
+  padding: var(--ve-space-4) 0;
+  border-bottom: 1px solid var(--ve-rule);
+}
+
+.ve-review-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+.ve-review-export-text {
+  flex-basis: 100%;
+  width: 100%;
+  padding: var(--ve-space-3);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-text);
+  font: var(--ve-text-code)/var(--ve-leading-code) var(--ve-font-mono);
+}
+
+.ve-review-list {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-review-item > .ve-disclosure > .ve-disclosure-summary {
+  align-items: flex-start;
+  padding-block: var(--ve-space-3);
+}
+
+.ve-review-item > .ve-disclosure > .ve-disclosure-summary > :is(.ve-disclosure-caret, .ve-disclosure-meta) {
+  margin-top: 0.6rem;
+}
+
+.ve-review-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ve-space-1) var(--ve-space-3);
+  width: 100%;
+}
+
+.ve-review-n {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1.5px solid var(--ve-heading);
+  border-radius: 999px;
+  color: var(--ve-heading);
+  font-size: var(--ve-text-label);
+  font-weight: var(--ve-weight-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-review-item[data-ve-blocks="true"] .ve-review-n {
+  border-color: var(--ve-status-err);
+  color: var(--ve-status-err);
+}
+
+.ve-review-title {
+  display: grid;
+  gap: var(--ve-space-1);
+  min-width: 0;
+}
+
+.ve-review-label {
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-review-why {
+  color: var(--ve-text);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-regular);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-review-marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2);
+  grid-column: 2;
+}
+
+.ve-review-todo {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+html:not([data-ve-js]) .ve-review-todo {
+  display: none;
+}
+
+.ve-review-body {
+  display: grid;
+  gap: var(--ve-space-5);
+}
+
+.ve-review-call {
+  display: grid;
+  gap: var(--ve-space-3);
+  margin: 0;
+  padding: var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-text) 3%, var(--ve-bg));
+}
+
+.ve-review-call > legend {
+  padding: 0 var(--ve-space-2);
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-review-call-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2);
+}
+
+.ve-review-call-options > label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  min-height: 44px;
+  padding: 0 var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-heading);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+  cursor: pointer;
+}
+
+.ve-review-call-options > label:hover {
+  border-color: var(--ve-heading);
+}
+
+.ve-review-call-options > label[data-ve-checked="true"] {
+  border-color: var(--ve-tone-ink);
+  background: color-mix(in srgb, var(--ve-tone-soft) 70%, var(--ve-bg));
+  color: var(--ve-tone-ink);
+  box-shadow: inset 0 0 0 1px var(--ve-tone-ink);
+}
+
+.ve-review-call-options input {
+  accent-color: var(--ve-tone-ink);
+}
+
+.ve-review-call-options > label:has(input:focus-visible) {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-review-note {
+  display: grid;
+  gap: var(--ve-space-1);
+  font-size: var(--ve-text-small);
+}
+
+.ve-review-note > span {
+  color: var(--ve-muted);
+}
+
+.ve-review-note textarea {
+  width: 100%;
+  max-width: calc(var(--ve-measure) + 6rem);
+  padding: var(--ve-space-2) var(--ve-space-3);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-text);
+  font: var(--ve-text-ui)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  resize: vertical;
+}
+
+.ve-review-note textarea:focus-visible,
+.ve-review-export-text:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 1px;
+}
+
+.ve-review-call > .ve-quiet {
+  margin: 0;
+  font-size: var(--ve-text-small);
+}
+
+@media (max-width: 640px) {
+  .ve-review-call-options > label {
+    flex: 1 1 100%;
+  }
+
+  .ve-path-step[data-ve-path="checks"] {
+    margin-left: 0;
+  }
+}
+
+.ve-review-item,
+.ve-review-item > .ve-disclosure,
+.ve-review-item .ve-disclosure-label {
+  min-width: 0;
+}
+
+.ve-review-why,
+.ve-review-label {
+  overflow-wrap: anywhere;
+}
+
+/* A grid column holds wide code by scrolling it, never by widening the page. */
+.ve-review-body,
+.ve-claim-evidence,
+.ve-file,
+.ve-path,
+.ve-bar-example {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ve-review-body > *,
+.ve-file > *,
+.ve-claim-evidence > * {
+  min-width: 0;
+}
+
+@media (min-width: 56rem) {
+  .ve-claim-evidence {
+    grid-template-columns: minmax(0, 1fr) 13.5rem;
+  }
+}
+
+/* A long bar name wraps inside its pill on a narrow column. */
+:is(.ve-review-marks, .ve-claim-row, .ve-file-head) .ve-status-pill {
+  max-width: 100%;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .ve-review-item .ve-disclosure-meta {
+    display: none;
+  }
+}
+
+/* A flagged line: the level's tint across the line, and its level as a word in the gutter. */
+[data-ve-code-ref] .ve-code-shiki .line[data-ve-flag] {
+  --ve-line-bg: color-mix(in srgb, var(--ve-flag-ink) 14%, var(--ve-code-bg));
+  position: relative;
+  box-shadow: inset 0 0 0 1.5px var(--ve-flag-ink);
+}
+
+[data-ve-code-ref] .line[data-ve-flag="risk"] { --ve-flag-ink: var(--ve-status-err); }
+[data-ve-code-ref] .line[data-ve-flag="question"] { --ve-flag-ink: var(--ve-status-warn); }
+[data-ve-code-ref] .line[data-ve-flag="nit"] { --ve-flag-ink: var(--ve-status-info); }
+
+/* ---- The chapters of the change: the idea on the left, its code on the right ----------------------- */
+
+/* The chapters of the change: a run of openers, the first one open. */
+.ve-change-chapters {
+  margin-top: var(--ve-space-7);
+}
+
+.ve-change-chapters > .ve-change-chapter + .ve-change-chapter {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-change-summary {
+  display: grid;
+  gap: var(--ve-space-1);
+  min-width: 0;
+}
+
+.ve-change-title {
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-ui)/var(--ve-leading-ui) var(--ve-font-ui);
+}
+
+.ve-change-line {
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-small) var(--ve-font-ui);
+}
+
+.ve-change-chapter > .ve-disclosure > .ve-disclosure-summary {
+  align-items: start;
+  padding-block: var(--ve-space-4);
+}
+
+.ve-change-chapter > .ve-disclosure > .ve-disclosure-summary :is(.ve-disclosure-caret, .ve-disclosure-meta) {
+  margin-top: 0.4rem;
+}
+
+.ve-change-grid {
+  display: grid;
+  gap: var(--ve-space-5);
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: var(--ve-space-2);
+}
+
+.ve-change-grid > .ve-spine-meta {
+  margin: 0;
+}
+
+.ve-change-chapter > h3,
+.ve-change-head > * {
+  margin: 0;
+}
+
+.ve-change-head {
+  display: grid;
+  gap: var(--ve-space-1);
+}
+
+.ve-change-diagrams {
+  display: grid;
+  gap: var(--ve-space-6);
+}
+
+@media (min-width: 1024px) {
+  .ve-change-grid > .ve-spine-meta,
+  .ve-change-diagrams {
+    grid-column: 1 / -1;
+  }
+}
+
+.ve-change-chapter[data-ve-tier="tests"],
+.ve-change-chapter[data-ve-tier="generated"] {
+  gap: var(--ve-space-3);
+}
+
+.ve-change-side {
+  display: grid;
+  align-content: start;
+  gap: var(--ve-space-3);
+  min-width: 0;
+}
+
+.ve-change-side > p {
+  margin: 0;
+}
+
+.ve-change-files {
+  display: grid;
+  align-content: start;
+  gap: var(--ve-space-4);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .ve-change-grid {
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.4fr);
+    gap: var(--ve-space-6);
+  }
+
+  .ve-change-side {
+    position: sticky;
+    top: calc(var(--ve-sticky-top, 0px) + var(--ve-space-4));
+    max-height: calc(100vh - var(--ve-sticky-top, 0px) - var(--ve-space-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.ve-flag-list {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-flag {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+  max-width: none;
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-flag .ve-status-pill {
+  flex: none;
+}
+
+.ve-flag-when {
+  color: var(--ve-muted);
+}
+
+.ve-file-flags,
+.ve-flag-block {
+  display: grid;
+  gap: var(--ve-space-2);
+  min-width: 0;
+}
+
+.ve-chapter-reviewed,
+.ve-approve-done {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+  min-height: 44px;
+  font-weight: var(--ve-weight-strong);
+  cursor: pointer;
+}
+
+.ve-chapter-reviewed {
+  width: fit-content;
+  padding: 0 var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+}
+
+.ve-chapter-reviewed:has(input:checked) {
+  border-color: var(--ve-status-ok);
+  color: var(--ve-status-ok);
+}
+
+:is(.ve-chapter-reviewed, .ve-approve-done) input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--ve-status-ok);
+}
+
+:is(.ve-chapter-reviewed, .ve-approve-done):has(input:focus-visible) {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-chapter-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+}
+
+/* ---- Before you approve ---------------------------------------------------------------------------- */
+
+.ve-approve {
+  display: grid;
+  gap: var(--ve-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ve-approve;
+}
+
+.ve-approve > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ve-space-3);
+  max-width: none;
+}
+
+html:not([data-ve-js]) .ve-approve > li {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ve-approve-body {
+  display: grid;
+  gap: var(--ve-space-2);
+  min-width: 0;
+}
+
+.ve-approve-body > p {
+  margin: 0;
+}
+
+.ve-approve-done {
+  align-self: start;
+}
+
+/* ---- A check row: the same everywhere a check shows ------------------------------------------- */
+
+.ve-check-rows {
+  display: grid;
+  gap: var(--ve-space-1);
+  min-width: 0;
+}
+
+.ve-check-rows-title {
+  margin: 0;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row {
+  min-width: 0;
+}
+
+.ve-check-row[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); }
+.ve-check-row[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); }
+.ve-check-row[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); }
+.ve-check-row[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); }
+
+.ve-check-row > .ve-disclosure > .ve-disclosure-summary {
+  min-height: 44px;
+  padding-block: var(--ve-space-2);
+}
+
+.ve-check-row-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-1) var(--ve-space-3);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-regular);
+  line-height: var(--ve-leading-small);
+}
+
+.ve-check-row-line .ve-tone-mark {
+  --ve-tone-on: var(--ve-bg);
+  flex: none;
+  color: var(--ve-tone-ink);
+}
+
+.ve-check-row-name {
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row-kind {
+  color: var(--ve-muted);
+}
+
+.ve-check-row-result {
+  color: var(--ve-tone-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-check-row-backs {
+  margin: var(--ve-space-1) 0 0 calc(1.25rem + var(--ve-space-3));
+  font-size: var(--ve-text-small);
+}
+
+/* ---- The checks chapter ------------------------------------------------------------------------ */
+
+[data-ve-trust="checks"] > .ve-checks-promise {
+  margin-top: var(--ve-space-7);
+}
+
+.ve-checks-promise {
+  display: grid;
+  gap: var(--ve-space-4);
+}
+
+.ve-checks-promise > h3 {
+  font-size: var(--ve-text-h4);
+  line-height: 1.3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-2) var(--ve-space-3);
+  margin: 0;
+}
+
+.ve-checks-claim {
+  display: grid;
+  gap: var(--ve-space-1);
+  padding-left: var(--ve-space-4);
+  border-left: 1px solid var(--ve-rule);
+}
+
+.ve-checks-claim > .ve-check-rows {
+  padding-left: var(--ve-space-4);
+}
+
+.ve-orphans {
+  padding: var(--ve-space-3) var(--ve-space-4);
+  border: 1px solid color-mix(in srgb, var(--ve-status-warn) 35%, transparent);
+  border-radius: var(--ve-card-radius);
+  background: color-mix(in srgb, var(--ve-status-warn-soft) 45%, var(--ve-bg));
+}
+
+.ve-orphans > p {
+  margin: 0;
+}
+
+.ve-spine-tests {
+  margin-top: var(--ve-space-7);
+  color: var(--ve-text);
+}
+
+/* What changed: a figure in the spine gets the air of a figure. */
+[data-ve-trust="spine"] > * + :is(.ve-change-chapters, .ve-subsection) {
+  margin-top: var(--ve-space-7);
+}

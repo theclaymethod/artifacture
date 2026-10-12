@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Breakable } from './breakable';
 import { alignDiffRows, diffLines } from './diff-lines.mjs';
 import type { DiffRow } from './diff-lines.mjs';
 import './code-blocks.css';
 
 export type { DiffRow } from './diff-lines.mjs';
+export { Breakable } from './breakable';
 
 export type CodeBlockProps = {
   code: string;
@@ -54,7 +56,7 @@ export function CodeBlock({ code, language, filename, highlightLines = [], annot
   return (
     <figure className="ve-code-block" data-ve-code-block>
       <figcaption className="ve-code-caption">
-        <span>{filename ?? language}</span>
+        <span className="ve-code-name">{filename ? <Breakable text={filename} /> : language}</span>
         {diff === 'unified' ? <span>diff</span> : null}
       </figcaption>
       <div className="ve-code-body">
@@ -77,9 +79,9 @@ export function CodeBlock({ code, language, filename, highlightLines = [], annot
 export function DiffBlock({ patch, before, after, language = 'text', filename, mode = 'unified', rows }: DiffBlockProps) {
   const diffRows = rows ?? buildDiffRows({ patch, before, after });
   return (
-    <figure className="ve-diff-block" data-ve-diff-block>
+    <figure className="ve-diff-block" data-ve-diff-block data-ve-prose={/\.(md|mdx|txt)$/i.test(filename ?? '') ? 'true' : undefined}>
       <figcaption className="ve-code-caption">
-        <span>{filename ?? 'diff'}</span>
+        <span className="ve-code-name">{filename ? <Breakable text={filename} /> : 'diff'}</span>
         <span>{mode === 'split' ? 'split diff' : `${language} diff`}</span>
       </figcaption>
       {mode === 'split' ? <SplitDiffTable rows={diffRows} /> : <UnifiedDiffTable rows={diffRows} />}

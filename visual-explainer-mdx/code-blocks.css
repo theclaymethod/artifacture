@@ -28,8 +28,14 @@
 
 .ve-code-block .ve-code-body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   max-height: 620px;
   overflow: auto;
+}
+
+/* The code is the sideways scroller, so a sticky line gutter holds while it scrolls. */
+.ve-code-block .ve-code-shiki {
+  min-width: 0;
 }
 
 .ve-code-block .ve-code-annotations {
@@ -38,7 +44,7 @@
   padding: 0.75rem 1rem;
   list-style: none;
   color: var(--ve-code-muted);
-  font: 0.875rem/1.5 var(--ve-font-mono);
+  font: var(--ve-text-code)/var(--ve-leading-code) var(--ve-font-mono);
 }
 
 .ve-code-block .ve-code-annotation {
@@ -63,6 +69,7 @@
   font-size: inherit;
 }
 
+/* Code never wraps: a long line scrolls sideways inside its block. */
 .ve-code-block .ve-code-shiki pre {
   margin: 0;
   padding: 1rem;
@@ -70,10 +77,12 @@
   background: var(--ve-code-bg) !important;
   color: var(--ve-code-text);
   font-family: var(--ve-font-mono);
-  font-size: 0.875rem;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  font-size: var(--ve-text-code);
+  font-weight: var(--ve-weight-regular);
+  line-height: var(--ve-leading-code);
+  white-space: pre;
+  overflow-wrap: normal;
+  tab-size: 4;
 }
 
 .ve-code-block .ve-code-shiki code {
@@ -92,9 +101,15 @@
   padding: 0.75rem 1rem;
   color: var(--ve-code-muted);
   font-family: var(--ve-font-mono);
-  font-size: 0.875rem;
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-ui);
   letter-spacing: normal;
   text-transform: none;
+}
+
+/* The file over a block: it wraps after a slash only. */
+:is(.ve-code-block, .ve-diff-block) .ve-code-name {
+  min-width: 0;
 }
 
 .ve-diff-block .ve-scroll-x {
@@ -118,8 +133,8 @@
   min-width: 680px;
   border-collapse: collapse;
   font-family: var(--ve-font-mono);
-  font-size: 0.8125rem;
-  line-height: 1.55;
+  font-size: var(--ve-text-code);
+  line-height: var(--ve-leading-code);
 }
 
 .ve-diff-block .ve-diff-table td {
@@ -139,14 +154,19 @@
 .ve-diff-block .ve-diff-mark {
   width: 2rem;
   text-align: center;
-  font-weight: 700;
+  font-weight: var(--ve-weight-regular);
 }
 
 .ve-diff-block .ve-diff-code {
   min-width: 0;
   padding: 0.2rem 0.75rem;
+  white-space: pre;
+}
+
+/* A diff of a document (Markdown, text) is prose: its lines wrap at words. */
+.ve-diff-block[data-ve-prose] .ve-diff-code {
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Added and removed rows: a tinted row, a colored edge and a +/- gutter, so a diff never relies on color alone. */
@@ -200,7 +220,7 @@
   padding: 0.5rem 0.75rem;
   color: var(--ve-code-muted);
   font-family: var(--ve-font-mono);
-  font-size: 0.75rem;
+  font-size: var(--ve-text-label);
 }
 
 .ve-terminal-block .ve-terminal-content {
@@ -210,13 +230,13 @@
   padding: 1rem;
   color: var(--ve-code-text);
   font-family: var(--ve-font-mono);
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: var(--ve-text-code);
+  line-height: var(--ve-leading-code);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-.ve-terminal-block .ve-ansi-bold { font-weight: 700; }
+.ve-terminal-block .ve-ansi-bold { font-weight: var(--ve-weight-strong); }
 .ve-terminal-block .ve-ansi-fg-0 { color: var(--ve-code-muted); }
 .ve-terminal-block .ve-ansi-fg-1 { color: var(--ve-err); }
 .ve-terminal-block .ve-ansi-fg-2 { color: var(--ve-ok); }
@@ -241,8 +261,8 @@
   padding: 1rem;
   color: var(--ve-text);
   font-family: var(--ve-font-mono);
-  font-size: 0.875rem;
-  line-height: 1.65;
+  font-size: var(--ve-text-code);
+  line-height: var(--ve-leading-code);
 }
 
 .ve-json-tree .ve-json-branch summary {

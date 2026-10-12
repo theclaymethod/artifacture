@@ -10,9 +10,10 @@ import react from '@vitejs/plugin-react';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite';
 import { highlightRefs, preflightSource } from './integrity.mjs';
-import { checkTrustMapPage, handCopied } from './trust-map-checks.mjs';
+import { checkTrustMapPage, defaultSteLint, handCopied } from './trust-map-checks.mjs';
 import { injectDesignSystemCss, presetNamesInSource, resolvePresetCssForExport } from './design-systems.mjs';
 import { DEFAULT_PRESET } from '../../visual-explainer-mdx/preset-policy.mjs';
+import { explainerTypeCss, explainerTypeName } from '../../visual-explainer-mdx/explainer-type.mjs';
 
 // The web fonts that each built-in preset sets. themes.css imports every family for every preset;
 // an MDX export keeps only the families its presets use, as variable weight ranges, so the page
@@ -45,18 +46,20 @@ function parseArgs(argv) {
   let prerender = false;
   let guardRepo = process.env.VE_GUARD_REPO || null;
   let guardHead = process.env.VE_GUARD_HEAD || null;
+  let steLint = defaultSteLint();
   for (let i = 0; i < args.length; i += 1) {
     if (args[i] === '--out') out = args[++i];
     else if (args[i] === '--draft') draft = true;
     else if (args[i] === '--prerender') prerender = true;
     else if (args[i] === '--guard-repo') guardRepo = args[++i];
     else if (args[i] === '--guard-head') guardHead = args[++i];
+    else if (args[i] === '--ste-lint') steLint = args[++i] === 'off' ? false : path.resolve(args[i]);
     else throw new Error(`Unknown argument: ${args[i]}`);
   }
-  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft] [--prerender] [--guard-repo <repo> --guard-head <sha>]');
+  if (!source) throw new Error('Usage: npm run ve:export -- <source.mdx|source.tsx> --out <output.html> [--draft] [--prerender] [--guard-repo <repo> --guard-head <sha>] [--ste-lint <ste-lint.py|off>]');
   if (!out) throw new Error('Missing --out <output.html>');
   if (Boolean(guardRepo) !== Boolean(guardHead)) throw new Error('The no-hand-copy guard needs both --guard-repo and --guard-head (or VE_GUARD_REPO and VE_GUARD_HEAD).');
-  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft, prerender, guard: guardRepo ? { repo: path.resolve(guardRepo), head: guardHead } : null };
+  return { source: path.resolve(repoRoot, source), out: path.resolve(repoRoot, out), draft, prerender, guard: guardRepo ? { repo: path.resolve(guardRepo), head: guardHead } : null, steLint };
 }
 
 function viteFsPath(filePath) {
@@ -104,7 +107,7 @@ async function replaceAsync(input, pattern, replacer) {
 
 // The trust-map components (visual-explainer-mdx/trust-map.tsx) need the static pre-render: it
 // validates their data and runs the trust-map checks.
-const TRUST_MAP_COMPONENTS = /<(MergeVerdict|PromiseList|PromiseChips|ClaimDetail|VerifyTheVerifiers|UnclaimedChanges|WhatChanged|Glossary|CodeRef)\b/;
+const TRUST_MAP_COMPONENTS = /<(VerifierView|ApproveChecks|MergeVerdict|PromiseList|PromiseChips|ClaimDetail|VerifyTheVerifiers|UnclaimedChanges|WhatChanged|Glossary|CodeRef|ReviewStart|ReviewChecklist|DiffSpine|EvidenceGuide|UnderstandingCheck|ReviewVerdict)\b/;
 const REACT_DEDUPE = ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'];
 
 /** The plugins that the static pre-render and the browser bundle share. `seen` collects the MDX files, `stamps` the trust maps that the source imports. */
@@ -149,7 +152,7 @@ async function prerender(source, draft, seen, stamps) {
 }
 
 async function main() {
-  const { source, out, draft, prerender: wantPrerender, guard } = parseArgs(process.argv.slice(2));
+  const { source, out, draft, prerender: wantPrerender, guard, steLint } = parseArgs(process.argv.slice(2));
   if (!(await exists(source))) throw new Error(`Source not found: ${source}`);
   if (!/\.(mdx|tsx|jsx)$/.test(source)) throw new Error('Source must end in .mdx, .tsx, or .jsx');
   const sourceCode = await fs.readFile(source, 'utf8');
@@ -159,7 +162,7 @@ async function main() {
   let markup = null;
   if (wantPrerender || trustMap) {
     markup = await prerender(source, draft, seen, stamps);
-    const errors = checkTrustMapPage(markup);
+    const errors = checkTrustMapPage(markup, { steLint });
     if (errors.length) throw new Error(`visual-explainer trust-map checks failed:\n  ${errors.join('\n  ')}`);
   }
   if (guard) {
@@ -232,7 +235,13 @@ async function main() {
       generated = injectDesignSystemCss(generated, designSystemCss);
     }
 
-    if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
+    if (trustMap) {
+      // A trust-map explainer embeds its own fonts (visual-explainer-mdx/explainer-type.mjs) and
+      // loads nothing from a font service, so it reads the same offline.
+      const type = explainerTypeName();
+      generated = generated.replace(FONT_IMPORT, '').replace(/<link rel="preconnect" href="https:\/\/fonts\.(?:googleapis|gstatic)\.com"(?: crossorigin)?>/g, '');
+      generated = generated.replace('</head>', () => `<style data-ve-explainer-type="${type}">\n${explainerTypeCss(type)}\n</style>\n</head>`);
+    } else if (source.endsWith('.mdx')) generated = subsetFontImport(generated, presetNamesInSource(sourceCode));
     if (markup !== null) generated = generated.replace('<div id="root"></div>', () => `<div id="root">${markup}</div>`);
     // The trust map that the page was built from: its head and the SHA-256 of the file, so a
     // reader (or understando review) can tell when the explainer is stale.
@@ -269,7 +278,8 @@ function veDataPlugin(stamps) {
         stamps.set(file, { head: value.head, sha256: createHash('sha256').update(await fs.readFile(file)).digest('hex') });
         return null;
       }
-      if (value && typeof value === 'object' && value.schema === 1 && Array.isArray(value.refs) && value.diff) {
+      // Any schema of refs.resolved.json: the components check the schema and fail an unknown one.
+      if (value && typeof value === 'object' && Number.isInteger(value.schema) && Array.isArray(value.refs) && value.diff) {
         return { code: JSON.stringify(await highlightRefs(value)), map: null };
       }
       return null;

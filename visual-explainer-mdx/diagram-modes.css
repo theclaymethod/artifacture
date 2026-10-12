@@ -1,56 +1,74 @@
-/* The Simple / Detailed switch: a labelled two-option control with 44px targets. */
-.ve-diagram-modes .ve-diagram-mode-switch {
-  display: inline-flex;
+/* The figure's header: its title, and the view switch beside it. */
+.ve-figure-head {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem;
-  margin: 0 0 0.75rem;
-  padding: 0;
-  border: 0;
+  justify-content: space-between;
+  gap: var(--ve-space-2) var(--ve-space-4);
+  margin: 0 0 var(--ve-space-4);
+}
+
+.ve-figure-title {
+  margin: 0;
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
+}
+
+/* The view switch: a quiet segmented control. A hairline holds the options; the chosen one has a
+   faint fill and the heading ink. Each option keeps a 44px target. */
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
   min-width: 0;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch legend {
-  float: left;
-  margin-right: 0.5rem;
-  padding: 0;
-  color: var(--ve-muted);
-  font-size: 0.875rem;
-  line-height: 44px;
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label {
   position: relative;
   display: inline-flex;
   align-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 1rem;
-  border: 1px solid var(--ve-rule);
-  border-radius: 999px;
-  color: var(--ve-text);
+  min-height: 2rem;
+  padding: 0 var(--ve-space-3);
+  border-radius: 6px;
+  color: var(--ve-muted);
   cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font: var(--ve-weight-regular) var(--ve-text-small)/1 var(--ve-font-ui);
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label[data-ve-checked="true"] {
-  border-color: var(--ve-heading);
-  background: var(--ve-heading);
-  color: var(--ve-bg);
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label:hover {
+  color: var(--ve-heading);
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch input {
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label[data-ve-checked="true"] {
+  background: color-mix(in srgb, var(--ve-text) 9%, transparent);
+  color: var(--ve-heading);
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch input {
   position: absolute;
-  inset: -1px;
+  inset: -7px 0;
   margin: 0;
   opacity: 0;
   cursor: pointer;
 }
 
-.ve-diagram-modes .ve-diagram-mode-switch label:has(input:focus-visible) {
-  outline: 3px solid var(--ve-accent);
-  outline-offset: 2px;
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label:has(input:focus-visible) {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 1px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

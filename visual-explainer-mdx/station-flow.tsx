@@ -3,6 +3,7 @@
 // to the next box) in Simple and Detailed modes, and follows the page's diagram mode. The numbers
 // are the numbers of a Steps list, so the figure and the steps read as one.
 import { useId } from 'react';
+import { useStepThrough } from './content-blocks';
 import { useDiagramMode, type DiagramModeGraph } from './diagram-modes';
 import type { DiagramNode } from './diagram-types';
 import './station-flow.css';
@@ -28,6 +29,8 @@ export type StationFlowProps = { simple: Graph; detailed: Graph; title: string; 
 export function StationFlow({ simple, detailed, title, description }: StationFlowProps) {
   const rawId = useId().replace(/:/g, '');
   const [mode, setMode] = useDiagramMode();
+  const stepper = useStepThrough();
+  const active = stepper?.live ? stepper.current + 1 : null;
   // Each Simple box keeps its number in both modes; a Detailed box with no Simple twin is unnumbered.
   const number = new Map(simple.nodes.map((n, i) => [n.id, i + 1]));
   const graph = mode === 'detailed' && chainOrder(detailed) ? detailed : simple;
@@ -42,27 +45,38 @@ export function StationFlow({ simple, detailed, title, description }: StationFlo
   const label = { simple: 'Simple', detailed: 'Detailed' } as const;
   return (
     <figure aria-label={title} className="ve-diagram-modes ve-stations" data-ve-diagram-modes data-ve-mode={mode} data-ve-stations>
-      <fieldset className="ve-diagram-mode-switch">
-        <legend><span className="ve-visually-hidden">{title}: </span>View</legend>
-        {(['simple', 'detailed'] as const).map((option) => (
-          <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
-            <input checked={mode === option} name={`ve-stations-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
-            <span>{label[option]}</span>
-          </label>
-        ))}
-      </fieldset>
+      <div className="ve-figure-head">
+        <p className="ve-figure-title">{title}</p>
+        <fieldset className="ve-diagram-mode-switch">
+          <legend>{title}: view</legend>
+          {(['simple', 'detailed'] as const).map((option) => (
+            <label data-ve-checked={mode === option ? 'true' : undefined} key={option}>
+              <input checked={mode === option} name={`ve-stations-mode-${rawId}`} onChange={() => setMode(option)} type="radio" value={option} />
+              <span>{label[option]}</span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
       <div className="ve-stations-track" style={{ gridTemplateColumns: `${'minmax(0, 1fr) 1.25rem '.repeat(nodes.length - 1)}minmax(0, 1fr)` }}>
         <ol className="ve-stations-row">
           {nodes.map((n, i) => {
             const back = backs.filter((e) => e.from === n.id);
             return (
-              <li className="ve-station" data-ve-shape={n.shape ?? 'rect'} key={n.id} style={{ gridColumn: 2 * i + 1 }}>
+              <li aria-current={active !== null && number.get(n.id) === active ? 'step' : undefined} className="ve-station" data-ve-active={active !== null && number.get(n.id) === active ? 'true' : undefined} data-ve-shape={n.shape ?? 'rect'} key={n.id} style={{ gridColumn: 2 * i + 1 }}>
                 {via(n, i) ? <span className="ve-station-via"><svg aria-hidden="true" height="10" viewBox="0 0 14 14" width="10"><path d="M1 7h11M8 3l4 4-4 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" /></svg>{via(n, i)}</span> : null}
-                <span className="ve-station-box">
-                  {number.has(n.id) ? <span className="ve-station-number">{number.get(n.id)}</span> : <span aria-hidden="true" className="ve-station-number" data-ve-extra="true" />}
-                  <span className="ve-station-label" data-ve-code={mode === 'detailed' ? 'true' : undefined}>{n.label}</span>
-                  {n.detail ? <span className="ve-station-detail">{n.detail}</span> : null}
-                </span>
+                {stepper?.live && number.has(n.id) && number.get(n.id)! <= stepper.count ? (
+                  <button aria-label={`Show step ${number.get(n.id)}: ${n.label}`} className="ve-station-box" data-ve-station-button onClick={() => stepper.set(number.get(n.id)! - 1)} type="button">
+                    <span className="ve-station-number">{number.get(n.id)}</span>
+                    <span className="ve-station-label" data-ve-code={mode === 'detailed' ? 'true' : undefined}>{n.label}</span>
+                    {n.detail ? <span className="ve-station-detail">{n.detail}</span> : null}
+                  </button>
+                ) : (
+                  <span className="ve-station-box">
+                    {number.has(n.id) ? <span className="ve-station-number">{number.get(n.id)}</span> : <span aria-hidden="true" className="ve-station-number" data-ve-extra="true" />}
+                    <span className="ve-station-label" data-ve-code={mode === 'detailed' ? 'true' : undefined}>{n.label}</span>
+                    {n.detail ? <span className="ve-station-detail">{n.detail}</span> : null}
+                  </span>
+                )}
                 {back.map((e) => <span className="ve-station-back" key={e.to}>Back to {name(e.to)}{e.label ? `: ${e.label}` : ''}</span>)}
               </li>
             );

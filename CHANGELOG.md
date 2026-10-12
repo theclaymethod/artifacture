@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Scan-first explainers
+- One type scale for explainer pages (`themes.css`): prose body and lead at 1.6, h2 to h4 by size and weight, UI text at 15 and 14px and labels at 13px at 1.4, code at 14px and 1.5, and the weights 400 and 600 only. The shell text is UI 15px; prose roles keep the reading face. Figures are tabular in the UI face. Headings balance and paragraphs wrap pretty.
+- Code never wraps: a code block scrolls sideways, and the line gutter of a `CodeRef` stays in place while it scrolls. A step or a list item that holds code or a table takes the column; only its text keeps the prose measure.
+- `Breakable` (`breakable.tsx`): a path wraps only after a `/` and a name only after a `_` or `-`, never inside a word. Code captions, `DataTable` ID cells, file paths and worked-example values use it.
+- Worked examples: the table sizes its columns to its values; text that a tool wrote for a person shows as a quote in the UI face with a 1px rule; In, Decision and Out are sentence-case labels; the station of a step is a muted line under its name; the stations and the step controls share one height; Next is a quiet control, the same as Previous.
 - Added a chapter rail to `ExplainerShell` (`chapterNav`): a sticky side rail at 1200px and wider, a compact top bar with a disclosure list below that, `aria-current` tracking while the reader scrolls, fragment links, Escape to close, and smooth scrolling only without a reduced-motion preference. `Section` takes `id`, `navLabel` and `anchors`. With a rail, the review tool docks under it.
 - Added `appearance="auto"` to `ExplainerShell`, which follows `prefers-color-scheme` with the ISO dark tokens; code keeps a dark plate in dark mode.
 - Added `DataTable`, `StatusPill`, `Badge` and `Legend`: a sticky header, zebra rows, right-aligned tabular numbers, monospace IDs, state pills, flag badges, and labelled cards below 640px.
