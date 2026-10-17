@@ -1856,6 +1856,7 @@ export function PresentationDeck({
       className="ve-pres-root"
       data-ve-preset={preset}
       data-ve-presentation="true"
+      data-presentation-slide-count={count}
       style={{
         position: 'fixed',
         inset: 0,

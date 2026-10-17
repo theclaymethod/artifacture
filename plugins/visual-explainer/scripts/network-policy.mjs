@@ -14,7 +14,7 @@ function parsedOrigin(rawUrl) {
   }
 }
 
-export function isAllowedBrowserRequest(rawUrl, { additionalOrigins = [] } = {}) {
+export function isAllowedBrowserRequest(rawUrl, { additionalOrigins = [], purpose = 'artifact' } = {}) {
   let url;
   try {
     url = new URL(rawUrl);
@@ -22,6 +22,9 @@ export function isAllowedBrowserRequest(rawUrl, { additionalOrigins = [] } = {})
     return false;
   }
 
+  if (purpose === 'image') return url.protocol === 'data:' || rawUrl === 'about:blank';
+  if (purpose === 'corpus') return url.protocol === 'data:' || url.protocol === 'blob:' || rawUrl === 'about:blank';
+  if (purpose !== 'artifact') throw new Error(`Unsupported browser purpose: ${purpose}`);
   if (PASS_THROUGH_PROTOCOLS.has(url.protocol)) return true;
   if (FONT_ORIGINS.has(url.origin)) return true;
   if (url.origin === MERMAID_ORIGIN && url.pathname.startsWith(MERMAID_PATH_PREFIX)) return true;

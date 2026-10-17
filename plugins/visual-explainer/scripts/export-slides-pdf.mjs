@@ -26,17 +26,16 @@
  * Generalized for the visual-explainer skill's slide / magazine templates.
  */
 
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { isAllowedBrowserRequest } from './network-policy.mjs';
+import { detectProfile, isFixedStagePresentation } from './verify/lib/profile.mjs';
 
-// Dynamic import so we can fail with an actionable message instead of a raw
-// ERR_MODULE_NOT_FOUND trace when Playwright isn't installed.
-let chromium;
+let openBrowserSession;
+let settleBrowserArtifact;
 try {
-  ({ chromium } = await import('playwright'));
-} catch {
+  ({ openBrowserSession, settleBrowserArtifact } = await import('./browser-owner.mjs'));
+} catch (error) {
+  if (error.code !== 'ERR_MODULE_NOT_FOUND' || !/['"]playwright-core['"]/.test(error.message)) throw error;
   console.error(`\nexport-slides-pdf.mjs: playwright is not installed.
 
 Install it in the current directory (or any ancestor where Node can resolve it):
@@ -74,17 +73,15 @@ if (!fs.existsSync(absInput)) {
 }
 
 let htmlContent = fs.readFileSync(absInput, 'utf-8');
-const inputDir = path.dirname(absInput);
 
-// Auto-detect mode from the DOM when the user didn't specify.
-let mode = flags.mode;
-if (!mode) {
-  if (htmlContent.includes('scroll-snap-type: x')) mode = 'magazine';
-  else if (/class="[^"]*\bslide\b/.test(htmlContent) || htmlContent.includes("class='slide'")) mode = 'slides';
-  else mode = 'scroll';
-}
+const layout = detectProfile(absInput, htmlContent);
+const inferredMode = isFixedStagePresentation(htmlContent) ? 'scroll'
+  : { slides: 'slides', magazine: 'magazine' }[layout]
+    || (/<[^>]+\bclass=["'][^"']*\bslide\b/i.test(htmlContent) ? 'slides' : 'scroll');
+const mode = flags.mode || inferredMode;
+if (!['slides', 'magazine', 'scroll'].includes(mode)) throw new Error(`Unsupported PDF mode: ${mode}`);
 
-const defaultSelector = { slides: '.slide', magazine: '.page', scroll: null }[mode];
+const defaultSelector = { slides: '.slide, [data-ve-deck="vertical"] > section', magazine: '.page, [data-ve-deck="horizontal"] > section', scroll: null }[mode];
 const perPageSelector = flags.selector || defaultSelector;
 
 const orientation = flags.orientation
@@ -205,242 +202,195 @@ const printCss = mode === 'scroll' ? `
 htmlContent = htmlContent.replace('</head>', `${printCss}\n</head>`);
 htmlContent = htmlContent.replace('</body>', `${chartFixScript}\n</body>`);
 
-// ---------- 3. Serve the patched HTML over HTTP ----------
-// file:// blocks script execution in some Chromium configs and breaks relative
-// asset paths. A throwaway HTTP server keeps both working.
-const port = 9870 + Math.floor(Math.random() * 100);
-const server = http.createServer((req, res) => {
-  const url = req.url === '/' ? '/index.html' : req.url;
-  if (url === '/index.html') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(htmlContent);
-    return;
-  }
-  // Serve sibling assets (images, fonts, etc.) from the input's directory.
-  const resolved = path.resolve(inputDir, '.' + path.sep + decodeURIComponent(url.split('?')[0]));
-  if ((!resolved.startsWith(inputDir + path.sep) && resolved !== inputDir) || !fs.existsSync(resolved)) {
-    res.writeHead(404);
-    res.end('not found');
-    return;
-  }
-  const assetPath = resolved;
-  const ext = path.extname(assetPath).toLowerCase();
-  const ct = {
-    '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg',
-    '.gif':'image/gif', '.webp':'image/webp', '.svg':'image/svg+xml',
-    '.woff':'font/woff', '.woff2':'font/woff2', '.ttf':'font/ttf',
-    '.css':'text/css', '.js':'application/javascript',
-    '.webm':'video/webm', '.mp4':'video/mp4'
-  }[ext] || 'application/octet-stream';
-  res.writeHead(200, { 'Content-Type': ct });
-  fs.createReadStream(assetPath).pipe(res);
-});
-await new Promise(resolve => server.listen(port, '127.0.0.1', resolve));
-
-// ---------- 4. Render ----------
-const browser = await chromium.launch();
-const context = await browser.newContext({
-  viewport: { width: pageWidth, height: pageHeight },
-  deviceScaleFactor: 2,
-});
-const page = await context.newPage();
-const localOrigin = `http://127.0.0.1:${port}`;
-await page.route('**/*', (route) => {
-  const url = route.request().url();
-  return isAllowedBrowserRequest(url, { additionalOrigins: [localOrigin] })
-    ? route.continue()
-    : route.abort('blockedbyclient');
-});
-
+let session;
 try {
-  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'networkidle', timeout: 20000 });
-} catch (err) {
-  console.error(`Navigation failed: ${err.message}`);
-  await browser.close();
-  server.close();
-  process.exit(1);
-}
-
-// Canvas → image swap has a 1.2s delay. Any canvas observed by the conversion
-// pass must complete before export; if readiness times out, a canvas still in
-// the DOM makes the export fail closed.
-let canvasState;
-let canvasReadinessError;
-try {
-  await page.waitForFunction(
-    () => window.__vePdfCanvasState?.complete === true,
-    undefined,
-    { timeout: 6000 },
-  );
-  canvasState = await page.evaluate(() => window.__vePdfCanvasState);
-} catch (error) {
-  canvasReadinessError = error;
-}
-
-let canvasFailure;
-if (canvasState) {
-  const remainingCanvases = await page.locator('canvas').count();
-  if (
-    canvasState.failures > 0
-    || canvasState.converted !== canvasState.expected
-    || remainingCanvases > 0
-  ) {
-    canvasFailure = `converted ${canvasState.converted} of ${canvasState.expected} canvas elements; ${remainingCanvases} remain`;
+  session = await openBrowserSession({ artifact: { filePath: absInput, html: htmlContent }, purpose: 'artifact' });
+  const { page, context } = await session.newPage({
+    viewport: { width: pageWidth, height: pageHeight },
+    deviceScaleFactor: 2,
+  });
+  try {
+    await page.goto(session.url, { waitUntil: 'networkidle', timeout: 20000 });
+  } catch (error) {
+    throw new Error(`Navigation failed: ${error.message}`);
   }
-} else {
-  const observedCanvases = await page.locator('canvas').count();
-  if (observedCanvases > 0) {
-    canvasFailure = canvasReadinessError?.message || 'readiness state was not reported';
+  const settlement = await settleBrowserArtifact(page);
+  if (settlement.mermaidError) throw new Error(settlement.mermaidError);
+
+  // Canvas → image swap has a 1.2s delay. Any canvas observed by the conversion
+  // pass must complete before export; if readiness times out, a canvas still in
+  // the DOM makes the export fail closed.
+  let canvasState;
+  let canvasReadinessError;
+  try {
+    await page.waitForFunction(
+      () => window.__vePdfCanvasState?.complete === true,
+      undefined,
+      { timeout: 6000 },
+    );
+    canvasState = await page.evaluate(() => window.__vePdfCanvasState);
+  } catch (error) {
+    canvasReadinessError = error;
   }
-}
 
-if (canvasFailure) {
-  console.error(`Canvas preparation failed; PDF was not exported (${canvasFailure}).`);
-  await browser.close();
-  server.close();
-  process.exit(1);
-}
+  let canvasFailure;
+  if (canvasState) {
+    const remainingCanvases = await page.locator('canvas').count();
+    if (
+      canvasState.failures > 0
+      || canvasState.converted !== canvasState.expected
+      || remainingCanvases > 0
+    ) {
+      canvasFailure = `converted ${canvasState.converted} of ${canvasState.expected} canvas elements; ${remainingCanvases} remain`;
+    }
+  } else {
+    const observedCanvases = await page.locator('canvas').count();
+    if (observedCanvases > 0) {
+      canvasFailure = canvasReadinessError?.message || 'readiness state was not reported';
+    }
+  }
 
-// ---------- Print-time DOM surgery ----------
-// CSS-only pagination is brittle: :last-child selectors miss because of
-// trailing whitespace nodes, flex-centered Mermaid wrappers collapse to the
-// SVG's intrinsic size instead of the slide width, and fixed chrome leaks
-// onto the trailing page Chromium inserts after the last break-after.
-// Handle all three explicitly in the live DOM before the PDF snapshot.
-if (mode !== 'scroll') {
-  await page.evaluate(({ selector, pageWidth, pageHeight }) => {
-    const slides = Array.from(document.querySelectorAll(selector));
-    slides.forEach((s, i) => {
-      s.style.setProperty('break-after',
-        i === slides.length - 1 ? 'avoid' : 'page', 'important');
-      s.style.setProperty('page-break-after',
-        i === slides.length - 1 ? 'avoid' : 'always', 'important');
-      s.style.setProperty('break-inside', 'avoid', 'important');
-      s.style.setProperty('page-break-inside', 'avoid', 'important');
-      s.style.setProperty('width',  pageWidth  + 'px', 'important');
-      s.style.setProperty('height', pageHeight + 'px', 'important');
-      s.style.setProperty('min-height', pageHeight + 'px', 'important');
-      s.style.setProperty('max-height', pageHeight + 'px', 'important');
-      s.style.setProperty('overflow', 'hidden', 'important');
-    });
+  if (canvasFailure) {
+    throw new Error(`Canvas preparation failed; PDF was not exported (${canvasFailure}).`);
+  }
 
-    // Mermaid flex-center collapse: force the .mermaid wrapper AND its SVG
-    // to fill the parent .mermaid-wrap. Undo any live zoom transform.
-    document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
-      wrap.style.setProperty('overflow', 'hidden', 'important');
-      const mer = wrap.querySelector('.mermaid');
-      if (mer) {
-        mer.style.setProperty('width', '100%', 'important');
-        mer.style.setProperty('height', '100%', 'important');
-        mer.style.setProperty('zoom', '1', 'important');
-        mer.style.setProperty('transform', 'none', 'important');
-        mer.style.setProperty('display', 'flex', 'important');
-        mer.style.setProperty('align-items', 'center', 'important');
-        mer.style.setProperty('justify-content', 'center', 'important');
-      }
-      wrap.querySelectorAll('svg').forEach(svg => {
-        svg.removeAttribute('width');
-        svg.removeAttribute('height');
-        svg.style.setProperty('width', '100%', 'important');
-        svg.style.setProperty('height', '100%', 'important');
-        svg.style.setProperty('max-width', '100%', 'important');
-        svg.style.setProperty('max-height', '100%', 'important');
+  if (mode !== 'scroll') {
+    await page.evaluate(({ selector, pageWidth, pageHeight }) => {
+      const slides = Array.from(document.querySelectorAll(selector));
+      slides.forEach((s, i) => {
+        s.style.setProperty('break-after',
+          i === slides.length - 1 ? 'avoid' : 'page', 'important');
+        s.style.setProperty('page-break-after',
+          i === slides.length - 1 ? 'avoid' : 'always', 'important');
+        s.style.setProperty('break-inside', 'avoid', 'important');
+        s.style.setProperty('page-break-inside', 'avoid', 'important');
+        s.style.setProperty('width',  pageWidth  + 'px', 'important');
+        s.style.setProperty('height', pageHeight + 'px', 'important');
+        s.style.setProperty('min-height', pageHeight + 'px', 'important');
+        s.style.setProperty('max-height', pageHeight + 'px', 'important');
+        s.style.setProperty('overflow', 'hidden', 'important');
       });
-    });
 
-    // Fixed chrome (progress bars, nav dots, scroll hints, page counter) has
-    // position: fixed, so it repeats on every printed page. Hide it here
-    // regardless of what the original class names were.
-    const chromeSelectors = [
-      '.theme-toggle', '.deck-progress', '.deck-dots', '.deck-nav',
-      '.mag-nav', '.mag-nav__dots', '.mag-counter',
-      '.slide__progress', '.slide-counter', '.slide-index',
-      '.zoom-controls', '.diagram-shell__hint'
-    ];
-    document.querySelectorAll(chromeSelectors.join(',')).forEach(el => {
-      el.style.setProperty('display', 'none', 'important');
-    });
+      // Mermaid flex-center collapse: force the .mermaid wrapper AND its SVG
+      // to fill the parent .mermaid-wrap. Undo any live zoom transform.
+      document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
+        wrap.style.setProperty('overflow', 'hidden', 'important');
+        const mer = wrap.querySelector('.mermaid');
+        if (mer) {
+          mer.style.setProperty('width', '100%', 'important');
+          mer.style.setProperty('height', '100%', 'important');
+          mer.style.setProperty('zoom', '1', 'important');
+          mer.style.setProperty('transform', 'none', 'important');
+          mer.style.setProperty('display', 'flex', 'important');
+          mer.style.setProperty('align-items', 'center', 'important');
+          mer.style.setProperty('justify-content', 'center', 'important');
+        }
+        wrap.querySelectorAll('svg').forEach(svg => {
+          svg.removeAttribute('width');
+          svg.removeAttribute('height');
+          svg.style.setProperty('width', '100%', 'important');
+          svg.style.setProperty('height', '100%', 'important');
+          svg.style.setProperty('max-width', '100%', 'important');
+          svg.style.setProperty('max-height', '100%', 'important');
+        });
+      });
 
-    // Any position:fixed element we didn't name: if it's outside every slide,
-    // drop it too. Scroll-to-navigate hints and similar helpers fall into
-    // this bucket.
-    document.querySelectorAll('body *').forEach(el => {
-      if (el.closest(selector)) return;
-      const cs = getComputedStyle(el);
-      if (cs.position === 'fixed' && cs.display !== 'none') {
+      // Fixed chrome (progress bars, nav dots, scroll hints, page counter) has
+      // position: fixed, so it repeats on every printed page. Hide it here
+      // regardless of what the original class names were.
+      const chromeSelectors = [
+        '.theme-toggle', '.deck-progress', '.deck-dots', '.deck-nav',
+        '.mag-nav', '.mag-nav__dots', '.mag-counter',
+        '.slide__progress', '.slide-counter', '.slide-index',
+        '.zoom-controls', '.diagram-shell__hint'
+      ];
+      document.querySelectorAll(chromeSelectors.join(',')).forEach(el => {
         el.style.setProperty('display', 'none', 'important');
-      }
+      });
+
+      // Any position:fixed element we didn't name: if it's outside every slide,
+      // drop it too. Scroll-to-navigate hints and similar helpers fall into
+      // this bucket.
+      document.querySelectorAll('body *').forEach(el => {
+        if (el.closest(selector)) return;
+        const cs = getComputedStyle(el);
+        if (cs.position === 'fixed' && cs.display !== 'none') {
+          el.style.setProperty('display', 'none', 'important');
+        }
+      });
+    }, { selector: perPageSelector, pageWidth, pageHeight });
+  }
+
+  if (mode === 'scroll') {
+    // Flow-based pagination: let Chromium paginate the long page naturally.
+    await page.emulateMedia({ media: 'print' });
+    await page.waitForTimeout(400);
+    await page.pdf({
+      path: absOutput,
+      printBackground: true,
+      margin: { top: '0', bottom: '0', left: '0', right: '0' },
+      width: `${pageWidth}px`,
+      height: `${pageHeight}px`,
+      preferCSSPageSize: true,
     });
-  }, { selector: perPageSelector, pageWidth, pageHeight });
+  } else {
+    // Slide / magazine mode: screenshot each slide independently, then composite
+    // them into a multi-page PDF via an off-screen HTML that stacks the images
+    // with a hard page break between each. This avoids the trailing-blank-page
+    // quirk Chromium produces when `break-after: page` cascades past the last
+    // element, and also sidesteps any live-scroll / flex-collapse bugs in the
+    // slide templates.
+    const slides = await page.$$(perPageSelector);
+    if (slides.length === 0) {
+      throw new Error(`No elements matched selector "${perPageSelector}"; check --selector or --mode.`);
+    }
+
+    const shots = [];
+    for (let i = 0; i < slides.length; i++) {
+      const buf = await slides[i].screenshot({ type: 'png', omitBackground: false });
+      shots.push(buf.toString('base64'));
+    }
+
+    const compositeHtml = `<!doctype html><meta charset="utf-8">
+  <style>
+    @page { size: ${pageWidth}px ${pageHeight}px; margin: 0; }
+    html, body { margin: 0; padding: 0; background: #000; }
+    .pg {
+      width: ${pageWidth}px;
+      height: ${pageHeight}px;
+      display: block;
+      break-after: page;
+      page-break-after: always;
+      overflow: hidden;
+    }
+    .pg:last-child { break-after: auto; page-break-after: auto; }
+    .pg img { width: 100%; height: 100%; display: block; }
+  </style>
+  ${shots.map(b64 => `<section class="pg"><img src="data:image/png;base64,${b64}"></section>`).join('')}`;
+
+    const composite = await context.newPage();
+    await composite.setContent(compositeHtml, { waitUntil: 'load' });
+    await composite.emulateMedia({ media: 'print' });
+    await composite.pdf({
+      path: absOutput,
+      printBackground: true,
+      margin: { top: '0', bottom: '0', left: '0', right: '0' },
+      width: `${pageWidth}px`,
+      height: `${pageHeight}px`,
+      preferCSSPageSize: true,
+    });
+    await composite.close();
+  }
+
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
+} finally {
+  await session?.close();
 }
 
-if (mode === 'scroll') {
-  // Flow-based pagination: let Chromium paginate the long page naturally.
-  await page.emulateMedia({ media: 'print' });
-  await page.waitForTimeout(400);
-  await page.pdf({
-    path: absOutput,
-    printBackground: true,
-    margin: { top: '0', bottom: '0', left: '0', right: '0' },
-    width: `${pageWidth}px`,
-    height: `${pageHeight}px`,
-    preferCSSPageSize: true,
-  });
-} else {
-  // Slide / magazine mode: screenshot each slide independently, then composite
-  // them into a multi-page PDF via an off-screen HTML that stacks the images
-  // with a hard page break between each. This avoids the trailing-blank-page
-  // quirk Chromium produces when `break-after: page` cascades past the last
-  // element, and also sidesteps any live-scroll / flex-collapse bugs in the
-  // slide templates.
-  const slides = await page.$$(perPageSelector);
-  if (slides.length === 0) {
-    console.error(`No elements matched selector "${perPageSelector}" — check --selector or --mode.`);
-    await browser.close();
-    server.close();
-    process.exit(1);
-  }
-
-  const shots = [];
-  for (let i = 0; i < slides.length; i++) {
-    const buf = await slides[i].screenshot({ type: 'png', omitBackground: false });
-    shots.push(buf.toString('base64'));
-  }
-
-  const compositeHtml = `<!doctype html><meta charset="utf-8">
-<style>
-  @page { size: ${pageWidth}px ${pageHeight}px; margin: 0; }
-  html, body { margin: 0; padding: 0; background: #000; }
-  .pg {
-    width: ${pageWidth}px;
-    height: ${pageHeight}px;
-    display: block;
-    break-after: page;
-    page-break-after: always;
-    overflow: hidden;
-  }
-  .pg:last-child { break-after: auto; page-break-after: auto; }
-  .pg img { width: 100%; height: 100%; display: block; }
-</style>
-${shots.map(b64 => `<section class="pg"><img src="data:image/png;base64,${b64}"></section>`).join('')}`;
-
-  const composite = await context.newPage();
-  await composite.setContent(compositeHtml, { waitUntil: 'load' });
-  await composite.emulateMedia({ media: 'print' });
-  await composite.pdf({
-    path: absOutput,
-    printBackground: true,
-    margin: { top: '0', bottom: '0', left: '0', right: '0' },
-    width: `${pageWidth}px`,
-    height: `${pageHeight}px`,
-    preferCSSPageSize: true,
-  });
-  await composite.close();
+if (!process.exitCode) {
+  const bytes = fs.statSync(absOutput).size;
+  const kb = Math.round(bytes / 1024);
+  console.log(`PDF exported: ${absOutput} (${kb} KB, mode=${mode}, ${pageWidth}×${pageHeight})`);
 }
-
-await browser.close();
-server.close();
-
-const bytes = fs.statSync(absOutput).size;
-const kb = Math.round(bytes / 1024);
-console.log(`PDF exported: ${absOutput} (${kb} KB, mode=${mode}, ${pageWidth}×${pageHeight})`);

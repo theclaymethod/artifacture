@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright';
+import { openBrowserSession, settleBrowserArtifact } from '../../plugins/visual-explainer/scripts/browser-owner.mjs';
 import {
   DEFAULT_VIEWPORT,
   expandCorpus,
@@ -89,12 +89,12 @@ export async function renderCorpus({
     ? path.resolve(outputRoot)
     : path.dirname(cases[0]?.image.path || path.resolve('corpus/rendered/placeholder.png'));
   await fs.mkdir(root, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await openBrowserSession({ purpose: 'corpus' });
   const renderHashes = new Map();
   const caseByHash = new Map();
   const renderedImages = [];
   try {
-    const page = await browser.newPage({
+    const { page } = await browser.newPage({
       viewport: DEFAULT_VIEWPORT,
       deviceScaleFactor: 1,
       colorScheme: 'light',
@@ -102,6 +102,8 @@ export async function renderCorpus({
     for (const evalCase of cases) {
       await page.setViewportSize(evalCase.viewport || DEFAULT_VIEWPORT);
       await page.setContent(renderCaseHtml(evalCase), { waitUntil: 'load' });
+      const settlement = await settleBrowserArtifact(page);
+      if (settlement.mermaidError) throw new Error(settlement.mermaidError);
       const file = path.join(root, `${evalCase.image.id}.png`);
       const bytes = await page.screenshot({ path: file, type: 'png' });
       const hash = crypto.createHash('sha256').update(bytes).digest('hex');

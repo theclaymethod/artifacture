@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test, { describe } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { runBrowserStage } from '../plugins/visual-explainer/scripts/verify/lib/browser.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = path.join(ROOT, 'evals/fixtures/deck-review/presentation-states.html');
@@ -112,3 +113,94 @@ test('public bounded recapture retains paired context and rejects stale or unpai
     fs.rmSync(workDir, { recursive: true, force: true });
   }
 });
+
+test('browser verification records a failing metric when declared Mermaid content never renders', async () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-mermaid-readiness-'));
+  const artifact = path.join(workDir, 'poster.html');
+  const screensDir = path.join(workDir, 'screens');
+  const html = '<!doctype html><html><body><main><div class="mermaid">graph TD; A--&gt;B</div></main></body></html>';
+  fs.writeFileSync(artifact, html);
+  const ctx = {
+    filePath: artifact,
+    html,
+    profile: 'poster',
+    preset: 'custom',
+    flags: { hasAnimations: false, hasMermaid: true },
+  };
+
+  try {
+    const result = await runBrowserStage(ctx, {
+      screensDir,
+      profile: 'poster',
+      captureDeckReview: false,
+      mermaidTimeoutMs: 100,
+    });
+    const metric = result.runs[0].metrics['mermaid-rendered'];
+    assert.match(metric.readinessError, /Mermaid rendering did not complete within 100ms/);
+    assert.equal(metric.offenders.length > 0, true);
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  }
+});
+
+test('browser verification recognizes the component-backed Mermaid shell', async () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-mermaid-shell-'));
+  const artifact = path.join(workDir, 'poster.html');
+  const screensDir = path.join(workDir, 'screens');
+  const html = '<!doctype html><html><body><main><figure data-ve-mermaid-shell><div><svg role="img"></svg></div></figure></main></body></html>';
+  fs.writeFileSync(artifact, html);
+  const ctx = {
+    filePath: artifact,
+    html,
+    profile: 'poster',
+    preset: 'custom',
+    flags: { hasAnimations: false, hasMermaid: true },
+  };
+
+  try {
+    const result = await runBrowserStage(ctx, {
+      screensDir,
+      profile: 'poster',
+      captureDeckReview: false,
+      mermaidTimeoutMs: 100,
+    });
+    assert.equal(result.runs.length > 0, true);
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  }
+});
+
+
+for (const ids of [
+  ['Case', 'middle', 'case'],
+  ['punctuation.dot', 'middle', 'punctuation-dot'],
+  [`${'x'.repeat(80)}one`, 'middle', `${'x'.repeat(80)}two`],
+]) {
+  test(`distinct authored slide ids retain distinct evidence after normalization: ${ids[0].slice(0, 20)}`, async () => {
+    const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifacture-state-ids-'));
+    const artifact = path.join(workDir, 'slides.html');
+    const colors = ['#ffc0cb', '#90ee90', '#add8e6'];
+    const html = `<!doctype html><html><head><style>html,body{margin:0}section{height:100vh}</style></head><body data-ve-deck="vertical">${ids.map((id, index) => `<section class="slide" data-slide-id="${id}" style="background:${colors[index]}"><h1>Content ${index}</h1></section>`).join('')}</body></html>`;
+    fs.writeFileSync(artifact, html);
+    try {
+      const result = await runBrowserStage({ filePath: artifact, html, profile: 'slides', flags: {} }, { screensDir: path.join(workDir, 'screens') });
+      for (const run of result.runs) {
+        const units = run.deckReview.units;
+        assert.equal(units.length, 3);
+        assert.equal(new Set(units.map((unit) => unit.state_id)).size, 3);
+        assert.equal(new Set(units.map((unit) => unit.screenshot_path)).size, 3);
+        assert.equal(new Set(units.map((unit) => fs.readFileSync(unit.screenshot_path).toString('base64'))).size, 3);
+        assert.equal(units[1].state_id, 'middle--base');
+      }
+      const legacy = `${ids[0].toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 80)}--base`;
+      const previous = process.env.ARTIFACTURE_DECK_REVIEW_STATES;
+      try {
+        process.env.ARTIFACTURE_DECK_REVIEW_STATES = legacy;
+        await assert.rejects(runBrowserStage({ filePath: artifact, html, profile: 'slides', flags: {} }, { screensDir: path.join(workDir, 'filtered') }), /Ambiguous legacy deck review state.*use one of/);
+      } finally {
+        if (previous === undefined) delete process.env.ARTIFACTURE_DECK_REVIEW_STATES;
+        else process.env.ARTIFACTURE_DECK_REVIEW_STATES = previous;
+      }
+    } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+  });
+}

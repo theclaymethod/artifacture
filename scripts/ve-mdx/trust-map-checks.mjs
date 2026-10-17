@@ -334,7 +334,7 @@ export function defaultSteLint() {
 }
 
 /**
- * One run of the STE lint over the copy, one block per line; each hard violation is an error. The
+ * One run of the STE lint over the copy, one paragraph per block; each hard violation is an error. The
  * copy is the narrative and the text of the components outside their records. A record (a claim,
  * a check, an invariant) holds the values that understando derives from the map.
  */
@@ -343,7 +343,7 @@ function lintSte(body, script) {
   if (!existsSync(script)) throw new Error(`the STE lint is not at ${script}. ${off}`);
   const blocks = textBlocks(body, NOT_COPY).filter((b) => b.role !== 'record');
   // One line for each block. A line that opens with a fence mark would hide the lines after it.
-  const input = blocks.map((b) => b.text.replace(/^(```|~~~)+/, '')).join('\n') + '\n';
+  const input = blocks.map((b) => b.text.replace(/^(```|~~~)+/, '')).join('\n\n') + '\n';
   const lint = spawnSync('python3', ['-I', script, '--json'], { input, encoding: 'utf8', maxBuffer: 1 << 26 });
   if (lint.error) throw new Error(`the STE lint cannot run python3: ${lint.error.message}. ${off}`);
   let report;
@@ -353,7 +353,7 @@ function lintSte(body, script) {
     throw new Error(`the STE lint gave no report (exit ${lint.status}): ${lint.stderr.trim()}`);
   }
   return report.violations.filter((v) => v.level === 'advisory-free').map((v) => {
-    const block = blocks[v.line - 1];
+    const block = blocks[Math.floor((v.line - 1) / 2)];
     return `${block.where}: STE ${v.rule}: ${v.message} [${v.match}] in "${around(block.text, v.col - 1)}"`;
   });
 }

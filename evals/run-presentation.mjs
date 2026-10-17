@@ -19,32 +19,59 @@
  * Run: npm run ve:eval-presentation   (CI: evals job, after ve:eval)
  */
 import { spawnSync } from 'node:child_process';
-import { availableParallelism } from 'node:os';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright';
+import { openBrowserSession, settleBrowserArtifact } from '../plugins/visual-explainer/scripts/browser-owner.mjs';
 
 const EVAL_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(EVAL_ROOT, '..');
 const DEMO_SOURCE = 'examples/visual-explainer-mdx/presentation-deck.tsx';
 const SECOND_PRESET = 'algebrica';
 
-const cases = [];
 const results = [];
 const consoleErrors = [];
+const cases = [];
+const caseErrors = new AsyncLocalStorage();
 
-function schedule(group, id, run) {
-  cases.push(() => record(group, id, run));
+function record(group, id, run) {
+  cases.push({ group, id, run });
 }
 
-async function record(group, id, run) {
-  try {
-    await run();
-    results.push({ group, id, status: 'pass' });
-  } catch (error) {
-    results.push({ group, id, status: 'fail', detail: error instanceof Error ? error.message : String(error) });
+function errorDetail(error) {
+  return error instanceof AggregateError
+    ? error.errors.map(errorDetail).join('; ')
+    : error instanceof Error ? error.message : String(error);
+}
+
+async function executeCase(index) {
+  const { group, id, run } = cases[index];
+  const errors = [];
+  await caseErrors.run(errors, async () => {
+    try {
+      await run();
+      results[index] = { group, id, status: 'pass' };
+    } catch (error) {
+      results[index] = { group, id, status: 'fail', detail: errorDetail(error) };
+    }
+  });
+  return errors;
+}
+
+async function runCases() {
+  const terminal = cases.length - 1;
+  const errors = [];
+  let next = 0;
+  async function worker() {
+    while (next < terminal) {
+      const index = next++;
+      errors[index] = await executeCase(index);
+    }
   }
+  await Promise.all([worker(), worker()]);
+  consoleErrors.push(...errors.flat());
+  await executeCase(terminal);
 }
 
 function assert(condition, message) {
@@ -77,18 +104,29 @@ function exportDemo(sourcePath, outPath) {
 }
 
 async function withPage(browser, { viewport = { width: 1440, height: 900 }, reducedMotion = 'no-preference', url }, fn) {
-  const context = await browser.newContext({ viewport, reducedMotion });
-  const page = await context.newPage();
+  const errors = caseErrors.getStore() || consoleErrors;
+  const lease = await browser.newPage({ viewport, reducedMotion, artifact: { filePath: fileURLToPath(url) } });
+  const { page } = lease;
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error') errors.push(message.text());
   });
-  page.on('pageerror', (error) => consoleErrors.push(String(error)));
+  page.on('pageerror', (error) => errors.push(String(error)));
+  let callbackError;
   try {
-    await page.goto(url, { waitUntil: 'load' });
+    await page.goto(lease.url, { waitUntil: 'load' });
+    const settlement = await settleBrowserArtifact(page);
+    if (settlement.mermaidError) throw new Error(settlement.mermaidError);
     await page.waitForSelector('[data-stage]', { timeout: 10_000 });
     return await fn(page);
+  } catch (error) {
+    callbackError = error;
+    throw error;
   } finally {
-    await context.close();
+    try { await lease.close(); }
+    catch (cleanupError) {
+      if (callbackError) throw new AggregateError([callbackError, cleanupError]);
+      throw cleanupError;
+    }
   }
 }
 
@@ -139,15 +177,13 @@ async function main() {
   const primaryUrl = pathToFileURL(primaryHtml).href;
   const secondUrl = pathToFileURL(secondHtml).href;
 
-  const browser = await chromium.launch().catch((error) => {
-    throw new Error('Chromium is required for presentation E2E. Install it with npx playwright install chromium.', { cause: error });
-  });
+  const browser = await openBrowserSession({ purpose: 'artifact' });
   try {
     /* ------------------------------------------------------------ */
     /* interaction                                                   */
     /* ------------------------------------------------------------ */
 
-    schedule('interaction', 'keyboard-nav-matrix', () =>
+    record('interaction', 'keyboard-nav-matrix', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         const steps = [
           ['ArrowRight', 1],
@@ -173,7 +209,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'edge-click-zones', () =>
+    record('interaction', 'edge-click-zones', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await page.locator('[data-edge-next]').click({ position: { x: 40, y: 450 }, force: true });
         assert((await slideIndex(page)) === 1, 'right edge zone should advance');
@@ -182,7 +218,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'vertical-fallthrough-without-click-ins', () =>
+    record('interaction', 'vertical-fallthrough-without-click-ins', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         assert((await slideIndex(page)) === 0, 'fallthrough fixture must start on slide 0');
         await page.locator('[data-stage] [data-drill-target]').evaluateAll((triggers) => {
@@ -201,7 +237,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'vertical-drill-navigation', () =>
+    record('interaction', 'vertical-drill-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         const label = () => sheetOpen(page).getAttribute('aria-label');
@@ -243,7 +279,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'vertical-custom-state-navigation', () =>
+    record('interaction', 'vertical-custom-state-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 3);
         const stateIndex = () =>
@@ -278,7 +314,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'vertical-layer-explorer-navigation', () =>
+    record('interaction', 'vertical-layer-explorer-navigation', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 2);
         const pressedId = () =>
@@ -311,7 +347,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'drill-dismiss-guard-matrix', () =>
+    record('interaction', 'drill-dismiss-guard-matrix', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -330,7 +366,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'drill-escape-and-x-close', () =>
+    record('interaction', 'drill-escape-and-x-close', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -344,7 +380,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'drill-cta-open-contract', () =>
+    record('interaction', 'drill-cta-open-contract', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // Every sheet-opening trigger must open via click AND Enter AND Space.
         const triggers = [
@@ -373,7 +409,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'drill-cta-variant-styles', () =>
+    record('interaction', 'drill-cta-variant-styles', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         const styleOf = (selector) =>
           page.locator(selector).evaluate((el) => {
@@ -392,7 +428,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'layer-explorer-selection', () =>
+    record('interaction', 'layer-explorer-selection', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 2);
         assert((await sheetOpen(page).count()) === 0, 'explorer starts on the initial layer (no drill-open)');
@@ -405,7 +441,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'keyboard-guard-typing-and-modifiers', () =>
+    record('interaction', 'keyboard-guard-typing-and-modifiers', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // Modifier chords are browser/OS shortcuts — the deck must not steal
         // them. (Playwright still delivers the keydown, so a missing guard
@@ -434,7 +470,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'nav-gated-while-sheet-open', () =>
+    record('interaction', 'nav-gated-while-sheet-open', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         await goToSlide(page, 1);
         await page.locator('[data-drill-target="sys-guard"]').click();
@@ -456,7 +492,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'light-tone-primary-cta-contrast', () =>
+    record('interaction', 'light-tone-primary-cta-contrast', () =>
       withPage(browser, { url: primaryUrl }, async (page) => {
         // On light-tone slides --ve-accent remaps to the ink color, so a
         // primary CTA filled with it must flip its text to the slide surface
@@ -477,7 +513,7 @@ async function main() {
       }),
     );
 
-    schedule('interaction', 'reduced-motion-disables-animation', () =>
+    record('interaction', 'reduced-motion-disables-animation', () =>
       withPage(browser, { url: primaryUrl, reducedMotion: 'reduce' }, async (page) => {
         const animation = await page
           .locator('[data-stage] > div')
@@ -502,7 +538,7 @@ async function main() {
       { width: 1024, height: 768 },
       { width: 800, height: 1000 },
     ]) {
-      schedule('geometry', `scale-to-fit-${viewport.width}x${viewport.height}`, () =>
+      record('geometry', `scale-to-fit-${viewport.width}x${viewport.height}`, () =>
         withPage(browser, { url: primaryUrl, viewport }, async (page) => {
           const { container, stage } = await page.evaluate(() => {
             const bounds = (element) => {
@@ -526,7 +562,7 @@ async function main() {
       );
     }
 
-    schedule('geometry', 'letterbox-on-mismatched-ratio', () =>
+    record('geometry', 'letterbox-on-mismatched-ratio', () =>
       withPage(browser, { url: primaryUrl, viewport: { width: 800, height: 1000 } }, async (page) => {
         const { top, availH, scale } = await page.evaluate(() => {
           const main = document.querySelector('main');
@@ -541,7 +577,7 @@ async function main() {
       }),
     );
 
-    schedule('geometry', 'rail-collapse-and-hover-expand', () =>
+    record('geometry', 'rail-collapse-and-hover-expand', () =>
       withPage(browser, { url: primaryUrl, reducedMotion: 'reduce' }, async (page) => {
         const rail = page.locator('[data-rail]');
         await page.waitForFunction(
@@ -567,7 +603,7 @@ async function main() {
       }),
     );
 
-    schedule('geometry', 'slide-text-readable-and-contained', async () => {
+    record('geometry', 'slide-text-readable-and-contained', async () => {
       for (const url of [primaryUrl, secondUrl]) {
         await withPage(browser, { url }, async (page) => {
           const text = await page.locator('[data-stage] p, [data-stage] h1, [data-stage] h2, [data-stage] h3').evaluateAll((els) =>
@@ -596,7 +632,7 @@ async function main() {
     /* tokens                                                        */
     /* ------------------------------------------------------------ */
 
-    schedule('tokens', 'preset-reskin-changes-computed-colors', async () => {
+    record('tokens', 'preset-reskin-changes-computed-colors', async () => {
       const sample = (url) =>
         withPage(browser, { url }, async (page) => ({
           slideBg: await page.locator('[data-ve-slide]').evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -612,15 +648,18 @@ async function main() {
       assert(a.font !== b.font, `display font must reskin per preset (both ${a.font})`);
     });
 
-    await Promise.all(Array.from({ length: Math.min(2, availableParallelism()) }, async () => {
-      while (cases.length) await cases.shift()();
-    }));
     await record('interaction', 'no-console-errors', async () => {
       assert(consoleErrors.length === 0, `console errors during evals:\n${consoleErrors.join('\n')}`);
     });
+    await runCases();
   } finally {
-    await browser.close();
-    rmSync(workDir, { recursive: true, force: true });
+    try { await browser.close(); }
+    catch (cleanupError) {
+      const failures = results.filter((row) => row.status !== 'pass').map((row) => new Error(`${row.group}/${row.id}: ${row.detail}`));
+      throw new AggregateError([...failures, cleanupError], [...failures, cleanupError].map(errorDetail).join('; '));
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
   }
 
   console.log('eval_id,group,status');
