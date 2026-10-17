@@ -2,6 +2,8 @@
 
 Connect the old behavior, the change, and a concrete outcome. Use `DiffBlock` for the changed code and `Quiz` only when a question helps the reader check their understanding.
 
+For an animated review, read [code-review-diffs.md](../references/code-review-diffs.md). Discover `code-diff` to build aligned split/unified scenes, focus changes on narration cues, or animate the edit while retaining unchanged character identities. Put the observed outcome beside the changed condition; a diff alone does not prove a behavioral claim.
+
 Illustrative example:
 
 ```mdx

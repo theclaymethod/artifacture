@@ -194,9 +194,9 @@ Use the supplied voice or the `af_nova` default. Voice choices ship with Hyperfr
 
 ### Generate word-level transcript
 ```bash
-npx hyperframes transcribe narration.wav --output transcript.json
+npx hyperframes transcribe narration.wav --dir .
 ```
-This outputs a JSON array of `{text, start, end}` per word. Keep this file — it's the source of truth for caption copy and timing.
+This writes `transcript.json` in the selected directory, a JSON array of `{text, start, end}` per word. Keep this file as the source of truth for caption copy and timing. The `--output` option exports SRT or VTT; it does not select the JSON path.
 
 ### Derive caption HTML from the transcript
 ```bash

@@ -36,7 +36,8 @@ No fills, glows or shadows. The active edge goes from the silhouette's stroke to
 Leaving returns the figure to a composition: a dune, a lean, a slight explode. The still frame is the thumbnail, so it has to hold up alone.
 
 - **Keep it:** give every part a rest value that is not zero and not uniform (Terrain's dune is two Gaussians; Riffle's cards lean back 12°). Put one bright mark at rest where the eye should start. When the pointer chooses, the mark gives the bright up to what it chose (rule 04).
-- **Rejected when:** at rest the figure is a flat grid, an empty tray, a perfectly regular row; at rest nothing says what the figure is about; rest and "nothing rendered yet" look alike.
+- **Keep it, when emptiness is the concept:** an empty state shows an object holding nothing. That is right when the object itself is composed, uneven and whole, and one bright mark says where to look. The tray is empty; the drawing is not.
+- **Rejected when:** at rest the figure is a flat grid, a tray left empty because nothing was drawn in it, a perfectly regular row; at rest nothing says what the figure is about; rest and "nothing rendered yet" look alike.
 
 ## 06 · honesty: construction stays honest
 
@@ -65,6 +66,7 @@ A solid is the hull of two rounded rings, its top and its base. The vertical cor
 
 - **Keep it:** `rings(x0, y0, x1, y1, r, b)` then `prism(P, front, ring, inner, z0, z1)` into `solid(parent)` with `put`. A thin plate gets a second line for its thickness, not a second solid. Round flat outlines with `fillet`. `rings` takes four steps round each corner, so a full round has sixteen sides, and they show once its radius on screen passes about 20 viewBox units (r × S; r 12 at S 1.9). For a large round, build the two rings yourself with more steps: `rrect(x0, y0, x1, y1, r, 14)` and `rrect(x0 + b, y0 + b, x1 - b, y1 - b, r - b, 14)`.
 - **Keep it, when a solid's top is smaller than its foot** (a cabin, a roof, a tower that tapers): `prism` stands one ring straight up, so write its two strings yourself, from two rings. With `foot`, `top` and `inner` each an `rrect`, `inner` being `top` inset by b: the silhouette is `poly(hull(ringAt(P, foot, z0).concat(ringAt(P, top, z1))))` and the crease is `open(ringAt(P, run(inner, front), z1))`. Then `put(solid(parent), { sil, crease })`, as with `prism`. That is all `prism` does, so there is nothing to look up under the index.
+- **Keep it, for a mark:** a mark keeps its own corners where rounding would make it another mark. Use the smallest radius that still reads as built, half a unit to two, and round everything that is not the mark as usual.
 - **Rejected when:** a box shows twelve edges or any vertical corner line; a corner is sharp; inner lines are as bright as the silhouette; a solid has more than its silhouette, one crease, and at most a few marks the object would really have.
 
 ## 10 · quiet: no words inside the figure
@@ -72,7 +74,9 @@ A solid is the hull of two rounded rings, its top and its base. The vertical cor
 Geometry carries identity: a punch on a card's tab, a dot code on a crate's lid, a bright edge instead of a label. Names go to the corner read-out, outside the drawing. Anything decorative has to be something the object would really have.
 
 - **Keep it:** `read.textContent = …` names what is under the pointer, in a few characters (`cell 4·2`, `08`), and says `rest` when nothing is. Number things with dots.
-- **Rejected when:** the svg holds text, letters or digits drawn as paths, icons, arrows or logos; the figure cannot be understood without its read-out; the read-out is a sentence.
+- **Keep it, for a figure made from a mark:** logos stay out when they label something else. The one exception is a figure made from a mark, where the mark is the object: built as a solid, answering the pointer. A glyph that belongs to the mark is a relief on one face. Nothing else in that figure is a letter, and the mark's name still goes to the read-out's side, never into the drawing.
+- **Keep it, when a glyph is the subject:** a glyph may be the object when it is built as a solid and is the figure's whole subject, as the package's Query is: a question mark made of a bent bar over a loose ball, answering the pointer. It is a thing in the scene, not a label on one, and nothing else in that figure is a letter.
+- **Rejected when:** the svg holds text, letters or digits drawn as paths, icons, arrows or logos, other than the mark, and a glyph that belongs to it, in a figure made from a mark, or a glyph built as a solid that is the figure's whole subject; the figure cannot be understood without its read-out; the read-out is a sentence.
 
 ## The frame
 

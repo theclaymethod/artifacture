@@ -1,0 +1,91 @@
+[
+  {
+    "id": "iso-glow",
+    "purpose": "Fine-line isometric objects with causal lighting and optional native Three.js scenes.",
+    "url": "https://isoglow.dev/",
+    "install": "Download the official skill archive from https://isoglow.dev/ and follow its installation instructions.",
+    "limitations": "Native HTML/Three.js output; use media or a browser project when the figure has no seek API."
+  },
+  {
+    "id": "hairline",
+    "purpose": "Native interactive isometric figures and a skill for custom illustrations.",
+    "url": "https://hairline.lucasmarkes.com/docs",
+    "install": "npm install @lucasmarkes/hairline; npx skills add lucasmarkes/hairline",
+    "limitations": "Pointer-driven figures are not automatically seekable video scenes."
+  },
+  {
+    "id": "iso-figure",
+    "purpose": "Isometric drawing method and custom object authoring.",
+    "url": "https://github.com/MrBongoC/ai-iso-skill",
+    "install": "npx skills add MrBongoC/ai-iso-skill"
+  },
+  {
+    "id": "diagram-design",
+    "purpose": "Original diagram selection, geometry, layout and motion.",
+    "url": "https://github.com/cathrynlavery/diagram-design",
+    "install": "npx skills add cathrynlavery/diagram-design"
+  },
+  {
+    "id": "anatomy",
+    "purpose": "Existing mechanism figures or native authoring of new mechanisms.",
+    "url": "https://skills.wheresryan.sh/anatomy/collection#use",
+    "install": "npm install anatomy-figures; npx skills add wheresryan22/anatomy",
+    "limitations": "Not a chart library; figure theme and seeking support vary."
+  },
+  {
+    "id": "manim",
+    "purpose": "Mathematical animation rendered as reusable native media with Manim Community.",
+    "url": "https://docs.manim.community/en/stable/installation/uv.html",
+    "install": "Use the official uv installation workflow in a project-local Python environment.",
+    "limitations": "Distinct from ManimGL; preserve the engine identity in scene source."
+  },
+  {
+    "id": "manimgl",
+    "purpose": "Original 3Blue1Brown engine and manimlib scene API.",
+    "url": "https://github.com/3b1b/manim",
+    "install": "Follow the upstream installation and project requirements.",
+    "limitations": "Do not substitute Manim Community scene APIs without migration."
+  },
+  {
+    "id": "frankenmanim",
+    "purpose": "Experimental Rust implementation and Python portal for manimlib-compatible work.",
+    "url": "https://github.com/Dicklesworthstone/franken_manim",
+    "install": "Reference only in this release. Consult upstream current capabilities and license before adoption.",
+    "limitations": "README mixes current capabilities with a 1.0 target. Python portal currently documents PNG output; video and reproducibility claims need independent verification. License includes an additional rider."
+  },
+  {
+    "id": "fframes",
+    "purpose": "Preferred native Rust/SVG video composition, scenes, audio and rendering.",
+    "url": "https://fframes.studio/",
+    "install": "cargo install cargo-fframes --locked; npx skills add https://fframes.studio",
+    "limitations": "Native Rust/SVG project; arbitrary browser React does not translate automatically."
+  },
+  {
+    "id": "hyperframes",
+    "purpose": "Native browser video when a composition needs DOM, CSS or browser graphics.",
+    "url": "https://github.com/heygen-com/hyperframes",
+    "install": "Follow upstream project initialization and skills instructions.",
+    "limitations": "Select explicitly for browser compositions; the template owns this renderer."
+  },
+  {
+    "id": "emil-animation",
+    "purpose": "Animation skills for building, discovering, auditing and reviewing interactive motion; includes animate, animation-vocabulary, find-animation-opportunities, improve-animations, review-animations and emil-design-eng.",
+    "url": "https://github.com/emilkowalski/skills",
+    "install": "Prefer the host-installed skill. Otherwise run npx skills@latest add emilkowalski/skills and select only the needed skills.",
+    "limitations": "Interactive UI guidance; preserve film pacing and the selected renderer. Audit and opportunity skills propose work rather than implementing it."
+  },
+  {
+    "id": "hyperframes-animation",
+    "purpose": "Native browser animation choreography, keyframes and audio skills: hyperframes-animation, hyperframes-keyframes and hyperframes-audio.",
+    "url": "https://github.com/heygen-com/hyperframes",
+    "install": "Resolve installed skills through the hyperframes entry skill; otherwise follow the official HyperFrames skill installation instructions.",
+    "limitations": "HyperFrames-specific runtime contracts. Do not switch a FFrames project to GSAP or DOM composition merely to use an animation reference."
+  },
+  {
+    "id": "motionmaxxing",
+    "purpose": "Upstream animation and motion-design reference for composition, pacing, typography and expressive transitions.",
+    "url": "https://github.com/Tejashmakwana/motionmaxxing",
+    "install": "Read upstream SKILL.md and installation instructions on demand; not assumed installed.",
+    "limitations": "Apply relevant design decisions using the selected renderer and established theme; this reference is not another Artifacture animation engine."
+  }
+]

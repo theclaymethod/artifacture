@@ -1,0 +1,138 @@
+{
+  "source": "https://github.com/yanliudesign/mono-color-skill",
+  "commit": "c8ff70597ddedcd65f21a0b528f6a70c35690b0a",
+  "files": [
+    {
+      "path": "ASSET-LICENSE.md",
+      "sha256": "1a02a8b7a3bae6b21bb5182d6865a5d4db66777a8c5c064c64c84756eebf257f"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "2025880f6441e121c76c01bc5996e84a7498d9d5aa7222a10400d303bdd043cb"
+    },
+    {
+      "path": "README.md",
+      "sha256": "e0fd0738cba2b955a6c79c9332838fb7656040fff65b66a3921230e0a2ec1f54"
+    },
+    {
+      "path": "REFERENCES.md",
+      "sha256": "4d43fd49246a55d338ee0f791ddc22100331979553c30201cdcb7319761925c5"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "8274bc1f30a92a9dc715c03c3fb9aeaa060fb5a12fd58dfe8d977ae98a26bd76"
+    },
+    {
+      "path": "design-system/BOARD-DIRECTION.md",
+      "sha256": "84411f1a4d410fa324bc57b2693abfe0380090042232c64d46f8152a51b99308"
+    },
+    {
+      "path": "design-system/carriers.json",
+      "sha256": "32ad6bd5917c8d5ad4b0c8f78006848f941489649824f0857a7a94685914a8d7"
+    },
+    {
+      "path": "design-system/colors.json",
+      "sha256": "e299d6b4a2ec36e2e59b7095b85bae5f13609f505d21c9a83561088f7c446b48"
+    },
+    {
+      "path": "design-system/compositions.json",
+      "sha256": "8faec6d102a6dcf15a465123f00265609afe271dd2998baa0d56f0fb39105703"
+    },
+    {
+      "path": "design-system/imperfections.json",
+      "sha256": "e281a1c7fb183af973179a7588df5745527a231462681797850227e791372715"
+    },
+    {
+      "path": "design-system/rhythm.json",
+      "sha256": "02c8c4ca0bba218feeca7311b35b61362972bded129f050b288a384d61c0c920"
+    },
+    {
+      "path": "design-system/typography.json",
+      "sha256": "b20f558444aab2c93b6339b76aa3178ae9e04e25eed1059cd2db8044733db26f"
+    },
+    {
+      "path": "scripts/build_design_system_board.py",
+      "sha256": "592a0ed60eaa7c401010bced39963460425d3db8a00ab66dbf56e592177db6f2"
+    },
+    {
+      "path": "scripts/build_vibe_coding_poster.py",
+      "sha256": "095d1736221aa1e0335ed68552f915a3715e3f2b198a1cb86938add3e482b43b"
+    },
+    {
+      "path": "scripts/validate_design_system.py",
+      "sha256": "3d61d28928b033788dd86260c8b4d4f4d04bb9ca81117e2079470c66bdd1276c"
+    },
+    {
+      "path": "scripts/validate_evals.py",
+      "sha256": "d87778e0c8ede4ac42a7480d192005acb426ac825b2d69f9773e32c1ff604b86"
+    },
+    {
+      "path": "swatches/aubergine.svg",
+      "sha256": "49754cc72ecb773a2fac8ef89aa9f288c0a10df01c3eea04116d10528cb16b4e"
+    },
+    {
+      "path": "swatches/botanical-green-oxblood.svg",
+      "sha256": "02858fa494c1e5b06907b7292fbeb944322021c6ebf7f35204f5c0f2f458a640"
+    },
+    {
+      "path": "swatches/botanical-green.svg",
+      "sha256": "4b378335b4f7766a2042e2b0e5935d1af159fcc9cb2355e57cf02dcb60225db6"
+    },
+    {
+      "path": "swatches/charcoal-signal-red.svg",
+      "sha256": "88277383e742dd158f26743e940099800c5a9246beb75c5ed0d438d4fff92e0a"
+    },
+    {
+      "path": "swatches/charcoal.svg",
+      "sha256": "7b4fd323c288ebefc20f633a1f13ada40fee4d00a501037071225c411f4cdb23"
+    },
+    {
+      "path": "swatches/cobalt-terracotta.svg",
+      "sha256": "8e4457d1206e3e98360ec459ebe229caa9b9f68f10247996a875e8be8747ce8f"
+    },
+    {
+      "path": "swatches/cobalt.svg",
+      "sha256": "0451e74d5bf7497292c3b28635fab1d78ce34936719ae511ae025b8a60b863c0"
+    },
+    {
+      "path": "swatches/cyan-brick-red.svg",
+      "sha256": "6ccf50472402a2f9dfcafa170160e8f81a6ffaddaae59d591b5a8484fb122ca6"
+    },
+    {
+      "path": "swatches/electric-blue-carbon.svg",
+      "sha256": "58bbb268e6b0125c73ca5aae44751a07100e0facfad9cb2a9b21ff338fd5b3fc"
+    },
+    {
+      "path": "swatches/mint-green-charcoal.svg",
+      "sha256": "a92c78b706575fd33bf42ac404dc6f5cdc639597ecc3e87bc1ece5920ac510eb"
+    },
+    {
+      "path": "swatches/mint-green.svg",
+      "sha256": "c9e53d5d306467f00cd62739249e346c9557fb6e25ce9de0783c5243670f0223"
+    },
+    {
+      "path": "swatches/powder-blue-signal-red.svg",
+      "sha256": "901ac3afa37b468898e8206186e8ae3caa1f49e8280efe5a69fee80c4c09a919"
+    },
+    {
+      "path": "swatches/royal-blue.svg",
+      "sha256": "d847dfbc3d721c7fccaad6c534ed335db3578f08a74ca297e242285731aeb5e8"
+    },
+    {
+      "path": "swatches/signal-red.svg",
+      "sha256": "995ce93dd4769f4a62538b69e80698fb76ca78ee3d1587ca3dcd1c1d41b2c01b"
+    },
+    {
+      "path": "swatches/tangerine-slate-blue.svg",
+      "sha256": "e3ac0b792342425621bce345f893dfd5f60a06c5f05961f5c7a0377d521c7c46"
+    },
+    {
+      "path": "swatches/terracotta.svg",
+      "sha256": "90ab477466acce0d1630a5ea9801f1ba79e9e3e0d970d58c3e338872fdb06c5d"
+    },
+    {
+      "path": "swatches/ultramarine-safety-orange.svg",
+      "sha256": "062f170d2e3c7937c1a8fa27bec5844700d2608d2a73e6c4ef3598e7337ec8c7"
+    }
+  ]
+}

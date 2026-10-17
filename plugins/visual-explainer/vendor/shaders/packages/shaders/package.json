@@ -1,0 +1,1996 @@
+{
+  "name": "shaders",
+  "version": "4.0.0",
+  "description": "The design platform for web shaders",
+  "author": "Shader Effects Inc.",
+  "license": "MIT",
+  "homepage": "https://shaders.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shader-effects-inc/shaders.git",
+    "directory": "packages/shaders"
+  },
+  "bugs": "https://github.com/shader-effects-inc/shaders/issues",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "shaders": "dist/cli.js"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry.d.ts",
+      "import": "./dist/registry.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    },
+    "./vue/codegen": {
+      "types": "./dist/vue/codegen.d.ts",
+      "import": "./dist/vue/codegen.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./react/bundle": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/bundle.js"
+    },
+    "./react/codegen": {
+      "types": "./dist/react/codegen.d.ts",
+      "import": "./dist/react/codegen.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte/index.d.ts",
+      "svelte": "./dist/svelte/source/index.js",
+      "import": "./dist/svelte/index.js"
+    },
+    "./svelte/codegen": {
+      "types": "./dist/svelte/codegen.d.ts",
+      "import": "./dist/svelte/codegen.js"
+    },
+    "./solid": {
+      "types": "./dist/solid/index.d.ts",
+      "import": "./dist/solid/index.js"
+    },
+    "./solid/codegen": {
+      "types": "./dist/solid/codegen.d.ts",
+      "import": "./dist/solid/codegen.js"
+    },
+    "./js": {
+      "types": "./dist/js/index.d.ts",
+      "import": "./dist/js/index.js"
+    },
+    "./js/bundle": {
+      "types": "./dist/js/index.d.ts",
+      "import": "./dist/js/bundle.js"
+    },
+    "./js/codegen": {
+      "types": "./dist/js/codegen.d.ts",
+      "import": "./dist/js/codegen.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.js"
+    },
+    "./core/telemetry": {
+      "types": "./dist/core/telemetry/index.d.ts",
+      "import": "./dist/core/telemetry/index.js",
+      "require": "./dist/core/telemetry/index.js"
+    },
+    "./core/AngularBlur": {
+      "types": "./dist/core/shaders/AngularBlur/index.d.ts",
+      "import": "./dist/core/shaders/AngularBlur/index.js",
+      "require": "./dist/core/shaders/AngularBlur/index.js"
+    },
+    "./core/Ascii": {
+      "types": "./dist/core/shaders/Ascii/index.d.ts",
+      "import": "./dist/core/shaders/Ascii/index.js",
+      "require": "./dist/core/shaders/Ascii/index.js"
+    },
+    "./core/Blob": {
+      "types": "./dist/core/shaders/Blob/index.d.ts",
+      "import": "./dist/core/shaders/Blob/index.js",
+      "require": "./dist/core/shaders/Blob/index.js"
+    },
+    "./core/Blur": {
+      "types": "./dist/core/shaders/Blur/index.d.ts",
+      "import": "./dist/core/shaders/Blur/index.js",
+      "require": "./dist/core/shaders/Blur/index.js"
+    },
+    "./core/Bulge": {
+      "types": "./dist/core/shaders/Bulge/index.d.ts",
+      "import": "./dist/core/shaders/Bulge/index.js",
+      "require": "./dist/core/shaders/Bulge/index.js"
+    },
+    "./core/CRTScreen": {
+      "types": "./dist/core/shaders/CRTScreen/index.d.ts",
+      "import": "./dist/core/shaders/CRTScreen/index.js",
+      "require": "./dist/core/shaders/CRTScreen/index.js"
+    },
+    "./core/ChannelBlur": {
+      "types": "./dist/core/shaders/ChannelBlur/index.d.ts",
+      "import": "./dist/core/shaders/ChannelBlur/index.js",
+      "require": "./dist/core/shaders/ChannelBlur/index.js"
+    },
+    "./core/Checkerboard": {
+      "types": "./dist/core/shaders/Checkerboard/index.d.ts",
+      "import": "./dist/core/shaders/Checkerboard/index.js",
+      "require": "./dist/core/shaders/Checkerboard/index.js"
+    },
+    "./core/ChromaFlow": {
+      "types": "./dist/core/shaders/ChromaFlow/index.d.ts",
+      "import": "./dist/core/shaders/ChromaFlow/index.js",
+      "require": "./dist/core/shaders/ChromaFlow/index.js"
+    },
+    "./core/ChromaticAberration": {
+      "types": "./dist/core/shaders/ChromaticAberration/index.d.ts",
+      "import": "./dist/core/shaders/ChromaticAberration/index.js",
+      "require": "./dist/core/shaders/ChromaticAberration/index.js"
+    },
+    "./core/Circle": {
+      "types": "./dist/core/shaders/Circle/index.d.ts",
+      "import": "./dist/core/shaders/Circle/index.js",
+      "require": "./dist/core/shaders/Circle/index.js"
+    },
+    "./core/CursorTrail": {
+      "types": "./dist/core/shaders/CursorTrail/index.d.ts",
+      "import": "./dist/core/shaders/CursorTrail/index.js",
+      "require": "./dist/core/shaders/CursorTrail/index.js"
+    },
+    "./core/DiffuseBlur": {
+      "types": "./dist/core/shaders/DiffuseBlur/index.d.ts",
+      "import": "./dist/core/shaders/DiffuseBlur/index.js",
+      "require": "./dist/core/shaders/DiffuseBlur/index.js"
+    },
+    "./core/Dither": {
+      "types": "./dist/core/shaders/Dither/index.d.ts",
+      "import": "./dist/core/shaders/Dither/index.js",
+      "require": "./dist/core/shaders/Dither/index.js"
+    },
+    "./core/DotGrid": {
+      "types": "./dist/core/shaders/DotGrid/index.d.ts",
+      "import": "./dist/core/shaders/DotGrid/index.js",
+      "require": "./dist/core/shaders/DotGrid/index.js"
+    },
+    "./core/Duotone": {
+      "types": "./dist/core/shaders/Duotone/index.d.ts",
+      "import": "./dist/core/shaders/Duotone/index.js",
+      "require": "./dist/core/shaders/Duotone/index.js"
+    },
+    "./core/FilmGrain": {
+      "types": "./dist/core/shaders/FilmGrain/index.d.ts",
+      "import": "./dist/core/shaders/FilmGrain/index.js",
+      "require": "./dist/core/shaders/FilmGrain/index.js"
+    },
+    "./core/FloatingParticles": {
+      "types": "./dist/core/shaders/FloatingParticles/index.d.ts",
+      "import": "./dist/core/shaders/FloatingParticles/index.js",
+      "require": "./dist/core/shaders/FloatingParticles/index.js"
+    },
+    "./core/GlassTiles": {
+      "types": "./dist/core/shaders/GlassTiles/index.d.ts",
+      "import": "./dist/core/shaders/GlassTiles/index.js",
+      "require": "./dist/core/shaders/GlassTiles/index.js"
+    },
+    "./core/Glow": {
+      "types": "./dist/core/shaders/Glow/index.d.ts",
+      "import": "./dist/core/shaders/Glow/index.js",
+      "require": "./dist/core/shaders/Glow/index.js"
+    },
+    "./core/Godrays": {
+      "types": "./dist/core/shaders/Godrays/index.d.ts",
+      "import": "./dist/core/shaders/Godrays/index.js",
+      "require": "./dist/core/shaders/Godrays/index.js"
+    },
+    "./core/Grayscale": {
+      "types": "./dist/core/shaders/Grayscale/index.d.ts",
+      "import": "./dist/core/shaders/Grayscale/index.js",
+      "require": "./dist/core/shaders/Grayscale/index.js"
+    },
+    "./core/Grid": {
+      "types": "./dist/core/shaders/Grid/index.d.ts",
+      "import": "./dist/core/shaders/Grid/index.js",
+      "require": "./dist/core/shaders/Grid/index.js"
+    },
+    "./core/GridDistortion": {
+      "types": "./dist/core/shaders/GridDistortion/index.d.ts",
+      "import": "./dist/core/shaders/GridDistortion/index.js",
+      "require": "./dist/core/shaders/GridDistortion/index.js"
+    },
+    "./core/Group": {
+      "types": "./dist/core/shaders/Group/index.d.ts",
+      "import": "./dist/core/shaders/Group/index.js",
+      "require": "./dist/core/shaders/Group/index.js"
+    },
+    "./core/Halftone": {
+      "types": "./dist/core/shaders/Halftone/index.d.ts",
+      "import": "./dist/core/shaders/Halftone/index.js",
+      "require": "./dist/core/shaders/Halftone/index.js"
+    },
+    "./core/HueShift": {
+      "types": "./dist/core/shaders/HueShift/index.d.ts",
+      "import": "./dist/core/shaders/HueShift/index.js",
+      "require": "./dist/core/shaders/HueShift/index.js"
+    },
+    "./core/ImageTexture": {
+      "types": "./dist/core/shaders/ImageTexture/index.d.ts",
+      "import": "./dist/core/shaders/ImageTexture/index.js",
+      "require": "./dist/core/shaders/ImageTexture/index.js"
+    },
+    "./core/Invert": {
+      "types": "./dist/core/shaders/Invert/index.d.ts",
+      "import": "./dist/core/shaders/Invert/index.js",
+      "require": "./dist/core/shaders/Invert/index.js"
+    },
+    "./core/LinearBlur": {
+      "types": "./dist/core/shaders/LinearBlur/index.d.ts",
+      "import": "./dist/core/shaders/LinearBlur/index.js",
+      "require": "./dist/core/shaders/LinearBlur/index.js"
+    },
+    "./core/LinearGradient": {
+      "types": "./dist/core/shaders/LinearGradient/index.d.ts",
+      "import": "./dist/core/shaders/LinearGradient/index.js",
+      "require": "./dist/core/shaders/LinearGradient/index.js"
+    },
+    "./core/Liquify": {
+      "types": "./dist/core/shaders/Liquify/index.d.ts",
+      "import": "./dist/core/shaders/Liquify/index.js",
+      "require": "./dist/core/shaders/Liquify/index.js"
+    },
+    "./core/Pixelate": {
+      "types": "./dist/core/shaders/Pixelate/index.d.ts",
+      "import": "./dist/core/shaders/Pixelate/index.js",
+      "require": "./dist/core/shaders/Pixelate/index.js"
+    },
+    "./core/PolarCoordinates": {
+      "types": "./dist/core/shaders/PolarCoordinates/index.d.ts",
+      "import": "./dist/core/shaders/PolarCoordinates/index.js",
+      "require": "./dist/core/shaders/PolarCoordinates/index.js"
+    },
+    "./core/Posterize": {
+      "types": "./dist/core/shaders/Posterize/index.d.ts",
+      "import": "./dist/core/shaders/Posterize/index.js",
+      "require": "./dist/core/shaders/Posterize/index.js"
+    },
+    "./core/ProgressiveBlur": {
+      "types": "./dist/core/shaders/ProgressiveBlur/index.d.ts",
+      "import": "./dist/core/shaders/ProgressiveBlur/index.js",
+      "require": "./dist/core/shaders/ProgressiveBlur/index.js"
+    },
+    "./core/RadialGradient": {
+      "types": "./dist/core/shaders/RadialGradient/index.d.ts",
+      "import": "./dist/core/shaders/RadialGradient/index.js",
+      "require": "./dist/core/shaders/RadialGradient/index.js"
+    },
+    "./core/Ripples": {
+      "types": "./dist/core/shaders/Ripples/index.d.ts",
+      "import": "./dist/core/shaders/Ripples/index.js",
+      "require": "./dist/core/shaders/Ripples/index.js"
+    },
+    "./core/Saturation": {
+      "types": "./dist/core/shaders/Saturation/index.d.ts",
+      "import": "./dist/core/shaders/Saturation/index.js",
+      "require": "./dist/core/shaders/Saturation/index.js"
+    },
+    "./core/SimplexNoise": {
+      "types": "./dist/core/shaders/SimplexNoise/index.d.ts",
+      "import": "./dist/core/shaders/SimplexNoise/index.js",
+      "require": "./dist/core/shaders/SimplexNoise/index.js"
+    },
+    "./core/SineWave": {
+      "types": "./dist/core/shaders/SineWave/index.d.ts",
+      "import": "./dist/core/shaders/SineWave/index.js",
+      "require": "./dist/core/shaders/SineWave/index.js"
+    },
+    "./core/SolidColor": {
+      "types": "./dist/core/shaders/SolidColor/index.d.ts",
+      "import": "./dist/core/shaders/SolidColor/index.js",
+      "require": "./dist/core/shaders/SolidColor/index.js"
+    },
+    "./core/Spiral": {
+      "types": "./dist/core/shaders/Spiral/index.d.ts",
+      "import": "./dist/core/shaders/Spiral/index.js",
+      "require": "./dist/core/shaders/Spiral/index.js"
+    },
+    "./core/Strands": {
+      "types": "./dist/core/shaders/Strands/index.d.ts",
+      "import": "./dist/core/shaders/Strands/index.js",
+      "require": "./dist/core/shaders/Strands/index.js"
+    },
+    "./core/Swirl": {
+      "types": "./dist/core/shaders/Swirl/index.d.ts",
+      "import": "./dist/core/shaders/Swirl/index.js",
+      "require": "./dist/core/shaders/Swirl/index.js"
+    },
+    "./core/TiltShift": {
+      "types": "./dist/core/shaders/TiltShift/index.d.ts",
+      "import": "./dist/core/shaders/TiltShift/index.js",
+      "require": "./dist/core/shaders/TiltShift/index.js"
+    },
+    "./core/Tritone": {
+      "types": "./dist/core/shaders/Tritone/index.d.ts",
+      "import": "./dist/core/shaders/Tritone/index.js",
+      "require": "./dist/core/shaders/Tritone/index.js"
+    },
+    "./core/Twirl": {
+      "types": "./dist/core/shaders/Twirl/index.d.ts",
+      "import": "./dist/core/shaders/Twirl/index.js",
+      "require": "./dist/core/shaders/Twirl/index.js"
+    },
+    "./core/Vibrance": {
+      "types": "./dist/core/shaders/Vibrance/index.d.ts",
+      "import": "./dist/core/shaders/Vibrance/index.js",
+      "require": "./dist/core/shaders/Vibrance/index.js"
+    },
+    "./core/WaveDistortion": {
+      "types": "./dist/core/shaders/WaveDistortion/index.d.ts",
+      "import": "./dist/core/shaders/WaveDistortion/index.js",
+      "require": "./dist/core/shaders/WaveDistortion/index.js"
+    },
+    "./core/ZoomBlur": {
+      "types": "./dist/core/shaders/ZoomBlur/index.d.ts",
+      "import": "./dist/core/shaders/ZoomBlur/index.js",
+      "require": "./dist/core/shaders/ZoomBlur/index.js"
+    },
+    "./core/RectangularCoordinates": {
+      "types": "./dist/core/shaders/RectangularCoordinates/index.d.ts",
+      "import": "./dist/core/shaders/RectangularCoordinates/index.js",
+      "require": "./dist/core/shaders/RectangularCoordinates/index.js"
+    },
+    "./core/Stretch": {
+      "types": "./dist/core/shaders/Stretch/index.d.ts",
+      "import": "./dist/core/shaders/Stretch/index.js",
+      "require": "./dist/core/shaders/Stretch/index.js"
+    },
+    "./core/Spherize": {
+      "types": "./dist/core/shaders/Spherize/index.d.ts",
+      "import": "./dist/core/shaders/Spherize/index.js",
+      "require": "./dist/core/shaders/Spherize/index.js"
+    },
+    "./core/Beam": {
+      "types": "./dist/core/shaders/Beam/index.d.ts",
+      "import": "./dist/core/shaders/Beam/index.js",
+      "require": "./dist/core/shaders/Beam/index.js"
+    },
+    "./core/BrightnessContrast": {
+      "types": "./dist/core/shaders/BrightnessContrast/index.d.ts",
+      "import": "./dist/core/shaders/BrightnessContrast/index.js",
+      "require": "./dist/core/shaders/BrightnessContrast/index.js"
+    },
+    "./core/Sharpness": {
+      "types": "./dist/core/shaders/Sharpness/index.d.ts",
+      "import": "./dist/core/shaders/Sharpness/index.js",
+      "require": "./dist/core/shaders/Sharpness/index.js"
+    },
+    "./core/Perspective": {
+      "types": "./dist/core/shaders/Perspective/index.d.ts",
+      "import": "./dist/core/shaders/Perspective/index.js",
+      "require": "./dist/core/shaders/Perspective/index.js"
+    },
+    "./core/Tint": {
+      "types": "./dist/core/shaders/Tint/index.d.ts",
+      "import": "./dist/core/shaders/Tint/index.js",
+      "require": "./dist/core/shaders/Tint/index.js"
+    },
+    "./core/Stripes": {
+      "types": "./dist/core/shaders/Stripes/index.d.ts",
+      "import": "./dist/core/shaders/Stripes/index.js",
+      "require": "./dist/core/shaders/Stripes/index.js"
+    },
+    "./core/Shatter": {
+      "types": "./dist/core/shaders/Shatter/index.d.ts",
+      "import": "./dist/core/shaders/Shatter/index.js",
+      "require": "./dist/core/shaders/Shatter/index.js"
+    },
+    "./core/WebcamTexture": {
+      "types": "./dist/core/shaders/WebcamTexture/index.d.ts",
+      "import": "./dist/core/shaders/WebcamTexture/index.js",
+      "require": "./dist/core/shaders/WebcamTexture/index.js"
+    },
+    "./core/Mirror": {
+      "types": "./dist/core/shaders/Mirror/index.d.ts",
+      "import": "./dist/core/shaders/Mirror/index.js",
+      "require": "./dist/core/shaders/Mirror/index.js"
+    },
+    "./core/Kaleidoscope": {
+      "types": "./dist/core/shaders/Kaleidoscope/index.d.ts",
+      "import": "./dist/core/shaders/Kaleidoscope/index.js",
+      "require": "./dist/core/shaders/Kaleidoscope/index.js"
+    },
+    "./core/FlowField": {
+      "types": "./dist/core/shaders/FlowField/index.d.ts",
+      "import": "./dist/core/shaders/FlowField/index.js",
+      "require": "./dist/core/shaders/FlowField/index.js"
+    },
+    "./core/ContourLines": {
+      "types": "./dist/core/shaders/ContourLines/index.d.ts",
+      "import": "./dist/core/shaders/ContourLines/index.js",
+      "require": "./dist/core/shaders/ContourLines/index.js"
+    },
+    "./core/VideoTexture": {
+      "types": "./dist/core/shaders/VideoTexture/index.d.ts",
+      "import": "./dist/core/shaders/VideoTexture/index.js",
+      "require": "./dist/core/shaders/VideoTexture/index.js"
+    },
+    "./core/Plasma": {
+      "types": "./dist/core/shaders/Plasma/index.d.ts",
+      "import": "./dist/core/shaders/Plasma/index.js",
+      "require": "./dist/core/shaders/Plasma/index.js"
+    },
+    "./core/Glitch": {
+      "types": "./dist/core/shaders/Glitch/index.d.ts",
+      "import": "./dist/core/shaders/Glitch/index.js",
+      "require": "./dist/core/shaders/Glitch/index.js"
+    },
+    "./core/LensFlare": {
+      "types": "./dist/core/shaders/LensFlare/index.d.ts",
+      "import": "./dist/core/shaders/LensFlare/index.js",
+      "require": "./dist/core/shaders/LensFlare/index.js"
+    },
+    "./core/ConcentricSpin": {
+      "types": "./dist/core/shaders/ConcentricSpin/index.d.ts",
+      "import": "./dist/core/shaders/ConcentricSpin/index.js",
+      "require": "./dist/core/shaders/ConcentricSpin/index.js"
+    },
+    "./core/StudioBackground": {
+      "types": "./dist/core/shaders/StudioBackground/index.d.ts",
+      "import": "./dist/core/shaders/StudioBackground/index.js",
+      "require": "./dist/core/shaders/StudioBackground/index.js"
+    },
+    "./core/Aurora": {
+      "types": "./dist/core/shaders/Aurora/index.d.ts",
+      "import": "./dist/core/shaders/Aurora/index.js",
+      "require": "./dist/core/shaders/Aurora/index.js"
+    },
+    "./core/CursorRipples": {
+      "types": "./dist/core/shaders/CursorRipples/index.d.ts",
+      "import": "./dist/core/shaders/CursorRipples/index.js",
+      "require": "./dist/core/shaders/CursorRipples/index.js"
+    },
+    "./core/Glass": {
+      "types": "./dist/core/shaders/Glass/index.d.ts",
+      "import": "./dist/core/shaders/Glass/index.js",
+      "require": "./dist/core/shaders/Glass/index.js"
+    },
+    "./core/CircleSDF": {
+      "types": "./dist/core/shaders/CircleSDF/index.d.ts",
+      "import": "./dist/core/shaders/CircleSDF/index.js",
+      "require": "./dist/core/shaders/CircleSDF/index.js"
+    },
+    "./core/Cross": {
+      "types": "./dist/core/shaders/Cross/index.d.ts",
+      "import": "./dist/core/shaders/Cross/index.js",
+      "require": "./dist/core/shaders/Cross/index.js"
+    },
+    "./core/Flower": {
+      "types": "./dist/core/shaders/Flower/index.d.ts",
+      "import": "./dist/core/shaders/Flower/index.js",
+      "require": "./dist/core/shaders/Flower/index.js"
+    },
+    "./core/Polygon": {
+      "types": "./dist/core/shaders/Polygon/index.d.ts",
+      "import": "./dist/core/shaders/Polygon/index.js",
+      "require": "./dist/core/shaders/Polygon/index.js"
+    },
+    "./core/Ring": {
+      "types": "./dist/core/shaders/Ring/index.d.ts",
+      "import": "./dist/core/shaders/Ring/index.js",
+      "require": "./dist/core/shaders/Ring/index.js"
+    },
+    "./core/Star": {
+      "types": "./dist/core/shaders/Star/index.d.ts",
+      "import": "./dist/core/shaders/Star/index.js",
+      "require": "./dist/core/shaders/Star/index.js"
+    },
+    "./core/Crescent": {
+      "types": "./dist/core/shaders/Crescent/index.d.ts",
+      "import": "./dist/core/shaders/Crescent/index.js",
+      "require": "./dist/core/shaders/Crescent/index.js"
+    },
+    "./core/Ellipse": {
+      "types": "./dist/core/shaders/Ellipse/index.d.ts",
+      "import": "./dist/core/shaders/Ellipse/index.js",
+      "require": "./dist/core/shaders/Ellipse/index.js"
+    },
+    "./core/RoundedRect": {
+      "types": "./dist/core/shaders/RoundedRect/index.d.ts",
+      "import": "./dist/core/shaders/RoundedRect/index.js",
+      "require": "./dist/core/shaders/RoundedRect/index.js"
+    },
+    "./core/Trapezoid": {
+      "types": "./dist/core/shaders/Trapezoid/index.d.ts",
+      "import": "./dist/core/shaders/Trapezoid/index.js",
+      "require": "./dist/core/shaders/Trapezoid/index.js"
+    },
+    "./core/Vesica": {
+      "types": "./dist/core/shaders/Vesica/index.d.ts",
+      "import": "./dist/core/shaders/Vesica/index.js",
+      "require": "./dist/core/shaders/Vesica/index.js"
+    },
+    "./core/Neon": {
+      "types": "./dist/core/shaders/Neon/index.d.ts",
+      "import": "./dist/core/shaders/Neon/index.js",
+      "require": "./dist/core/shaders/Neon/index.js"
+    },
+    "./core/Emboss": {
+      "types": "./dist/core/shaders/Emboss/index.d.ts",
+      "import": "./dist/core/shaders/Emboss/index.js",
+      "require": "./dist/core/shaders/Emboss/index.js"
+    },
+    "./core/Paper": {
+      "types": "./dist/core/shaders/Paper/index.d.ts",
+      "import": "./dist/core/shaders/Paper/index.js",
+      "require": "./dist/core/shaders/Paper/index.js"
+    },
+    "./core/FallingLines": {
+      "types": "./dist/core/shaders/FallingLines/index.d.ts",
+      "import": "./dist/core/shaders/FallingLines/index.js",
+      "require": "./dist/core/shaders/FallingLines/index.js"
+    },
+    "./core/RadialLines": {
+      "types": "./dist/core/shaders/RadialLines/index.d.ts",
+      "import": "./dist/core/shaders/RadialLines/index.js",
+      "require": "./dist/core/shaders/RadialLines/index.js"
+    },
+    "./core/SpeedTunnel": {
+      "types": "./dist/core/shaders/SpeedTunnel/index.d.ts",
+      "import": "./dist/core/shaders/SpeedTunnel/index.js",
+      "require": "./dist/core/shaders/SpeedTunnel/index.js"
+    },
+    "./core/Ribbon": {
+      "types": "./dist/core/shaders/Ribbon/index.d.ts",
+      "import": "./dist/core/shaders/Ribbon/index.js",
+      "require": "./dist/core/shaders/Ribbon/index.js"
+    },
+    "./core/Distortion3D": {
+      "types": "./dist/core/shaders/Distortion3D/index.d.ts",
+      "import": "./dist/core/shaders/Distortion3D/index.js",
+      "require": "./dist/core/shaders/Distortion3D/index.js"
+    },
+    "./core/Form3D": {
+      "types": "./dist/core/shaders/Form3D/index.d.ts",
+      "import": "./dist/core/shaders/Form3D/index.js",
+      "require": "./dist/core/shaders/Form3D/index.js"
+    },
+    "./core/FlowingGradient": {
+      "types": "./dist/core/shaders/FlowingGradient/index.d.ts",
+      "import": "./dist/core/shaders/FlowingGradient/index.js",
+      "require": "./dist/core/shaders/FlowingGradient/index.js"
+    },
+    "./core/Crystal": {
+      "types": "./dist/core/shaders/Crystal/index.d.ts",
+      "import": "./dist/core/shaders/Crystal/index.js",
+      "require": "./dist/core/shaders/Crystal/index.js"
+    },
+    "./core/ConicGradient": {
+      "types": "./dist/core/shaders/ConicGradient/index.d.ts",
+      "import": "./dist/core/shaders/ConicGradient/index.js",
+      "require": "./dist/core/shaders/ConicGradient/index.js"
+    },
+    "./core/DiamondGradient": {
+      "types": "./dist/core/shaders/DiamondGradient/index.d.ts",
+      "import": "./dist/core/shaders/DiamondGradient/index.js",
+      "require": "./dist/core/shaders/DiamondGradient/index.js"
+    },
+    "./core/Solarize": {
+      "types": "./dist/core/shaders/Solarize/index.d.ts",
+      "import": "./dist/core/shaders/Solarize/index.js",
+      "require": "./dist/core/shaders/Solarize/index.js"
+    },
+    "./core/Triangle": {
+      "types": "./dist/core/shaders/Triangle/index.d.ts",
+      "import": "./dist/core/shaders/Triangle/index.js",
+      "require": "./dist/core/shaders/Triangle/index.js"
+    },
+    "./core/Vignette": {
+      "types": "./dist/core/shaders/Vignette/index.d.ts",
+      "import": "./dist/core/shaders/Vignette/index.js",
+      "require": "./dist/core/shaders/Vignette/index.js"
+    },
+    "./core/Voronoi": {
+      "types": "./dist/core/shaders/Voronoi/index.d.ts",
+      "import": "./dist/core/shaders/Voronoi/index.js",
+      "require": "./dist/core/shaders/Voronoi/index.js"
+    },
+    "./core/Crosshatch": {
+      "types": "./dist/core/shaders/Crosshatch/index.d.ts",
+      "import": "./dist/core/shaders/Crosshatch/index.js",
+      "require": "./dist/core/shaders/Crosshatch/index.js"
+    },
+    "./core/DropShadow": {
+      "types": "./dist/core/shaders/DropShadow/index.d.ts",
+      "import": "./dist/core/shaders/DropShadow/index.js",
+      "require": "./dist/core/shaders/DropShadow/index.js"
+    },
+    "./core/HexGrid": {
+      "types": "./dist/core/shaders/HexGrid/index.d.ts",
+      "import": "./dist/core/shaders/HexGrid/index.js",
+      "require": "./dist/core/shaders/HexGrid/index.js"
+    },
+    "./core/InnerGlow": {
+      "types": "./dist/core/shaders/InnerGlow/index.d.ts",
+      "import": "./dist/core/shaders/InnerGlow/index.js",
+      "require": "./dist/core/shaders/InnerGlow/index.js"
+    },
+    "./core/Outline": {
+      "types": "./dist/core/shaders/Outline/index.d.ts",
+      "import": "./dist/core/shaders/Outline/index.js",
+      "require": "./dist/core/shaders/Outline/index.js"
+    },
+    "./core/Truchet": {
+      "types": "./dist/core/shaders/Truchet/index.d.ts",
+      "import": "./dist/core/shaders/Truchet/index.js",
+      "require": "./dist/core/shaders/Truchet/index.js"
+    },
+    "./core/Weave": {
+      "types": "./dist/core/shaders/Weave/index.d.ts",
+      "import": "./dist/core/shaders/Weave/index.js",
+      "require": "./dist/core/shaders/Weave/index.js"
+    },
+    "./core/MultiPointGradient": {
+      "types": "./dist/core/shaders/MultiPointGradient/index.d.ts",
+      "import": "./dist/core/shaders/MultiPointGradient/index.js",
+      "require": "./dist/core/shaders/MultiPointGradient/index.js"
+    },
+    "./core/DOMTexture": {
+      "types": "./dist/core/shaders/HTMLInCanvas/index.d.ts",
+      "import": "./dist/core/shaders/HTMLInCanvas/index.js",
+      "require": "./dist/core/shaders/HTMLInCanvas/index.js"
+    },
+    "./core/VHS": {
+      "types": "./dist/core/shaders/VHS/index.d.ts",
+      "import": "./dist/core/shaders/VHS/index.js",
+      "require": "./dist/core/shaders/VHS/index.js"
+    },
+    "./core/Smoke": {
+      "types": "./dist/core/shaders/Smoke/index.d.ts",
+      "import": "./dist/core/shaders/Smoke/index.js",
+      "require": "./dist/core/shaders/Smoke/index.js"
+    },
+    "./core/SmokeFill": {
+      "types": "./dist/core/shaders/SmokeFill/index.d.ts",
+      "import": "./dist/core/shaders/SmokeFill/index.js",
+      "require": "./dist/core/shaders/SmokeFill/index.js"
+    },
+    "./core/Fog": {
+      "types": "./dist/core/shaders/Fog/index.d.ts",
+      "import": "./dist/core/shaders/Fog/index.js",
+      "require": "./dist/core/shaders/Fog/index.js"
+    },
+    "./partner": {
+      "types": "./dist/partner/index.d.ts",
+      "import": "./dist/partner/index.js"
+    },
+    "./core/FlutedGlass": {
+      "types": "./dist/core/shaders/FlutedGlass/index.d.ts",
+      "import": "./dist/core/shaders/FlutedGlass/index.js",
+      "require": "./dist/core/shaders/FlutedGlass/index.js"
+    },
+    "./core/WorleyNoise": {
+      "types": "./dist/core/shaders/WorleyNoise/index.d.ts",
+      "import": "./dist/core/shaders/WorleyNoise/index.js",
+      "require": "./dist/core/shaders/WorleyNoise/index.js"
+    },
+    "./core/BarShift": {
+      "types": "./dist/core/shaders/BarShift/index.d.ts",
+      "import": "./dist/core/shaders/BarShift/index.js",
+      "require": "./dist/core/shaders/BarShift/index.js"
+    },
+    "./core/LightBands": {
+      "types": "./dist/core/shaders/LightBands/index.d.ts",
+      "import": "./dist/core/shaders/LightBands/index.js",
+      "require": "./dist/core/shaders/LightBands/index.js"
+    },
+    "./core/BrickPattern": {
+      "types": "./dist/core/shaders/BrickPattern/index.d.ts",
+      "import": "./dist/core/shaders/BrickPattern/index.js",
+      "require": "./dist/core/shaders/BrickPattern/index.js"
+    },
+    "./core/Chevron": {
+      "types": "./dist/core/shaders/Chevron/index.d.ts",
+      "import": "./dist/core/shaders/Chevron/index.js",
+      "require": "./dist/core/shaders/Chevron/index.js"
+    },
+    "./core/CloudField": {
+      "types": "./dist/core/shaders/CloudField/index.d.ts",
+      "import": "./dist/core/shaders/CloudField/index.js",
+      "require": "./dist/core/shaders/CloudField/index.js"
+    },
+    "./core/Crystalline": {
+      "types": "./dist/core/shaders/Crystalline/index.d.ts",
+      "import": "./dist/core/shaders/Crystalline/index.js",
+      "require": "./dist/core/shaders/Crystalline/index.js"
+    },
+    "./core/DiamondTile": {
+      "types": "./dist/core/shaders/DiamondTile/index.d.ts",
+      "import": "./dist/core/shaders/DiamondTile/index.js",
+      "require": "./dist/core/shaders/DiamondTile/index.js"
+    },
+    "./core/FractalNoise": {
+      "types": "./dist/core/shaders/FractalNoise/index.d.ts",
+      "import": "./dist/core/shaders/FractalNoise/index.js",
+      "require": "./dist/core/shaders/FractalNoise/index.js"
+    },
+    "./core/GradientNoise": {
+      "types": "./dist/core/shaders/GradientNoise/index.d.ts",
+      "import": "./dist/core/shaders/GradientNoise/index.js",
+      "require": "./dist/core/shaders/GradientNoise/index.js"
+    },
+    "./core/Halation": {
+      "types": "./dist/core/shaders/Halation/index.d.ts",
+      "import": "./dist/core/shaders/Halation/index.js",
+      "require": "./dist/core/shaders/Halation/index.js"
+    },
+    "./core/HoloFoil": {
+      "types": "./dist/core/shaders/HoloFoil/index.d.ts",
+      "import": "./dist/core/shaders/HoloFoil/index.js",
+      "require": "./dist/core/shaders/HoloFoil/index.js"
+    },
+    "./core/MarbleTexture": {
+      "types": "./dist/core/shaders/MarbleTexture/index.d.ts",
+      "import": "./dist/core/shaders/MarbleTexture/index.js",
+      "require": "./dist/core/shaders/MarbleTexture/index.js"
+    },
+    "./core/NeonGrid": {
+      "types": "./dist/core/shaders/NeonGrid/index.d.ts",
+      "import": "./dist/core/shaders/NeonGrid/index.js",
+      "require": "./dist/core/shaders/NeonGrid/index.js"
+    },
+    "./core/Plaid": {
+      "types": "./dist/core/shaders/Plaid/index.d.ts",
+      "import": "./dist/core/shaders/Plaid/index.js",
+      "require": "./dist/core/shaders/Plaid/index.js"
+    },
+    "./core/ScatterDots": {
+      "types": "./dist/core/shaders/ScatterDots/index.d.ts",
+      "import": "./dist/core/shaders/ScatterDots/index.js",
+      "require": "./dist/core/shaders/ScatterDots/index.js"
+    },
+    "./core/StarField": {
+      "types": "./dist/core/shaders/StarField/index.d.ts",
+      "import": "./dist/core/shaders/StarField/index.js",
+      "require": "./dist/core/shaders/StarField/index.js"
+    },
+    "./core/SunBurst": {
+      "types": "./dist/core/shaders/SunBurst/index.d.ts",
+      "import": "./dist/core/shaders/SunBurst/index.js",
+      "require": "./dist/core/shaders/SunBurst/index.js"
+    },
+    "./core/Topographic": {
+      "types": "./dist/core/shaders/Topographic/index.d.ts",
+      "import": "./dist/core/shaders/Topographic/index.js",
+      "require": "./dist/core/shaders/Topographic/index.js"
+    },
+    "./core/WaveInterference": {
+      "types": "./dist/core/shaders/WaveInterference/index.d.ts",
+      "import": "./dist/core/shaders/WaveInterference/index.js",
+      "require": "./dist/core/shaders/WaveInterference/index.js"
+    },
+    "./core/WoodGrain": {
+      "types": "./dist/core/shaders/WoodGrain/index.d.ts",
+      "import": "./dist/core/shaders/WoodGrain/index.js",
+      "require": "./dist/core/shaders/WoodGrain/index.js"
+    },
+    "./core/ChromaticGradient": {
+      "types": "./dist/core/shaders/ChromaticGradient/index.d.ts",
+      "import": "./dist/core/shaders/ChromaticGradient/index.js",
+      "require": "./dist/core/shaders/ChromaticGradient/index.js"
+    },
+    "./core/ColorWheel": {
+      "types": "./dist/core/shaders/ColorWheel/index.d.ts",
+      "import": "./dist/core/shaders/ColorWheel/index.js",
+      "require": "./dist/core/shaders/ColorWheel/index.js"
+    },
+    "./core/Marble": {
+      "types": "./dist/core/shaders/Marble/index.d.ts",
+      "import": "./dist/core/shaders/Marble/index.js",
+      "require": "./dist/core/shaders/Marble/index.js"
+    },
+    "./core/ReflectivePlane": {
+      "types": "./dist/core/shaders/ReflectivePlane/index.d.ts",
+      "import": "./dist/core/shaders/ReflectivePlane/index.js",
+      "require": "./dist/core/shaders/ReflectivePlane/index.js"
+    },
+    "./core/Exposure": {
+      "types": "./dist/core/shaders/Exposure/index.d.ts",
+      "import": "./dist/core/shaders/Exposure/index.js",
+      "require": "./dist/core/shaders/Exposure/index.js"
+    },
+    "./core/ThinFilm": {
+      "types": "./dist/core/shaders/ThinFilm/index.d.ts",
+      "import": "./dist/core/shaders/ThinFilm/index.js",
+      "require": "./dist/core/shaders/ThinFilm/index.js"
+    },
+    "./core/BrushedMetal": {
+      "types": "./dist/core/shaders/BrushedMetal/index.d.ts",
+      "import": "./dist/core/shaders/BrushedMetal/index.js",
+      "require": "./dist/core/shaders/BrushedMetal/index.js"
+    },
+    "./core/CarbonFiber": {
+      "types": "./dist/core/shaders/CarbonFiber/index.d.ts",
+      "import": "./dist/core/shaders/CarbonFiber/index.js",
+      "require": "./dist/core/shaders/CarbonFiber/index.js"
+    },
+    "./core/Frost": {
+      "types": "./dist/core/shaders/Frost/index.d.ts",
+      "import": "./dist/core/shaders/Frost/index.js",
+      "require": "./dist/core/shaders/Frost/index.js"
+    },
+    "./core/Goo": {
+      "types": "./dist/core/shaders/Goo/index.d.ts",
+      "import": "./dist/core/shaders/Goo/index.js",
+      "require": "./dist/core/shaders/Goo/index.js"
+    },
+    "./core/Hologram": {
+      "types": "./dist/core/shaders/Hologram/index.d.ts",
+      "import": "./dist/core/shaders/Hologram/index.js",
+      "require": "./dist/core/shaders/Hologram/index.js"
+    },
+    "./core/Holographic": {
+      "types": "./dist/core/shaders/Holographic/index.d.ts",
+      "import": "./dist/core/shaders/Holographic/index.js",
+      "require": "./dist/core/shaders/Holographic/index.js"
+    },
+    "./core/LiquidMetal": {
+      "types": "./dist/core/shaders/LiquidMetal/index.d.ts",
+      "import": "./dist/core/shaders/LiquidMetal/index.js",
+      "require": "./dist/core/shaders/LiquidMetal/index.js"
+    },
+    "./core/Plastic": {
+      "types": "./dist/core/shaders/Plastic/index.d.ts",
+      "import": "./dist/core/shaders/Plastic/index.js",
+      "require": "./dist/core/shaders/Plastic/index.js"
+    },
+    "./core/Prism": {
+      "types": "./dist/core/shaders/Prism/index.d.ts",
+      "import": "./dist/core/shaders/Prism/index.js",
+      "require": "./dist/core/shaders/Prism/index.js"
+    },
+    "./core/Repeater": {
+      "types": "./dist/core/shaders/Repeater/index.d.ts",
+      "import": "./dist/core/shaders/Repeater/index.js",
+      "require": "./dist/core/shaders/Repeater/index.js"
+    },
+    "./core/Surface3D": {
+      "types": "./dist/core/shaders/Surface3D/index.d.ts",
+      "import": "./dist/core/shaders/Surface3D/index.js",
+      "require": "./dist/core/shaders/Surface3D/index.js"
+    },
+    "./core/Text": {
+      "types": "./dist/core/shaders/Text/index.d.ts",
+      "import": "./dist/core/shaders/Text/index.js",
+      "require": "./dist/core/shaders/Text/index.js"
+    },
+    "./core/Arc": {
+      "types": "./dist/core/shaders/Arc/index.d.ts",
+      "import": "./dist/core/shaders/Arc/index.js",
+      "require": "./dist/core/shaders/Arc/index.js"
+    },
+    "./core/BlockNoise": {
+      "types": "./dist/core/shaders/BlockNoise/index.d.ts",
+      "import": "./dist/core/shaders/BlockNoise/index.js",
+      "require": "./dist/core/shaders/BlockNoise/index.js"
+    },
+    "./core/BlueNoise": {
+      "types": "./dist/core/shaders/BlueNoise/index.d.ts",
+      "import": "./dist/core/shaders/BlueNoise/index.js",
+      "require": "./dist/core/shaders/BlueNoise/index.js"
+    },
+    "./core/Chalkboard": {
+      "types": "./dist/core/shaders/Chalkboard/index.d.ts",
+      "import": "./dist/core/shaders/Chalkboard/index.js",
+      "require": "./dist/core/shaders/Chalkboard/index.js"
+    },
+    "./core/CompressionArtifacts": {
+      "types": "./dist/core/shaders/CompressionArtifacts/index.d.ts",
+      "import": "./dist/core/shaders/CompressionArtifacts/index.js",
+      "require": "./dist/core/shaders/CompressionArtifacts/index.js"
+    },
+    "./core/CornerPin": {
+      "types": "./dist/core/shaders/CornerPin/index.d.ts",
+      "import": "./dist/core/shaders/CornerPin/index.js",
+      "require": "./dist/core/shaders/CornerPin/index.js"
+    },
+    "./core/CurlNoise": {
+      "types": "./dist/core/shaders/CurlNoise/index.d.ts",
+      "import": "./dist/core/shaders/CurlNoise/index.js",
+      "require": "./dist/core/shaders/CurlNoise/index.js"
+    },
+    "./core/ErosionNoise": {
+      "types": "./dist/core/shaders/ErosionNoise/index.d.ts",
+      "import": "./dist/core/shaders/ErosionNoise/index.js",
+      "require": "./dist/core/shaders/ErosionNoise/index.js"
+    },
+    "./core/GaborNoise": {
+      "types": "./dist/core/shaders/GaborNoise/index.d.ts",
+      "import": "./dist/core/shaders/GaborNoise/index.js",
+      "require": "./dist/core/shaders/GaborNoise/index.js"
+    },
+    "./core/GradientMap": {
+      "types": "./dist/core/shaders/GradientMap/index.d.ts",
+      "import": "./dist/core/shaders/GradientMap/index.js",
+      "require": "./dist/core/shaders/GradientMap/index.js"
+    },
+    "./core/Heart": {
+      "types": "./dist/core/shaders/Heart/index.d.ts",
+      "import": "./dist/core/shaders/Heart/index.js",
+      "require": "./dist/core/shaders/Heart/index.js"
+    },
+    "./core/IsometricCubes": {
+      "types": "./dist/core/shaders/IsometricCubes/index.d.ts",
+      "import": "./dist/core/shaders/IsometricCubes/index.js",
+      "require": "./dist/core/shaders/IsometricCubes/index.js"
+    },
+    "./core/ObjectTracker": {
+      "types": "./dist/core/shaders/ObjectTracker/index.d.ts",
+      "import": "./dist/core/shaders/ObjectTracker/index.js",
+      "require": "./dist/core/shaders/ObjectTracker/index.js"
+    },
+    "./core/PagePeel": {
+      "types": "./dist/core/shaders/PagePeel/index.d.ts",
+      "import": "./dist/core/shaders/PagePeel/index.js",
+      "require": "./dist/core/shaders/PagePeel/index.js"
+    },
+    "./core/Parallelogram": {
+      "types": "./dist/core/shaders/Parallelogram/index.d.ts",
+      "import": "./dist/core/shaders/Parallelogram/index.js",
+      "require": "./dist/core/shaders/Parallelogram/index.js"
+    },
+    "./core/PerlinNoise": {
+      "types": "./dist/core/shaders/PerlinNoise/index.d.ts",
+      "import": "./dist/core/shaders/PerlinNoise/index.js",
+      "require": "./dist/core/shaders/PerlinNoise/index.js"
+    },
+    "./core/PixelSort": {
+      "types": "./dist/core/shaders/PixelSort/index.d.ts",
+      "import": "./dist/core/shaders/PixelSort/index.js",
+      "require": "./dist/core/shaders/PixelSort/index.js"
+    },
+    "./core/PixelThrow": {
+      "types": "./dist/core/shaders/PixelThrow/index.d.ts",
+      "import": "./dist/core/shaders/PixelThrow/index.js",
+      "require": "./dist/core/shaders/PixelThrow/index.js"
+    },
+    "./core/Scratches": {
+      "types": "./dist/core/shaders/Scratches/index.d.ts",
+      "import": "./dist/core/shaders/Scratches/index.js",
+      "require": "./dist/core/shaders/Scratches/index.js"
+    },
+    "./core/SmokeFlow": {
+      "types": "./dist/core/shaders/SmokeFlow/index.d.ts",
+      "import": "./dist/core/shaders/SmokeFlow/index.js",
+      "require": "./dist/core/shaders/SmokeFlow/index.js"
+    },
+    "./core/Stone": {
+      "types": "./dist/core/shaders/Stone/index.d.ts",
+      "import": "./dist/core/shaders/Stone/index.js",
+      "require": "./dist/core/shaders/Stone/index.js"
+    },
+    "./core/Teardrop": {
+      "types": "./dist/core/shaders/Teardrop/index.d.ts",
+      "import": "./dist/core/shaders/Teardrop/index.js",
+      "require": "./dist/core/shaders/Teardrop/index.js"
+    },
+    "./core/TriangularGrid": {
+      "types": "./dist/core/shaders/TriangularGrid/index.d.ts",
+      "import": "./dist/core/shaders/TriangularGrid/index.js",
+      "require": "./dist/core/shaders/TriangularGrid/index.js"
+    },
+    "./core/Water": {
+      "types": "./dist/core/shaders/Water/index.d.ts",
+      "import": "./dist/core/shaders/Water/index.js",
+      "require": "./dist/core/shaders/Water/index.js"
+    },
+    "./core/Watercolor": {
+      "types": "./dist/core/shaders/Watercolor/index.d.ts",
+      "import": "./dist/core/shaders/Watercolor/index.js",
+      "require": "./dist/core/shaders/Watercolor/index.js"
+    },
+    "./core/WaveletNoise": {
+      "types": "./dist/core/shaders/WaveletNoise/index.d.ts",
+      "import": "./dist/core/shaders/WaveletNoise/index.js",
+      "require": "./dist/core/shaders/WaveletNoise/index.js"
+    },
+    "./core/Wool": {
+      "types": "./dist/core/shaders/Wool/index.d.ts",
+      "import": "./dist/core/shaders/Wool/index.js",
+      "require": "./dist/core/shaders/Wool/index.js"
+    },
+    "./core/ColorKey": {
+      "types": "./dist/core/shaders/ColorKey/index.d.ts",
+      "import": "./dist/core/shaders/ColorKey/index.js",
+      "require": "./dist/core/shaders/ColorKey/index.js"
+    },
+    "./core/DataMosh": {
+      "types": "./dist/core/shaders/DataMosh/index.d.ts",
+      "import": "./dist/core/shaders/DataMosh/index.js",
+      "require": "./dist/core/shaders/DataMosh/index.js"
+    },
+    "./core/Flip": {
+      "types": "./dist/core/shaders/Flip/index.d.ts",
+      "import": "./dist/core/shaders/Flip/index.js",
+      "require": "./dist/core/shaders/Flip/index.js"
+    },
+    "./core/Heatmap": {
+      "types": "./dist/core/shaders/Heatmap/index.d.ts",
+      "import": "./dist/core/shaders/Heatmap/index.js",
+      "require": "./dist/core/shaders/Heatmap/index.js"
+    },
+    "./core/KeyFrames": {
+      "types": "./dist/core/shaders/KeyFrames/index.d.ts",
+      "import": "./dist/core/shaders/KeyFrames/index.js",
+      "require": "./dist/core/shaders/KeyFrames/index.js"
+    },
+    "./core/LightEdge": {
+      "types": "./dist/core/shaders/LightEdge/index.d.ts",
+      "import": "./dist/core/shaders/LightEdge/index.js",
+      "require": "./dist/core/shaders/LightEdge/index.js"
+    },
+    "./core/LightLeak": {
+      "types": "./dist/core/shaders/LightLeak/index.d.ts",
+      "import": "./dist/core/shaders/LightLeak/index.js",
+      "require": "./dist/core/shaders/LightLeak/index.js"
+    },
+    "./core/PolishedMirror": {
+      "types": "./dist/core/shaders/PolishedMirror/index.d.ts",
+      "import": "./dist/core/shaders/PolishedMirror/index.js",
+      "require": "./dist/core/shaders/PolishedMirror/index.js"
+    },
+    "./core/ArcGradient": {
+      "types": "./dist/core/shaders/ArcGradient/index.d.ts",
+      "import": "./dist/core/shaders/ArcGradient/index.js",
+      "require": "./dist/core/shaders/ArcGradient/index.js"
+    },
+    "./core/Balloon": {
+      "types": "./dist/core/shaders/Balloon/index.d.ts",
+      "import": "./dist/core/shaders/Balloon/index.js",
+      "require": "./dist/core/shaders/Balloon/index.js"
+    },
+    "./core/Engraving": {
+      "types": "./dist/core/shaders/Engraving/index.d.ts",
+      "import": "./dist/core/shaders/Engraving/index.js",
+      "require": "./dist/core/shaders/Engraving/index.js"
+    },
+    "./core/Cloth": {
+      "types": "./dist/core/shaders/Cloth/index.d.ts",
+      "import": "./dist/core/shaders/Cloth/index.js",
+      "require": "./dist/core/shaders/Cloth/index.js"
+    },
+    "./core/Ferrofluid": {
+      "types": "./dist/core/shaders/Ferrofluid/index.d.ts",
+      "import": "./dist/core/shaders/Ferrofluid/index.js",
+      "require": "./dist/core/shaders/Ferrofluid/index.js"
+    },
+    "./core/Particles": {
+      "types": "./dist/core/shaders/Particles/index.d.ts",
+      "import": "./dist/core/shaders/Particles/index.js",
+      "require": "./dist/core/shaders/Particles/index.js"
+    },
+    "./core/ReactionDiffusion": {
+      "types": "./dist/core/shaders/ReactionDiffusion/index.d.ts",
+      "import": "./dist/core/shaders/ReactionDiffusion/index.js",
+      "require": "./dist/core/shaders/ReactionDiffusion/index.js"
+    },
+    "./core/BlockDissolve": {
+      "types": "./dist/core/shaders/BlockDissolve/index.d.ts",
+      "import": "./dist/core/shaders/BlockDissolve/index.js",
+      "require": "./dist/core/shaders/BlockDissolve/index.js"
+    },
+    "./core/Boids": {
+      "types": "./dist/core/shaders/Boids/index.d.ts",
+      "import": "./dist/core/shaders/Boids/index.js",
+      "require": "./dist/core/shaders/Boids/index.js"
+    },
+    "./core/BokehBlur": {
+      "types": "./dist/core/shaders/BokehBlur/index.d.ts",
+      "import": "./dist/core/shaders/BokehBlur/index.js",
+      "require": "./dist/core/shaders/BokehBlur/index.js"
+    },
+    "./core/DisplacementMap": {
+      "types": "./dist/core/shaders/DisplacementMap/index.d.ts",
+      "import": "./dist/core/shaders/DisplacementMap/index.js",
+      "require": "./dist/core/shaders/DisplacementMap/index.js"
+    },
+    "./core/FilmStock": {
+      "types": "./dist/core/shaders/FilmStock/index.d.ts",
+      "import": "./dist/core/shaders/FilmStock/index.js",
+      "require": "./dist/core/shaders/FilmStock/index.js"
+    },
+    "./core/GradientWipe": {
+      "types": "./dist/core/shaders/GradientWipe/index.d.ts",
+      "import": "./dist/core/shaders/GradientWipe/index.js",
+      "require": "./dist/core/shaders/GradientWipe/index.js"
+    },
+    "./core/IrisWipe": {
+      "types": "./dist/core/shaders/IrisWipe/index.d.ts",
+      "import": "./dist/core/shaders/IrisWipe/index.js",
+      "require": "./dist/core/shaders/IrisWipe/index.js"
+    },
+    "./core/LinearWipe": {
+      "types": "./dist/core/shaders/LinearWipe/index.d.ts",
+      "import": "./dist/core/shaders/LinearWipe/index.js",
+      "require": "./dist/core/shaders/LinearWipe/index.js"
+    },
+    "./core/ParticleField": {
+      "types": "./dist/core/shaders/ParticleField/index.d.ts",
+      "import": "./dist/core/shaders/ParticleField/index.js",
+      "require": "./dist/core/shaders/ParticleField/index.js"
+    },
+    "./core/RadialWipe": {
+      "types": "./dist/core/shaders/RadialWipe/index.d.ts",
+      "import": "./dist/core/shaders/RadialWipe/index.js",
+      "require": "./dist/core/shaders/RadialWipe/index.js"
+    },
+    "./core/TimeTrail": {
+      "types": "./dist/core/shaders/TimeTrail/index.d.ts",
+      "import": "./dist/core/shaders/TimeTrail/index.js",
+      "require": "./dist/core/shaders/TimeTrail/index.js"
+    },
+    "./core/VenetianBlinds": {
+      "types": "./dist/core/shaders/VenetianBlinds/index.d.ts",
+      "import": "./dist/core/shaders/VenetianBlinds/index.js",
+      "require": "./dist/core/shaders/VenetianBlinds/index.js"
+    },
+    "./core/InkFlow": {
+      "types": "./dist/core/shaders/InkFlow/index.d.ts",
+      "import": "./dist/core/shaders/InkFlow/index.js",
+      "require": "./dist/core/shaders/InkFlow/index.js"
+    },
+    "./core/Bend": {
+      "types": "./dist/core/shaders/Bend/index.d.ts",
+      "import": "./dist/core/shaders/Bend/index.js",
+      "require": "./dist/core/shaders/Bend/index.js"
+    },
+    "./core/GravityWell": {
+      "types": "./dist/core/shaders/GravityWell/index.d.ts",
+      "import": "./dist/core/shaders/GravityWell/index.js",
+      "require": "./dist/core/shaders/GravityWell/index.js"
+    },
+    "./core/MagneticFilings": {
+      "types": "./dist/core/shaders/MagneticFilings/index.d.ts",
+      "import": "./dist/core/shaders/MagneticFilings/index.js",
+      "require": "./dist/core/shaders/MagneticFilings/index.js"
+    },
+    "./core/ParticleFlow": {
+      "types": "./dist/core/shaders/ParticleFlow/index.d.ts",
+      "import": "./dist/core/shaders/ParticleFlow/index.js",
+      "require": "./dist/core/shaders/ParticleFlow/index.js"
+    },
+    "./core/HTMLInCanvas": {
+      "types": "./dist/core/shaders/HTMLInCanvas/index.d.ts",
+      "import": "./dist/core/shaders/HTMLInCanvas/index.js",
+      "require": "./dist/core/shaders/HTMLInCanvas/index.js"
+    },
+    "./core/BarnDoors": {
+      "types": "./dist/core/shaders/BarnDoors/index.d.ts",
+      "import": "./dist/core/shaders/BarnDoors/index.js",
+      "require": "./dist/core/shaders/BarnDoors/index.js"
+    },
+    "./core/CheckerWipe": {
+      "types": "./dist/core/shaders/CheckerWipe/index.d.ts",
+      "import": "./dist/core/shaders/CheckerWipe/index.js",
+      "require": "./dist/core/shaders/CheckerWipe/index.js"
+    },
+    "./core/DiamondWipe": {
+      "types": "./dist/core/shaders/DiamondWipe/index.d.ts",
+      "import": "./dist/core/shaders/DiamondWipe/index.js",
+      "require": "./dist/core/shaders/DiamondWipe/index.js"
+    },
+    "./core/NoiseDissolve": {
+      "types": "./dist/core/shaders/NoiseDissolve/index.d.ts",
+      "import": "./dist/core/shaders/NoiseDissolve/index.js",
+      "require": "./dist/core/shaders/NoiseDissolve/index.js"
+    },
+    "./core/RandomBars": {
+      "types": "./dist/core/shaders/RandomBars/index.d.ts",
+      "import": "./dist/core/shaders/RandomBars/index.js",
+      "require": "./dist/core/shaders/RandomBars/index.js"
+    },
+    "./core/RippleWipe": {
+      "types": "./dist/core/shaders/RippleWipe/index.d.ts",
+      "import": "./dist/core/shaders/RippleWipe/index.js",
+      "require": "./dist/core/shaders/RippleWipe/index.js"
+    },
+    "./core/SliceWipe": {
+      "types": "./dist/core/shaders/SliceWipe/index.d.ts",
+      "import": "./dist/core/shaders/SliceWipe/index.js",
+      "require": "./dist/core/shaders/SliceWipe/index.js"
+    },
+    "./core/LensDistortion": {
+      "types": "./dist/core/shaders/LensDistortion/index.d.ts",
+      "import": "./dist/core/shaders/LensDistortion/index.js",
+      "require": "./dist/core/shaders/LensDistortion/index.js"
+    },
+    "./core/Chrome": {
+      "types": "./dist/core/shaders/Chrome/index.d.ts",
+      "import": "./dist/core/shaders/Chrome/index.js",
+      "require": "./dist/core/shaders/Chrome/index.js"
+    },
+    "./core/Line": {
+      "types": "./dist/core/shaders/Line/index.d.ts",
+      "import": "./dist/core/shaders/Line/index.js",
+      "require": "./dist/core/shaders/Line/index.js"
+    },
+    "./core/MeshGradient": {
+      "types": "./dist/core/shaders/MeshGradient/index.d.ts",
+      "import": "./dist/core/shaders/MeshGradient/index.js",
+      "require": "./dist/core/shaders/MeshGradient/index.js"
+    },
+    "./core/Nebula": {
+      "types": "./dist/core/shaders/Nebula/index.d.ts",
+      "import": "./dist/core/shaders/Nebula/index.js",
+      "require": "./dist/core/shaders/Nebula/index.js"
+    },
+    "./core/Obsidian": {
+      "types": "./dist/core/shaders/Obsidian/index.d.ts",
+      "import": "./dist/core/shaders/Obsidian/index.js",
+      "require": "./dist/core/shaders/Obsidian/index.js"
+    },
+    "./core/Waveform": {
+      "types": "./dist/core/shaders/Waveform/index.d.ts",
+      "import": "./dist/core/shaders/Waveform/index.js",
+      "require": "./dist/core/shaders/Waveform/index.js"
+    },
+    "./core/Irradiance": {
+      "types": "./dist/core/shaders/Irradiance/index.d.ts",
+      "import": "./dist/core/shaders/Irradiance/index.js",
+      "require": "./dist/core/shaders/Irradiance/index.js"
+    },
+    "./core/VolumetricFog": {
+      "types": "./dist/core/shaders/VolumetricFog/index.d.ts",
+      "import": "./dist/core/shaders/VolumetricFog/index.js",
+      "require": "./dist/core/shaders/VolumetricFog/index.js"
+    },
+    "./core/Voxels": {
+      "types": "./dist/core/shaders/Voxels/index.d.ts",
+      "import": "./dist/core/shaders/Voxels/index.js",
+      "require": "./dist/core/shaders/Voxels/index.js"
+    },
+    "./std": {
+      "types": "./dist/core/std/index.d.ts",
+      "import": "./dist/core/std/index.js",
+      "require": "./dist/core/std/index.js"
+    },
+    "./docs-manifest.json": "./dist/core/docs-manifest.json",
+    "./llms.txt": "./dist/core/llms.txt",
+    "./core/Sparkle": {
+      "types": "./dist/core/shaders/Sparkle/index.d.ts",
+      "import": "./dist/core/shaders/Sparkle/index.js",
+      "require": "./dist/core/shaders/Sparkle/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "vue": [
+        "./dist/vue/index.d.ts"
+      ],
+      "vue/codegen": [
+        "./dist/vue/codegen.d.ts"
+      ],
+      "react": [
+        "./dist/react/index.d.ts"
+      ],
+      "react/codegen": [
+        "./dist/react/codegen.d.ts"
+      ],
+      "svelte": [
+        "./dist/svelte/index.d.ts"
+      ],
+      "svelte/codegen": [
+        "./dist/svelte/codegen.d.ts"
+      ],
+      "solid": [
+        "./dist/solid/index.d.ts"
+      ],
+      "solid/codegen": [
+        "./dist/solid/codegen.d.ts"
+      ],
+      "js": [
+        "./dist/js/index.d.ts"
+      ],
+      "js/codegen": [
+        "./dist/js/codegen.d.ts"
+      ],
+      "core": [
+        "./dist/core/index.d.ts"
+      ],
+      "core/telemetry": [
+        "./dist/core/telemetry/index.d.ts"
+      ],
+      "std": [
+        "./dist/core/std/index.d.ts"
+      ],
+      "registry": [
+        "./dist/registry.d.ts"
+      ],
+      "config": [
+        "./dist/config.d.ts"
+      ],
+      "partner": [
+        "./dist/partner/index.d.ts"
+      ],
+      "core/AngularBlur": [
+        "./dist/core/shaders/AngularBlur/index.d.ts"
+      ],
+      "core/Arc": [
+        "./dist/core/shaders/Arc/index.d.ts"
+      ],
+      "core/Ascii": [
+        "./dist/core/shaders/Ascii/index.d.ts"
+      ],
+      "core/Aurora": [
+        "./dist/core/shaders/Aurora/index.d.ts"
+      ],
+      "core/BarShift": [
+        "./dist/core/shaders/BarShift/index.d.ts"
+      ],
+      "core/BarnDoors": [
+        "./dist/core/shaders/BarnDoors/index.d.ts"
+      ],
+      "core/Beam": [
+        "./dist/core/shaders/Beam/index.d.ts"
+      ],
+      "core/Bend": [
+        "./dist/core/shaders/Bend/index.d.ts"
+      ],
+      "core/Blob": [
+        "./dist/core/shaders/Blob/index.d.ts"
+      ],
+      "core/BlockDissolve": [
+        "./dist/core/shaders/BlockDissolve/index.d.ts"
+      ],
+      "core/BlockNoise": [
+        "./dist/core/shaders/BlockNoise/index.d.ts"
+      ],
+      "core/BlueNoise": [
+        "./dist/core/shaders/BlueNoise/index.d.ts"
+      ],
+      "core/Blur": [
+        "./dist/core/shaders/Blur/index.d.ts"
+      ],
+      "core/Boids": [
+        "./dist/core/shaders/Boids/index.d.ts"
+      ],
+      "core/BokehBlur": [
+        "./dist/core/shaders/BokehBlur/index.d.ts"
+      ],
+      "core/BrickPattern": [
+        "./dist/core/shaders/BrickPattern/index.d.ts"
+      ],
+      "core/BrightnessContrast": [
+        "./dist/core/shaders/BrightnessContrast/index.d.ts"
+      ],
+      "core/BrushedMetal": [
+        "./dist/core/shaders/BrushedMetal/index.d.ts"
+      ],
+      "core/Bulge": [
+        "./dist/core/shaders/Bulge/index.d.ts"
+      ],
+      "core/CRTScreen": [
+        "./dist/core/shaders/CRTScreen/index.d.ts"
+      ],
+      "core/CarbonFiber": [
+        "./dist/core/shaders/CarbonFiber/index.d.ts"
+      ],
+      "core/Chalkboard": [
+        "./dist/core/shaders/Chalkboard/index.d.ts"
+      ],
+      "core/ChannelBlur": [
+        "./dist/core/shaders/ChannelBlur/index.d.ts"
+      ],
+      "core/CheckerWipe": [
+        "./dist/core/shaders/CheckerWipe/index.d.ts"
+      ],
+      "core/Checkerboard": [
+        "./dist/core/shaders/Checkerboard/index.d.ts"
+      ],
+      "core/Chevron": [
+        "./dist/core/shaders/Chevron/index.d.ts"
+      ],
+      "core/ChromaFlow": [
+        "./dist/core/shaders/ChromaFlow/index.d.ts"
+      ],
+      "core/ChromaticAberration": [
+        "./dist/core/shaders/ChromaticAberration/index.d.ts"
+      ],
+      "core/Chrome": [
+        "./dist/core/shaders/Chrome/index.d.ts"
+      ],
+      "core/Circle": [
+        "./dist/core/shaders/Circle/index.d.ts"
+      ],
+      "core/ColorWheel": [
+        "./dist/core/shaders/ColorWheel/index.d.ts"
+      ],
+      "core/CompressionArtifacts": [
+        "./dist/core/shaders/CompressionArtifacts/index.d.ts"
+      ],
+      "core/ConcentricSpin": [
+        "./dist/core/shaders/ConcentricSpin/index.d.ts"
+      ],
+      "core/ConicGradient": [
+        "./dist/core/shaders/ConicGradient/index.d.ts"
+      ],
+      "core/ContourLines": [
+        "./dist/core/shaders/ContourLines/index.d.ts"
+      ],
+      "core/CornerPin": [
+        "./dist/core/shaders/CornerPin/index.d.ts"
+      ],
+      "core/Crescent": [
+        "./dist/core/shaders/Crescent/index.d.ts"
+      ],
+      "core/Cross": [
+        "./dist/core/shaders/Cross/index.d.ts"
+      ],
+      "core/Crystal": [
+        "./dist/core/shaders/Crystal/index.d.ts"
+      ],
+      "core/CurlNoise": [
+        "./dist/core/shaders/CurlNoise/index.d.ts"
+      ],
+      "core/CursorRipples": [
+        "./dist/core/shaders/CursorRipples/index.d.ts"
+      ],
+      "core/CursorTrail": [
+        "./dist/core/shaders/CursorTrail/index.d.ts"
+      ],
+      "core/DataMosh": [
+        "./dist/core/shaders/DataMosh/index.d.ts"
+      ],
+      "core/DiamondGradient": [
+        "./dist/core/shaders/DiamondGradient/index.d.ts"
+      ],
+      "core/DiamondWipe": [
+        "./dist/core/shaders/DiamondWipe/index.d.ts"
+      ],
+      "core/DiffuseBlur": [
+        "./dist/core/shaders/DiffuseBlur/index.d.ts"
+      ],
+      "core/DisplacementMap": [
+        "./dist/core/shaders/DisplacementMap/index.d.ts"
+      ],
+      "core/Dither": [
+        "./dist/core/shaders/Dither/index.d.ts"
+      ],
+      "core/DotGrid": [
+        "./dist/core/shaders/DotGrid/index.d.ts"
+      ],
+      "core/DropShadow": [
+        "./dist/core/shaders/DropShadow/index.d.ts"
+      ],
+      "core/Duotone": [
+        "./dist/core/shaders/Duotone/index.d.ts"
+      ],
+      "core/Ellipse": [
+        "./dist/core/shaders/Ellipse/index.d.ts"
+      ],
+      "core/Emboss": [
+        "./dist/core/shaders/Emboss/index.d.ts"
+      ],
+      "core/Engraving": [
+        "./dist/core/shaders/Engraving/index.d.ts"
+      ],
+      "core/ErosionNoise": [
+        "./dist/core/shaders/ErosionNoise/index.d.ts"
+      ],
+      "core/Exposure": [
+        "./dist/core/shaders/Exposure/index.d.ts"
+      ],
+      "core/FallingLines": [
+        "./dist/core/shaders/FallingLines/index.d.ts"
+      ],
+      "core/FilmGrain": [
+        "./dist/core/shaders/FilmGrain/index.d.ts"
+      ],
+      "core/FilmStock": [
+        "./dist/core/shaders/FilmStock/index.d.ts"
+      ],
+      "core/Flip": [
+        "./dist/core/shaders/Flip/index.d.ts"
+      ],
+      "core/FloatingParticles": [
+        "./dist/core/shaders/FloatingParticles/index.d.ts"
+      ],
+      "core/FlowField": [
+        "./dist/core/shaders/FlowField/index.d.ts"
+      ],
+      "core/Flower": [
+        "./dist/core/shaders/Flower/index.d.ts"
+      ],
+      "core/FlowingGradient": [
+        "./dist/core/shaders/FlowingGradient/index.d.ts"
+      ],
+      "core/FlutedGlass": [
+        "./dist/core/shaders/FlutedGlass/index.d.ts"
+      ],
+      "core/Fog": [
+        "./dist/core/shaders/Fog/index.d.ts"
+      ],
+      "core/Form3D": [
+        "./dist/core/shaders/Form3D/index.d.ts"
+      ],
+      "core/FractalNoise": [
+        "./dist/core/shaders/FractalNoise/index.d.ts"
+      ],
+      "core/Frost": [
+        "./dist/core/shaders/Frost/index.d.ts"
+      ],
+      "core/GaborNoise": [
+        "./dist/core/shaders/GaborNoise/index.d.ts"
+      ],
+      "core/Glass": [
+        "./dist/core/shaders/Glass/index.d.ts"
+      ],
+      "core/GlassTiles": [
+        "./dist/core/shaders/GlassTiles/index.d.ts"
+      ],
+      "core/Glitch": [
+        "./dist/core/shaders/Glitch/index.d.ts"
+      ],
+      "core/Glow": [
+        "./dist/core/shaders/Glow/index.d.ts"
+      ],
+      "core/Godrays": [
+        "./dist/core/shaders/Godrays/index.d.ts"
+      ],
+      "core/Goo": [
+        "./dist/core/shaders/Goo/index.d.ts"
+      ],
+      "core/GradientMap": [
+        "./dist/core/shaders/GradientMap/index.d.ts"
+      ],
+      "core/Grayscale": [
+        "./dist/core/shaders/Grayscale/index.d.ts"
+      ],
+      "core/Grid": [
+        "./dist/core/shaders/Grid/index.d.ts"
+      ],
+      "core/GridDistortion": [
+        "./dist/core/shaders/GridDistortion/index.d.ts"
+      ],
+      "core/Group": [
+        "./dist/core/shaders/Group/index.d.ts"
+      ],
+      "core/HTMLInCanvas": [
+        "./dist/core/shaders/HTMLInCanvas/index.d.ts"
+      ],
+      "core/Halftone": [
+        "./dist/core/shaders/Halftone/index.d.ts"
+      ],
+      "core/Heart": [
+        "./dist/core/shaders/Heart/index.d.ts"
+      ],
+      "core/Heatmap": [
+        "./dist/core/shaders/Heatmap/index.d.ts"
+      ],
+      "core/HexGrid": [
+        "./dist/core/shaders/HexGrid/index.d.ts"
+      ],
+      "core/Hologram": [
+        "./dist/core/shaders/Hologram/index.d.ts"
+      ],
+      "core/Holographic": [
+        "./dist/core/shaders/Holographic/index.d.ts"
+      ],
+      "core/HueShift": [
+        "./dist/core/shaders/HueShift/index.d.ts"
+      ],
+      "core/ImageTexture": [
+        "./dist/core/shaders/ImageTexture/index.d.ts"
+      ],
+      "core/InkFlow": [
+        "./dist/core/shaders/InkFlow/index.d.ts"
+      ],
+      "core/Invert": [
+        "./dist/core/shaders/Invert/index.d.ts"
+      ],
+      "core/IrisWipe": [
+        "./dist/core/shaders/IrisWipe/index.d.ts"
+      ],
+      "core/Irradiance": [
+        "./dist/core/shaders/Irradiance/index.d.ts"
+      ],
+      "core/IsometricCubes": [
+        "./dist/core/shaders/IsometricCubes/index.d.ts"
+      ],
+      "core/Kaleidoscope": [
+        "./dist/core/shaders/Kaleidoscope/index.d.ts"
+      ],
+      "core/KeyFrames": [
+        "./dist/core/shaders/KeyFrames/index.d.ts"
+      ],
+      "core/LensDistortion": [
+        "./dist/core/shaders/LensDistortion/index.d.ts"
+      ],
+      "core/LensFlare": [
+        "./dist/core/shaders/LensFlare/index.d.ts"
+      ],
+      "core/LightEdge": [
+        "./dist/core/shaders/LightEdge/index.d.ts"
+      ],
+      "core/LightLeak": [
+        "./dist/core/shaders/LightLeak/index.d.ts"
+      ],
+      "core/Line": [
+        "./dist/core/shaders/Line/index.d.ts"
+      ],
+      "core/LinearBlur": [
+        "./dist/core/shaders/LinearBlur/index.d.ts"
+      ],
+      "core/LinearGradient": [
+        "./dist/core/shaders/LinearGradient/index.d.ts"
+      ],
+      "core/LinearWipe": [
+        "./dist/core/shaders/LinearWipe/index.d.ts"
+      ],
+      "core/LiquidMetal": [
+        "./dist/core/shaders/LiquidMetal/index.d.ts"
+      ],
+      "core/Liquify": [
+        "./dist/core/shaders/Liquify/index.d.ts"
+      ],
+      "core/MagneticFilings": [
+        "./dist/core/shaders/MagneticFilings/index.d.ts"
+      ],
+      "core/Marble": [
+        "./dist/core/shaders/Marble/index.d.ts"
+      ],
+      "core/MeshGradient": [
+        "./dist/core/shaders/MeshGradient/index.d.ts"
+      ],
+      "core/Mirror": [
+        "./dist/core/shaders/Mirror/index.d.ts"
+      ],
+      "core/MultiPointGradient": [
+        "./dist/core/shaders/MultiPointGradient/index.d.ts"
+      ],
+      "core/Nebula": [
+        "./dist/core/shaders/Nebula/index.d.ts"
+      ],
+      "core/Neon": [
+        "./dist/core/shaders/Neon/index.d.ts"
+      ],
+      "core/NoiseDissolve": [
+        "./dist/core/shaders/NoiseDissolve/index.d.ts"
+      ],
+      "core/ObjectTracker": [
+        "./dist/core/shaders/ObjectTracker/index.d.ts"
+      ],
+      "core/Obsidian": [
+        "./dist/core/shaders/Obsidian/index.d.ts"
+      ],
+      "core/PagePeel": [
+        "./dist/core/shaders/PagePeel/index.d.ts"
+      ],
+      "core/Paper": [
+        "./dist/core/shaders/Paper/index.d.ts"
+      ],
+      "core/Parallelogram": [
+        "./dist/core/shaders/Parallelogram/index.d.ts"
+      ],
+      "core/ParticleField": [
+        "./dist/core/shaders/ParticleField/index.d.ts"
+      ],
+      "core/ParticleFlow": [
+        "./dist/core/shaders/ParticleFlow/index.d.ts"
+      ],
+      "core/Particles": [
+        "./dist/core/shaders/Particles/index.d.ts"
+      ],
+      "core/PerlinNoise": [
+        "./dist/core/shaders/PerlinNoise/index.d.ts"
+      ],
+      "core/Perspective": [
+        "./dist/core/shaders/Perspective/index.d.ts"
+      ],
+      "core/PixelSort": [
+        "./dist/core/shaders/PixelSort/index.d.ts"
+      ],
+      "core/PixelThrow": [
+        "./dist/core/shaders/PixelThrow/index.d.ts"
+      ],
+      "core/Pixelate": [
+        "./dist/core/shaders/Pixelate/index.d.ts"
+      ],
+      "core/Plasma": [
+        "./dist/core/shaders/Plasma/index.d.ts"
+      ],
+      "core/Plastic": [
+        "./dist/core/shaders/Plastic/index.d.ts"
+      ],
+      "core/PolarCoordinates": [
+        "./dist/core/shaders/PolarCoordinates/index.d.ts"
+      ],
+      "core/Polygon": [
+        "./dist/core/shaders/Polygon/index.d.ts"
+      ],
+      "core/Posterize": [
+        "./dist/core/shaders/Posterize/index.d.ts"
+      ],
+      "core/Prism": [
+        "./dist/core/shaders/Prism/index.d.ts"
+      ],
+      "core/ProgressiveBlur": [
+        "./dist/core/shaders/ProgressiveBlur/index.d.ts"
+      ],
+      "core/RadialGradient": [
+        "./dist/core/shaders/RadialGradient/index.d.ts"
+      ],
+      "core/RadialWipe": [
+        "./dist/core/shaders/RadialWipe/index.d.ts"
+      ],
+      "core/RandomBars": [
+        "./dist/core/shaders/RandomBars/index.d.ts"
+      ],
+      "core/ReactionDiffusion": [
+        "./dist/core/shaders/ReactionDiffusion/index.d.ts"
+      ],
+      "core/RectangularCoordinates": [
+        "./dist/core/shaders/RectangularCoordinates/index.d.ts"
+      ],
+      "core/ReflectivePlane": [
+        "./dist/core/shaders/ReflectivePlane/index.d.ts"
+      ],
+      "core/Repeater": [
+        "./dist/core/shaders/Repeater/index.d.ts"
+      ],
+      "core/Ring": [
+        "./dist/core/shaders/Ring/index.d.ts"
+      ],
+      "core/RippleWipe": [
+        "./dist/core/shaders/RippleWipe/index.d.ts"
+      ],
+      "core/Ripples": [
+        "./dist/core/shaders/Ripples/index.d.ts"
+      ],
+      "core/RoundedRect": [
+        "./dist/core/shaders/RoundedRect/index.d.ts"
+      ],
+      "core/Saturation": [
+        "./dist/core/shaders/Saturation/index.d.ts"
+      ],
+      "core/Scratches": [
+        "./dist/core/shaders/Scratches/index.d.ts"
+      ],
+      "core/Sharpness": [
+        "./dist/core/shaders/Sharpness/index.d.ts"
+      ],
+      "core/Shatter": [
+        "./dist/core/shaders/Shatter/index.d.ts"
+      ],
+      "core/SimplexNoise": [
+        "./dist/core/shaders/SimplexNoise/index.d.ts"
+      ],
+      "core/SineWave": [
+        "./dist/core/shaders/SineWave/index.d.ts"
+      ],
+      "core/SliceWipe": [
+        "./dist/core/shaders/SliceWipe/index.d.ts"
+      ],
+      "core/Smoke": [
+        "./dist/core/shaders/Smoke/index.d.ts"
+      ],
+      "core/SmokeFill": [
+        "./dist/core/shaders/SmokeFill/index.d.ts"
+      ],
+      "core/SmokeFlow": [
+        "./dist/core/shaders/SmokeFlow/index.d.ts"
+      ],
+      "core/Solarize": [
+        "./dist/core/shaders/Solarize/index.d.ts"
+      ],
+      "core/SolidColor": [
+        "./dist/core/shaders/SolidColor/index.d.ts"
+      ],
+      "core/Sparkle": [
+        "./dist/core/shaders/Sparkle/index.d.ts"
+      ],
+      "core/Spherize": [
+        "./dist/core/shaders/Spherize/index.d.ts"
+      ],
+      "core/Spiral": [
+        "./dist/core/shaders/Spiral/index.d.ts"
+      ],
+      "core/Star": [
+        "./dist/core/shaders/Star/index.d.ts"
+      ],
+      "core/Stone": [
+        "./dist/core/shaders/Stone/index.d.ts"
+      ],
+      "core/Strands": [
+        "./dist/core/shaders/Strands/index.d.ts"
+      ],
+      "core/Stretch": [
+        "./dist/core/shaders/Stretch/index.d.ts"
+      ],
+      "core/Stripes": [
+        "./dist/core/shaders/Stripes/index.d.ts"
+      ],
+      "core/StudioBackground": [
+        "./dist/core/shaders/StudioBackground/index.d.ts"
+      ],
+      "core/SunBurst": [
+        "./dist/core/shaders/SunBurst/index.d.ts"
+      ],
+      "core/Surface3D": [
+        "./dist/core/shaders/Surface3D/index.d.ts"
+      ],
+      "core/Swirl": [
+        "./dist/core/shaders/Swirl/index.d.ts"
+      ],
+      "core/Teardrop": [
+        "./dist/core/shaders/Teardrop/index.d.ts"
+      ],
+      "core/Text": [
+        "./dist/core/shaders/Text/index.d.ts"
+      ],
+      "core/ThinFilm": [
+        "./dist/core/shaders/ThinFilm/index.d.ts"
+      ],
+      "core/TiltShift": [
+        "./dist/core/shaders/TiltShift/index.d.ts"
+      ],
+      "core/TimeTrail": [
+        "./dist/core/shaders/TimeTrail/index.d.ts"
+      ],
+      "core/Tint": [
+        "./dist/core/shaders/Tint/index.d.ts"
+      ],
+      "core/Trapezoid": [
+        "./dist/core/shaders/Trapezoid/index.d.ts"
+      ],
+      "core/TriangularGrid": [
+        "./dist/core/shaders/TriangularGrid/index.d.ts"
+      ],
+      "core/Tritone": [
+        "./dist/core/shaders/Tritone/index.d.ts"
+      ],
+      "core/Truchet": [
+        "./dist/core/shaders/Truchet/index.d.ts"
+      ],
+      "core/Twirl": [
+        "./dist/core/shaders/Twirl/index.d.ts"
+      ],
+      "core/VHS": [
+        "./dist/core/shaders/VHS/index.d.ts"
+      ],
+      "core/VenetianBlinds": [
+        "./dist/core/shaders/VenetianBlinds/index.d.ts"
+      ],
+      "core/Vesica": [
+        "./dist/core/shaders/Vesica/index.d.ts"
+      ],
+      "core/Vibrance": [
+        "./dist/core/shaders/Vibrance/index.d.ts"
+      ],
+      "core/VideoTexture": [
+        "./dist/core/shaders/VideoTexture/index.d.ts"
+      ],
+      "core/Vignette": [
+        "./dist/core/shaders/Vignette/index.d.ts"
+      ],
+      "core/Voronoi": [
+        "./dist/core/shaders/Voronoi/index.d.ts"
+      ],
+      "core/Voxels": [
+        "./dist/core/shaders/Voxels/index.d.ts"
+      ],
+      "core/Water": [
+        "./dist/core/shaders/Water/index.d.ts"
+      ],
+      "core/Watercolor": [
+        "./dist/core/shaders/Watercolor/index.d.ts"
+      ],
+      "core/WaveDistortion": [
+        "./dist/core/shaders/WaveDistortion/index.d.ts"
+      ],
+      "core/Waveform": [
+        "./dist/core/shaders/Waveform/index.d.ts"
+      ],
+      "core/WaveletNoise": [
+        "./dist/core/shaders/WaveletNoise/index.d.ts"
+      ],
+      "core/Weave": [
+        "./dist/core/shaders/Weave/index.d.ts"
+      ],
+      "core/WebcamTexture": [
+        "./dist/core/shaders/WebcamTexture/index.d.ts"
+      ],
+      "core/Wool": [
+        "./dist/core/shaders/Wool/index.d.ts"
+      ],
+      "core/WorleyNoise": [
+        "./dist/core/shaders/WorleyNoise/index.d.ts"
+      ],
+      "core/ZoomBlur": [
+        "./dist/core/shaders/ZoomBlur/index.d.ts"
+      ],
+      "core/*": [
+        "./dist/core/shaders/*/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "echo '⚙️  Building shaders package...' && pnpm run clean && tsx scripts/build.ts",
+    "clean": "rm -rf dist",
+    "dev": "tsx scripts/build.ts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "solid-js": "^1.8.0",
+    "svelte": "^5",
+    "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "typegpu": "0.12.3"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.9.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.17.11",
+    "add-mcp": "^1.13.2",
+    "consola": "^3.4.2",
+    "esbuild": "^0.28.0",
+    "fs-extra": "^11.2.0",
+    "nypm": "^0.6.10",
+    "pkg-types": "^2.3.3",
+    "shaders-core": "workspace:*",
+    "shaders-react": "workspace:*",
+    "shaders-solid": "workspace:*",
+    "shaders-svelte": "workspace:*",
+    "shaders-vue": "workspace:*",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "react",
+    "svelte",
+    "solid",
+    "webgpu",
+    "webgl",
+    "wgsl",
+    "glsl",
+    "shaders"
+  ]
+}

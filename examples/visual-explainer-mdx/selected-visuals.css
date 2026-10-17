@@ -1,0 +1,8 @@
+.selected-gallery .effect-stage { max-width:960px; }
+.selected-gallery .trace-preview { display:block; width:100%; height:auto; }
+.selected-gallery button { margin-top:14px; }
+.selected-gallery .effect-controls button { margin-top:0; }
+.selected-gallery .effect-stage + button { margin-top:20px; }
+.selected-gallery section:last-child p { margin-top:20px; }
+
+.selected-gallery .frozen-control { display:flex; align-items:center; gap:12px; margin-top:20px; font-size:16px; }

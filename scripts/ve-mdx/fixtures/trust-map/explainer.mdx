@@ -1,0 +1,125 @@
+{/* The fixture verification explainer, as the explain step writes it. The narrative is Markdown; the parts from data are components. The card trust-map of visual-explainer holds the contract. */}
+import { ArchitectureDiagram, CodeRef, Definition, DefinitionList, Disclosure, EvidenceGuide, ExplainerShell, Glossary, Glossed, Invariants, Lead, PromiseLink, promiseAnchors, Section, Step, Steps, StepThrough, TypedDiagram, VerifierView, WorkedExample } from 'visual-explainer-mdx/components';
+import trust from './trust-map.json';
+import refs from './refs.resolved.json';
+import explain from './explain.json';
+
+<ExplainerShell title="Refuse overdrafts in the wallet: what is verified" summary="How the wallet refuses an overdraft, which rules must always hold, and which checks, planted bugs and proofs back each claim." paged appearance="auto" reviewTools={false}>
+
+<Section id="ch-0" title="What does the wallet promise?" navLabel="The promise" aliases={['story', 'why']}>
+
+<Glossed data={trust} expand>
+
+<Lead>
+
+The wallet now refuses an overdraft. A planted bug proves the overdraft rule, and a proof checks it for every balance.
+
+</Lead>
+
+</Glossed>
+
+<WorkedExample refs={refs} id="overdraft-before-after" explain={explain} />
+
+<Glossed data={trust}>
+
+<DefinitionList size="lead">
+<Definition term="Before">A withdrawal could take the balance below zero.</Definition>
+<Definition term="After">The withdraw function refuses an amount above the balance, and a new function adds a fee.</Definition>
+</DefinitionList>
+
+</Glossed>
+
+<ArchitectureDiagram spec={explain.diagrams.story} name="story" />
+
+</Section>
+
+<Section id="ch-1" title="How does one withdrawal run?" navLabel="How it works" aliases={['loop']}>
+
+<Glossed data={trust}>
+
+<Lead>
+
+A caller asks the wallet for an amount, and the wallet pays it or refuses it.
+
+</Lead>
+
+</Glossed>
+
+<WorkedExample refs={refs} id="one-withdrawal" explain={explain} />
+
+<StepThrough label="One withdrawal">
+
+<ArchitectureDiagram spec={explain.diagrams.loop} name="loop" numbered />
+
+<Steps label="The steps of one withdrawal">
+<Step id="loop-step-1">
+A caller asks the wallet to take an amount from the balance. <PromiseLink data={trust} id="P1" />
+
+<Disclosure summary="Show the code for this step">
+<CodeRef refs={refs} path="wallet/core.py" symbol="withdraw" />
+</Disclosure>
+</Step>
+<Step id="loop-step-2">
+The wallet refuses an amount above the balance, and else it gives the balance minus the amount. <PromiseLink data={trust} id="P1" />
+
+<Disclosure summary="Show the code for this step">
+<CodeRef refs={refs} path="wallet/core.py" start={1} end={5} />
+</Disclosure>
+</Step>
+<Step id="loop-step-3">
+The change also adds a fee function and a denial message, but the withdraw function does not call them yet. <PromiseLink data={trust} id="P4" />
+</Step>
+</Steps>
+
+</StepThrough>
+
+<TypedDiagram spec={explain.diagrams.withdrawal} name="withdrawal" chapters={{ 'claim-c01': 'The overdraft refusal' }} />
+
+</Section>
+
+<Section id="ch-2" title="Which rules must always hold?" navLabel="The invariants" aliases={['invariants']}>
+
+<Glossed data={trust}>
+
+The overdraft claims rest on one rule that the user accepted. A second rule is only proposed, so it cannot make a claim stronger.
+
+</Glossed>
+
+<Invariants data={trust} />
+
+</Section>
+
+<Section id="ch-3" title="How do you read the evidence?" navLabel="Reading the evidence" aliases={['verifiers']}>
+
+<EvidenceGuide data={trust} refs={refs} checks="#checks" />
+
+</Section>
+
+<Section id="ch-4" title="Which checks back each claim?" navLabel="The claims and checks" aliases={['checks', 'promises']} anchors={promiseAnchors(trust, refs)}>
+
+<Lead>
+
+Open a claim to see its code, its checks, the bugs that we planted and the proof that matches the code.
+
+</Lead>
+
+<VerifierView data={trust} refs={refs} explain={explain} />
+
+</Section>
+
+<Section id="ch-5" title="What does the evidence not show?" navLabel="Limits and words" aliases={['tradeoffs', 'glossary']}>
+
+<Glossed data={trust}>
+
+- The fixture is small, so each chapter is short.
+- The unit test that expects an integer from a withdrawal cannot fail.
+
+</Glossed>
+
+<h3 className="ve-subsection-title" id="limits-glossary">The words on this page</h3>
+
+<Glossary data={trust} only="used" />
+
+</Section>
+
+</ExplainerShell>

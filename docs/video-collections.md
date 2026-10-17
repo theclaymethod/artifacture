@@ -12,7 +12,7 @@ Version 1 is a closed JSON object. Unknown fields fail validation at every decla
 |---|---|
 | `version`, `id`, `title`, `question` | Version `1`, semantic collection ID, readable title, and shared question. |
 | `audience` | `who`, `knows` array, and `goal`. |
-| `theme` | A built-in or registered custom `preset`, default `"hairline"`, and `appearance: "light"` or `"dark"`. Appearance is separate from component surface tones. |
+| `theme` | A built-in or registered custom `preset`, default `"iso"`, and `appearance: "light"` or `"dark"`. Appearance is separate from component surface tones. |
 | `format` | Positive integer `width` and `height` up to 8192, `fps` of 24, 30, or 60, and `narration` of `"none"` or `"authored-script"`. |
 | `terms` | Records with `id`, `name`, `definition`, and `aliases`. Names and aliases cannot be ambiguous. |
 | `subjects` | Records with `id`, `name`, `meaning`, and `visualRole`. This is the canonical identity owner. |

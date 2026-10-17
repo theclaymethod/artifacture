@@ -1,0 +1,13 @@
+{/* One chapter in its own MDX module. The exporter checks and highlights imported chapters too. */}
+import { CodeBlock, DiffBlock } from '../../visual-explainer-mdx/components';
+
+<DiffBlock language="python" filename="wallet/core.py" before={`def withdraw(balance: int, amount: int) -> int:
+    return balance - amount
+`} after={`def withdraw(balance: int, amount: int) -> int:
+    if amount > balance:
+        raise OverdraftError(f"{amount} is above the balance")
+    return balance - amount
+`} />
+<CodeBlock language="ts" filename="wallet.test.ts" code={"// Escaped markup stays text: \u003cscript\u003ealert(1)\u003c/script\u003e\nexport function check(balance: number, amount: number): boolean {\n  return amount <= balance;\n}"} />
+<CodeBlock language="shell" filename="Run the checks" code={"uv run pytest tests/test_core.py -q"} />
+<CodeBlock language="json" filename="result.json" code={"{\"claim\": \"C1\", \"state\": \"Proven\", \"checks\": 2}"} />

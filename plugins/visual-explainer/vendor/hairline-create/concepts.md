@@ -27,6 +27,25 @@ The package's six figures each answer the pointer a different way. A new figure 
 
 `examples/terrain.js` is the first and `examples/riffle.js` the second, in full.
 
+## An empty state
+
+Asked for an empty state (no results, nothing here yet, not found), draw the absence, not a sad face.
+
+- **The subject is absence.** Pick the tool that looks for things or holds them, and show it holding none: a sieve with a bare mesh, a rail of bare hangers, a loupe over a blank sheet.
+- **Rest is the whole figure.** An empty state sits small above a heading and a button, and most people never bring the pointer to it. Judge the rest pose first. The site's thumbnail is 160px, smaller than `look.mjs`'s small picture, so judge that picture as if it were two-thirds its size.
+- **Empty is not blank.** The object is all there and composed; what is missing is what it would hold. One bright mark says where to look.
+- **The read-out counts to zero.** Under the pointer it names the part and what it holds, none: `sieve 2 · 0`, `row 4 · 0`. At rest it still says `rest`.
+
+## From a mark
+
+Asked to draw from a company's mark, the mark is not a label on something else.
+
+- **The mark is the object.** Build it as a solid with the kernel, the way you would build a padlock; never trace it flat onto a face.
+- **Take the idea from the product.** Its own empty state names it: "No deployments yet", "No pages inside". The figure shows that.
+- **Give the mark something to answer with.** It lands, it joins, it opens. A mark that only sits there is an icon.
+- **One mark, drawn whole.** Keep its proportions and the features that make it that mark. A glyph that is part of the mark is a relief on a face, built, not written.
+- **Ask whether the mark is theirs to use.** If it belongs to someone else, say that the page shows another company's trademark and is theirs to publish or not.
+
 ## A weak concept
 
 Drop it, or fix it before building, when:
@@ -36,7 +55,7 @@ Drop it, or fix it before building, when:
 - **It holds more than one idea.** Two gestures, two variables, two objects.
 - **The pointer has no reason.** The figure would be the same as a loop.
 - **It is a diagram.** Boxes, arrows and lines between them are not an object.
-- **It is an icon.** The literal symbol of the idea (a padlock for security) has nothing to answer with.
+- **It is an icon.** The literal symbol of the idea (a padlock for security) has nothing to answer with. A mark the person asked for is the exception: see "From a mark".
 - **It depends on colour.** The palette is one stroke in four weights.
 - **It will not read at 240px.** Too many parts, or parts too small.
 

@@ -1,0 +1,704 @@
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger),
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger) * {
+  box-sizing: border-box;
+}
+
+:is(.ve-pipeline, .ve-decision-matrix, .ve-risk-ledger) {
+  min-width: 0;
+  font-family: var(--ve-font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ve-pipeline {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-risk-ledger {
+  display: grid;
+  gap: 1rem;
+}
+
+.ve-pipeline .ve-pipeline-item,
+.ve-risk-ledger .ve-risk-card {
+  min-width: 0;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 1.25rem;
+}
+
+.ve-pipeline .ve-pipeline-position {
+  color: var(--ve-accent);
+  font: 0.875rem/1.5 var(--ve-font-body);
+}
+
+.ve-pipeline .ve-pipeline-title,
+.ve-risk-ledger .ve-risk-title {
+  margin: 1rem 0 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: 1.25rem;
+  font-weight: var(--ve-heading-weight);
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.ve-risk-ledger .ve-risk-title {
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+}
+
+.ve-pipeline .ve-content-detail,
+.ve-risk-ledger .ve-content-detail {
+  margin: 0.75rem 0 0;
+  color: var(--ve-muted);
+  line-height: 1.5;
+}
+
+.ve-risk-ledger .ve-risk-mitigation {
+  margin-top: 0.5rem;
+}
+
+.ve-risk-ledger .ve-risk-level {
+  margin: 0;
+  color: var(--ve-faint);
+  font-size: 0.875rem;
+}
+
+.ve-risk-ledger .ve-content-label {
+  color: var(--ve-text);
+}
+
+.ve-decision-matrix {
+  overflow-x: auto;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+}
+
+.ve-decision-matrix .ve-decision-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.ve-decision-matrix .ve-decision-head {
+  background: var(--ve-panel-strong);
+  color: var(--ve-muted);
+}
+
+.ve-decision-matrix .ve-decision-heading {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 0.75rem 1rem;
+  text-align: inherit;
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-decision-matrix .ve-decision-row:nth-child(odd) {
+  background: var(--ve-row);
+}
+
+.ve-decision-matrix .ve-decision-cell {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 1rem;
+  vertical-align: top;
+  color: var(--ve-muted);
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline, .ve-risk-ledger) {
+  gap: 0;
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) :is(.ve-pipeline .ve-pipeline-item, .ve-risk-ledger .ve-risk-card) {
+  border: 0;
+  border-top: 1px solid var(--ve-rule);
+  border-radius: 0;
+  background: transparent;
+  padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-pipeline .ve-pipeline-position {
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="low"] .ve-risk-level {
+  color: var(--ve-ok);
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="medium"] .ve-risk-level {
+  color: var(--ve-warn);
+}
+
+:is([data-ve-preset="iso"], [data-ve-preset="algebrica"], [data-ve-preset="mono-color"]) .ve-risk-ledger .ve-risk-card[data-ve-risk-level="high"] .ve-risk-level {
+  color: var(--ve-danger);
+}
+
+@media (min-width: 768px) {
+  .ve-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ve-risk-ledger { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
+  .ve-pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Definition list: a quiet label column and a reading column. A tone marks the label only, with
+   its glyph, so the sentence stays in body ink. */
+.ve-definition-list {
+  display: grid;
+  grid-template-columns: var(--ve-label-column) minmax(0, var(--ve-copy-measure, var(--ve-measure)));
+  gap: var(--ve-space-4) var(--ve-space-5);
+  margin: 0;
+  padding: 0;
+}
+
+/* The lead size gives the labels the heading ink; the sentences stay at body size, so the lead
+   above stays the one larger block. */
+.ve-definition-list[data-ve-size="lead"] > dt {
+  color: var(--ve-heading);
+}
+
+/* Below 900px of column, each label sits above its sentence. */
+@container ve-column (max-width: 56rem) {
+  .ve-definition-list,
+  .ve-definition-list[data-ve-size="lead"] {
+    grid-template-columns: minmax(0, var(--ve-copy-measure, var(--ve-measure)));
+    row-gap: 0;
+  }
+
+  .ve-definition-list > dt + dd {
+    margin-top: var(--ve-space-1);
+  }
+
+  .ve-definition-list > dd + dt {
+    margin-top: var(--ve-space-4);
+  }
+}
+
+.ve-definition-list > dt {
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+  line-height: var(--ve-leading-body);
+}
+
+.ve-definition-list:not([data-ve-size]) > dt {
+  padding-top: 0.125rem;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  line-height: var(--ve-leading-body);
+}
+
+.ve-definition-list > dd {
+  margin: 0;
+}
+
+.ve-definition-list > dt[data-ve-tone] {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2);
+}
+
+.ve-definition-list > dt[data-ve-tone]::before {
+  content: "";
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+  background: var(--ve-tone-ink, currentColor);
+  transform: translateY(0.05rem);
+}
+
+.ve-definition-list > dt[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); color: var(--ve-status-ok); }
+.ve-definition-list > dt[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); color: var(--ve-status-info); }
+.ve-definition-list > dt[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); color: var(--ve-status-warn); }
+.ve-definition-list > dt[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); color: var(--ve-status-err); }
+.ve-definition-list > dt[data-ve-tone="neutral"] { --ve-tone-ink: var(--ve-status-neutral); }
+
+/* A subsection: its heading and air above it; no rule, so a level never stacks two rules. */
+.ve-subsection {
+  min-width: 0;
+}
+
+.ve-subsection > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-subsection > .ve-subsection-title + * {
+  margin-top: var(--ve-space-3);
+}
+
+.ve-subsection .ve-subsection-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ve-space-2) var(--ve-space-3);
+  margin: 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: var(--ve-text-h3);
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.ve-subsection[data-ve-level="4"] .ve-subsection-title {
+  font-size: var(--ve-text-h4);
+  letter-spacing: 0;
+}
+
+.ve-subsection .ve-subsection-marker {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding-inline: 0.375rem;
+  border-radius: 999px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font: var(--ve-weight-strong) 0.875rem/1 var(--ve-font-body);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  /* Sit on the first line of a long title; never wrap onto a line of its own. */
+  align-self: flex-start;
+  margin-top: calc((1.3em - 1.75rem) / 2);
+}
+
+.ve-subsection .ve-subsection-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* A deep link lands with its headline in view, below the sticky top bar on narrow screens. */
+:is(.ve-subsection, .ve-disclosure, .ve-section)[id] {
+  scroll-margin-top: var(--ve-anchor-offset, 1.5rem);
+}
+
+@media (max-width: 1199px) {
+  :is(.ve-subsection, .ve-disclosure, .ve-section)[id] {
+    --ve-anchor-offset: 4.5rem;
+  }
+}
+
+/* Copy link: a quiet 44px control at the end of a heading or a summary row. */
+.ve-copy-link {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  margin: -0.5rem 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ve-muted);
+  cursor: pointer;
+  align-self: center;
+}
+
+.ve-copy-link:hover {
+  color: var(--ve-heading);
+}
+
+.ve-copy-link .ve-copy-link-status {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font: var(--ve-weight-strong) var(--ve-text-label)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ve-copy-link .ve-copy-link-status:empty {
+  display: none;
+}
+
+/* Term: a faint dotted underline, set low, marks a word with a definition; hover, focus or tap
+   shows it and brings the underline to full ink. */
+.ve-term {
+  position: relative;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.32em;
+  cursor: help;
+}
+
+/* A one-word term (CR-33, 4H) never breaks at its hyphen. */
+.ve-term[data-ve-word] {
+  white-space: nowrap;
+}
+
+.ve-term:is(:hover, :focus-visible, [data-ve-shown="true"]) {
+  text-decoration-color: currentColor;
+}
+
+.ve-term:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.ve-term-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 50%;
+  z-index: 30;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2rem));
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font: 400 0.875rem/1.45 var(--ve-font-body);
+  text-align: left;
+  text-decoration: none;
+  white-space: normal;
+  transform: translateX(calc(-50% + var(--ve-term-shift, 0px)));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--ve-text) 18%, transparent);
+  pointer-events: none;
+}
+
+.ve-term[data-ve-shown="true"] > .ve-term-tip {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .ve-definition-list,
+  .ve-definition-list[data-ve-size="lead"] {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .ve-definition-list > dt + dd {
+    margin-top: var(--ve-space-1);
+  }
+
+  .ve-definition-list > dd + dt {
+    margin-top: var(--ve-space-4);
+  }
+}
+
+/* Disclosure: an opener. A boxed row with a caret says "more detail here"; it opens in place.
+   Openers in a run share one box edge each; a block inside a block is a plain row under a rule. */
+.ve-disclosure {
+  min-width: 0;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+}
+
+.ve-disclosure + .ve-disclosure {
+  margin-top: var(--ve-space-2);
+}
+
+.ve-disclosure > .ve-disclosure-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-space-3);
+  min-height: 44px;
+  padding: var(--ve-space-2) var(--ve-space-4) var(--ve-space-2) var(--ve-space-3);
+  border-radius: calc(var(--ve-control-radius) - 1px);
+  color: var(--ve-heading);
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--ve-text-ui);
+  line-height: var(--ve-leading-ui);
+}
+
+.ve-disclosure > .ve-disclosure-summary:hover {
+  background: color-mix(in srgb, var(--ve-text) 4%, transparent);
+}
+
+.ve-disclosure > .ve-disclosure-summary:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-disclosure > .ve-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.ve-disclosure-caret {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline: 0.375rem 0.125rem;
+  border-right: 2px solid var(--ve-muted);
+  border-bottom: 2px solid var(--ve-muted);
+  transform: rotate(-45deg);
+  transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.ve-disclosure[open] > .ve-disclosure-summary .ve-disclosure-caret {
+  transform: rotate(45deg) translate(-0.125rem, -0.125rem);
+}
+
+.ve-disclosure-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: var(--ve-weight-strong);
+  overflow-wrap: anywhere;
+}
+
+.ve-disclosure-meta {
+  flex: none;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Closed detail takes no layout, so it can never widen the page. */
+.ve-disclosure:not([open]) > .ve-disclosure-body {
+  display: none;
+}
+
+/* Without JavaScript (a pre-rendered page before it hydrates, or with scripts off), a deep link
+   still shows its target: the targeted block, and each block that holds the target, show their
+   body. The script sets data-ve-js on the root and opens the blocks itself. */
+html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target))::details-content {
+  content-visibility: visible;
+  display: block;
+}
+
+html:not([data-ve-js]) :is(.ve-disclosure:target, .ve-disclosure:has(:target)) > .ve-disclosure-body {
+  display: block;
+}
+
+.ve-disclosure-body {
+  min-width: 0;
+  max-width: 100%;
+  padding: var(--ve-space-2) var(--ve-space-4) var(--ve-space-5);
+}
+
+.ve-disclosure-body > * + * {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-disclosure-body > :is(p, ul, ol) {
+  max-width: var(--ve-copy-measure, 64ch);
+}
+
+/* A block inside a block is an item in a list: a plain row under a hairline, regular weight,
+   so the outer opener stays first. */
+.ve-disclosure-body .ve-disclosure {
+  border: 0;
+  border-top: 1px solid var(--ve-rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+.ve-disclosure-body .ve-disclosure:last-child {
+  border-bottom: 1px solid var(--ve-rule);
+}
+
+.ve-disclosure-body .ve-disclosure + .ve-disclosure {
+  margin-top: 0;
+}
+
+.ve-disclosure-body .ve-disclosure > .ve-disclosure-summary {
+  padding-inline: 0;
+  border-radius: 0;
+}
+
+.ve-disclosure-body .ve-disclosure > .ve-disclosure-summary .ve-disclosure-label {
+  font-weight: var(--ve-weight-regular);
+}
+
+.ve-disclosure-body .ve-disclosure-body {
+  padding: var(--ve-space-1) 0 var(--ve-space-5) var(--ve-space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ve-disclosure-caret { transition: none; }
+}
+
+/* ChipLinks: links that read as chips, each one a 44px target. */
+.ve-chip-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-chip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-3);
+  min-height: 44px;
+  max-width: 100%;
+  padding: var(--ve-space-2) var(--ve-space-2) var(--ve-space-2) var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-panel, transparent);
+  color: var(--ve-heading);
+  font-weight: var(--ve-weight-strong);
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.ve-chip-link:hover {
+  border-color: var(--ve-muted);
+}
+
+.ve-chip-link-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ve-chip-link > .ve-status-pill {
+  flex: none;
+}
+
+/* Steps: numbered stations of a run. The number is a filled disc in the margin, the same disc the
+   numbered diagram shows, so the list and the figure read as one. Two columns from 1024px. */
+.ve-steps {
+  display: grid;
+  gap: var(--ve-space-5) var(--ve-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ve-step;
+}
+
+.ve-steps > .ve-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ve-space-3);
+  min-width: 0;
+  padding-left: calc(1.75rem + var(--ve-space-3));
+  counter-increment: ve-step;
+}
+
+.ve-steps > .ve-step::before {
+  content: counter(ve-step);
+  position: absolute;
+  top: 0.1rem;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--ve-heading);
+  color: var(--ve-bg);
+  font: var(--ve-weight-strong) var(--ve-text-small)/1 var(--ve-font-ui, var(--ve-font-body));
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-steps > .ve-step > p {
+  margin: 0;
+}
+
+.ve-steps > .ve-step > .ve-disclosure {
+  margin-top: auto;
+}
+
+.ve-steps > .ve-step[id] {
+  scroll-margin-top: var(--ve-anchor-offset, 1.5rem);
+}
+
+@media (min-width: 1024px) {
+  .ve-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---- Stepper: one step at a time, its station lit ------------------------------------------- */
+
+.ve-stepper > * + * {
+  margin-top: var(--ve-space-5);
+}
+
+.ve-steps[data-ve-stepping] {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 9rem;
+}
+
+.ve-steps[data-ve-stepping] > .ve-step[hidden] {
+  display: none;
+}
+
+.ve-steps[data-ve-stepping] > .ve-step::before {
+  content: attr(data-ve-step-number);
+  background: var(--ve-accent);
+  color: var(--ve-accent-contrast, var(--ve-bg));
+}
+
+/* A step's text keeps the measure; its code takes the column (code wider than prose). */
+.ve-steps[data-ve-stepping] > .ve-step > :is(p, ul, ol) {
+  max-width: var(--ve-measure);
+}
+
+.ve-stepper-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ve-space-3);
+  margin-top: var(--ve-space-4);
+}
+
+.ve-stepper-count {
+  margin: 0;
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Previous and Next: one quiet control style, one height. */
+.ve-stepper-button {
+  min-height: var(--ve-control-height);
+  padding: 0 var(--ve-space-4);
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  background: var(--ve-bg);
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  cursor: pointer;
+}
+
+.ve-stepper-button:hover:not(:disabled) {
+  border-color: var(--ve-heading);
+}
+
+.ve-stepper-button:disabled {
+  border-color: var(--ve-rule);
+  background: transparent;
+  color: var(--ve-faint, var(--ve-muted));
+  cursor: default;
+}
+
+.ve-stepper-button:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+/* A definition list resets its margin, so it takes the block rhythm of the section body here. */
+.ve-section-body > * + .ve-definition-list {
+  margin-top: var(--ve-space-4);
+}
+
+.ve-section-body > .ve-lead + .ve-definition-list {
+  margin-top: var(--ve-space-6);
+}

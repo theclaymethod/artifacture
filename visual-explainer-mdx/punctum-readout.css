@@ -1,0 +1,15 @@
+/* Punctum font software: SIL OFL 1.1. See punctum/OFL.txt. */
+@font-face {
+  font-family: Punctum;
+  src: url('./punctum/Punctum-VF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+.ve-punctum-readout {
+  display: inline-block;
+  font-family: Punctum, monospace;
+  line-height: 1.45;
+  white-space: pre;
+  font-synthesis: none;
+}

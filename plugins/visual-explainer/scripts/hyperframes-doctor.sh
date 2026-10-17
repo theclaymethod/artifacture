@@ -12,16 +12,17 @@ FAIL=0
 printf "Hyperframes doctor — runtime check\n"
 printf "%s\n" "----------------------------------"
 
-# 1. Node >= 22
+# 1. Node >= 22.12 (the installed Artifacture CLI contract)
 if ! command -v node >/dev/null 2>&1; then
   printf "  [FAIL] node not found on PATH\n"
-  printf "         Install Node.js >= 22: https://nodejs.org\n"
+  printf "         Install Node.js >= 22.12: https://nodejs.org\n"
   FAIL=1
 else
   NODE_MAJOR=$(node -p 'parseInt(process.versions.node.split(".")[0], 10)' 2>/dev/null || echo 0)
+  NODE_MINOR=$(node -p 'parseInt(process.versions.node.split(".")[1], 10)' 2>/dev/null || echo 0)
   NODE_FULL=$(node -p 'process.versions.node' 2>/dev/null || echo "unknown")
-  if [ "${NODE_MAJOR}" -lt 22 ]; then
-    printf "  [FAIL] node %s found; Hyperframes requires >= 22\n" "${NODE_FULL}"
+  if [ "${NODE_MAJOR}" -lt 22 ] || { [ "${NODE_MAJOR}" -eq 22 ] && [ "${NODE_MINOR}" -lt 12 ]; }; then
+    printf "  [FAIL] node %s found; Artifacture requires >= 22.12\n" "${NODE_FULL}"
     printf "         Upgrade Node.js: https://nodejs.org or use nvm/fnm/volta\n"
     FAIL=1
   else
@@ -52,6 +53,14 @@ else
   printf "  [ ok ] ffmpeg %s\n" "${FFMPEG_VER:-installed}"
 fi
 
+# Narration and rendering both need actual stream timing.
+if ! command -v ffprobe >/dev/null 2>&1; then
+  printf "  [FAIL] ffprobe not found on PATH; install the FFmpeg tools\n"
+  FAIL=1
+else
+  printf "  [ ok ] ffprobe\n"
+fi
+
 # 4. Hyperframes itself — delegate to upstream doctor if we have the prereqs
 if [ "${FAIL}" -eq 0 ]; then
   printf "\nRunning 'npx hyperframes doctor' (first invocation may download Chrome)...\n"
@@ -66,6 +75,8 @@ fi
 # The video commands prefer the upstream `/hyperframes` + `/gsap` vocab when
 # those skills are installed; otherwise they author directly from our refs.
 skill_dirs=(
+  "${HOME}/.agents/skills"
+  "${HOME}/.codex/skills"
   "${HOME}/.claude/skills"
   "${HOME}/.claude/plugins/cache/heygen-com"
 )
@@ -99,7 +110,7 @@ fi
 
 printf "\n"
 if [ "${FAIL}" -eq 0 ]; then
-  printf "All checks passed. Ready to render.\n"
+  printf "Required runtime checks passed. Ready to render.\n"
   exit 0
 else
   printf "One or more checks failed. Video commands will not run until resolved.\n"

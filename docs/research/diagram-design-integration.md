@@ -1,6 +1,15 @@
 # Diagram Design integration receipt
 
-Research snapshot only; no integration is implemented here.
+This receipt records the historical 2026-08-14 research snapshot. The 2026-10-04
+[component catalog](../component-catalog.md) adds original sequence, state, and
+containment scene builders after inspecting the newer 42-reference source pin;
+it does not import the upstream renderer or skins.
+
+The palette recommendations below are historical. As of 2026-10-04, Hairline is the default; 3b1b, Mono Color, and Algebrica are the primary alternatives. Editorial is retired. Follow [shared themes](../shared-themes.md) when integrating geometry or motion from this research, rather than importing an upstream skin.
+
+## Axonometric additions, 2026-10-05
+
+The plan and exploded references were reviewed at upstream revision `19f79daa0b540ff398af853af9a8a1c90df197c6`. Original builders now provide the shared 2:1 projection, rounded prism faces, topological plan occlusion, horizontal names, tray back/front ordering, shared assembly levels and finite phased/lift motion. The [installed authoring reference](../../plugins/visual-explainer/references/axonometric.md) documents their contracts and limits. The full upstream MIT notice is copied as `visual-explainer-mdx/DIAGRAM-DESIGN-LICENSE`. No upstream skins, fonts, icon packs or motion controller are imported. The historical survey and validation claims below retain their original pin.
 
 ## Source pin and confidence
 

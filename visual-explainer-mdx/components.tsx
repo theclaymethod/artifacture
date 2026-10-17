@@ -1,22 +1,94 @@
-import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { layoutDiagram, wrapWords } from './diagram-layout';
-import { GraphicCanvas } from './graphics';
-import { diagramSceneFromLayout } from './diagram-scene';
-import type { DiagramCanvasProps } from './diagram-types';
+import React, { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ChapterRail, chapterSlug, ShellContext, useResolvedAppearance, type Chapter, type ChapterAnchor, type ExplainerAppearance, type ReadMode, type ShellState } from './explainer-nav';
+import { wrapWords } from './diagram-layout';
+import { ChapterContext } from './chapter-context';
+import { flushSync } from 'react-dom';
+import { installCalmScroll, keepInPlace, landOn } from './calm-scroll';
+import { assertSupportedPreset, type BuiltinPreset } from './preset-policy.mjs';
+export { DiagramCanvas } from './diagram-canvas';
+export { DataTable, StatusPill, Badge, Legend } from './data-table';
+export type { DataTableProps, DataTableColumn, DataTableRow, DataTableCell, DataTableValue, DataTableBadge, StatusTone, StatusPillProps, BadgeProps, LegendProps, LegendItem, KeyStroke, KeyGlyph } from './data-table';
+export { ChapterRail, useExplainerShell } from './explainer-nav';
+export type { Chapter, ChapterAnchor, ExplainerAppearance, ReadMode } from './explainer-nav';
+export { AsciiImage, AsciiSweep } from './ascii-effects';
+export { AsciiObject } from './ascii-object';
+export { VhsEffect } from './vhs-effect';
+export { ModelView, createModelView, modelAsset } from './model-view';
+export { createLivingForm } from './living-forms';
+export { createProceduralProp } from './procedural-models';
+export { OrbitalText } from './orbital-text';
+export { TracePath } from './trace-path';
+export type { ModelViewProps } from './model-view';
+export type { ModelAsset, ModelFactory, ModelSource, ModelFrame, ModelFrameReport, ModelViewController, GlyphMatcherSettings, ParticleSettings } from './model-types';
+export type { OrbitalTextProps, OrbitalTextPalette } from './orbital-text';
+export type { TracePathProps, TracePathStyle } from './trace-path';
+export type { AsciiImageProps, AsciiSweepProps } from './ascii-effects';
+export type { AsciiModel, AsciiObjectProps } from './ascii-object';
+export type { VhsEffectProps } from './vhs-effect';
+export { CodeBlock, DiffBlock, TerminalBlock, JsonTree, Quiz } from './code-blocks';
+export type { CodeBlockProps, DiffRow, DiffBlockProps, TerminalBlockProps, JsonTreeProps, JsonTreePrimitive, JsonTreeRecord, JsonTreeData, QuizProps } from './code-blocks';
+export { Pipeline, DecisionMatrix, RiskLedger, DefinitionList, Definition, Subsection, Disclosure, CopyLink, Term, Steps, Step, StepThrough, ChipLinks, Lead, Aside } from './content-blocks';
+export type { PipelineProps, DecisionMatrixProps, RiskLedgerProps, DefinitionListProps, DefinitionProps, SubsectionProps, DisclosureProps, TermProps, StepsProps, StepProps, ChipLinksProps, ChipLinkItem, LeadProps, AsideProps } from './content-blocks';
 export type { DiagramCanvasProps, DiagramEdge, DiagramLane, DiagramNode } from './diagram-types';
 export { GraphicCanvas, createGraphicScene } from './graphics';
-export type { GraphicScene, GraphicObject, GraphicPrimitive, GraphicBounds, GraphicPaint } from './graphics-types';
+export { projectAxonometric, createAxonometricPlan, createAxonometricPlanMotion, createExplodedScene, createExplodedMotion } from './axonometric-scene';
+export type { AxonometricRect, AxonometricBox, AxonometricMark, AxonometricPlanInput, ExplodedPart, ExplodedSceneInput } from './axonometric-scene';
+export type { GraphicScene, GraphicObject, GraphicPrimitive, GraphicBounds, GraphicPaint, GraphicPlacement, GraphicClip, GraphicFont, GraphicStrokeRole } from './graphics-types';
+export { composeGraphics } from './graphics-composition';
+export type { GraphicInstance, GraphicCompositionInput, GraphicComposition } from './graphics-composition';
 export { createDiagramScene } from './diagram-scene';
+export { createHairlineScene } from './hairline-scene';
+export type { HairlineSolid } from './hairline-scene';
+export { createIsoScene, projectIsoPoint } from './iso-scene';
+export type { IsoPoint, IsoFace, IsoDetail, IsoPart, IsoSceneInput } from './iso-scene';
+export { motionEaseNames, sampleMotionEase } from './motion-eases';
+export type { MotionEase } from './motion-eases';
 export { defineGraphicMotion, sampleScene } from './graphic-motion';
 export type { GraphicMotion, GraphicMotionTrack } from './graphic-motion';
+export { createDotMatrixScene } from './dot-matrix';
+export type { DotMatrixInput, DotMatrixCell, PreparedDotMatrix } from './dot-matrix';
+export { createCharacterRoll } from './character-roll';
+export type { CharacterRollInput, CharacterRollChange, PreparedCharacterRoll } from './character-roll';
+export { createColumnScan } from './column-scan';
+export type { ColumnScanInput, DotScanEvent, PreparedColumnScan } from './column-scan';
+export { synthesizeScanWav } from './scan-audio';
+export type { ScanAudioOptions } from './scan-audio';
+export { PunctumReadout, awaitPunctumFont } from './punctum-readout';
+export type { PunctumReadoutProps } from './punctum-readout';
+export { prepareGraphicRoute } from './graphic-routes';
+export type { GraphicPoint, GraphicRouteSegment, GraphicRouteInput, PreparedGraphicRoute } from './graphic-routes';
+export { followPath } from './teaching-motion';
+export type { RouteTimestamp, FollowPathInput } from './teaching-motion';
+export { comparisonWipe } from './comparison-motion';
+export type { ComparisonWipeInput } from './comparison-motion';
+export { createSourceScene } from './source-scenes';
+export type { SourcePart, SourceVersion, SourcePosition, SourceRange, SourceLayout, SourceCell, SourceSceneInput, PreparedSourceScene } from './source-scenes';
+export { focusSourceRange, editWithIdentity } from './narrated-motion';
+export type { SourceEdit, SourceCueBinding, SourceCueFocusInput, SourceCueFocus } from './narrated-motion';
+export { prepareCodeDiff, createCodeDiffScene, focusCodeDiff, createCodeDiffTransition } from './code-diff';
+export type { CodeDiffPart, CodeDiffLine, CodeDiffRow, CodeDiffFold, CodeDiffInput, PreparedCodeDiff, CodeDiffLayout, CodeDiffSceneInput, CodeDiffFocusBeat, PreparedCodeDiffScene, CodeDiffTransitionInput, PreparedCodeDiffTransition } from './code-diff';
 export { createSlideScene, sequenceSlides, sampleSlideSequence, GraphicSlide } from './graphic-slides';
 export type { GraphicSlideScene, GraphicSlideSequence } from './graphic-slides';
 export { GraphicVideo } from './graphic-video';
+export { NativeClip, NativeStill, validateNativeClipAsset } from './native-clip';
+export { DagCanvas } from './dag-canvas';
+export type { DagCanvasProps } from './dag-canvas';
+export { prepareDag, createDagScene, createDagDiagram, dagNeighborhood, focusDagScene, createDagReveal } from './dag-scene';
+export type { DagNode, DagInput, DagEdge, PreparedDag, DagNeighborhood } from './dag-scene';
+export type { NativeClipAsset, NativeClipPlacement } from './native-clip';
 export { DataChart } from './charts';
 export type { ChartDatum, DataChartProps } from './charts';
 export { LieflatChart } from './lieflat-charts';
 export type { LieflatChartProps, LieflatChartSpec, RungBarsSpec, UnitFieldSpec, BarcodeSpec, BubbleMatrixSpec, ThreadsSpec } from './lieflat-types';
 export { DiagramWalkthrough } from './diagram-walkthrough';
+export { DiagramModes, useDiagramMode } from './diagram-modes';
+export { TypedDiagram } from './typed-diagrams';
+export type { TypedDiagramSpec, SequenceSpec, StateSpec, ChangeStatus } from './typed-diagrams';
+export { ClaimTimeline, EvidenceGuide, VerifierView } from './verification';
+export { ArchitectureDiagram, BarCard, BarChip, ChangedCode, CheckRow, ClaimBody, ClaimDetail, ClaimRow, CodeRef, Glossary, Glossed, Invariants, PromiseChips, PromiseLink, PromiseList, VerdictLegend, VerdictPill, VerifyTheVerifiers, Walkthrough, promiseAnchors } from './trust-map';
+export { ExamplesFor, WorkedExample, exampleOf } from './worked-example';
+export type { WorkedExampleData, ExampleStep, ExampleValue } from './worked-example';
+export type { DiagramModesProps, DiagramMode, DiagramModeGraph } from './diagram-modes';
 export type { DiagramWalkthroughProps, DiagramWalkthroughStep } from './diagram-walkthrough';
 
 declare global {
@@ -49,20 +121,7 @@ type MermaidConfiguration = {
 // Built-in preset names, plus any slug resolvable from the external
 // design-system registry (see docs/design-systems.md). `(string & {})` keeps
 // literal autocompletion for the built-ins while admitting registry names.
-export type VisualPreset =
-  | 'hairline'
-  | 'lieflat'
-  | 'mono-color'
-  | 'algebrica'
-  | 'oa-design'
-  | 'mono-industrial'
-  | 'nothing'
-  | 'blueprint'
-  | 'editorial'
-  | 'paper-ink'
-  | 'terminal'
-  | 'custom'
-  | (string & {});
+export type VisualPreset = BuiltinPreset | (string & {});
 
 /* Presentation deck engine + primitives (fixed-stage interactive decks).
    Re-exported here so users keep a single import entry; implementation lives
@@ -129,77 +188,31 @@ type ShellProps = {
   summary?: string;
   preset?: VisualPreset;
   reviewTools?: boolean;
+  /** Add a chapter rail built from the direct Section children. */
+  chapterNav?: boolean;
+  /** `auto` follows prefers-color-scheme. The default stays light. */
+  appearance?: ExplainerAppearance;
+  /**
+   * Chapters as pages: one Section at a time, with previous and next links, the current chapter
+   * marked in the rail, and a switch to read as one page. A fragment link shows the chapter that
+   * holds its target. Without JavaScript, every chapter renders in sequence. Implies chapterNav.
+   */
+  paged?: boolean;
   children: ReactNode;
 };
 
 type SectionProps = {
   title: string;
   kicker?: string;
+  /** Fragment id. Defaults to a slug of the title. */
+  id?: string;
+  /** A short label for the chapter rail. Defaults to the title. */
+  navLabel?: string;
+  /** In-section targets that the chapter rail lists under this chapter. */
+  anchors?: readonly ChapterAnchor[];
+  /** Old fragment ids that land on this chapter, so links made for an earlier layout keep working. */
+  aliases?: readonly string[];
   children: ReactNode;
-};
-
-type PipelineProps = {
-  steps: Array<string | { title: string; body?: string }>;
-};
-
-type PipelineStep = PipelineProps['steps'][number];
-
-type DecisionMatrixProps = {
-  rows: Array<Record<string, ReactNode>>;
-};
-
-type RiskLedgerProps = {
-  risks: Array<{ risk: string; signal: string; mitigation: string; level?: 'low' | 'medium' | 'high' }>;
-};
-
-type CodeBlockProps = {
-  code: string;
-  language: string;
-  filename?: string;
-  highlightLines?: number[];
-  annotations?: Array<{ line: number; note: string }>;
-  diff?: 'unified';
-  html?: string;
-};
-
-type DiffRow = {
-  kind: 'context' | 'add' | 'remove' | 'hunk';
-  oldNo?: number;
-  newNo?: number;
-  code: string;
-  html?: string;
-};
-
-type DiffBlockProps = {
-  patch?: string;
-  before?: string;
-  after?: string;
-  language?: string;
-  filename?: string;
-  mode?: 'unified' | 'split';
-  rows?: DiffRow[];
-};
-
-type TerminalBlockProps = {
-  content: string;
-  title?: string;
-  showPrompt?: boolean;
-};
-
-type JsonTreeProps = {
-  data: JsonTreeData;
-  collapsedDepth?: number;
-};
-
-type JsonTreePrimitive = null | boolean | number | string;
-type JsonTreeRecord = { readonly [key: string]: JsonTreeData };
-type JsonTreeData = JsonTreePrimitive | readonly JsonTreeData[] | JsonTreeRecord;
-
-type QuizProps = {
-  questions: Array<{
-    q: string;
-    options: Array<{ text: string; correct?: boolean; why: string }>;
-  }>;
 };
 
 type MermaidBlockProps = {
@@ -240,440 +253,177 @@ type Annotation = {
   note: string;
 };
 
+const modeKey = () => `ve-read-mode:${window.location.pathname}`;
+function readMode(): ReadMode {
+  try {
+    return window.localStorage.getItem(modeKey()) === 'one' ? 'one' : 'pages';
+  } catch {
+    return 'pages';
+  }
+}
+
+function hashTarget() {
+  let hash = window.location.hash.slice(1);
+  try { hash = decodeURIComponent(hash); } catch { /* keep the raw fragment */ }
+  return hash ? document.getElementById(hash) : null;
+}
+
 export function ExplainerShell({
   title,
   summary,
-  preset = 'hairline',
+  preset = 'iso',
   reviewTools = true,
+  chapterNav = false,
+  appearance = 'light',
+  paged = false,
   children,
 }: ShellProps) {
+  assertSupportedPreset(preset);
+  const resolved = useResolvedAppearance(appearance);
+  const chapters = chapterNav || paged ? collectChapters(children) : [];
+  const hasChapters = chapters.length > 0;
+  // A paged shell renders every chapter on the server (the no-JS page reads in sequence); after
+  // hydration it shows one chapter, picked from the fragment.
+  const [live, setLive] = useState(false);
+  const [mode, setModeState] = useState<ReadMode>('pages');
+  const [current, setCurrent] = useState(chapters[0]?.id ?? '');
+  const chapterIds = chapters.map((c) => c.id).join('\n');
+  const setMode = useCallback((next: ReadMode) => {
+    // The reader keeps their place: the chapter at the reading line stays where it is on the
+    // screen, and reading by chapter opens that chapter.
+    const shown = [...document.querySelectorAll<HTMLElement>('section.ve-section[id]:not([hidden])')];
+    const line = window.innerHeight * 0.32;
+    const here = shown.filter((section) => section.getBoundingClientRect().top <= line).at(-1) ?? shown[0];
+    const top = here?.getBoundingClientRect().top ?? 0;
+    flushSync(() => {
+      if (here && next === 'pages') setCurrent(here.id);
+      setModeState(next);
+    });
+    if (here) {
+      const drift = here.getBoundingClientRect().top - top;
+      if (Math.abs(drift) >= 1) window.scrollBy({ top: drift, behavior: 'instant' });
+      // The chapters that now show measure their figures in the next frames: hold the place through them.
+      keepInPlace(here);
+      const target = hashTarget();
+      if (next === 'pages' && !(target && here.contains(target))) window.history.replaceState(window.history.state, '', `#${here.id}`);
+    }
+    try { window.localStorage.setItem(modeKey(), next); } catch { /* storage can be off: the mode lasts for this view */ }
+  }, []);
+  useEffect(() => {
+    installCalmScroll();
+    const ids = chapterIds.split('\n');
+    // On load the chapter shows with the hydrated page; in the page it shows at once, in the same
+    // task as the jump, so no frame paints the new chapter at the old scroll position.
+    const land = (initial: boolean) => {
+      const target = hashTarget();
+      const section = target?.closest<HTMLElement>('section.ve-section') ?? null;
+      const show = (id: string) => (initial ? setCurrent(id) : flushSync(() => setCurrent(id)));
+      if (paged && section && ids.includes(section.id)) show(section.id);
+      else if (paged && !target) show(ids[0] ?? '');
+      if (!target) {
+        if (paged && !initial) window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+      // The browser's own jump found a hidden chapter, or a page that was not yet rendered: land
+      // the target once, on load when the layout has settled, in the page at once.
+      landOn(target, initial ? 'load' : 'now');
+      if (!initial && target === section) section.querySelector<HTMLElement>('.ve-section-heading h2')?.focus({ preventScroll: true });
+    };
+    if (paged) {
+      setModeState(readMode());
+      setLive(true);
+    }
+    land(true);
+    if (!paged) return undefined;
+    const onHash = () => land(false);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [paged, chapterIds]);
+  const index = Math.max(0, chapters.findIndex((c) => c.id === current));
+  const state = useMemo<ShellState | null>(() => (paged ? { paged, live, mode, current, chapters, setMode } : null), [paged, live, mode, current, chapterIds, setMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const content = (
+    <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10" id="ve-content" tabIndex={-1}>
+      <header className="ve-shell-header grid gap-6">
+        <div>
+          <h1 className="max-w-[var(--ve-shell-title-measure)] text-balance text-[length:var(--ve-shell-title-size)] leading-[var(--ve-shell-title-leading)] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
+            {title}
+          </h1>
+          {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}
+        </div>
+      </header>
+      {children}
+    </div>
+  );
+  const pages = paged && live && mode === 'pages';
   return (
-    <main className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}`} data-ve-preset={preset}>
-      <div className="ve-shell-inner mx-auto flex w-full max-w-[var(--ve-page-max)] flex-col gap-[var(--ve-section-gap)] px-5 py-8 sm:px-8 lg:px-10">
-        <header className="ve-shell-header grid gap-6">
-          <div>
-            <h1 className="max-w-[var(--ve-shell-title-measure,18ch)] text-balance text-[length:var(--ve-shell-title-size)] leading-[1.04] tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-display-weight)]">
-              {title}
-            </h1>
-            {summary ? <p className="mt-6 max-w-[52ch] text-[length:var(--ve-shell-summary-size)] leading-[1.5] text-[var(--ve-muted)]">{summary}</p> : null}
+    <ShellContext.Provider value={state}>
+      <main
+        className={`ve-shell min-h-screen bg-[var(--ve-bg)] text-[var(--ve-text)] [font-family:var(--ve-font-body)]${reviewTools ? ' ve-has-review' : ''}${hasChapters ? ' ve-has-chapters' : ''}`}
+        data-ve-appearance={resolved === 'dark' ? 'dark' : undefined}
+        data-ve-live={paged && live ? 'true' : undefined}
+        data-ve-page={pages ? String(index) : undefined}
+        data-ve-paged={paged ? (pages ? 'pages' : 'one') : undefined}
+        data-ve-preset={preset}
+      >
+        <a className="ve-skip-link" href="#ve-content">Skip to content</a>
+        {hasChapters ? (
+          <div className="ve-shell-frame">
+            <ChapterRail chapters={chapters} current={pages ? current : undefined} mode={paged && live ? mode : undefined} onMode={paged ? setMode : undefined} />
+            {content}
           </div>
-        </header>
-        {children}
-      </div>
-      {reviewTools ? <AnnotationLayer /> : null}
-    </main>
+        ) : content}
+        {reviewTools ? <AnnotationLayer /> : null}
+      </main>
+    </ShellContext.Provider>
   );
 }
 
-export function Section({ title, children }: SectionProps) {
+function collectChapters(children: ReactNode): Chapter[] {
+  const chapters: Chapter[] = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement<SectionProps>(child) || child.type !== Section) return;
+    const { id, title, navLabel, anchors } = child.props;
+    chapters.push({ id: id ?? chapterSlug(title), label: navLabel ?? title, anchors });
+  });
+  return chapters;
+}
+
+export function Section({ title, id, aliases, children }: SectionProps) {
+  const sectionId = id ?? chapterSlug(title);
+  const shell = useContext(ShellContext);
+  const at = shell ? shell.chapters.findIndex((c) => c.id === sectionId) : -1;
+  const hidden = Boolean(shell?.live && shell.mode === 'pages' && shell.current !== sectionId);
+  const prev = at > 0 ? shell!.chapters[at - 1] : null;
+  const next = shell && at >= 0 && at < shell.chapters.length - 1 ? shell.chapters[at + 1] : null;
   return (
-    <section className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+    <section aria-labelledby={`${sectionId}-title`} className="ve-section grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]" data-ve-chapter={at >= 0 ? String(at + 1) : undefined} hidden={hidden} id={sectionId}>
+      {(aliases ?? []).map((alias) => <span aria-hidden="true" className="ve-alias-anchor" id={alias} key={alias} />)}
       <div className="ve-section-heading">
-        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{title}</h2>
+        <h2 className="text-2xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]" id={`${sectionId}-title`} tabIndex={-1}>{title}</h2>
       </div>
-      <div className="ve-section-body min-w-0">{children}</div>
+      <div className="ve-section-body min-w-0">
+        <ChapterContext.Provider value={sectionId}>{children}</ChapterContext.Provider>
+      </div>
+      {shell && at >= 0 ? (
+        <nav aria-label="Chapters" className="ve-pager" data-ve-pager>
+          {prev ? <a className="ve-pager-link" data-ve-pager-prev href={`#${prev.id}`} rel="prev"><span className="ve-pager-key"><PagerArrow back />Previous</span><span className="ve-pager-label">{prev.label}</span></a> : <span />}
+          {next ? <a className="ve-pager-link" data-ve-pager-next href={`#${next.id}`} rel="next"><span className="ve-pager-key">Next<PagerArrow /></span><span className="ve-pager-label">{next.label}</span></a> : null}
+        </nav>
+      ) : null}
     </section>
+  );
+}
+
+function PagerArrow({ back = false }: { back?: boolean }) {
+  return (
+    <svg aria-hidden="true" className="ve-pager-arrow" height="12" viewBox="0 0 14 14" width="12">
+      <path d={back ? 'M13 7H2M6 3L2 7l4 4' : 'M1 7h11M8 3l4 4-4 4'} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+    </svg>
   );
 }
 
 export function Callout({ children }: { children: ReactNode }) {
   return <div className="ve-callout text-[var(--ve-text)]">{children}</div>;
-}
-
-export function Pipeline({ steps }: PipelineProps) {
-  return (
-    <ol className="ve-pipeline grid md:grid-cols-2 xl:grid-cols-4">
-      {steps.map((step, index) => {
-        const item = normalizePipelineStep(step);
-        return (
-          <li key={`${item.title}-${index}`} className="ve-pipeline-item min-w-0">
-            <div className="text-sm text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{String(index + 1).padStart(2, '0')}</div>
-            <h3 className="mt-4 text-xl tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{item.title}</h3>
-            {item.body ? <p className="mt-3 text-base leading-6 text-[var(--ve-muted)]">{item.body}</p> : null}
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
-function normalizePipelineStep(step: PipelineStep): { title: string; body?: string } {
-  return isPipelineTitle(step) ? { title: step } : step;
-}
-
-function isPipelineTitle(step: PipelineStep): step is string {
-  return Object.prototype.toString.call(step) === '[object String]';
-}
-
-export function DecisionMatrix({ rows }: DecisionMatrixProps) {
-  const columns = Array.from(new Set(rows.flatMap((row) => Object.keys(row))));
-  return (
-    <div className="ve-table-shell overflow-x-auto rounded-[var(--ve-radius)] border border-[color:var(--ve-rule)]">
-      <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-        <thead className="bg-[var(--ve-panel-strong)] text-sm text-[var(--ve-muted)]">
-          <tr>
-            {columns.map((column) => (
-              <th key={column} className="border-b border-[color:var(--ve-rule)] px-4 py-3 font-medium">
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className="odd:bg-[var(--ve-row)]">
-              {columns.map((column) => (
-                <td key={column} className="border-b border-[color:var(--ve-rule)] px-4 py-4 align-top text-[var(--ve-muted)]">
-                  {row[column]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export function RiskLedger({ risks }: RiskLedgerProps) {
-  return (
-    <div className="ve-risk-ledger grid md:grid-cols-3">
-      {risks.map((risk) => (
-        <article data-ve-risk-level={risk.level ?? 'medium'} key={risk.risk} className="ve-risk-card">
-          {risk.level ? <p className="text-sm text-[var(--ve-faint)]">{risk.level} risk</p> : null}
-          <h3 className="mt-3 text-lg tracking-normal text-[var(--ve-heading)] [font-family:var(--ve-font-display)] [font-weight:var(--ve-heading-weight)]">{risk.risk}</h3>
-          <p className="mt-3 text-base leading-6 text-[var(--ve-muted)]">
-            <span className="text-[var(--ve-text)]">Signal:</span> {risk.signal}
-          </p>
-          <p className="mt-2 text-base leading-6 text-[var(--ve-muted)]">
-            <span className="text-[var(--ve-text)]">Mitigation:</span> {risk.mitigation}
-          </p>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-export function DiagramCanvas({ nodes, edges, layout = 'flow', direction = 'auto', lanes, dates, title = 'Diagram', description }: DiagramCanvasProps) {
-  const rawId = useId().replace(/:/g, '');
-  const figureRef = useRef<HTMLElement>(null);
-  const [availableWidth, setAvailableWidth] = useState<number | null>(null);
-  const candidates = useMemo(() => {
-    const initial = layoutDiagram(nodes, edges, layout, lanes, dates, direction);
-    if (layout !== 'flow' || direction !== 'auto') return { initial, horizontal: initial, vertical: initial };
-    return {
-      initial,
-      horizontal: layoutDiagram(nodes, edges, layout, lanes, dates, 'horizontal'),
-      vertical: layoutDiagram(nodes, edges, layout, lanes, dates, 'vertical'),
-    };
-  }, [nodes, edges, layout, lanes, dates, direction]);
-  useLayoutEffect(() => {
-    const figure = figureRef.current;
-    if (!figure || layout !== 'flow' || direction !== 'auto') return;
-    const updateWidth = (width: number) => {
-      if (width <= 0) return;
-      const next = Math.floor(width);
-      setAvailableWidth((previous) => previous === next ? previous : next);
-    };
-    updateWidth(figure.clientWidth);
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) updateWidth(entry.contentRect.width);
-    });
-    observer.observe(figure);
-    return () => observer.disconnect();
-  }, [layout, direction]);
-  const diagram = useMemo(() => {
-    if (availableWidth === null || layout !== 'flow' || direction !== 'auto') return candidates.initial;
-    const { horizontal, vertical } = candidates;
-    if (horizontal.viewBox.width <= availableWidth) return horizontal;
-    return vertical.viewBox.width < horizontal.viewBox.width ? vertical : horizontal;
-  }, [availableWidth, candidates, layout, direction]);
-  const scene = useMemo(() => diagramSceneFromLayout(diagram, { id: 'diagram', title, description }), [diagram, title, description]);
-  return (
-    <figure className="ve-diagram-shell ve-diagram-has-mobile" ref={figureRef}>
-      <div aria-label={`${title}, scroll to explore`} className="ve-diagram-variant ve-diagram-variant-desktop" data-diagram-role="diagram-desktop" data-ve-variant="desktop" role="region" tabIndex={0}>
-        <GraphicCanvas scene={scene} instancePrefix={rawId} style={{ aspectRatio: `${diagram.viewBox.width} / ${diagram.viewBox.height}`, minWidth: diagram.viewBox.width, maxWidth: diagram.viewBox.width, marginInline: 'auto' }} />
-      </div>
-      <MobileSwimlaneVariant diagram={diagram} idPrefix={rawId} title={title} />
-    </figure>
-  );
-}
-
-function MobileSwimlaneVariant({ diagram, idPrefix, title }: { diagram: ReturnType<typeof layoutDiagram>; idPrefix: string; title: string }) {
-  const sortedNodes = [...diagram.nodes].sort((a, b) => a.rank - b.rank || a.order - b.order);
-  return (
-    <div aria-label={title} className="ve-diagram-variant ve-diagram-variant-mobile" data-diagram-role="diagram-mobile" data-ve-variant="mobile" role="group">
-      <div className="ve-diagram-mobile-list">
-        {sortedNodes.map((node) => {
-          const connections = diagram.edges.filter(({ edge }) => edge.from === node.id || (edge.style === 'bidirectional' && edge.to === node.id && edge.from !== node.id));
-          const context = [node.lane ? diagram.laneLabels.get(node.lane) ?? node.lane : undefined, node.date].filter(Boolean).join(' · ');
-          return (
-            <article className="ve-diagram-mobile-node" data-diagram-role="mobile-node" data-ve-accent={node.isAccented ? 'true' : undefined} data-ve-node-id={node.id} id={`ve-mobile-${idPrefix}-${node.order}`} key={node.id}>
-              {context ? <p className="ve-diagram-mobile-lane">{context}</p> : null}
-              <h3>{node.label}</h3>
-              {node.detail ? <p>{node.detail}</p> : null}
-              {connections.length ? (
-                <ul aria-label={`Connections from ${node.label}`} className="ve-diagram-mobile-connections">
-                  {connections.map(({ edge, from, to }, index) => {
-                    const target = from.id === node.id ? to : from;
-                    return <li key={index}>{edge.label ? `${edge.label}: ` : 'To '}<a href={`#ve-mobile-${idPrefix}-${target.order}`}>{target.label}</a>{edge.style === 'bidirectional' ? ' (both directions)' : ''}</li>;
-                  })}
-                </ul>
-              ) : null}
-            </article>
-          );
-        })}
-        {!sortedNodes.length ? <p>No nodes to display.</p> : null}
-      </div>
-    </div>
-  );
-}
-
-export function CodeBlock({ code, language, filename, highlightLines = [], annotations = [], diff, html }: CodeBlockProps) {
-  const highlighted = html ?? `<pre><code>${escapeHtml(code)}</code></pre>`;
-  const highlightSet = new Set(highlightLines);
-  const annotationMap = new Map(annotations.map((item) => [item.line, item.note]));
-  return (
-    <figure className="overflow-hidden rounded-[var(--ve-radius)] border border-[color:var(--ve-code-rule)] bg-[var(--ve-code-bg)] text-[var(--ve-code-text)]" data-ve-code-block>
-      <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--ve-code-rule)] px-4 py-3 text-sm text-[var(--ve-code-muted)] [font-family:var(--ve-font-mono)]">
-        <span>{filename ?? language}</span>
-        {diff === 'unified' ? <span>diff</span> : null}
-      </figcaption>
-      <div className="grid max-h-[620px] overflow-auto">
-        <div className="ve-code-shiki" dangerouslySetInnerHTML={{ __html: highlighted }} />
-        {highlightSet.size || annotationMap.size ? (
-          <ol className="border-t border-[color:var(--ve-code-rule)] px-4 py-3 text-sm text-[var(--ve-code-muted)] [font-family:var(--ve-font-mono)]">
-            {Array.from(new Set([...highlightSet, ...annotationMap.keys()])).sort((a, b) => a - b).map((line) => (
-              <li className="py-1" key={line}>
-                <span className="text-[var(--ve-code-accent)]">L{line}</span>
-                {annotationMap.get(line) ? <span className="ml-3 text-[var(--ve-code-text)]">{annotationMap.get(line)}</span> : null}
-              </li>
-            ))}
-          </ol>
-        ) : null}
-      </div>
-    </figure>
-  );
-}
-
-export function DiffBlock({ patch, before, after, language = 'text', filename, mode = 'unified', rows }: DiffBlockProps) {
-  const diffRows = rows ?? buildDiffRows({ patch, before, after });
-  return (
-    <figure className="ve-diff-block" data-ve-diff-block>
-      <figcaption className="ve-code-caption">
-        <span>{filename ?? 'diff'}</span>
-        <span>{mode === 'split' ? 'split diff' : `${language} diff`}</span>
-      </figcaption>
-      {mode === 'split' ? <SplitDiffTable rows={diffRows} /> : <UnifiedDiffTable rows={diffRows} />}
-    </figure>
-  );
-}
-
-function UnifiedDiffTable({ rows }: { rows: DiffRow[] }) {
-  return (
-    <div className="ve-scroll-x">
-      <table className="ve-diff-table">
-        <tbody>
-          {rows.map((row, index) => (
-            <tr data-ve-diff-kind={row.kind} key={`${row.kind}-${row.oldNo ?? 'x'}-${row.newNo ?? 'x'}-${index}`}>
-              <td className="ve-diff-gutter">{row.oldNo ?? ''}</td>
-              <td className="ve-diff-gutter">{row.newNo ?? ''}</td>
-              <td className="ve-diff-mark">{diffGlyph(row.kind)}</td>
-              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row.html ?? escapeHtml(row.code) }} />
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function SplitDiffTable({ rows }: { rows: DiffRow[] }) {
-  const left = rows.filter((row) => row.kind !== 'add');
-  const right = rows.filter((row) => row.kind !== 'remove');
-  return (
-    <div className="ve-diff-split ve-scroll-x">
-      <DiffSide title="Before" rows={left} side="old" />
-      <DiffSide title="After" rows={right} side="new" />
-    </div>
-  );
-}
-
-function DiffSide({ title, rows, side }: { title: string; rows: DiffRow[]; side: 'old' | 'new' }) {
-  return (
-    <div className="ve-diff-side">
-      <div className="ve-diff-side-title">{title}</div>
-      <table className="ve-diff-table">
-        <tbody>
-          {rows.map((row, index) => (
-            <tr data-ve-diff-kind={row.kind} key={`${side}-${row.oldNo ?? 'x'}-${row.newNo ?? 'x'}-${index}`}>
-              <td className="ve-diff-gutter">{side === 'old' ? row.oldNo ?? '' : row.newNo ?? ''}</td>
-              <td className="ve-diff-mark">{diffGlyph(row.kind)}</td>
-              <td className="ve-diff-code" dangerouslySetInnerHTML={{ __html: row.html ?? escapeHtml(row.code) }} />
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export function TerminalBlock({ content, title = 'Terminal', showPrompt = false }: TerminalBlockProps) {
-  const lines = showPrompt ? content.split('\n').map((line) => `$ ${line}`).join('\n') : content;
-  return (
-    <figure className="ve-terminal-block" data-ve-terminal-block>
-      <figcaption className="ve-code-caption">
-        <span>{title}</span>
-      </figcaption>
-      <pre className="ve-terminal-content">
-        {parseAnsi(lines).map((segment, index) => (
-          <span className={segment.className} key={`${segment.text}-${index}`}>{segment.text}</span>
-        ))}
-      </pre>
-    </figure>
-  );
-}
-
-export function JsonTree({ data, collapsedDepth = 2 }: JsonTreeProps) {
-  const rootEntry = parseJsonTreeEntry(data);
-  return (
-    <div className="ve-json-tree" data-ve-json-tree>
-      <JsonNode name="root" entry={rootEntry} depth={0} collapsedDepth={collapsedDepth} root />
-    </div>
-  );
-}
-
-type JsonTreeEntry = JsonLeafEntry | JsonBranchEntry;
-
-type JsonLeafEntry = {
-  kind: 'leaf';
-  display: string;
-  valueType: string;
-};
-
-type JsonBranchEntry = {
-  kind: 'branch';
-  branchType: 'Array' | 'Object';
-  children: Array<[string, JsonTreeEntry]>;
-};
-
-function JsonNode({ name, entry, depth, collapsedDepth, root = false }: { name: string; entry: JsonTreeEntry; depth: number; collapsedDepth: number; root?: boolean }) {
-  if (entry.kind === 'leaf') {
-    return (
-      <div className="ve-json-leaf">
-        {!root ? <span className="ve-json-key">{JSON.stringify(name)}: </span> : null}
-        <JsonPrimitive entry={entry} />
-      </div>
-    );
-  }
-  const label = `${entry.branchType}(${entry.children.length})`;
-  return (
-    <details className="ve-json-branch" open={depth < collapsedDepth}>
-      <summary>
-        {!root ? <span className="ve-json-key">{JSON.stringify(name)}: </span> : null}
-        <span className="ve-json-type">{label}</span>
-      </summary>
-      <div className="ve-json-children">
-        {entry.children.map(([key, child]) => (
-          <JsonNode collapsedDepth={collapsedDepth} depth={depth + 1} key={key} name={key} entry={child} />
-        ))}
-      </div>
-    </details>
-  );
-}
-
-function JsonPrimitive({ entry }: { entry: JsonLeafEntry }) {
-  return <span data-ve-json-type={entry.valueType}>{entry.display}</span>;
-}
-
-function parseJsonTreeEntry(value: JsonTreeData): JsonTreeEntry {
-  if (value === null) return { kind: 'leaf', display: 'null', valueType: 'null' };
-  if (isJsonTreeList(value)) {
-    return {
-      kind: 'branch',
-      branchType: 'Array',
-      children: value.map((item, index) => [String(index), parseJsonTreeEntry(item)]),
-    };
-  }
-  if (isJsonTreeRecord(value)) {
-    return {
-      kind: 'branch',
-      branchType: 'Object',
-      children: Object.entries(value).map(([key, child]) => [key, parseJsonTreeEntry(child)]),
-    };
-  }
-  const valueType = jsonValueType(value);
-  return {
-    kind: 'leaf',
-    display: isJsonText(value) ? JSON.stringify(value) : String(value),
-    valueType,
-  };
-}
-
-function isJsonTreeRecord(value: JsonTreeData): value is JsonTreeRecord {
-  return Object.prototype.toString.call(value) === '[object Object]';
-}
-
-function isJsonTreeList(value: JsonTreeData): value is readonly JsonTreeData[] {
-  return Array.isArray(value);
-}
-
-function isJsonText(value: JsonTreePrimitive): value is string {
-  return Object.prototype.toString.call(value) === '[object String]';
-}
-
-function jsonValueType(value: JsonTreePrimitive): string {
-  const tag = Object.prototype.toString.call(value);
-  return tag.slice(8, -1).toLowerCase();
-}
-
-export function Quiz({ questions }: QuizProps) {
-  const [answers, setAnswers] = useState<Array<number | null>>(() => questions.map(() => null));
-  const answeredCount = answers.filter((answer) => answer !== null).length;
-  const score = answers.reduce<number>((sum, answer, index) => {
-    if (answer === null) return sum;
-    return questions[index]?.options[answer]?.correct ? sum + 1 : sum;
-  }, 0);
-  return (
-    <section className="ve-quiz" data-ve-quiz>
-      {questions.map((question, questionIndex) => {
-        const selected = answers[questionIndex];
-        return (
-          <article className="ve-quiz-question" key={question.q}>
-            <h3>{question.q}</h3>
-            <div className="ve-quiz-options" role="group" aria-label={question.q}>
-              {question.options.map((option, optionIndex) => {
-                const isSelected = selected === optionIndex;
-                const state = selected === null ? 'idle' : option.correct ? 'correct' : isSelected ? 'incorrect' : 'idle';
-                return (
-                  <button
-                    aria-pressed={isSelected}
-                    className="ve-quiz-option"
-                    data-ve-quiz-state={state}
-                    key={option.text}
-                    onClick={() => setAnswers((current) => current.map((answer, index) => index === questionIndex ? optionIndex : answer))}
-                    type="button"
-                  >
-                    <span className="ve-quiz-choice">{String.fromCharCode(65 + optionIndex)}</span>
-                    <span>{option.text}</span>
-                    {isSelected ? <span className="ve-quiz-result">{option.correct ? 'Correct' : 'Incorrect'}</span> : null}
-                  </button>
-                );
-              })}
-            </div>
-            {selected !== null ? (
-              <p className="ve-quiz-feedback" data-ve-quiz-state={question.options[selected]?.correct ? 'correct' : 'incorrect'}>
-                {question.options[selected]?.why}
-              </p>
-            ) : null}
-          </article>
-        );
-      })}
-      {answeredCount === questions.length ? (
-        <p className="ve-quiz-score">Score: {score}/{questions.length}</p>
-      ) : null}
-    </section>
-  );
 }
 
 export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
@@ -741,118 +491,6 @@ export function MermaidBlock({ chart, caption }: MermaidBlockProps) {
       </div>
     </figure>
   );
-}
-
-function escapeHtml(input: string) {
-  return input.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
-}
-
-function diffGlyph(kind: DiffRow['kind']) {
-  if (kind === 'add') return '+';
-  if (kind === 'remove') return '-';
-  if (kind === 'hunk') return '@';
-  return ' ';
-}
-
-function buildDiffRows({ patch, before, after }: Pick<DiffBlockProps, 'patch' | 'before' | 'after'>): DiffRow[] {
-  if (patch) return parseUnifiedDiff(patch);
-  if (before !== undefined && after !== undefined) return diffLines(before, after);
-  return [];
-}
-
-function parseUnifiedDiff(patch: string): DiffRow[] {
-  const rows: DiffRow[] = [];
-  let oldLine = 0;
-  let newLine = 0;
-  for (const line of patch.split(/\r?\n/)) {
-    if (line.startsWith('@@')) {
-      const match = line.match(/^@@\s+-(\d+)(?:,\d+)?\s+\+(\d+)(?:,\d+)?\s+@@/);
-      oldLine = match ? Number(match[1]) : oldLine;
-      newLine = match ? Number(match[2]) : newLine;
-      rows.push({ kind: 'hunk', code: line });
-    } else if (line.startsWith('+') && !line.startsWith('+++')) {
-      rows.push({ kind: 'add', newNo: newLine, code: line.slice(1) });
-      newLine += 1;
-    } else if (line.startsWith('-') && !line.startsWith('---')) {
-      rows.push({ kind: 'remove', oldNo: oldLine, code: line.slice(1) });
-      oldLine += 1;
-    } else if (line.startsWith(' ')) {
-      rows.push({ kind: 'context', oldNo: oldLine, newNo: newLine, code: line.slice(1) });
-      oldLine += 1;
-      newLine += 1;
-    } else if (line.startsWith('\\ No newline')) {
-      continue;
-    }
-  }
-  return rows;
-}
-
-function diffLines(before: string, after: string): DiffRow[] {
-  const a = before.split(/\r?\n/);
-  const b = after.split(/\r?\n/);
-  const table = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i -= 1) {
-    for (let j = b.length - 1; j >= 0; j -= 1) {
-      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
-    }
-  }
-  const rows: DiffRow[] = [{ kind: 'hunk', code: `@@ -1,${a.length} +1,${b.length} @@` }];
-  let i = 0;
-  let j = 0;
-  while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) {
-      rows.push({ kind: 'context', oldNo: i + 1, newNo: j + 1, code: a[i] });
-      i += 1;
-      j += 1;
-    } else if (j < b.length && (i === a.length || table[i][j + 1] >= table[i + 1][j])) {
-      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
-      j += 1;
-    } else if (i < a.length) {
-      rows.push({ kind: 'remove', oldNo: i + 1, code: a[i] });
-      i += 1;
-    }
-  }
-  return rows;
-}
-
-function parseAnsi(input: string) {
-  const output: Array<{ text: string; className?: string }> = [];
-  let active = '';
-  const ansiEscape = String.fromCharCode(27);
-  const pattern = new RegExp(`${ansiEscape}\\[([0-9;]*)m`, 'g');
-  let last = 0;
-  for (const match of input.matchAll(pattern)) {
-    if (match.index > last) output.push({ text: input.slice(last, match.index), className: active || undefined });
-    active = sgrClass(match[1], active);
-    last = match.index + match[0].length;
-  }
-  if (last < input.length) output.push({ text: input.slice(last), className: active || undefined });
-  return output;
-}
-
-function sgrClass(code: string, active: string) {
-  const parts = code.split(';').filter(Boolean).map(Number);
-  if (!parts.length || parts.includes(0)) return '';
-  let className = active;
-  for (const part of parts) {
-    if (part === 1) className = appendClass(className, 've-ansi-bold');
-    else if (part === 22) className = removeClass(className, 've-ansi-bold');
-    else if (part >= 30 && part <= 37) className = replaceAnsiClass(className, `ve-ansi-fg-${part - 30}`);
-    else if (part >= 90 && part <= 97) className = replaceAnsiClass(className, `ve-ansi-fg-${part - 90}-bright`);
-  }
-  return className;
-}
-
-function appendClass(className: string, next: string) {
-  return className.split(' ').includes(next) ? className : `${className} ${next}`.trim();
-}
-
-function removeClass(className: string, target: string) {
-  return className.split(' ').filter((item) => item && item !== target).join(' ');
-}
-
-function replaceAnsiClass(className: string, next: string) {
-  return appendClass(className.split(' ').filter((item) => !item.startsWith('ve-ansi-fg-')).join(' '), next);
 }
 
 function loadMermaid() {
@@ -953,9 +591,10 @@ export function SlideDeck({
   eyebrow,
   children,
   orientation = 'vertical',
-  preset = 'hairline',
+  preset = 'iso',
   reviewTools = true,
 }: SlideDeckProps) {
+  assertSupportedPreset(preset);
   const isHorizontal = orientation === 'horizontal';
   return (
     <main
@@ -1004,7 +643,8 @@ export function Slide({ title, kicker, tone = 'dark', children }: SlideProps) {
   );
 }
 
-export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'hairline', reviewTools = true, children }: PosterCanvasProps) {
+export function PosterCanvas({ eyebrow, title, stat, footer, preset = 'iso', reviewTools = true, children }: PosterCanvasProps) {
+  assertSupportedPreset(preset);
   return (
     <main className="min-h-screen bg-[var(--ve-bg)] p-4 text-[var(--ve-text)] sm:p-8 [font-family:var(--ve-font-body)]" data-ve-preset={preset}>
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] items-center justify-center sm:min-h-[calc(100vh-4rem)]">
@@ -1082,7 +722,7 @@ function AnnotationLayer() {
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">review</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--ve-accent-text)] [font-family:var(--ve-font-mono)]">review</p>
           <p className="mt-1 text-[var(--ve-muted)]">{enabled ? 'Click the page to annotate.' : 'Point-and-click feedback is off.'}</p>
         </div>
         <button
@@ -1098,7 +738,7 @@ function AnnotationLayer() {
 
       {target ? (
         <div className="rounded-[var(--ve-radius)] border border-[color:var(--ve-accent)] bg-[var(--ve-accent-soft)] p-3">
-          <p className="text-xs text-[var(--ve-accent)] [font-family:var(--ve-font-mono)]">{target.path}</p>
+          <p className="text-xs text-[var(--ve-accent-text)] [font-family:var(--ve-font-mono)]">{target.path}</p>
           <p className="mt-2 max-h-16 overflow-y-auto text-xs leading-5 text-[var(--ve-muted)]">{target.text}</p>
           <textarea
             className="mt-3 min-h-24 w-full resize-y border border-[color:var(--ve-rule)] bg-[var(--ve-bg)] p-3 text-sm text-[var(--ve-text)] outline-none focus:border-[var(--ve-accent)]"
@@ -1156,3 +796,21 @@ function describeElement(element: HTMLElement) {
   }
   return parts.join(' > ');
 }
+
+export { DiagramDesignFigure, diagramDesignExamples, type DiagramDesignFigureProps, type DiagramDesignExample } from './diagram-design-figure';
+export * from './hairline-figures';
+
+export { NativeLivingForm, nativeLivingFormSettings } from "./native-living-forms";
+export type { NativeLivingFormProps } from "./native-living-forms";
+
+export { NativeProceduralProp } from "./native-procedural-props";
+export type { NativeProceduralPropProps } from "./native-procedural-props";
+
+export { PrLensFigure, prLensExamples } from './pr-lens-figure';
+export type { PrLensExample } from './pr-lens-figure';
+
+export { ChalkboardFigure, chalkboardExamples } from './chalkboard-figure';
+export type { ChalkboardExample } from './chalkboard-figure';
+
+export { SourceFigure, prepareSourceDocument, seekSourceFrame } from './source-figure';
+export type { SourceDocument, SourceTiming, SourceFigureProps } from './source-figure';

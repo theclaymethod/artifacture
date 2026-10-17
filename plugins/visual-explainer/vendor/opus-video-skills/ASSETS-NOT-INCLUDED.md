@@ -1,0 +1,1 @@
+Original MIT skill instructions, templates, animation engines, renderers and worked source examples are included. Demo GIFs, JPEGs, recordings and other media are excluded. Keep the John Heibel license in the painted-animation template.

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    // e4 fix: three is gone (WebGPU-only migration) — its typings previously supplied the
+    // ambient WebGPU globals (GPUDevice/GPUAdapter/…) createSharedDevice.ts uses. Swap to
+    // @webgpu/types, mirroring the E3 fix in packages/core. (js builds via vite; this only
+    // affects standalone `tsc --noEmit`.)
+    "types": ["@webgpu/types"]
+  },
+  "include": ["src"]
+}

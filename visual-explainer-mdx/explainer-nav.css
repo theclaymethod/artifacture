@@ -1,0 +1,498 @@
+/* Chapter rail: sticky side rail at >=1200px, compact sticky top bar below that. */
+.ve-has-chapters {
+  --ve-rail-width: 15rem;
+  --ve-topbar-height: 3.5rem;
+  --ve-sticky-top: var(--ve-topbar-height);
+}
+
+/* Every jump is instant (no smooth scrolling): a smooth scroll moves the page under the reader's
+   eyes. Every fragment target lands under the sticky top bar, not behind it. */
+.ve-shell.ve-has-chapters [id] {
+  scroll-margin-top: calc(var(--ve-sticky-top) + 1rem);
+}
+
+/* The rail speaks the UI face at one size: a muted number column with tabular figures, the title
+   wrapping under its own text. Every gap comes from the
+   4px scale; each row is a 44px target. The current chapter is accent text in weight 600, with no
+   tint, and a screen reader hears it from aria-current. */
+.ve-chapter-rail {
+  --ve-rail-text: 0.9375rem;
+  --ve-rail-leading: var(--ve-leading-ui, 1.4);
+  --ve-rail-index: 1.5rem;
+  --ve-rail-gap: var(--ve-space-3, 0.75rem);
+  --ve-rail-pad: var(--ve-space-2, 0.5rem);
+  --ve-rail-current: var(--ve-accent-text, var(--ve-accent));
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--ve-rule);
+  background: var(--ve-nav-bg);
+  color: var(--ve-text);
+  font-family: var(--ve-font-ui, var(--ve-font-body));
+  font-size: var(--ve-rail-text);
+  letter-spacing: var(--ve-ui-tracking, 0);
+  line-height: var(--ve-rail-leading);
+}
+
+/* Narrow screens: a compact top bar that names the current chapter. */
+.ve-chapter-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--ve-rail-gap);
+  width: 100%;
+  min-height: var(--ve-topbar-height);
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong, 600) var(--ve-rail-text)/var(--ve-rail-leading) var(--ve-font-ui, var(--ve-font-body));
+  text-align: left;
+  cursor: pointer;
+}
+
+.ve-has-chapters .ve-chapter-rail .ve-chapter-toggle {
+  min-height: var(--ve-topbar-height);
+  border-radius: 0;
+  background: transparent;
+}
+
+.ve-chapter-count {
+  flex: none;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small, 0.875rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ve-weight-regular, 400);
+}
+
+.ve-chapter-current {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ve-chapter-caret {
+  flex: none;
+  color: var(--ve-muted);
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-chapter-caret {
+  transform: rotate(180deg);
+}
+
+.ve-chapter-heading {
+  display: none;
+  margin: 0 0 var(--ve-space-2, 0.5rem);
+  padding-inline: var(--ve-rail-pad);
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small, 0.875rem);
+  font-weight: var(--ve-weight-strong, 600);
+  line-height: var(--ve-rail-leading);
+}
+
+/* Narrow screens: the open list lies over the page under the top bar, so opening it moves nothing. */
+.ve-chapter-panel {
+  display: none;
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-chapter-panel {
+  display: block;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: calc(100vh - var(--ve-topbar-height));
+  max-height: calc(100dvh - var(--ve-topbar-height));
+  padding: var(--ve-space-2, 0.5rem) calc(1.25rem - var(--ve-rail-pad)) var(--ve-space-5, 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid var(--ve-rule);
+  background: var(--ve-nav-bg);
+}
+
+.ve-chapter-list {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-chapter-list {
+  display: block;
+}
+
+.ve-chapter-list ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-chapter-list li {
+  margin: 0;
+  padding: 0;
+}
+
+/* A chapter row: the number and the title wrapping under itself. */
+.ve-chapter-list > li > a {
+  display: grid;
+  grid-template-columns: var(--ve-rail-index) minmax(0, 1fr);
+  column-gap: var(--ve-rail-gap);
+  align-content: center;
+  align-items: baseline;
+  min-height: 44px;
+  padding: var(--ve-space-2, 0.5rem) var(--ve-rail-pad);
+  border-radius: 6px;
+  color: var(--ve-text);
+  font-weight: var(--ve-weight-regular, 400);
+  text-decoration: none;
+}
+
+.ve-chapter-index {
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ve-chapter-label {
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+/* The in-chapter targets: only under the current chapter, smaller and muted, set under its title. */
+.ve-chapter-anchors {
+  display: none;
+}
+
+.ve-chapter-list [data-ve-current="true"] > .ve-chapter-anchors {
+  display: block;
+  padding-bottom: var(--ve-space-2, 0.5rem);
+}
+
+.ve-chapter-anchors a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--ve-space-1, 0.25rem) var(--ve-rail-pad) var(--ve-space-1, 0.25rem) calc(var(--ve-rail-pad) + var(--ve-rail-index) + var(--ve-rail-gap));
+  border-radius: 6px;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small, 0.875rem);
+  line-height: var(--ve-rail-leading);
+  text-decoration: none;
+}
+
+.ve-chapter-list a:hover {
+  color: var(--ve-heading);
+}
+
+.ve-chapter-list a:hover .ve-chapter-index {
+  color: var(--ve-heading);
+}
+
+.ve-chapter-list [data-ve-current="true"] > a,
+.ve-chapter-list [data-ve-current="true"] > a .ve-chapter-index,
+.ve-chapter-anchors a[aria-current="location"] {
+  color: var(--ve-rail-current);
+}
+
+.ve-chapter-list [data-ve-current="true"] > a {
+  font-weight: var(--ve-weight-strong, 600);
+}
+
+.ve-chapter-list a:focus-visible,
+.ve-chapter-toggle:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: -2px;
+}
+
+/* Reading mode: a quiet two-way switch at the foot, like the view switches of the figures. */
+.ve-read-mode {
+  display: none;
+  align-items: center;
+  gap: var(--ve-space-1, 0.25rem);
+  margin-top: var(--ve-space-4, 1rem);
+  padding-inline: var(--ve-rail-pad);
+  color: var(--ve-muted);
+  font: var(--ve-weight-regular, 400) var(--ve-text-small, 0.875rem)/1 var(--ve-font-ui, var(--ve-font-body));
+  white-space: nowrap;
+}
+
+.ve-chapter-rail[data-ve-open="true"] .ve-read-mode {
+  display: flex;
+}
+
+.ve-read-mode-label {
+  margin-right: var(--ve-space-1, 0.25rem);
+}
+
+/* Each option is 32px tall; its hit area reaches 44px. */
+.ve-read-mode button {
+  position: relative;
+  min-height: 2rem;
+  padding: 0 var(--ve-space-2, 0.5rem);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ve-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ve-read-mode button::before {
+  position: absolute;
+  inset: -6px 0;
+  content: "";
+}
+
+.ve-read-mode button:hover {
+  color: var(--ve-heading);
+}
+
+.ve-read-mode button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--ve-text) 9%, transparent);
+  color: var(--ve-heading);
+  cursor: default;
+}
+
+.ve-read-mode button:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ve-chapter-caret {
+    transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+.ve-shell-frame {
+  min-width: 0;
+}
+
+/* Chapter headings already live in the rail: a level is one reading column at every width. */
+.ve-has-chapters .ve-section {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1200px) {
+  .ve-has-chapters {
+    --ve-sticky-top: 0px;
+  }
+
+  .ve-has-chapters .ve-shell-frame {
+    display: grid;
+    grid-template-columns: var(--ve-rail-width) minmax(0, 1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    max-width: calc(var(--ve-page-max) + var(--ve-rail-width) + 3rem);
+    margin-inline: auto;
+    padding-inline: 2.5rem;
+  }
+
+  .ve-has-chapters .ve-shell-inner {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  /* The side rail: a column as tall as the screen; the list scrolls inside it only when the
+     chapters do not fit, and the reading switch stays under the last chapter. */
+  .ve-chapter-rail {
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    height: 100vh;
+    padding: clamp(2rem, 5vw, 4rem) 0 var(--ve-space-5, 1.5rem);
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .ve-chapter-toggle {
+    display: none;
+  }
+
+  .ve-chapter-panel,
+  .ve-chapter-rail[data-ve-open="true"] .ve-chapter-panel {
+    display: flex;
+    flex-direction: column;
+    position: static;
+    min-height: 0;
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .ve-chapter-heading {
+    display: block;
+  }
+
+  .ve-chapter-list,
+  .ve-chapter-rail[data-ve-open="true"] .ve-chapter-list {
+    display: block;
+    flex: 0 1 auto;
+    min-height: 0;
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  .ve-read-mode,
+  .ve-chapter-rail[data-ve-open="true"] .ve-read-mode {
+    display: flex;
+    flex: none;
+  }
+
+  /* With a rail, the review tool docks under it instead of reserving a right gutter. */
+  .ve-has-chapters.ve-has-review {
+    padding-right: 0;
+  }
+
+  .ve-has-chapters.ve-has-review .ve-chapter-list {
+    max-height: calc(100vh - 24rem);
+  }
+
+  .ve-has-chapters .ve-review-panel > div:first-child {
+    flex-wrap: wrap;
+  }
+
+  .ve-has-chapters .ve-review-panel > div:first-child > button {
+    flex: none;
+  }
+
+  .ve-has-chapters .ve-review-panel {
+    right: auto;
+    left: max(2.5rem, calc((100vw - (var(--ve-page-max) + var(--ve-rail-width) + 3rem)) / 2 + 2.5rem));
+    width: var(--ve-rail-width);
+  }
+}
+
+/* ---- Chapters as pages (ExplainerShell paged) ------------------------------------------------ */
+
+/* Before the page runs, a paged shell already shows one chapter: the one the address names, or
+   the first. The browser's own jump to the fragment then lands where the page lands it, and the
+   page does not jump again when it starts. Without script every chapter shows in sequence. */
+@media (scripting: enabled) {
+  .ve-shell[data-ve-paged]:not([data-ve-live]) .ve-section:not(:target, :has(:target)) {
+    display: none;
+  }
+
+  .ve-shell[data-ve-paged]:not([data-ve-live]):not(:has(.ve-section:target, .ve-section :target)) .ve-section:first-of-type {
+    display: grid;
+  }
+
+  .ve-shell[data-ve-paged]:not([data-ve-live]):has(.ve-section:not(:first-of-type):target, .ve-section:not(:first-of-type) :target) .ve-shell-header {
+    display: none;
+  }
+}
+
+/* A page of a paged shell: the title and summary show on the first chapter only. */
+.ve-shell[data-ve-paged="pages"]:not([data-ve-page="0"]) .ve-shell-header {
+  display: none;
+}
+
+.ve-section[hidden] {
+  display: none;
+}
+
+/* A chapter heading takes focus when its page opens, for a screen reader; it is not a control, so it shows no ring. */
+.ve-section-heading h2:focus {
+  outline: none;
+}
+
+.ve-alias-anchor {
+  display: block;
+  height: 0;
+}
+
+/* Previous and next: two 44px targets at the foot of each chapter, in the same place on every
+   chapter. The pager follows the chapter body (the section gap plus this margin make 48px). */
+.ve-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ve-space-4, 1rem);
+  margin-top: calc(var(--ve-space-7, 3rem) - var(--ve-space-5, 1.5rem));
+  padding-top: var(--ve-space-4, 1rem);
+  border-top: 1px solid var(--ve-rule);
+}
+
+/* A page fills the screen at least, so a short chapter puts the pager where a long one ends:
+   at the foot of the screen once the chapter is read (1rem landing margin, 2rem page foot). */
+.ve-shell[data-ve-paged="pages"] .ve-section:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--ve-sticky-top) - 3rem);
+  min-height: calc(100svh - var(--ve-sticky-top) - 3rem);
+}
+
+.ve-shell[data-ve-paged="pages"] .ve-section > .ve-section-body {
+  margin-bottom: calc(var(--ve-space-7, 3rem) - var(--ve-space-5, 1.5rem));
+}
+
+.ve-shell[data-ve-paged="pages"] .ve-section > .ve-pager {
+  margin-top: auto;
+}
+
+/* Each label holds two lines, so the pager is one height on every chapter. */
+.ve-pager-label {
+  display: -webkit-box;
+  min-height: calc(2em * 1.3);
+  overflow: hidden;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ve-pager a.ve-pager-link {
+  display: grid;
+  gap: 0.125rem;
+  min-height: 44px;
+  max-width: 48%;
+  padding: var(--ve-space-2, 0.5rem) 0;
+  color: var(--ve-heading);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ve-pager-link[rel="next"] {
+  margin-left: auto;
+  text-align: right;
+}
+
+.ve-pager-key {
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small, 0.875rem);
+  font-weight: 400;
+}
+
+.ve-pager-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ve-pager-link[rel="next"] .ve-pager-key {
+  justify-content: flex-end;
+}
+
+.ve-pager a.ve-pager-link:hover > span:last-child {
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+.ve-pager a.ve-pager-link:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+/* One page, and print: each chapter in sequence. */
+@media print {
+  .ve-section[hidden] {
+    display: grid;
+  }
+
+  .ve-pager,
+  .ve-read-mode {
+    display: none;
+  }
+}

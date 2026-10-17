@@ -1,10 +1,9 @@
-import { codeToHtml } from 'shiki';
+import { codeToHtml, createCssVariablesTheme } from 'shiki';
+import { diffLines } from '../../visual-explainer-mdx/diff-lines.mjs';
 
 const diagramComponents = new Set(['DiagramCanvas', 'DiagramWalkthrough']);
-// Exported so scripts/ve-mdx/check.mjs can assert this set stays in sync with
-// components.tsx's actual named exports (roster-sync guard, plan 008 step 5).
-// Contents are unchanged — this only adds visibility, not a refactor of how
-// the set is built.
+// Keep the preflight component roster aligned with components.tsx exports.
+// scripts/ve-mdx/check.mjs validates this without executing TSX in Node.
 export const sharedComponents = new Set([
   'ExplainerShell',
   'Section',
@@ -12,11 +11,23 @@ export const sharedComponents = new Set([
   'Pipeline',
   'DecisionMatrix',
   'RiskLedger',
+  'DefinitionList', 'Definition', 'Subsection', 'Disclosure', 'CopyLink', 'Term', 'Steps', 'Step', 'ChipLinks', 'Lead', 'Aside',
   'DiagramCanvas',
+  'DataTable', 'StatusPill', 'Badge', 'Legend', 'ChapterRail',
+  'ArchitectureDiagram', 'ClaimDetail', 'CodeRef', 'Glossary', 'Glossed', 'Invariants', 'PromiseChips', 'PromiseLink',
+  'PromiseList', 'VerdictLegend', 'VerdictPill', 'VerifyTheVerifiers', 'Walkthrough',
+  // The verification explainer (verification.tsx, typed-diagrams.tsx, worked-example.tsx) and the shared trust-map rows.
+  'StepThrough', 'TypedDiagram', 'ClaimTimeline', 'EvidenceGuide', 'WorkedExample', 'ExamplesFor', 'VerifierView',
+  'BarCard', 'BarChip', 'ChangedCode', 'CheckRow', 'ClaimBody', 'ClaimRow',
   'GraphicCanvas',
+  'PunctumReadout',
   'GraphicSlide',
   'GraphicVideo',
-  'DiagramWalkthrough',
+  'NativeClip', 'NativeStill',
+  'DagCanvas',
+  'AsciiImage', 'AsciiSweep', 'AsciiObject', 'VhsEffect',
+  'ModelView', 'OrbitalText', 'TracePath',
+  'DiagramWalkthrough', 'DiagramModes', 'DiagramDesignFigure', 'NativeLivingForm', 'NativeProceduralProp', 'PrLensFigure', 'ChalkboardFigure', 'SourceFigure',
   'DataChart',
   'LieflatChart',
   'CodeBlock',
@@ -368,12 +379,9 @@ function findBalanced(input, start, open, close) {
   return -1;
 }
 
-// evaluateLiteral parses a JSX prop expression as a bounded literal — it never
-// executes source. Only object/array literals, strings (single/double/
-// backtick without `${` interpolation), numbers, booleans, and null are
-// accepted; anything else (identifiers, calls, spreads, arrow functions,
-// template interpolation) is rejected with the same diagnostic shape the
-// previous eval-based evaluator produced.
+// Parse bounded JSX literals without executing source. Object/array literals,
+// plain strings, numbers, booleans and null are accepted; identifiers, calls,
+// spreads, functions and template interpolation are rejected.
 function evaluateLiteral(expr, file, label, diagnostics) {
   try {
     const state = { input: expr, pos: 0 };
@@ -575,8 +583,21 @@ function unescapeLiteralChar(state) {
     case '`': return '`';
     case '\\': return '\\';
     case '\n': return '';
+    case 'u': return unescapeCodePoint(state, /^(?:\{([0-9a-fA-F]{1,6})\}|([0-9a-fA-F]{4}))/);
+    case 'x': return unescapeCodePoint(state, /^([0-9a-fA-F]{2})/);
     default: return esc;
   }
+}
+
+// \uXXXX, \u{X...} and \xXX, as JavaScript decodes them. Authors escape "<" as \u003c so the
+// integrity scan never reads code text as a component tag; the highlighter needs the real text.
+function unescapeCodePoint(state, pattern) {
+  const match = pattern.exec(state.input.slice(state.pos));
+  if (!match) throw new Error(`non-literal expression: invalid escape sequence at position ${state.pos}`);
+  state.pos += match[0].length;
+  const codePoint = Number.parseInt(match[1] ?? match[2], 16);
+  if (codePoint > 0x10ffff) throw new Error(`non-literal expression: invalid code point at position ${state.pos}`);
+  return String.fromCodePoint(codePoint);
 }
 
 function parseLiteralNumber(state) {
@@ -612,11 +633,9 @@ function computeSimpleLayout(nodes) {
 }
 
 async function injectCodeBlockHtml(code) {
-  const pattern = /<CodeBlock\b[\s\S]*?\/>/g;
-  const matches = [...code.matchAll(pattern)];
   let output = code;
-  for (const match of matches) {
-    const tag = match[0];
+  // Quote- and brace-aware: a "/>" inside the code string does not end the tag.
+  for (const { source: tag } of findComponentTags(code, new Set(['CodeBlock']))) {
     if (/\bhtml\s*=/.test(tag)) continue;
     const codeExpr = getPropExpression(tag, 'code');
     const languageExpr = getPropExpression(tag, 'language');
@@ -626,18 +645,15 @@ async function injectCodeBlockHtml(code) {
     const language = readLiteralText(evaluateLiteral(languageExpr, 'CodeBlock', 'language', diagnostics));
     if (diagnostics.length || rawCode === null || language === null) continue;
     const html = await highlightCode(rawCode, language);
-    const injected = tag.replace(/\s*\/>$/, ` html={${JSON.stringify(html)}} />`);
-    output = output.replace(tag, injected);
+    const injected = tag.replace(/\s*\/>$/, ` html={${jsxString(html)}} />`);
+    output = output.replace(tag, () => injected);
   }
   return output;
 }
 
 async function injectDiffBlockRows(code) {
-  const pattern = /<DiffBlock\b[\s\S]*?\/>/g;
-  const matches = [...code.matchAll(pattern)];
   let output = code;
-  for (const match of matches) {
-    const tag = match[0];
+  for (const { source: tag } of findComponentTags(code, new Set(['DiffBlock']))) {
     if (/\brows\s*=/.test(tag)) continue;
     const rows = buildRowsFromDiffTag(tag);
     if (!rows) continue;
@@ -651,8 +667,8 @@ async function injectDiffBlockRows(code) {
         html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, language),
       });
     }
-    const injected = tag.replace(/\s*\/>$/, ` rows={${JSON.stringify(highlightedRows)}} />`);
-    output = output.replace(tag, injected);
+    const injected = tag.replace(/\s*\/>$/, ` rows={${jsxString(highlightedRows)}} />`);
+    output = output.replace(tag, () => injected);
   }
   return output;
 }
@@ -677,6 +693,57 @@ function buildRowsFromDiffTag(tag) {
   return null;
 }
 
+/**
+ * Highlight the code of a resolved-refs file (refs.resolved.json) at export time: each excerpt gets
+ * `html`, each removed line of an excerpt gets `html`, and each control patch gets highlighted diff `rows`. The data components
+ * then render the same markup in the static pre-render and in the browser.
+ */
+export async function highlightRefs(refs) {
+  for (const ref of refs.refs ?? []) {
+    if (ref.link_only) continue;
+    if (ref.html === undefined) ref.html = await highlightCode(ref.excerpt, ref.language ?? 'text');
+    if (ref.changes?.removed?.length) await highlightRemoved(ref);
+  }
+  for (const edits of Object.values(refs.controls ?? {})) {
+    for (const edit of edits) {
+      if (edit.rows || (edit.patch === undefined && edit.before === undefined)) continue;
+      let rows = null;
+      if (edit.patch !== undefined) {
+        const parsed = parseUnifiedDiff(edit.patch);
+        rows = parsed.errors.length ? null : parsed.rows;
+      } else rows = diffLines(edit.before, edit.after ?? '');
+      if (!rows) continue;
+      edit.rows = [];
+      for (const row of rows) edit.rows.push({ ...row, html: row.kind === 'hunk' ? escapeHtml(row.code) : await highlightSnippet(row.code, edit.language ?? 'text') });
+    }
+  }
+  return refs;
+}
+
+/**
+ * The removed lines of an excerpt (changes.removed), highlighted in their base context: the
+ * unchanged lines of the excerpt and the removed lines, in base order, as one block. So a removed
+ * line inside a docstring stays a string. Each removed line gets the markup of its own line.
+ */
+async function highlightRemoved(ref) {
+  const { added = [], modified = [], removed } = ref.changes;
+  const changed = new Set([...added, ...modified]);
+  const base = [];
+  const take = (test) => { for (const line of removed) if (test(line.at)) base.push({ text: line.text, line }); };
+  ref.excerpt.split('\n').forEach((text, i) => {
+    const no = ref.start + i;
+    take((at) => (i === 0 ? at <= no : at === no));
+    if (!changed.has(no)) base.push({ text });
+  });
+  take((at) => at > ref.end);
+  const html = await highlightCode(base.map((b) => b.text).join('\n'), ref.language ?? 'text');
+  const body = html.match(/<code[^>]*>([\s\S]*)<\/code>/)?.[1] ?? '';
+  const lines = body.split('\n').map((line) => line.replace(/^<span class="line">/, '').replace(/<\/span>$/, ''));
+  base.forEach((b, i) => {
+    if (b.line && b.line.html === undefined) b.line.html = lines.length === base.length ? lines[i] : escapeHtml(b.text);
+  });
+}
+
 async function highlightCode(code, language) {
   const lang = normalizeLanguage(language);
   try {
@@ -696,22 +763,24 @@ async function highlightSnippet(code, language) {
   return match ? match[1].replace(/\n$/, '') : escapeHtml(code);
 }
 
-const veCodeTheme = {
-  name: 'visual-explainer-mono',
-  type: 'dark',
-  settings: [
-    { settings: { background: '#0a0a0a', foreground: '#f4f4f5' } },
-    { scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: '#a1a1aa', fontStyle: 'italic' } },
-    { scope: ['keyword', 'storage', 'entity.name.function', 'entity.name.tag'], settings: { foreground: '#fafafa' } },
-    { scope: ['string', 'constant.numeric', 'constant.language', 'support.type'], settings: { foreground: '#d4d4d8' } },
-  ],
-};
+// Token colors resolve from --ve-syntax-* on the code surface (code-blocks.css), so every
+// preset and appearance keeps its own AA palette.
+const veCodeTheme = createCssVariablesTheme({ name: 'visual-explainer-tokens', variablePrefix: '--shiki-', fontStyle: true });
+
+// JSON for a JSX attribute expression. Escape angle brackets so the integrity scan never reads
+// highlighted markup or source text as a component tag; the literal parser decodes \\u escapes.
+function jsxString(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+}
+
+const languageAliases = new Map([
+  ['mdx', 'jsx'], ['shell', 'bash'], ['sh', 'bash'], ['zsh', 'bash'], ['console', 'bash'],
+  ['typescript', 'ts'], ['javascript', 'js'], ['py', 'python'], ['yml', 'yaml'], ['jsonc', 'json'],
+]);
 
 function normalizeLanguage(language) {
-  if (language === 'mdx') return 'jsx';
-  if (language === 'tsx') return 'tsx';
-  if (language === 'shell') return 'bash';
-  return language;
+  const lang = String(language).trim().toLowerCase();
+  return languageAliases.get(lang) ?? lang;
 }
 
 function parseUnifiedDiff(patch) {
@@ -751,34 +820,6 @@ function parseUnifiedDiff(patch) {
   if (!rows.some((row) => row.kind === 'hunk')) errors.push('patch must include at least one unified diff hunk');
   if (!rows.some((row) => row.kind === 'add' || row.kind === 'remove')) errors.push('patch must include at least one added or removed line');
   return { rows, errors };
-}
-
-function diffLines(before, after) {
-  const a = before.split(/\r?\n/);
-  const b = after.split(/\r?\n/);
-  const table = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i -= 1) {
-    for (let j = b.length - 1; j >= 0; j -= 1) {
-      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
-    }
-  }
-  const rows = [{ kind: 'hunk', code: `@@ -1,${a.length} +1,${b.length} @@` }];
-  let i = 0;
-  let j = 0;
-  while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) {
-      rows.push({ kind: 'context', oldNo: i + 1, newNo: j + 1, code: a[i] });
-      i += 1;
-      j += 1;
-    } else if (j < b.length && (i === a.length || table[i][j + 1] >= table[i + 1][j])) {
-      rows.push({ kind: 'add', newNo: j + 1, code: b[j] });
-      j += 1;
-    } else if (i < a.length) {
-      rows.push({ kind: 'remove', oldNo: i + 1, code: a[i] });
-      i += 1;
-    }
-  }
-  return rows;
 }
 
 function assertJsonSerializable(value) {

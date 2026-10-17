@@ -162,7 +162,7 @@ export const checks = Object.fromEntries([
     return [];
   })],
   ['diagram-sketchy-filter-shapes-not-text', scoped((ctx) => hasDiagramDom(ctx) && /sketch|rough|filter/i.test(ctx.html), (ctx) => /<text\b[^>]*filter\s*=/i.test(ctx.html) ? [fail('sketchy filter applied to diagram text', '<text>')] : [])],
-  ['diagram-proportional-honesty', scoped((ctx) => hasDiagramDom(ctx) && /pyramid|proportional|timeline/i.test(ctx.html), (ctx) => /data-value|data-weight|data-start|data-end/i.test(ctx.html) ? [] : [fail('proportional diagram lacks data values/intervals', '<svg>')])],
+  ['diagram-proportional-honesty', scoped((ctx) => hasDiagramDom(ctx) && /pyramid|funnel|proportional|timeline/i.test(legacyDiagramMarkup(ctx)), (ctx) => /data-value|data-weight|data-start|data-end/i.test(legacyDiagramMarkup(ctx)) ? [] : [fail('proportional diagram lacks data values/intervals', '<svg>')])],
   ['mono-theme-toggle-structure', scoped((ctx) => isMono(ctx) && ctx.profile === 'page' && ctx.dom, (ctx) => {
     const toggles = all(ctx.dom, '[role="radiogroup"],.theme-toggle,.theme-dock').filter((el) => /light/i.test(textOf(el)) && /dark/i.test(textOf(el)) && /auto|system/i.test(textOf(el)));
     if (!toggles.length) return [fail('Mono-Industrial page lacks 3-option light/dark/auto toggle', 'theme toggle')];
@@ -349,11 +349,16 @@ function scoped(appliesWhen, run) {
 }
 
 function hasDiagramDom(ctx) {
-  return ctx.dom && /<svg\b/i.test(ctx.html) && (/data-diagram-role/i.test(ctx.html) || ctx.flags.hasInlineSvgDiagram);
+  return ctx.dom && diagramEls(ctx).length > 0 && (/data-diagram-role/i.test(ctx.html) || ctx.flags.hasInlineSvgDiagram);
 }
 
 function diagramEls(ctx) {
-  return all(ctx.dom, 'svg [data-diagram-role],svg rect,svg circle,svg path,svg polygon,svg text,g[data-diagram-role]');
+  return all(ctx.dom, 'svg [data-diagram-role],svg rect,svg circle,svg path,svg polygon,svg text,g[data-diagram-role]')
+    .filter(element => !element.closest('svg[data-graphic-scene]'));
+}
+
+function legacyDiagramMarkup(ctx) {
+  return all(ctx.dom, 'svg').filter(svg => !svg.hasAttribute('data-graphic-scene')).map(svg => svg.outerHTML).join('\n');
 }
 
 function isMono(ctx) {

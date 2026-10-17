@@ -1,0 +1,18 @@
+{
+  "id": "iso-diagram",
+  "kind": "diagram",
+  "purpose": "Explain a mechanism through a native Hairline figure and compact MDX.",
+  "type": "project",
+  "references": [
+    "hairline",
+    "iso-glow",
+    "iso-figure",
+    "diagram-design",
+    "anatomy"
+  ],
+  "skills": [
+    "lucasmarkes/hairline"
+  ],
+  "output": "HTML",
+  "preview": "templates/iso-diagram/preview.png"
+}

@@ -1,0 +1,1366 @@
+{
+ "schema": 2,
+ "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+ "repo": "fixture/wallet",
+ "refs": [
+  {
+   "ref": {
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 8,
+   "end": 15,
+   "span": [
+    8,
+    15
+   ],
+   "language": "python",
+   "excerpt": "def withdraw(balance: int, amount: int) -> int:\n    \"\"\"\n    @cc [owner:fixture,label:product] no-overdraft\n    `withdraw` refuses an amount above the balance with `OverdraftError`.\n    \"\"\"\n    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L8-L15",
+   "changes": {
+    "added": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14
+    ],
+    "modified": [],
+    "removed": []
+   }
+  },
+  {
+   "ref": {
+    "match": "return balance - amount",
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 15,
+   "end": 15,
+   "span": [
+    15,
+    15
+   ],
+   "language": "python",
+   "excerpt": "    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L15",
+   "changes": {
+    "added": [],
+    "modified": [],
+    "removed": []
+   }
+  },
+  {
+   "ref": {
+    "path": "wallet/messages.py",
+    "symbol": "denial"
+   },
+   "path": "wallet/messages.py",
+   "start": 4,
+   "end": 5,
+   "span": [
+    4,
+    5
+   ],
+   "language": "python",
+   "excerpt": "def denial(account: str, amount: int) -> str:\n    return f\"We cannot pay out {amount}. The balance is too low.\"",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/messages.py#L4-L5",
+   "changes": {
+    "added": [
+     4,
+     5
+    ],
+    "modified": [],
+    "removed": []
+   }
+  },
+  {
+   "ref": {
+    "context": [
+     0,
+     2
+    ],
+    "match": "if amount > balance:",
+    "path": "wallet/core.py",
+    "symbol": "withdraw"
+   },
+   "path": "wallet/core.py",
+   "start": 13,
+   "end": 15,
+   "span": [
+    13,
+    15
+   ],
+   "language": "python",
+   "excerpt": "    if amount > balance:\n        raise OverdraftError(f\"{amount} is above the balance\")\n    return balance - amount",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L13-L15",
+   "changes": {
+    "added": [
+     13,
+     14
+    ],
+    "modified": [],
+    "removed": []
+   }
+  },
+  {
+   "ref": {
+    "path": "wallet/fees.py"
+   },
+   "path": "wallet/fees.py",
+   "start": 1,
+   "end": 5,
+   "span": [
+    1,
+    5
+   ],
+   "language": "python",
+   "excerpt": "\"\"\"Added by the PR. No test names this module, and the PR text does not mention it.\"\"\"\n\n\ndef fee(amount: int) -> int:\n    return amount // 100 + 1",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L1-L5",
+   "changes": {
+    "added": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "modified": [],
+    "removed": []
+   }
+  },
+  {
+   "ref": {
+    "path": "bin/report.py",
+    "symbol": "main"
+   },
+   "path": "bin/report.py",
+   "start": 7,
+   "end": 11,
+   "span": [
+    7,
+    11
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/bin/report.py#L7-L11",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "tests/test_core.py",
+    "symbol": "OverdraftTest"
+   },
+   "path": "tests/test_core.py",
+   "start": 6,
+   "end": 11,
+   "span": [
+    6,
+    11
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/tests/test_core.py#L6-L11",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "tests/test_messages.py",
+    "symbol": "DenialTest"
+   },
+   "path": "tests/test_messages.py",
+   "start": 6,
+   "end": 10,
+   "span": [
+    6,
+    10
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/tests/test_messages.py#L6-L10",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "path": "wallet/fees.py",
+    "symbol": "fee"
+   },
+   "path": "wallet/fees.py",
+   "start": 4,
+   "end": 5,
+   "span": [
+    4,
+    5
+   ],
+   "language": "python",
+   "excerpt": "",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/fees.py#L4-L5",
+   "link_only": true
+  },
+  {
+   "ref": {
+    "end": 5,
+    "path": "wallet/core.py",
+    "start": 1
+   },
+   "path": "wallet/core.py",
+   "start": 1,
+   "end": 5,
+   "span": [
+    1,
+    5
+   ],
+   "language": "python",
+   "excerpt": "\"\"\"A small wallet. The head commit of the understando fixture: the PR under review.\"\"\"\n\n\nclass OverdraftError(ValueError):\n    pass",
+   "permalink": "https://github.com/fixture/wallet/blob/ad4d049fa962c81958626dc83583cf9f3b82e5eb/wallet/core.py#L1-L5",
+   "changes": {
+    "added": [
+     2,
+     3,
+     4,
+     5
+    ],
+    "modified": [
+     1
+    ],
+    "removed": [
+     {
+      "at": 1,
+      "base": 1,
+      "text": "\"\"\"A small wallet. The base commit of the understando fixture.\"\"\""
+     }
+    ]
+   }
+  }
+ ],
+ "controls": {
+  "K01": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n"
+   }
+  ],
+  "K02": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..21b526c 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -13,3 +13,3 @@ def withdraw(balance: int, amount: int) -> int:\n     if amount > balance:\n         raise OverdraftError(f\"{amount} is above the balance\")\n-    return balance - amount\n+    return balance + amount\n"
+   }
+  ],
+  "K03": [
+   {
+    "path": "wallet/core.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..5f89aed 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -8,5 +8,5 @@ class OverdraftError(ValueError):\n def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n-    @cc [owner:fixture,label:product] no-overdraft\n+    @cc [owner:fixture,label:product] no-over:draft\n     `withdraw` refuses an amount above the balance with `OverdraftError`.\n     \"\"\"\n"
+   }
+  ],
+  "K07": [
+   {
+    "path": "wallet/messages.py",
+    "language": "python",
+    "patch": "diff --git a/wallet/messages.py b/wallet/messages.py\nindex 9938bb1..ec3eba5 100644\n--- a/wallet/messages.py\n+++ b/wallet/messages.py\n@@ -3,3 +3,3 @@\n \n def denial(account: str, amount: int) -> str:\n-    return f\"We cannot pay out {amount}. The balance is too low.\"\n+    return f\"We cannot pay out. The balance is too low.\"\n"
+   }
+  ],
+  "K08": [
+   {
+    "path": "proofs/Withdraw.lean",
+    "language": "text",
+    "patch": "--- a/proofs/Withdraw.lean\n+++ b/proofs/Withdraw.lean\n@@ -1,4 +1,4 @@\n -- The model of `withdraw` in wallet/core.py. The fixture records the proof run; no test runs Lean.\n-def withdraw (b a : Nat) : Option Int := if a > b then none else some ((b : Int) - a)\n+def withdraw (b a : Nat) : Option Int := some ((b : Int) - a)\n \n theorem withdraw_nonneg (b a : Nat) (r : Int) (h : withdraw b a = some r) : 0 ≤ r := by\n"
+   }
+  ]
+ },
+ "diff": {
+  "files": {
+   "bin/report.py": [
+    15,
+    0
+   ],
+   "proofs/Withdraw.lean": [
+    7,
+    0
+   ],
+   "tests/test_core.py": [
+    11,
+    1
+   ],
+   "tests/test_messages.py": [
+    14,
+    0
+   ],
+   "wallet/core.py": [
+    11,
+    1
+   ],
+   "wallet/fees.py": [
+    5,
+    0
+   ],
+   "wallet/messages.py": [
+    5,
+    0
+   ]
+  },
+  "deleted": [],
+  "created": [
+   "bin/report.py",
+   "proofs/Withdraw.lean",
+   "tests/test_messages.py",
+   "wallet/fees.py",
+   "wallet/messages.py"
+  ],
+  "added": {
+   "bin/report.py": [
+    [
+     1,
+     15
+    ]
+   ],
+   "proofs/Withdraw.lean": [
+    [
+     1,
+     7
+    ]
+   ],
+   "tests/test_core.py": [
+    [
+     3,
+     11
+    ],
+    [
+     15,
+     16
+    ]
+   ],
+   "tests/test_messages.py": [
+    [
+     1,
+     14
+    ]
+   ],
+   "wallet/core.py": [
+    [
+     1,
+     5
+    ],
+    [
+     9,
+     14
+    ]
+   ],
+   "wallet/fees.py": [
+    [
+     1,
+     5
+    ]
+   ],
+   "wallet/messages.py": [
+    [
+     1,
+     5
+    ]
+   ]
+  },
+  "symbols": {
+   "bin/report.py": {
+    "names": [
+     "main"
+    ],
+    "main": {
+     "path": "bin/report.py",
+     "symbol": "main"
+    }
+   },
+   "tests/test_core.py": {
+    "names": [
+     "OverdraftTest",
+     "OverdraftTest.test_withdraw_refuses_an_overdraft",
+     "BalanceTest"
+    ],
+    "main": {
+     "path": "tests/test_core.py",
+     "symbol": "OverdraftTest"
+    }
+   },
+   "tests/test_messages.py": {
+    "names": [
+     "DenialTest",
+     "DenialTest.test_denial_names_the_amount"
+    ],
+    "main": {
+     "path": "tests/test_messages.py",
+     "symbol": "DenialTest"
+    }
+   },
+   "wallet/core.py": {
+    "names": [
+     "withdraw",
+     "OverdraftError"
+    ],
+    "main": {
+     "path": "wallet/core.py",
+     "symbol": "withdraw"
+    }
+   },
+   "wallet/fees.py": {
+    "names": [
+     "fee"
+    ],
+    "main": {
+     "path": "wallet/fees.py",
+     "symbol": "fee"
+    }
+   },
+   "wallet/messages.py": {
+    "names": [
+     "denial"
+    ],
+    "main": {
+     "path": "wallet/messages.py",
+     "symbol": "denial"
+    }
+   }
+  }
+ },
+ "derived": {
+  "schema": 2,
+  "head": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+  "promises": [
+   {
+    "id": "P4",
+    "strength": "Gap",
+    "claims": [
+     "C03"
+    ],
+    "count": 1,
+    "tally": "1 Gap",
+    "bars_met": 0,
+    "tier": null
+   },
+   {
+    "id": "P1",
+    "strength": "Asserted",
+    "claims": [
+     "C02",
+     "C01",
+     "C08"
+    ],
+    "count": 3,
+    "tally": "1 Formal, 1 Proven, 1 Asserted",
+    "bars_met": 2,
+    "tier": 5
+   },
+   {
+    "id": "P2",
+    "strength": "Asserted",
+    "claims": [
+     "C04"
+    ],
+    "count": 1,
+    "tally": "1 Asserted",
+    "bars_met": 0,
+    "tier": null
+   },
+   {
+    "id": "P3",
+    "strength": "Backed",
+    "claims": [
+     "C05",
+     "C06",
+     "C07"
+    ],
+    "count": 3,
+    "tally": "1 Proven, 2 Backed",
+    "bars_met": 1,
+    "tier": 1
+   }
+  ],
+  "claims": {
+   "C01": {
+    "strength": "Proven",
+    "tier": 3,
+    "checks": [
+     {
+      "id": "V01",
+      "name": "the overdraft test",
+      "kind": "unit",
+      "strength": "Proven",
+      "result": "caught"
+     },
+     {
+      "id": "V03",
+      "name": "the contract format check",
+      "kind": "contract-format",
+      "strength": "Proven",
+      "result": "caught"
+     }
+    ],
+    "n": 2,
+    "counts": {
+     "caught": 2
+    },
+    "summary": "2 checks: 2 caught their bug.",
+    "weakest": {
+     "id": "V01",
+     "name": "the overdraft test",
+     "result": "caught",
+     "strength": "Proven",
+     "text": "The strongest check is the overdraft test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: property test or static rule · met"
+    }
+   },
+   "C02": {
+    "strength": "Asserted",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V02",
+      "name": "the balance type test",
+      "kind": "unit",
+      "strength": "Asserted",
+      "result": "cannot-fail"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "cannot-fail": 1
+    },
+    "summary": "1 check: it cannot fail.",
+    "weakest": {
+     "id": "V02",
+     "name": "the balance type test",
+     "result": "cannot-fail",
+     "strength": "Asserted",
+     "text": "The strongest check is the balance type test. It cannot fail: it passed on each planted bug.",
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test.",
+     "part": null
+    },
+    "flagged": {
+     "text": "1 of 1 check cannot fail: the balance type test. Fix it or drop it.",
+     "checks": [
+      "V02"
+     ],
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test."
+    },
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "no check caught a planted bug",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: no check caught a planted bug"
+    }
+   },
+   "C04": {
+    "strength": "Asserted",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V09",
+      "name": "the PR text alone",
+      "kind": "none",
+      "strength": "Asserted",
+      "result": "none"
+     }
+    ],
+    "n": 0,
+    "counts": {},
+    "summary": "No check: only the PR text states it.",
+    "weakest": {
+     "id": "V09",
+     "name": "the PR text alone",
+     "result": "none",
+     "strength": "Asserted",
+     "text": "No tool checks it. Only the PR text states it.",
+     "action": "Only the PR text states it. Add a check (understando close), or accept the risk.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "other",
+     "surfaces": [
+      "other"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "check",
+     "need": "a check",
+     "met": false,
+     "why": "no check",
+     "part": null,
+     "text": "Bar: a check · below the bar: no check"
+    }
+   },
+   "C05": {
+    "strength": "Backed",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V05",
+      "name": "the message review",
+      "kind": "model",
+      "strength": "Backed",
+      "result": "recorded"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "recorded": 1
+    },
+    "summary": "1 check: it is a record of a past run.",
+    "weakest": {
+     "id": "V05",
+     "name": "the message review",
+     "result": "recorded",
+     "strength": "Backed",
+     "text": "The strongest check is the message review. It is a record of a past run, and we did not run it again.",
+     "action": "Treat it as one opinion. Ask a model of another family to check it, or read the evidence yourself.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "llm",
+     "surfaces": [
+      "llm",
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "degraded-eval",
+     "need": "eval with a degraded control",
+     "met": false,
+     "why": "only a model judgment, no eval",
+     "part": null,
+     "text": "Bar: eval with a degraded control · below the bar: only a model judgment, no eval"
+    }
+   },
+   "C06": {
+    "strength": "Backed",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V06",
+      "name": "the network import search",
+      "kind": "boundary",
+      "strength": "Backed",
+      "result": "checked"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "checked": 1
+    },
+    "summary": "1 check: it is a mechanical check.",
+    "weakest": {
+     "id": "V06",
+     "name": "the network import search",
+     "result": "checked",
+     "strength": "Backed",
+     "text": "The strongest check is the network import search. It is a mechanical check with no planted bug.",
+     "action": "Plant a bug for this mechanical check, or add a CI rule that keeps it true.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "other",
+     "surfaces": [
+      "other"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "check",
+     "need": "a check",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: a check · met"
+    }
+   },
+   "C07": {
+    "strength": "Proven",
+    "tier": 1,
+    "checks": [
+     {
+      "id": "V07",
+      "name": "the denial amount test",
+      "kind": "unit",
+      "strength": "Proven",
+      "result": "caught"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "caught": 1
+    },
+    "summary": "1 check: it caught its bug.",
+    "weakest": {
+     "id": "V07",
+     "name": "the denial amount test",
+     "result": "caught",
+     "strength": "Proven",
+     "text": "The strongest check is the denial amount test. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "only example tests",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: only example tests"
+    }
+   },
+   "C08": {
+    "strength": "Formal",
+    "tier": 5,
+    "checks": [
+     {
+      "id": "V08",
+      "name": "the balance proof",
+      "kind": "lean",
+      "strength": "Formal",
+      "result": "caught"
+     }
+    ],
+    "n": 1,
+    "counts": {
+     "caught": 1
+    },
+    "summary": "1 check: it caught its bug.",
+    "weakest": {
+     "id": "V08",
+     "name": "the balance proof",
+     "result": "caught",
+     "strength": "Formal",
+     "text": "The strongest check is the balance proof. It caught its planted bug.",
+     "action": "No action: it caught its planted bug.",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": true,
+     "why": "",
+     "part": null,
+     "text": "Bar: property test or static rule · met"
+    }
+   },
+   "C03": {
+    "strength": "Gap",
+    "tier": null,
+    "checks": [
+     {
+      "id": "V10",
+      "name": "no check yet",
+      "kind": "none",
+      "strength": "Gap",
+      "result": "none"
+     }
+    ],
+    "n": 0,
+    "counts": {},
+    "summary": "No check, and the PR text does not state it.",
+    "weakest": {
+     "id": "V10",
+     "name": "no check yet",
+     "result": "none",
+     "strength": "Gap",
+     "text": "No tool checks it, and the PR text does not state it.",
+     "action": "No check exists, and the PR text does not state it. Decide if it matters. To close it, add a check (understando close).",
+     "part": null
+    },
+    "flagged": null,
+    "parts": [],
+    "bar": {
+     "surface": "backend",
+     "surfaces": [
+      "backend"
+     ],
+     "mixed": false,
+     "risky": false,
+     "level": "property",
+     "need": "property test or static rule",
+     "met": false,
+     "why": "no check",
+     "part": null,
+     "text": "Bar: property test or static rule · below the bar: no check"
+    }
+   }
+  },
+  "bars": {
+   "met": 3,
+   "total": 8,
+   "risky_below": [],
+   "risky_below_names": [],
+   "summary": "3 of 8 claims meet their bar. No risky claim is below it.",
+   "story": [
+    "2 of 5 backend claims meet their bar: a proof, or a property test, type or static rule that caught a planted bug.",
+    "0 of 1 LLM claims meet their bar: a recorded eval with a degraded variant.",
+    "1 of 2 other claims meet their bar: a check that backs it.",
+    "Below the bar: the new balance, the thread safety, the hidden account number, the amount in the denial and 1 more."
+   ]
+  },
+  "verify": {
+   "result": "4 of 5 checks caught their planted bug. 1 cannot fail.",
+   "other": "2 more checks have no planted bug: records of a past run, mechanical checks or checks that no control ran.",
+   "tone": "err",
+   "checks": 7,
+   "ran": 5,
+   "caught": 4,
+   "evals": [],
+   "ui": [],
+   "missed": 0,
+   "cannot": 1,
+   "weak": [
+    {
+     "check": "V02",
+     "control": "K02",
+     "name": "the balance type test",
+     "broke": "Add the amount to the balance, not take it away.",
+     "happened": "The check passed on each planted bug, so it can fail on nothing.",
+     "why": "So this check does not protect the new balance.",
+     "action": "Change this check so that it can fail, or replace it (understando close). The cheapest way: Assert the exact new balance in the test.",
+     "ids": "K02 · V02 · C02",
+     "claims": [
+      "C02"
+     ],
+     "caught_by": null
+    }
+   ],
+   "by_promise": [
+    {
+     "id": "P1",
+     "rows": [
+      {
+       "check": "V01",
+       "name": "the overdraft test",
+       "claim": "the overdraft refusal",
+       "broke": [
+        "Remove the line that raises OverdraftError."
+       ],
+       "ids": "V01 · K01"
+      },
+      {
+       "check": "V03",
+       "name": "the contract format check",
+       "claim": "the overdraft refusal",
+       "broke": [
+        "Put a colon into the contract ID, which the grammar does not permit."
+       ],
+       "ids": "V03 · K03"
+      },
+      {
+       "check": "V08",
+       "name": "the balance proof",
+       "claim": "the never-negative balance",
+       "broke": [
+        "Remove the guard from the Lean model, so a withdrawal can go below zero."
+       ],
+       "ids": "V08 · K08"
+      }
+     ]
+    },
+    {
+     "id": "P3",
+     "rows": [
+      {
+       "check": "V07",
+       "name": "the denial amount test",
+       "claim": "the amount in the denial",
+       "broke": [
+        "Remove the amount from the denial message."
+       ],
+       "ids": "V07 · K07"
+      }
+     ]
+    }
+   ],
+   "tiers": [
+    {
+     "label": "Formal proof",
+     "n": 1
+    },
+    {
+     "label": "Types and import rules",
+     "n": 2
+    },
+    {
+     "label": "Tests",
+     "n": 3
+    },
+    {
+     "label": "Recorded runs and model judgments",
+     "n": 1
+    }
+   ],
+   "broke": {
+    "K01": "Remove the line that raises OverdraftError.",
+    "K02": "Add the amount to the balance, not take it away.",
+    "K03": "Put a colon into the contract ID, which the grammar does not permit.",
+    "K07": "Remove the amount from the denial message.",
+    "K08": "Remove the guard from the Lean model, so a withdrawal can go below zero."
+   }
+  },
+  "checks": {
+   "V01": {
+    "id": "V01",
+    "name": "the overdraft test",
+    "kind": "unit",
+    "result": "caught",
+    "claims": [
+     {
+      "id": "C01",
+      "name": "the overdraft refusal",
+      "parts": []
+     }
+    ],
+    "tests": [
+     {
+      "path": "tests/test_core.py",
+      "file": "tests/test_core.py",
+      "symbol": "OverdraftTest"
+     }
+    ],
+    "controls": [
+     "K01"
+    ],
+    "ref": {
+     "path": "tests/test_core.py",
+     "symbol": "OverdraftTest"
+    }
+   },
+   "V02": {
+    "id": "V02",
+    "name": "the balance type test",
+    "kind": "unit",
+    "result": "cannot-fail",
+    "claims": [
+     {
+      "id": "C02",
+      "name": "the new balance",
+      "parts": []
+     }
+    ],
+    "tests": [
+     {
+      "path": "tests/test_core.py",
+      "file": "tests/test_core.py",
+      "symbol": "BalanceTest"
+     }
+    ],
+    "controls": [
+     "K02"
+    ],
+    "ref": {
+     "path": "tests/test_core.py",
+     "symbol": "BalanceTest"
+    }
+   },
+   "V03": {
+    "id": "V03",
+    "name": "the contract format check",
+    "kind": "contract-format",
+    "result": "caught",
+    "claims": [
+     {
+      "id": "C01",
+      "name": "the overdraft refusal",
+      "parts": []
+     }
+    ],
+    "tests": [],
+    "controls": [
+     "K03"
+    ],
+    "ref": null
+   },
+   "V05": {
+    "id": "V05",
+    "name": "the message review",
+    "kind": "model",
+    "result": "recorded",
+    "claims": [
+     {
+      "id": "C05",
+      "name": "the hidden account number",
+      "parts": []
+     }
+    ],
+    "tests": [],
+    "controls": [],
+    "ref": null
+   },
+   "V06": {
+    "id": "V06",
+    "name": "the network import search",
+    "kind": "boundary",
+    "result": "checked",
+    "claims": [
+     {
+      "id": "C06",
+      "name": "the network ban",
+      "parts": []
+     }
+    ],
+    "tests": [],
+    "controls": [],
+    "ref": null
+   },
+   "V07": {
+    "id": "V07",
+    "name": "the denial amount test",
+    "kind": "unit",
+    "result": "caught",
+    "claims": [
+     {
+      "id": "C07",
+      "name": "the amount in the denial",
+      "parts": []
+     }
+    ],
+    "tests": [
+     {
+      "path": "tests/test_messages.py",
+      "file": "tests/test_messages.py",
+      "symbol": "DenialTest"
+     }
+    ],
+    "controls": [
+     "K07"
+    ],
+    "ref": {
+     "path": "tests/test_messages.py",
+     "symbol": "DenialTest"
+    }
+   },
+   "V08": {
+    "id": "V08",
+    "name": "the balance proof",
+    "kind": "lean",
+    "result": "caught",
+    "claims": [
+     {
+      "id": "C08",
+      "name": "the never-negative balance",
+      "parts": []
+     }
+    ],
+    "tests": [],
+    "controls": [
+     "K08"
+    ],
+    "ref": null
+   }
+  },
+  "tests": {
+   "files": [
+    {
+     "path": "tests/test_core.py",
+     "file": "tests/test_core.py",
+     "checks": [
+      "V01",
+      "V02"
+     ]
+    },
+    {
+     "path": "tests/test_messages.py",
+     "file": "tests/test_messages.py",
+     "checks": [
+      "V07"
+     ]
+    }
+   ],
+   "orphans": [],
+   "orphan_tests": 0,
+   "summary": "Each changed test backs a claim.",
+   "action": ""
+  }
+ },
+ "examples": [
+  {
+   "id": "overdraft-before-after",
+   "title": "One overdraft, with and without the guard",
+   "diagram": "story",
+   "claims": [
+    "C01"
+   ],
+   "lead": "A planted bug takes the guard out of the withdraw function, and the test of the PR runs on it. Then the same test runs on the code of the PR. The values are the recorded control run and the calls that the test makes.",
+   "sources": {
+    "control": {
+     "kind": "controls",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "ids": [
+      "K01"
+     ],
+     "from": "the controls of the map and their recorded results (understando controls)",
+     "sha256": "sha256:fa321c1632f1624c7c321d6d03db278fcd5cfdb54417e86648b1dc3e769b53e9",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    },
+    "after": {
+     "kind": "run",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "cwd": ".",
+     "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_core"
+     ],
+     "record": [
+      {
+       "name": "withdraw",
+       "target": "wallet.core:withdraw",
+       "args": true
+      }
+     ],
+     "setup": [],
+     "sha256": "sha256:012e61a4a8a435eb530f5714064ce60075b24a976b94475fd566c626558a9c3f",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    }
+   },
+   "steps": [
+    {
+     "n": 1,
+     "station": "before",
+     "name": "Without the guard, the wallet pays out",
+     "in": [],
+     "decision": [
+      {
+       "label": "control result",
+       "value": "red",
+       "from": "control:/K01/result/status"
+      }
+     ],
+     "out": [
+      {
+       "label": "test output",
+       "value": "AssertionError: OverdraftError not raised",
+       "from": "control:/K01/result/output_tail lines=[-6,-5]"
+      }
+     ],
+     "reason": "The control takes out the line that raises the error. The test asks for more than the balance, and no error comes, so the test fails.",
+     "diff": {
+      "path": "wallet/core.py",
+      "patch": "diff --git a/wallet/core.py b/wallet/core.py\nindex cbd95e2..113f95e 100644\n--- a/wallet/core.py\n+++ b/wallet/core.py\n@@ -12,4 +12,4 @@ def withdraw(balance: int, amount: int) -> int:\n     \"\"\"\n     if amount > balance:\n-        raise OverdraftError(f\"{amount} is above the balance\")\n+        pass\n     return balance - amount\n",
+      "from": [
+       "control:/K01/patch/0/path",
+       "control:/K01/patch/0/patch"
+      ]
+     },
+     "provenance": [
+      "control:/K01/result/status",
+      "control:/K01/result/output_tail lines=[-6,-5]",
+      "control:/K01/patch/0/path",
+      "control:/K01/patch/0/patch"
+     ]
+    },
+    {
+     "n": 2,
+     "station": "refuse",
+     "name": "With the guard, the wallet refuses the overdraft",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 11
+       },
+       "from": "after:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [
+      {
+       "label": "error",
+       "value": {
+        "raised": "OverdraftError: 11 is above the balance"
+       },
+       "from": "after:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+      }
+     ],
+     "out": [
+      {
+       "label": "test exit code",
+       "value": 0,
+       "from": "after:/exit"
+      }
+     ],
+     "reason": "The code of the PR compares the amount with the balance first. The amount is above the balance, so the function raises an error and pays out nothing.",
+     "code": {
+      "path": "wallet/core.py",
+      "symbol": "withdraw"
+     },
+     "provenance": [
+      "after:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}",
+      "after:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}",
+      "after:/exit"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "one-withdrawal",
+   "title": "Two withdrawals through the wallet",
+   "diagram": "loop",
+   "claims": [
+    "C01"
+   ],
+   "lead": "The test of the PR asks the wallet for two amounts. The values are the calls that it makes, at the head.",
+   "sources": {
+    "run": {
+     "kind": "run",
+     "commit": "ad4d049fa962c81958626dc83583cf9f3b82e5eb",
+     "cwd": ".",
+     "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_core"
+     ],
+     "record": [
+      {
+       "name": "withdraw",
+       "target": "wallet.core:withdraw",
+       "args": true
+      }
+     ],
+     "setup": [],
+     "sha256": "sha256:012e61a4a8a435eb530f5714064ce60075b24a976b94475fd566c626558a9c3f",
+     "extracted_at": "2026-10-11T23:31:51+00:00"
+    }
+   },
+   "steps": [
+    {
+     "n": 1,
+     "station": "ask",
+     "name": "A caller asks for an amount",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 3
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [],
+     "out": [],
+     "reason": "The balance test asks for a small amount.",
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+     ]
+    },
+    {
+     "n": 2,
+     "station": "pay",
+     "name": "The wallet pays it out",
+     "in": [
+      {
+       "label": "amount",
+       "value": {
+        "amount": 3
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [],
+     "out": [
+      {
+       "label": "new balance",
+       "value": {
+        "new balance": 7
+       },
+       "from": "run:/withdraw where={\"/args/1\":3} at=0 fields={\"new balance\":\"/result\"}"
+      }
+     ],
+     "reason": "The amount is not above the balance, so the wallet pays it and gives the new balance.",
+     "code": {
+      "path": "wallet/core.py",
+      "symbol": "withdraw"
+     },
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"amount\":\"/args/1\"}",
+      "run:/withdraw where={\"/args/1\":3} at=0 fields={\"new balance\":\"/result\"}"
+     ]
+    },
+    {
+     "n": 3,
+     "station": "refuse",
+     "name": "A caller asks for too much",
+     "in": [
+      {
+       "label": "call",
+       "value": {
+        "balance": 10,
+        "amount": 11
+       },
+       "from": "run:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}"
+      }
+     ],
+     "decision": [
+      {
+       "label": "error",
+       "value": {
+        "raised": "OverdraftError: 11 is above the balance"
+       },
+       "from": "run:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+      }
+     ],
+     "out": [],
+     "reason": "The amount is above the balance, so the wallet refuses it.",
+     "provenance": [
+      "run:/withdraw where={\"/args/1\":11} at=0 fields={\"balance\":\"/args/0\",\"amount\":\"/args/1\"}",
+      "run:/withdraw where={\"/args/1\":11} at=0 fields={\"raised\":\"/raised\"}"
+     ]
+    }
+   ]
+  }
+ ]
+}

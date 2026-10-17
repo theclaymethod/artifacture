@@ -1,14 +1,9 @@
-/*
- * presentation-core.ts — pure, DOM-light logic for the PresentationDeck
- * engine. No JSX and no React imports so node:test (and the eval harness)
- * can import this file directly under Node's type stripping, the same way
- * diagram-layout.test.mjs imports diagram-layout.ts.
- */
+/* Shared layout and interaction logic for the PresentationDeck engine. */
 
 /** Signature easing used for every deck transition. */
 export const presentationEase = 'cubic-bezier(0.22,1,0.36,1)';
 
-/** Rail geometry, shared with the eval harness so the numbers cannot drift. */
+/** Rail geometry for presentation layout. */
 export const RAIL_EXPANDED_WIDTH = 260;
 export const RAIL_COLLAPSED_WIDTH = 44;
 
@@ -19,11 +14,8 @@ export interface StageFit {
 }
 
 /**
- * Scale-to-fit math for the fixed-size stage: the stage renders at
- * stageWidth×stageHeight and is scaled by min(availW/stageW, availH/stageH),
- * then centered (letterboxed) in the leftover space. Scale is clamped at 0 so
- * a transiently unmeasured (0×0) container can never produce a negative or
- * NaN transform.
+ * Scale and center a fixed-size stage within the available area.
+ * Zero-size containers produce scale 0 while layout measurement is pending.
  */
 export function fitStage(
   availWidth: number,

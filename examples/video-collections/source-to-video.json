@@ -11,7 +11,7 @@
     "goal": "Know where to revise an explanation and how it becomes a reproducible video."
   },
   "theme": {
-    "preset": "hairline",
+    "preset": "iso",
     "appearance": "light"
   },
   "format": {

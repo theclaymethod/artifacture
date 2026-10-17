@@ -1,0 +1,8 @@
+{
+  "library": "pr-lens",
+  "example": "postmark-refactor/data-flow/send-pipeline-view/light",
+  "duration": 3,
+  "fps": 30,
+  "width": 1280,
+  "height": 800
+}

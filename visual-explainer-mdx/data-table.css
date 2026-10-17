@@ -1,0 +1,326 @@
+/* State pills, badges and keys share one tone ramp (--ve-status-*), each with a text label. */
+.ve-status-pill,
+.ve-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--ve-tone-ink) 35%, transparent);
+  border-radius: 999px;
+  background: var(--ve-tone-soft);
+  color: var(--ve-tone-ink);
+  max-width: 100%;
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+  white-space: nowrap;
+}
+
+/* In running text a long pill wraps inside its line box, so it never widens the page. */
+:is(p, li, dd) > :is(.ve-status-pill, .ve-badge) {
+  white-space: normal;
+}
+
+.ve-status-pill {
+  padding: 0.1875rem 0.625rem 0.1875rem 0.375rem;
+  vertical-align: 0.05em;
+}
+
+.ve-badge {
+  padding: 0.0625rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--ve-font-mono);
+  font-weight: var(--ve-weight-regular);
+}
+
+.ve-badge[data-ve-stroke="dashed"] {
+  border-style: dashed;
+  background: repeating-linear-gradient(135deg, var(--ve-tone-soft) 0 4px, transparent 4px 8px);
+}
+
+:is(.ve-status-pill, .ve-badge)[data-ve-tone="ok"] { --ve-tone-ink: var(--ve-status-ok); --ve-tone-soft: var(--ve-status-ok-soft); }
+:is(.ve-status-pill, .ve-badge)[data-ve-tone="info"] { --ve-tone-ink: var(--ve-status-info); --ve-tone-soft: var(--ve-status-info-soft); }
+:is(.ve-status-pill, .ve-badge)[data-ve-tone="warn"] { --ve-tone-ink: var(--ve-status-warn); --ve-tone-soft: var(--ve-status-warn-soft); }
+:is(.ve-status-pill, .ve-badge)[data-ve-tone="err"] { --ve-tone-ink: var(--ve-status-err); --ve-tone-soft: var(--ve-status-err-soft); }
+:is(.ve-status-pill, .ve-badge)[data-ve-tone="neutral"] { --ve-tone-ink: var(--ve-status-neutral); --ve-tone-soft: var(--ve-status-neutral-soft); }
+
+.ve-tone-mark {
+  flex: none;
+  color: var(--ve-tone-ink);
+  --ve-tone-on: var(--ve-tone-soft);
+}
+
+.ve-key-swatch {
+  flex: none;
+  overflow: visible;
+}
+
+.ve-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ve-rule);
+  color: var(--ve-text);
+  font: var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+}
+
+.ve-legend-title {
+  margin: 0;
+  color: var(--ve-muted);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-legend ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ve-legend-detail {
+  color: var(--ve-muted);
+}
+
+/* A key with sentence details: one item per line, the swatch and its word before the sentence. */
+.ve-legend[data-ve-layout="list"] {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ve-legend[data-ve-layout="list"] ul {
+  display: grid;
+  grid-template-columns: auto max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.375rem 0.625rem;
+}
+
+/* The items share the list's columns, so every word and sentence lines up. */
+.ve-legend[data-ve-layout="list"] li {
+  display: contents;
+}
+
+.ve-legend[data-ve-layout="list"] .ve-legend-label {
+  font-weight: var(--ve-weight-strong);
+}
+
+/* Data table. No wrapper overflow, so the header can stick to the page while it scrolls. */
+.ve-data-table {
+  min-width: 0;
+  margin: 0;
+}
+
+.ve-data-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--ve-text);
+  font: var(--ve-text-ui)/var(--ve-leading-ui) var(--ve-font-ui, var(--ve-font-body));
+}
+
+.ve-data-table caption {
+  margin-bottom: 0.5rem;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  text-align: left;
+}
+
+.ve-data-table th {
+  position: sticky;
+  top: var(--ve-sticky-top, 0px);
+  z-index: 2;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--ve-heading);
+  background: var(--ve-bg);
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+  text-align: left;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.ve-data-table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--ve-rule);
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+.ve-data-table tbody tr:nth-child(even) td {
+  background: var(--ve-row);
+}
+
+.ve-data-table tbody tr:target td,
+.ve-data-table tbody tr:has(a:focus-visible) td {
+  background: var(--ve-accent-soft);
+}
+
+.ve-data-table :is(th, td)[data-ve-kind="number"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ve-data-table :is(th, td):is([data-ve-kind="id"], [data-ve-kind="status"]) {
+  white-space: nowrap;
+}
+
+/* A long identifier, such as a file path, wraps inside its cell; a short one never breaks. */
+.ve-data-table td[data-ve-kind="id"] {
+  white-space: normal;
+}
+
+.ve-data-table .ve-cell-id {
+  overflow-wrap: anywhere;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--ve-font-mono);
+  font-size: var(--ve-text-small);
+}
+
+.ve-data-table .ve-cell-code {
+  padding: 0 0.25rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.ve-data-table .ve-cell-link {
+  /* A 44px hit target that keeps the row height: the padding is cancelled by the margin. */
+  display: inline-block;
+  min-width: 44px;
+  padding-block: calc((44px - 1.45em) / 2);
+  margin-block: calc((1.45em - 44px) / 2);
+  color: var(--ve-heading);
+  text-decoration: underline;
+  text-decoration-color: var(--ve-rule);
+  text-underline-offset: 3px;
+}
+
+.ve-data-table .ve-cell-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.ve-data-table .ve-cell {
+  display: block;
+  min-width: 0;
+}
+
+.ve-data-table .ve-cell-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+}
+
+.ve-data-table td[data-ve-kind="tags"] .ve-cell-badges {
+  margin-top: 0;
+}
+
+.ve-data-table .ve-cell-note {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+.ve-data-table .ve-cell-empty {
+  color: var(--ve-muted);
+}
+
+/* Narrow screens: each row becomes a labelled card, so wide tables never scroll sideways. */
+@media (max-width: 640px) {
+  /* Each cell repeats its column label from data-label, so the header row is not needed. */
+  .ve-data-table thead {
+    display: none;
+  }
+
+  .ve-data-table table,
+  .ve-data-table tbody,
+  .ve-data-table tr,
+  .ve-data-table td {
+    display: block;
+  }
+
+  .ve-data-table tbody tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--ve-rule);
+  }
+
+  .ve-data-table tbody tr:nth-child(even) td {
+    background: transparent;
+  }
+
+  .ve-data-table td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 32%) minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    border: 0;
+    text-align: left;
+  }
+
+  .ve-data-table td::before {
+    content: attr(data-label);
+    color: var(--ve-muted);
+    font-size: var(--ve-text-small);
+    font-weight: var(--ve-weight-strong);
+  }
+
+  .ve-data-table td[data-ve-kind="number"] {
+    text-align: left;
+  }
+
+  .ve-data-table td > * {
+    min-width: 0;
+  }
+
+  /* Compact cards: the first cell is the title, the numbers share one line, the rest follows. */
+  .ve-data-table[data-ve-density="compact"] td {
+    display: block;
+    padding: 0.125rem 0;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td::before {
+    content: none;
+  }
+
+  .ve-data-table[data-ve-density="compact"] td:first-child {
+    font-weight: var(--ve-weight-strong);
+  }
+
+  .ve-data-table[data-ve-density="compact"] td[data-ve-kind="number"] {
+    display: inline-block;
+    margin-right: 0.75rem;
+    color: var(--ve-muted);
+    font-size: var(--ve-text-small);
+  }
+
+  .ve-data-table[data-ve-density="compact"] td:not([data-ve-kind="number"]):not(:first-child) {
+    color: var(--ve-muted);
+    font-size: var(--ve-text-small);
+  }
+}
+
+@media (max-width: 640px) {
+  .ve-legend[data-ve-layout="list"] ul {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.125rem;
+  }
+
+  .ve-legend[data-ve-layout="list"] .ve-legend-detail {
+    grid-column: 2;
+    margin-bottom: 0.375rem;
+  }
+}

@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+### Scan-first explainers
+- One type scale for explainer pages (`themes.css`): prose body and lead at 1.6, h2 to h4 by size and weight, UI text at 15 and 14px and labels at 13px at 1.4, code at 14px and 1.5, and the weights 400 and 600 only. The shell text is UI 15px; prose roles keep the reading face. Figures are tabular in the UI face. Headings balance and paragraphs wrap pretty.
+- Code never wraps: a code block scrolls sideways, and the line gutter of a `CodeRef` stays in place while it scrolls. A step or a list item that holds code or a table takes the column; only its text keeps the prose measure.
+- `Breakable` (`breakable.tsx`): a path wraps only after a `/` and a name only after a `_` or `-`, never inside a word. Code captions, `DataTable` ID cells, file paths and worked-example values use it.
+- Worked examples: the table sizes its columns to its values; text that a tool wrote for a person shows as a quote in the UI face with a 1px rule; In, Decision and Out are sentence-case labels; the station of a step is a muted line under its name; the stations and the step controls share one height; Next is a quiet control, the same as Previous.
+- Added a chapter rail to `ExplainerShell` (`chapterNav`): a sticky side rail at 1200px and wider, a compact top bar with a disclosure list below that, `aria-current` tracking while the reader scrolls, fragment links, Escape to close, and smooth scrolling only without a reduced-motion preference. `Section` takes `id`, `navLabel` and `anchors`. With a rail, the review tool docks under it.
+- Added `appearance="auto"` to `ExplainerShell`, which follows `prefers-color-scheme` with the ISO dark tokens; code keeps a dark plate in dark mode.
+- Added `DataTable`, `StatusPill`, `Badge` and `Legend`: a sticky header, zebra rows, right-aligned tabular numbers, monospace IDs, state pills, flag badges, and labelled cards below 640px.
+- Added the `--ve-status-*` state ramp (`ok`, `info`, `warn`, `err`, `neutral`), AA in light and dark. `DiagramCanvas` nodes take `tone` and `stroke="dashed"` (dashed and hatched), and `DiagramCanvas` takes a `legend`.
+- `CodeBlock` and `DiffBlock` now color tokens from the preset's `--ve-syntax-*` ramp through Shiki's CSS-variables theme, and diff rows use `--ve-code-add` / `--ve-code-remove` with a `+`/`-` gutter. Diffs list removed lines before added lines and drop the empty row after a final newline.
+- The MDX preflight decodes `\u`/`\x` escapes in literal props, so code escaped as `\u003c` highlights as `<`; it also finds `CodeBlock` and `DiffBlock` tags with a quote-aware scan.
+- The review panel label uses `--ve-accent-text`, which passes AA on ISO light and dark.
+- The cover title is smaller for long titles: `--ve-shell-title-size` is `clamp(1.875rem, 1.25rem + 2vw, 2.5rem)` (30px on a phone, 40px on a desktop), with a 28ch measure and 1.1 leading. All presets use the same token; the ISO, Algebrica and Mono Color headers no longer override it.
+- Added `DefinitionList`, `Definition` and `Subsection`, and a default reading rhythm in a `Section` body (block spacing, `h3`/`h4`, list markers), so an explainer needs no page CSS.
+- Added `DiagramModes`: one architecture diagram in a Simple and a Detailed mode on one grid, with a labelled two-option switch that the whole page shares and remembers.
+- Added `Disclosure` (a native details block with a 44px summary row that opens on a fragment link into it) and `ChipLinks` (in-page links as 44px chips with a state pill). Plain text links in a `Section` body get a 44px target.
+- `ve:export` now runs the MDX preflight (integrity checks and code highlighting) on each MDX module that the entry imports from its own directory tree, so an explainer can keep one chapter per file.
+
+### Narrated films
+- Added `narration-align`: `alignScript` times every script word from a whole-recording transcript without later lines drifting when recognition drops, merges, splits or spells a word as digits; `compareTranscript` lists added, missing and changed words in a take.
+- Added `artifacture narration check-take | join | cut`: verify takes against their scripts, join takes at an even loudness, and cut beats at the quietest point inside each pause with reading holds, a −16 LUFS master and per-beat word timing. Exit codes gate loudness spread and audible cuts.
+- Added `scene-framing` (`frameScene`, `sampleFrame`, `widestFrame`) for camera keys computed from visible content below a reserved type band, and `end-holds` (`inspectEndHolds`) for beats that would cut before their end state can be read.
+
 ### Developer preview
 - Added `/annotate` and `artifacture-preview` for agent-owned local review sessions with exact-element comments, compact source-aware copy for coding agents, and guarded direct text edits that rebuild the owning MDX/TSX project while preserving the active slide.
 - Added Preview, Comment, and Edit text modes; a collapsible review queue; edit undo; publish output paths; optional Bun support alongside npm and pnpm; and an injected bridge that never modifies the deliverable HTML.

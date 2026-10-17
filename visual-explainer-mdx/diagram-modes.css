@@ -1,0 +1,83 @@
+/* The figure's header: its title, and the view switch beside it. */
+.ve-figure-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ve-space-2) var(--ve-space-4);
+  margin: 0 0 var(--ve-space-4);
+}
+
+.ve-figure-title {
+  margin: 0;
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
+}
+
+/* The view switch: a quiet segmented control. A hairline holds the options; the chosen one has a
+   faint fill and the heading ink. Each option keeps a 44px target. */
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-control-radius);
+  min-width: 0;
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 var(--ve-space-3);
+  border-radius: 6px;
+  color: var(--ve-muted);
+  cursor: pointer;
+  font: var(--ve-weight-regular) var(--ve-text-small)/1 var(--ve-font-ui);
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label:hover {
+  color: var(--ve-heading);
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label[data-ve-checked="true"] {
+  background: color-mix(in srgb, var(--ve-text) 9%, transparent);
+  color: var(--ve-heading);
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch input {
+  position: absolute;
+  inset: -7px 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+:is(.ve-diagram-modes, .ve-typed) .ve-diagram-mode-switch label:has(input:focus-visible) {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ve-diagram-modes :is(.ve-diagram-variant-desktop, .ve-diagram-variant-mobile) {
+    animation: ve-diagram-mode-in 180ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+@keyframes ve-diagram-mode-in {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}

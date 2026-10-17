@@ -1,6 +1,6 @@
 import React from 'react';
 import themes from '../../visual-explainer-mdx/themes.css?raw';
-import theme from '../../plugins/visual-explainer/templates/hairline-motion-theme.css?raw';
+import theme from '../../plugins/visual-explainer/templates/iso-motion-theme.css?raw';
 
 const css = `${themes}
 ${theme}
@@ -8,12 +8,12 @@ html, body { margin: 0; width: 100%; height: 100%; }
 .clip { position: absolute; inset: 0; }
 .statement { position: absolute; left: 128px; top: 92px; }
 .statement h1 { font-size: 88px; }
-.statement p { margin: 24px 0 0; font-size: 30px; color: var(--motion-secondary); }
+.statement p { margin: 24px 0 0; font-size: 30px; color: var(--ve-muted); }
 .drawing { position: absolute; inset: 0; width: 100%; height: 100%; }
 .relationship { position: absolute; left: 128px; bottom: 84px; font-size: 34px; }
 .relationship p { margin: 0; }
 .relationship .equation { font-family: var(--motion-display); font-size: 50px; margin-top: 12px; }
-.figure-label { fill: var(--motion-secondary); stroke: none; font-size: 28px; font-family: var(--motion-body); }
+.figure-label { fill: var(--ve-muted); stroke: none; font-size: 28px; font-family: var(--motion-body); }
 `;
 
 const animation = `
@@ -80,7 +80,7 @@ export default function HairlineMotionBaseline() {
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" />
       </head>
       <body>
-        <main id="root" className="motion-stage" data-ve-preset="hairline" data-ve-appearance={themeName} data-motion-theme={themeName}
+        <main id="root" className="motion-stage" data-ve-preset="iso" data-ve-appearance={themeName} data-motion-theme={themeName}
           data-composition-id="hairline-motion" data-width="1920" data-height="1080"
           data-start="0" data-duration="16">
             <header className="statement" id="statement">

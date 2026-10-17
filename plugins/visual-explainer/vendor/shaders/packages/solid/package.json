@@ -1,0 +1,43 @@
+{
+  "name": "shaders-solid",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "solid": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/generatePresetCode.d.ts",
+      "import": "./dist/utils/generatePresetCode.js",
+      "default": "./dist/utils/generatePresetCode.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "generate": "tsx ../core/scripts/generate-components.ts --framework=solid",
+    "prebuild": "pnpm run clean && pnpm run generate",
+    "build": "echo '⚙️  Building solid package...' && vite build"
+  },
+  "dependencies": {
+    "shaders-core": "workspace:*"
+  },
+  "devDependencies": {
+    "solid-js": "^1.9.10",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.3.0",
+    "vite-plugin-externalize-deps": "^0.10.0",
+    "vite-plugin-solid": "^2.11.10"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.0"
+  }
+}

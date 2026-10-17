@@ -1,0 +1,142 @@
+{
+  "source": "https://github.com/coldteadotai/pr-lens",
+  "commit": "7a9115c8202da4db030be5954ada8862e6135dce",
+  "files": [
+    {
+      "path": "skills/eli5/SKILL.md",
+      "sha256": "489b423e2d5710ea3dac38dbf72d5c94ff1b46a65ab39f4d9376f95e71f318a7"
+    },
+    {
+      "path": "skills/pr-lens/LICENSE",
+      "sha256": "f95e90af396c71c9a94648bd58e4f5bb2dcab4f6ac3ab7d3d2ca3f4e4f4a1ae7"
+    },
+    {
+      "path": "skills/pr-lens/SKILL.md",
+      "sha256": "d0260518613ab0b243849843f324027f8a4a33df3cc18edaf08d3a94e7fd4c9a"
+    },
+    {
+      "path": "packages/agent-skill/LICENSE",
+      "sha256": "f95e90af396c71c9a94648bd58e4f5bb2dcab4f6ac3ab7d3d2ca3f4e4f4a1ae7"
+    },
+    {
+      "path": "packages/agent-skill/README.md",
+      "sha256": "dd248118f3401718339e0429f157f353f78122bc4feeb24b0d5b9bee7df71e55"
+    },
+    {
+      "path": "packages/agent-skill/SKILL.md",
+      "sha256": "d0260518613ab0b243849843f324027f8a4a33df3cc18edaf08d3a94e7fd4c9a"
+    },
+    {
+      "path": "packages/agent-skill/manual.md",
+      "sha256": "9746f51ab6b1653b98c28b9eb1012466a0086c0098b91d4bf9d210752b533be7"
+    },
+    {
+      "path": "packages/agent-skill/package.json",
+      "sha256": "e85fd70263b9ee128f58e2cbc54b33806274d284b1d4e7717fda258bce2c5a4a"
+    },
+    {
+      "path": "packages/agent-skill/references/config.md",
+      "sha256": "b8d69e718a9f10b2d463243f7dbbf33fdac79330db6f257d987a14911327ec3e"
+    },
+    {
+      "path": "packages/agent-skill/references/example.graph.json",
+      "sha256": "fbc097b34641b5d2d527aac73bd00d52bdfa98a204fb102ca0005c476bbb6e91"
+    },
+    {
+      "path": "packages/agent-skill/references/graph-document.md",
+      "sha256": "f5b06e89dd7dacb68f555a7c3854af78900da0a45c97cc3186bf4c4b6a4811fb"
+    },
+    {
+      "path": "packages/agent-skill/scripts/mirror.ts",
+      "sha256": "06ff150ffc1c0b20955fe0b28e2d46010a9f3d93162f37d42479d89d50c610f7"
+    },
+    {
+      "path": "packages/agent-skill/scripts/sync.ts",
+      "sha256": "4f1ccd46cdf5ff585a5d4b30f377f42634e2fa643fdbe1b374d18259ac0a2931"
+    },
+    {
+      "path": "packages/agent-skill/tsconfig.json",
+      "sha256": "c7b1117efe48fa96d09329c53519c61940b6d103fa5356f9fd55d9dee1887cf0"
+    },
+    {
+      "path": "packages/agent-skill/vitest.config.ts",
+      "sha256": "d3f713bf444d5606c1e46d9740aaf2adab61c9a6af71e1b0d234cc8e7389fa5d"
+    },
+    {
+      "path": "packages/schema/examples/broadcast-baseline.graph.json",
+      "sha256": "e7ea79e8eb328158c9e3eb61dbed20f849989c2965e87f7b0b2299281935aed9"
+    },
+    {
+      "path": "packages/schema/examples/broadcast-baseline.patch.json",
+      "sha256": "743558de1a23fb1ae228a84143c8c1a2b863dd3fde9dd3368db1606e693d9e99"
+    },
+    {
+      "path": "packages/schema/examples/minimal.graph.json",
+      "sha256": "b0932c3ddd2889e6b33ad8b5d6316867bc3b6e3ae96b497a6e3979b91e621703"
+    },
+    {
+      "path": "packages/schema/examples/payload.graph.json",
+      "sha256": "fea384c014ca8028984f8184ffe320438ba5d43df9cfcf300f8fa50187035f40"
+    },
+    {
+      "path": "packages/schema/examples/postmark-refactor.graph.json",
+      "sha256": "fbc097b34641b5d2d527aac73bd00d52bdfa98a204fb102ca0005c476bbb6e91"
+    },
+    {
+      "path": "packages/schema/examples/postmark-refactor.render-manifest.json",
+      "sha256": "e77af9c2ffb9819f2fb1657a382b8ec5b28e47b79258b3b4110779e9bb20b77d"
+    },
+    {
+      "path": "packages/schema/examples/pr-lens.config.json",
+      "sha256": "b1554a6c39eed67b09e507e2f3e704312c1b9ce7d2ffb89d7202ee28bbe15c99"
+    },
+    {
+      "path": "packages/schema/json-schema/config.schema.json",
+      "sha256": "386d547adf73c8ef75bbcbd05e23374e61e054aefa65f048fdde0fcdc2672a05"
+    },
+    {
+      "path": "packages/schema/json-schema/graph-doc.schema.json",
+      "sha256": "bc7c5eddf415b783d2b7670bbfa8278f328d4499405dd1f51519b29218c68f58"
+    },
+    {
+      "path": "packages/schema/json-schema/live-command.schema.json",
+      "sha256": "c7d4922d6457e02ff7a936eadd923f13797dbef56edf119ecb70b1f598dda4e5"
+    },
+    {
+      "path": "packages/schema/json-schema/patch-doc.schema.json",
+      "sha256": "07f3a18f8304ee26b3c9af9a1111121e5093a8d1185d596525834324a78c2abc"
+    },
+    {
+      "path": "packages/schema/json-schema/render-manifest.schema.json",
+      "sha256": "83f4fb87919f9a2b8e9c2ccfa78cac390852e2b8aa2f412aa934cdf22f61a113"
+    },
+    {
+      "path": "packages/schema/json-schema/viewer-look.schema.json",
+      "sha256": "b3f2db80b15a95f2e7da6facb97d4298ce3e98225cfbcd33eb9b6031b5f1a092"
+    },
+    {
+      "path": "packages/renderer/README.md",
+      "sha256": "d7bc4b9862497ca189ec15bfbfa53ee09f3dcef61808492067324da233e4b9ec"
+    },
+    {
+      "path": "packages/renderer/LICENSE",
+      "sha256": "f95e90af396c71c9a94648bd58e4f5bb2dcab4f6ac3ab7d3d2ca3f4e4f4a1ae7"
+    },
+    {
+      "path": "packages/cli/README.md",
+      "sha256": "5f7a9f0d9136668fabeecb423d4616fbe02e440e3617e4a413195a5baf7c1001"
+    },
+    {
+      "path": "docs/canvas-api.md",
+      "sha256": "4c14210c365360bb6ae107409adc9baae937cf8afedd3938f475d2b6da3678d2"
+    },
+    {
+      "path": "README.md",
+      "sha256": "3bef7a4cfdbd9cb662c06c8463d579037de86131b7df2fa6181b6db313cc185e"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "f95e90af396c71c9a94648bd58e4f5bb2dcab4f6ac3ab7d3d2ca3f4e4f4a1ae7"
+    }
+  ]
+}

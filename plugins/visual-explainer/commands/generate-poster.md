@@ -23,7 +23,7 @@ Read `references/poster.md` before authoring and `templates/mono-industrial-post
    - Portrait editorial: `w-[1200px] h-[1500px]`
    - Social card (Twitter/LinkedIn): `w-[1200px] h-[628px]`
    - Square (Slack, Instagram): `w-[1080px] h-[1080px]`
-3. Use Lieflat by default: paper-gray fields, charcoal Inter text, generous whitespace, and data-driven marks. Read `./references/charts.md`. Use `mono-industrial-poster.tsx` only as a poster-ai mechanics reference; do not inherit its visual tokens. Use a named alternative only if the user requests one.
+3. Use Hairline by default, or 3b1b for mathematical mechanisms. Read `references/default-explainer-theme.md`; reuse Lieflat data encodings through `references/charts.md`. Shared diagrams and native figures should compose through `composeGraphics`, then render with `GraphicCanvas` or the shared `GraphicSlide` framing. Use `mono-industrial-poster.tsx` only as a poster-ai mechanics reference; do not inherit its visual tokens. Use another named palette only if the user requests one.
 
 **Authoring:**
 

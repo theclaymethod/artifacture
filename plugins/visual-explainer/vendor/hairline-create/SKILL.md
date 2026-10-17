@@ -14,7 +14,7 @@ Every file named below is in this skill's folder. The figure and the page are wr
 
 ## 1. Concept
 
-Read `concepts.md`. Then offer two or three concepts, one line each:
+Read `concepts.md`. It has a section for an empty state and one for a figure drawn from a mark. Then offer two or three concepts, one line each:
 
 > **Name.** The object. What the pointer does to it. What the read-out says.
 
@@ -37,7 +37,7 @@ One figure, one idea. A concept that needs a label to be understood is not a con
 ## 3. Check
 
 1. `node look.mjs <name>.js --answer x,y,z --edge x,y,z`, the points being world points of your figure, as `look.md` says. It builds the page, validates it, takes the eight pictures on one sheet, `hairline-<name>-look.png`, and checks the frame, the read-out and the console. Fix every line it prints as failed, and run it again until it exits 0.
-2. Read `look.md`, then the sheet, and answer its twelve questions. Fix what fails, then go back to 1.
+2. Read `look.md`, then the sheet, and answer its questions. Fix what fails, then go back to 1.
 
 `look.mjs` needs a browser and installs `playwright-core` once, outside this folder. Without one, check with `node validate.mjs hairline-<name>.html` after each build and do the look as `look.md` says under "Without a browser". Without Node, read the list of checks at the top of `validate.mjs` and answer each one from your code.
 
@@ -66,5 +66,6 @@ When the person asks for a change, edit only `<name>.js`, then run `look.mjs` ag
 | drawing a box with twelve edges | `prism` of two rounded rings: a silhouette and one crease (rule 09) |
 | drawing a part as a plain rounded block | give it the features that make it what it is, the ones you named in the concept (`concepts.md`) |
 | leaving rest flat, empty, or symmetric because that was easy | compose it: rest is the thumbnail (rule 05) |
+| stamping a mark on a box to say whose it is | build the mark as the object, or leave it out (`concepts.md`, "From a mark") |
 | editing the kernel or the bench to make something work | the figure is wrong; change the figure |
 | letting in a second idea | cut it: one figure, one idea |

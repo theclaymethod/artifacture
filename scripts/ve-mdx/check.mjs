@@ -3,7 +3,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { spawn } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import { parseHTML } from 'linkedom';
+import { checkComponentRegistry } from '../components/check.mjs';
 import { sharedComponents } from './integrity.mjs';
 
 const repoRoot = process.cwd();
@@ -24,32 +26,21 @@ const outputs = [
   ['examples/visual-explainer-mdx/code-walkthrough.mdx', 'dist/visual-explainer-mdx/code-walkthrough.html'],
   ['examples/visual-explainer-mdx/mermaid-block.mdx', 'dist/visual-explainer-mdx/mermaid-block.html'],
   ['examples/visual-explainer-mdx/diff-terminal-json.mdx', 'dist/visual-explainer-mdx/diff-terminal-json.html'],
+  ['examples/visual-explainer-mdx/review-scan.mdx', 'dist/visual-explainer-mdx/review-scan.html'],
   ['examples/visual-explainer-mdx/explain-diff-demo.mdx', 'dist/visual-explainer-mdx/explain-diff-demo.html'],
   ['examples/visual-explainer-mdx/presentation-deck.tsx', 'dist/visual-explainer-mdx/presentation-deck.html'],
 ];
 
-function run(args) {
+function run(args, exporter = 'export') {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['scripts/ve-mdx/export.mjs', ...args], {
+    const child = spawn(process.execPath, [`scripts/ve-mdx/${exporter}.mjs`, ...args], {
       cwd: repoRoot,
       stdio: 'inherit',
     });
-    child.on('exit', (code) => {
+    child.on('error', reject);
+    child.on('close', (code, signal) => {
       if (code === 0) resolve();
-      else reject(new Error(`export failed with exit code ${code}`));
-    });
-  });
-}
-
-function runStatic(args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['scripts/ve-mdx/export-static.mjs', ...args], {
-      cwd: repoRoot,
-      stdio: 'inherit',
-    });
-    child.on('exit', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`static export failed with exit code ${code}`));
+      else reject(new Error(`${exporter} failed (${signal ?? code})`));
     });
   });
 }
@@ -94,7 +85,7 @@ async function assertSourceRendersContent(sourcePath) {
   const tempOut = path.join(repoRoot, '.ve-mdx-tmp', `content-probe-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.html`);
   await fs.mkdir(path.dirname(tempOut), { recursive: true });
   try {
-    await runStatic([sourcePath, '--out', tempOut]);
+    await run([sourcePath, '--out', tempOut], 'export-static');
     const html = await fs.readFile(tempOut, 'utf8');
     const textLength = documentTextLength(html);
     if (textLength <= MIN_BODY_TEXT_LENGTH) {
@@ -111,13 +102,25 @@ async function assertSourceRendersContent(sourcePath) {
 // contract (plugins/visual-explainer/references/hyperframes.md) is a
 // Hyperframes composition root carrying data-composition-id, so that
 // attribute is this leg's equivalent of assertGenerated's id="root" check.
-async function assertStaticGenerated(filePath) {
+async function assertStaticGenerated(filePath, bundled = false) {
   const html = await fs.readFile(path.resolve(repoRoot, filePath), 'utf8');
   const failures = [];
   if (!html.includes('<style>')) failures.push('CSS was not inlined');
   if (!/\sdata-composition-id\s*=/.test(html)) failures.push('missing Hyperframes composition root (data-composition-id)');
   if (/<script[^>]+src=["']\.?\/assets\//.test(html) || /<link[^>]+href=["']\.?\/assets\//.test(html)) {
     failures.push('external build asset reference remains');
+  }
+  if (bundled) {
+    const { document } = parseHTML(html);
+    const scripts = [...document.querySelectorAll('script[src]')];
+    const runtime = scripts[0]?.getAttribute('src');
+    if (scripts.length !== 1 || !/^\.\/graphic-runtime-[a-f0-9]{12}\.js$/.test(runtime ?? '')) {
+      failures.push('missing local content-hashed graphic runtime');
+    } else {
+      const code = await fs.readFile(path.resolve(repoRoot, path.dirname(filePath), runtime), 'utf8');
+      if (!code.trim()) failures.push('graphic runtime is empty');
+    }
+    if (!html.includes('window.__timelines')) failures.push('missing graphic timeline registration');
   }
   const textLength = documentTextLength(html);
   if (textLength <= MIN_BODY_TEXT_LENGTH) {
@@ -126,14 +129,8 @@ async function assertStaticGenerated(filePath) {
   if (failures.length) throw new Error(`${filePath}: ${failures.join(', ')}`);
 }
 
-// Roster-sync guard: components.tsx's named exports, integrity.mjs's
-// sharedComponents set, and the progressively disclosed component reference
-// are hand-maintained lists with no automatic sync between them. A component
-// added to one but not another silently produces false integrity failures or
-// stale docs. This does not derive one list from another — deriving
-// integrity.mjs's set from the module at runtime means importing TSX into a
-// plain-node context, which is messier than a guard (deferred; see plan
-// 008's maintenance notes) — it only asserts the lists still agree.
+// Match the public component exports, the integrity allowlist and the reference.
+// Read TSX source so this plain-Node check never executes component modules.
 async function assertRosterInSync() {
   const componentsSource = await fs.readFile(path.resolve(repoRoot, 'visual-explainer-mdx/components.tsx'), 'utf8');
   const exported = new Set([...componentsSource.matchAll(/^export function (\w+)/gm)].map((match) => match[1]));
@@ -176,32 +173,55 @@ async function assertRosterInSync() {
   }
 }
 
+await checkComponentRegistry();
+console.log('component copy closures in sync');
 await assertRosterInSync();
 console.log('component roster in sync');
 
-for (const [source, out] of outputs) {
-  await run([source, '--out', out]);
-  await assertGenerated(out);
-  await assertSourceRendersContent(source);
-}
-
-const staticExample = [
-  'examples/visual-explainer-mdx/video-longform.tsx',
-  'dist/visual-explainer-mdx/video-longform-static.html',
+const staticSource = 'examples/visual-explainer-mdx/video-longform.tsx';
+const jobs = [
+  // This longer sequence owns its canary and temporary outputs; start it early.
+  () => run([], 'check-integrity'),
+  ...outputs.map(([source, out]) => async () => {
+    await run([source, '--out', out]);
+    await assertGenerated(out);
+    await assertSourceRendersContent(source);
+  }),
+  async () => {
+    const out = 'dist/visual-explainer-mdx/video-longform-static.html';
+    await run([staticSource, '--out', out], 'export-static');
+    await assertStaticGenerated(out);
+    console.log('static export ok');
+  },
+  async () => {
+    const out = 'dist/visual-explainer-mdx/video-longform/index.html';
+    await run([staticSource, '--out', out], 'graphic-video');
+    await assertStaticGenerated(out, true);
+    console.log('bundled graphic video export ok');
+  },
+  async () => {
+    const out = 'dist/visual-explainer-mdx/math-activation/index.html';
+    await run(['examples/visual-explainer-mdx/math-activation.tsx', '--out', out], 'graphic-video');
+    await assertStaticGenerated(out, true);
+    console.log('mathematical graphic video export ok');
+  },
 ];
-await runStatic([staticExample[0], '--out', staticExample[1]]);
-await assertStaticGenerated(staticExample[1]);
-console.log('static export ok');
 
-await new Promise((resolve, reject) => {
-  const child = spawn(process.execPath, ['scripts/ve-mdx/check-integrity.mjs'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
-  child.on('exit', (code) => {
-    if (code === 0) resolve();
-    else reject(new Error(`integrity fixture check failed with exit code ${code}`));
-  });
-});
+let failed = false;
+const exportJobs = availableParallelism() >= 8 ? 3 : Math.min(2, availableParallelism());
+const results = await Promise.allSettled(Array.from({ length: exportJobs }, async () => {
+  while (!failed && jobs.length) {
+    const job = jobs.shift();
+    try {
+      await job();
+    } catch (error) {
+      failed = true;
+      throw error;
+    }
+  }
+}));
+for (const result of results) {
+  if (result.status === 'rejected') throw result.reason;
+}
 
 console.log('ve:check passed');

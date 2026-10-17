@@ -4,7 +4,7 @@
   "meta": {
     "title": "Export and review an HTML artifact",
     "locale": "en",
-    "visual_preset": "editorial",
+    "visual_preset": "classic",
     "quality_profile": "showcase",
     "legend": {
       "mode": "hidden"

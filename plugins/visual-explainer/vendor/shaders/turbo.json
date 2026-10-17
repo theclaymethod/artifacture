@@ -1,0 +1,101 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": false
+    },
+    "shaders-core#build": {
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-vue#build": {
+      "dependsOn": [
+        "shaders-core#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-react#build": {
+      "dependsOn": [
+        "shaders-core#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-svelte#build": {
+      "dependsOn": [
+        "shaders-core#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-solid#build": {
+      "dependsOn": [
+        "shaders-core#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-js#build": {
+      "dependsOn": [
+        "shaders-core#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders-partner#build": {
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "env": [],
+      "outputLogs": "errors-only"
+    },
+    "shaders#build": {
+      "dependsOn": [
+        "shaders-core#build",
+        "shaders-vue#build",
+        "shaders-react#build",
+        "shaders-svelte#build",
+        "shaders-solid#build",
+        "shaders-js#build",
+        "shaders-partner#build"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true,
+      "outputLogs": "errors-only"
+    }
+  }
+}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chalkboard figure template</title>
+<style>@font-face{font-family:"PencilPete";src:url("PencilPete.ttf") format("truetype");}</style>
+<style>
+:root{
+  /* falls back gracefully when standalone; inherits the site's tokens when embedded */
+  --_serif: var(--serif, Georgia, 'Iowan Old Style', 'Times New Roman', serif);
+  --_ink: var(--ink, #2A2A26);
+  --chalk:#F5F4EF;
+  --chalk-dim:rgba(245,244,239,.55);
+  --board:#12291d;
+  --frame:#7A5230;
+  --tilt:1;   /* chalkiness multiplier for rotations, set by data-chalk */
+}
+.slate[data-chalk="rough"]{--tilt:3.6}
+.slate[data-chalk="shaky"]{--tilt:5}
+*{box-sizing:border-box}
+html{zoom:0.8}
+body{margin:0;padding:0 0 4px;background:transparent;font-family:var(--_serif)}
+.wrap{max-width:940px;margin:0 auto}
+/* opened directly (not in an iframe): center the board in the window */
+body.standalone{min-height:calc(100vh / 0.8);display:flex;align-items:center;justify-content:center;padding:24px 12px}
+body.standalone .wrap{width:100%}
+/* dirty slate: random eraser wipes, two anisotropic noise layers (one rotated), strength by data-chalk */
+.slate{overflow:hidden}
+.slate::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='0.004 0.02' numOctaves='5' seed='11'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 0.98  0 0 0 1.4 -0.75'/></filter><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0012 0.05' numOctaves='2' seed='29'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 0.98  0 0 0 1.1 -0.82'/></filter><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.001 0.04' numOctaves='2' seed='53'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 0.98  0 0 0 1.0 -0.8'/></filter><rect width='100%25' height='100%25' filter='url(%23a)'/><rect x='-600' y='-400' width='2400' height='1600' transform='rotate(-14 600 400)' filter='url(%23b)' opacity='0.6'/><rect x='-600' y='-400' width='2400' height='1600' transform='rotate(23 600 400)' filter='url(%23c)' opacity='0.45'/></svg>");
+  background-size:1200px 800px;mix-blend-mode:screen}
+.slate[data-chalk="rough"]::before{opacity:.2}
+.slate[data-chalk="shaky"]::before{opacity:.32}
+.slate > *{position:relative;z-index:1}
+.slate .ghost{position:absolute;inset:0;z-index:0;pointer-events:none;filter:blur(1.2px)}
+.board{background:var(--frame);border-radius:16px;padding:12px;position:relative}
+.slate{
+  position:relative;font-family:'PencilPete',cursive;
+  border-radius:10px;padding:30px 34px 52px;color:var(--chalk);
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,255,255,0.045), transparent 60%),
+    radial-gradient(ellipse 50% 45% at 75% 70%, rgba(255,255,255,0.035), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 55% 15%, rgba(255,255,255,0.03), transparent 60%),
+    var(--board);
+}
+.replay{position:absolute;bottom:18px;right:28px;z-index:2;display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:0}
+.replay svg{display:block;filter:url(#slip2)}
+.replay .eraser{
+  width:34px;height:17px;border-radius:3px;flex:none;
+  background:linear-gradient(#e9e7e2 0%, #cfccc5 58%, #57544d 59%, #45423c 100%);
+  box-shadow:0 1.5px 2.5px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.replay:hover .eraser{filter:brightness(1.08)}
+.replay:focus-visible{outline:2px solid rgba(245,244,239,.6);outline-offset:3px}
+.panel{
+  border:1.5px dashed rgba(245,244,239,.45);border-radius:12px;
+  padding:16px 18px;margin-bottom:18px;
+}
+.panel:last-child{margin-bottom:0}
+.panel.a{transform:rotate(calc(-0.3deg * var(--tilt)))}
+.panelhead{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.panelname{color:var(--chalk);font-size:1.5rem;font-weight:700;letter-spacing:.18em}
+.donebadge{
+  color:var(--chalk);font-size:1.15rem;margin-left:auto;
+  border:1.5px solid currentColor;border-radius:50px;
+  padding:2px 11px;opacity:0;transition:opacity .3s;transform:rotate(calc(1.2deg * var(--tilt)));
+}
+.chips{display:flex;gap:8px;flex-wrap:wrap;min-height:42px}
+.chip{
+  border:1.7px solid rgba(245,244,239,.75);
+  border-radius:10px 8px 11px 7px;
+  padding:5px 14px;font-size:1.35rem;font-weight:700;
+  color:var(--chalk);background:rgba(245,244,239,.05);
+  opacity:0;transition:opacity .3s;
+}
+.chip:nth-child(odd){transform:rotate(calc(-1.1deg * var(--tilt)))}
+.chip:nth-child(even){transform:rotate(calc(0.9deg * var(--tilt)))}
+.chip.show{opacity:1}
+.trackwrap{position:relative;height:9px;margin-top:12px}
+.trackbase{position:absolute;inset:3px 0;border-bottom:2px dotted rgba(245,244,239,.28)}
+.fill{
+  position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px;
+  background:repeating-linear-gradient(90deg,rgba(245,244,239,.85) 0 6px,rgba(245,244,239,.45) 6px 9px);
+}
+.status{font-size:1.15rem;color:var(--chalk-dim);margin-top:9px;height:24px;line-height:24px;white-space:nowrap;overflow:hidden}
+@media(max-width:640px){.slate{padding:20px 16px 46px}}
+@media(prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important}
+  .chip,.panel,.donebadge{transform:none!important}
+}
+</style>
+</head>
+<body>
+<script>if(window.self===window.top)document.documentElement.classList.add("standalone"),document.body.classList.add("standalone");</script>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="slip1" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.010" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="slip2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="slip3" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="17" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <!-- chalk dust: heavier stroke, patchy along its length, soft halo around it. slope/blur set by data-chalk -->
+  <filter id="dust" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="6000" height="6000">
+    <feMorphology in="SourceGraphic" operator="dilate" radius="0.6" result="fat"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.12 0.35" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+    <feComponentTransfer in="g" result="mask"><feFuncA id="dustA" type="linear" slope="2.4" intercept="-0.25"/></feComponentTransfer>
+    <feComposite in="fat" in2="mask" operator="in" result="patchy"/>
+    <feGaussianBlur in="patchy" stdDeviation="1.6" result="halo"/>
+    <feComponentTransfer in="halo" result="halo2"><feFuncA type="linear" slope="0.28"/></feComponentTransfer>
+    <feMerge><feMergeNode in="halo2"/><feMergeNode in="patchy"/></feMerge>
+  </filter>
+  <!-- chalk fade: a long stroke thins toward its end as the hand lifts -->
+  <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F5F4EF" stop-opacity="1"/><stop offset=".4" stop-color="#F5F4EF" stop-opacity=".85"/><stop offset="1" stop-color="#F5F4EF" stop-opacity=".22"/></linearGradient>
+</svg>
+<div class="wrap">
+  <div class="board"><div class="slate" data-chalk="tidy">
+    <button class="replay" id="replay" type="button" aria-label="replay"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M20.49 15 a9 9 0 1 1 -2.12 -9.36 L23 10" stroke="#F5F4EF" stroke-width="1.8" stroke-linecap="round" fill="none"/><polyline points="23 4 23 10 17 10" stroke="#F5F4EF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span class="eraser"></span></button>
+
+    <div class="panel a">
+      <div class="panelhead">
+        <span class="panelname">EXAMPLE PANEL</span>
+        <span class="donebadge" id="done">done &#10003;</span>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="trackwrap"><div class="trackbase"></div><div class="fill" id="fill"></div></div>
+      <div class="status" id="status"></div>
+    </div>
+
+  </div></div>
+</div>
+
+<script>
+(function(){
+  var words = ['chalk','it','up','one','beat','at','a','time'];
+  var STEP = 0.6, DONE = words.length * STEP, END = DONE + 1.2;
+
+  var host = document.getElementById('chips'), chips = [];
+  words.forEach(function(w){
+    var c = document.createElement('span');
+    c.className = 'chip'; c.textContent = w;
+    host.appendChild(c); chips.push(c);
+  });
+  var fill = document.getElementById('fill');
+  var done = document.getElementById('done');
+  var status = document.getElementById('status');
+
+  function paint(t){
+    chips.forEach(function(c, i){ c.classList.toggle('show', t >= (i + 1) * STEP); });
+    fill.style.width = (Math.min(t, DONE) / DONE * 100) + '%';
+    done.style.opacity = t >= DONE ? '1' : '0';
+    status.textContent = t >= DONE ? words.length + ' beats' :
+      'beat ' + Math.min(words.length, Math.floor(t / STEP) + 1) + ' of ' + words.length + '…';
+  }
+
+  var replay = document.getElementById('replay');
+  var t0 = performance.now(), raf = null;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function tick(){
+    var t = (performance.now() - t0) / 1000;
+    if (t >= END){ paint(END); raf = null; return; }
+    paint(t);
+    raf = requestAnimationFrame(tick);
+  }
+  function play(){
+    if (raf) cancelAnimationFrame(raf);
+    if (reduced){ paint(END); return; }
+    t0 = performance.now(); paint(0);
+    raf = requestAnimationFrame(tick);
+  }
+  replay.addEventListener('click', play);
+  play();
+
+  window.addEventListener('beforeprint', function(){
+    try { if (typeof raf !== 'undefined' && raf) cancelAnimationFrame(raf); } catch(e){}
+    try { paint(1e9); } catch(e){}
+  });
+  function postHeight(){
+    parent.postMessage({
+      chalkHeight: Math.ceil(document.body.getBoundingClientRect().height),
+      chalkSrc: location.pathname.split('/').pop()
+    }, '*');
+  }
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(postHeight);
+  setTimeout(postHeight, 1500);
+})();
+</script>
+<script>
+// chalky.js: the hand-drawn imperfection pass. Last script in the file.
+//
+// One attribute on the slate picks a preset: <div class="slate" data-chalk="tidy|rough|shaky">.
+// Every layer reads from that preset, nothing is tuned per figure:
+//   slip     turbulence filters on text/chips, applied with probability that grows with width
+//            (short strokes are easy to draw straight, long ones always waver somewhere)
+//   dust     SVG strokes get heavier, patchy along their length, with a soft halo (#dust filter)
+//   breaks   a fraction of strokes get dash gaps, wide enough to survive the dust halo
+//   geo      circles vary in size, closed shapes stop short of meeting, each shape tilts on its own
+//   ghost    a few individual shapes cloned faintly into random spots, like a half-erased earlier lesson
+//   fade     long strokes thin toward their end (#fade gradient), the hand lifting
+// Requires #slip1..3, #dust, and #fade from slip-filters.svg to be in the page.
+// All randomness is deterministic per element index so screenshots and replay are identical.
+// When you invent a new visual class for text, ADD IT to TEXT_SEL: this is the most common
+// way the hand-drawn feel silently goes missing.
+(function(){
+  var CHALK = {
+    tidy:  { slip: 1, dust: null,                                   weight: 1,    jitter: 0,   breaks: 0,   geo: null,                              ghost: null,                     fadeOver: 0,
+             pClean: function(w){ return w < 60 ? 0.85 : w < 160 ? 0.5 : w < 280 ? 0.15 : 0; } },
+    rough: { slip: 3, dust: {slope: 2.4, intercept: -0.25, blur: 1.2}, weight: 1.35, jitter: 0.6, breaks: 0.4, geo: {radius: 0.2,  gap: 0.05, rot: 2}, ghost: {count: 3, opacity: 0.1},  fadeOver: 80,
+             pClean: function(){ return 0; } },
+    shaky: { slip: 5, dust: {slope: 2.8, intercept: -0.45, blur: 1.6}, weight: 1.6,  jitter: 1.1, breaks: 0.8, geo: {radius: 0.45, gap: 0.13, rot: 5}, ghost: {count: 7, opacity: 0.16}, fadeOver: 40,
+             pClean: function(){ return 0; } }
+  };
+  var TEXT_SEL = '.slate span, .slate button, .slate .status, .slate .title, .slate .tally, .slate td, .slate th';
+  var STROKE_SEL = '.slate svg:not(.ghost) path, .slate svg:not(.ghost) circle, .slate svg:not(.ghost) rect';
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  var slate = document.querySelector('.slate');
+  var preset = CHALK[(slate && slate.getAttribute('data-chalk')) || 'tidy'] || CHALK.tidy;
+
+  // deterministic pseudo-random in [0,1) from an element index and a salt
+  function rand(i, salt){ return ((i * salt + 11) % 100) / 100; }
+  // strokes the pass may touch: never the replay button, never paths that animate their own dash
+  function strokes(){
+    return Array.prototype.filter.call(document.querySelectorAll(STROKE_SEL), function(n){
+      return !n.closest('.replay') && !n.classList.contains('draw') && !n.classList.contains('cut');
+    });
+  }
+  function isClosed(n){ return n.tagName === 'rect' || n.tagName === 'circle' || /z\s*$/i.test(n.getAttribute('d') || ''); }
+
+  // 1. slip filters scale with the preset
+  document.querySelectorAll('feDisplacementMap').forEach(function(m){
+    m.setAttribute('scale', (parseFloat(m.getAttribute('scale')) * preset.slip).toFixed(2));
+  });
+
+  // 2. dust: heavier, patchy strokes with a halo
+  var dustA = document.getElementById('dustA');
+  if (dustA && preset.dust){
+    dustA.setAttribute('slope', preset.dust.slope);
+    dustA.setAttribute('intercept', preset.dust.intercept);
+    var blur = document.querySelector('#dust feGaussianBlur');
+    if (blur) blur.setAttribute('stdDeviation', preset.dust.blur);
+    strokes().forEach(function(n){ n.style.filter = 'url(#dust)'; });
+  }
+
+  // 3. weight, jitter, breaks, geometry: one pass over every stroke
+  strokes().forEach(function(n, i){
+    var r1 = rand(i, 37), r2 = rand(i, 53), r3 = rand(i, 43);
+    var sw = parseFloat(getComputedStyle(n).strokeWidth) || 2;
+    n.style.strokeWidth = (sw * preset.weight * (1 + (r2 - 0.5) * preset.jitter)).toFixed(2);
+
+    if (preset.breaks && r1 < preset.breaks){
+      var gapK = preset.weight > 1.4 ? 3.2 : 2.2;   // gaps must outlive the dilate + halo
+      var a = 8 + Math.round(r2 * 16), b = Math.round((2 + r1 * 3) * gapK), c = 12 + Math.round(r1 * 22);
+      n.style.strokeDasharray = a + ' ' + b + ' ' + c + ' ' + b;
+    }
+    if (!preset.geo) return;
+    if (n.tagName === 'circle'){
+      var r = parseFloat(n.getAttribute('r')) || 0;
+      n.setAttribute('r', (r * (1 + (r1 - 0.5) * 2 * preset.geo.radius)).toFixed(2));
+      n.setAttribute('cx', (parseFloat(n.getAttribute('cx')) + (r2 - 0.5) * r * 0.4).toFixed(2));
+    }
+    if (isClosed(n) && preset.geo.gap && !n.style.strokeDasharray){
+      // the corner never quite meets
+      n.setAttribute('pathLength', '1');
+      var g = preset.geo.gap * (0.6 + r3 * 0.8);
+      n.style.strokeDasharray = (1 - g).toFixed(3) + ' ' + g.toFixed(3);
+      n.style.strokeDashoffset = (r2 * 0.25).toFixed(3);
+    }
+    if (preset.geo.rot){
+      n.style.transformBox = 'fill-box';
+      n.style.transformOrigin = 'center';
+      n.style.transform = 'rotate(' + ((r1 - 0.5) * 2 * preset.geo.rot).toFixed(2) + 'deg)';
+    }
+  });
+
+  // 4. ghost fragments: a few shapes from an earlier lesson, scattered and half erased
+  var main = document.querySelector('.slate > svg:not(.ghost)');
+  if (preset.ghost && main){
+    var cands = strokes().filter(function(n){
+      return n.closest('svg') === main && !n.classList.contains('tick') && (!n.getTotalLength || n.getTotalLength() > 40);
+    });
+    var vb = (main.getAttribute('viewBox') || '0 0 860 400').split(/\s+/).map(Number);
+    var layer = main.cloneNode(false);
+    layer.removeAttribute('id'); layer.removeAttribute('filter'); layer.setAttribute('class', 'ghost');
+    for (var k = 0; k < preset.ghost.count && cands.length; k++){
+      var src = cands[(k * 7919 + 13) % cands.length];
+      var box; try { box = src.getBBox(); } catch(e){ box = {x:0, y:0, width:40, height:40}; }
+      var cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+      var g1 = rand(k, 37), g2 = rand(k, 61), g3 = rand(k, 83);
+      var copy = src.cloneNode(true);
+      copy.removeAttribute('id'); copy.removeAttribute('class');
+      copy.style.opacity = ''; copy.style.strokeDasharray = ''; copy.style.filter = 'url(#dust)';
+      var wrap = document.createElementNS(SVG_NS, 'g');
+      wrap.setAttribute('transform',
+        'translate(' + (vb[0] + g1 * (vb[2] - box.width) - box.x).toFixed(1) + ' ' + (vb[1] + g2 * (vb[3] - box.height) - box.y).toFixed(1) + ') ' +
+        'rotate(' + ((g2 - 0.5) * 40).toFixed(1) + ' ' + cx + ' ' + cy + ') scale(' + (0.7 + g3 * 0.7).toFixed(2) + ')');
+      wrap.style.opacity = (preset.ghost.opacity * (0.6 + g1 * 0.8)).toFixed(3);
+      wrap.appendChild(copy); layer.appendChild(wrap);
+    }
+    main.parentNode.insertBefore(layer, main);
+  }
+
+  // 5. fade: long strokes thin toward the end
+  if (preset.fadeOver){
+    strokes().forEach(function(n){
+      try { if (n.getTotalLength() > preset.fadeOver) n.style.stroke = 'url(#fade)'; } catch(e){}
+    });
+  }
+
+  // 6. slip on text and chips, probability grows with width
+  var slips = ['url(#slip1)', 'url(#slip2)', 'url(#slip3)'];
+  document.querySelectorAll(TEXT_SEL).forEach(function(el, i){
+    if (rand(i, 61) < preset.pClean(el.offsetWidth || 0)) return;
+    el.style.filter = slips[i % 3];
+  });
+})();
+</script>
+</body>
+</html>

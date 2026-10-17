@@ -6,17 +6,23 @@
  *
  * It builds and validates the page as build.mjs and validate.mjs do, opens
  * look.md's eight addresses at once in one browser, and writes the eight
- * pictures, labelled, on one sheet: hairline-<name>-look.png. Then it prints
- * what can be measured, one line each, under look.md's item numbers: 9 the
- * frame, 8 the read-out, 12 the console, 4 the flicker. It exits 1 when the
+ * pictures, labelled, on one sheet: hairline-<name>-look.png. Beside it go the
+ * two 240px pictures with the name and the read-out hidden, for a reader told
+ * nothing, hairline-<name>-blind.png, and, when there is an answer point, the
+ * stage taken while the answer plays, rest to answer, hairline-<name>-motion.png.
+ * Then it prints what can be measured, one line each, under look.md's item
+ * numbers: 9 the frame, 8 the read-out, 12 the console, 4 the flicker, and 3
+ * how much of the thumbnail's ink the pointer moves. It exits 1 when the
  * validator rejects the page or one of those fails, 2 when it cannot run, and
- * 0 otherwise. Everything else is for eyes, on the sheet.
+ * 0 otherwise. Everything else is for eyes, on the three pictures.
  *
  * A point is a world point x,y,z, run through the P the figure made with its
  * own camera, or a viewBox point x,y, taken as it is. --answer is on the part
  * that should answer the pointer. --edge is at the figure's edge, for the two
  * ends of the slider; given twice, the first is for intensity 0 and the second
- * for 1. --zoom writes one shot's stage at three times the pixels.
+ * for 1. Without them, an `answer` or `edge` the figure gives in its
+ * hairline({ … }) call is used. --zoom writes one shot's stage at three times
+ * the pixels.
  *
  * The browser is Playwright's. playwright-core is installed once into a cache
  * folder of the user's (HAIRLINE_LOOK_CACHE moves it), never into the skill or
@@ -39,6 +45,39 @@ const USAGE = "usage: node look.mjs <name>.js --answer x,y,z [--edge x,y,z [--ed
 const WAIT = 1500, STILL = 250, CAP = 5000;
 /** A rest pose whose box covers less of the frame than this is reported as small. Both examples' rest boxes cover 36%: Terrain's 297 × 155, Riffle's 226 × 205. */
 const SMALL = 0.25;
+/** An answer that moves less of the thumbnail's ink than this is reported as faint. Terrain's answer moves 74%, Riffle's 139%; this is half the smaller. */
+const FAINT = 0.37;
+/** A pixel this far from the ground on any channel is ink: the dim stroke on a white plate stands 31 from it. */
+const INKED = 24;
+/** The motion strip: 16 frames of the stage 40ms apart, four to a row. The last, at 600ms, is most of the way through a 700ms tween; the sheet's answer picture is where it ends. */
+const FRAMES = 16, EVERY = 40, ACROSS = 4;
+
+/** The share of the rest picture's ink the answer moved: pixels inked in one and not the other, over the rest's ink. Each mask is a row of 0s and 1s. */
+export function moved(rest, answer) {
+  let ink = 0, changed = 0;
+  for (let i = 0; i < rest.length; i++) { ink += rest[i]; if (rest[i] !== answer[i]) changed++; }
+  return ink ? changed / ink : 0;
+}
+
+/** When each frame of the motion strip is taken, in ms after the pointer arrives: the first at rest, as it arrives, the others every `every` ms after. */
+export function beats(n = FRAMES, every = EVERY) {
+  return Array.from({ length: n }, (_, i) => i * every);
+}
+
+/* A picture's ink, read in the page: 1 where a pixel stands INKED or more from the ground, the colour 14px inside the picture's top left corner, on the plate and clear of the drawing. The outer 12px, where the plate's own outline runs, are left out. */
+const INK = async ([b64, INKED]) => {
+  const img = new Image();
+  img.src = "data:image/png;base64," + b64;
+  await img.decode();
+  const c = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }), x = c.getContext("2d");
+  x.drawImage(img, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height).data, at = (px, py) => 4 * (py * c.width + px), g = at(14, 14), mask = [];
+  for (let py = 12; py < c.height - 12; py++) for (let px = 12; px < c.width - 12; px++) {
+    const i = at(px, py);
+    mask.push(Math.max(Math.abs(d[i] - d[g]), Math.abs(d[i + 1] - d[g + 1]), Math.abs(d[i + 2] - d[g + 2])) >= INKED ? 1 : 0);
+  }
+  return mask;
+};
 
 /** look.md's eight pictures, in its order: the shot's name, what it adds to the address, and which point it holds. */
 export const SHOTS = [
@@ -82,10 +121,25 @@ function playwright(dir) {
   return { chromium: req("playwright-core").chromium, cli: join(dirname(has()), "cli.js") };
 }
 
-/* Keeps the P the figure makes from its own camera, so a world point can be turned into an ?at= point. */
+/*
+ * Keeps the P the figure makes from its own camera, so a world point can be
+ * turned into an ?at= point, and the `answer` and `edge` points a figure may
+ * give in its hairline({ … }) call. The bench is not touched: both are caught
+ * as the page sets them.
+ */
 const TRAP = () => {
-  let hl;
+  let hl, call;
   Object.defineProperty(window, "HL", { configurable: true, get: () => hl, set: (v) => { hl = { ...v, proj: (C) => (window.P = v.proj(C)) }; } });
+  Object.defineProperty(window, "hairline", {
+    configurable: true,
+    get: () => call,
+    set: (v) => {
+      call = (figure) => {
+        window.declared = { answer: figure.answer ?? null, edge: figure.edge ?? null };
+        return v(figure);
+      };
+    },
+  });
 };
 
 /**
@@ -106,6 +160,15 @@ const STATE = () => {
     clip: { x: Math.max(0, plate.left - 8), y: Math.max(0, plate.top - 8), width: plate.width + 16, height: bottom - plate.top + 16 },
     stage: { x: plate.left, y: plate.top, width: plate.width, height: plate.height },
   };
+};
+
+/* The pointer at a viewBox point x,y, put there as the bench's ?at= puts it: one pointermove on the stage. */
+const POINT = (at) => {
+  const [x, y] = at.split(",").map(Number), stage = document.getElementById("stage"), r = stage.getBoundingClientRect();
+  stage.dispatchEvent(new PointerEvent("pointermove", {
+    pointerType: "mouse", pointerId: 1, bubbles: true,
+    clientX: r.left + (x / 400) * r.width, clientY: r.top + (y / 320) * r.height,
+  }));
 };
 
 /** A browser context with look.md's window: 800 × 900, so ?w=240 narrows the page and not the window. */
@@ -159,12 +222,27 @@ function sheet(name, shots) {
 <div class="row">${cell(by.low)}${cell(by.high)}</div>`;
 }
 
+/** The motion strip: the stage's frames, ACROSS to a row at their own size, each under its time since the pointer arrived. */
+function strip(name, at, frames) {
+  return `<!doctype html><meta charset="utf-8"><style>
+  body { margin: 0; padding: 16px; width: max-content; background: #ececef; color: #18181b; font: 13px/1.3 ui-monospace, Menlo, Consolas, monospace; }
+  h1 { font: inherit; margin: 0 0 10px; color: #55555c; }
+  .grid { display: grid; grid-template-columns: repeat(${ACROSS}, auto); gap: 12px; }
+  figure { margin: 0; }
+  figcaption { margin: 0 0 6px; }
+  img { display: block; outline: 1px solid #c9c9ce; }
+</style><h1>hairline-${esc(name)} · the answer while it plays, the pointer to at=${esc(at)} after the first picture</h1>
+<div class="grid">${frames.map((f) => `<figure><figcaption>${esc(f.label)}</figcaption><img src="data:image/png;base64,${f.png}"></figure>`).join("")}</div>`;
+}
+
 /** Whether a box leaves the 400 × 320 viewBox. */
 const outside = (b) => b.x < 0 || b.y < 0 || b.x + b.w > 400 || b.y + b.h > 320;
 const n0 = (v) => Math.round(v);
 
 /** The look of one figure (a .js, built here, or a page build.mjs made). Prints as it goes and returns the exit code. */
-export async function look(src, { answer = null, edge = [], zoom = null } = {}, cwd = process.cwd()) {
+export async function look(src, given0 = {}, cwd = process.cwd()) {
+  let { answer = null, edge = [] } = given0;
+  const { zoom = null } = given0;
   if (zoom && !SHOTS.some(([s]) => s === zoom)) { console.error(`look: no shot "${zoom}". The shots: ${SHOTS.map(([s]) => s).join(", ")}.`); return 2; }
 
   // 1. the page, built and validated
@@ -206,17 +284,29 @@ export async function look(src, { answer = null, edge = [], zoom = null } = {}, 
     // 2. the points, through the figure's own P, from the rest page
     const context = await window800(browser);
     const rest = await open(context, url, true);
+    // the points the figure gives in its hairline({ … }) call, if any; a point on the command line wins over them
+    const decl = (await rest.page.evaluate(() => window.declared ?? null)) ?? { answer: null, edge: null }, theirs = new Set();
+    const isPoint = (p) => Array.isArray(p) && (p.length === 2 || p.length === 3) && p.every((v) => typeof v === "number" && Number.isFinite(v));
+    if (!answer && decl.answer) {
+      if (isPoint(decl.answer)) theirs.add((answer = decl.answer));
+      else console.log(`the figure's hairline call gives answer ${[decl.answer].flat().join(",")}, which is not a point: two numbers for the viewBox, three for the world. Give --answer x,y,z instead.`);
+    }
+    if (!edge.length && decl.edge) {
+      const list = Array.isArray(decl.edge[0]) ? decl.edge : [decl.edge];
+      if (list.length <= 2 && list.every(isPoint)) for (const p of (edge = list)) theirs.add(p);
+      else console.log(`the figure's hairline call gives edge ${JSON.stringify(decl.edge)}, which is not one point or two. Give --edge x,y,z instead.`);
+    }
     const given = { answer, low: edge[0] ?? answer, high: edge[1] ?? edge[0] ?? answer }, at = {}, said = [];
     for (const [key, p] of Object.entries({ answer, edge0: edge[0], edge1: edge[1] })) {
       if (!p) continue;
       const v = p.length === 2 ? p : await rest.page.evaluate((q) => (window.P ? window.P(...q).map(Math.round) : null), p);
       if (!v) { said.push(`${p} -> no P: the figure stopped before it called HL.proj`); continue; }
       for (const use of Object.keys(given)) if (given[use] === p) at[use] = v.join(",");
-      said.push(`${key === "answer" ? "answer" : "edge"} ${p} -> at=${v.join(",")}`);
+      said.push(`${key === "answer" ? "answer" : "edge"} ${p}${theirs.has(p) ? " (from the figure's hairline call)" : ""} -> at=${v.join(",")}`);
     }
     if (said.length) console.log(said.join(" · "));
     if (!answer) console.log("no --answer: the answering shots are taken at rest. Give --answer x,y,z, a world point on the part that should answer.");
-    else if (!edge.length) console.log("no --edge: the slider's two ends are taken with the pointer at the --answer point.");
+    else if (!edge.length) console.log(`no --edge: the slider's two ends are taken with the pointer at the ${theirs.has(answer) ? "answer" : "--answer"} point.`);
 
     // 3. the other seven, and the zoom, opened at once; each waits from its own load, so the waits overlap
     const queryOf = (q, use) => [q, use && at[use] && `at=${at[use]}`].filter(Boolean).join("&");
@@ -244,6 +334,40 @@ export async function look(src, { answer = null, edge = [], zoom = null } = {}, 
     await board.setContent(sheet(name, shots));
     await board.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
     await board.screenshot({ path: out, fullPage: true });
+
+    // the blind pair: the two thumbnails' stages with the name and the read-out hidden, for a reader who was told nothing
+    const unnamed = async (s) => {
+      await s.page.addStyleTag({ content: "#name, #read { visibility: hidden }" });
+      return (await s.page.screenshot({ clip: s.stage })).toString("base64");
+    };
+    const small = (n) => shots.find((s) => s.name === n);
+    const blind = [await unnamed(small("small")), await unnamed(small("small-answer"))];
+    const blindOut = join(cwd, `hairline-${name}-blind.png`);
+    const pair = await (await browser.newContext({ viewport: { width: 600, height: 300 } })).newPage();
+    await pair.setContent(`<!doctype html><meta charset="utf-8"><style>body { margin: 0; padding: 12px; display: flex; gap: 12px; align-items: flex-start; width: max-content; background: #ececef; } img { display: block; outline: 1px solid #c9c9ce; }</style>${blind.map((b) => `<img src="data:image/png;base64,${b}">`).join("")}`);
+    await pair.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
+    await pair.locator("body").screenshot({ path: blindOut });
+    const share = moved(await pair.evaluate(INK, [blind[0], INKED]), await pair.evaluate(INK, [blind[1], INKED]));
+
+    // the motion strip: the rest page, held still, given the pointer at the answer point as ?at= gives it, and taken while it plays
+    const motion = [];
+    let motionOut = null;
+    if (at.answer) {
+      const stage = shots[0], snap = async () => (await stage.page.screenshot({ clip: stage.stage })).toString("base64");
+      motion.push({ label: "rest", png: await snap() });
+      await stage.page.evaluate(POINT, at.answer);
+      const t0 = Date.now();
+      for (const t of beats().slice(1)) {
+        await sleep(t0 + t - Date.now());
+        const ms = Date.now() - t0;
+        motion.push({ label: `${ms}ms`, png: await snap() });
+      }
+      motionOut = join(cwd, `hairline-${name}-motion.png`);
+      const film = await (await browser.newContext({ viewport: { width: 1400, height: 800 } })).newPage();
+      await film.setContent(strip(name, at.answer, motion));
+      await film.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
+      await film.screenshot({ path: motionOut, fullPage: true });
+    }
 
     // 5. what can be measured
     let failed = false;
@@ -280,7 +404,17 @@ export async function look(src, { answer = null, edge = [], zoom = null } = {}, 
       ? `moving. ${restless.length === shots.length ? "Every shot" : restless.map((s) => s.name).join(", ")} still moving ${CAP / 1000} seconds after loading${shots[0].held === null ? "" : ", while rest held still"}`
       : `still. Every shot held still within ${slowest.toFixed(1)} seconds of loading`}. Information, not a check: look.md, item 4.`);
 
+
+    // how much of the thumbnail the answer moves: a warning, never a fail
+    if (!answer) console.log("3 answer: not measured. No --answer.");
+    else {
+      const faint = share < FAINT;
+      console.log(`3 answer: ${faint ? "warn" : "ok"}. At 240px the pointer moves ${n0(share * 100)}% of the ink, the pixels drawn in one small picture and not the other, over those drawn at rest${faint ? `; under ${n0(FAINT * 100)}% the answer is hard to see in a thumbnail. A change of colour moves no ink: make the answer move more, or say why a small one is right` : ""}.`);
+    }
+
     console.log(`sheet ${out}`);
+    console.log(`blind ${blindOut} holds the small and small-answer pictures with the name and the read-out hidden, as someone who has not seen the figure would meet it: for item 1, look at it that way, or show it to such a reader.`);
+    if (motionOut) console.log(`motion ${motionOut} is the stage while the answer plays: ${motion.length} pictures, rest first, then each labelled with the ms since the pointer reached the answer point. The sheet shows only pictures that held still, so a part that folds, crosses another part, or jumps between two frames on the way is seen only here: look for one, and fix it in the figure.`);
     if (zoomOut) console.log(`zoom ${zoomOut}`);
     return failed ? 1 : 0;
   } finally {

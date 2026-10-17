@@ -1,0 +1,345 @@
+/* Typed diagrams in Diagram Design's grammar (Cathryn Lavery, MIT): paper, ink, muted and rule from
+   the host's tokens, one accent for the focal element, hairlines, no shadows, no dot grid. The change
+   status of an element tints its stroke and also shows as a word, so colour is never the only cue. */
+
+.ve-typed {
+  --ve-dd-paper: var(--ve-bg);
+  --ve-dd-ink: var(--ve-heading);
+  --ve-dd-muted: var(--ve-muted);
+  --ve-dd-rule: color-mix(in srgb, var(--ve-heading) 22%, transparent);
+  --ve-dd-accent: var(--ve-accent);
+  display: grid;
+  gap: var(--ve-space-3);
+  min-width: 0;
+  margin: 0;
+  container-type: inline-size;
+}
+
+.ve-typed > figcaption {
+  display: grid;
+  gap: var(--ve-space-1);
+}
+
+.ve-typed > figcaption > .ve-figure-head {
+  margin: 0;
+}
+
+.ve-typed-title {
+  color: var(--ve-heading);
+  font: var(--ve-weight-strong) var(--ve-text-small)/var(--ve-leading-ui) var(--ve-font-ui);
+}
+
+.ve-typed-caption {
+  max-width: var(--ve-measure);
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+.ve-typed-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-2);
+}
+
+.ve-typed-body {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.ve-typed-body:focus-visible {
+  outline: 3px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+[data-ve-status="added"] { --ve-change-ink: var(--ve-status-ok); }
+[data-ve-status="changed"] { --ve-change-ink: var(--ve-status-info); }
+[data-ve-status="removed"] { --ve-change-ink: var(--ve-status-err); }
+[data-ve-status="same"] { --ve-change-ink: var(--ve-dd-muted); }
+
+/* ---- The shared grammar ------------------------------------------------------------------------ */
+
+.ve-dd {
+  display: block;
+  max-width: none;
+  height: auto;
+  font-family: var(--ve-font-body);
+}
+
+.ve-dd-node {
+  fill: var(--ve-dd-paper);
+  stroke: var(--ve-dd-ink);
+  stroke-width: 1;
+}
+
+[data-ve-status="added"] > a > .ve-dd-node,
+[data-ve-status="added"] > .ve-dd-node,
+[data-ve-status="changed"] > a > .ve-dd-node,
+[data-ve-status="changed"] > .ve-dd-node,
+[data-ve-status="removed"] > a > .ve-dd-node,
+[data-ve-status="removed"] > .ve-dd-node {
+  stroke: var(--ve-change-ink);
+  stroke-width: 1.5;
+}
+
+[data-ve-status="removed"] > a > .ve-dd-node,
+[data-ve-status="removed"] > .ve-dd-node {
+  stroke-dasharray: 4 3;
+}
+
+[data-ve-focal="true"] > a > .ve-dd-node,
+[data-ve-focal="true"] > .ve-dd-node {
+  fill: color-mix(in srgb, var(--ve-dd-accent) 8%, var(--ve-dd-paper));
+  stroke: var(--ve-dd-accent);
+}
+
+.ve-dd-name {
+  fill: var(--ve-dd-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ve-dd-name[data-ve-mono="true"],
+.ve-dd-field,
+.ve-dd-frame-op,
+.ve-dd-tag,
+.ve-dd-card {
+  font-family: var(--ve-font-mono);
+}
+
+.ve-dd-name[data-ve-mono="true"] {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ve-dd-status {
+  fill: var(--ve-change-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ve-dd-label,
+.ve-dd-note-label,
+.ve-dd-guard {
+  fill: var(--ve-dd-ink);
+  font-size: 14px;
+}
+
+.ve-dd-mask {
+  fill: var(--ve-dd-paper);
+}
+
+.ve-dd-edge,
+.ve-dd-msg line,
+.ve-dd-msg path {
+  fill: none;
+  stroke: var(--ve-dd-muted);
+  stroke-width: 1.2;
+}
+
+:is(.ve-dd-edge-g, .ve-dd-msg):not([data-ve-status="same"]) :is(.ve-dd-edge, line, path) {
+  stroke: var(--ve-change-ink);
+  stroke-width: 1.5;
+}
+
+.ve-dd-dashed :is(.ve-dd-edge, line, path) {
+  stroke-dasharray: 5 4;
+}
+
+.ve-dd-accent :is(.ve-dd-edge, line, path) {
+  stroke: var(--ve-dd-accent);
+  stroke-width: 1.5;
+}
+
+[data-ve-struck="true"] text,
+text[data-ve-struck="true"] {
+  text-decoration: line-through;
+}
+
+.ve-dd-head {
+  fill: var(--ve-dd-muted);
+}
+
+.ve-dd-head-open {
+  fill: none;
+  stroke: var(--ve-dd-muted);
+  stroke-width: 1.2;
+}
+
+.ve-dd-head-accent {
+  fill: var(--ve-dd-accent);
+}
+
+.ve-dd a:hover .ve-dd-name {
+  text-decoration: underline;
+}
+
+.ve-dd a:focus-visible .ve-dd-node {
+  stroke: var(--ve-accent);
+  stroke-width: 3;
+}
+
+/* ---- Sequence ------------------------------------------------------------------------------------ */
+
+.ve-dd-life {
+  stroke: var(--ve-dd-rule);
+  stroke-dasharray: 3 3;
+}
+
+.ve-dd-activation {
+  fill: color-mix(in srgb, var(--ve-dd-ink) 6%, var(--ve-dd-paper));
+  stroke: var(--ve-dd-muted);
+  stroke-width: 0.8;
+}
+
+.ve-dd-frame > rect:first-child {
+  fill: color-mix(in srgb, var(--ve-dd-ink) 2%, transparent);
+  stroke: var(--ve-dd-rule);
+}
+
+.ve-dd-frame-tab {
+  fill: var(--ve-dd-paper);
+  stroke: var(--ve-dd-rule);
+}
+
+.ve-dd-frame-op {
+  fill: var(--ve-dd-muted);
+  font-size: 12px;
+}
+
+.ve-dd-guard {
+  fill: var(--ve-dd-muted);
+}
+
+.ve-dd-note {
+  fill: color-mix(in srgb, var(--ve-dd-ink) 4%, var(--ve-dd-paper));
+  stroke: var(--ve-dd-rule);
+}
+
+.ve-dd-divider {
+  stroke: var(--ve-dd-rule);
+}
+
+.ve-dd-divider-label {
+  fill: var(--ve-dd-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---- State, flow, map, schema ----------------------------------------------------------------------- */
+
+.ve-dd-start {
+  fill: var(--ve-dd-ink);
+}
+
+.ve-dd-end-ring {
+  fill: none;
+  stroke: var(--ve-dd-ink);
+  stroke-width: 1.2;
+}
+
+.ve-dd-tag {
+  fill: var(--ve-dd-muted);
+  font-size: 12px;
+}
+
+.ve-dd-rule {
+  stroke: var(--ve-dd-rule);
+}
+
+.ve-dd-field {
+  fill: var(--ve-dd-ink);
+  font-size: 13px;
+}
+
+.ve-dd-field:not([data-ve-status="same"]) {
+  fill: var(--ve-change-ink);
+}
+
+.ve-dd-card {
+  fill: var(--ve-dd-muted);
+  font-size: 12px;
+}
+
+/* ---- The text version: always for a screen reader, in view when the column is too narrow ------------ */
+
+.ve-typed-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A narrow column reads the figure as its list: a phone never pans a diagram sideways. */
+@container (max-width: 40rem) {
+  .ve-typed .ve-typed-body {
+    display: none;
+  }
+
+  .ve-typed .ve-typed-text {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+.ve-typed-list {
+  display: grid;
+  gap: var(--ve-space-2);
+  margin: 0;
+  padding-left: var(--ve-space-5);
+}
+
+.ve-typed-list > li[data-ve-struck="true"] {
+  text-decoration: line-through;
+}
+
+.ve-typed-list-aside {
+  list-style: none;
+  margin-left: calc(-1 * var(--ve-space-5));
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-typed-word {
+  color: var(--ve-change-ink);
+  font-weight: var(--ve-weight-strong);
+}
+
+.ve-typed-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ve-space-1) var(--ve-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ve-muted);
+  font-size: var(--ve-text-small);
+}
+
+.ve-typed-key > li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ve-space-2);
+}
+
+.ve-typed-key > li > span {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1.5px solid var(--ve-change-ink);
+  border-radius: 3px;
+}
+
+.ve-typed-key > li[data-ve-status="removed"] > span {
+  border-style: dashed;
+}
+
+.ve-typed-links {
+  margin: 0;
+  font-size: var(--ve-text-small);
+}

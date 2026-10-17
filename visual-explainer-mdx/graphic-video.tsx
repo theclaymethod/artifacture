@@ -1,4 +1,3 @@
-import React from 'react';
 import { GraphicSlide, sampleSlideSequence, type GraphicSlideSequence } from './graphic-slides';
 
 export function GraphicVideo({ sequence, authoredSeconds = 0 }: { sequence: GraphicSlideSequence; authoredSeconds?: number }) {

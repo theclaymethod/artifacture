@@ -11,7 +11,7 @@ produce `verified` after the required review verdict is present.
 ## 1. Run mechanics
 
 ```bash
-node "{{skill_dir}}/scripts/verify/ve-verify.mjs" artifact.html \
+node "{{skill_dir}}/scripts/artifacture.mjs" verify artifact.html \
   --truth brief.md \
   --json /tmp/ve-report.json \
   --screens /tmp/ve-screens
@@ -19,6 +19,13 @@ node "{{skill_dir}}/scripts/verify/ve-verify.mjs" artifact.html \
 
 Use `--mechanics-only` for fast fixture and CI work when deck-state screenshots
 are not needed. Use `--static-only` only for diagnosis; it skips browser checks.
+
+Raw SVG diagram style checks apply to authored SVG, including raw SVG beside a
+shared scene. `GraphicCanvas` uses validated scene/layout contracts instead:
+its `data-graphic-scene` geometry is not subject to the raw four-pixel grid,
+shape-radius, or global layering assumptions. General browser, accessibility,
+and video-runtime checks still apply. Proportional-data checks inspect the
+diagram markup rather than words in bundled JavaScript.
 
 The report contains:
 

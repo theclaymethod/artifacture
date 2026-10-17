@@ -20,23 +20,11 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { BUILTIN_PRESET_NAMES, DEFAULT_PRESET, assertSupportedPreset } from '../../visual-explainer-mdx/preset-policy.mjs';
 
-export const BUILTIN_PRESETS = new Set([
-  'hairline',
-  'lieflat',
-  'mono-color',
-  'algebrica',
-  'oa-design',
-  'mono-industrial',
-  'nothing',
-  'blueprint',
-  'editorial',
-  'paper-ink',
-  'terminal',
-  'custom',
-]);
+export const BUILTIN_PRESETS = new Set(BUILTIN_PRESET_NAMES);
 
-export const DEFAULT_FALLBACK_PRESET = 'lieflat';
+export const DEFAULT_FALLBACK_PRESET = DEFAULT_PRESET;
 
 // Token keys a complete design system is expected to provide (directly or via
 // the derived fallbacks the exporter injects). Used for coverage reporting by
@@ -138,6 +126,7 @@ export function designSystemSearchPaths({
  */
 export function resolveDesignSystem(name, opts = {}) {
   assertValidSlug(name);
+  assertExportPreset(name);
   for (const searchPath of designSystemSearchPaths(opts)) {
     const dir = path.join(searchPath, name);
     if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) continue;
@@ -182,7 +171,13 @@ export function listDesignSystems(opts = {}) {
   for (const searchPath of designSystemSearchPaths(opts)) {
     if (!fs.existsSync(searchPath)) continue;
     for (const entry of fs.readdirSync(searchPath, { withFileTypes: true })) {
-      if (entry.isDirectory() && SLUG_PATTERN.test(entry.name)) names.add(entry.name);
+      if (!entry.isDirectory() || !SLUG_PATTERN.test(entry.name) || BUILTIN_PRESETS.has(entry.name)) continue;
+      try {
+        assertSupportedPreset(entry.name);
+        names.add(entry.name);
+      } catch {
+        // Retired palettes cannot be resolved as external systems.
+      }
     }
   }
   return [...names].sort();
@@ -339,15 +334,17 @@ export function presetNamesInSource(code) {
  * of unset tokens).
  */
 export function builtinFallbackCss(name, globalCss, fallbackPreset = DEFAULT_FALLBACK_PRESET) {
-  const pattern = new RegExp(`\\[data-ve-preset="${fallbackPreset}"\\]\\s*\\{([^}]*)\\}`);
-  const match = globalCss.match(pattern);
-  if (!match) {
+  const selector = `[data-ve-preset="${fallbackPreset}"]`;
+  const blocks = [...globalCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter((match) => match[1].split(',').some((part) => part.trim() === selector))
+    .map((match) => match[2]);
+  if (!blocks.length) {
     throw new DesignSystemError(
       `Could not find built-in preset "${fallbackPreset}" in global.css to use as a fallback.`,
       { name },
     );
   }
-  return `/* unknown preset "${name}": falling back to built-in "${fallbackPreset}" tokens */\n[data-ve-preset="${name}"] {${match[1]}}`;
+  return `/* unknown preset "${name}": falling back to built-in "${fallbackPreset}" tokens */\n[data-ve-preset="${name}"] {${blocks.join('\n')}}`;
 }
 
 /**
@@ -361,6 +358,7 @@ export function resolvePresetCssForExport(sourceCode, opts = {}) {
   const styles = [];
   const warnings = [];
   for (const name of presetNamesInSource(sourceCode)) {
+    assertExportPreset(name);
     if (BUILTIN_PRESETS.has(name)) continue;
     if (!SLUG_PATTERN.test(name)) continue;
     const system = resolveDesignSystem(name, opts);
@@ -389,4 +387,12 @@ export function resolvePresetCssForExport(sourceCode, opts = {}) {
     styles.push(builtinFallbackCss(name, fallbackCss));
   }
   return { css: styles.length ? styles.join('\n') : null, warnings };
+}
+
+function assertExportPreset(name) {
+  try {
+    assertSupportedPreset(name);
+  } catch (error) {
+    throw new DesignSystemError(error.message, { name });
+  }
 }

@@ -1,0 +1,7 @@
+# ISO geometry and lighting
+
+`iso-scene.ts` adapts the 30-degree point/face projection in [iso-figure](https://github.com/MrBongoC/ai-iso-skill) at revision `44b4da7714148eef547cc1b102e433472dfe3531` (Tolga Cohce, MIT). The implementation emits flattened rounded paths into Artifacture's shared scene model, validates face details, fits rest bounds and retains part identity. Keep `ISO-FIGURE-LICENSE` with copied source.
+
+Live-part lighting is informed by [iso-glow](https://isoglow.dev/). Its MIT skill archive was retrieved October 7, 2026 (SHA-256 `fe2d14a964609439f682a693c79d62e3813ad3f42ddecfe73fcd7b2629a19720`); keep `ISO-GLOW-LICENSE` with copied source. Its palette picker, plate captions, navigation shell, pointer runtime and timers are not copied. Artifacture's theme tokens own the single accent, with a portable 2.3-unit SVG halo; only designated live geometry glows. Hairline's unchanged upstream runtime remains a separate prepared-path/pointer route.
+
+`motion-eases.ts` adapts eight monotone curves from [motionmaxxing](https://github.com/Tejashmakwana/motionmaxxing) revision `8c8ec0f2a6f6c9a0da15cd24f7b1298ab298368c`, `runtime/motion.js`, Apache-2.0. Names are kebab-case, inputs are checked, endpoints are exact, and the existing absolute-time sampler consumes them. No GSAP runtime, third-party study films, bounce/overshoot curves or another clock is copied. Keep `MOTIONMAXXING-LICENSE` and `MOTIONMAXXING-NOTICE` with copied easing source. Upstream measurements motivate options; they are not an independently reproduced benchmark.

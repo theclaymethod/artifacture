@@ -2,10 +2,13 @@
 
 Choose the route before authoring:
 
+- **Diagram Design's original skin, geometry or animation:** read [source-fidelity.md](../references/source-fidelity.md) and follow the bundled original skill. Use its original HTML or `DiagramDesignFigure`; the layouts below are separate Artifacture adapters.
+
 - **Compact flow, tree, swimlane, or timeline:** `DiagramCanvas` sizes and lays out nodes from their content. Use the example below; no additional diagram reference is needed.
 - **Ordered walkthrough of a compact graph:** read [animated-diagrams.md](../references/animated-diagrams.md) for opt-in `DiagramWalkthrough`. Author explicit steps against stable edge IDs; playback starts paused.
 - **Complex architecture, workflow, sequence, dataflow, or lifecycle:** read [archify.md](../references/archify.md). Keep editable typed JSON and use Archify's validated standalone HTML delivery.
 - **Quantitative comparison or trend:** read [charts.md](../references/charts.md).
+- **Physical floor/site plan or exploded assembly:** read [axonometric.md](../references/axonometric.md) for the installed builders and motion.
 - **Specialized diagram family:** read [diagram-design.md](../references/diagram-design.md). If no computed layout fits and custom SVG geometry is justified, read [diagrams-svg.md](../references/diagrams-svg.md).
 
 Start with the relationship the reader needs to understand. Use short, specific node names; add detail only when it distinguishes the node. Label edges with information that direction alone cannot convey. Add lanes for actual ownership and legends only for non-obvious encodings.

@@ -1,0 +1,52 @@
+use fframes::{AudioMap, Duration, FFramesContext, Frame, Video, Svgr, RenderOptions, EncoderOptions, DynamicMediaProvider, RawFontData};
+use fframes::cli::{self, clap};
+use fframes_skia_renderer::{SkiaFFramesRenderer, SkiaPipelineConfig, metal::SkiaMetalCtx};
+use std::{process::ExitCode, sync::Arc};
+
+#[derive(serde::Deserialize)]
+struct Bridge { width: usize, height: usize, fps: usize, order: Vec<usize>, svgs: Vec<String> }
+impl Video for Bridge {
+    const FPS: usize = {{FPS}};
+    const WIDTH: usize = {{WIDTH}};
+    const HEIGHT: usize = {{HEIGHT}};
+    fn duration(&self) -> Duration<'_> { Duration::Frames(self.order.len()) }
+    fn audio(&self) -> AudioMap<'_> { AudioMap::none() }
+    fn render_frame<'a>(&'a self, frame: Frame, _: &FFramesContext<'a, '_>) -> Svgr<'a> {
+        self.svgs[self.order[frame.global_index]].as_str().into()
+    }
+}
+
+#[derive(Debug, clap::Args)]
+struct Args {
+    #[arg(long, global = true, default_value = "frames.json")] frames: String,
+    #[arg(long, global = true, default_value = "media")] fonts: String,
+}
+
+fn execute() -> Result<ExitCode, Box<dyn std::error::Error>> {
+    let args = cli::parse::<Args>();
+    // Prepare once, before native rendering fans out across worker threads.
+    let video: Bridge = serde_json::from_slice(&std::fs::read(&args.app.frames)?)?;
+    if video.width != Bridge::WIDTH || video.height != Bridge::HEIGHT || video.fps != Bridge::FPS || video.order.is_empty() || video.order.iter().any(|index| *index >= video.svgs.len()) { return Err("Frame pack differs from the native frame configuration".into()); }
+    let mut media = DynamicMediaProvider::default();
+    for entry in std::fs::read_dir(&args.app.fonts)? {
+        let path = entry?.path();
+        if path.extension().is_some_and(|ext| ext == "ttf" || ext == "otf") {
+            media.fontdata.push(RawFontData { file_name: path.file_name().ok_or("Font filename")?.to_string_lossy().into(), data: Arc::new(std::fs::read(&path)?) });
+        }
+    }
+    let gpu = SkiaMetalCtx::new(Bridge::WIDTH, Bridge::HEIGHT)?;
+    let backend = SkiaFFramesRenderer::new_metal(&gpu, SkiaPipelineConfig::default())?;
+    Ok(cli::new(&video, RenderOptions {
+        media: Some(&media), default_font: "Inter",
+        video_encoder_options: EncoderOptions {
+            preferred_encoder: Some("libx264"),
+            codec_params: Some(&[("crf", "20"), ("preset", "medium"), ("tune", "animation")]),
+            ..Default::default()
+        },
+        ..Default::default()
+    }).args(args).backend(backend).run())
+}
+
+fn main() -> ExitCode {
+    match execute() { Ok(code) => code, Err(error) => { eprintln!("{error}"); ExitCode::FAILURE } }
+}

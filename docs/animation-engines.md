@@ -1,6 +1,6 @@
 # Animation engine choices
 
-Artifacture uses one editable graphic scene across posters, diagrams, animations, slides, and videos. Browser rendering with HyperFrames is the default. For advanced mathematics, the recommended additional backend is a pinned Manim Community environment. Original ManimGL remains an option when compatibility with 3b1b's Python source matters. Psychopomp is a promising native code-review system to evaluate separately.
+Artifacture uses one editable graphic scene across posters, diagrams, animations, slides, and videos. Browser rendering with HyperFrames is the default. For advanced mathematics, the recommended additional backend is a pinned Manim Community environment. Original ManimGL remains an option when compatibility with 3b1b's Python source matters. Manim Community and Psychopomp now have optional pinned native adapters; see [native engine usage](native-engines.md).
 
 ## The scene is the foundation
 
@@ -22,14 +22,14 @@ The initial motion surface supports opacity, path reveal, highlight, and illustr
 
 ## Native options
 
-These are engine choices, separate from the shared scene API. No native backend is installed or integrated by this foundation change.
+The native adapters are separate from the shared scene API. They retain editable source, pins, clips, selected stills and provenance. Browser geometry stays editable; rendered native pixels enter through `NativeClip` and `NativeStill`.
 
 | Choice | Best use | Adoption scope and limits |
 | --- | --- | --- |
 | Browser SVG + [HyperFrames](https://github.com/heygen-com/hyperframes) | Editable diagrams, code-review and nontechnical explanations, shared collections | Default preview and capture path. Extend specific 2D operations when a real scene needs them; retain vector source and meaningful still poses. |
-| [Manim Community 0.21.0](https://pypi.org/project/manim/) | Equations, derivations, function graphs, and 3D mathematics | Recommended optional source-to-clip backend in an isolated, pinned Python environment. Preserve Python source, renderer settings, clips, and selected stills under the episode's identity. Browser review plays those rendered assets. MIT. |
+| [Manim Community 0.21.0](https://pypi.org/project/manim/) | Equations, derivations, function graphs, and 3D mathematics | Integrated optional source-to-clip backend in isolated Python 3.12.11 with a hash-locked dependency environment. Preserve Python source, renderer settings, clips, and selected stills under the episode's identity. Browser review plays those rendered assets. MIT. |
 | [3b1b ManimGL](https://github.com/3b1b/manim) | Literal 3b1b scene/source compatibility | Alternate Python renderer, with an explicit package version or source SHA. Published `manimgl` 1.7.2 uses OpenGL dependencies; inspected master uses wgpu while still declaring 1.7.2. Avoid treating those as the same renderer. MIT. |
-| [Psychopomp](https://github.com/kitlangton/psychopomp) | Native code-review films and interruptible presentations | Evaluate an external Rust/wgpu renderer. Its upstream README calls it an early prototype. No browser backend or general TeX engine was observed. No tracked source LICENSE or package license field was found at the inspected SHA; no implementation is vendored or ported here. |
+| [Psychopomp](https://github.com/kitlangton/psychopomp) | Native code-review films and interruptible presentations | Integrated optional Rust/wgpu source-to-clip adapter at `156444d4fee830a9c88307b2c27352412cd5c18d`, with Rust 1.99.0 and a bounded paint-only theme bridge. Scene Plans validate before render. Upstream now includes an MIT license. Native GPU required; presentation controls are not part of this adapter. |
 
 Manim Community supplies [MathTex](https://docs.manim.community/en/stable/reference/manim.mobject.text.tex_mobject.MathTex.html), [TransformMatchingTex](https://docs.manim.community/en/stable/reference/manim.animation.transform_matching_parts.TransformMatchingTex.html), and [Axes](https://docs.manim.community/en/stable/reference/manim.mobject.graphing.coordinate_systems.Axes.html). MathTex requires TeX tooling; optional [MathTypst](https://docs.manim.community/en/stable/reference/manim.mobject.text.typst_mobject.MathTypst.html) compiles another formula source to SVG. Installing a math backend does not make its Python geometry directly editable in the browser. Validate its output codec and compositing before promising transparent overlays.
 
@@ -39,9 +39,9 @@ Psychopomp's [PR walkthrough](https://github.com/kitlangton/psychopomp/blob/46fd
 
 Keep browser scenes as the default collection source. Code-review episodes preserve unchanged code identity, demonstrate the broken behavior and fixed replay, and cite their source. Nontechnical episodes explain one causal mechanism with familiar language. Mathematical episodes can embed separately rendered Manim clips. Share figure identities, terminology, visual treatment, and prerequisite order across episodes; presentation modes should not create separate geometry libraries.
 
-Implement an optional math adapter only after selecting its engine and pin. Its boundary is a source scene plus explicit theme, dimensions, frame rate, and requested poses, producing clips and stills with their source provenance. Do not begin a full Manim or Psychopomp port: general path alignment, equation glyphs, updaters, shaders, cameras, and 3D depth are a much larger compatibility commitment than the required 2D foundation.
+The native adapter boundary is a source scene plus explicit theme, dimensions, frame rate, and requested poses, producing clips and stills with their source provenance. Do not begin a full Manim or Psychopomp port: general path alignment, equation glyphs, updaters, shaders, cameras, and 3D depth are a much larger compatibility commitment than the required 2D foundation.
 
-## Evidence and limits
+## Initial research evidence and limits (2026-10-04)
 
 The engine assessment inspected these exact source revisions on 2026-10-04. They are research snapshots, not installed dependency pins:
 
@@ -54,3 +54,7 @@ A separate disposable SVG/GSAP prototype sampled times `0, 1, 3, 5, 7.5, 3`. Bac
 On the assessed host, Rust and TeX tools were absent. An isolated Python 3.14.4 probe, `uv pip install --python <scratch-venv>/bin/python --only-binary :all: manim==0.21.0`, failed because usable ModernGL wheels were unavailable. No system dependencies or compile fallback were installed. No native render or comparative speed result is claimed.
 
 Session-local receipts and exact reproduction commands are retained under `/Users/claytonkim/.codex/investigations/artifacture-video-upgrade-2026-10-04/engines/`: `browser-proof.json`, `commands.md`, `manim-install-probe.json`, and `psychopomp-source-receipt.json`. The Artifacture worktree baseline was `e5e131eae83b068eb158a1ee67c4b4f70d1b0b34`; the new foundation is described by the source files in this change, rather than attributed to that baseline commit.
+
+## Native integration evidence (2026-10-05)
+
+The pinned Manim Community adapter rendered a 14-second, 1920×1080/30-fps secant-to-tangent scene using MathTypst formulas and a matching-shape derivative transform without TeX. The pinned Psychopomp adapter rendered an 8-second connection/packet scene on Apple M1 Max Metal. Both were rendered in Hairline and 3b1b, normalized to H.264/yuv420p, probed for actual frame settings, and decoded into three selected stills per clip. Manim output has 420 frames; Psychopomp delivery has 240, with native 60-fps rendering recorded separately. These examples are unnarrated component clips. No comparative performance or ManimGL execution is claimed.

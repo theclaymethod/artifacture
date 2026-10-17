@@ -1,0 +1,4 @@
+/* A path or a name wraps only at its joints (breakable.tsx): each part between two joints stays whole. */
+.ve-nobreak {
+  white-space: nowrap;
+}

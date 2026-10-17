@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/coldteadotai/pr-lens/main/packages/schema/json-schema/config.schema.json",
+  "title": "PR Lens repository config",
+  "version": "0.2.0",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^0\\.(1|2)\\.\\d+$",
+      "description": "Declared explicitly so a repository's corrections keep their meaning across contract versions."
+    },
+    "lenses": {
+      "default": [
+        "architecture",
+        "data-flow"
+      ],
+      "description": "Lenses to render for this repository.",
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "architecture",
+          "data-flow"
+        ],
+        "description": "Rendering lens."
+      }
+    },
+    "map": {
+      "default": {
+        "rename": [],
+        "exclude": [],
+        "lane": [],
+        "group": []
+      },
+      "type": "object",
+      "properties": {
+        "rename": {
+          "default": [],
+          "description": "Replace the inferred label.",
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "match": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "`id:<node-id>` for an exact node, otherwise a repository-relative path glob."
+              },
+              "to": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "description": "Short display label."
+              }
+            },
+            "required": [
+              "match",
+              "to"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "exclude": {
+          "default": [],
+          "description": "Drop matching nodes, and any edge or flow step that touched them.",
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "`id:<node-id>` for an exact node, otherwise a repository-relative path glob."
+          }
+        },
+        "lane": {
+          "default": [],
+          "description": "Move matching nodes into a lane.",
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "match": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "`id:<node-id>` for an exact node, otherwise a repository-relative path glob."
+              },
+              "lane": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$",
+                "description": "Stable identifier, unique within its collection in a document."
+              }
+            },
+            "required": [
+              "match",
+              "lane"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "group": {
+          "default": [],
+          "description": "Cluster matching nodes under a sub-group within their lane.",
+          "maxItems": 128,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "match": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "`id:<node-id>` for an exact node, otherwise a repository-relative path glob."
+              },
+              "group": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$",
+                "description": "Stable identifier, unique within its collection in a document."
+              }
+            },
+            "required": [
+              "match",
+              "group"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Overlay applied over inference, never mutated by it."
+    },
+    "branding": {
+      "default": true,
+      "description": "Show the 'Rendered by PR Lens' footer on comments.",
+      "type": "boolean"
+    },
+    "github": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "comment": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "collapsed": {
+              "default": false,
+              "description": "Start the hosted App's diagrams and details in a closed disclosure. Drawing still runs automatically.",
+              "type": "boolean"
+            },
+            "notice": {
+              "default": true,
+              "description": "Leave a short note on a pull request the hosted App does not draw because drawing is on request. `false` keeps it silent until asked.",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "draw": {
+          "default": "auto",
+          "description": "When the hosted App draws: every push, or only after someone comments `@pr-lens draw` on the pull request.",
+          "type": "string",
+          "enum": [
+            "auto",
+            "on-demand"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion"
+  ],
+  "additionalProperties": false,
+  "description": "Repository configuration for PR Lens."
+}

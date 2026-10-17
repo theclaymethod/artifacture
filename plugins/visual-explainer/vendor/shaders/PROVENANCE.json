@@ -1,0 +1,2061 @@
+{
+  "source": "https://github.com/shader-effects-inc/shaders",
+  "commit": "935f71a7789f0e07811dfe6fd0d8f707e9848238",
+  "nativePackage": "shaders",
+  "nativeVersion": "4.0.0",
+  "excluded": "Upstream test/snapshot files and demo images; platform editor/presets are separate from the MIT engine.",
+  "files": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "453bbc2717d80bcd6a90d8f41aef8b8ceac568de49c0fbce95951b678f54bbae"
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "sha256": "266b2170c8de35863518acb89d8959235d26e99e71a917e9757a3dbb02063f75"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "7011a89606edb0139b5b8bca58c85e26225ddfc5ca22c9c44f20e88d26d055fe"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "eeaaa26f5c65cb6dfebf1c098ac2375fdcdb497cebf105b0542f229482b106f4"
+    },
+    {
+      "path": "README.md",
+      "sha256": "b95f9e3973b706f211da133eb5414f4cb5fc98e2fe58409273ca811d5ef25bea"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "720d8476b08b48255d88b139759608e5e886789f470c4296068206eda492e1fc"
+    },
+    {
+      "path": "changelog.config.mjs",
+      "sha256": "717dac1572d2aad97e1dfd1294ec22ea6c916b94cbc7441120950884a1f66783"
+    },
+    {
+      "path": "package.json",
+      "sha256": "8b19e18f767d5b4aae91bd36688c765262def60048bda8724bac66e24ae72472"
+    },
+    {
+      "path": "packages/core/docs/std/README.md",
+      "sha256": "46c943dd9eafa540e309763f71ec96cbe99aecc0e2591be1c408df95157e9024"
+    },
+    {
+      "path": "packages/core/docs/std/STYLE.md",
+      "sha256": "a92d16e1d10a7f1005333622b6624104c686c106bd1b4180efc542ce32fd94cc"
+    },
+    {
+      "path": "packages/core/docs/std/compose.md",
+      "sha256": "5366331e3cc59d7894cd7eb90504035e2e38a7e955800c24e1cf8f5a1ff6f961"
+    },
+    {
+      "path": "packages/core/docs/std/define.md",
+      "sha256": "f7022dbd57f4d29c6e4289fe810ff75c79f78de2a5233103d69b00cf2b9f3163"
+    },
+    {
+      "path": "packages/core/docs/std/effects.blurs.md",
+      "sha256": "d10997cdfe10984f0aaa6a293c1ffe8faf6250b88cc372c5bdb815a479e977d8"
+    },
+    {
+      "path": "packages/core/docs/std/effects.color.md",
+      "sha256": "c77a580b03008b9e9bc0d6ed2f6c4b907435f7038ee1aaf9399fed309373495b"
+    },
+    {
+      "path": "packages/core/docs/std/effects.edgeGlow.md",
+      "sha256": "161431d827cad518d500e0e676577640de0438c83751c606096468da84b82d58"
+    },
+    {
+      "path": "packages/core/docs/std/effects.fracture.md",
+      "sha256": "5856d0eee6ae8fc33bc44897fc823aa178af9fdb0ec725f3dcf28253a5269d46"
+    },
+    {
+      "path": "packages/core/docs/std/effects.instances.md",
+      "sha256": "155343977408c008f5fdc1f6d847f4a59c7e8ad2848abd3629250c4da2b39711"
+    },
+    {
+      "path": "packages/core/docs/std/effects.lens.md",
+      "sha256": "b8c330edb6f4632cc10d6a48970cc0a6e6ab0dc8997d2da65e928513e10ef4df"
+    },
+    {
+      "path": "packages/core/docs/std/effects.overlay.md",
+      "sha256": "ede04ec5d27b96700d0e3d43f236c2a0d8127d6ce221ab52ce184ec81d9100da"
+    },
+    {
+      "path": "packages/core/docs/std/effects.pointerFields.md",
+      "sha256": "47864618053bb648e7fa87d8811f12af42fed13537f759add907253530ad5955"
+    },
+    {
+      "path": "packages/core/docs/std/effects.reveal.md",
+      "sha256": "f0255c85061f9d2eeb44b7a0c87bfc91b1b87212b89d1a368e7fe198f529d6c4"
+    },
+    {
+      "path": "packages/core/docs/std/effects.stylize.md",
+      "sha256": "7ccd89f4f36e7b6d836344104d4049fe9182aa114040409a9ea98f9526afb84c"
+    },
+    {
+      "path": "packages/core/docs/std/figures.md",
+      "sha256": "a4ae578e1641732ebe5d712ae83a7dce2f36cc586134c8ee6dd2be2128000037"
+    },
+    {
+      "path": "packages/core/docs/std/filter.md",
+      "sha256": "338259e5f2e171caec9789a711947cb5aa789a404cd7e7e0034d1568a045b122"
+    },
+    {
+      "path": "packages/core/docs/std/frames.md",
+      "sha256": "7774c0f260c6fb019b09ff4d23d41f004e2db58f7d3057012b8ebaf3c2e3c170"
+    },
+    {
+      "path": "packages/core/docs/std/gradients.md",
+      "sha256": "19b851249a69df65c3707f516642a9f1577a1bf4f2df6030b5df6448882bfb42"
+    },
+    {
+      "path": "packages/core/docs/std/invoke.md",
+      "sha256": "201e98566d4be95a2d7d251116d5bf32bcbc2a4049ef6c4480f14d6faa8ce610"
+    },
+    {
+      "path": "packages/core/docs/std/light.md",
+      "sha256": "d083ebedabad46de4b6e3b912e0b3d1bb17199abe5bdfe78f998840cba57a473"
+    },
+    {
+      "path": "packages/core/docs/std/lists.md",
+      "sha256": "0bc2903891e5ec881db1cd68328e19ef83fd7223ed33d652e20e4c5f29c69708"
+    },
+    {
+      "path": "packages/core/docs/std/mask.md",
+      "sha256": "8c3c086ae7f30b790db1911fbb74cd70022b9a6ec9e6fab91d19315841eb22fa"
+    },
+    {
+      "path": "packages/core/docs/std/materials.md",
+      "sha256": "a7b878c10c32edf19280284a6200ec9c14e8da4fcec2d125d5e16e158cdd3b25"
+    },
+    {
+      "path": "packages/core/docs/std/math.md",
+      "sha256": "0c05021e28cef4d73901f1c72c0d0ffc7dd7e51f3111fd13aff8b290564588f9"
+    },
+    {
+      "path": "packages/core/docs/std/media.md",
+      "sha256": "ea20d0c84623d62090b92630e50c718cfebb190ae316014e056047188882fc05"
+    },
+    {
+      "path": "packages/core/docs/std/motion.md",
+      "sha256": "00955f0fa84d705fd983aa21dd0adc6d54044f7579cbb042db566a5a51096ec9"
+    },
+    {
+      "path": "packages/core/docs/std/noise.md",
+      "sha256": "8a3397053c30a223aabe87f1f89dcd3dd03397a46b30e5d3e22e8d2d5458a5d1"
+    },
+    {
+      "path": "packages/core/docs/std/paint.md",
+      "sha256": "6cd6f6216f497e4f6367fa70a123dd0268bac5f002c48fc7d25caacb2ad43c6b"
+    },
+    {
+      "path": "packages/core/docs/std/patterns.md",
+      "sha256": "bcbe2270ad926c231e925398273cb11de2d7dc06fb88121e95f26b7af52bccb8"
+    },
+    {
+      "path": "packages/core/docs/std/radiance.md",
+      "sha256": "f6c2b39d15d60cf6916160606c4e6d62f7b83703b38c015ea605baf2ae536965"
+    },
+    {
+      "path": "packages/core/docs/std/shape.md",
+      "sha256": "ff88a04b2deb1dfd6b2cd6d81e877c109a8bf34ec6277bf7d2d1d0f254529c17"
+    },
+    {
+      "path": "packages/core/docs/std/signal.md",
+      "sha256": "33d7d73dbba240dffc649d9431d95a66379014950bde6ccdc62515ac052115f8"
+    },
+    {
+      "path": "packages/core/docs/std/sim.agentForces.md",
+      "sha256": "5ead11944f36bf819807dbc90ba7e1f493a3ded187f60ee3a32c39591bf04734"
+    },
+    {
+      "path": "packages/core/docs/std/sim.agentFrame.md",
+      "sha256": "7128a593a7cc315d6d2daccccb6add954b9a0d2865328bba828b8aaf2f0c44a6"
+    },
+    {
+      "path": "packages/core/docs/std/sim.agentRender.md",
+      "sha256": "d708f2c8ce2ba0d3691e6c7a9019c7d6a940e630d329cb2da4c1bc416c82ef44"
+    },
+    {
+      "path": "packages/core/docs/std/sim.agents.md",
+      "sha256": "b1e817eb53f934c4d4ceff6ad72f9fa1244d010ed58528699492c91db9248804"
+    },
+    {
+      "path": "packages/core/docs/std/sim.feedback.md",
+      "sha256": "69df67bc9385eeb3747304ab6eaa5d441ca1a3135c473cbdadf506992e90533a"
+    },
+    {
+      "path": "packages/core/docs/std/sim.fluids.md",
+      "sha256": "a792e345d9e140ca6ce70cf4bb94a8a8558e89087aceba5d948596a1a7fdd076"
+    },
+    {
+      "path": "packages/core/docs/std/sim.grids.md",
+      "sha256": "e0fc7176391dad8e6546ee25ddcc1a0ac5fec8938bc372e2debe0571b59c639b"
+    },
+    {
+      "path": "packages/core/docs/std/sim.shapeFields.md",
+      "sha256": "6e820f69b6b6205fc127947d4a4bf1885b283e55eb3b1c412d46056b6b141c10"
+    },
+    {
+      "path": "packages/core/docs/std/simulate.md",
+      "sha256": "3a388d373be4738a637accd38066f108777d657ae089fd23dc42d5f732ca5c1b"
+    },
+    {
+      "path": "packages/core/docs/std/slots.md",
+      "sha256": "15e3fc1761ccdf2005c629502eba27510b85c32c8f9c8f07f94bb465c324a98c"
+    },
+    {
+      "path": "packages/core/docs/std/values.md",
+      "sha256": "4d97ccdb2c2c653fa908abd8baae13f40b193c4f28d3c0b67ed5a1194a4ae955"
+    },
+    {
+      "path": "packages/core/docs/std/volume.md",
+      "sha256": "876d452650a44ac8c0ae8392187276756f4a9adfada7fa173afc4b22d0bdd075"
+    },
+    {
+      "path": "packages/core/docs/std/voxels.md",
+      "sha256": "3ea6dc5c65226f12f9cc98c0d2fee54d2a0be127ded6bba44be51335275539dc"
+    },
+    {
+      "path": "packages/core/docs/std/warps.md",
+      "sha256": "f08b331cdba4cb4892697492e7c7add7439cbe9c8635f4447dd61093da295af5"
+    },
+    {
+      "path": "packages/core/eslint.config.mjs",
+      "sha256": "bca4588a36185ad7af97a97e63ec51df47fcc6199ecfe64e7060039c0ad65a96"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "15940b3bdf6f24cd9e95e9bb09486e116edf3123305bee5611e4be76af0db09d"
+    },
+    {
+      "path": "packages/core/scripts/docsManifest.ts",
+      "sha256": "5c032626dba97714af9c12c035ee2e532ff087db2c3dfa8eafbffa7c93ba9588"
+    },
+    {
+      "path": "packages/core/scripts/generate-components.ts",
+      "sha256": "b3df10d5219ab76040d8d743912476ac6a2a47dea27a99f45d1b0fafcb495cae"
+    },
+    {
+      "path": "packages/core/scripts/generateRegistry.ts",
+      "sha256": "393b995479cce5d4384c94fa5a16a7fa31078add569fe2a751b2099a90b3d1ac"
+    },
+    {
+      "path": "packages/core/scripts/inject-jsdoc.ts",
+      "sha256": "ecff735391950d0b1b51ebea714d8bec1d5be60652f5492d7457357a7b078609"
+    },
+    {
+      "path": "packages/core/scripts/optimize-covers.ts",
+      "sha256": "db8b03e7b214211b914f78e98a1fc80200db4af69aa13b0c44912c8685232485"
+    },
+    {
+      "path": "packages/core/src/customShaders.ts",
+      "sha256": "6c0edc0db9cd38ed8349a27c05c1701105c858aef55d7a00ceebe1d0ed608764"
+    },
+    {
+      "path": "packages/core/src/gpu/composer.ts",
+      "sha256": "fb9d49e9cf231e9a386c4d82bae9991f7d9452fa143b6ceaf37e05af41f415c6"
+    },
+    {
+      "path": "packages/core/src/gpu/compute.ts",
+      "sha256": "83e9dcf43edf1b2029a326c9015de58f2971c763da6a9bb944c797de1706a7f4"
+    },
+    {
+      "path": "packages/core/src/gpu/contract.ts",
+      "sha256": "4b0e758bba6a823637823c0fa7685223d3b0549d391d44d15a49bfaafa86a60c"
+    },
+    {
+      "path": "packages/core/src/gpu/frame.ts",
+      "sha256": "624fdb63d17346547e0ad8cea692e07f7668b0471838443ed872a67016e05861"
+    },
+    {
+      "path": "packages/core/src/gpu/index.ts",
+      "sha256": "3c338d3dea3926aad65d6119bdee2022204f869791ab930e5ad63c2f76d4736d"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/CATALOG.md",
+      "sha256": "b9f2373d02f2b4c1270b469093166140ba77fb56253382bfbc2712c10c326bae"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/PRIMITIVES.md",
+      "sha256": "5fd137737cfa27e9ec8997f79d6b9acc5c5bae0fb3e30990565599732445ff13"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/aa.ts",
+      "sha256": "7a47c1a00c0c8709912fa77b3fa2e6da62d66dd47a4aa6b3a33850af2b8180e8"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/agents.ts",
+      "sha256": "0dc5f7aeb5b50e8848a6dcbc3e55efaaa39f734eb1b490d343fd8114e0166450"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/blend.ts",
+      "sha256": "0c5156d535da07f04aef5b9b5b063ed6e5607e5c8822a98708eb86d4ece1a538"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/blur.ts",
+      "sha256": "341117aeba293c0d7c097cc14e94c59cf5accf481c10fe166380d3ad9013f694"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/cells.ts",
+      "sha256": "d6a07cdbe7f2eb8bd84321690ccf9239cb4bde01b05ebde6ad6e4401c1f24344"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/cellular.ts",
+      "sha256": "138625950ee5117febfe17ccbb318f4b7b5b782b3b97382fba4a63f12dfcf9de"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/colorMixing.ts",
+      "sha256": "27bc84b626247ac36ae2696a3f31f1f23b46afef1fde1f96dffa51b6cf1af3e5"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/colorOps.ts",
+      "sha256": "e2884d78cb5460e0b1606f071d318e38012990a37f53e90ac00ceb03c3cfcdc8"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/colorStops.ts",
+      "sha256": "18b60e94e0b2430d7efb473be1600c1e98c65513625c634585c814e07ec59efc"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/constants.ts",
+      "sha256": "f41d01b1b25d8f5dc58497d7f38f018e95f95f048782e5d455f5886305e4a4e0"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/coords.ts",
+      "sha256": "a62fa2e2fb94c069f4f50c2a39b13ee2bf85ea9e4380d12427af13d98eac7115"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/dataEncoding.ts",
+      "sha256": "36ddb5e8268fbf2d1f1e36cc7f91a6c2f58f60146067a975c505c49894f75f6d"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/displace.ts",
+      "sha256": "82499cd7248027bca19fc9dd736a869f0e6cfa4873d1dee1577cb3ad476e080e"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/edges.ts",
+      "sha256": "5e542c8fc00b5ad2fa0c527537d84ffaac34ced967e18e358601613b4a9f8018"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/bevel.ts",
+      "sha256": "8edd2b2bf8896f8931a55d230747ec168befb7f3f011987f549d4f465e004736"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/emboss.ts",
+      "sha256": "f93f0de4d86dab9272f95ac600ef5fa7e0f212e6e4f61b7f81187fc32ad25df7"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/glass.ts",
+      "sha256": "180cb03fa58712632cb4cd6a12257543a0b2a0713647694e9029c49180c69acf"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/index.ts",
+      "sha256": "8bf468e5e88213943023604a04c7b852935cbf4f7f26c495c6a90635e535229b"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/neon.ts",
+      "sha256": "2f160c7bf3f52453b5d942b9ecd072e3503e2435b32698da5b90697080e79b87"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/raymarch3d.ts",
+      "sha256": "183680b43a47e482b77dc307abf1e080a78e01cb1a43af2bbf5d82cf0f7b808e"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/effects/thinFilm.ts",
+      "sha256": "a77b923b661a5d1c9b6f17e9c820038ba0810111aaf526191d46d1884861533a"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/fields.ts",
+      "sha256": "d789f0d13d92d0e20ecd66571814e7c78dcf54e3ace638120854500612ccf2e3"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/geom.ts",
+      "sha256": "8dab7a46e4d955f580ef56a49f341d4c48aed48f0e5347a60aeb123eca7e06e8"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/gradientPaints.ts",
+      "sha256": "010e3792aa2c64701ef2b5131916193c98c03d7fd60ff1fd60b59ae23f3d6316"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/host/canvasRaster.ts",
+      "sha256": "e8ec02b543bd2f7f3ef3e9e3b0e6295c256690a56f14ada6ec5802e2feada90d"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/host/mediaLifecycle.ts",
+      "sha256": "86d4bb82d3de8685b3475229036531745741118269e5a3fc51e66e93412e296e"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/host/pointer.ts",
+      "sha256": "bed3a363bd0a368ef38201b8677ea8265dcf111a62929625b961486897cc1af3"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/index.ts",
+      "sha256": "049bc788e295a187c85d7197295aba9886c58209ea70584e4fe6d5d9a7dd0ef3"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/instanceParts.ts",
+      "sha256": "043a4909eeff94dbb930325623c5e207d2b61f6eed068d3af2bb217b3cf16aa9"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/lensParts.ts",
+      "sha256": "340a620f036dd14bf5a43c2395db1397453de70cfe0cdc73dcbf9ff16a0f78f1"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/lightfields.ts",
+      "sha256": "e5cfb516288b2470ebe20fcf21771e10158547c98fbfca5dce5e37112fe00304"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/lighting.ts",
+      "sha256": "e90a6b5f8aedc978bec5bcda4529493a35cb68212be8fc4628e2abdedec3daaf"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/mask.ts",
+      "sha256": "9eb3c514e9fefff7409b3d74a96dab28d5029568f2987532036a074eaa83276f"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/materialParts.ts",
+      "sha256": "e812166513e6a6a7eb00df5682760bf5fb8275471172ccf7ef512f7fff08f719"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/media.ts",
+      "sha256": "dfaa5fb7cea71aece1671bf5ce90d568da8437e552cab7d3a7950772cef2fd9e"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/motionBlur.ts",
+      "sha256": "f0bbc59ac663467041ed9e6b8c3b883d1c25e1b504dd7bbe17c77fe8e7e2c00f"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/noise.ts",
+      "sha256": "5817311eff374e9849aa4c0ea58a826c69e0f27696815dea109f395e7aad4cd4"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/noiseColor.ts",
+      "sha256": "bc463df01fbfba3b13de8e1588fa1d85ba333e82c71f5fd8690a3610f4727baf"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/noisePaints.ts",
+      "sha256": "d8d8afca8f6f029e5aa53b200fdef56fbf6a74dc5df398b513e7b7175d87c1a3"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/noiseStylize.ts",
+      "sha256": "702a59cc57260694dcd9a0d3d895c46d5ce510f04175202b575285d87c7c018d"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/overlayParts.ts",
+      "sha256": "be11e07a3c009fb0072c4a576ca9c33756fc928f3d6a5fbe63b69d3c7bba5ea3"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/patternPaints.ts",
+      "sha256": "dc1007128031fe3681386333eb27cb8354c906d37672853b104eae91add368b1"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/reveal.ts",
+      "sha256": "99392f686bda1ea4c35700bce4183dec3d18f403e68ab68c1e5fdae21bd935e9"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/sampling.ts",
+      "sha256": "ebdee1c46d73d7a93dcc0e845d79a057d36c1c733d15feb5fc1b1595d9ac1716"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/sdf.ts",
+      "sha256": "cf41d192ccfbbfc107047d51061a8b9520e05942c5142b585133dcffca48a220"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/sdf3d.ts",
+      "sha256": "c3f1f54edf60c94a03ece26960b7be5ce3d71ec06c15ffe3bfedcc0bb19a380f"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/shapePaints.ts",
+      "sha256": "958eba76646fe14993d390c4d330cde3bddda896c9aa0ed87ea2318902846a25"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/stylizePaints.ts",
+      "sha256": "b3d51a6c3ec2dad53ecdfc4eff95e00160eac1de703b8e7ebe375f7cf89710f1"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/time.ts",
+      "sha256": "27991ccdcb583a20d271e93c8c25be6fe3315a8a0bb95693cd2ff8761281b024"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/tone.ts",
+      "sha256": "0e251067be1298b43625a45aa3c92eebbbd71e4c301559a579e0ad087be72ff5"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/tonemap.ts",
+      "sha256": "f75702b381cc85b85636cb3c8cc5a3e31b05b1e950d48680bc813292d5a17038"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/trackerSim.ts",
+      "sha256": "a637dd49d74492d7b05b5dea63a4d82a1dd869c47a1018b3170b30f7c5b2ae7a"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/uvTransform.ts",
+      "sha256": "29e501ea416d3090ac9274d9c287e89ffd5c5519e613669a0902ff8697629933"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/voxels.ts",
+      "sha256": "b3b482ad083748423528a5147e607320fa9a9711d2abf10d0ec1896f182e5841"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/warpMaps.ts",
+      "sha256": "3ae6978b1a2e66cf596213357b4cb1929f5cc1028c8bb01dc61dbc7b161778ea"
+    },
+    {
+      "path": "packages/core/src/gpu/kit/waves.ts",
+      "sha256": "5225d7afd93498a6a4c273fceae2d2856659a20112051b5cf4f2a0aaf43df53c"
+    },
+    {
+      "path": "packages/core/src/gpu/passManager.ts",
+      "sha256": "3a4daa7c8e59896242ad64c7602d7a9bcc8f5b4b93a08fdbd27879ade090005c"
+    },
+    {
+      "path": "packages/core/src/gpu/pipelineCache.ts",
+      "sha256": "b33b2ba35eeff21a90aff4ebaa94b35b47f9d1d76b4d99857f2a4f676e723c4b"
+    },
+    {
+      "path": "packages/core/src/gpu/porters.ts",
+      "sha256": "d65cf312c88cd1858a7dd2b5c1c35cacd7bed367199741c03ab3c9cb8c76b44b"
+    },
+    {
+      "path": "packages/core/src/gpu/root.ts",
+      "sha256": "7e8d5c937b6f5be6cb53d03dcd6672810d8acd3ea65c4eafbf68581a52851d23"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/agentSystem.ts",
+      "sha256": "cb24da774e6dbb93b9aaaa0cc84c328fc46a22c7ccd1d0e5786d5bdf231580ff"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/feedbackSim.ts",
+      "sha256": "cc2e96903823ccd1a498b3c1ac0ee26d51cfdb5d0907bdec4b68746e432472de"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/fluids.ts",
+      "sha256": "1f96736de90dfb8abc4251cf59aea24f8e692ce983dadcc700d72d21b8c947f9"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/gridKernels.ts",
+      "sha256": "49935f9d33cbbee9a9f483f0a84e706d89a01125d1b819cc0e9cefe2e924b0ec"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/heightField.ts",
+      "sha256": "c7d65fe5d11afbe331f673f770538f55581d4fd7a273a6af95cee62942ed2cd7"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/lateBoundChild.ts",
+      "sha256": "6e5482dbae3c33c0eca92a84c3ee623c6c15765e8cc662166bc928d1f0ad73f4"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/pointwiseFilter.ts",
+      "sha256": "507a0d610a1b110c1f9e9be3c59b31a6483bd9f7fd681097a61f71401dc8a563"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/radiance.ts",
+      "sha256": "2bf9edf9508765b9797fb3d1baad31e562ebbf4d8cbd5476069c8cb9321eb6ba"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/rttFilter.ts",
+      "sha256": "6952cd7eb37218231042117e9c719b681912b777bf5263926ad142dfdf98d587"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/sdfShape.ts",
+      "sha256": "3870741d38fb65515b10b68efd2134bd8ed396ec6835ffd6cbf020e15f6044f9"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/shared.ts",
+      "sha256": "06b1512377370f7eca47f244b3fe08d0ddb46dbee537019045d3b430e6001702"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/simShared.ts",
+      "sha256": "cf6e042f1df783fbc583c24a3abd619f51c0a4419500257c3ced8bfdabe6e33d"
+    },
+    {
+      "path": "packages/core/src/gpu/scaffolds/uvRemapShader.ts",
+      "sha256": "5c74997cf825e34626c5758d7610a85d15d07aa15f5f71f61df72c12159d0c48"
+    },
+    {
+      "path": "packages/core/src/gpu/support.ts",
+      "sha256": "fadad33597413698c4fb54fdafe697250544087baa24bc201af44c738f937a8d"
+    },
+    {
+      "path": "packages/core/src/gpu/textures.ts",
+      "sha256": "36c0180f9926c2b3de0d66fcfa58905d90eba24f2502bd708073294944bd387a"
+    },
+    {
+      "path": "packages/core/src/gpu/transforms.ts",
+      "sha256": "d7b30a4970c2017efa378bd9fb4a2f8c98551e05a971c2f6c27791376efff6f5"
+    },
+    {
+      "path": "packages/core/src/gpu/uniformBridge.ts",
+      "sha256": "917301c3a5f62f52a73a4d41540257cc1a105ca446986a12209b815e702d037f"
+    },
+    {
+      "path": "packages/core/src/gpu/uniformStore.ts",
+      "sha256": "a8304e7a4e26733f3e8a2e3662e8831bf89bb36b86c00c3d1adc686dfaca226c"
+    },
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "17983df38127b7d4a5f3fb99427e92b5cc8a801da1c0fa35fc018711c16a68e5"
+    },
+    {
+      "path": "packages/core/src/maskResolution.ts",
+      "sha256": "6ba1b6b3016e804b0c64dcc3fea87512eded2f08c645682c827d76009a481e94"
+    },
+    {
+      "path": "packages/core/src/performanceTracker.ts",
+      "sha256": "3de16c21739b44cafaaaf516b7f6ed405e5184417137e55a2143f56ac10280f9"
+    },
+    {
+      "path": "packages/core/src/presetRenderer.ts",
+      "sha256": "5bb7f6972586590b1cd6eb63cba0bf6aef58bc4d4c05d4e4105151a2f3d47b0e"
+    },
+    {
+      "path": "packages/core/src/registry.ts",
+      "sha256": "c4b7aa9e66bd3d23fdc5d00e20099d343e343d9fec0eb322ae7a6b76ecd88db4"
+    },
+    {
+      "path": "packages/core/src/shaderRegistry.ts",
+      "sha256": "59fd58bcd6900aabf6554f338679590fafd5b29ff2252f0538a154a33d75668c"
+    },
+    {
+      "path": "packages/core/src/shaders/AngularBlur/index.ts",
+      "sha256": "938306923b2bdc888749ce51d51b0b6de1b7cc8b87f02e4bc84a9025376eb27f"
+    },
+    {
+      "path": "packages/core/src/shaders/Arc/index.ts",
+      "sha256": "d72dc48cea9ce2885faf68bbb24021d0ac7a0ea537e0208edb63201234b832e2"
+    },
+    {
+      "path": "packages/core/src/shaders/Ascii/index.ts",
+      "sha256": "f43105ca8c072c64b28b42c6ce70e12594326e1799669c7527682d309cf75f52"
+    },
+    {
+      "path": "packages/core/src/shaders/Aurora/index.ts",
+      "sha256": "32dc53c1b028e1cef041ec6c8853e7392009459a785a9dcb462ad58f7f64af21"
+    },
+    {
+      "path": "packages/core/src/shaders/BarShift/index.ts",
+      "sha256": "e9fd5cd67894812c5d9a0fa2c694b6af67fc35348b9f41d6cf27e03967e919a5"
+    },
+    {
+      "path": "packages/core/src/shaders/BarnDoors/index.ts",
+      "sha256": "c8e293f67d645cbc274d119f3b776de0f30ee418c5a5563a8db86b922c0c38ab"
+    },
+    {
+      "path": "packages/core/src/shaders/Beam/index.ts",
+      "sha256": "c9351636ee5ae6f7dd2c59d2966215506f90ec1b925c61a04ce8424a451c782c"
+    },
+    {
+      "path": "packages/core/src/shaders/Bend/index.ts",
+      "sha256": "eaad2759a12944c5ee5b73047262ddf66d9645c5256b36e4596810b0637a16fa"
+    },
+    {
+      "path": "packages/core/src/shaders/Blob/index.ts",
+      "sha256": "39a732e2153dc2b9241c9019ceb061029dfca285c554161e5ac88909419f7fab"
+    },
+    {
+      "path": "packages/core/src/shaders/BlockDissolve/index.ts",
+      "sha256": "8b3e05ebb8ced99ef60609f638458510d053a2603205da68feceb8a8bbf85440"
+    },
+    {
+      "path": "packages/core/src/shaders/BlockNoise/index.ts",
+      "sha256": "f109f7fe1bbe5e34ea2e678bea81e5c880f32dc3e43dfbe59f5ce121d792b0fe"
+    },
+    {
+      "path": "packages/core/src/shaders/BlueNoise/index.ts",
+      "sha256": "9ad8216ef9d86042cb615a9a628c46218cf9c0b0967e37015d7e5fa2ad02455f"
+    },
+    {
+      "path": "packages/core/src/shaders/Blur/index.ts",
+      "sha256": "09e067be046dad312416bfffc80ef645911b778f12b40216b8704205318259bd"
+    },
+    {
+      "path": "packages/core/src/shaders/Boids/index.ts",
+      "sha256": "dd60990678d4e2313d376817216cb0fb1462f25d3502475523f6afc5c7447c1e"
+    },
+    {
+      "path": "packages/core/src/shaders/BokehBlur/index.ts",
+      "sha256": "cb96216ab6b3503b343903e1016bd8b812f7923eac4c31e4af89f4d17a85dede"
+    },
+    {
+      "path": "packages/core/src/shaders/BrickPattern/index.ts",
+      "sha256": "cff90fe75bc2c63a24788e3c5cc82659aabfcd2137f5dd80e1cad25bba6b997b"
+    },
+    {
+      "path": "packages/core/src/shaders/BrightnessContrast/index.ts",
+      "sha256": "46af03bc1a913730d38ee85db1255afc7b4c704f3e783261d088ff5b968c0900"
+    },
+    {
+      "path": "packages/core/src/shaders/BrushedMetal/index.ts",
+      "sha256": "bf73a6e52ba9a59758da5b7576486aa4b85cb0ebde05d00be3a415bf82fb74a8"
+    },
+    {
+      "path": "packages/core/src/shaders/Bulge/index.ts",
+      "sha256": "2611a2590752d4702a73c737e5fc38760100a4fa24a48201126cb268126e165e"
+    },
+    {
+      "path": "packages/core/src/shaders/CRTScreen/index.ts",
+      "sha256": "898df7b8c6d34ead769f2b046a3a59de51abc5d0d50ab7367481c71002957e05"
+    },
+    {
+      "path": "packages/core/src/shaders/CarbonFiber/index.ts",
+      "sha256": "4db311eb868d6902845a801b584f6e3582be9fde385dc17f854bde2c2cbc0121"
+    },
+    {
+      "path": "packages/core/src/shaders/Chalkboard/index.ts",
+      "sha256": "3e5eb0eb231540bb405bdcbf28df3601e239aefe01c0f06fdd966391225f2526"
+    },
+    {
+      "path": "packages/core/src/shaders/ChannelBlur/index.ts",
+      "sha256": "d923cfbaf765ad94d1503a7c763e9c029af2e962ddcac5cc9d5f2ed1f1afc092"
+    },
+    {
+      "path": "packages/core/src/shaders/CheckerWipe/index.ts",
+      "sha256": "c5dc46607a36e9622987f2095a2831c06c1e9a735ad0e0a05c5d22d0ef8a68ff"
+    },
+    {
+      "path": "packages/core/src/shaders/Checkerboard/index.ts",
+      "sha256": "3e07030c8978e53a96b2683f15b4312f56dc1d5f8a410de5ceeecf0d778e8252"
+    },
+    {
+      "path": "packages/core/src/shaders/Chevron/index.ts",
+      "sha256": "4cb3a52d407bac287e212972cbd1520b3b5797a2a7c88bbe0aeb82866bff7c6d"
+    },
+    {
+      "path": "packages/core/src/shaders/ChromaFlow/index.ts",
+      "sha256": "8d77c90b84649bb1f109ddede4c4b17d37413223fcff3832c99550f7cc1d93fa"
+    },
+    {
+      "path": "packages/core/src/shaders/ChromaticAberration/index.ts",
+      "sha256": "ce2806b9594cfe6b936bfd1461cd1cb15e28d8f1ea00bd4dc46e5b2525416d88"
+    },
+    {
+      "path": "packages/core/src/shaders/Chrome/index.ts",
+      "sha256": "fff7f118cb4d12e7f04ea6d49e68f774a49a21a2ba1c9b3616f6a00480061523"
+    },
+    {
+      "path": "packages/core/src/shaders/Circle/index.ts",
+      "sha256": "a305aaa840f678330d65f45fe67b4a57dd09c954979785c5c738dd9c9a087e64"
+    },
+    {
+      "path": "packages/core/src/shaders/ColorWheel/index.ts",
+      "sha256": "663995db41fe47ed626ececdbb4ce50bde6837806f7e4ee71966c4403f3ef3be"
+    },
+    {
+      "path": "packages/core/src/shaders/CompressionArtifacts/index.ts",
+      "sha256": "71e2245ffc2e7e47290cb3c4d5315051057d15efe2867dc411ec916b27e7f729"
+    },
+    {
+      "path": "packages/core/src/shaders/ConcentricSpin/index.ts",
+      "sha256": "e6cbd961ae96132e0a7a394152d0cdf2b91ca2a1db07222807fcc8c1a738e322"
+    },
+    {
+      "path": "packages/core/src/shaders/ConicGradient/index.ts",
+      "sha256": "78a2711173769b03fdfb686783341ad89b77446f83aba9e7de0d2074d36da267"
+    },
+    {
+      "path": "packages/core/src/shaders/ContourLines/index.ts",
+      "sha256": "2447a4d7c9007086d3dd2d9672aecf82a539c5255e2440630e1815357ff3f32d"
+    },
+    {
+      "path": "packages/core/src/shaders/CornerPin/index.ts",
+      "sha256": "02eaec36ee19e5a93cd44b9f0eea7b808a04b4fc9bed1a8b24ee4e1db2d9b86a"
+    },
+    {
+      "path": "packages/core/src/shaders/Crescent/index.ts",
+      "sha256": "4317b5e3d3e957e1f2010efb02759b376d5c415114c804b135be137ee6412551"
+    },
+    {
+      "path": "packages/core/src/shaders/Cross/index.ts",
+      "sha256": "e68b2da7fde5c7c6e87c9aada42e1e1a57baa20ef3910b744241bf7165f02644"
+    },
+    {
+      "path": "packages/core/src/shaders/Crystal/index.ts",
+      "sha256": "7ca528a2b0e35a799ea9873ac76c467bfa78a89b66c11014f5f16981fbc9b025"
+    },
+    {
+      "path": "packages/core/src/shaders/CurlNoise/index.ts",
+      "sha256": "5b008028cf877e5c7c31591cc03c0c6e0edc801a92d911d97dbd406ee67b3651"
+    },
+    {
+      "path": "packages/core/src/shaders/CursorRipples/index.ts",
+      "sha256": "dc3904201ccdae0c2d3a732699c9415d6d421fe9fb123f695b64980bf8b3e72d"
+    },
+    {
+      "path": "packages/core/src/shaders/CursorTrail/index.ts",
+      "sha256": "1cfdb60b981438b885d6b47c5ee3557f3289669fc12fb07e5000e4c0476c5cb2"
+    },
+    {
+      "path": "packages/core/src/shaders/DataMosh/index.ts",
+      "sha256": "2c798fc631390fa473ed20d21a4f66d9f8ba9b321158cbe6e2be8e96b3501f9c"
+    },
+    {
+      "path": "packages/core/src/shaders/DiamondGradient/index.ts",
+      "sha256": "2a58cd03f40d41aaf0530db20d3f9c1df3b195ba25c8e5d4b1e3dcdda03cc2e5"
+    },
+    {
+      "path": "packages/core/src/shaders/DiamondWipe/index.ts",
+      "sha256": "fd535761737ee87f94e12a69320ea17bc4db6c0f96a2e0bdf5c7b0d73bf7d540"
+    },
+    {
+      "path": "packages/core/src/shaders/DiffuseBlur/index.ts",
+      "sha256": "bc7c0f0498a5c6f767800e0038fca1fb57272a68a250f8360619b16a05af5006"
+    },
+    {
+      "path": "packages/core/src/shaders/DisplacementMap/index.ts",
+      "sha256": "ad6a0a7ea91a28269a6e5316255637e6f4baf75e971970eacfdf323ddb25878b"
+    },
+    {
+      "path": "packages/core/src/shaders/Dither/index.ts",
+      "sha256": "5534d40a1737df5562b7c204714105d044c11017cc9d36372a0591188a8f6eee"
+    },
+    {
+      "path": "packages/core/src/shaders/DotGrid/index.ts",
+      "sha256": "43b92e7413662b1d141ed67f8881195218344bada46fed27b40db35e700e5446"
+    },
+    {
+      "path": "packages/core/src/shaders/DropShadow/index.ts",
+      "sha256": "6d08d2cabf54bf333a3d40f7074d304a6aa0c8d35c6e09d2f5e223404bed6578"
+    },
+    {
+      "path": "packages/core/src/shaders/Duotone/index.ts",
+      "sha256": "5025fae0d150f067ac8ee35c2ea9092b553d3c5f4342a5d21aafe4f0807b5ef2"
+    },
+    {
+      "path": "packages/core/src/shaders/Ellipse/index.ts",
+      "sha256": "7397c8547499ebe8c04c3b2fc5c55ffa495720f1043887b8996f1dd4d6b0b219"
+    },
+    {
+      "path": "packages/core/src/shaders/Emboss/index.ts",
+      "sha256": "ff31f6250a9abebfeca5e1bfb87ffebbc8517f8dd2d747de833821be5e3fa5df"
+    },
+    {
+      "path": "packages/core/src/shaders/Engraving/index.ts",
+      "sha256": "206459b93e8346cb9c7b806cc6e349fe647ecfc40bd7c0fa4e94326253d060fe"
+    },
+    {
+      "path": "packages/core/src/shaders/ErosionNoise/index.ts",
+      "sha256": "a716f84c6ee69d2c1a5b57d58522570fd4d91597d97e6ff95bad7e88930d87c6"
+    },
+    {
+      "path": "packages/core/src/shaders/Exposure/index.ts",
+      "sha256": "5b5d39a80a34290d7b355242e86374d517ff3c41b68112e22488e630e8b8aa38"
+    },
+    {
+      "path": "packages/core/src/shaders/FallingLines/index.ts",
+      "sha256": "ab36e92908ee3d3157d59ddfffff537775437a88d8e3b11666f60c96f8df6d0c"
+    },
+    {
+      "path": "packages/core/src/shaders/FilmGrain/index.ts",
+      "sha256": "bc51157e62205aedcaa8544cfaa259f23c0fe8401407ba9c08e34c2da79945ec"
+    },
+    {
+      "path": "packages/core/src/shaders/FilmStock/index.ts",
+      "sha256": "8d0e36f0a22c08c7802a87a20bd0a6c6db247a3554225a50e0d7c24818924478"
+    },
+    {
+      "path": "packages/core/src/shaders/FilmStock/stockLuts.ts",
+      "sha256": "24942a55c53185943440d0419ee181f368fe35bbf2666c61697fae9e8a99bea9"
+    },
+    {
+      "path": "packages/core/src/shaders/Flip/index.ts",
+      "sha256": "2b48cfe235ec5a1af09368f4d5c3553c4afd54daae560bd4b9529ac0e89a847e"
+    },
+    {
+      "path": "packages/core/src/shaders/FloatingParticles/index.ts",
+      "sha256": "367edfde907b090e32e2d06f13a6155da43c2c9e92b6e00002b330f8a71d7b40"
+    },
+    {
+      "path": "packages/core/src/shaders/FlowField/index.ts",
+      "sha256": "7deaf09a5360b2e225b61380c009d2a2b1edcac13a1fa3cfc354c7fc84e02ba0"
+    },
+    {
+      "path": "packages/core/src/shaders/Flower/index.ts",
+      "sha256": "df7080662464efb2ea55169344d45ab7c015af62f58a2ce1130652cbcb98d2cb"
+    },
+    {
+      "path": "packages/core/src/shaders/FlowingGradient/index.ts",
+      "sha256": "7e30d231988daca4348b0e12d9902207d63e8e47637167a763da99098c003d32"
+    },
+    {
+      "path": "packages/core/src/shaders/FlutedGlass/index.ts",
+      "sha256": "8fd8b53a4f8be34dba5491dcf15a63063d00cd12f4d904ed6353282b001a25e0"
+    },
+    {
+      "path": "packages/core/src/shaders/Fog/index.ts",
+      "sha256": "e7ee840cd24dab3c9215c5db6da0f98b4685d6d503ba7c42b203d45be07c11c2"
+    },
+    {
+      "path": "packages/core/src/shaders/Form3D/index.ts",
+      "sha256": "8089ee5cb29c2e74d00f95d144e1748c3a6ab6b16f236f178505d27b0df0e929"
+    },
+    {
+      "path": "packages/core/src/shaders/FractalNoise/index.ts",
+      "sha256": "98a01370a54e5c403b4392b3046b570febcbf223a694dbb27a004d880ef425de"
+    },
+    {
+      "path": "packages/core/src/shaders/Frost/index.ts",
+      "sha256": "e248024ac9b9c6636126b103bc4b574ae702c54a92598b9c497736d94c3c3941"
+    },
+    {
+      "path": "packages/core/src/shaders/GaborNoise/index.ts",
+      "sha256": "370337933a4a08d12cc49d2764b3083e38ab81e6b8a5160e1f9efceedd2fbd83"
+    },
+    {
+      "path": "packages/core/src/shaders/Glass/index.ts",
+      "sha256": "964f8b456050a05e5a3dc278c5c40b5d6c880d02889e11d7b203d1d2a63afc45"
+    },
+    {
+      "path": "packages/core/src/shaders/GlassTiles/index.ts",
+      "sha256": "5271a87efde8e9a8741716b67fad1392cfec8b7d67fd2f134dcbaff1c8d90cf1"
+    },
+    {
+      "path": "packages/core/src/shaders/Glitch/index.ts",
+      "sha256": "0ac41bee0d66f2c9a31d68a35c999901c23d9154e0d914485567d006e85e9742"
+    },
+    {
+      "path": "packages/core/src/shaders/Glow/index.ts",
+      "sha256": "6a7bba8cca0c9e88022df5a82a3d3c05bc11111e23da7108d3c736e5473575b2"
+    },
+    {
+      "path": "packages/core/src/shaders/Godrays/index.ts",
+      "sha256": "de1d9cc0ffb4b85931fbe8d6193362c7c2b43cc8c9fb9968e0f70ce93037dbd7"
+    },
+    {
+      "path": "packages/core/src/shaders/Goo/index.ts",
+      "sha256": "8de5f4bda980988f90b585fc03eca781ffbf17373a857c0733dbe4a34bbf6e91"
+    },
+    {
+      "path": "packages/core/src/shaders/GradientMap/index.ts",
+      "sha256": "37ee499067375c48b4ab67c39b3743830ec8ccccdc51e38703ad4a03494b88b1"
+    },
+    {
+      "path": "packages/core/src/shaders/Grayscale/index.ts",
+      "sha256": "fa0881102ae8980dca4c109679e539fc21280482a738d3a5b0ca7b403b0ce734"
+    },
+    {
+      "path": "packages/core/src/shaders/Grid/index.ts",
+      "sha256": "fa3430010f16cb4b9002a2ab187c8442ab71aac1fc648b16bf2af9392036faea"
+    },
+    {
+      "path": "packages/core/src/shaders/GridDistortion/index.ts",
+      "sha256": "8295b2bde7a15cf55cbcf97874011eda2e5412452f6779879180ab1ac6aceb1a"
+    },
+    {
+      "path": "packages/core/src/shaders/Group/index.ts",
+      "sha256": "0a21c5f8adf0e125128595d94dabfafec0623b99cdcf74a2e7f31ca2c65c74b4"
+    },
+    {
+      "path": "packages/core/src/shaders/HTMLInCanvas/docs.md",
+      "sha256": "25b089121f41543f8c33ba6d2d7aea7e9008bea5ce01e145cd4a91283cbc53a1"
+    },
+    {
+      "path": "packages/core/src/shaders/HTMLInCanvas/index.ts",
+      "sha256": "09f3ccdfccfc319d9268d391bc675b14529be6a9ff48d0b4520aa2f7b984ea8e"
+    },
+    {
+      "path": "packages/core/src/shaders/Halftone/index.ts",
+      "sha256": "231525fa1aba38948f1c8be67ee51610c73a53dd9174ac8b7d70881fcffadba7"
+    },
+    {
+      "path": "packages/core/src/shaders/Heart/index.ts",
+      "sha256": "a788a53773541cc865c9f2556f44c2394327b480bfdce813e6fcb369ab936cc6"
+    },
+    {
+      "path": "packages/core/src/shaders/Heatmap/index.ts",
+      "sha256": "3d3c941a4ca58da5b90e7be6f10902877ae479eaa1116b3eae962e9903d3de4c"
+    },
+    {
+      "path": "packages/core/src/shaders/HexGrid/index.ts",
+      "sha256": "11ee3fe27c478139695467420633ef145564d15cca90dbe8ae0a776f22651b0e"
+    },
+    {
+      "path": "packages/core/src/shaders/Hologram/index.ts",
+      "sha256": "33a30628ef5a73d76c15ec1febc2f06f2f35119b626436548bf8a4d870297e45"
+    },
+    {
+      "path": "packages/core/src/shaders/Holographic/index.ts",
+      "sha256": "ee3a8ea07a4deac78cc95dd6c777d5baf4439d909b0d6c93499f6a53c23dd647"
+    },
+    {
+      "path": "packages/core/src/shaders/HueShift/index.ts",
+      "sha256": "5494846fc1fd62d478e8dd827a392c219f73758b3f8f0fb7a91c5fb3bc773bb2"
+    },
+    {
+      "path": "packages/core/src/shaders/ImageTexture/index.ts",
+      "sha256": "606de7103b7de535ebbf034711c091e9493fa32bf78551bb81ab84b4684ded60"
+    },
+    {
+      "path": "packages/core/src/shaders/InkFlow/index.ts",
+      "sha256": "032cf43f2195e267c99cef3a1b426391affc84f8f0cc0a0bc3cbd397dc347b1b"
+    },
+    {
+      "path": "packages/core/src/shaders/Invert/index.ts",
+      "sha256": "637172dabc01b3c225494d09420253259eeb8e7d98f2e382cf2010b31b7a66f3"
+    },
+    {
+      "path": "packages/core/src/shaders/IrisWipe/index.ts",
+      "sha256": "3db152deee68b2ff82b07bf55b99bfcc65ceb6f9b81dcfa4294c9c99fbab9e6a"
+    },
+    {
+      "path": "packages/core/src/shaders/Irradiance/index.ts",
+      "sha256": "dccc4aaeca062fdd9082cd97ba248b69a661f321cad8559dd8d6afc19e08b0fd"
+    },
+    {
+      "path": "packages/core/src/shaders/IsometricCubes/index.ts",
+      "sha256": "41b2a119ee741fd4e79ecadcd205b8b3f2683e27bf1e0e23f3e0598e7235dc78"
+    },
+    {
+      "path": "packages/core/src/shaders/Kaleidoscope/index.ts",
+      "sha256": "f119cd29daae6b80272850eb8c44e5a01ae38c33677338a9c59129981be7d420"
+    },
+    {
+      "path": "packages/core/src/shaders/KeyFrames/index.ts",
+      "sha256": "b63396c49f11dcc2472b17878e972b6872a463be1850fccc4962d11f997c2d9a"
+    },
+    {
+      "path": "packages/core/src/shaders/LensDistortion/index.ts",
+      "sha256": "753e6b1fee5dccc5440a84580ac3bc1b1d58a80564511a1d130c162d91e90b29"
+    },
+    {
+      "path": "packages/core/src/shaders/LensFlare/index.ts",
+      "sha256": "0679f2a5f65fd08a93cd6ef3b4393010895c065e9c06ad71011bddba1e3565ed"
+    },
+    {
+      "path": "packages/core/src/shaders/LightEdge/index.ts",
+      "sha256": "3fd506396fec0dec67d67c7750e51b8d9d69739b2191f779bd93d39e932ed7db"
+    },
+    {
+      "path": "packages/core/src/shaders/LightLeak/index.ts",
+      "sha256": "fe39ea01f0445d0f0bff6cf14b8642d8e489b212f4edd34f42fba5a0f18a581d"
+    },
+    {
+      "path": "packages/core/src/shaders/Line/index.ts",
+      "sha256": "7ba7573175046d0480a98defdc30c98050d985071bed1d94f8f90ab933dfeeba"
+    },
+    {
+      "path": "packages/core/src/shaders/LinearBlur/index.ts",
+      "sha256": "76d5fa393fa64378e01e1c3802f245785a2c152780f1b7781b7225c7472808cd"
+    },
+    {
+      "path": "packages/core/src/shaders/LinearGradient/index.ts",
+      "sha256": "83046b19ca64c80df89bdf13af77766a993327667adfe3f820405db4e1d0b1cd"
+    },
+    {
+      "path": "packages/core/src/shaders/LinearWipe/index.ts",
+      "sha256": "d422f1f041818e4091ff3193c0417218e599b0f71e2806a3810bf4f59b960266"
+    },
+    {
+      "path": "packages/core/src/shaders/LiquidMetal/index.ts",
+      "sha256": "6af799e9654a0504cb19d038e925af9adaa8ad3c613baea368565a12fa3277b0"
+    },
+    {
+      "path": "packages/core/src/shaders/Liquify/index.ts",
+      "sha256": "8308e978de020592454908d00999cef70f63e67700cddd50cb9ba0ee9d1cccc2"
+    },
+    {
+      "path": "packages/core/src/shaders/MagneticFilings/index.ts",
+      "sha256": "f552ab484092bec1f57e5c95546bce6f410c2f66366037f88d09fc03f10f425e"
+    },
+    {
+      "path": "packages/core/src/shaders/Marble/index.ts",
+      "sha256": "a735d75084c061ccb77cce3763ed5e5c4a5404c1c843c492ed15a7bf7b9ff036"
+    },
+    {
+      "path": "packages/core/src/shaders/MeshGradient/index.ts",
+      "sha256": "2c25225e631ae0998caff6bfd7ed40771886e64c456804b8faa6c48bbbfccd34"
+    },
+    {
+      "path": "packages/core/src/shaders/Mirror/index.ts",
+      "sha256": "40251ceb01508df09119068caf85e4fd9384b865929a3c20bc4abe873e8bbf8c"
+    },
+    {
+      "path": "packages/core/src/shaders/MultiPointGradient/index.ts",
+      "sha256": "3ba6f153bc781cc0754bcb45965196e585a67c12388ed60d2c8eb65b8b415519"
+    },
+    {
+      "path": "packages/core/src/shaders/Nebula/index.ts",
+      "sha256": "c7f47115f80ad7ee526fa8ebc14e0a82969aec6129318c51d3c0303e8c9d9c53"
+    },
+    {
+      "path": "packages/core/src/shaders/Neon/index.ts",
+      "sha256": "7ecc741e788bc9000bd062ee4f1b2a042e9fd0cea96059ff6d84138fcb6ac586"
+    },
+    {
+      "path": "packages/core/src/shaders/NoiseDissolve/index.ts",
+      "sha256": "62d834b345677b1b4b6046d784e254a75e517beb6a5eb53e0b583ea1c9d4a83f"
+    },
+    {
+      "path": "packages/core/src/shaders/ObjectTracker/index.ts",
+      "sha256": "71dd74474901ababee8cb8720b121ccedf1662b8d0c1ad740905c870e4cb93bb"
+    },
+    {
+      "path": "packages/core/src/shaders/Obsidian/index.ts",
+      "sha256": "6df2dc577de584864ca87903cfbdfae188f215547c7bb68ca1c8db1ed25e79c9"
+    },
+    {
+      "path": "packages/core/src/shaders/PagePeel/index.ts",
+      "sha256": "29462a205f65ef07fddde116212c09af818b5008729d2586a02b71c70e76caaf"
+    },
+    {
+      "path": "packages/core/src/shaders/Paper/index.ts",
+      "sha256": "947f0a90b2f9dcff82bfbe96a0fa059ec65e3a854c15ecbb70f28163dd494ec1"
+    },
+    {
+      "path": "packages/core/src/shaders/Parallelogram/index.ts",
+      "sha256": "19ca5342d3c2913349b584ad21c596c9d9f909ea2c4abf2c0022ea7ad1711a3d"
+    },
+    {
+      "path": "packages/core/src/shaders/ParticleField/index.ts",
+      "sha256": "ab71b6c12ffde8b7d91ff44df6014d5f90839ec274493180f8f59292c2ecdaa6"
+    },
+    {
+      "path": "packages/core/src/shaders/ParticleFlow/index.ts",
+      "sha256": "74b39b7b3d6b1e6857980d0315fd74e722ea82723c10bb8c05d78396916ac6af"
+    },
+    {
+      "path": "packages/core/src/shaders/Particles/index.ts",
+      "sha256": "5452323fa30b0f50a058b94e801b157009dc7010047ad6790b95338344c4d636"
+    },
+    {
+      "path": "packages/core/src/shaders/PerlinNoise/index.ts",
+      "sha256": "ebadd93ab7622f034aa9012a68f16d12f62f906a7e565327203931ce75c93177"
+    },
+    {
+      "path": "packages/core/src/shaders/Perspective/index.ts",
+      "sha256": "5a4086c50038a0ecaf58c757a3559df6fb08cd91635382bb09eae845e4e02ca1"
+    },
+    {
+      "path": "packages/core/src/shaders/PixelSort/index.ts",
+      "sha256": "a2272e9859d046206527e39a76521bdf78dbbc6d6a03178c096871713726da30"
+    },
+    {
+      "path": "packages/core/src/shaders/PixelThrow/index.ts",
+      "sha256": "e8561655266c458594c37e266e2d074ec649221de71c2c1e3b052d1f0fc30f73"
+    },
+    {
+      "path": "packages/core/src/shaders/Pixelate/index.ts",
+      "sha256": "4ec5226f653daaab3ae2e801194f764b852c4aa92ccd0b927bc547c018ba6ffe"
+    },
+    {
+      "path": "packages/core/src/shaders/Plasma/index.ts",
+      "sha256": "573ff885aa7283e56ab55f13b9b55edf25e715a87f31aac0ed459e5667ab3be4"
+    },
+    {
+      "path": "packages/core/src/shaders/Plastic/index.ts",
+      "sha256": "072faa4a936f03883679a4539302d26a456ee5004f9d38d8f91da7f302df5137"
+    },
+    {
+      "path": "packages/core/src/shaders/PolarCoordinates/index.ts",
+      "sha256": "7f6a9c4012030965dbd21186b1971c247b33038905e4436353a90fd79b2922db"
+    },
+    {
+      "path": "packages/core/src/shaders/Polygon/index.ts",
+      "sha256": "d848aabd33d6eb34759e88a81406af13f9ac8e9bc739f526df831ae7f35efde8"
+    },
+    {
+      "path": "packages/core/src/shaders/Posterize/index.ts",
+      "sha256": "6557f1b086001e1614449830a524628e6eafcd035edca50049b6497818662979"
+    },
+    {
+      "path": "packages/core/src/shaders/Prism/index.ts",
+      "sha256": "a59c6a3c3a415e2ee5b167bdc7b4d2d994c07a56d6e2efc1e36ef043496e45a8"
+    },
+    {
+      "path": "packages/core/src/shaders/ProgressiveBlur/index.ts",
+      "sha256": "e0f8356ac10a05c96d45ff43cc267378c11df5005ae4f35d724d07989e6cf165"
+    },
+    {
+      "path": "packages/core/src/shaders/RadialGradient/index.ts",
+      "sha256": "a37d6df95dd06625abf7cec5bb49cac03f32fd6a783259647f9e72936917e4d7"
+    },
+    {
+      "path": "packages/core/src/shaders/RadialWipe/index.ts",
+      "sha256": "6b5dff0d86dc0d7bf90afc8708828b1a2032c5a5073d108644d34b4e119bcd38"
+    },
+    {
+      "path": "packages/core/src/shaders/RandomBars/index.ts",
+      "sha256": "949d1d8be4efd772468b8ae00534a88f4c3a57d717cb3f96ea722569c281385d"
+    },
+    {
+      "path": "packages/core/src/shaders/ReactionDiffusion/index.ts",
+      "sha256": "18ae1ab92d1beb844b30786575497d9da25433258de3976f628dd0823fdc2489"
+    },
+    {
+      "path": "packages/core/src/shaders/RectangularCoordinates/index.ts",
+      "sha256": "125a121c16f53e203e7152ac4e32fcae61ce320bd96cfd6fcb224af3f99ca3f5"
+    },
+    {
+      "path": "packages/core/src/shaders/ReflectivePlane/index.ts",
+      "sha256": "6bde3bf7cc0b135a5b4f012b19bb7af3b06d5bc870213ba06c96095769190d71"
+    },
+    {
+      "path": "packages/core/src/shaders/Repeater/index.ts",
+      "sha256": "06ff826b01a9f710e3d93a081beb3dbb79c3580c5b70934c1f77801cfcf87f6b"
+    },
+    {
+      "path": "packages/core/src/shaders/Ring/index.ts",
+      "sha256": "eb3561b87e5e87e9d6240d90139e56589ed0d69bd7c526df5f1f9df79298c5b6"
+    },
+    {
+      "path": "packages/core/src/shaders/RippleWipe/index.ts",
+      "sha256": "b30c200a1d9d32c62e3d477a7d7ea2813e7791baf8f233c26cad9502264877e2"
+    },
+    {
+      "path": "packages/core/src/shaders/Ripples/index.ts",
+      "sha256": "1c59e67820403aa9c02373a35dc049cb9477e4b52e63be2921cae82a7eb2e71c"
+    },
+    {
+      "path": "packages/core/src/shaders/RoundedRect/index.ts",
+      "sha256": "0fa546fd3061e362189a929d73d7d448fe3cd4bcbdc3a36b80d37b740049ef42"
+    },
+    {
+      "path": "packages/core/src/shaders/Saturation/index.ts",
+      "sha256": "8d4bc355915cdf9795aede263300f0ab37b979d02aa29f7369a7e9870fb63347"
+    },
+    {
+      "path": "packages/core/src/shaders/Scratches/index.ts",
+      "sha256": "ab8e4cc5bd3088f69449842d5a2b46cac99b5fcbc9267a87244fa6b7a87e75b7"
+    },
+    {
+      "path": "packages/core/src/shaders/Sharpness/index.ts",
+      "sha256": "8f3e239b92f8cbb877bb4de0dd56f707228c66ab4aadcfcddf2d9c2702c15a59"
+    },
+    {
+      "path": "packages/core/src/shaders/Shatter/index.ts",
+      "sha256": "d5b0ebc92244ae7ac7e4bf087dbeacf274cb96c379f59faeb369b0c3e1086e1c"
+    },
+    {
+      "path": "packages/core/src/shaders/SimplexNoise/index.ts",
+      "sha256": "4b4fd3b044b666220c59c22fee450222faf17ec3f09dd841b136f31830c79aba"
+    },
+    {
+      "path": "packages/core/src/shaders/SineWave/index.ts",
+      "sha256": "1e50c4dfdfb26fb2bf04b505207b89acbb4ea268674736679c35ca6d7a7373e8"
+    },
+    {
+      "path": "packages/core/src/shaders/SliceWipe/index.ts",
+      "sha256": "204edf28e74cebde91aab9840277f1f615fac7e3ae1b9166c0d4456e69262132"
+    },
+    {
+      "path": "packages/core/src/shaders/Smoke/index.ts",
+      "sha256": "2eaaeadad7a750c586b48ba1f5af5875013c17158deadaec19d8ecbffe5d9489"
+    },
+    {
+      "path": "packages/core/src/shaders/SmokeFill/index.ts",
+      "sha256": "ccdf227e96f54d52038b96a813cc83f4e00c627a73cc9f06a5281b29cc0579c5"
+    },
+    {
+      "path": "packages/core/src/shaders/SmokeFlow/index.ts",
+      "sha256": "94ba321ffc027230b2faf2adbd93899c5f7274bb8e3b4f06ac989d3a7172d295"
+    },
+    {
+      "path": "packages/core/src/shaders/Solarize/index.ts",
+      "sha256": "35f6e40de70cbc7927be55a4292040a92c2e48a7a7dceb5454d3475ee3d61442"
+    },
+    {
+      "path": "packages/core/src/shaders/SolidColor/index.ts",
+      "sha256": "02f00555c8a4c9f7b07b40c3a6360d9a936368efd71d66b3349eded3414aee8e"
+    },
+    {
+      "path": "packages/core/src/shaders/Sparkle/index.ts",
+      "sha256": "fb020021af52451c20facd7602c23c539e51be9f7201561691ba987749c3e676"
+    },
+    {
+      "path": "packages/core/src/shaders/Spherize/index.ts",
+      "sha256": "b725e45bd5597275385b7e66adbb24d6f8056aea9c475d40280564cfe25bf1fe"
+    },
+    {
+      "path": "packages/core/src/shaders/Spiral/index.ts",
+      "sha256": "2f6f036ddeb36f7dce4a762ffde4612eaed7fb88aabc0c71a34cfe6d989331c6"
+    },
+    {
+      "path": "packages/core/src/shaders/Star/index.ts",
+      "sha256": "affbd645db506fd78747261db7a2b7da9c4f47594d42671f15a91b4a0ed93520"
+    },
+    {
+      "path": "packages/core/src/shaders/Stone/index.ts",
+      "sha256": "ecb1e5c0ff9fd993b1b85fc04f79dca6c500f8975fee9d05616045b233e19ebc"
+    },
+    {
+      "path": "packages/core/src/shaders/Strands/index.ts",
+      "sha256": "bf9fd652d2625d3463f008000b746db94e904eb74a57947472a21a617f8a71ec"
+    },
+    {
+      "path": "packages/core/src/shaders/Stretch/index.ts",
+      "sha256": "c32327cc079e2b8df9a19ec1f0b12063a6d23fce3ff8553a298020094dc8f5b6"
+    },
+    {
+      "path": "packages/core/src/shaders/Stripes/index.ts",
+      "sha256": "b9839b2b2c7b0687794b4bbc53dc606d1559b68cbb61dd5092ea641313293390"
+    },
+    {
+      "path": "packages/core/src/shaders/StudioBackground/index.ts",
+      "sha256": "69b19781c3a9e6a770874bb8cd8449f3440a17a39188bcdbc5c02089be6500d5"
+    },
+    {
+      "path": "packages/core/src/shaders/SunBurst/index.ts",
+      "sha256": "d1d809fdd2904677ba1894e92f3443a80045bc9937fcbc29c62b05c0ea0216ad"
+    },
+    {
+      "path": "packages/core/src/shaders/Surface3D/index.ts",
+      "sha256": "30fd40784e962e16767b20dbbd24a2644206831f3cae951e6e5eb25a7ebb6253"
+    },
+    {
+      "path": "packages/core/src/shaders/Swirl/index.ts",
+      "sha256": "4be5098e94762006bd3384d8430cc30599251f3c99f06195a489d1472b670ada"
+    },
+    {
+      "path": "packages/core/src/shaders/Teardrop/index.ts",
+      "sha256": "898e09c718daf521727bf8f727a3bd5ef9ea2b899e10307d057d79ba0d380abd"
+    },
+    {
+      "path": "packages/core/src/shaders/Text/index.ts",
+      "sha256": "0f7422212a71565d917f480fb067eed40fdff03c0adb2bd973e74739aed34dd0"
+    },
+    {
+      "path": "packages/core/src/shaders/ThinFilm/index.ts",
+      "sha256": "babec2ceac456d86f0bacaa0521c96dc4de686d5e295f1bca983252084cf1bb7"
+    },
+    {
+      "path": "packages/core/src/shaders/TiltShift/index.ts",
+      "sha256": "8cfc6d86a95a10a512c30373be22301a90e4e0f98100f220191762f8245428f9"
+    },
+    {
+      "path": "packages/core/src/shaders/TimeTrail/index.ts",
+      "sha256": "7b9957acd2e4c0e6696a51ea583f96dc383977e55bee1f70e628254628669635"
+    },
+    {
+      "path": "packages/core/src/shaders/Tint/index.ts",
+      "sha256": "3b055e06753914d78035ae4e78dd924f7f18493ae5c34acf6350ee0562a1f264"
+    },
+    {
+      "path": "packages/core/src/shaders/Trapezoid/index.ts",
+      "sha256": "2aa8c2e7a1b30289f8181167ed677baa430fc7bab2d03b18f2a804ef17f75acf"
+    },
+    {
+      "path": "packages/core/src/shaders/TriangularGrid/index.ts",
+      "sha256": "22e27c9bd0490e9a47fc042c1d67d8ad725f5d13925adfa3a46c2ac389f6cb86"
+    },
+    {
+      "path": "packages/core/src/shaders/Tritone/index.ts",
+      "sha256": "e6280b159aafb2d762c4d6fb711c8c2449280e03be6ebaad202e122771486d73"
+    },
+    {
+      "path": "packages/core/src/shaders/Truchet/index.ts",
+      "sha256": "e75eba7b4cbb66494c32d25da9fc8b56cb4e67ba9d6784cec50b1c3b8a908fd5"
+    },
+    {
+      "path": "packages/core/src/shaders/Twirl/index.ts",
+      "sha256": "bcfa9144773ff730c4bdbc7145ea0a20a346ed7a76582f6d7e8a2d8fdbe41411"
+    },
+    {
+      "path": "packages/core/src/shaders/VHS/index.ts",
+      "sha256": "afe743e7b8c35ee790991a877250d100bc7a4af0a474a90c4075350c8e995863"
+    },
+    {
+      "path": "packages/core/src/shaders/VenetianBlinds/index.ts",
+      "sha256": "a8136646f15dd57a4a77a06c1fdb8281f11e77adc582d8469f0df0e22b6a42aa"
+    },
+    {
+      "path": "packages/core/src/shaders/Vesica/index.ts",
+      "sha256": "890a925f6a8000eb2fcef7970a46d0e7bdf05efe808f48f41820486821f26f69"
+    },
+    {
+      "path": "packages/core/src/shaders/Vibrance/index.ts",
+      "sha256": "7afc8db07d5591a738aa718f348efee02fb67377453e3862c30816902c4f9611"
+    },
+    {
+      "path": "packages/core/src/shaders/VideoTexture/index.ts",
+      "sha256": "6532b48e72c4290bd755712e7493dbdf564c2ff710f1befa58f29c602071a5c1"
+    },
+    {
+      "path": "packages/core/src/shaders/Vignette/index.ts",
+      "sha256": "ad7d2805a94010eba2a6e692c5c354220a528f0df1401930b9769d535857ff8b"
+    },
+    {
+      "path": "packages/core/src/shaders/Voronoi/index.ts",
+      "sha256": "34d7f9544e989277ec073a14392f8eff2303263ccf3e11d301b59d5abf62ba3b"
+    },
+    {
+      "path": "packages/core/src/shaders/Voxels/index.ts",
+      "sha256": "af8a81a41d6a2aa1f75de3fa173ee223d5ecff5ec2f6b6056f67786c47814625"
+    },
+    {
+      "path": "packages/core/src/shaders/Water/index.ts",
+      "sha256": "f370b6b5f6afd9de5f8c86faa64485a33dba6b99d7d4f5e3b7c27eaf6d8990bc"
+    },
+    {
+      "path": "packages/core/src/shaders/Watercolor/index.ts",
+      "sha256": "08357253397ba2bc58c187c5748ff866fd871aad634e2a9cda4907d0046c3f45"
+    },
+    {
+      "path": "packages/core/src/shaders/WaveDistortion/index.ts",
+      "sha256": "44506fdd226dadef842c9ec93ea5826924f9da9bf0f29795cb4368034842883b"
+    },
+    {
+      "path": "packages/core/src/shaders/Waveform/index.ts",
+      "sha256": "30d15ea50013f463616c41029661257f68573f151658796c73a2521f2afa73b7"
+    },
+    {
+      "path": "packages/core/src/shaders/WaveletNoise/index.ts",
+      "sha256": "7a16ccf42d7fc5380d6aa35cd686b2f37bf45f58ecf67d305d7134dc71bb3005"
+    },
+    {
+      "path": "packages/core/src/shaders/Weave/index.ts",
+      "sha256": "e460d584e4418c50c42e42544e41afc13f073ed7a0e69ce88ef93b87093ea96a"
+    },
+    {
+      "path": "packages/core/src/shaders/WebcamTexture/index.ts",
+      "sha256": "e020ef01a9bd2bc5879514121f4503e55b5e4d61f9df57ab588facc21708d3b7"
+    },
+    {
+      "path": "packages/core/src/shaders/Wool/index.ts",
+      "sha256": "510e319684486a8794d950390a6ff68048d60e629257a2cc7d3c4bed97d73697"
+    },
+    {
+      "path": "packages/core/src/shaders/WorleyNoise/index.ts",
+      "sha256": "c8c18bdd04107c6a43302ce5786c4871378817500cb9b5ffbf647a9546eae267"
+    },
+    {
+      "path": "packages/core/src/shaders/ZoomBlur/index.ts",
+      "sha256": "546b00a9ec3ad6c5c21750fa8af928ccf8e16f024be56927254de4e28966a61e"
+    },
+    {
+      "path": "packages/core/src/std/effects/blurs.ts",
+      "sha256": "b6d43a84520ba98ee85f3a3c63aa2c1e19cfd0ec73dad577ca207994ac0ba545"
+    },
+    {
+      "path": "packages/core/src/std/effects/color.ts",
+      "sha256": "efa61973f730997a8df8c1028235886c8a1ba730b2e8c975089b9546ab5375af"
+    },
+    {
+      "path": "packages/core/src/std/effects/edgeGlow.ts",
+      "sha256": "b08ab369db71ca327412942857f3570dde1270ec251d8eeff478ebda82b5ff67"
+    },
+    {
+      "path": "packages/core/src/std/effects/fracture.ts",
+      "sha256": "6ca4fc77e32187fb39e01ab6eecd62e1264a80b0d31c5c080c740e69ef48214c"
+    },
+    {
+      "path": "packages/core/src/std/effects/index.ts",
+      "sha256": "f21ed808439da74e9764b88cdb5feae8e96f2ecff57f386bdfedf53e8f247097"
+    },
+    {
+      "path": "packages/core/src/std/effects/instances.ts",
+      "sha256": "3f77b88d42cf55ad5d44636d58db21daa3d48725eb2246795e357f6c0f02825c"
+    },
+    {
+      "path": "packages/core/src/std/effects/lens.ts",
+      "sha256": "1f772674fb4ddd0bba4389e4a9e2802652e181adf617858613f7688cf9c281de"
+    },
+    {
+      "path": "packages/core/src/std/effects/overlay.ts",
+      "sha256": "e78700888b2cb14b42dd2314046f712558e0d638da140e9889a229c90d63902d"
+    },
+    {
+      "path": "packages/core/src/std/effects/pointerFields.ts",
+      "sha256": "c540f8b8741e3004c3eec1ad9343b5d96bdf9f0dab8f8a829bbd03afffdd7b46"
+    },
+    {
+      "path": "packages/core/src/std/effects/reveal.ts",
+      "sha256": "665852eca6336c3d793d94dd682d47f776b1a9d2767ac7072949195d561d9eb7"
+    },
+    {
+      "path": "packages/core/src/std/effects/stylize.ts",
+      "sha256": "a1c841cd890b3f1ad6d3962112d37f2b6a457d44d032a47b461303bf4d11e4d8"
+    },
+    {
+      "path": "packages/core/src/std/filter.ts",
+      "sha256": "b7596583e842e7210d573376b6136753f7478bdeb8e9cbd7a2cbf49ba76561c4"
+    },
+    {
+      "path": "packages/core/src/std/frames.ts",
+      "sha256": "266f193937088703ade4054721bd72e085cc64c0591f56dbca0c49214843c3ab"
+    },
+    {
+      "path": "packages/core/src/std/index.ts",
+      "sha256": "de0b6213bc9b9de65f0491da2e5caab5b6582493810c488a89364c4e34dfcf4c"
+    },
+    {
+      "path": "packages/core/src/std/invoke.ts",
+      "sha256": "463a64c4bfb97188f06f1380d68d648b4dcd77fbf2df1ca0d5c50bd49c03992e"
+    },
+    {
+      "path": "packages/core/src/std/lists.ts",
+      "sha256": "79f5e0bd2fcdae873cdd2c7da17998cb3d5c272693315203e9aff5436bf311d4"
+    },
+    {
+      "path": "packages/core/src/std/lower.ts",
+      "sha256": "760e696ff13d3e48fe82102073eab58f2866b968f209f6cf169baf80ad00552d"
+    },
+    {
+      "path": "packages/core/src/std/mask.ts",
+      "sha256": "4282bdfd86bd4bb01117e4b5911140013d410765ad86261856ce134d6ec5b68b"
+    },
+    {
+      "path": "packages/core/src/std/math.ts",
+      "sha256": "ceaeb24066e8be1d48ee644e86523e2ae4a6c0bee0681091a4c5e9e2e5662745"
+    },
+    {
+      "path": "packages/core/src/std/motion.ts",
+      "sha256": "6de9d39df5d573ce1c69b3f85927e61439cb5dae9b921b8b208144e40cb6508d"
+    },
+    {
+      "path": "packages/core/src/std/paint/compose.ts",
+      "sha256": "5fcbb8148ec431634db0f94197d2d1f21021c635a76dfd10f8760a8e9d7311ed"
+    },
+    {
+      "path": "packages/core/src/std/paint/fields.ts",
+      "sha256": "deec580b435e45ea16f3b2635ce1f6a0461c44278754614cff91d30cf56b0560"
+    },
+    {
+      "path": "packages/core/src/std/paint/figures.ts",
+      "sha256": "0147d1786e900a5c061ae8d60cfb2b38562a1f14611eeaa49bede7e11f03e2ba"
+    },
+    {
+      "path": "packages/core/src/std/paint/gradients.ts",
+      "sha256": "c58c08834fd81693e1b3a09af73c9eba9333f15393bf1a4f2eb4915e9a662f25"
+    },
+    {
+      "path": "packages/core/src/std/paint/light.ts",
+      "sha256": "0318bbe0e40390868ca317d33b8bfefab73788fc1941e8ff28f948e5a525ea5c"
+    },
+    {
+      "path": "packages/core/src/std/paint/materials.ts",
+      "sha256": "7cb6e03cf96c26cd71ad9442002d2f642d301770e62ec08fbcfe33e86a359782"
+    },
+    {
+      "path": "packages/core/src/std/paint/media.ts",
+      "sha256": "80943d3476b9e2e8adc3409ef184c6c712c196e2c2d66e6da4093b0dd7afd4d9"
+    },
+    {
+      "path": "packages/core/src/std/paint/noise.ts",
+      "sha256": "f56dade560d18c8310f1d6cf2f86bd73961bdd0998e4bbb487087b8c581f7040"
+    },
+    {
+      "path": "packages/core/src/std/paint/patterns.ts",
+      "sha256": "5aad6730eb59d5e73de65ffa117884a040fd716abcd5d29ff9b8412be14de2cc"
+    },
+    {
+      "path": "packages/core/src/std/paint/radiance.ts",
+      "sha256": "81e3281870add057c4baa88fba0960f96fb6e01bfbf28c5aadec8b8e8dfc6a73"
+    },
+    {
+      "path": "packages/core/src/std/paint/volume.ts",
+      "sha256": "4b8a0ac5c19dd24c0324bca45a66c2282c919b00fe5c54712dada8b870f04e76"
+    },
+    {
+      "path": "packages/core/src/std/paint/voxels.ts",
+      "sha256": "333afbf1cbf1995a8c33e5479aa4f0c8f5a3c9733538305c842514cc923a81a5"
+    },
+    {
+      "path": "packages/core/src/std/shape.ts",
+      "sha256": "d04d50bb5825e382902203484860246495b90d8a5637cade1b8779ec783db01d"
+    },
+    {
+      "path": "packages/core/src/std/signal.ts",
+      "sha256": "29ee6c6035cc5bac417cf0f405635a826e932736d2d9bb19fd719f3c7ef0287f"
+    },
+    {
+      "path": "packages/core/src/std/sim.ts",
+      "sha256": "7f0f99b8e5f85f0d94655514717ce473952bcd6c30d4bd7d24723dc95bd52b29"
+    },
+    {
+      "path": "packages/core/src/std/sim/agentForces.ts",
+      "sha256": "3508e7e2798170e2ced7d607bcc9631e64b6ad4c9657da52f7d091a02134df31"
+    },
+    {
+      "path": "packages/core/src/std/sim/agentFrame.ts",
+      "sha256": "f399ff88d957e754cf78f85f156ba02a346b2c829fa82168466646c21f0ca7d4"
+    },
+    {
+      "path": "packages/core/src/std/sim/agentRender.ts",
+      "sha256": "b0ecb9003591e40ce629d136375fad5ecca0c399036005ffb21520cffd47d635"
+    },
+    {
+      "path": "packages/core/src/std/sim/agents.ts",
+      "sha256": "08cd5deeb4b41d17376e2503fdb7dcb623d2f4494ddd3770f640777a95c9d915"
+    },
+    {
+      "path": "packages/core/src/std/sim/feedback.ts",
+      "sha256": "48dead2c20c09bcf33b6879dc1013809ce515a31baad8e0715d96927778b626b"
+    },
+    {
+      "path": "packages/core/src/std/sim/fluids.ts",
+      "sha256": "e5a916e3c19c39ab82974074eb16ae8818a31810735feccb4e2268f942bbf443"
+    },
+    {
+      "path": "packages/core/src/std/sim/grids.ts",
+      "sha256": "a7952e8bc3a9842a259166a16b5f767ce0e5c6ca5235e995bc37ad5021c4b21b"
+    },
+    {
+      "path": "packages/core/src/std/sim/index.ts",
+      "sha256": "df6e366135f3c76120a3a2df49a2d4ad137775868d901dab2b75044b454d1066"
+    },
+    {
+      "path": "packages/core/src/std/sim/shapeFields.ts",
+      "sha256": "3cd6fa43d4033f1e4bb343a34a6b2de225261cf8c5967fcc2ea81ffb2a2111c7"
+    },
+    {
+      "path": "packages/core/src/std/slots.ts",
+      "sha256": "4081545e564235e1224330e15d5df4dc5c9bbb13bf69af9ed8dd875bcc106d3f"
+    },
+    {
+      "path": "packages/core/src/std/types.ts",
+      "sha256": "6bd6bdab957a9bbeae509f21be672e654962d1ea87c4d134d2c4afec3f573455"
+    },
+    {
+      "path": "packages/core/src/std/values.ts",
+      "sha256": "d55ca66aa4f0aaf472f1182bd723be883f552e627c93fc7b2105569342f9a05e"
+    },
+    {
+      "path": "packages/core/src/std/warps.ts",
+      "sha256": "9cbb12d1d312c31424631cde6e38dbf284603dbca2793c3b18a0c85661222d16"
+    },
+    {
+      "path": "packages/core/src/std/wgsl.ts",
+      "sha256": "ad826ef75d65abc79091e1892fdd9892c0229d4edbb2f000ebbcf3ee166d2192"
+    },
+    {
+      "path": "packages/core/src/telemetry/collector.ts",
+      "sha256": "95148f72de627c4b68e5ffd9610f96658b40b2897073e0c6d3428ee21c83e499"
+    },
+    {
+      "path": "packages/core/src/telemetry/config.ts",
+      "sha256": "dc9c0ea949dc93409b580bc4475ddf81542dfc91676ac15cc8d16ab8ad7d0423"
+    },
+    {
+      "path": "packages/core/src/telemetry/environmentCollector.ts",
+      "sha256": "4a72c99b16ebc9631416fabcaad10d60575f2feeb086b91c86f11a26a4c0fc6c"
+    },
+    {
+      "path": "packages/core/src/telemetry/index.ts",
+      "sha256": "c185e908f6f7bc86b710cc6f9994a7ab2b9747e5ebce1b441b65e35e9f02320a"
+    },
+    {
+      "path": "packages/core/src/telemetry/types.ts",
+      "sha256": "71865fc46eebe330c9df99f46d259aa3991678de155c729f26c79289965de567"
+    },
+    {
+      "path": "packages/core/src/types.ts",
+      "sha256": "dc2d6e7071c0cf14359c712433e378b7cf12d118a0d8ec60256f106045a032b8"
+    },
+    {
+      "path": "packages/core/src/utilities/boundingBox.ts",
+      "sha256": "9560887cb177e80d70e17e10e3ab818766070cad5dc942c73e3fef555a3202cd"
+    },
+    {
+      "path": "packages/core/src/utilities/browser.ts",
+      "sha256": "fe87f291b8f19e589d8484383a69cbc99db92f030aebe4599a4ca4bfec46decf"
+    },
+    {
+      "path": "packages/core/src/utilities/colorStops.ts",
+      "sha256": "ad164712234358298448d5eabeca17d858da3b8e451690805807f9f2df799ba4"
+    },
+    {
+      "path": "packages/core/src/utilities/device.ts",
+      "sha256": "c77c89cbe3c66450420c7d4d6a74835407d9d800f4eac6d13ec837bac6178dbb"
+    },
+    {
+      "path": "packages/core/src/utilities/dimensionalProps.ts",
+      "sha256": "c8b77354785a639683466f610d0aba0f6731308d833dbb072bda1f983b6bf6f7"
+    },
+    {
+      "path": "packages/core/src/utilities/fonts.ts",
+      "sha256": "b08a8b7314818ed76986d24cc5d357e12cc6aab42547f73e2832b5b2f8e14390"
+    },
+    {
+      "path": "packages/core/src/utilities/halfUvProps.ts",
+      "sha256": "5052f3e60ec346226f01a3f910faa8b4c0eb10095fde5ee3dfec6e68b399b72b"
+    },
+    {
+      "path": "packages/core/src/utilities/layout.ts",
+      "sha256": "f7145ac9d2db04fe898f6892994bc0767a08176ee8b457c039ea69bed2f35591"
+    },
+    {
+      "path": "packages/core/src/utilities/listProps.ts",
+      "sha256": "fa280a4774e4fd61fee4b593b5aaf8adb0f924f83b777fba28c75d6cc7346180"
+    },
+    {
+      "path": "packages/core/src/utilities/measure.ts",
+      "sha256": "e873fa2c8dbcf7db8d9aab957d80e8570bf4eff0f2615b33dc59acb9f9f47b8d"
+    },
+    {
+      "path": "packages/core/src/utilities/naturalSize.ts",
+      "sha256": "f418a7c501240af68a841c32c88156ba9c59b2af8bd27f85127b05c5c38b5f2f"
+    },
+    {
+      "path": "packages/core/src/utilities/noiseColor.ts",
+      "sha256": "e514858f4aa463ae35b92283a6090b219c9582c934aca3d0dafd0bb903e471cd"
+    },
+    {
+      "path": "packages/core/src/utilities/noiseStylize.ts",
+      "sha256": "f4037a6fd0127991ef43f6a7dd251ccaf99da01fec7ae582f090476ff453bf19"
+    },
+    {
+      "path": "packages/core/src/utilities/propConfigs.ts",
+      "sha256": "d23c52a8b7de6b4f7085719798e0ac66d79a50b942fc6cdf7a341c519b084dcb"
+    },
+    {
+      "path": "packages/core/src/utilities/scatterAnchors.ts",
+      "sha256": "984ab4cef8d8d050accd846b42ca31acd63e2ad20c1cdc59d7eee2f272816dfe"
+    },
+    {
+      "path": "packages/core/src/utilities/sdf3d.ts",
+      "sha256": "c6cb19c85ca3e628018f087e5364a78ecc1ca64c214a02d4b08ac1a3676182db"
+    },
+    {
+      "path": "packages/core/src/utilities/sdfBounds.ts",
+      "sha256": "8317e8f0121f3d09973ab3d7ff11eed3134f79304536c2f87c0d7adb3a532ebc"
+    },
+    {
+      "path": "packages/core/src/utilities/shapeEffectBounds.ts",
+      "sha256": "534f1e3dc5f84f9816bad93351a3398c57287e4720dcf260f5de52178a3312b4"
+    },
+    {
+      "path": "packages/core/src/utilities/textMeasure.ts",
+      "sha256": "6d531e70f0cdfec80b1077200dc0b8c8b82f53415c355b8908e5934950edc281"
+    },
+    {
+      "path": "packages/core/src/utilities/transformations.ts",
+      "sha256": "100949ef1c89002dde238760982aec059171a96bef7b8c7508ff374b2a7635f0"
+    },
+    {
+      "path": "packages/core/src/utilities/uvTransform.ts",
+      "sha256": "71a2c6a72c9a104889e1f256e539be25f0defea5f349fe02316950d04d75938f"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "b4f193dbc3a3422ff9dc34bf183b82374628f0ec9327d2d5f806471af8c481f7"
+    },
+    {
+      "path": "packages/core/vite-env.d.ts",
+      "sha256": "58fcdd4752507f2e253801192a87199229f8c7e45bbd6d2116d80d6d0a8f7aa2"
+    },
+    {
+      "path": "packages/core/vite.config.ts",
+      "sha256": "e4cf1ac9396d68e2ed8de739ffc1872117e885ecf11f3d9a3dba2b02cdbb9441"
+    },
+    {
+      "path": "packages/core/vitest.config.ts",
+      "sha256": "ac0b5480adfe3933d99793f1c28295157b035d3df601d03a6c4911e53290202b"
+    },
+    {
+      "path": "packages/js/package.json",
+      "sha256": "2030fb2615d73247a1adae50fd373715675aada69caf825c6c7d20c6308cc300"
+    },
+    {
+      "path": "packages/js/src/createPreview.ts",
+      "sha256": "4ea26d48df4e34efbfbadf01f6ba0e970b68739a7dc27e2ebe4884af2cad0e0b"
+    },
+    {
+      "path": "packages/js/src/createShader.ts",
+      "sha256": "568744de47e36cf3223517e35b939a6d3a4282ebae51c2cea11365ecd493ad00"
+    },
+    {
+      "path": "packages/js/src/createSharedDevice.ts",
+      "sha256": "8487f27daefb91b16cd10100a0c5b8696f24bd4f0c00e0548b6577913a51b397"
+    },
+    {
+      "path": "packages/js/src/decode.ts",
+      "sha256": "339a262b68cf3c7b59d07407ce8e50fd0195a06f77c90220a9db44186f518420"
+    },
+    {
+      "path": "packages/js/src/index.ts",
+      "sha256": "748f51e781aa915a95ca0b85fc108ff7120af16cb55c210283ca513aa2e602b9"
+    },
+    {
+      "path": "packages/js/src/types.ts",
+      "sha256": "f7144afb9a2c569c9490d3a411508c6de0b502714e524f26d68b0daca57cd0bf"
+    },
+    {
+      "path": "packages/js/src/utils/generatePresetCode.template.ts",
+      "sha256": "3c5c27e4d9c55a55fa9fdfa308aa77046877101b2c9018653a4b9e29319c664e"
+    },
+    {
+      "path": "packages/js/src/utils/generatePresetCode.ts",
+      "sha256": "ff6a3634639ddfb490dc7bd1bdd97e24adf988cb0b900170f912c0d8a1c48c63"
+    },
+    {
+      "path": "packages/js/tsconfig.json",
+      "sha256": "01763f74bb39de7636be763ea58e229185d0a00db22ae71cf11712e883ca93ee"
+    },
+    {
+      "path": "packages/js/vite.config.ts",
+      "sha256": "f42ca818d9d21f188f961cffb4cc5fa00d852267916ec02e49d7654499a01d06"
+    },
+    {
+      "path": "packages/partner/package.json",
+      "sha256": "44d3116e374e5dafc6ce77fc6a5f7e9478818dc4f2741898823ea174f0f8b82c"
+    },
+    {
+      "path": "packages/partner/src/index.ts",
+      "sha256": "8fd8bf0aa58dabc8064e8e0d963465e691c090bdc27b825f05f69f5a6c28adea"
+    },
+    {
+      "path": "packages/partner/tsconfig.json",
+      "sha256": "c4301f3314c3fa5f2fcd5206e7965e22747f856369be52007140ac717f8682e6"
+    },
+    {
+      "path": "packages/partner/vite.config.ts",
+      "sha256": "2d8c91c4fdde1272b966018a781ca76e1460248c09e077d27b5284dad8b91849"
+    },
+    {
+      "path": "packages/react/CHANGELOG.md",
+      "sha256": "0a5107ea78e052a94775354d87aae30cc69b5d87958b043ac0650efb0e7d7840"
+    },
+    {
+      "path": "packages/react/package.json",
+      "sha256": "ca8418d89f02838c452ecb59e402942de1915c25be62ad41e69ccf49468ecef0"
+    },
+    {
+      "path": "packages/react/src/engine/CustomShader.tsx",
+      "sha256": "2b57f0d521649ccd0b2ead8eed036d8555c1df9a3d5c6727e67bbf84c7a7251b"
+    },
+    {
+      "path": "packages/react/src/engine/Preview.tsx",
+      "sha256": "f6bf584067d6d706fd475e6a37b217de2e6b4e3dfdac72a633d769c6949aa42b"
+    },
+    {
+      "path": "packages/react/src/engine/Shader.tsx",
+      "sha256": "85dbd3342d41a13f2caa89754fd1e0f27db7b9a9455a9b5cbee38e04b480d991"
+    },
+    {
+      "path": "packages/react/src/engine/component.template.tsx",
+      "sha256": "29577b46fc14014ef5cf5e2cf65bb2a1747c1cd2ff2ff93baa1df63b439a77bf"
+    },
+    {
+      "path": "packages/react/src/utils/generatePresetCode.template.ts",
+      "sha256": "b7168931a12acd0a2de53335c036d1cc2ff6e5541178b91818251f88a2950cfb"
+    },
+    {
+      "path": "packages/react/tsconfig.json",
+      "sha256": "1fb36fbd55b4ce2798a8a3bbc9159b5f5ab78baede0b4e7b785e3974701c25a9"
+    },
+    {
+      "path": "packages/react/vite.config.ts",
+      "sha256": "ae6067b70db7f6e5ed08a51e5ccd6c8c410f772e8e0581ff69779ac8525f16c7"
+    },
+    {
+      "path": "packages/shaders/.npmignore",
+      "sha256": "51c740a568230c3f21e9c56bf372b231f96888047be986c7315a016332d7f20a"
+    },
+    {
+      "path": "packages/shaders/package.json",
+      "sha256": "64fa69f15ace77817e0ac016ff82d33bfdb66897602af9ab8e7b5b908ee745fc"
+    },
+    {
+      "path": "packages/shaders/scripts/build.ts",
+      "sha256": "5edc2d2014c79f7d88896d82dc5028c2afd320df008201a2357bbb588e8b1310"
+    },
+    {
+      "path": "packages/shaders/src/cli.ts",
+      "sha256": "f1ca067df37f3461c76a5c8b32fc3406aca910042e080b21be7a236905915879"
+    },
+    {
+      "path": "packages/shaders/src/cli/api.ts",
+      "sha256": "1f227ed3d009ef21ce4ced0a5311919b267fb028cd2bd3df67f50362067456b3"
+    },
+    {
+      "path": "packages/shaders/src/cli/auth.ts",
+      "sha256": "4b38fcf0ceb1b311ce0de0ca2564f9bb429dcffb16f23b14014f3b602e784444"
+    },
+    {
+      "path": "packages/shaders/src/cli/configFile.ts",
+      "sha256": "0a5cc9deaf407f3f6c302422cfb2b686d17805ab74eaebf49c33994c2bc275ee"
+    },
+    {
+      "path": "packages/shaders/src/cli/detect.ts",
+      "sha256": "da2e0c9106190cbb7f2816cae8207cf04938d0b5c5692bc32b02379e63f50cf7"
+    },
+    {
+      "path": "packages/shaders/src/cli/fail.ts",
+      "sha256": "1845c16529e68cf7e4cf24a36512716d16f4d2b4359251e3656fd85faa45762d"
+    },
+    {
+      "path": "packages/shaders/src/cli/init.ts",
+      "sha256": "ddd14d5244ea0b9c30c99092365aeb4e1f6aac283cb1022ff70f8c327bcc5fc2"
+    },
+    {
+      "path": "packages/shaders/src/cli/install.ts",
+      "sha256": "0fb6b40a8d5354775ecb6b454f3dcf8eb86bde5b79c2b05e994a62e3757fb391"
+    },
+    {
+      "path": "packages/shaders/src/cli/installMcp.ts",
+      "sha256": "070f5f4580d409de676c472f4c6f84a2e618745b092d891ff039954f7c1634ab"
+    },
+    {
+      "path": "packages/shaders/src/cli/lockFile.ts",
+      "sha256": "43b2b27e4208b0354c965025caab585f8c42fca60f12bb1ba42bd3b839634211"
+    },
+    {
+      "path": "packages/shaders/src/cli/open.ts",
+      "sha256": "263673701fc4afa084742342f889e1f111852738ef82a8acedb77e9834c0cc99"
+    },
+    {
+      "path": "packages/shaders/src/cli/presets.ts",
+      "sha256": "d386eac3f9415427d25b83315ff199349036d0086f29b45bb29a18fffb6ce4ed"
+    },
+    {
+      "path": "packages/shaders/src/cli/project.ts",
+      "sha256": "0310a3263c766e0b917c56add8edd3af32f650705dd15c84d60d8384f8e735a5"
+    },
+    {
+      "path": "packages/shaders/src/cli/update.ts",
+      "sha256": "c7a8fd933bb187a2de23479bcc2012d62a8e156bf4c3287cec04dfa34177352a"
+    },
+    {
+      "path": "packages/shaders/src/config.ts",
+      "sha256": "34ec98a9321c2665ba5c4eec58d6a03b0764858c7e5e2e5c2367715cc31df444"
+    },
+    {
+      "path": "packages/shaders/tsconfig.json",
+      "sha256": "38b9f96dc418a1c7dd3f357cdee12c753e06733ff7ccc2cf7e75476569fa7d82"
+    },
+    {
+      "path": "packages/solid/package.json",
+      "sha256": "bb50870ec0a2ad476fe530118e1a879c88134c79dae8ce4649e79115e007a284"
+    },
+    {
+      "path": "packages/solid/src/engine/CustomShader.tsx",
+      "sha256": "d71589660ac6dee9304bc2e15e5548ca0bbd46e34292e916c7f1d853726e9306"
+    },
+    {
+      "path": "packages/solid/src/engine/Preview.tsx",
+      "sha256": "b9549a7e389fb1177851ce5ce9744b966e9323ce2373cf5e654c15b049549d19"
+    },
+    {
+      "path": "packages/solid/src/engine/Shader.tsx",
+      "sha256": "f262b6d664727db9fd50c180549b3c578dd89f9cb09651f044e5089e6fca3366"
+    },
+    {
+      "path": "packages/solid/src/engine/component.template.tsx",
+      "sha256": "44eb17b0ca55ab9b46343714b56e848992a0dac71f15004e9c5b4f9441c2f374"
+    },
+    {
+      "path": "packages/solid/src/utils/generatePresetCode.template.ts",
+      "sha256": "d2fb35f1be7fe34da523ee4884c3492d28136cf3e9d8b04f9eee8038df8f457b"
+    },
+    {
+      "path": "packages/solid/tsconfig.json",
+      "sha256": "d42dd8ecf93152518e8941200fe619061213cfd46e6d8bcb348985abe7c75ccd"
+    },
+    {
+      "path": "packages/solid/vite.config.ts",
+      "sha256": "38e2911463f8208fc2e24353b00537375b3af3034389dca051bab8a4615443aa"
+    },
+    {
+      "path": "packages/svelte/CHANGELOG.md",
+      "sha256": "7a9fd2f345000e1f43cf9fc4078a2266592993dec4fc9b83085a56b6e0fba611"
+    },
+    {
+      "path": "packages/svelte/package.json",
+      "sha256": "02514e4f9b9d110d46e88e32aa6bf65ada55d6d8862dc1bb618144aab7389d5e"
+    },
+    {
+      "path": "packages/svelte/scripts/copy-types.js",
+      "sha256": "0a32f3dc775a90676f675163a3dd4df75e95172a6b961c84804a08be8285a288"
+    },
+    {
+      "path": "packages/svelte/src/lib/engine/CustomShader.svelte",
+      "sha256": "25a48e0ef62328bfb264c2519383fd536a20b8852c0001340a0174f1cb78b313"
+    },
+    {
+      "path": "packages/svelte/src/lib/engine/Preview.svelte",
+      "sha256": "61e83388cee9ecd18f4e205d98d2e01d75641bee29e7e19d352d3446b4348964"
+    },
+    {
+      "path": "packages/svelte/src/lib/engine/PreviewRenderComponent.svelte",
+      "sha256": "9378831b4fcca9ef0ea2c089b1f7f28049514c91ad83ce896f8421924ba2fc01"
+    },
+    {
+      "path": "packages/svelte/src/lib/engine/Shader.svelte",
+      "sha256": "23067528d046ed3b0807484c58ec00e36991664e56b83acf260cd1974453c088"
+    },
+    {
+      "path": "packages/svelte/src/lib/engine/component.template.svelte",
+      "sha256": "edefb249bc9ec72bc2266bbaa131f6e0fc765c9f6d979ebb61e8d7c5e5907636"
+    },
+    {
+      "path": "packages/svelte/src/lib/utils/generatePresetCode.template.ts",
+      "sha256": "73a1560c2c84fb548602c66f4061f0b5c98779a004c65204e5766784dab08df6"
+    },
+    {
+      "path": "packages/svelte/src/vite-env.d.ts",
+      "sha256": "cc9c01ab82cd866d596b11028637a284c3cca4b115d2aa5a02c31d2c59977fc1"
+    },
+    {
+      "path": "packages/svelte/svelte.config.js",
+      "sha256": "e9ba69ba3158faf8b934068d4518459ad070b7eca43e25d7650998a20be7974c"
+    },
+    {
+      "path": "packages/svelte/tsconfig.json",
+      "sha256": "dfa8667e09ea9ee810dfacbb07667ddd8c108aaaef30d7c0175ff6264636ed39"
+    },
+    {
+      "path": "packages/svelte/tsconfig.node.json",
+      "sha256": "413a920f66a91eab5bc0a208d5525434d8206e04ffc9fa757ad1b3b0d5d18313"
+    },
+    {
+      "path": "packages/svelte/vite.config.ts",
+      "sha256": "1af1d468697c001cedbca927660a3bdc53b8cfa2ba2e434d6067684673cdb5e2"
+    },
+    {
+      "path": "packages/vue/package.json",
+      "sha256": "087c56bc04e3962a951104837227faf656027d5d57dc4088c1e07f2d6ea260a2"
+    },
+    {
+      "path": "packages/vue/src/engine/CustomShader.vue",
+      "sha256": "74196db37de167453c8ec9bac3a23256f49558cdf9444758f077843e8e6fd996"
+    },
+    {
+      "path": "packages/vue/src/engine/Preview.vue",
+      "sha256": "5e585d88439e6e68f7e5e179a218fa3b6a60912bf5cdd8b0e7af462f8bfcb7a6"
+    },
+    {
+      "path": "packages/vue/src/engine/Shader.vue",
+      "sha256": "7d5f9ff6bd4c5fbf237bffbcbdf867ffe01ea47d8819ec792fdfffd41cb0e0ea"
+    },
+    {
+      "path": "packages/vue/src/engine/component.template.vue",
+      "sha256": "997be6582474507265e23dab402f3aa52b5beb2ff25ba88f32b4f8865888027d"
+    },
+    {
+      "path": "packages/vue/src/utils/generatePresetCode.template.ts",
+      "sha256": "150ec6bcc55e533ea6d508d86c77a94d43322e703ad998a0445a93446305e36a"
+    },
+    {
+      "path": "packages/vue/src/vite-env.d.ts",
+      "sha256": "d345328043a8139e131904b430b9cce351b9e5a5868fca6269ecd57b91c6d064"
+    },
+    {
+      "path": "packages/vue/tsconfig.json",
+      "sha256": "1fb36fbd55b4ce2798a8a3bbc9159b5f5ab78baede0b4e7b785e3974701c25a9"
+    },
+    {
+      "path": "packages/vue/vite.config.ts",
+      "sha256": "aa5268a7280663aadde6b5c1f52125cd1c62a74d358fba4a9230a2425cfd00a4"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "165f542417878dc5def829d5c81d04be4706797d52238bbe1d5410d9fe68fc4a"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "477e6c5f8b033a1ecb7f8919ad2726e4328c7893c4ad6228d62471425b22dbe7"
+    },
+    {
+      "path": "scripts/release.mjs",
+      "sha256": "d38d1e876fd43d176704212ee469d35d670297c249e17265c54eeb981840ad90"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "e04c7b745e3633dcd0bdc39378623a00caa11dfb6402093b603d76aab9b019b4"
+    },
+    {
+      "path": "turbo.json",
+      "sha256": "6120362c129f565fddcaa39e59d2d422ba8d704f7ce8b01eb4f3d251b685da9a"
+    }
+  ]
+}

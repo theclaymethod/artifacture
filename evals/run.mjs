@@ -171,15 +171,20 @@ async function mapWithConcurrency(items, concurrency, mapper) {
   return results;
 }
 
-const violationResults = await mapWithConcurrency(
-  violationFiles,
-  JOBS,
-  (file) => checkViolation(file, expectations[file]),
-);
 const cleanFiles = readdirSync(cleanRoot)
   .filter((file) => file.endsWith('.html'))
   .sort();
-const cleanResults = await mapWithConcurrency(cleanFiles, JOBS, checkClean);
+// Keep clean cases in the same queue so no worker waits at a suite boundary.
+const jobs = [
+  ...violationFiles.map((file) => ({ file, clean: false })),
+  ...cleanFiles.map((file) => ({ file, clean: true })),
+];
+const results = await mapWithConcurrency(jobs, JOBS, async ({ file, clean }) => ({
+  clean,
+  ...await (clean ? checkClean(file) : checkViolation(file, expectations[file])),
+}));
+const violationResults = results.filter((row) => !row.clean);
+const cleanResults = results.filter((row) => row.clean);
 
 console.log('check_id,stage,status,expected_severity');
 for (const row of violationResults) {
