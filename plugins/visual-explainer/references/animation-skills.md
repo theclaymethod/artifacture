@@ -37,3 +37,9 @@ For a React slide interaction, use `animate` with the project's native component
 - **Motionmaxxing:** an optional upstream motion-design reference for stronger composition, pacing and typography. Discover with `artifacture info motionmaxxing`; it is not assumed installed. Adapt relevant design decisions to the selected native renderer instead of importing another runtime.
 
 Keep the established ISO, mono-color or Algebrica visual language. Use motion to expose a relationship or change, preserve reduced motion in interactive outputs, and review actual frames and transition boundaries. Do not load every skill or audit every project by default.
+
+### Applying Motionmaxxing to an existing film
+
+Resolve and read the upstream skill when named; a catalog entry is not an installed skill. Use its direction, emphasis budget and measured curves within the current renderer. Reuse a curve module with provenance rather than copying a second runtime over a working native project. Spend the strongest motion on the requested hero and shorten supporting entrances; scaling every transform up does not improve pacing.
+
+Run render-based audits on the delivered MP4. Before trusting a DOM lint result, establish that it expands mounted scenes and seeks each nested timeline using its local offset. Motionmaxxing's generic `__timelines` fallback seeks every timeline to the same time; that is not the timing contract of nested HyperFrames scenes. A reported PASS without demonstrated scene coverage is inconclusive. Distinguish source text from words baked into media and keep meaningful diagram labels separate from ornamental film chrome.

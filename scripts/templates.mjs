@@ -92,5 +92,6 @@ export async function installSkill(directory) {
   await cp(path.join(source, 'SKILL.md'), path.join(destination, 'SKILL.md'), { force: false, errorOnExist: true });
   await cp(path.join(source, 'scripts/artifacture.mjs'), path.join(destination, 'scripts/artifacture.mjs'), { force: false, errorOnExist: true });
   await cp(path.join(source, 'references/animation-skills.md'), path.join(destination, 'references/animation-skills.md'), { force: false, errorOnExist: true });
+  await cp(path.join(source, 'references/video-capture-and-edit.md'), path.join(destination, 'references/video-capture-and-edit.md'), { force: false, errorOnExist: true });
   console.log(`Installed the entry skill at ${destination}. Native skills are fetched only for selected templates.`);
 }

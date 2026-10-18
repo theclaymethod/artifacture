@@ -9,3 +9,11 @@ For ISO illustrations consult ISO Glow, Hairline and iso-figure. Use their nativ
 Install the official FFrames skill for native API and toolchain guidance. Use the generated project's commands for `timeline`, `inspect`, `frame`, `strip`, audio analysis and `render`. Inspect a draft before final rendering. There is no runtime renderer switch: a browser-dependent composition should start from a native HyperFrames project instead.
 
 When available, consult `motion-doctrine` for causal continuity and `cut-the-curve` for transition choices. Use their transferable design guidance with FFrames native timelines and springs; HyperFrames-specific seam and DOM rules remain scoped to that renderer. `artifacture info motionmaxxing` discovers an optional upstream design reference. The installed `fframes-video` skill owns implementation and verification.
+
+## Scenes are the authoring unit
+
+A slide hosts a scene with an internal progression; it is not the smallest unit of content. Author meaningful beats within a persistent visual space. Establish the subject, expose its relationships, show an intervention, and resolve the question with evidence. Keep objects recognizable as they move, reorganize, gain annotations or receive focus. A new heading or entrance animation alone is not a new beat. Add comparisons, failure cases and exploration when they improve understanding.
+
+For interactive presentations, let viewers step forward/back through beats, pause and replay timed choreography, and explore without losing their place. Keep explicit scene navigation separate from beat navigation. Respect focused controls and reduced motion. For video, choreograph those beats with the renderer's native clock; do not merely hold a screenshot for several seconds. Scene duration follows the argument rather than a fixed slide timer. These are authoring conventions, not a new universal scene schema.
+
+For a showcase, inventory distinct capabilities and assign each a unique demonstration before composing. Reuse upstream geometry and choreography without repeatedly replaying the same footage. Prove each capture path with decoded beginning, middle and end frames; native structural inspection alone cannot identify blank or poorly styled source media. Check actual encoded dimensions, then publish the verified media before switching the player.
