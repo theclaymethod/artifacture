@@ -35,6 +35,8 @@ Artifacture calls `cargo-fframes new` and adds a narrative workflow. The generat
 
 Use the `hyperframes-browser` recipe when the requested composition depends on DOM/CSS or a browser-only visual. PR reviews have a separate evidence/narrative recipe. Use ordinary media files to compose outputs across tools.
 
+For the completed HyperFrames showcase, use the [reel publication guide](reel-publication.md) to preserve editable projects, source captures, rendered media and verification evidence in a checksummed bundle.
+
 ## References and skills
 
 ```sh
