@@ -3,12 +3,23 @@ import os from 'node:os';
 import path from 'node:path';
 import { effect, frame, init, target } from 'vgpu/mock';
 import { describe, expect, it } from 'vitest';
-import { buildEffectSetBag, inspectUniformBindings, lerpParams } from '../src/index.ts';
+import {
+  buildEffectSetBag,
+  easeInOutCubic,
+  inspectUniformBindings,
+  lerpParams,
+} from '../src/index.ts';
 import { compileWgslFile, computeRgbStdDev } from '../src/node/index.ts';
 import { liquidPrismScene } from '../src/scenes/index.ts';
 
 describe('@artifacture/gpu uniforms, mock execution, and compiler', () => {
-  it('interpolates numeric and tuple uniforms via lerpParams', () => {
+  it('interpolates numeric and tuple uniforms via lerpParams and easeInOutCubic', () => {
+    expect(easeInOutCubic(0)).toBe(0);
+    expect(easeInOutCubic(0.25)).toBeLessThan(0.1);
+    expect(easeInOutCubic(0.5)).toBeCloseTo(0.5);
+    expect(easeInOutCubic(0.75)).toBeGreaterThan(0.9);
+    expect(easeInOutCubic(1)).toBe(1);
+
     const mid = lerpParams(
       { morph: 0, yaw: -1, color: [0, 0.5, 1] },
       { morph: 1, yaw: 1, color: [1, 1, 0] },

@@ -73,6 +73,12 @@ export function easeOutQuintic(t: number): number {
   return 1 - (1 - x) ** 4;
 }
 
+/** Symmetric ease-in-out cubic curve for smooth GPU slide morphs across transitions. */
+export function easeInOutCubic(t: number): number {
+  const x = Math.max(0, Math.min(1, t));
+  return x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
+}
+
 export function lerpParamValue(a: GpuParamValue, b: GpuParamValue, t: number): GpuParamValue {
   if (typeof a === 'number' && typeof b === 'number') {
     return a + (b - a) * t;

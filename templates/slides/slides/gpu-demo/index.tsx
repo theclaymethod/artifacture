@@ -46,6 +46,11 @@ export const transition: SlideTransition = {
   morph: { duration: 760, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
 };
 
+const morphSlideTransition: SlideTransition = {
+  duration: 0,
+  morph: { duration: 920, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+};
+
 export const comparisonSpec: ComparisonSlideSpec = {
   id: 'runtime-comparison',
   layout: 'comparison',
@@ -100,6 +105,7 @@ const Cover: Page = () => (
       stageId="spike-hero"
       scene={liquidPrismScene}
       stillSrc={prismPose0Still}
+      morphMs={920}
       label="Refractive liquid prism in initial resting pose"
       params={{
         morph: 0.0,
@@ -114,45 +120,59 @@ const Cover: Page = () => (
       }}
     />
 
-    <MorphElement id="hero-title">
-      <h1
+    <MorphElement id="stage-kicker">
+      <div
         style={{
           position: 'absolute',
           left: 96,
-          top: 96,
-          width: 760,
-          margin: 0,
-          fontFamily: 'var(--osd-font-display)',
-          fontSize: 78,
-          fontWeight: 500,
-          lineHeight: 1.02,
-          letterSpacing: '-0.02em',
-          color: '#16181d',
+          top: 88,
+          fontFamily: 'var(--ve-font-mono)',
+          fontSize: 15,
+          fontWeight: 600,
+          letterSpacing: '0.12em',
+          color: 'var(--ve-accent)',
+          textTransform: 'uppercase',
         }}
       >
-        Persistent WebGPU scenes inside stock open-slide
-      </h1>
+        WEBGPU STAGE · LIQUID PRISM
+      </div>
     </MorphElement>
 
-    <MorphElement id="hero-caption">
-      <p
-        style={{
-          position: 'absolute',
-          left: 96,
-          bottom: 84,
-          width: 680,
-          margin: 0,
-          fontSize: 28,
-          lineHeight: 1.4,
-          color: '#2a2e36',
-        }}
-      >
-        One shared vgpu device holds pipeline state across cuts while MorphElement carries DOM
-        typography.
-      </p>
-    </MorphElement>
+    <h1
+      style={{
+        position: 'absolute',
+        left: 96,
+        top: 128,
+        width: 760,
+        margin: 0,
+        fontFamily: 'var(--osd-font-display)',
+        fontSize: 78,
+        fontWeight: 500,
+        lineHeight: 1.02,
+        letterSpacing: '-0.02em',
+        color: '#16181d',
+      }}
+    >
+      Persistent WebGPU scenes inside stock open-slide
+    </h1>
+
+    <p
+      style={{
+        position: 'absolute',
+        left: 96,
+        bottom: 84,
+        width: 680,
+        margin: 0,
+        fontSize: 28,
+        lineHeight: 1.4,
+        color: '#2a2e36',
+      }}
+    >
+      One shared vgpu device holds the canvas alive across cuts without cloning WebGPU state.
+    </p>
   </section>
 );
+Cover.transition = morphSlideTransition;
 
 const MorphFollowup: Page = () => (
   <section
@@ -170,7 +190,7 @@ const MorphFollowup: Page = () => (
       stageId="spike-hero"
       scene={liquidPrismScene}
       stillSrc={prismPose1Still}
-      morphMs={760}
+      morphMs={920}
       label="Refractive liquid prism morphed into torus state"
       params={{
         morph: 1.0,
@@ -185,42 +205,56 @@ const MorphFollowup: Page = () => (
       }}
     />
 
-    <MorphElement id="hero-title">
-      <h1
+    <MorphElement id="stage-kicker">
+      <div
         style={{
           position: 'absolute',
           left: 96,
-          top: 96,
-          width: 620,
-          margin: 0,
-          fontFamily: 'var(--osd-font-display)',
-          fontSize: 52,
-          fontWeight: 500,
-          lineHeight: 1.08,
-          letterSpacing: '-0.02em',
-          color: '#16181d',
+          top: 72,
+          fontFamily: 'var(--ve-font-mono)',
+          fontSize: 15,
+          fontWeight: 600,
+          letterSpacing: '0.12em',
+          color: 'var(--ve-accent)',
+          textTransform: 'uppercase',
         }}
       >
-        Uniforms interpolate without cloning the canvas
-      </h1>
+        WEBGPU STAGE · LIQUID PRISM
+      </div>
     </MorphElement>
 
-    <MorphElement id="hero-caption">
-      <p
-        style={{
-          position: 'absolute',
-          left: 96,
-          bottom: 84,
-          width: 600,
-          margin: 0,
-          fontSize: 24,
-          lineHeight: 1.4,
-          color: '#2a2e36',
-        }}
-      >
-        Print, PPTX, thumbnails, and non-WebGPU browsers swap cleanly to deterministic Dawn stills.
-      </p>
-    </MorphElement>
+    <h1
+      style={{
+        position: 'absolute',
+        left: 96,
+        top: 112,
+        width: 620,
+        margin: 0,
+        fontFamily: 'var(--osd-font-display)',
+        fontSize: 52,
+        fontWeight: 500,
+        lineHeight: 1.08,
+        letterSpacing: '-0.02em',
+        color: '#16181d',
+      }}
+    >
+      Uniforms interpolate without cloning the canvas
+    </h1>
+
+    <p
+      style={{
+        position: 'absolute',
+        left: 96,
+        bottom: 84,
+        width: 600,
+        margin: 0,
+        fontSize: 24,
+        lineHeight: 1.4,
+        color: '#2a2e36',
+      }}
+    >
+      Print, PPTX, thumbnails, and non-WebGPU browsers swap cleanly to deterministic Dawn stills.
+    </p>
 
     <div
       style={{
@@ -271,6 +305,7 @@ const MorphFollowup: Page = () => (
     </div>
   </section>
 );
+MorphFollowup.transition = morphSlideTransition;
 
 const MachineHinge: Page = () => (
   <section

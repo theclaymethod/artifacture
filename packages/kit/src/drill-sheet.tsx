@@ -213,11 +213,19 @@ export function DrillCard({
 
   return (
     <>
-      <button
-        type="button"
+      {/* biome-ignore lint/a11y/useSemanticElements: open-slide VirtualThumbList wraps thumbnails in <button> */}
+      <div
+        role="button"
+        tabIndex={0}
         className={className ? `ve-drill-card ${className}` : 've-drill-card'}
         data-drill-target={drillId}
         onClick={() => setOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}
         style={{ minHeight, ...style }}
       >
         {eyebrow ? <span className="ve-drill-card-eyebrow">{eyebrow}</span> : null}
@@ -239,7 +247,7 @@ export function DrillCard({
             <span>{hint}</span>
           </span>
         ) : null}
-      </button>
+      </div>
       {open ? (
         <DrillSheet
           eyebrow={detailEyebrow ?? [eyebrow, title].filter(Boolean).join(' · ')}
