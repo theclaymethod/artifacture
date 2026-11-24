@@ -68,7 +68,8 @@ export async function renderSceneStill<TParams extends GpuSceneParams = GpuScene
       const controller = opts.scene.setup(gpu, offscreen, merged);
       try {
         if (controller.compile) await controller.compile(offscreen);
-        controller.renderAt(seconds, merged, offscreen);
+        const submitted = frame(gpu, (f) => controller.renderAt(seconds, merged, offscreen, f));
+        await submitted.done;
       } finally {
         controller.dispose();
       }
@@ -159,7 +160,8 @@ export async function renderSceneSequence<TParams extends GpuSceneParams = GpuSc
         } as TParams;
 
         if (controller) {
-          controller.renderAt(sec, merged, offscreen);
+          const submitted = frame(gpu, (f) => controller.renderAt(sec, merged, offscreen, f));
+          await submitted.done;
         } else if (eff) {
           const bag = buildEffectSetBag(bindings, merged, sec, [width, height]);
           eff.set(bag);

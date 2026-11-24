@@ -10,7 +10,7 @@ import {
   lerpParams,
 } from '../src/index.ts';
 import { compileWgslFile, computeRgbStdDev } from '../src/node/index.ts';
-import { liquidPrismScene } from '../src/scenes/index.ts';
+import { gaussianSplatScene, liquidPrismScene } from '../src/scenes/index.ts';
 
 describe('@artifacture/gpu uniforms, mock execution, and compiler', () => {
   it('interpolates numeric and tuple uniforms via lerpParams and easeInOutCubic', () => {
@@ -71,5 +71,30 @@ describe('@artifacture/gpu uniforms, mock execution, and compiler', () => {
     const variedRgba = new Uint8Array([0, 0, 0, 255, 255, 255, 255, 255]);
     expect(computeRgbStdDev(variedRgba)).toBeCloseTo(127.5);
     expect(os.tmpdir()).toBeTruthy();
+  });
+
+  it('compiles and submits custom 2-pass gaussianSplatScene setup on vgpu/mock', async () => {
+    const gpu = await init();
+    try {
+      const offscreen = target(gpu, { size: [128, 72], format: 'rgba8unorm' });
+      const controller = gaussianSplatScene.setup?.(
+        gpu,
+        offscreen,
+        gaussianSplatScene.defaultParams,
+      );
+      expect(controller).toBeDefined();
+      if (!controller) return;
+      try {
+        if (controller.compile) await controller.compile(offscreen);
+        const submitted = frame(gpu, (f) =>
+          controller.renderAt(1.0, gaussianSplatScene.defaultParams, offscreen, f),
+        );
+        await submitted.done;
+      } finally {
+        controller.dispose();
+      }
+    } finally {
+      gpu.dispose();
+    }
   });
 });

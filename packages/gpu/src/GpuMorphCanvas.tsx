@@ -305,7 +305,7 @@ export function GpuMorphCanvas<TParams extends GpuSceneParams = GpuSceneParams>(
           record.currentTimeSec = timeSec;
 
           if (activeController) {
-            activeController.renderAt(timeSec, interpolated as TParams, activeSurface);
+            activeController.renderAt(timeSec, interpolated as TParams, activeSurface, activeFrame);
             return;
           }
           if (activeEffect) {

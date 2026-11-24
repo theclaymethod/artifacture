@@ -1,4 +1,4 @@
-import type { Effect, Gpu, ShaderSource, Target } from 'vgpu';
+import type { Effect, Frame, Gpu, ShaderSource, Target } from 'vgpu';
 
 export type GpuParamScalar = number;
 export type GpuParamVector = readonly number[];
@@ -8,8 +8,8 @@ export type GpuSceneParams = Record<string, GpuParamValue>;
 export interface GpuSceneController<TParams extends GpuSceneParams = GpuSceneParams> {
   /** Resize intermediate targets if the scene owns any. */
   resize?(width: number, height: number): void;
-  /** Update uniforms and draw one frame into `target` inside a `frame` pass or directly. */
-  renderAt(timeSeconds: number, params: TParams, target: Target): void;
+  /** Update uniforms and draw one frame into `target`, reusing `activeFrame` inside frame loops. */
+  renderAt(timeSeconds: number, params: TParams, target: Target, activeFrame?: Frame): void;
   /** Optional pipeline warm-up before the first visible frame. */
   compile?(target: Target): Promise<void>;
   dispose(): void;

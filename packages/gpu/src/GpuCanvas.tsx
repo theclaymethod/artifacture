@@ -140,7 +140,7 @@ export function GpuCanvas<TParams extends GpuSceneParams = GpuSceneParams>({
           if (disposed) return;
           const p = latestRef.current.mergedParams;
           if (customController) {
-            customController.renderAt(timeSec, p, activeSurface);
+            customController.renderAt(timeSec, p, activeSurface, activeFrame);
             return;
           }
           const activeEffect = defaultEffect;
