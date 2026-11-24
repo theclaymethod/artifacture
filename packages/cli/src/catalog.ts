@@ -2,7 +2,12 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { blindsGlassScene, gaussianSplatScene, liquidPrismScene } from '@artifacture/gpu/scenes';
+import {
+  blindsGlassScene,
+  gaussianSplatScene,
+  liquidPrismScene,
+  mirrorCityScene,
+} from '@artifacture/gpu/scenes';
 import { KIT_CATALOG, type KitBlockEntry } from '@artifacture/kit';
 import { ARTIFACTURE_THEMES, type ThemeSpec } from '@artifacture/themes';
 
@@ -41,6 +46,13 @@ export const GPU_SCENE_CATALOG: readonly GpuSceneCatalogEntry[] = [
     importPath: '@artifacture/gpu/scenes',
     params: Object.keys(gaussianSplatScene.defaultParams),
     stillSize: gaussianSplatScene.stillSize ?? [1280, 720],
+  },
+  {
+    id: mirrorCityScene.id,
+    label: mirrorCityScene.label,
+    importPath: '@artifacture/gpu/scenes',
+    params: Object.keys(mirrorCityScene.defaultParams),
+    stillSize: mirrorCityScene.stillSize ?? [1280, 720],
   },
 ];
 
