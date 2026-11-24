@@ -14,7 +14,12 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "vitest run",
-    "doctor": "vgpu doctor"
+    "doctor": "vgpu doctor",
+    "spirula:colab": "node scripts/spirula-colab.mjs",
+    "sharp:colab": "node scripts/sharp-colab.mjs",
+    "physgs:colab": "node scripts/physgs-colab.mjs",
+    "da3:colab": "node scripts/da3-colab.mjs",
+    "mcmc:colab": "node scripts/mcmc-colab.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.8",

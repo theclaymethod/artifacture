@@ -12,6 +12,7 @@ import subprocess
 import sys
 import threading
 import time
+import zipfile
 from pathlib import Path
 
 
@@ -224,13 +225,53 @@ def apply_pinhole_only_codegen(repo_dir: Path) -> None:
     print(f"[colab-spirula-cuda] Codegen finished in {dt_gen:.2f}s ({cu_count} .cu files remain)", flush=True)
 
 
+def find_colmap_root(search_root: Path) -> Path:
+    candidates = [search_root] + sorted(p for p in search_root.rglob("*") if p.is_dir())
+    for cand in candidates:
+        if "__MACOSX" in cand.parts:
+            continue
+        if (cand / "images").is_dir() and (cand / "sparse").is_dir():
+            return cand
+    raise FileNotFoundError(
+        f"No COLMAP dataset root containing both images/ and sparse/ found under {search_root}"
+    )
+
+
+def ensure_binary_runs(bin_path: Path) -> str | None:
+    if not bin_path.exists():
+        return None
+    bin_path.chmod(0o755)
+    proc = subprocess.run([str(bin_path), "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    if proc.returncode == 0:
+        return proc.stdout.strip()
+    if "libgomp" in proc.stdout:
+        print("[colab-spirula-cuda] Installing libgomp1 for cached Spirula binary...", flush=True)
+        run_cmd(["apt-get", "update", "-qq"])
+        run_cmd(["apt-get", "install", "-y", "-qq", "libgomp1"])
+        proc2 = subprocess.run([str(bin_path), "--version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        if proc2.returncode == 0:
+            return proc2.stdout.strip()
+    print(f"[colab-spirula-cuda] Cached binary {bin_path} failed self-check ({proc.returncode}): {proc.stdout}", flush=True)
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build & run headless CUDA Spirula Studio on Colab GPU.")
     parser.add_argument("--repo-dir", default="/content/spirula-studio")
+    parser.add_argument("--binary", default="/content/spirula-cuda-bin")
+    parser.add_argument("--rebuild", action="store_true", help="Force compile from source even if --binary exists.")
     parser.add_argument("--data-dir", default="/content/datasets/tandt/truck")
+    parser.add_argument("--data-zip", default=None, help="Optional uploaded zip containing COLMAP images/ and sparse/.")
+    parser.add_argument("--hf-repo", default="alexmkwizu/gaussian_training_datasets")
+    parser.add_argument("--hf-subdir", default="tandt/truck")
+    parser.add_argument("--dataset-label", default=None)
     parser.add_argument("--out-prefix", default="/content/spirula_out")
     parser.add_argument("--run-name", default="truck_cuda")
+    parser.add_argument("--primitive", default="3dgs")
     parser.add_argument("--steps", type=int, default=3000)
+    parser.add_argument("--eval-mode", choices=["interval", "none"], default="interval")
+    parser.add_argument("--eval-interval", type=int, default=8)
+    parser.add_argument("--extra-arg", action="append", default=[])
     parser.add_argument("--out-ply", default="/content/spirula-truck-cuda.ply")
     parser.add_argument("--bench-json", default="/content/spirula-cuda-bench.json")
     parser.add_argument("--full-camera-matrix", action="store_true", help="Compile all 10 camera/distortion models.")
@@ -245,97 +286,133 @@ def main() -> int:
     gpu_parts = [p.strip() for p in gpu_line.split(",")]
     print(f"[colab-spirula-cuda] GPU: {gpu_line}", flush=True)
 
-    _, nvcc_out = run_cmd(["nvcc", "--version"])
-    print(f"[colab-spirula-cuda] nvcc: {nvcc_out.strip().splitlines()[-1]}", flush=True)
-
-    missing_bins = [b for b in ("ninja", "cmake", "pkg-config") if shutil.which(b) is None]
-    if missing_bins or not Path("/usr/include/omp.h").exists():
-        print(f"[colab-spirula-cuda] Installing build deps (missing={missing_bins})...", flush=True)
-        run_cmd(["apt-get", "update", "-qq"])
-        run_cmd(["apt-get", "install", "-y", "-qq", "cmake", "ninja-build", "libomp-dev", "pkg-config", "git"])
-
-    if importlib.util.find_spec("huggingface_hub") is None:
-        print("[colab-spirula-cuda] Installing huggingface_hub...", flush=True)
-        run_cmd([sys.executable, "-m", "pip", "install", "-q", "huggingface_hub"])
-
-    repo_dir = Path(args.repo_dir)
-    if not (repo_dir / ".git").exists():
-        print("[colab-spirula-cuda] Cloning harry7557558/spirula-studio (master)...", flush=True)
-        run_cmd([
-            "git",
-            "clone",
-            "--depth",
-            "1",
-            "--branch",
-            "master",
-            "https://github.com/harry7557558/spirula-studio.git",
-            str(repo_dir),
-        ])
-
-    build_dir = repo_dir / "build_cuda"
+    binary_path = Path(args.binary)
     spirula_bin: Path | None = None
-    for cand in (build_dir / "spirula", build_dir / "bin" / "spirula"):
-        if cand.exists():
-            spirula_bin = cand
-            break
-
+    ver_out = ""
+    built_from_source = False
     build_sec = 0.0
+
+    if not args.rebuild:
+        checked_ver = ensure_binary_runs(binary_path)
+        if checked_ver is not None:
+            spirula_bin = binary_path
+            ver_out = checked_ver
+            print(f"[colab-spirula-cuda] Cache hit ({binary_path}): {ver_out} — skipping build!", flush=True)
+
     if spirula_bin is None:
-        if not args.full_camera_matrix:
-            apply_pinhole_only_codegen(repo_dir)
-        print("[colab-spirula-cuda] Configuring CMake (-DSS_BACKEND=cuda -DSS_BUILD_GUI=OFF)...", flush=True)
-        cfg_sec, cfg_out = run_cmd([
-            "cmake",
-            "-G",
-            "Ninja",
-            "-S",
-            str(repo_dir),
-            "-B",
-            str(build_dir),
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DSS_BACKEND=cuda",
-            "-DSS_BUILD_GUI=OFF",
-            "-DSS_BUILD_SFM=OFF",
-            "-DSS_BUILD_SAM=OFF",
-            "-DSS_BUILD_BACKEND_TESTS=OFF",
-            "-DSS_CHECK_COMMENTS=OFF",
-        ])
-        for line in cfg_out.splitlines():
-            if any(k in line for k in ("CUDA", "CUDAToolkit", "architecture", "configured")):
-                print(line, flush=True)
-        nproc = str(os.cpu_count() or 2)
-        print(f"[colab-spirula-cuda] Compiling `spirula` CUDA target (-j{nproc})...", flush=True)
-        comp_sec, _ = stream_cmd(
-            ["cmake", "--build", str(build_dir), "--target", "spirula", f"-j{nproc}"],
-            show_all=True,
-        )
-        build_sec = cfg_sec + comp_sec
+        built_from_source = True
+        _, nvcc_out = run_cmd(["nvcc", "--version"])
+        print(f"[colab-spirula-cuda] nvcc: {nvcc_out.strip().splitlines()[-1]}", flush=True)
+
+        missing_bins = [b for b in ("ninja", "cmake", "pkg-config") if shutil.which(b) is None]
+        if missing_bins or not Path("/usr/include/omp.h").exists():
+            print(f"[colab-spirula-cuda] Installing build deps (missing={missing_bins})...", flush=True)
+            run_cmd(["apt-get", "update", "-qq"])
+            run_cmd(["apt-get", "install", "-y", "-qq", "cmake", "ninja-build", "libomp-dev", "pkg-config", "git"])
+
+        repo_dir = Path(args.repo_dir)
+        build_dir = repo_dir / "build_cuda"
+        if not (repo_dir / ".git").exists():
+            print("[colab-spirula-cuda] Cloning harry7557558/spirula-studio (master)...", flush=True)
+            run_cmd([
+                "git",
+                "clone",
+                "--depth",
+                "1",
+                "--branch",
+                "master",
+                "https://github.com/harry7557558/spirula-studio.git",
+                str(repo_dir),
+            ])
+        elif args.rebuild:
+            run_cmd(["git", "checkout", "--", "."], cwd=repo_dir)
+            if build_dir.exists():
+                shutil.rmtree(build_dir)
+
         for cand in (build_dir / "spirula", build_dir / "bin" / "spirula"):
-            if cand.exists():
+            if cand.exists() and not args.rebuild:
                 spirula_bin = cand
                 break
+
         if spirula_bin is None:
-            found = list(build_dir.rglob("spirula"))
-            spirula_bin = found[0] if found else None
-        if spirula_bin is None:
-            raise FileNotFoundError(f"Built `spirula` binary not found in {build_dir}")
-        print(f"[colab-spirula-cuda] Built {spirula_bin} in {build_sec:.2f}s", flush=True)
+            if not args.full_camera_matrix:
+                apply_pinhole_only_codegen(repo_dir)
+            print("[colab-spirula-cuda] Configuring CMake (-DSS_BACKEND=cuda -DSS_BUILD_GUI=OFF)...", flush=True)
+            cfg_sec, cfg_out = run_cmd([
+                "cmake",
+                "-G",
+                "Ninja",
+                "-S",
+                str(repo_dir),
+                "-B",
+                str(build_dir),
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DSS_BACKEND=cuda",
+                "-DSS_BUILD_GUI=OFF",
+                "-DSS_BUILD_SFM=OFF",
+                "-DSS_BUILD_SAM=OFF",
+                "-DSS_BUILD_BACKEND_TESTS=OFF",
+                "-DSS_CHECK_COMMENTS=OFF",
+            ])
+            for line in cfg_out.splitlines():
+                if any(k in line for k in ("CUDA", "CUDAToolkit", "architecture", "configured")):
+                    print(line, flush=True)
+            nproc = str(os.cpu_count() or 2)
+            print(f"[colab-spirula-cuda] Compiling `spirula` CUDA target (-j{nproc})...", flush=True)
+            comp_sec, _ = stream_cmd(
+                ["cmake", "--build", str(build_dir), "--target", "spirula", f"-j{nproc}"],
+                show_all=True,
+            )
+            build_sec = cfg_sec + comp_sec
+            for cand in (build_dir / "spirula", build_dir / "bin" / "spirula"):
+                if cand.exists():
+                    spirula_bin = cand
+                    break
+            if spirula_bin is None:
+                found = list(build_dir.rglob("spirula"))
+                spirula_bin = found[0] if found else None
+            if spirula_bin is None:
+                raise FileNotFoundError(f"Built `spirula` binary not found in {build_dir}")
+            print(f"[colab-spirula-cuda] Built {spirula_bin} in {build_sec:.2f}s", flush=True)
 
-    _, ver_out = run_cmd([str(spirula_bin), "--version"])
-    print(f"[colab-spirula-cuda] Binary version: {ver_out.strip()}", flush=True)
-    shutil.copy2(spirula_bin, "/content/spirula-cuda-bin")
+        _, ver_raw = run_cmd([str(spirula_bin), "--version"])
+        ver_out = ver_raw.strip()
+        binary_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(spirula_bin, binary_path)
+        binary_path.chmod(0o755)
+        print(f"[colab-spirula-cuda] Binary version: {ver_out}", flush=True)
 
-    data_dir = Path(args.data_dir)
-    if not (data_dir / "images").exists() or not (data_dir / "sparse").exists():
-        print("[colab-spirula-cuda] Downloading tandt/truck COLMAP dataset...", flush=True)
-        from huggingface_hub import snapshot_download
+    dataset_label = args.dataset_label
+    if args.data_zip:
+        zip_path = Path(args.data_zip)
+        if not zip_path.exists():
+            raise FileNotFoundError(f"Dataset archive not found: {zip_path}")
+        extract_root = Path("/content/datasets") / args.run_name
+        if extract_root.exists():
+            shutil.rmtree(extract_root)
+        extract_root.mkdir(parents=True, exist_ok=True)
+        print(f"[colab-spirula-cuda] Extracting {zip_path} -> {extract_root}...", flush=True)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(extract_root)
+        data_dir = find_colmap_root(extract_root)
+        dataset_label = dataset_label or zip_path.name
+    else:
+        data_dir = Path(args.data_dir)
+        if not (data_dir / "images").exists() or not (data_dir / "sparse").exists():
+            if importlib.util.find_spec("huggingface_hub") is None:
+                print("[colab-spirula-cuda] Installing huggingface_hub...", flush=True)
+                run_cmd([sys.executable, "-m", "pip", "install", "-q", "huggingface_hub"])
+            print(f"[colab-spirula-cuda] Downloading {args.hf_repo}:{args.hf_subdir}...", flush=True)
+            from huggingface_hub import snapshot_download
 
-        snapshot_download(
-            repo_id="alexmkwizu/gaussian_training_datasets",
-            repo_type="dataset",
-            allow_patterns=["tandt/truck/*"],
-            local_dir="/content/datasets",
-        )
+            snapshot_download(
+                repo_id=args.hf_repo,
+                repo_type="dataset",
+                allow_patterns=[f"{args.hf_subdir}/*"],
+                local_dir="/content/datasets",
+            )
+            data_dir = Path("/content/datasets") / args.hf_subdir
+        dataset_label = dataset_label or args.hf_subdir
 
     out_run_dir = Path(args.out_prefix) / args.run_name
     if out_run_dir.exists():
@@ -363,7 +440,7 @@ def main() -> int:
     train_cmd = [
         str(spirula_bin),
         "train",
-        "3dgs",
+        args.primitive,
         "--data",
         str(data_dir),
         "--num-iterations",
@@ -379,15 +456,16 @@ def main() -> int:
         "--keep-viewer-alive",
         "0",
         "--eval-mode",
-        "interval",
-        "--eval-interval",
-        "8",
-        "--eval-lpips",
-        "0",
+        args.eval_mode,
         "--steps-per-save",
         "-1",
     ]
-    print(f"[colab-spirula-cuda] Training {args.steps} steps on {data_dir}...", flush=True)
+    if args.eval_mode == "interval":
+        train_cmd.extend(["--eval-interval", str(args.eval_interval), "--eval-lpips", "0"])
+    if args.extra_arg:
+        train_cmd.extend(args.extra_arg)
+
+    print(f"[colab-spirula-cuda] Training {args.steps} steps ({args.primitive}) on {data_dir}...", flush=True)
     train_sec, train_log = stream_cmd(train_cmd, on_sample=sample_vram)
     Path("/content/spirula-cuda-train.log").write_text(train_log, encoding="utf-8")
 
@@ -397,6 +475,7 @@ def main() -> int:
         raise FileNotFoundError(f"No .ply output found in {out_run_dir}; files={output_files}")
     src_ply = ply_candidates[0]
     out_ply = Path(args.out_ply)
+    out_ply.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src_ply, out_ply)
 
     splat_count = parse_ply_vertex_count(out_ply)
@@ -409,12 +488,16 @@ def main() -> int:
 
     summary = {
         "backend": "spirula-cuda",
-        "version": ver_out.strip(),
+        "version": ver_out,
+        "built_from_source": built_from_source,
+        "binary_path": str(binary_path),
+        "full_camera_matrix": args.full_camera_matrix,
+        "primitive": args.primitive,
         "gpu_name": gpu_parts[0] if len(gpu_parts) > 0 else gpu_line,
         "driver": gpu_parts[1] if len(gpu_parts) > 1 else None,
         "gpu_memory_total": gpu_parts[2] if len(gpu_parts) > 2 else None,
         "compute_cap": gpu_parts[3] if len(gpu_parts) > 3 else None,
-        "dataset": "tandt/truck",
+        "dataset_label": dataset_label,
         "steps": args.steps,
         "build_sec": round(build_sec, 2),
         "wall_sec": round(train_sec, 2),
@@ -426,6 +509,7 @@ def main() -> int:
         "output_files": output_files,
         "out_ply": str(out_ply),
     }
+    Path(args.bench_json).parent.mkdir(parents=True, exist_ok=True)
     Path(args.bench_json).write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print("[colab-spirula-cuda] SUMMARY:", json.dumps(summary, indent=2), flush=True)
     return 0
