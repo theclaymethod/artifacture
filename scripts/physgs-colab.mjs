@@ -163,6 +163,9 @@ async function main() {
     }
 
     const meta = JSON.parse(readFileSync(path.join(outDir, 'meta.json'), 'utf-8'));
+    if (meta.has_rigid_quats) {
+      await runStreaming('colab', ['download', '-s', sessionName, `${remoteOutDir}/mpm-rigid.bin`, path.join(outDir, 'mpm-rigid.bin')]);
+    }
     if (meta.static_particles > 0) {
       await runStreaming('colab', ['download', '-s', sessionName, `${remoteOutDir}/mpm-static.ply`, path.join(outDir, 'mpm-static.ply')]);
       await convertPlyToSpz(path.join(outDir, 'mpm-static.ply'), path.join(outDir, 'mpm-static.spz'), false);

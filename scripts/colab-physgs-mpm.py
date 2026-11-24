@@ -34,6 +34,41 @@ def compute_svd_polar(F: wp.mat33):
 
 
 @wp.kernel
+def transform_rigid_shards_kernel(
+    x_local: wp.array(dtype=wp.vec3),
+    shard_id: wp.array(dtype=int),
+    shard_pos: wp.array(dtype=wp.vec3),
+    shard_quat: wp.array(dtype=wp.vec4),
+    shard_awake: wp.array(dtype=float),
+    splinter_pos: wp.array(dtype=wp.vec3),
+    splinter_strain: wp.array(dtype=float),
+    out_pos: wp.array(dtype=wp.vec3),
+    out_strain: wp.array(dtype=float),
+):
+    p = wp.tid()
+    sid = shard_id[p]
+    if sid >= 65535 or sid < 0:
+        out_pos[p] = splinter_pos[p]
+        out_strain[p] = splinter_strain[p]
+        return
+    q = shard_quat[sid]
+    qx = q[0]
+    qy = q[1]
+    qz = q[2]
+    qw = q[3]
+    v = x_local[p]
+    uv_x = qy * v[2] - qz * v[1]
+    uv_y = qz * v[0] - qx * v[2]
+    uv_z = qx * v[1] - qy * v[0]
+    uuv_x = qy * uv_z - qz * uv_y
+    uuv_y = qz * uv_x - qx * uv_z
+    uuv_z = qx * uv_y - qy * uv_x
+    rot_v = v + 2.0 * qw * wp.vec3(uv_x, uv_y, uv_z) + 2.0 * wp.vec3(uuv_x, uuv_y, uuv_z)
+    out_pos[p] = shard_pos[sid] + rot_v
+    out_strain[p] = shard_awake[sid]
+
+
+@wp.kernel
 def zero_grid_kernel(grid_mv: wp.array(dtype=wp.vec4)):
     tid = wp.tid()
     grid_mv[tid] = wp.vec4(0.0, 0.0, 0.0, 0.0)
@@ -294,6 +329,302 @@ def save_subset_ply(ply_in: PlyData, indices: np.ndarray, xyz_override: np.ndarr
     PlyData([el], text=False).write(str(out_path))
 
 
+def quat_mul_np(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    ax, ay, az, aw = float(a[0]), float(a[1]), float(a[2]), float(a[3])
+    bx, by, bz, bw = float(b[0]), float(b[1]), float(b[2]), float(b[3])
+    out = np.array([
+        aw * bx + ax * bw + ay * bz - az * by,
+        aw * by - ax * bz + ay * bw + az * bx,
+        aw * bz + ax * by - ay * bx + az * bw,
+        aw * bw - ax * bx - ay * by - az * bz,
+    ], dtype=np.float32)
+    n = float(np.linalg.norm(out))
+    return out / n if n > 1e-8 else np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32)
+
+
+def quat_to_rot_np(q: np.ndarray) -> np.ndarray:
+    x, y, z, w = float(q[0]), float(q[1]), float(q[2]), float(q[3])
+    xx, yy, zz = x * x, y * y, z * z
+    xy, xz, yz = x * y, x * z, y * z
+    wx, wy, wz = w * x, w * y, w * z
+    return np.array([
+        [1.0 - 2.0 * (yy + zz), 2.0 * (xy - wz), 2.0 * (xz + wy)],
+        [2.0 * (xy + wz), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - wx)],
+        [2.0 * (xz - wy), 2.0 * (yz + wx), 1.0 - 2.0 * (xx + yy)],
+    ], dtype=np.float32)
+
+
+def solve_rigid_voronoi_shatter(
+    hero_pts: np.ndarray,
+    floor_world_y: float,
+    hero_extent: float,
+    frames: int,
+    fps: float,
+    substeps: int,
+    dev: str,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+    n_p = len(hero_pts)
+    k_shards = 28
+    rng = np.random.default_rng(17)
+
+    # Jagged crystal warp for authentic fractured rock/jade planes
+    warp_scale = 0.016 * max(0.35, hero_extent)
+    warped = hero_pts + warp_scale * np.stack([
+        np.sin(hero_pts[:, 1] * 38.0) * np.cos(hero_pts[:, 2] * 31.0),
+        np.sin(hero_pts[:, 2] * 35.0) * np.cos(hero_pts[:, 0] * 38.0),
+        np.sin(hero_pts[:, 0] * 31.0) * np.cos(hero_pts[:, 1] * 35.0),
+    ], axis=1).astype(np.float32)
+
+    seeds = warped[rng.choice(n_p, size=k_shards, replace=False)].copy()
+    for _ in range(4):
+        d2 = np.sum((warped[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
+        vor_ids = np.argmin(d2, axis=1)
+        for k in range(k_shards):
+            m = vor_ids == k
+            if np.any(m):
+                seeds[k] = warped[m].mean(axis=0)
+
+    d2 = np.sum((warped[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
+    vor_ids = np.argmin(d2, axis=1).astype(np.int32)
+    d2_two = np.partition(d2, 1, axis=1)[:, :2]
+    seam_gap = d2_two[:, 1] - d2_two[:, 0]
+    seam_thresh = 0.0045 * max(0.4, hero_extent ** 2)
+    splinter_mask = seam_gap < seam_thresh
+    if float(np.mean(splinter_mask)) > 0.11:
+        splinter_mask = seam_gap < float(np.percentile(seam_gap, 9.0))
+    if float(np.mean(splinter_mask)) < 0.04:
+        splinter_mask = seam_gap < float(np.percentile(seam_gap, 7.5))
+
+    shard_ids_np = vor_ids.copy()
+    shard_ids_np[splinter_mask] = 65535
+
+    # Fibonacci unit directions for 32-vertex extremal contact hulls per chunk
+    fib_idx = np.arange(32, dtype=np.float32)
+    fib_y = 1.0 - (fib_idx / 31.0) * 2.0
+    fib_r = np.sqrt(np.maximum(0.0, 1.0 - fib_y * fib_y))
+    fib_theta = np.pi * (3.0 - np.sqrt(5.0)) * fib_idx
+    fib_dirs = np.stack([np.cos(fib_theta) * fib_r, fib_y, np.sin(fib_theta) * fib_r], axis=1).astype(np.float32)
+
+    coms = np.zeros((k_shards, 3), dtype=np.float32)
+    masses = np.ones(k_shards, dtype=np.float32)
+    inertias = np.ones(k_shards, dtype=np.float32) * 0.01
+    r_rms = np.ones(k_shards, dtype=np.float32) * 0.05
+    hulls = np.zeros((k_shards, 32, 3), dtype=np.float32)
+    x_local = np.zeros((n_p, 3), dtype=np.float32)
+
+    for k in range(k_shards):
+        m = shard_ids_np == k
+        if not np.any(m):
+            continue
+        pts_k = hero_pts[m]
+        c_k = pts_k.mean(axis=0)
+        loc_k = pts_k - c_k[None, :]
+        x_local[m] = loc_k
+        coms[k] = c_k
+        m_k = float(len(pts_k))
+        masses[k] = m_k
+        rms = float(np.sqrt(np.mean(np.sum(loc_k * loc_k, axis=1))))
+        r_rms[k] = max(0.03, rms)
+        inertias[k] = 0.4 * m_k * (max(0.035, rms) ** 2)
+        proj = loc_k @ fib_dirs.T
+        best_v = np.argmax(proj, axis=0)
+        hulls[k] = loc_k[best_v]
+
+    impact_pt = np.array([0.0, 0.04, 0.02], dtype=np.float32)
+    wake_t = 0.04 + 0.42 * np.linalg.norm(coms - impact_pt[None, :], axis=1)
+    vel0 = np.zeros((k_shards, 3), dtype=np.float32)
+    omega0 = np.zeros((k_shards, 3), dtype=np.float32)
+
+    for k in range(k_shards):
+        rx = float(coms[k, 0] - impact_pt[0])
+        rz = float(coms[k, 2] - impact_pt[2])
+        rn = float(np.hypot(rx, rz))
+        if rn < 0.018:
+            ang = k * 2.3999632
+            ux, uz = float(np.cos(ang)), float(np.sin(ang))
+        else:
+            ux, uz = rx / rn, rz / rn
+        h_norm = float(np.clip((coms[k, 1] - floor_world_y) / max(0.25, hero_extent), 0.0, 1.0))
+        v_rad = float(rng.uniform(0.42, 0.92)) * (0.75 + 0.55 * h_norm)
+        v_up = 0.48 + 0.92 * h_norm + float(rng.uniform(0.0, 0.32))
+        vel0[k] = np.array([ux * v_rad, v_up, uz * v_rad], dtype=np.float32)
+        peel_axis = np.array([-uz, 0.0, ux], dtype=np.float32) + rng.normal(0.0, 0.32, size=3).astype(np.float32)
+        pn = float(np.linalg.norm(peel_axis))
+        peel_axis = peel_axis / pn if pn > 1e-5 else np.array([1.0, 0.0, 0.0], dtype=np.float32)
+        omega0[k] = peel_axis * float(rng.uniform(3.5, 9.0))
+
+    total_mass = float(np.sum(masses))
+    vel0[:, 0] -= float(np.sum(masses * vel0[:, 0])) / total_mass
+    vel0[:, 2] -= float(np.sum(masses * vel0[:, 2])) / total_mass
+
+    # Ballistic seam splinters
+    spl_idx = np.nonzero(splinter_mask)[0]
+    spl_pts0 = hero_pts[spl_idx].copy()
+    spl_pos = spl_pts0.copy()
+    spl_vel = np.zeros_like(spl_pos)
+    spl_wake = 0.02 + 0.42 * np.linalg.norm(spl_pts0 - impact_pt[None, :], axis=1)
+    for ii in range(len(spl_idx)):
+        rx = float(spl_pts0[ii, 0] - impact_pt[0])
+        rz = float(spl_pts0[ii, 2] - impact_pt[2])
+        rn = float(np.hypot(rx, rz))
+        if rn < 0.015:
+            ang = ii * 2.3999632
+            ux, uz = float(np.cos(ang)), float(np.sin(ang))
+        else:
+            ux, uz = rx / rn, rz / rn
+        h_norm = float(np.clip((spl_pts0[ii, 1] - floor_world_y) / max(0.25, hero_extent), 0.0, 1.0))
+        vr = float(rng.uniform(0.55, 1.35)) * (0.7 + 0.5 * h_norm)
+        vu = 0.52 + 0.95 * h_norm + float(rng.uniform(0.0, 0.45))
+        spl_vel[ii] = np.array([ux * vr + rng.normal(0.0, 0.14), vu, uz * vr + rng.normal(0.0, 0.14)], dtype=np.float32)
+
+    pos = coms.copy()
+    vel = np.zeros_like(pos)
+    omega = np.zeros_like(pos)
+    quats = np.tile(np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32), (k_shards, 1))
+    awake = np.zeros(k_shards, dtype=np.float32)
+
+    splinter_pos_all = hero_pts.copy()
+    splinter_strain_all = np.zeros(n_p, dtype=np.float32)
+
+    x_local_wp = wp.array(x_local, dtype=wp.vec3, device=dev)
+    shard_id_wp = wp.array(shard_ids_np, dtype=int, device=dev)
+    splinter_pos_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
+    splinter_strain_wp = wp.zeros(n_p, dtype=float, device=dev)
+    out_pos_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
+    out_strain_wp = wp.zeros(n_p, dtype=float, device=dev)
+
+    frame_positions = np.zeros((frames, n_p, 3), dtype=np.float32)
+    frame_strains = np.zeros((frames, n_p), dtype=np.float32)
+    shard_quats_out = np.zeros((frames, k_shards, 4), dtype=np.float32)
+
+    gravity_y = -5.8
+    dt = (1.0 / fps) / substeps
+    sim_time = 0.0
+    t_sim0 = time.perf_counter()
+
+    for f in range(frames):
+        for k in range(k_shards):
+            qk = quats[k].copy()
+            if f > 0 and float(np.dot(shard_quats_out[f - 1, k], qk)) < 0.0:
+                qk = -qk
+            shard_quats_out[f, k] = qk
+
+        shard_pos_wp = wp.array(pos.astype(np.float32), dtype=wp.vec3, device=dev)
+        shard_quat_wp = wp.array(shard_quats_out[f].astype(np.float32), dtype=wp.vec4, device=dev)
+        shard_awake_wp = wp.array(awake.astype(np.float32), dtype=float, device=dev)
+        if len(spl_idx) > 0:
+            splinter_pos_all[spl_idx] = spl_pos
+            splinter_strain_all[spl_idx] = np.where(sim_time >= spl_wake, 1.65, 0.0).astype(np.float32)
+        wp.copy(splinter_pos_wp, wp.array(splinter_pos_all, dtype=wp.vec3, device="cpu"))
+        wp.copy(splinter_strain_wp, wp.array(splinter_strain_all, dtype=float, device="cpu"))
+
+        wp.launch(
+            transform_rigid_shards_kernel,
+            dim=n_p,
+            inputs=[x_local_wp, shard_id_wp, shard_pos_wp, shard_quat_wp, shard_awake_wp, splinter_pos_wp, splinter_strain_wp, out_pos_wp, out_strain_wp],
+            device=dev,
+        )
+        frame_positions[f] = out_pos_wp.numpy()
+        frame_strains[f] = out_strain_wp.numpy()
+
+        for _ in range(substeps):
+            sim_time += dt
+            for k in range(k_shards):
+                if awake[k] == 0.0:
+                    if sim_time >= wake_t[k]:
+                        awake[k] = 0.35
+                        vel[k] = vel0[k]
+                        omega[k] = omega0[k]
+                    continue
+
+                vel[k, 1] += gravity_y * dt
+                pos[k] += vel[k] * dt
+                w_mag = float(np.linalg.norm(omega[k]))
+                if w_mag > 1e-6:
+                    ang = w_mag * dt
+                    ax = omega[k] / w_mag
+                    s2 = float(np.sin(0.5 * ang))
+                    dq = np.array([ax[0] * s2, ax[1] * s2, ax[2] * s2, float(np.cos(0.5 * ang))], dtype=np.float32)
+                    quats[k] = quat_mul_np(dq, quats[k])
+
+                # Multi-vertex hull contact with floor_world_y
+                R_k = quat_to_rot_np(quats[k])
+                world_v = pos[k][None, :] + (hulls[k] @ R_k.T)
+                pens = floor_world_y - world_v[:, 1]
+                hit = pens > 0.0
+                if np.any(hit):
+                    pos[k, 1] += float(np.max(pens))
+                    world_v = pos[k][None, :] + (hulls[k] @ R_k.T)
+                    r_arm = np.mean(world_v[hit], axis=0) - pos[k]
+                    v_c = vel[k] + np.cross(omega[k], r_arm)
+                    if v_c[1] < 0.0:
+                        n_dir = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+                        rn_vec = np.cross(r_arm, n_dir)
+                        denom_n = (1.0 / masses[k]) + float(np.dot(rn_vec, rn_vec)) / inertias[k]
+                        e_rest = 0.34 if abs(float(v_c[1])) >= 0.22 else 0.0
+                        jn = -(1.0 + e_rest) * float(v_c[1]) / denom_n
+                        j_vec = jn * n_dir
+                        vel[k] += j_vec / masses[k]
+                        omega[k] += np.cross(r_arm, j_vec) / inertias[k]
+
+                        v_after = vel[k] + np.cross(omega[k], r_arm)
+                        vt = np.array([v_after[0], 0.0, v_after[2]], dtype=np.float32)
+                        vt_len = float(np.linalg.norm(vt))
+                        if vt_len > 1e-6:
+                            t_dir = vt / vt_len
+                            rt_vec = np.cross(r_arm, t_dir)
+                            denom_t = (1.0 / masses[k]) + float(np.dot(rt_vec, rt_vec)) / inertias[k]
+                            jt = min(0.50 * jn, vt_len / denom_t)
+                            jt_vec = -jt * t_dir
+                            vel[k] += jt_vec / masses[k]
+                            omega[k] += np.cross(r_arm, jt_vec) / inertias[k]
+                    vel[k, 0] *= 0.996
+                    vel[k, 2] *= 0.996
+                    omega[k] *= 0.965
+
+            # Pairwise chunk-chunk repulsion
+            for i in range(k_shards):
+                if awake[i] == 0.0:
+                    continue
+                for j in range(i + 1, k_shards):
+                    if awake[j] == 0.0:
+                        continue
+                    diff = pos[j] - pos[i]
+                    dist = float(np.linalg.norm(diff))
+                    min_d = 0.68 * (r_rms[i] + r_rms[j])
+                    if 1e-5 < dist < min_d:
+                        nrm = diff / dist
+                        ov = min_d - dist
+                        wi = 1.0 / masses[i]
+                        wj = 1.0 / masses[j]
+                        wsum = wi + wj
+                        pos[i] -= nrm * (ov * wi / wsum)
+                        pos[j] += nrm * (ov * wj / wsum)
+                        vrel = float(np.dot(vel[j] - vel[i], nrm))
+                        if vrel < 0.0:
+                            imp = -1.35 * vrel / wsum
+                            vel[i] -= (imp * wi) * nrm
+                            vel[j] += (imp * wj) * nrm
+
+            # Update ballistic crack-seam splinters
+            if len(spl_idx) > 0:
+                act = sim_time >= spl_wake
+                if np.any(act):
+                    spl_vel[act, 1] += gravity_y * dt
+                    spl_pos[act] += spl_vel[act] * dt
+                    floor_hit = act & (spl_pos[:, 1] < floor_world_y)
+                    if np.any(floor_hit):
+                        spl_pos[floor_hit, 1] = floor_world_y
+                        bounce = floor_hit & (spl_vel[:, 1] < 0.0)
+                        spl_vel[bounce, 1] = np.where(np.abs(spl_vel[bounce, 1]) > 0.25, -0.40 * spl_vel[bounce, 1], 0.0)
+                        spl_vel[bounce, 0] *= 0.80
+                        spl_vel[bounce, 2] *= 0.80
+
+    wp.synchronize()
+    sim_sec = time.perf_counter() - t_sim0
+    return frame_positions, frame_strains, shard_ids_np.astype(np.uint16), shard_quats_out, sim_sec
+
+
 def parse_vec3_list(s: str | None) -> np.ndarray | None:
     if not s:
         return None
@@ -423,124 +754,85 @@ def main() -> int:
     dt = (1.0 / args.fps) / args.substeps
 
     preset_id = {"shatter": 0, "blast": 1, "smoke_dissolve": 2, "elastic_drop": 3}[args.preset]
-    use_voronoi_burst = 1 if (preset_id == 0 and args.roi == "all") else 0
-    E = 120.0 if use_voronoi_burst == 1 else (180.0 if preset_id != 3 else 70.0)
-    nu = 0.25
-    mu0 = E / (2.0 * (1.0 + nu))
-    la0 = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu))
-    p_vol = (dx * 0.5) ** 3
-    p_mass = p_vol * 1.0
-    gravity_y = -3.8 if use_voronoi_burst == 1 else (-6.5 if preset_id != 2 else 2.2)
-    yield_stress = 0.085 if preset_id == 0 else 0.11
-
     dev = ("cuda:0" if wp.is_cuda_available() else "cpu") if args.device == "auto" else args.device
-    x_wp = wp.array(x_init, dtype=wp.vec3, device=dev)
-    v_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
-    C_wp = wp.zeros(n_p, dtype=wp.mat33, device=dev)
-    F_init = np.broadcast_to(np.eye(3, dtype=np.float32), (n_p, 3, 3)).copy()
-    F_wp = wp.array(F_init, dtype=wp.mat33, device=dev)
 
-    # Start hero particles dormant (-1.0) so an expanding kinetic trigger cracks them cleanly from intact state!
-    strain_init = np.full(n_p, -1.0 if preset_id in (0, 1, 2) else 0.0, dtype=np.float32)
-    strain_wp = wp.array(strain_init, dtype=float, device=dev)
-    grid_mv = wp.zeros(grid_res * grid_res * grid_res, dtype=wp.vec4, device=dev)
-
-    if use_voronoi_burst == 1:
-        rng_s = np.random.default_rng(7)
-        k_shards = 14
-        seeds = x_init[rng_s.choice(n_p, size=k_shards, replace=False)].copy()
-        for _ in range(4):
-            d2 = np.sum((x_init[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
-            shard_ids = np.argmin(d2, axis=1)
-            for k in range(k_shards):
-                m = shard_ids == k
-                if np.any(m):
-                    seeds[k] = x_init[m].mean(axis=0)
-        d2 = np.sum((x_init[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
-        shard_ids = np.argmin(d2, axis=1)
-
-        v_burst_np = np.zeros((n_p, 3), dtype=np.float32)
-        for k in range(k_shards):
-            m = shard_ids == k
-            if not np.any(m):
-                continue
-            sc = seeds[k]
-            rx, rz = float(sc[0] - 0.5), float(sc[2] - 0.5)
-            rn = float(np.hypot(rx, rz))
-            if rn < 0.015:
-                ang = k * 2.399963
-                ux, uz = float(np.cos(ang)), float(np.sin(ang))
-            else:
-                ux, uz = rx / rn, rz / rn
-            h_norm = float(np.clip((sc[1] - floor_sim_y) / 0.42, 0.0, 1.0))
-            v_rad = float(rng_s.uniform(0.92, 1.48)) * (0.75 + 0.55 * h_norm)
-            v_up = 0.34 + 0.74 * h_norm + float(rng_s.uniform(0.0, 0.20))
-            base_v = np.array([ux * v_rad, v_up, uz * v_rad], dtype=np.float32)
-            omega = rng_s.uniform(-4.2, 4.2, size=3).astype(np.float32)
-            rel_p = x_init[m] - sc[None, :]
-            spin_v = np.cross(omega[None, :], rel_p).astype(np.float32)
-            jitter = rng_s.normal(0.0, 0.015, size=(int(np.sum(m)), 3)).astype(np.float32)
-            v_burst_np[m] = base_v[None, :] + spin_v + jitter
-        v_burst_np[:, 0] -= v_burst_np[:, 0].mean()
-        v_burst_np[:, 2] -= v_burst_np[:, 2].mean()
-        v_burst_wp = wp.array(v_burst_np, dtype=wp.vec3, device=dev)
+    shard_ids_np: np.ndarray | None = None
+    shard_quats_np: np.ndarray | None = None
+    if preset_id == 0 and args.roi == "all":
+        frame_positions, frame_strains, shard_ids_np, shard_quats_np, sim_sec = solve_rigid_voronoi_shatter(
+            hero_pts, floor_world_y, hero_extent, args.frames, args.fps, args.substeps, dev
+        )
     else:
+        E = 180.0 if preset_id != 3 else 70.0
+        nu = 0.25
+        mu0 = E / (2.0 * (1.0 + nu))
+        la0 = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu))
+        p_vol = (dx * 0.5) ** 3
+        p_mass = p_vol * 1.0
+        gravity_y = -6.5 if preset_id != 2 else 2.2
+        yield_stress = 0.085 if preset_id == 0 else 0.11
+
+        x_wp = wp.array(x_init, dtype=wp.vec3, device=dev)
+        v_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
+        C_wp = wp.zeros(n_p, dtype=wp.mat33, device=dev)
+        F_init = np.broadcast_to(np.eye(3, dtype=np.float32), (n_p, 3, 3)).copy()
+        F_wp = wp.array(F_init, dtype=wp.mat33, device=dev)
+
+        # Start hero particles dormant (-1.0) so an expanding kinetic trigger cracks them cleanly from intact state!
+        strain_init = np.full(n_p, -1.0 if preset_id in (0, 1, 2) else 0.0, dtype=np.float32)
+        strain_wp = wp.array(strain_init, dtype=float, device=dev)
+        grid_mv = wp.zeros(grid_res * grid_res * grid_res, dtype=wp.vec4, device=dev)
         v_burst_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
 
-    blast_origin = wp.vec3(0.5, 0.34 if args.roi == "all" else 0.25, 0.5)
-    frame_positions = np.zeros((args.frames, n_p, 3), dtype=np.float32)
-    frame_strains = np.zeros((args.frames, n_p), dtype=np.float32)
+        blast_origin = wp.vec3(0.5, 0.25, 0.5)
+        frame_positions = np.zeros((args.frames, n_p, 3), dtype=np.float32)
+        frame_strains = np.zeros((args.frames, n_p), dtype=np.float32)
 
-    t_sim0 = time.perf_counter()
-    for f in range(args.frames):
-        frame_positions[f] = (x_wp.numpy() - sim_offset) / sim_scale
-        frame_strains[f] = np.clip(strain_wp.numpy(), 0.0, 2.0)
+        t_sim0 = time.perf_counter()
+        for f in range(args.frames):
+            frame_positions[f] = (x_wp.numpy() - sim_offset) / sim_scale
+            frame_strains[f] = np.clip(strain_wp.numpy(), 0.0, 2.0)
 
-        sim_t = f / args.fps
-        if use_voronoi_burst == 1:
-            wake_r = 0.03 + sim_t * 0.48
-            b_rad = 0.0
-            b_force = 0.0
-        else:
+            sim_t = f / args.fps
             wake_r = 0.05 + sim_t * (0.42 if preset_id == 0 else 0.55)
             b_rad = 0.05 + sim_t * (0.34 if preset_id == 0 else 0.45)
             b_force = 24.0 if (preset_id == 0 and sim_t < 2.2) else (16.0 if preset_id in (1, 2) else 0.0)
 
-        for _ in range(args.substeps):
-            wp.launch(zero_grid_kernel, dim=grid_res ** 3, inputs=[grid_mv], device=dev)
-            wp.launch(
-                p2g_kernel,
-                dim=n_p,
-                inputs=[
-                    x_wp, v_wp, C_wp, F_wp, strain_wp, grid_mv,
-                    inv_dx, dx, dt, p_vol, p_mass, mu0, la0, yield_stress,
-                    grid_res, 1.0 if b_force > 0 else 0.0, blast_origin, b_rad,
-                ],
-                device=dev,
-            )
-            wp.launch(
-                grid_update_kernel,
-                dim=grid_res ** 3,
-                inputs=[
-                    grid_mv, grid_res, dx, dt, gravity_y, floor_sim_y * inv_dx,
-                    b_force, blast_origin, b_rad, preset_id, sim_t,
-                ],
-                device=dev,
-            )
-            wp.launch(
-                g2p_kernel,
-                dim=n_p,
-                inputs=[
-                    x_wp, v_wp, C_wp, F_wp, strain_wp, grid_mv,
-                    inv_dx, dx, dt, grid_res, floor_sim_y,
-                    wake_r if preset_id in (0, 1, 2) else 99.0,
-                    blast_origin, 3.5 * dx, 1.0 - 3.5 * dx,
-                    v_burst_wp, use_voronoi_burst,
-                ],
-                device=dev,
-            )
-    wp.synchronize()
-    sim_sec = time.perf_counter() - t_sim0
+            for _ in range(args.substeps):
+                wp.launch(zero_grid_kernel, dim=grid_res ** 3, inputs=[grid_mv], device=dev)
+                wp.launch(
+                    p2g_kernel,
+                    dim=n_p,
+                    inputs=[
+                        x_wp, v_wp, C_wp, F_wp, strain_wp, grid_mv,
+                        inv_dx, dx, dt, p_vol, p_mass, mu0, la0, yield_stress,
+                        grid_res, 1.0 if b_force > 0 else 0.0, blast_origin, b_rad,
+                    ],
+                    device=dev,
+                )
+                wp.launch(
+                    grid_update_kernel,
+                    dim=grid_res ** 3,
+                    inputs=[
+                        grid_mv, grid_res, dx, dt, gravity_y, floor_sim_y * inv_dx,
+                        b_force, blast_origin, b_rad, preset_id, sim_t,
+                    ],
+                    device=dev,
+                )
+                wp.launch(
+                    g2p_kernel,
+                    dim=n_p,
+                    inputs=[
+                        x_wp, v_wp, C_wp, F_wp, strain_wp, grid_mv,
+                        inv_dx, dx, dt, grid_res, floor_sim_y,
+                        wake_r if preset_id in (0, 1, 2) else 99.0,
+                        blast_origin, 3.5 * dx, 1.0 - 3.5 * dx,
+                        v_burst_wp, 0,
+                    ],
+                    device=dev,
+                )
+        wp.synchronize()
+        sim_sec = time.perf_counter() - t_sim0
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -548,6 +840,18 @@ def main() -> int:
     if len(static_idx) > 0:
         save_subset_ply(ply, static_idx, None, out_dir / "mpm-static.ply")
     save_subset_ply(ply, hero_idx, None, out_dir / "mpm-dynamic.ply")
+
+    if shard_ids_np is not None and shard_quats_np is not None:
+        rigid_path = out_dir / "mpm-rigid.bin"
+        k_sh = int(shard_quats_np.shape[1])
+        id_bytes = shard_ids_np.astype(np.uint16).tobytes(order="C")
+        pad = b"\x00\x00" if (len(id_bytes) % 4) != 0 else b""
+        with rigid_path.open("wb") as rf:
+            rf.write(struct.pack("<4sIII", b"RSHD", args.frames, k_sh, n_p))
+            rf.write(id_bytes)
+            if pad:
+                rf.write(pad)
+            rf.write(shard_quats_np.astype(np.float32).tobytes(order="C"))
 
     # Note: frame_positions were in upright world space (+Y up if flip_x); export upright positions in mpm-traj.bin
     b_min = np.min(frame_positions, axis=(0, 1)).astype(np.float32) - 0.02
@@ -604,6 +908,8 @@ def main() -> int:
         "floor_y": floor_world_y,
         "flip_x": bool(args.flip_x),
         "up": up_vec.tolist() if up_vec is not None else None,
+        "has_rigid_quats": bool(shard_ids_np is not None),
+        "num_shards": int(shard_quats_np.shape[1]) if shard_quats_np is not None else 0,
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print("[colab-physgs-mpm] SUMMARY:", json.dumps(meta, indent=2), flush=True)
