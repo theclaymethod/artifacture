@@ -1,0 +1,120 @@
+:root,
+[data-ve-theme="iso"] {
+  --ve-bg: #ffffff;
+  --ve-surface: #f7f8fa;
+  --ve-surface-elevated: #ffffff;
+  --ve-heading: #16181d;
+  --ve-text: #2a2e36;
+  --ve-muted: #5e6573;
+  --ve-rule: #dde2ea;
+  --ve-accent: #079fba;
+  --ve-accent-rgb: 7, 159, 186;
+  --ve-danger: #c4472d;
+  --ve-success: #1f7a53;
+  --ve-chart-stroke: 2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 6px;
+}
+
+[data-ve-theme="function"] {
+  --ve-bg: #fef9ef;
+  --ve-surface: #f5eee1;
+  --ve-surface-elevated: #fef9ef;
+  --ve-heading: #2a2b2f;
+  --ve-text: #2a2b2f;
+  --ve-muted: #515151;
+  --ve-rule: #d1c9bf;
+  --ve-accent: #b05a36;
+  --ve-accent-rgb: 176, 90, 54;
+  --ve-danger: #b05a36;
+  --ve-success: #315f46;
+  --ve-chart-stroke: 2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "Financier Display", "Cormorant Garamond", Georgia, serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "Fragment Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 4px;
+}
+
+[data-ve-theme="function-intelligence"] {
+  --ve-bg: #0d1916;
+  --ve-surface: #15231f;
+  --ve-surface-elevated: #20312c;
+  --ve-heading: #fef9ef;
+  --ve-text: #fef9ef;
+  --ve-muted: rgba(184, 227, 197, 0.72);
+  --ve-rule: rgba(184, 227, 197, 0.28);
+  --ve-accent: #79bd8b;
+  --ve-accent-rgb: 121, 189, 139;
+  --ve-danger: #e89a70;
+  --ve-success: #b8e3c5;
+  --ve-chart-stroke: 2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "Financier Display", "Cormorant Garamond", Georgia, serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "Fragment Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 4px;
+}
+
+[data-ve-theme="3b1b"] {
+  --ve-bg: #0d1016;
+  --ve-surface: #151a24;
+  --ve-surface-elevated: #1b2230;
+  --ve-heading: #f5f7fa;
+  --ve-text: #dfe4ec;
+  --ve-muted: #98a2b3;
+  --ve-rule: #2d3748;
+  --ve-accent: #58c4dd;
+  --ve-accent-rgb: 88, 196, 221;
+  --ve-danger: #fc6255;
+  --ve-success: #83c167;
+  --ve-chart-stroke: 2.2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "Cormorant Garamond", Georgia, serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 4px;
+}
+
+[data-ve-theme="algebrica"] {
+  --ve-bg: #f4f0ef;
+  --ve-surface: #ece6e4;
+  --ve-surface-elevated: #faf7f6;
+  --ve-heading: #312f2f;
+  --ve-text: #312f2f;
+  --ve-muted: #686260;
+  --ve-rule: #d5cdca;
+  --ve-accent: #079fba;
+  --ve-accent-rgb: 7, 159, 186;
+  --ve-danger: #b54530;
+  --ve-success: #2f7551;
+  --ve-chart-stroke: 2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "EB Garamond", Georgia, serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 4px;
+}
+
+[data-ve-theme="mono-color"] {
+  --ve-bg: #fafaf7;
+  --ve-surface: #f1f0ea;
+  --ve-surface-elevated: #ffffff;
+  --ve-heading: #16181d;
+  --ve-text: #1f232b;
+  --ve-muted: #5a606d;
+  --ve-rule: #d4d3ca;
+  --ve-accent: #2148b8;
+  --ve-accent-rgb: 33, 72, 184;
+  --ve-danger: #c4563a;
+  --ve-success: #216e54;
+  --ve-chart-stroke: 2px;
+  --ve-chart-detail-stroke: 1px;
+  --ve-font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ve-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-radius: 2px;
+}

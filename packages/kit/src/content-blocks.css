@@ -1,0 +1,141 @@
+:is(.ve-pipeline, .ve-decision-matrix),
+:is(.ve-pipeline, .ve-decision-matrix) * {
+  box-sizing: border-box;
+}
+
+:is(.ve-pipeline, .ve-decision-matrix) {
+  min-width: 0;
+  font-family: var(--ve-font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ve-pipeline {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ve-pipeline .ve-pipeline-item {
+  min-width: 0;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 1.25rem;
+}
+
+.ve-pipeline .ve-pipeline-position {
+  color: var(--ve-accent);
+  font: 0.875rem / 1.5 var(--ve-font-mono);
+}
+
+.ve-pipeline .ve-pipeline-title {
+  margin: 1rem 0 0;
+  color: var(--ve-heading);
+  font-family: var(--ve-font-display);
+  font-size: 1.25rem;
+  font-weight: var(--ve-heading-weight);
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.ve-pipeline .ve-content-detail {
+  margin: 0.75rem 0 0;
+  color: var(--ve-muted);
+  line-height: 1.5;
+}
+
+.ve-decision-matrix {
+  overflow-x: auto;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+}
+
+.ve-decision-matrix .ve-decision-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.ve-decision-matrix .ve-decision-head {
+  background: var(--ve-panel-strong);
+  color: var(--ve-muted);
+}
+
+.ve-decision-matrix .ve-decision-heading {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 0.75rem 1rem;
+  text-align: inherit;
+  font-weight: 500;
+}
+
+.ve-decision-matrix .ve-decision-row:nth-child(odd) {
+  background: var(--ve-row);
+}
+
+.ve-decision-matrix .ve-decision-cell {
+  border-bottom: 1px solid var(--ve-rule);
+  padding: 1rem;
+  vertical-align: top;
+  color: var(--ve-muted);
+}
+
+:is(
+    [data-ve-theme="iso"],
+    [data-ve-theme="algebrica"],
+    [data-ve-theme="mono-color"],
+    [data-ve-preset="iso"],
+    [data-ve-preset="algebrica"],
+    [data-ve-preset="mono-color"]
+  )
+  .ve-pipeline {
+  gap: 0;
+}
+
+:is(
+    [data-ve-theme="iso"],
+    [data-ve-theme="algebrica"],
+    [data-ve-theme="mono-color"],
+    [data-ve-preset="iso"],
+    [data-ve-preset="algebrica"],
+    [data-ve-preset="mono-color"]
+  )
+  .ve-pipeline
+  .ve-pipeline-item {
+  border: 0;
+  border-top: 1px solid var(--ve-rule);
+  border-radius: 0;
+  background: transparent;
+  padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.5rem;
+}
+
+:is(
+    [data-ve-theme="iso"],
+    [data-ve-theme="algebrica"],
+    [data-ve-theme="mono-color"],
+    [data-ve-preset="iso"],
+    [data-ve-preset="algebrica"],
+    [data-ve-preset="mono-color"]
+  )
+  .ve-pipeline
+  .ve-pipeline-position {
+  color: var(--ve-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .ve-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .ve-pipeline {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,98 @@
+import { GpuCanvas } from '@artifacture/gpu';
+import { CodeBlock, DecisionMatrix, DiagramCanvas, DiffBlock, LieflatChart } from '@artifacture/kit';
+import { waveFieldScene } from '../scenes/wave-field.ts';
+import waveFieldStill from '../assets/wave-field-still.png';
+
+# Direct WGSL scenes inside technical explainers
+
+This explainer demonstrates `@artifacture/gpu` and `@artifacture/kit` inside a standalone Vite + MDX document. Every `.wgsl` shader resolves at build time through `@vgpu/wgsl/loader-vite` while Dawn renders static PNG fallbacks for offline exports and non-WebGPU browsers.
+
+<div className="explainer-hero-gpu">
+  <GpuCanvas
+    scene={waveFieldScene}
+    stillSrc={waveFieldStill}
+    label="Interactive harmonic contour wave field"
+    style={{ width: '100%', height: '100%' }}
+  />
+</div>
+
+## Shared data and diagram blocks
+
+Diagrams, code snippets, and charts inherit theme variables from `@artifacture/themes/tokens.css` so light ISO documents and dark editorial surfaces stay coherent.
+
+<div className="explainer-block">
+  <DiagramCanvas
+    title="Build-time and runtime shader pipeline"
+    layout="flow"
+    direction="horizontal"
+    nodes={[
+      { id: 'author', label: 'wave-field.wgsl', detail: 'Typed uniform struct' },
+      { id: 'vite', label: '@vgpu/wgsl/loader-vite', detail: 'Zero-parser client JS' },
+      { id: 'dawn', label: 'vgpu/node (Dawn)', detail: 'Validation & fallback PNG' },
+    ]}
+    edges={[
+      { from: 'author', to: 'vite', label: 'Vite ESM' },
+      { from: 'author', to: 'dawn', label: 'CI / stills' },
+    ]}
+  />
+</div>
+
+<div className="explainer-block">
+  <LieflatChart
+    title="Core block footprint by surface"
+    description="Normalized complexity units across the curated v2 blocks."
+    spec={{
+      kind: 'rung-bars',
+      unit: 100,
+      unitLabel: 'loc',
+      data: [
+        { label: 'wave-field.wgsl', value: 42 },
+        { label: 'Semantic slides', value: 190 },
+        { label: 'DiagramCanvas layout', value: 494 },
+        { label: 'LieflatChart renderers', value: 656 },
+      ],
+    }}
+  />
+</div>
+
+## Code, diffs, and architecture tradeoffs
+
+<div className="explainer-block">
+  <CodeBlock
+    language="ts"
+    filename="src/scenes/wave-field.ts"
+    code={`import waveFieldShader from '../shaders/wave-field.wgsl';
+
+export const waveFieldScene = {
+  id: 'wave-field',
+  label: 'Harmonic interference field rendered directly from WGSL',
+  shader: waveFieldShader,
+  defaultParams: { frequency: 6.5, amplitude: 0.18 },
+};`}
+    annotations={[
+      { line: 1, note: 'Transformed via wgslVitePlugin() with Dawn reflection metadata.' },
+      { line: 7, note: 'Mapped automatically to uniform struct members at runtime.' },
+    ]}
+  />
+</div>
+
+<div className="explainer-block">
+  <DiffBlock
+    filename="Shader loading migration"
+    language="wgsl"
+    before={`// Legacy runtime compilation
+const compiled = await runtimeParseWgsl(rawSource);`}
+    after={`// Artifacture v2 build-time preparation
+import shader from '../shaders/wave-field.wgsl';`}
+  />
+</div>
+
+<div className="explainer-block">
+  <DecisionMatrix
+    rows={[
+      { Surface: 'Explainer', Host: 'Vite + MDX', GPU: 'GpuCanvas', Artifact: 'dist/ & singlefile HTML' },
+      { Surface: 'Slides', Host: 'Stock open-slide', GPU: 'GpuMorphCanvas', Artifact: 'Deck bundle, PDF, PPTX' },
+      { Surface: 'Video', Host: 'HyperFrames + Dawn', GPU: 'GpuCanvas (seconds)', Artifact: 'Deterministic PNG -> MP4' },
+    ]}
+  />
+</div>

@@ -1,0 +1,173 @@
+.ve-drill-chip,
+.ve-drill-card,
+.ve-drill-sheet,
+.ve-drill-sheet * {
+  box-sizing: border-box;
+}
+
+.ve-drill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--ve-accent);
+  border-radius: var(--ve-radius);
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--ve-accent);
+  font-family: var(--ve-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.ve-drill-chip[data-variant="primary"] {
+  background: var(--ve-accent);
+  color: var(--ve-bg);
+}
+
+.ve-drill-chip:hover,
+.ve-drill-chip:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-drill-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 18px 20px;
+  color: var(--ve-text);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.ve-drill-card:hover {
+  border-color: var(--ve-accent);
+  transform: translateY(-1px);
+}
+
+.ve-drill-card:focus-visible {
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-drill-card-eyebrow {
+  display: block;
+  font-family: var(--ve-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ve-accent);
+}
+
+.ve-drill-card-title {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--ve-font-display);
+  font-size: 20px;
+  font-weight: var(--ve-heading-weight);
+  line-height: 1.25;
+  color: var(--ve-heading);
+}
+
+.ve-drill-card-body {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--ve-font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ve-muted);
+}
+
+.ve-drill-card-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid var(--ve-accent);
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-family: var(--ve-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ve-accent);
+}
+
+.ve-drill-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px;
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-bg);
+  color: var(--ve-text);
+  box-shadow: 0 24px 60px color-mix(in srgb, #000 18%, transparent);
+}
+
+.ve-drill-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--ve-rule);
+}
+
+.ve-drill-sheet-eyebrow {
+  font-family: var(--ve-font-display);
+  font-size: 22px;
+  font-weight: var(--ve-heading-weight);
+  color: var(--ve-heading);
+}
+
+.ve-drill-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--ve-rule);
+  background: transparent;
+  color: var(--ve-heading);
+  cursor: pointer;
+}
+
+.ve-drill-close:hover,
+.ve-drill-close:focus-visible {
+  border-color: var(--ve-accent);
+  outline: 2px solid var(--ve-accent);
+  outline-offset: 2px;
+}
+
+.ve-drill-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ve-drill-chip,
+  .ve-drill-card {
+    transition: none;
+  }
+
+  .ve-drill-card:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,50 @@
+:root {
+  --ve-bg: var(--osd-bg, #ffffff);
+  --ve-surface: #f7f8fa;
+  --ve-panel: color-mix(in srgb, var(--ve-text) 4%, var(--ve-bg));
+  --ve-panel-strong: color-mix(in srgb, var(--ve-text) 8%, var(--ve-bg));
+  --ve-row: color-mix(in srgb, var(--ve-text) 2.5%, transparent);
+  --ve-heading: var(--osd-text, #16181d);
+  --ve-text: var(--osd-text, #2a2e36);
+  --ve-muted: color-mix(in srgb, var(--ve-text) 62%, var(--ve-bg));
+  --ve-faint: color-mix(in srgb, var(--ve-text) 42%, var(--ve-bg));
+  --ve-rule: color-mix(in srgb, var(--ve-text) 16%, var(--ve-bg));
+  --ve-accent: var(--osd-accent, #079fba);
+  --ve-ok: #1f7a53;
+  --ve-warn: #b7791f;
+  --ve-err: #c4472d;
+  --ve-danger: #c4472d;
+  --ve-info: #2563eb;
+  --ve-radius: var(--osd-radius, 6px);
+  --ve-font-body: var(--osd-font-body, "Inter", ui-sans-serif, system-ui, sans-serif);
+  --ve-font-display: var(--osd-font-display, "Inter", ui-sans-serif, system-ui, sans-serif);
+  --ve-font-mono: "JetBrains Mono", "Fragment Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ve-font-math: "Cormorant Garamond", Georgia, serif;
+  --ve-heading-weight: 600;
+  --ve-chart-stroke: 2px;
+  --ve-chart-active-stroke: 2.5px;
+  --ve-chart-detail-stroke: 1px;
+
+  --ve-diagram-bg: var(--ve-bg);
+  --ve-diagram-ink: var(--ve-heading);
+  --ve-diagram-muted: var(--ve-muted);
+  --ve-diagram-frame: var(--ve-rule);
+  --ve-node-bg: var(--ve-surface);
+  --ve-node-stroke: var(--ve-rule);
+  --ve-node-radius: 6;
+  --ve-illustration-ink: var(--ve-heading);
+  --ve-illustration-muted: var(--ve-muted);
+  --ve-diagram-accent-fill: color-mix(in srgb, var(--ve-accent) 12%, var(--ve-bg));
+  --ve-graphic-stroke: 1.75;
+  --ve-graphic-detail-stroke: 1;
+  --ve-graphic-active-stroke: 2;
+  --ve-illustration-stroke: 1.5;
+  --ve-illustration-detail-stroke: 0.8;
+  --ve-illustration-active-stroke: 1.5;
+
+  --ve-code-bg: color-mix(in srgb, var(--ve-text) 3.5%, var(--ve-bg));
+  --ve-code-text: var(--ve-text);
+  --ve-code-muted: var(--ve-muted);
+  --ve-code-rule: var(--ve-rule);
+  --ve-code-accent: var(--ve-accent);
+}

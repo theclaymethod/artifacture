@@ -1,0 +1,140 @@
+.ve-slide-semantic,
+.ve-slide-semantic * {
+  box-sizing: border-box;
+}
+
+.ve-slide-semantic {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  font-family: var(--ve-font-body);
+  color: var(--ve-text);
+}
+
+.ve-slide-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ve-slide-kicker {
+  margin: 0;
+  font-family: var(--ve-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ve-accent);
+}
+
+.ve-slide-title {
+  margin: 0;
+  font-family: var(--ve-font-display);
+  font-size: 40px;
+  font-weight: var(--ve-heading-weight);
+  line-height: 1.08;
+  color: var(--ve-heading);
+}
+
+.ve-slide-takeaway {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ve-muted);
+}
+
+.ve-slide-case-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.ve-slide-panel {
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 20px 24px;
+}
+
+.ve-slide-facts {
+  display: grid;
+  gap: 16px;
+}
+
+.ve-slide-fact {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ve-rule);
+}
+
+.ve-slide-fact-label {
+  font-family: var(--ve-font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ve-muted);
+}
+
+.ve-slide-fact-value {
+  font-family: var(--ve-font-display);
+  font-size: 24px;
+  font-weight: var(--ve-heading-weight);
+  color: var(--ve-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-slide-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.ve-slide-comparison-card {
+  border: 1px solid var(--ve-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-panel);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ve-slide-comparison-card[data-highlight="true"] {
+  border-color: var(--ve-accent);
+  background: color-mix(in srgb, var(--ve-accent) 8%, var(--ve-bg));
+}
+
+.ve-slide-comparison-name {
+  margin: 0;
+  font-family: var(--ve-font-display);
+  font-size: 24px;
+  font-weight: var(--ve-heading-weight);
+  color: var(--ve-heading);
+}
+
+.ve-slide-process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.ve-slide-decision-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.ve-slide-outcome {
+  margin-top: auto;
+  border-top: 1px solid var(--ve-rule);
+  padding-top: 14px;
+  font-size: 16px;
+  color: var(--ve-heading);
+}

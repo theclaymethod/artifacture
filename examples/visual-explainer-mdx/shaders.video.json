@@ -1,8 +1,0 @@
-{
-  "library": "shaders",
-  "example": "Plasma",
-  "duration": 3,
-  "fps": 30,
-  "width": 1280,
-  "height": 720
-}

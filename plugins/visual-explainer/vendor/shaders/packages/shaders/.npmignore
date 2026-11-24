@@ -1,2 +1,0 @@
-# Empty .npmignore to prevent npm from using parent .gitignore patterns
-# The package.json "files" field controls what gets published

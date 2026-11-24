@@ -1,0 +1,33 @@
+{
+  "name": "@artifacture/template-video",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "render:dawn": "node scripts/render-dawn.mjs",
+    "encode": "bash scripts/encode-mp4.sh"
+  },
+  "dependencies": {
+    "@artifacture/gpu": "workspace:*",
+    "@artifacture/kit": "workspace:*",
+    "@artifacture/themes": "workspace:*",
+    "hyperframes": "^0.9.86",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vgpu": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.3"
+  }
+}

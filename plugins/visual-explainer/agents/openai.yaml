@@ -1,4 +1,0 @@
-interface:
-  display_name: "Artifacture"
-  short_description: "Create charts, diagrams, and HTML explainers"
-  default_prompt: "Use $visual-explainer to create an editable HTML explanation, then check it in a browser."

@@ -1,0 +1,39 @@
+{
+  "name": "@artifacture/template-slides",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "open-slide dev",
+    "build": "open-slide build",
+    "preview": "open-slide preview",
+    "stills": "artifacture stills slides/gpu-demo",
+    "check": "artifacture check .",
+    "review": "artifacture review ."
+  },
+  "dependencies": {
+    "@artifacture/gpu": "workspace:*",
+    "@artifacture/kit": "workspace:*",
+    "@artifacture/themes": "workspace:*",
+    "@open-slide/core": "^2.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vgpu": "^0.6.0"
+  },
+  "dependenciesMeta": {
+    "@artifacture/gpu": {
+      "injected": true
+    },
+    "@artifacture/kit": {
+      "injected": true
+    },
+    "@artifacture/themes": {
+      "injected": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "typescript": "^5.9.3"
+  }
+}

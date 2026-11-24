@@ -1,0 +1,59 @@
+@import "@artifacture/themes/tokens.css";
+@import "@artifacture/kit/styles.css";
+
+* {
+  box-sizing: border-box;
+  transition: none !important;
+  animation: none !important;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ve-bg);
+  color: var(--ve-text);
+  font-family: var(--ve-font-body);
+}
+
+.video-stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.video-hud {
+  position: absolute;
+  left: 64px;
+  top: 56px;
+  bottom: 56px;
+  width: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px;
+  border-radius: var(--ve-radius);
+  border: 1px solid var(--ve-rule);
+  background: color-mix(in srgb, var(--ve-bg) 88%, transparent);
+}
+
+.video-timecode {
+  font-family: var(--ve-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--ve-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.video-title {
+  margin: 10px 0 0;
+  font-family: var(--ve-font-display);
+  font-size: 40px;
+  line-height: 1.08;
+  color: var(--ve-heading);
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@artifacture/gpu",
+  "version": "2.0.0-alpha.1",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.js"
+    },
+    "./scenes": {
+      "types": "./dist/scenes/index.d.ts",
+      "import": "./dist/scenes/index.js"
+    }
+  },
+  "scripts": {
+    "shaders:build": "node scripts/build-shaders.mjs",
+    "build": "pnpm run shaders:build && tsdown",
+    "typecheck": "tsc --noEmit",
+    "test:wgsl": "node scripts/check-wgsl.mjs"
+  },
+  "dependencies": {
+    "@vgpu/wgsl": "^0.6.0",
+    "pngjs": "^7.0.0",
+    "vgpu": "^0.6.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5"
+  }
+}

@@ -1,0 +1,187 @@
+:is(.ve-code-block, .ve-diff-block),
+:is(.ve-code-block, .ve-diff-block) * {
+  box-sizing: border-box;
+}
+
+.ve-code-block .ve-code-body {
+  display: grid;
+  max-height: 620px;
+  overflow: auto;
+}
+
+.ve-code-block .ve-code-annotations {
+  margin: 0;
+  border-top: 1px solid var(--ve-code-rule);
+  padding: 0.75rem 1rem;
+  list-style: none;
+  color: var(--ve-code-muted);
+  font: 0.875rem / 1.5 var(--ve-font-mono);
+}
+
+.ve-code-block .ve-code-annotation {
+  padding-block: 0.25rem;
+}
+
+.ve-code-block .ve-code-line {
+  color: var(--ve-code-accent);
+}
+
+.ve-code-block .ve-code-note {
+  margin-left: 0.75rem;
+  color: var(--ve-code-text);
+}
+
+.ve-code-block code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.ve-code-block .ve-code-shiki pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--ve-code-bg) !important;
+  color: var(--ve-code-text);
+  font-family: var(--ve-font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ve-code-block .ve-code-shiki code {
+  display: block;
+  min-width: min-content;
+}
+
+:is(.ve-code-block, .ve-diff-block) .ve-code-caption,
+.ve-diff-block figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--ve-code-rule);
+  padding: 0.75rem 1rem;
+  color: var(--ve-code-muted);
+  font-family: var(--ve-font-mono);
+  font-size: 0.875rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.ve-diff-block .ve-scroll-x {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.ve-code-block,
+.ve-diff-block {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--ve-code-rule);
+  border-radius: var(--ve-radius);
+  background: var(--ve-code-bg);
+  color: var(--ve-code-text);
+}
+
+.ve-diff-block .ve-diff-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-family: var(--ve-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.ve-diff-block .ve-diff-table td {
+  border-bottom: 1px solid var(--ve-code-rule);
+  vertical-align: top;
+}
+
+.ve-diff-block .ve-diff-gutter,
+.ve-diff-block .ve-diff-mark {
+  width: 3rem;
+  padding: 0.2rem 0.5rem;
+  color: var(--ve-code-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.ve-diff-block .ve-diff-mark {
+  width: 2rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.ve-diff-block .ve-diff-code {
+  min-width: 0;
+  padding: 0.2rem 0.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="add"] {
+  background: color-mix(in srgb, var(--ve-ok) 14%, transparent);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="add"] .ve-diff-mark {
+  color: var(--ve-ok);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="remove"] {
+  background: color-mix(in srgb, var(--ve-err) 14%, transparent);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="remove"] .ve-diff-mark {
+  color: var(--ve-err);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] {
+  background: var(--ve-panel-strong);
+}
+
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-code,
+.ve-diff-block .ve-diff-table [data-ve-diff-kind="hunk"] .ve-diff-mark {
+  color: var(--ve-code-accent);
+}
+
+.ve-diff-block .ve-diff-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px;
+  background: var(--ve-code-rule);
+}
+
+.ve-diff-block .ve-diff-side {
+  min-width: 0;
+  overflow-x: auto;
+  background: var(--ve-code-bg);
+}
+
+.ve-diff-block .ve-diff-split .ve-diff-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.ve-diff-block .ve-diff-side-title {
+  border-bottom: 1px solid var(--ve-code-rule);
+  padding: 0.5rem 0.75rem;
+  color: var(--ve-code-muted);
+  font-family: var(--ve-font-mono);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .ve-diff-block .ve-diff-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ve-diff-block .ve-diff-table {
+    min-width: 520px;
+  }
+}

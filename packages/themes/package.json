@@ -1,0 +1,19 @@
+{
+  "name": "@artifacture/themes",
+  "version": "2.0.0-alpha.1",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist", "open-slide"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./open-slide/*": "./open-slide/*"
+  },
+  "scripts": {
+    "build": "tsdown && cp src/tokens.css dist/tokens.css",
+    "typecheck": "tsc --noEmit"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "artifacture",
+  "version": "2.0.0-alpha.1",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist", "docs"],
+  "bin": {
+    "artifacture": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@artifacture/gpu": "workspace:*",
+    "@artifacture/kit": "workspace:*",
+    "@artifacture/themes": "workspace:*",
+    "@artifacture/verify": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0"
+  }
+}

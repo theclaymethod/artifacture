@@ -1,0 +1,35 @@
+{
+  "name": "@artifacture/template-explainer",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:singlefile": "SINGLEFILE=1 vite build",
+    "preview": "vite preview",
+    "stills": "node scripts/render-stills.mjs"
+  },
+  "dependencies": {
+    "@artifacture/gpu": "workspace:*",
+    "@artifacture/kit": "workspace:*",
+    "@artifacture/themes": "workspace:*",
+    "@mdx-js/react": "^3.1.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vgpu": "^0.6.0"
+  },
+  "devDependencies": {
+    "@mdx-js/rollup": "^3.1.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vgpu/wgsl": "^0.6.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.3",
+    "vite-plugin-singlefile": "^2.3.4"
+  }
+}

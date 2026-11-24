@@ -1,0 +1,55 @@
+@import "@artifacture/themes/tokens.css";
+@import "@artifacture/kit/styles.css";
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--ve-bg);
+  color: var(--ve-text);
+  font-family: var(--ve-font-body);
+  line-height: 1.65;
+}
+
+.explainer-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.explainer-shell h1 {
+  margin: 0 0 16px;
+  font-family: var(--ve-font-display);
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.08;
+  color: var(--ve-heading);
+}
+
+.explainer-shell h2 {
+  margin: 48px 0 14px;
+  font-family: var(--ve-font-display);
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--ve-heading);
+}
+
+.explainer-shell p {
+  margin: 0 0 18px;
+  max-width: 68ch;
+  color: var(--ve-text);
+}
+
+.explainer-hero-gpu {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--ve-radius);
+  border: 1px solid var(--ve-rule);
+  margin: 24px 0 36px;
+}
+
+.explainer-block {
+  margin: 28px 0;
+}
