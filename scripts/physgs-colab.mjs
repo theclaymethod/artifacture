@@ -158,15 +158,19 @@ async function main() {
 
     await execRemoteScript(sessionName, WORKER_SCRIPT, '/content/colab-physgs-mpm.py', args);
 
-    for (const fname of ['mpm-static.ply', 'mpm-dynamic.ply', 'mpm-traj.bin', 'meta.json']) {
+    for (const fname of ['mpm-dynamic.ply', 'mpm-traj.bin', 'meta.json']) {
       await runStreaming('colab', ['download', '-s', sessionName, `${remoteOutDir}/${fname}`, path.join(outDir, fname)]);
     }
 
-    await convertPlyToSpz(path.join(outDir, 'mpm-static.ply'), path.join(outDir, 'mpm-static.spz'), false);
-    await convertPlyToSpz(path.join(outDir, 'mpm-dynamic.ply'), path.join(outDir, 'mpm-dynamic.spz'), false);
-
     const meta = JSON.parse(readFileSync(path.join(outDir, 'meta.json'), 'utf-8'));
-    meta.static_spz_bytes = statSync(path.join(outDir, 'mpm-static.spz')).size;
+    if (meta.static_particles > 0) {
+      await runStreaming('colab', ['download', '-s', sessionName, `${remoteOutDir}/mpm-static.ply`, path.join(outDir, 'mpm-static.ply')]);
+      await convertPlyToSpz(path.join(outDir, 'mpm-static.ply'), path.join(outDir, 'mpm-static.spz'), false);
+      meta.static_spz_bytes = statSync(path.join(outDir, 'mpm-static.spz')).size;
+    } else {
+      meta.static_spz_bytes = 0;
+    }
+    await convertPlyToSpz(path.join(outDir, 'mpm-dynamic.ply'), path.join(outDir, 'mpm-dynamic.spz'), false);
     meta.dynamic_spz_bytes = statSync(path.join(outDir, 'mpm-dynamic.spz')).size;
     writeFileSync(path.join(outDir, 'meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
 

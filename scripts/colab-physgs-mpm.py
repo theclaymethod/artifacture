@@ -192,7 +192,7 @@ def grid_update_kernel(
         vn = vel[1]
         vt = wp.vec3(vel[0], 0.0, vel[2])
         vt_len = wp.length(vt)
-        mu_f = 0.55
+        mu_f = 0.42
         if vt_len > 1e-6:
             scale = wp.max(0.0, 1.0 + mu_f * vn / vt_len)
             vel = wp.vec3(vt[0] * scale, -vn * 0.12, vt[2] * scale)
@@ -225,12 +225,19 @@ def g2p_kernel(
     wake_origin: wp.vec3,
     bounds_lo: float,
     bounds_hi: float,
+    v_burst: wp.array(dtype=wp.vec3),
+    use_voronoi_burst: int,
 ):
     p = wp.tid()
     xp = x[p]
     if strain_arr[p] < 0.0:
         if wp.length(xp - wake_origin) <= wake_radius:
-            strain_arr[p] = 0.02
+            if use_voronoi_burst == 1:
+                strain_arr[p] = 0.72
+                v[p] = v_burst[p]
+                return
+            else:
+                strain_arr[p] = 0.02
         else:
             return
 
@@ -309,6 +316,7 @@ def main() -> int:
     parser.add_argument("--fps", type=float, default=15.0)
     parser.add_argument("--grid", type=int, default=64)
     parser.add_argument("--substeps", type=int, default=64)
+    parser.add_argument("--device", default="auto", choices=["auto", "cuda:0", "cpu"])
     args, _ = parser.parse_known_args()
 
     t_total0 = time.perf_counter()
@@ -387,9 +395,12 @@ def main() -> int:
     if len(hero_idx) > args.max_particles:
         rng = np.random.default_rng(42)
         hero_idx = np.sort(rng.choice(hero_idx, size=args.max_particles, replace=False))
-    static_mask = np.ones(total_n, dtype=bool)
-    static_mask[hero_idx] = False
-    static_idx = np.nonzero(static_mask)[0]
+    if args.roi == "all":
+        static_idx = np.empty(0, dtype=np.int64)
+    else:
+        static_mask = np.ones(total_n, dtype=bool)
+        static_mask[hero_idx] = False
+        static_idx = np.nonzero(static_mask)[0]
 
     hero_pts = pts[hero_idx]
     hero_lo = np.percentile(hero_pts, 2.0, axis=0)
@@ -412,16 +423,17 @@ def main() -> int:
     dt = (1.0 / args.fps) / args.substeps
 
     preset_id = {"shatter": 0, "blast": 1, "smoke_dissolve": 2, "elastic_drop": 3}[args.preset]
-    E = 180.0 if preset_id != 3 else 70.0
+    use_voronoi_burst = 1 if (preset_id == 0 and args.roi == "all") else 0
+    E = 120.0 if use_voronoi_burst == 1 else (180.0 if preset_id != 3 else 70.0)
     nu = 0.25
     mu0 = E / (2.0 * (1.0 + nu))
     la0 = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu))
     p_vol = (dx * 0.5) ** 3
     p_mass = p_vol * 1.0
-    gravity_y = -6.5 if preset_id != 2 else 2.2
+    gravity_y = -3.8 if use_voronoi_burst == 1 else (-6.5 if preset_id != 2 else 2.2)
     yield_stress = 0.085 if preset_id == 0 else 0.11
 
-    dev = "cuda:0"
+    dev = ("cuda:0" if wp.is_cuda_available() else "cpu") if args.device == "auto" else args.device
     x_wp = wp.array(x_init, dtype=wp.vec3, device=dev)
     v_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
     C_wp = wp.zeros(n_p, dtype=wp.mat33, device=dev)
@@ -433,7 +445,49 @@ def main() -> int:
     strain_wp = wp.array(strain_init, dtype=float, device=dev)
     grid_mv = wp.zeros(grid_res * grid_res * grid_res, dtype=wp.vec4, device=dev)
 
-    blast_origin = wp.vec3(0.5, 0.25, 0.5)
+    if use_voronoi_burst == 1:
+        rng_s = np.random.default_rng(7)
+        k_shards = 14
+        seeds = x_init[rng_s.choice(n_p, size=k_shards, replace=False)].copy()
+        for _ in range(4):
+            d2 = np.sum((x_init[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
+            shard_ids = np.argmin(d2, axis=1)
+            for k in range(k_shards):
+                m = shard_ids == k
+                if np.any(m):
+                    seeds[k] = x_init[m].mean(axis=0)
+        d2 = np.sum((x_init[:, None, :] - seeds[None, :, :]) ** 2, axis=2)
+        shard_ids = np.argmin(d2, axis=1)
+
+        v_burst_np = np.zeros((n_p, 3), dtype=np.float32)
+        for k in range(k_shards):
+            m = shard_ids == k
+            if not np.any(m):
+                continue
+            sc = seeds[k]
+            rx, rz = float(sc[0] - 0.5), float(sc[2] - 0.5)
+            rn = float(np.hypot(rx, rz))
+            if rn < 0.015:
+                ang = k * 2.399963
+                ux, uz = float(np.cos(ang)), float(np.sin(ang))
+            else:
+                ux, uz = rx / rn, rz / rn
+            h_norm = float(np.clip((sc[1] - floor_sim_y) / 0.42, 0.0, 1.0))
+            v_rad = float(rng_s.uniform(0.92, 1.48)) * (0.75 + 0.55 * h_norm)
+            v_up = 0.34 + 0.74 * h_norm + float(rng_s.uniform(0.0, 0.20))
+            base_v = np.array([ux * v_rad, v_up, uz * v_rad], dtype=np.float32)
+            omega = rng_s.uniform(-4.2, 4.2, size=3).astype(np.float32)
+            rel_p = x_init[m] - sc[None, :]
+            spin_v = np.cross(omega[None, :], rel_p).astype(np.float32)
+            jitter = rng_s.normal(0.0, 0.015, size=(int(np.sum(m)), 3)).astype(np.float32)
+            v_burst_np[m] = base_v[None, :] + spin_v + jitter
+        v_burst_np[:, 0] -= v_burst_np[:, 0].mean()
+        v_burst_np[:, 2] -= v_burst_np[:, 2].mean()
+        v_burst_wp = wp.array(v_burst_np, dtype=wp.vec3, device=dev)
+    else:
+        v_burst_wp = wp.zeros(n_p, dtype=wp.vec3, device=dev)
+
+    blast_origin = wp.vec3(0.5, 0.34 if args.roi == "all" else 0.25, 0.5)
     frame_positions = np.zeros((args.frames, n_p, 3), dtype=np.float32)
     frame_strains = np.zeros((args.frames, n_p), dtype=np.float32)
 
@@ -443,9 +497,14 @@ def main() -> int:
         frame_strains[f] = np.clip(strain_wp.numpy(), 0.0, 2.0)
 
         sim_t = f / args.fps
-        wake_r = 0.04 + sim_t * (0.42 if preset_id == 0 else 0.55)
-        b_rad = 0.05 + sim_t * (0.34 if preset_id == 0 else 0.45)
-        b_force = 24.0 if (preset_id == 0 and sim_t < 2.2) else (16.0 if preset_id in (1, 2) else 0.0)
+        if use_voronoi_burst == 1:
+            wake_r = 0.03 + sim_t * 0.48
+            b_rad = 0.0
+            b_force = 0.0
+        else:
+            wake_r = 0.05 + sim_t * (0.42 if preset_id == 0 else 0.55)
+            b_rad = 0.05 + sim_t * (0.34 if preset_id == 0 else 0.45)
+            b_force = 24.0 if (preset_id == 0 and sim_t < 2.2) else (16.0 if preset_id in (1, 2) else 0.0)
 
         for _ in range(args.substeps):
             wp.launch(zero_grid_kernel, dim=grid_res ** 3, inputs=[grid_mv], device=dev)
@@ -476,6 +535,7 @@ def main() -> int:
                     inv_dx, dx, dt, grid_res, floor_sim_y,
                     wake_r if preset_id in (0, 1, 2) else 99.0,
                     blast_origin, 3.5 * dx, 1.0 - 3.5 * dx,
+                    v_burst_wp, use_voronoi_burst,
                 ],
                 device=dev,
             )
@@ -485,7 +545,8 @@ def main() -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     # Write static and dynamic PLYs in original PLY space (so Radix applies its normal Y-down -> +Y-up flip!)
-    save_subset_ply(ply, static_idx, None, out_dir / "mpm-static.ply")
+    if len(static_idx) > 0:
+        save_subset_ply(ply, static_idx, None, out_dir / "mpm-static.ply")
     save_subset_ply(ply, hero_idx, None, out_dir / "mpm-dynamic.ply")
 
     # Note: frame_positions were in upright world space (+Y up if flip_x); export upright positions in mpm-traj.bin
@@ -518,7 +579,7 @@ def main() -> int:
         f.write(packed.tobytes(order="C"))
 
     final_disp = np.linalg.norm(frame_positions[-1] - frame_positions[0], axis=1)
-    gpu_name = wp.get_device(dev).name
+    gpu_name = getattr(wp.get_device(dev), "name", str(dev))
     meta = {
         "backend": "nvidia-warp-cuda-mpm",
         "warp_version": wp.__version__,
