@@ -17,12 +17,12 @@
   "dependencies": {
     "@artifacture/gpu": "workspace:*",
     "@artifacture/kit": "workspace:*",
-    "pixelmatch": "^7.1.0",
-    "playwright": "^1.60.0",
+    "pixelmatch": "^8.0.0",
+    "playwright": "^1.65.1",
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^26.6.6",
     "@types/pngjs": "^6.0.5"
   }
 }
