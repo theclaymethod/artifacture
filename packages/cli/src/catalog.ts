@@ -7,6 +7,7 @@ import {
   gaussianSplatScene,
   liquidPrismScene,
   mirrorCityScene,
+  splatFxScene,
 } from '@artifacture/gpu/scenes';
 import { KIT_CATALOG, type KitBlockEntry } from '@artifacture/kit';
 import { ARTIFACTURE_THEMES, type ThemeSpec } from '@artifacture/themes';
@@ -53,6 +54,13 @@ export const GPU_SCENE_CATALOG: readonly GpuSceneCatalogEntry[] = [
     importPath: '@artifacture/gpu/scenes',
     params: Object.keys(mirrorCityScene.defaultParams),
     stillSize: mirrorCityScene.stillSize ?? [1280, 720],
+  },
+  {
+    id: splatFxScene.id,
+    label: splatFxScene.label,
+    importPath: '@artifacture/gpu/scenes',
+    params: Object.keys(splatFxScene.defaultParams),
+    stillSize: splatFxScene.stillSize ?? [1280, 720],
   },
 ];
 

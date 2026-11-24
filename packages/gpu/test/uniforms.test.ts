@@ -15,6 +15,7 @@ import {
   liquidPrismScene,
   mirrorCityScene,
   parseSplatBuffer,
+  splatFxScene,
 } from '../src/scenes/index.ts';
 
 describe('@artifacture/gpu uniforms, mock execution, and compiler', () => {
@@ -156,5 +157,26 @@ describe('@artifacture/gpu uniforms, mock execution, and compiler', () => {
     expect(parsed[13]).toBeCloseTo(128 / 255);
     expect(parsed[14]).toBeCloseTo(0);
     expect(parsed[32 + 3]).toBe(0);
+  });
+
+  it('compiles and dispatches compute-sorted splatFxScene on vgpu/mock', async () => {
+    const gpu = await init();
+    try {
+      const offscreen = target(gpu, { size: [128, 72], format: 'rgba8unorm' });
+      const controller = splatFxScene.setup?.(gpu, offscreen, splatFxScene.defaultParams);
+      expect(controller).toBeDefined();
+      if (!controller) return;
+      try {
+        if (controller.compile) await controller.compile(offscreen);
+        const submitted = frame(gpu, (f) =>
+          controller.renderAt(1.6, splatFxScene.defaultParams, offscreen, f),
+        );
+        await submitted.done;
+      } finally {
+        controller.dispose();
+      }
+    } finally {
+      gpu.dispose();
+    }
   });
 });

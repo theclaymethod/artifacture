@@ -6,4 +6,6 @@ export type { LiquidPrismParams } from './liquid-prism.ts';
 export { liquidPrismScene } from './liquid-prism.ts';
 export type { MirrorCityParams, MirrorCitySceneOptions } from './mirror-city.ts';
 export { CITY_SPLAT_COUNT, createMirrorCityScene, mirrorCityScene } from './mirror-city.ts';
+export type { SplatFxParams, SplatFxSceneOptions } from './splat-fx.ts';
+export { createSplatFxScene, SPLAT_FX_COUNT, splatFxScene } from './splat-fx.ts';
 export { loadSplatSource, parseSplatBuffer } from './splat-loader.ts';
