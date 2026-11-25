@@ -85,6 +85,7 @@ const SPZ_ASSETS = [
   'alien-dimension-wide.spz',
   'tokyo-alley.spz',
   'buddha.spz',
+  'grace-cathedral-lite.spz',
 ];
 
 let totalBytes = 0;

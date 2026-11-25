@@ -75,10 +75,6 @@ export interface SlideSpec {
   };
 }
 
-const IS_LOCAL_DEV =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost");
-
 export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
@@ -125,13 +121,11 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   grace: {
     id: "grace",
-    label: "Grace Cathedral (10M SH3)",
-    url: IS_LOCAL_DEV
-      ? "./assets/grace-interior-10m.rdx"
-      : "https://storage.googleapis.com/forge-dev-public/asundqui/radix/261015/rdx-sh/grace-interior-10m.rdx",
+    label: "Grace Cathedral (1.15M SPZ · 17 MB)",
+    url: "./assets/grace-cathedral-lite.spz",
     placement: "catalog",
-    layout: "packedSplats",
-    sh: "packed",
+    layout: "extSplats",
+    sh: false,
     flipX: true,
     preBlur: false,
     targetSpan: 10,
@@ -378,17 +372,17 @@ export const SLIDES: SlideSpec[] = [
     id: "grace-lidar",
     scene: "grace",
     layout: "left",
-    kicker: "05 · 10M SH3 PACKED SPLATS · MONOCHROME LIDAR",
+    kicker: "05 · 41× COMPRESSED GOTHIC NAVE · MONOCHROME LIDAR",
     title: "Stark B&W Spherical Point-Cloud Matrix",
     lead:
-      "Scaling to 10 million SH3 packed Gaussians inside Grace Cathedral: a pure achromatic spherical wavefront sweeps across pews, Gothic arches, organ pipes, and the rose window before contracting back to color.",
+      "Nave-importance-sampled Grace Cathedral (715 MB 10M SH3 compressed 41× to 17.4 MB SH0 SPZ): a pure achromatic spherical wavefront sweeps across pews, Gothic arches, organ pipes, and the rose window before contracting back to color.",
     bullets: [
-      "Stochastic hash decimation thins ~80% of overlapping interior fill splats so crisp white particles float in pure black space",
+      "Solid-angle importance sampling + stained-glass chroma weighting retains full architectural clarity at 1.15M splats",
+      "Stochastic hash decimation thins interior fill splats so crisp white particles float in pure black space",
       "Scale clamping (<code>dotRefScale = min(fxScale, 12)</code>) keeps pinpoint dot radii sharp across a 50-meter nave",
-      "Zero chromatic tint on the wavefront shell and concentric scan contours preserves high-contrast LiDAR readability",
     ],
     metrics: [
-      { label: "Splat Count", value: "9,997,774 SH3 Packed" },
+      { label: "Compressed Asset", value: "1.15M SPZ · 17.4 MB (41×)" },
       { label: "Sweep Radius", value: "52m Full Nave Return" },
     ],
     notes:
@@ -443,8 +437,8 @@ export const SLIDES: SlideSpec[] = [
       {
         effect: "B&W LiDAR Shockwave",
         scene: "Grace Cathedral Nave",
-        splats: "9,997,774 (SH3)",
-        technique: "Packed SH3 layout + stochastic decimation + pure-white spherical shell",
+        splats: "1,150,000 (17.4 MB SPZ)",
+        technique: "41× importance-sampled SPZ + stochastic decimation + pure-white shell",
       },
     ],
     notes:

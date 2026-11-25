@@ -189,10 +189,7 @@ function fetchSplatCached(url: string, meta: SceneAssetSpec): Promise<LoadedEntr
   let p = parsedCache.get(key);
   if (!p) {
     p = loadSplatFile(url, { name: url, worker: true, layout: meta.layout, sh: meta.sh });
-    // Don't retain huge 700MB Grace Cathedral in CPU cache across swaps; keep small scenes (<40MB) cached
-    if (meta.id !== "grace") {
-      parsedCache.set(key, p);
-    }
+    parsedCache.set(key, p);
   }
   return p;
 }
@@ -312,10 +309,11 @@ async function mountScene(sceneId: DeckSceneId): Promise<void> {
   }
 }
 
-// Background-prefetch lightweight scenes (Tokyo 7MB + Buddha 3MB) after boot
+// Background-prefetch remaining scenes (Tokyo 7MB + Buddha 3MB + compressed Grace Cathedral 17MB) after boot
 function prefetchLightScenes() {
   void fetchSplatCached(DECK_SCENES.tokyo_alley.url, DECK_SCENES.tokyo_alley).catch(() => {});
   void fetchSplatCached(DECK_SCENES.buddha.url, DECK_SCENES.buddha).catch(() => {});
+  void fetchSplatCached(DECK_SCENES.grace.url, DECK_SCENES.grace).catch(() => {});
 }
 
 // ── Slide State & Continuous Transition Engine ─────────────────────────────
