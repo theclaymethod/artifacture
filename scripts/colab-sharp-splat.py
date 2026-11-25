@@ -13,6 +13,19 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+dep_specs = (
+    ("plyfile", "plyfile"),
+    ("pillow_heif", "pillow-heif"),
+    ("timm", "timm"),
+    ("imageio", "imageio"),
+    ("scipy", "scipy"),
+    ("click", "click"),
+)
+missing_deps = [pip_name for mod_name, pip_name in dep_specs if importlib.util.find_spec(mod_name) is None]
+if missing_deps:
+    print(f"[colab-sharp] Installing missing runtime deps: {', '.join(missing_deps)}...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", *missing_deps])
+
 if importlib.util.find_spec("sharp") is None:
     print("[colab-sharp] Installing apple/ml-sharp (--no-deps)...")
     subprocess.check_call(

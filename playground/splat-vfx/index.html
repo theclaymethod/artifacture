@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splat VFX Playground · WebGPU 3DGS Deck &amp; FX Lab</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #07090d;
+      --surface: rgba(18, 22, 31, 0.78);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.28);
+      --text: #f3f6fb;
+      --muted: rgba(214, 224, 238, 0.72);
+      --accent: #7ee3ff;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at 18% 12%, #111927 0%, var(--bg) 56%);
+      color: var(--text);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 64px 28px 80px;
+    }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.06;
+    }
+    .lead {
+      margin: 0 0 40px;
+      max-width: 680px;
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 26px 26px 24px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+    }
+    .card:hover {
+      border-color: var(--border-strong);
+      background: rgba(24, 30, 42, 0.92);
+      transform: translateY(-2px);
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+      flex: 1;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(235, 242, 250, 0.84);
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .cta {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #ffffff;
+    }
+    footer {
+      margin-top: 44px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="kicker">ARTIFACTURE PLAYGROUND · @SPARKJSDEV/RADIX · WEBGPU + TSL</div>
+    <h1>3D Gaussian Splat VFX Playground</h1>
+    <p class="lead">
+      Interactive WebGPU presentation deck and shader sandbox running GPU radix depth-sorted
+      3D Gaussian Splats up to 10M SH3 Gaussians with real-time TSL modifiers.
+    </p>
+    <div class="grid">
+      <a class="card" href="./deck/">
+        <span class="tag">Presentation · 8 Slides</span>
+        <h2>WebGPU 3DGS Slide Deck</h2>
+        <p>
+          Full-bleed interactive slide deck that flies live through a dual-world chaotic gravity
+          wormhole, counter-parallax Neon Tokyo alleyway, volumetric Stone Buddha smoke dissolve,
+          and a 10M SH3 monochrome B&amp;W LiDAR scan of Grace Cathedral.
+        </p>
+        <div class="meta">
+          <span class="pill">Arrow Keys / Space</span>
+          <span class="pill">O · Free Orbit</span>
+          <span class="pill">R · Replay FX</span>
+          <span class="pill">N · Speaker Notes</span>
+        </div>
+        <div class="cta">Launch Slide Deck →</div>
+      </a>
+      <a class="card" href="./fx-lab/">
+        <span class="tag">Interactive Sandbox · 9 Modes</span>
+        <h2>Artifacture 3DGS FX Lab</h2>
+        <p>
+          Direct shader playground across 20 scanned &amp; SHARP-synthesized 3DGS scenes with live
+          switching between monochrome LiDAR, curl smoke, HDR neon, geometric wave, vortex, CUDA
+          MPM shatter, 3D voxels, dual-world singularity, and Tokyo parallax.
+        </p>
+        <div class="meta">
+          <span class="pill">1–9 FX Modes</span>
+          <span class="pill">20 Scenes</span>
+          <span class="pill">CUDA MPM Playback</span>
+        </div>
+        <div class="cta">Open FX Lab →</div>
+      </a>
+    </div>
+    <footer>
+      Requires WebGPU-capable Chromium / Safari / Firefox. Local scan assets resolve from
+      <code>playground/splat-vfx/assets/</code> with automatic fallback to
+      <code>../radix/examples/artifacture-fx/assets/</code>.
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Large local 3DGS scan assets & rendered media (kept out of git history)
+assets/*.spz
+assets/*.rdx
+assets/*.ply
+assets/*.splat
+assets/*.bin
+assets/bonsai-mpm/
+assets/jade-king-mpm/
+*.mp4
+*.wav
+*.webm
+captures/
+.DS_Store

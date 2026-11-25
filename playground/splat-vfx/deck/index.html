@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programmable 3D Gaussian Splatting · WebGPU Slide Deck</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/build/three.webgpu.js",
+        "three/webgpu": "/vendor/three/build/three.webgpu.js",
+        "three/tsl": "/vendor/three/build/three.tsl.js",
+        "three/addons/": "/vendor/three/examples/jsm/",
+        "three/examples/jsm/": "/vendor/three/examples/jsm/",
+        "@sparkjsdev/radix": "/vendor/radix/radix.module.js"
+      }
+    }
+  </script>
+</head>
+<body data-layout="left">
+  <div id="stage-root"></div>
+  <div id="scene-veil"></div>
+  <div id="slide-scrim"></div>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+
+  <div id="freecam-badge">FREE ORBIT CAMERA · DRAG / SCROLL · PRESS O TO LOCK</div>
+  <div id="loading-toast">Loading 3DGS scene...</div>
+
+  <div id="telemetry-pill">
+    <span class="telemetry-dot" id="telemetry-dot"></span>
+    <span id="telemetry-text">Initializing WebGPU...</span>
+  </div>
+
+  <main id="slide-overlay" aria-live="polite">
+    <article class="slide-card" id="slide-card"></article>
+  </main>
+
+  <aside id="notes-drawer" aria-label="Speaker Notes">
+    <div class="drawer-label">Speaker Notes</div>
+    <p id="notes-body"></p>
+  </aside>
+
+  <div id="overview-modal" role="dialog" aria-modal="true" aria-label="Slide Overview">
+    <div class="overview-inner">
+      <div class="overview-header">
+        <div class="drawer-label" style="margin: 0">Slide Overview · Press Esc or G to close</div>
+        <button class="deck-btn" id="btn-close-overview" type="button">Close</button>
+      </div>
+      <div class="overview-grid" id="overview-grid"></div>
+    </div>
+  </div>
+
+  <nav id="deck-bar" aria-label="Presentation Controls">
+    <div class="bar-group">
+      <button class="deck-btn" id="btn-prev" type="button" title="Previous Slide (Left Arrow)">← Prev</button>
+      <span id="slide-counter">01 / 08</span>
+      <button class="deck-btn" id="btn-next" type="button" title="Next Slide (Right Arrow / Space)">Next →</button>
+    </div>
+    <div class="bar-group">
+      <button class="deck-btn" id="btn-replay" type="button" title="Replay Slide VFX (R)">Replay <kbd>R</kbd></button>
+      <button class="deck-btn" id="btn-orbit" type="button" title="Toggle Free Orbit Camera (O)">Orbit <kbd>O</kbd></button>
+      <button class="deck-btn" id="btn-notes" type="button" title="Speaker Notes (N)">Notes <kbd>N</kbd></button>
+      <button class="deck-btn" id="btn-overview" type="button" title="Slide Overview (G)">Grid <kbd>G</kbd></button>
+      <button class="deck-btn" id="btn-hide" type="button" title="Hide Slide Overlay (H)">Clean <kbd>H</kbd></button>
+      <a class="deck-btn" href="../" style="text-decoration: none" title="Playground Hub">Hub</a>
+    </div>
+  </nav>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
