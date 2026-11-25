@@ -56,7 +56,8 @@ const btnHide = document.getElementById("btn-hide")!;
 const btnHub = document.getElementById("btn-hub");
 const btnCloseOverview = document.getElementById("btn-close-overview")!;
 
-const IS_STANDALONE = !window.location.pathname.startsWith("/deck");
+const IS_STANDALONE =
+  window.location.hostname !== "127.0.0.1" && window.location.hostname !== "localhost";
 if (IS_STANDALONE && btnHub) {
   btnHub.style.display = "none";
 }

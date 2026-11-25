@@ -60,14 +60,14 @@ function resolveRequestFile(urlPath) {
   let pathname = decodeURIComponent(urlPath.split('?')[0]);
   if (pathname.endsWith('/')) pathname += 'index.html';
 
-  // 1. Mounted vendor packages from sibling radix checkout
-  if (pathname.startsWith('/vendor/radix/')) {
-    const rel = pathname.slice('/vendor/radix/'.length);
-    return { file: safeJoin(path.join(RADIX_ROOT, 'dist'), rel), stripTs: false };
+  // 1. Mounted vendor packages from sibling radix checkout (supports both /vendor/... and /deck/vendor/...)
+  const vendorRadixMatch = /^\/(?:deck\/|fx-lab\/)?vendor\/radix\/(.*)$/.exec(pathname);
+  if (vendorRadixMatch) {
+    return { file: safeJoin(path.join(RADIX_ROOT, 'dist'), vendorRadixMatch[1]), stripTs: false };
   }
-  if (pathname.startsWith('/vendor/three/')) {
-    const rel = pathname.slice('/vendor/three/'.length);
-    return { file: safeJoin(path.join(RADIX_ROOT, 'node_modules/three'), rel), stripTs: false };
+  const vendorThreeMatch = /^\/(?:deck\/|fx-lab\/)?vendor\/three\/(.*)$/.exec(pathname);
+  if (vendorThreeMatch) {
+    return { file: safeJoin(path.join(RADIX_ROOT, 'node_modules/three'), vendorThreeMatch[1]), stripTs: false };
   }
 
   // 2. Shared 3DGS assets (local playground/assets first, then radix/examples/artifacture-fx/assets)

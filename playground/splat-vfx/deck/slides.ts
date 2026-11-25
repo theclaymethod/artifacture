@@ -83,8 +83,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
     label: "Dual-World 16:9 3DGS (2.36M)",
-    url: "/assets/forest-clearing-wide.spz",
-    secondaryUrl: "/assets/alien-dimension-wide.spz",
+    url: "./assets/forest-clearing-wide.spz",
+    secondaryUrl: "./assets/alien-dimension-wide.spz",
     placement: "dual_world",
     layout: "extSplats",
     sh: false,
@@ -98,7 +98,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   tokyo_alley: {
     id: "tokyo_alley",
     label: "Tokyo Neon Alley (500k)",
-    url: "/assets/tokyo-alley.spz",
+    url: "./assets/tokyo-alley.spz",
     placement: "catalog",
     layout: "extSplats",
     sh: false,
@@ -112,7 +112,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   buddha: {
     id: "buddha",
     label: "Carved Stone Buddha (262k)",
-    url: "/assets/buddha.spz",
+    url: "./assets/buddha.spz",
     placement: "normalized",
     layout: "extSplats",
     sh: false,
@@ -127,7 +127,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
     id: "grace",
     label: "Grace Cathedral (10M SH3)",
     url: IS_LOCAL_DEV
-      ? "/assets/grace-interior-10m.rdx"
+      ? "./assets/grace-interior-10m.rdx"
       : "https://storage.googleapis.com/forge-dev-public/asundqui/radix/261015/rdx-sh/grace-interior-10m.rdx",
     placement: "catalog",
     layout: "packedSplats",
