@@ -1,6 +1,11 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
-import { analyzePngBuffer, evaluateGeometryIssues, type RawElementMetric } from '../src/index.ts';
+import {
+  analyzePngBuffer,
+  evaluateGeometryIssues,
+  evaluateSvgGeometryIssues,
+  type RawElementMetric,
+} from '../src/index.ts';
 
 function sampleMetric(overrides: Partial<RawElementMetric> = {}): RawElementMetric {
   return {
@@ -45,6 +50,33 @@ describe('@artifacture/verify geometry and PNG inspection', () => {
     ]);
     expect(result.overflowCount).toBe(1);
     expect(result.clippedCount).toBe(1);
+  });
+
+  it('catches SVG label overlaps, SVG box spill, and viewport-edge clipping (past benchmark defects)', () => {
+    const svgViolations = evaluateSvgGeometryIssues([
+      { svgIndex: 0, textSample: 'twistAng', left: 100, top: 200, right: 170, bottom: 216 },
+      { svgIndex: 0, textSample: 'quat', left: 145, top: 204, right: 190, bottom: 220 },
+      {
+        svgIndex: 1,
+        textSample: 'SplatCollection([arrays(fileArrays, matrixWorld)])',
+        left: 92,
+        top: 300,
+        right: 340,
+        bottom: 316,
+        parentBox: { left: 100, top: 290, right: 280, bottom: 330 },
+      },
+    ]);
+    expect(svgViolations.filter((v) => v.kind === 'svg-text-overlap')).toHaveLength(1);
+    expect(svgViolations.filter((v) => v.kind === 'svg-box-overflow')).toHaveLength(1);
+
+    const vpClip = evaluateGeometryIssues([
+      sampleMetric({
+        textSample: 'DETERMINISTIC HASH & CORRIDOR MASK',
+        rect: { left: 24, top: 695, right: 320, bottom: 738 },
+        viewport: { width: 1280, height: 720 },
+      }),
+    ]);
+    expect(vpClip.viewportClipCount).toBe(1);
   });
 
   it('computes non-zero RGB stddev from encoded PNG pixel data', () => {

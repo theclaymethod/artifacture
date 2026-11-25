@@ -12,11 +12,13 @@ export type {
   GeometryThresholds,
   GeometryViolation,
   RawElementMetric,
+  RawSvgTextMetric,
 } from './geometry.ts';
 export {
   auditPageGeometry,
   DEFAULT_GEOMETRY_THRESHOLDS,
   evaluateGeometryIssues,
+  evaluateSvgGeometryIssues,
 } from './geometry.ts';
 export type {
   CaptureEntry,
