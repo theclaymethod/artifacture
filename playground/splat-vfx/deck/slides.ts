@@ -26,6 +26,42 @@ export interface SlideMetric {
   value: string;
 }
 
+export type SlideFxTiming =
+  | {
+      /** Static shader age (seconds). Cannot combine with ageRate (prevents double-play snap on transition end). */
+      ageStatic: number;
+      ageRate?: never;
+      loopSec?: never;
+      loopLeadSec?: never;
+    }
+  | {
+      ageStatic?: never;
+      /** Continuous shader age advance rate (units/sec), optionally looping over loopLeadSec + loopSec */
+      ageRate: number;
+      loopSec?: number;
+      loopLeadSec?: number;
+    };
+
+export type SlideFxConfig = SlideFxTiming & {
+  mode: DeckFxMode;
+  mix: number;
+  twist: number;
+  /** Bloom tuning */
+  bloomStrength: number;
+  bloomThreshold: number;
+  bloomRadius: number;
+};
+
+/** Single source of truth for optimized asset counts/sizes referenced in labels, copy, notes, and summary rows. */
+export const DECK_STATS = {
+  totalMb: "52.4 MB",
+  overallRatio: "14.5×",
+  dualWorld: { splats: "1.36M", perWorld: "680k", mb: "18.9 MB" },
+  tokyo: { splats: "400k", mb: "5.7 MB" },
+  buddha: { splats: "240k", mb: "2.9 MB" },
+  grace: { splats: "1.62M", mb: "24.9 MB", ratio: "28.7×", rawMb: "714.7 MB", voxels: "88.6k" },
+} as const;
+
 export interface SummaryRow {
   effect: string;
   scene: string;
@@ -52,22 +88,7 @@ export interface SlideSpec {
     driftAmp: [number, number, number];
     driftSpeed: number;
   };
-  fx: {
-    mode: DeckFxMode;
-    mix: number;
-    twist: number;
-    /** Target shader age (seconds) when static, or loop duration when loopSec > 0 */
-    ageStatic?: number;
-    /** When > 0, shader age advances continuously from 0..loopSec (or wraps) */
-    ageRate?: number;
-    loopSec?: number;
-    /** Pause duration at start of each loop before advancing age */
-    loopLeadSec?: number;
-    /** Bloom tuning */
-    bloomStrength: number;
-    bloomThreshold: number;
-    bloomRadius: number;
-  };
+  fx: SlideFxConfig;
   /** Continuous transition profile when arriving from the previous slide in the same scene */
   transitionFromPrev?: {
     kind: "glide" | "wormhole-launch" | "tokyo-arc";
@@ -150,7 +171,7 @@ export const SLIDES: SlideSpec[] = [
       { label: "Controls", value: "← → Navigate · O Orbit · R Replay" },
     ],
     notes:
-      "Start on the intact blue-hour forest creek clearing. Both the forest (1.18M) and the hidden alien dimension (1.18M) are already mounted inside one GPU SplatCollection. Mention you can press O at any moment to orbit freely and verify it is live 3D geometry.",
+      `Start on the intact blue-hour forest creek clearing. Both the forest (${DECK_STATS.dualWorld.perWorld}) and the hidden alien dimension (${DECK_STATS.dualWorld.perWorld}, ${DECK_STATS.dualWorld.splats} combined) are already mounted inside one GPU SplatCollection. Press O at any moment to orbit freely and verify it is live 3D geometry.`,
     camera: {
       pos: [0.0, 0.0, -0.25],
       target: [0.0, 0.04, -6.2],
@@ -294,7 +315,7 @@ export const SLIDES: SlideSpec[] = [
     kicker: "03B · MICRO-GAUSSIAN BLOOM BREAKUP",
     title: "Signage Isolation & Emissive Particle Void",
     lead:
-      "Continuous transition inside the same 500k-splat scene: walls recede into ink-black noir while chroma-gated signage splats shrink to pinpoint radii and ignite HDR AgX bloom.",
+      `Continuous transition inside the same ${DECK_STATS.tokyo.splats}-splat scene: walls recede into ink-black noir while chroma-gated signage splats shrink to pinpoint radii and ignite HDR AgX bloom.`,
     bullets: [
       "Chroma + luminance masking separates emissive neon signs and wet puddle reflections from dark masonry",
       "Isotropic pinpoint clamping (<code>1.4–4.8mm</code>) turns solid facades into suspended neon constellations",
@@ -335,7 +356,7 @@ export const SLIDES: SlideSpec[] = [
     kicker: "04 · CURL-NOISE VOLUMETRIC ADVECTION",
     title: "Complete Smoke & Ash Dissolution",
     lead:
-      "A diagonal erosion front sweeps across an isolated 262k-Gaussian stone sculpture, splitting each splat probabilistically into volumetric charcoal smoke puffs or bright rising ash grains.",
+      `A diagonal erosion front sweeps across an isolated ${DECK_STATS.buddha.splats}-Gaussian stone sculpture, splitting each splat probabilistically into volumetric charcoal smoke puffs or bright rising ash grains.`,
     bullets: [
       "Divergence-free 3D curl noise advects eroded particles upward in coherent turbulent plumes",
       "Dual-population scaling: 32% expand <code>3.2×</code> into soft slate wisps; 68% collapse to crisp glowing ash embers",

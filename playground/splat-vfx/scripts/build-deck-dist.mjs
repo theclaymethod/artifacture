@@ -88,12 +88,18 @@ const SPZ_ASSETS = [
   'grace-cathedral-opt.spz',
 ];
 
+const CLOUDFLARE_MAX_ASSET_BYTES = 25 * 1024 * 1024;
 let totalBytes = 0;
 for (const name of SPZ_ASSETS) {
   const src = resolveAsset(name);
   const dst = path.join(SITE_DIR, 'assets', name);
   ensureCopy(src, dst);
   const size = statSync(dst).size;
+  if (size >= CLOUDFLARE_MAX_ASSET_BYTES) {
+    throw new Error(
+      `[build-deck-dist] Asset ${name} is ${(size / (1024 * 1024)).toFixed(2)} MiB (>= 25 MiB Cloudflare Static Assets limit). Re-run optimize-all-splats.mjs with a lower targetCount.`,
+    );
+  }
   totalBytes += size;
   console.log(`[build-deck-dist] + /${ROUTE_SLUG}/assets/${name} (${(size / (1024 * 1024)).toFixed(2)} MB)`);
 }
