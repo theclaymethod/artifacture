@@ -459,13 +459,23 @@ function evalContinuousTransition(tr: ActiveTransition, uRaw: number) {
     lerp(from.camera.roll, to.camera.roll, s),
   );
   setModeWeights(to.fx.mode);
-  uniforms.uFxMix.value = lerp(from.fx.mix, to.fx.mix, s);
+  // For wormhole opening/closing: bring mix up early so uFxAge cleanly drives the 2-stage
+  // gravitational-lensing -> spherical-wormhole bloom ONCE without double-playing!
+  if (to.fx.mode === "wormhole" && from.fx.mix !== to.fx.mix) {
+    const opening = to.fx.mix > from.fx.mix;
+    uniforms.uFxMix.value = opening
+      ? smooth01(u / 0.12)
+      : 1.0 - smooth01((u - 0.88) / 0.12);
+    uniforms.uFxAge.value = lerp(from.fx.ageStatic ?? 0, to.fx.ageStatic ?? 2.3, s);
+  } else {
+    uniforms.uFxMix.value = lerp(from.fx.mix, to.fx.mix, s);
+    uniforms.uFxAge.value = lerp(
+      from.fx.ageStatic ?? 0,
+      to.fx.ageStatic ?? (to.fx.mode === "wormhole" ? 2.3 : 0.8),
+      s,
+    );
+  }
   uniforms.uTwist.value = lerp(from.fx.twist, to.fx.twist, s);
-  uniforms.uFxAge.value = lerp(
-    from.fx.ageStatic ?? 0,
-    to.fx.ageStatic ?? (to.fx.mode === "wormhole" ? 2.3 : 0.8),
-    s,
-  );
   setBloom(
     lerp(from.fx.bloomStrength, to.fx.bloomStrength, s),
     lerp(from.fx.bloomRadius, to.fx.bloomRadius, s),
@@ -637,6 +647,20 @@ async function goToSlide(targetIdx: number, instant = false): Promise<void> {
 }
 
 function triggerReplay() {
+  const slide = SLIDES[currentSlideIdx];
+  if (slide.id === "wormhole-rift") {
+    // Replay the 2-stage gravitational lensing -> spherical wormhole bloom ONCE in place!
+    activeTransition = {
+      from: { ...slide, fx: { ...slide.fx, mix: 0.0, ageStatic: 0.0 } },
+      to: slide,
+      kind: "glide",
+      reverse: false,
+      startClock: deckClock,
+      durationSec: 2.35,
+    };
+    slideEnteredAt = deckClock;
+    return;
+  }
   activeTransition = null;
   slideEnteredAt = deckClock;
 }
@@ -806,6 +830,14 @@ interface DeckWindowApi {
     hideCard?: boolean;
     settlePasses?: number;
   }) => Promise<void>;
+  renderCustomPose: (opts: {
+    sceneId: DeckSceneId;
+    pos: [number, number, number];
+    target: [number, number, number];
+    fov?: number;
+    hideUi?: boolean;
+    settlePasses?: number;
+  }) => Promise<void>;
   resumeLive: () => void;
   getState: () => {
     slideIdx: number;
@@ -813,6 +845,9 @@ interface DeckWindowApi {
     sceneId: DeckSceneId | null;
     splatCount: number;
     shDegree: number;
+    uFxAge: number;
+    uFxMix: number;
+    transitionActive: boolean;
   };
 }
 
@@ -877,6 +912,25 @@ const api: DeckWindowApi = {
       await new Promise((r) => requestAnimationFrame(r));
     }
   },
+  async renderCustomPose({ sceneId, pos, target, fov = 62, hideUi = true, settlePasses = 3 }) {
+    manualStepping = true;
+    activeTransition = null;
+    await mountScene(sceneId);
+    sceneVeil.style.opacity = "0";
+    document.body.classList.toggle("ui-hidden", hideUi);
+    slideOverlay.style.opacity = hideUi ? "0" : "";
+    applyCameraPose(pos, target, fov, 0);
+    setModeWeights("none");
+    uniforms.uFxMix.value = 0;
+    uniforms.uFxAge.value = 0;
+    uniforms.uTwist.value = 0;
+    setBloom(0.12, 0.25, 0.94);
+    updateTelemetry();
+    for (let i = 0; i < settlePasses; i++) {
+      pipeline.render();
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+  },
   resumeLive() {
     manualStepping = false;
     lastFrameMs = performance.now();
@@ -888,6 +942,9 @@ const api: DeckWindowApi = {
       sceneId: activeSceneId,
       splatCount: currentSplatCount,
       shDegree: currentShDegree,
+      uFxAge: Number(uniforms.uFxAge.value),
+      uFxMix: Number(uniforms.uFxMix.value),
+      transitionActive: activeTransition !== null,
     };
   },
 };

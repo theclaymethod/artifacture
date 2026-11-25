@@ -204,7 +204,7 @@ export function createMainFxModifier(u: DeckUniforms): SplatModifier {
     scales.assign(
       mix(scales, vec3(lidarDotRad).mul(float(1.0).add(ringGlow.mul(0.32))), wShockEff.mul(insideOrShell).mul(0.988)),
     );
-    const keepThresh = mix(float(0.45), float(0.14), smoothstep(0.1, 0.58, lum));
+    const keepThresh = mix(float(0.68), float(0.28), smoothstep(0.1, 0.58, lum));
     const keepMask = smoothstep(keepThresh.sub(0.07), keepThresh.add(0.05), seed);
     const particleKeep = clamp(keepMask.add(ringGlow.mul(0.75)).add(scanContours.mul(0.75)), 0.0, 1.0);
     opacity.assign(opacity.mul(mix(float(1.0), mix(float(1.0), particleKeep, insideSphere), wShockEff)));
@@ -363,12 +363,15 @@ export function createWormholeModifiers(u: DeckUniforms) {
     const t = u.uTime;
     const age = u.uFxAge;
     const wAmt = u.uWormhole.mul(u.uFxMix).toVar();
-    const prog = clamp(age.mul(0.45), 0.0, 1.0).toVar();
-    const gravAmt = smoothstep(0.0, 0.36, prog).mul(wAmt).toVar();
-    const openAmt = smoothstep(0.06, 0.58, prog).mul(wAmt).toVar();
+    // Clean 2-stage relativistic progression:
+    //   0.00..0.44 -> Transparent spherical gravitational lens bends surrounding forest into curved Einstein arcs
+    //   0.26..0.96 -> Smooth spherical Morris-Thorne wormhole blooms open inside the photon ring
+    const prog = clamp(age.div(2.3), 0.0, 1.0).toVar();
+    const gravAmt = smoothstep(0.0, 0.42, prog).mul(wAmt).toVar();
+    const openAmt = smoothstep(0.18, 0.95, prog).mul(wAmt).toVar();
 
     const bhPos = u.uFxCenter.toVar();
-    const baseR = float(1.06).toVar();
+    const baseR = float(1.14).toVar();
     const signedDist = u.uCamPos.z.sub(bhPos.z).toVar();
     const bhD = max(signedDist, float(0.35)).toVar();
     const crossedAmt = smoothstep(2.55, 0.45, signedDist).mul(openAmt).toVar();
@@ -385,6 +388,9 @@ export function createWormholeModifiers(u: DeckUniforms) {
     const ray = pWorld.sub(u.uCamPos).toVar();
     const sD = dot(ray, fwd).toVar();
     const scaleToPortal = bhD.div(max(sD, 0.25)).toVar();
+    // Exact inverse projection ratio (NEVER clamp scaleToPortal at 0.14—distant sky/mist at 50-200m
+    // needs its true sD / bhD ratio so ZERO blue forest splats ever stay inside the wormhole sphere!)
+    const invScale = max(sD, 0.25).div(max(bhD, 0.35)).toVar();
     const proj3 = u.uCamPos.add(ray.mul(scaleToPortal)).sub(bhPos).toVar();
     const px = dot(proj3, pRight).toVar();
     const py = dot(proj3, pUp).toVar();
@@ -394,16 +400,11 @@ export function createWormholeModifiers(u: DeckUniforms) {
     const radDir3 = pRight.mul(dir2.x).add(pUp.mul(dir2.y)).toVar();
     const tanDir3 = pRight.mul(tan2.x).add(pUp.mul(tan2.y)).toVar();
 
-    const n1 = fbm3(vec3(dir2.x.mul(2.1), dir2.y.mul(2.1), t.mul(0.45))).toVar();
-    const n2 = fbm3(vec3(dir2.x.mul(5.2).add(11.7), dir2.y.mul(5.2).sub(5.3), t.mul(-1.05))).toVar();
-    const n3 = noise3(vec3(dir2.x.mul(11.5).sub(t.mul(2.0)), dir2.y.mul(11.5).add(t.mul(1.5)), t.mul(0.95))).toVar();
-    const ellip = mix(float(1.0), float(1.18), dir2.y.mul(dir2.y));
-    const chaosMod = float(1.0)
-      .add(n1.sub(0.5).mul(0.58))
-      .add(n2.sub(0.5).mul(0.36))
-      .add(n3.sub(0.5).mul(0.2))
-      .toVar();
-    const rEdge = baseR.mul(ellip).mul(chaosMod).mul(openAmt).mul(float(1.0).add(crossedAmt.mul(0.65))).toVar();
+    // Pure, mathematically smooth Interstellar Morris-Thorne spherical horizon (ZERO jagged rift wobble!)
+    const n1 = fbm3(vec3(dir2.x.mul(1.6), dir2.y.mul(1.6), t.mul(0.2))).toVar();
+    const n2 = fbm3(vec3(dir2.x.mul(3.2).add(11.7), dir2.y.mul(3.2).sub(5.3), t.mul(-0.35))).toVar();
+    const n3 = noise3(vec3(dir2.x.mul(6.0), dir2.y.mul(6.0), t.mul(0.3))).toVar();
+    const rEdge = baseR.mul(openAmt).mul(float(1.0).add(crossedAmt.mul(0.82))).toVar();
 
     return {
       t,
@@ -417,8 +418,13 @@ export function createWormholeModifiers(u: DeckUniforms) {
       baseR,
       bhD,
       fwd,
+      pRight,
+      pUp,
       sD,
       scaleToPortal,
+      invScale,
+      px,
+      py,
       r,
       radDir3,
       tanDir3,
@@ -439,88 +445,88 @@ export function createWormholeModifiers(u: DeckUniforms) {
 
     const pWorld = vec3(pObj.x, pObj.y.negate(), pObj.z.negate()).toVar();
     const f = evalPortalField(pWorld);
-    const seed = hash31(pObj.mul(43.7).add(vec3(7.1, 13.9, 29.3))).toVar();
-    const h3 = hash33(pObj.mul(59.3).add(vec3(19.3, 41.7, 3.1))).toVar();
 
-    const isBehindPlane = smoothstep(f.bhD.sub(0.55), f.bhD.add(0.45), f.sD).toVar();
+    // Clean depth gates: immediate foreground creek & framing mossy arch stay grounded in front,
+    // while ALL mid-to-far trees, valley mist, and sky bend around the sphere with ZERO leak into the alien world!
+    const clearDepth = min(f.bhD.sub(0.35), float(2.35));
+    const isBehindPlane = smoothstep(clearDepth.sub(0.55), clearDepth.add(0.2), f.sD).toVar();
+    const isLensDepth = smoothstep(clearDepth.sub(1.05), clearDepth.add(0.15), f.sD).toVar();
     const hasPortal = smoothstep(0.01, 0.08, f.openAmt).toVar();
     const nearCamFade = smoothstep(0.42, 1.15, length(pWorld.sub(u.uCamPos))).toVar();
 
-    const lensRefR = max(f.rEdge, f.baseR.mul(0.36).mul(f.gravAmt));
-    const einR = sqrt(f.r.mul(f.r).add(lensRefR.mul(lensRefR).mul(1.12)));
-    const lensFalloff = exp(pow(f.r.div(max(f.baseR.mul(2.75), 0.05)), 1.9).negate());
-    const lensDeltaR = einR.sub(f.r).mul(lensFalloff).mul(isBehindPlane).mul(f.gravAmt);
-    const shearZone = exp(pow(max(f.r.sub(f.rEdge), 0.0).div(max(f.baseR.mul(0.95), 0.05)), 1.35).negate())
-      .mul(isBehindPlane)
+    // Interstellar concentric warp-bubble gravitational lensing:
+    // Stage 1 (gravAmt): transparent spherical glass bubble bends forest outward (0 at r=0 -> ZERO black dot)
+    // Stage 2 (openAmt): exact Schwarzschild Einstein deflection rWarped = sqrt(r^2 + rEdge^2) + concentric glass
+    //   meniscus shell around 1.00..1.58 * rEdge so the outer warp bubble reads unmistakably as a 3D spherical lens!
+    const preLensNorm = clamp(f.r.div(max(f.baseR.mul(2.15), 0.05)), 0.0, 1.0);
+    const preLensBulge = sin(preLensNorm.mul(3.14159265))
+      .mul(f.baseR.mul(0.54))
       .mul(f.gravAmt)
-      .toVar();
-    const curlTurb = curl3(pWorld.mul(0.55).add(vec3(0.0, f.t.mul(0.5), f.t.mul(-0.4)))).toVar();
-    const shearSwirl = f.tanDir3.mul(shearZone.mul(float(0.48).add(f.n2.sub(0.32).mul(0.72))));
-    const invScale = float(1.0).div(max(f.scaleToPortal, 0.14));
-    const throatRush = f.radDir3.mul(f.throatPeak.mul(1.35)).add(f.tanDir3.mul(f.throatPeak.mul(0.68)));
-    const warpedWorld = pWorld
-      .add(f.radDir3.mul(lensDeltaR.mul(invScale)))
-      .add(shearSwirl.mul(invScale))
-      .add(curlTurb.mul(shearZone.mul(0.56)))
-      .add(throatRush.mul(isBehindPlane))
+      .mul(float(1.0).sub(f.openAmt.mul(0.9)));
+
+    const einRadius = f.rEdge.mul(1.005).toVar();
+    const einR = sqrt(f.r.mul(f.r).add(einRadius.mul(einRadius))).toVar();
+    const outerExcess = max(f.r.sub(f.rEdge), 0.0);
+    // Pure, wide-field Schwarzschild gravitational lensing tapering smoothly across the forest clearing
+    const lensFalloff = exp(pow(outerExcess.div(max(f.baseR.mul(3.8), 0.05)), 1.4).negate());
+    const einDeltaR = einR.sub(f.r).mul(lensFalloff).mul(f.openAmt);
+    const lensDeltaR = einDeltaR.add(preLensBulge.mul(lensFalloff)).mul(isLensDepth).toVar();
+    const rWarped = f.r.add(lensDeltaR).toVar();
+
+    const throatRush = f.radDir3.mul(f.throatPeak.mul(1.45)).add(f.tanDir3.mul(f.throatPeak.mul(0.45)));
+
+    const finalWorld = pWorld
+      .add(f.radDir3.mul(lensDeltaR.mul(f.invScale)))
+      .add(throatRush.mul(isLensDepth))
       .toVar();
 
-    const inTearZone = smoothstep(f.rEdge.mul(0.84), f.rEdge.mul(1.06), f.r)
-      .mul(float(1.0).sub(smoothstep(f.rEdge.mul(1.15), f.rEdge.mul(2.15), f.r)))
-      .mul(isBehindPlane)
+    // Verify ACTUAL post-displacement projected radius so ZERO far-forest blue mist can ever bleed inside the sphere!
+    const finalRay = finalWorld.sub(u.uCamPos);
+    const finalSD = max(dot(finalRay, f.fwd), 0.25);
+    const finalProj = u.uCamPos.add(finalRay.mul(f.bhD.div(finalSD))).sub(f.bhPos);
+    const rActual = length(vec2(dot(finalProj, f.pRight), dot(finalProj, f.pUp))).toVar();
+
+    // Natural tangential optical elongation along the curved gravitational-lensing arcs (no painted rings!)
+    const shellBand = exp(pow(max(rWarped.sub(f.rEdge.mul(1.0)), 0.0).div(max(f.baseR.mul(0.68), 0.05)), 1.55).negate())
+      .mul(isLensDepth)
       .mul(f.gravAmt)
       .toVar();
-    const isDebris = seed.lessThan(0.14);
-    const debAct = select(isDebris, inTearZone, float(0.0)).toVar();
-    const debPhase = fract(f.t.mul(0.32).add(h3.x)).toVar();
-    const debSwirl = debPhase.mul(debPhase).mul(3.4).add(f.n2.mul(1.2)).mul(debAct).toVar();
-    const debPull = mix(float(1.0), float(0.8), pow(max(debPhase, 0.001), 1.4)).toVar();
-    const debOff = f.radDir3
-      .mul(f.r.mul(debPull.sub(1.0)).mul(invScale))
-      .add(f.tanDir3.mul(debSwirl.mul(0.34).mul(invScale)))
-      .add(curlTurb.mul(debPhase.mul(0.42)));
-    const finalWorld = mix(warpedWorld, pWorld.add(debOff), debAct).toVar();
-
     const debDirObj = normalize(vec3(f.tanDir3.x, f.tanDir3.y.negate(), f.tanDir3.z.negate())).toVar();
     const fwdObj = normalize(vec3(f.fwd.x, f.fwd.y.negate(), f.fwd.z.negate())).toVar();
     const debYObj = normalize(cross(fwdObj, debDirObj).add(vec3(0.0, 1e-5, 0.0)));
     const debZObj = normalize(cross(debDirObj, debYObj));
     const debQuat = basisToQuat(debDirObj, debYObj, debZObj);
     const debQuatAligned = select(dot(quat, debQuat).lessThan(0.0), debQuat.negate(), debQuat);
-    const finalQuat = normalize(mix(quat, debQuatAligned, debAct));
-    const isoS = clamp(length(scales).mul(0.55), float(0.006), float(0.045));
-    const debScale = mix(scales, vec3(isoS.mul(3.4), isoS.mul(0.42), isoS.mul(0.42)), debAct);
-    const debFade = mix(
-      float(1.0),
-      smoothstep(0.0, 0.14, debPhase).mul(float(1.0).sub(smoothstep(0.72, 0.98, debPhase))),
-      debAct,
-    );
+    const arcBlend = clamp(shellBand.mul(0.58), 0.0, 0.7).toVar();
+    const finalQuat = normalize(mix(quat, debQuatAligned, arcBlend));
+    const baseMag = length(scales).mul(0.57735);
+    const arcStretchScale = vec3(baseMag.mul(1.75), baseMag.mul(0.94), baseMag.mul(0.94));
+    const finalScale = mix(scales, arcStretchScale, arcBlend.mul(0.46));
 
+    // Hard zero-leak spherical horizon cutout on rActual (mathematically zero blue mist inside sphere!)
+    const coreGuard = mix(float(1.0), smoothstep(0.02, 0.07, f.r), isBehindPlane.mul(hasPortal));
     const portalCutout = mix(
       float(1.0),
-      smoothstep(f.rEdge.mul(0.86), f.rEdge.mul(1.03), f.r),
+      smoothstep(f.rEdge.mul(0.99), f.rEdge.mul(1.025), rActual),
       isBehindPlane.mul(hasPortal),
-    );
+    ).mul(coreGuard);
 
-    const rimLip = exp(pow(f.r.sub(f.rEdge.mul(1.03)).div(max(f.baseR.mul(0.12), 0.02)), 2.0).negate())
-      .mul(isBehindPlane)
-      .mul(f.gravAmt)
-      .toVar();
-    const causticGlint = pow(clamp(f.n2.mul(1.18).add(f.n3.mul(0.25)), 0.0, 1.0), 3.4).toVar();
-    const gravShadow = mix(float(1.0), float(0.24), rimLip.mul(float(0.85).sub(causticGlint.mul(0.65))));
-    const rimRefractCol = mix(vec3(0.32, 0.72, 1.05), vec3(1.18, 0.8, 0.42), smoothstep(0.3, 0.75, f.n1))
-      .mul(causticGlint)
-      .mul(rimLip)
-      .mul(0.48);
+    // Pure, unadulterated optical lensing: just a whisper-thin horizon sheen, ZERO painted concentric rings
+    const rRatio = rActual.div(max(f.rEdge, 0.05)).toVar();
+    const bubbleVis = isLensDepth.mul(hasPortal).mul(float(1.0).sub(f.crossedAmt)).toVar();
+    const glassRim = exp(pow(rRatio.sub(1.015).div(0.024), 2.0).negate()).mul(bubbleVis);
+    const outerContrast = exp(pow(rRatio.sub(1.055).div(0.14), 2.0).negate()).mul(bubbleVis);
 
     const srgbCol = pow(max(baseRgb, vec3(0.0001)), vec3(1.0 / 2.2));
-    const finalRgb = srgbCol.mul(gravShadow).add(rimRefractCol);
-    const finalOp = opacity.mul(portalCutout).mul(debFade).mul(f.forestPassFade).mul(nearCamFade);
+    const finalRgb = srgbCol
+      .mul(mix(float(1.0), float(0.9), outerContrast.mul(0.45)))
+      .add(vec3(0.76, 0.86, 0.98).mul(glassRim).mul(0.18));
+    const finalOp = opacity.mul(portalCutout).mul(f.forestPassFade).mul(nearCamFade);
 
     out.get("center").assign(vec3(finalWorld.x, finalWorld.y.negate(), finalWorld.z.negate()));
-    out.get("scales").assign(debScale);
+    out.get("scales").assign(finalScale);
     out.get("quaternion").assign(finalQuat);
-    out.get("rgb").assign(clamp(finalRgb, vec3(0.0), vec3(1.8)));
+    out.get("rgb").assign(clamp(finalRgb, vec3(0.0), vec3(1.12)));
     out.get("opacity").assign(clamp(finalOp, 0.0, 1.0));
     return out;
   };
@@ -543,22 +549,38 @@ export function createWormholeModifiers(u: DeckUniforms) {
     const isBehindCam = smoothstep(0.18, 0.55, f.sD).toVar();
     const nearCamFade = smoothstep(0.35, 0.95, length(pWorld.sub(u.uCamPos))).toVar();
 
-    const insideHole = float(1.0).sub(smoothstep(f.rEdge.mul(0.84), f.rEdge.mul(1.03), f.r)).toVar();
-    const alienVis = mix(insideHole, float(1.0), f.crossedAmt).mul(smoothstep(0.03, 0.14, f.openAmt));
+    // Pure spherical gravitational-lens refraction inside the wormhole (no painted concentric rings!)
+    const outsideView = float(1.0).sub(f.crossedAmt).toVar();
 
-    const edgeBand = exp(pow(f.r.sub(f.rEdge.mul(0.95)).div(max(f.baseR.mul(0.16), 0.02)), 2.0).negate())
-      .mul(float(1.0).sub(f.crossedAmt))
-      .toVar();
-    const curlAlien = curl3(pWorld.mul(0.5).add(vec3(f.t.mul(0.35), 0.0, f.t.mul(-0.45))));
-    const dustDrift = curlAlien.mul(select(seed.greaterThan(0.955), f.crossedAmt, float(0.0)).mul(0.16));
+    // Gentle vertical frustum lift (1.18x) guarantees 100% solid alien sky & desert floor top-to-bottom inside the circle
+    const pyFilled = f.py.mul(mix(float(1.0), float(1.18), outsideView.mul(f.openAmt))).toVar();
+    const rFilled = length(vec2(f.px, pyFilled)).add(0.0005).toVar();
+    const insideSphere = float(1.0).sub(smoothstep(f.rEdge.mul(0.97), f.rEdge.mul(1.015), rFilled)).toVar();
+    const alienVis = mix(insideSphere, float(1.0), f.crossedAmt).mul(smoothstep(0.02, 0.14, f.openAmt));
+
+    const uNorm = clamp(rFilled.div(max(f.rEdge, 0.05)), 0.0, 1.0).toVar();
+    // Smooth, singularity-free convex spherical lensing (f(0)=0, f'(0)=1.42 -> ZERO center smudge, f(1)=1 -> ZERO rim gap!)
+    const uSphere = uNorm.mul(float(1.42).sub(uNorm.mul(0.42))).toVar();
+    const rTarget = mix(rFilled, f.rEdge.mul(uSphere), outsideView.mul(f.openAmt)).toVar();
+    const radialScale = rTarget.div(rFilled);
+    const targetPx = f.px.mul(radialScale);
+    const targetPy = pyFilled.mul(radialScale);
+    const shiftX = targetPx.sub(f.px);
+    const shiftY = targetPy.sub(f.py);
+
+    const curlAlien = curl3(pWorld.mul(0.45).add(vec3(f.t.mul(0.28), 0.0, f.t.mul(-0.35))));
+    const dustDrift = curlAlien.mul(select(seed.greaterThan(0.955), f.crossedAmt, float(0.0)).mul(0.14));
     const warpedWorld = pWorld
-      .add(f.tanDir3.mul(edgeBand.mul(0.16).mul(f.n2.sub(0.35))))
-      .add(curlAlien.mul(edgeBand.mul(0.18)))
+      .add(f.pRight.mul(shiftX.mul(f.invScale)))
+      .add(f.pUp.mul(shiftY.mul(f.invScale)))
       .add(dustDrift);
 
+    // Subtle natural optical spherical limb shading + delicate Fresnel edge (clean lensing only!)
+    const bubbleVis = outsideView.mul(f.openAmt).toVar();
+    const rimPow = pow(uSphere, 6.5).mul(bubbleVis);
+    const sphereLimbShade = mix(float(1.0), float(0.84), pow(uSphere, 3.6).mul(bubbleVis));
     const srgbCol = pow(max(baseRgb, vec3(0.0001)), vec3(1.0 / 2.2));
-    const innerCaustic = vec3(1.1, 0.72, 0.34).mul(edgeBand.mul(pow(f.n2, 2.6)).mul(0.32));
-    const finalRgb = srgbCol.mul(float(1.04)).add(innerCaustic);
+    const finalRgb = srgbCol.mul(sphereLimbShade).add(vec3(0.76, 0.86, 1.0).mul(rimPow).mul(0.2));
 
     out
       .get("center")
@@ -569,8 +591,8 @@ export function createWormholeModifiers(u: DeckUniforms) {
           float(ALIEN_WORLD_OFFSET.z).sub(warpedWorld.z),
         ),
       );
-    out.get("scales").assign(scales);
-    out.get("rgb").assign(clamp(finalRgb, vec3(0.0), vec3(1.9)));
+    out.get("scales").assign(scales.mul(mix(float(1.0), float(1.08), bubbleVis)));
+    out.get("rgb").assign(clamp(finalRgb, vec3(0.0), vec3(1.15)));
     out.get("opacity").assign(clamp(opacity.mul(alienVis).mul(isBehindCam).mul(nearCamFade), 0.0, 1.0));
     return out;
   };

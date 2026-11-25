@@ -83,6 +83,86 @@ try {
   await page.screenshot({ path: midWormholePath });
   console.log('[verify-deck] Captured mid-wormhole slingshot transition (u=0.52)');
 
+  // 4-frame spherical wormhole gravitational-lensing opening strip (Slide 1 -> Slide 2)
+  const whFrames = [];
+  for (const [idx, uVal] of [0.25, 0.48, 0.76, 1.0].entries()) {
+    await page.evaluate(
+      (u) => window.splatDeck.renderTransitionAt({ fromIdx: 0, toIdx: 1, u, timeSec: 2.0 + u * 2.35, hideCard: true, settlePasses: 3 }),
+      uVal,
+    );
+    const p = path.join(CAPTURES_DIR, `wormhole_open_${idx}.png`);
+    await page.screenshot({ path: p });
+    whFrames.push(p);
+  }
+  const wormholeStripPath = path.join(PLAYGROUND_ROOT, 'wormhole-opening-strip.png');
+  execFileSync(
+    'ffmpeg',
+    [
+      '-y',
+      ...whFrames.flatMap((p) => ['-i', p]),
+      '-filter_complex',
+      '[0:v]scale=960:540[v0];[1:v]scale=960:540[v1];[2:v]scale=960:540[v2];[3:v]scale=960:540[v3];[v0][v1][v2][v3]xstack=inputs=4:layout=0_0|960_0|0_540|960_540[out]',
+      '-map', '[out]', '-frames:v', '1', '-update', '1',
+      wormholeStripPath,
+    ],
+    { stdio: 'inherit' },
+  );
+  console.log(`[verify-deck] Wrote 2x2 wormhole opening strip: ${wormholeStripPath}`);
+
+  // 4-angle Grace Cathedral verification strip (front nave, back nave -X, transept/vaults, peak B&W LiDAR)
+  const graceAngles = [
+    { pos: [-13.8, 7.35, -3.55], target: [-2.0, 9.6, -4.55], fov: 60, file: 'grace_front_nave.png' },
+    { pos: [-8.0, 8.5, -3.0], target: [-42.0, 12.0, -3.0], fov: 64, file: 'grace_back_nave.png' },
+    { pos: [-2.0, 7.8, -14.0], target: [-5.0, 18.0, 10.0], fov: 66, file: 'grace_transept_vaults.png' },
+  ];
+  const graceFrames = [];
+  for (const a of graceAngles) {
+    await page.evaluate((opts) => window.splatDeck.renderCustomPose({ sceneId: 'grace', ...opts }), a);
+    const p = path.join(CAPTURES_DIR, a.file);
+    await page.screenshot({ path: p });
+    graceFrames.push(p);
+  }
+  graceFrames.push(path.join(CAPTURES_DIR, 'slide_07_grace_bw_lidar.png'));
+  const graceStripPath = path.join(PLAYGROUND_ROOT, 'grace-detail-strip.png');
+  execFileSync(
+    'ffmpeg',
+    [
+      '-y',
+      ...graceFrames.flatMap((p) => ['-i', p]),
+      '-filter_complex',
+      '[0:v]scale=960:540[v0];[1:v]scale=960:540[v1];[2:v]scale=960:540[v2];[3:v]scale=960:540[v3];[v0][v1][v2][v3]xstack=inputs=4:layout=0_0|960_0|0_540|960_540[out]',
+      '-map', '[out]', '-frames:v', '1', '-update', '1',
+      graceStripPath,
+    ],
+    { stdio: 'inherit' },
+  );
+  console.log(`[verify-deck] Wrote 2x2 Grace Cathedral detail strip: ${graceStripPath}`);
+
+  // Live-clock single-play monotonic check for Slide 1 -> Slide 2 (proves zero double-play!)
+  await page.evaluate(async () => {
+    await window.splatDeck.goToSlide(0, true);
+    window.splatDeck.resumeLive();
+  });
+  await page.waitForTimeout(200);
+  await page.evaluate(() => void window.splatDeck.goToSlide(1, false));
+  const ageSamples = [];
+  for (let i = 0; i < 24; i++) {
+    await page.waitForTimeout(160);
+    const st = await page.evaluate(() => window.splatDeck.getState());
+    ageSamples.push({ tMs: i * 160, uFxAge: Number(st.uFxAge.toFixed(3)), uFxMix: Number(st.uFxMix.toFixed(3)), tr: st.transitionActive });
+  }
+  let maxAgeSeen = -1;
+  let backwardDrop = false;
+  for (const s of ageSamples) {
+    if (s.uFxAge + 0.01 < maxAgeSeen) backwardDrop = true;
+    if (s.uFxAge > maxAgeSeen) maxAgeSeen = s.uFxAge;
+  }
+  console.log('[verify-deck] Live Slide 1->2 uFxAge trace:', ageSamples.map((s) => s.uFxAge).join(' -> '));
+  if (backwardDrop || maxAgeSeen < 2.25) {
+    throw new Error(`Wormhole opening monotonic check FAILED (backwardDrop=${backwardDrop}, maxAgeSeen=${maxAgeSeen})`);
+  }
+  console.log('[verify-deck] Live Slide 1->2 single-play monotonic check PASSED!');
+
   // Build 4x2 contact sheet of all 8 slides (1920x540 -> 2x4 or 4x2 at 640x360 = 2560x720)
   const inputs = [];
   const filters = [];

@@ -78,7 +78,7 @@ export interface SlideSpec {
 export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
-    label: "Dual-World 16:9 3DGS (740k · 10.7 MB)",
+    label: "Dual-World 16:9 3DGS (1.36M · 18.9 MB)",
     url: "./assets/forest-clearing-wide-opt.spz",
     secondaryUrl: "./assets/alien-dimension-wide-opt.spz",
     placement: "dual_world",
@@ -93,7 +93,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   tokyo_alley: {
     id: "tokyo_alley",
-    label: "Tokyo Neon Alley (270k · 4.2 MB)",
+    label: "Tokyo Neon Alley (400k · 5.7 MB)",
     url: "./assets/tokyo-alley-opt.spz",
     placement: "catalog",
     layout: "extSplats",
@@ -107,7 +107,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   buddha: {
     id: "buddha",
-    label: "Carved Stone Buddha (165k · 2.0 MB)",
+    label: "Carved Stone Buddha (240k · 2.9 MB)",
     url: "./assets/buddha-opt.spz",
     placement: "normalized",
     layout: "extSplats",
@@ -121,7 +121,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   grace: {
     id: "grace",
-    label: "Grace Cathedral (540k · 8.1 MB)",
+    label: "Grace Cathedral (1.56M · 24.1 MB)",
     url: "./assets/grace-cathedral-opt.spz",
     placement: "catalog",
     layout: "extSplats",
@@ -143,10 +143,10 @@ export const SLIDES: SlideSpec[] = [
     kicker: "WEBGPU + TSL · @SPARKJSDEV/RADIX",
     title: "Programmable 3D Gaussian Splatting",
     lead:
-      "This deck renders live 3D Gaussian splats directly in WebGPU. All five scenes are perceptually pruned and quantized to 25 MB total (30× smaller than raw captures) so every transition runs smoothly in real-time TSL compute shaders.",
+      "This deck renders live 3D Gaussian splats directly in WebGPU. All five scenes use 3D voxel-density-equalized Morton-sorted SPZ compression (51.5 MB total, 15× smaller than raw captures) so every transition runs smoothly in real-time TSL compute shaders.",
     metrics: [
       { label: "Renderer", value: "Three.js WebGPU + Radix" },
-      { label: "Active Scene", value: "740k Dual-World · 10.7 MB" },
+      { label: "Active Scene", value: "1.36M Dual-World · 18.9 MB" },
       { label: "Controls", value: "← → Navigate · O Orbit · R Replay" },
     ],
     notes:
@@ -173,21 +173,21 @@ export const SLIDES: SlideSpec[] = [
     id: "wormhole-rift",
     scene: "dual_world",
     layout: "left",
-    kicker: "01 · DUAL-WORLD SINGLE-PASS OCCLUSION",
-    title: "Chaotic Gravity Rift & Portal Masking",
+    kicker: "01 · INTERSTELLAR WARP BUBBLE · GRAVITATIONAL LENSING",
+    title: "Spherical Wormhole & Einstein Lens",
     lead:
-      "Two independently synthesized SHARP scenes share a single GPU radix depth sort. Per-object TSL modifiers carve a boiling 3-octave FBM aperture without stencil passes or render-to-texture compositing.",
+      "Two independently synthesized SHARP worlds share one GPU radix depth sort. A serene Morris-Thorne warp bubble bends surrounding Douglas firs symmetrically around a floating crystal sphere revealing the curved alien horizon inside.",
     bullets: [
-      "Zero-gap Einstein lensing (<code>r' = sqrt(r² + R²)</code>) bends conifers outward around the tear without black void seams",
-      "Foreground trunks, ferns, and creek remain intact in front of the portal plane via camera-ray depth gating",
-      "Rim debris splats tear away and align tangentially along orbital vectors using quaternion basis construction",
+      "Symmetric Schwarzschild lensing (<code>r' = sqrt(r² + R²)</code>) curves the surrounding forest smoothly around the sphere",
+      "Convex spherical lens mapping bows the alien canyon & ringed gas giant edge-to-edge inside the floating warp bubble",
+      "Clean Fresnel glass limb refraction unwraps smoothly 1:1 to native 16:9 perspective as the camera flies through",
     ],
     metrics: [
-      { label: "Splat Budget", value: "740k Unified Sort · 10.7 MB" },
-      { label: "Portal Edge", value: "3-Octave FBM + Curl" },
+      { label: "Splat Budget", value: "1.36M Unified Sort · 18.9 MB" },
+      { label: "Lensing", value: "Morris-Thorne Warp Bubble" },
     ],
     notes:
-      "Notice there was no scene reload from Slide 1—the camera simply pushed forward down the creek while the wormhole modifier opened the aperture. Next advance will physically launch the camera through the membrane.",
+      "Notice there was no scene reload from Slide 1—gravitational lensing bends the forest first, then the spherical wormhole blooms open cleanly once without re-triggering. Press R to replay the lensing bloom, or advance to launch through the throat.",
     camera: {
       pos: [0.04, 0.14, -1.05],
       target: [-0.08, 0.42, -6.2],
@@ -200,15 +200,14 @@ export const SLIDES: SlideSpec[] = [
       mode: "wormhole",
       mix: 1.0,
       twist: 0.0,
-      ageRate: 0.45,
       ageStatic: 2.3,
-      bloomStrength: 0.26,
-      bloomThreshold: 0.88,
-      bloomRadius: 0.3,
+      bloomStrength: 0.14,
+      bloomThreshold: 0.94,
+      bloomRadius: 0.24,
     },
     transitionFromPrev: {
       kind: "glide",
-      durationSec: 1.75,
+      durationSec: 2.35,
     },
   },
   {
@@ -265,7 +264,7 @@ export const SLIDES: SlideSpec[] = [
       "Near-camera clip fading removes foreground pop as the crane glides past hanging signs",
     ],
     metrics: [
-      { label: "Scene", value: "270k Splats · 4.2 MB SPZ" },
+      { label: "Scene", value: "400k Splats · 5.7 MB SPZ" },
       { label: "Parallax", value: "Opposing FG/BG + Shear" },
     ],
     notes:
@@ -343,7 +342,7 @@ export const SLIDES: SlideSpec[] = [
       "Press <code>R</code> at any time to re-trigger the dissolution from intact carved stone",
     ],
     metrics: [
-      { label: "Scene", value: "165k Splats · 2.0 MB SPZ" },
+      { label: "Scene", value: "240k Splats · 2.9 MB SPZ" },
       { label: "Advection", value: "Analytic 3D Curl Field" },
     ],
     notes:
@@ -372,17 +371,17 @@ export const SLIDES: SlideSpec[] = [
     id: "grace-lidar",
     scene: "grace",
     layout: "left",
-    kicker: "05 · 88× COMPRESSED GOTHIC NAVE · MONOCHROME LIDAR",
+    kicker: "05 · FULL-VOLUME 30× COMPRESSED CATHEDRAL · MONOCHROME LIDAR",
     title: "Stark B&W Spherical Point-Cloud Matrix",
     lead:
-      "Nave-importance-sampled Grace Cathedral (715 MB 10M SH3 compressed 88× to 8.1 MB SH0 SPZ): a pure achromatic spherical wavefront sweeps across pews, Gothic arches, organ pipes, and the rose window before contracting back to color.",
+      "Voxel-density-equalized Grace Cathedral (715 MB 10M SH3 compressed 30× to 24.1 MB Morton-sorted SPZ across all 79k 3D voxels): a pure achromatic spherical wavefront sweeps across pews, Gothic vaults, transepts, organ pipes, and the rose window before contracting back to color.",
     bullets: [
-      "Solid-angle importance sampling + stained-glass chroma weighting retains full architectural clarity at 540k splats",
+      "3D voxel-density equalization retains 100% of the cathedral interior (nave, back nave, transepts, and 33m vaults) at 1.56M splats",
       "Stochastic hash decimation thins interior fill splats so crisp white particles float in pure black space",
       "Scale clamping (<code>dotRefScale = min(fxScale, 12)</code>) keeps pinpoint dot radii sharp across a 50-meter nave",
     ],
     metrics: [
-      { label: "Compressed Asset", value: "540k SPZ · 8.1 MB (88×)" },
+      { label: "Compressed Asset", value: "1.56M SPZ · 24.1 MB (30×)" },
       { label: "Sweep Radius", value: "52m Full Nave Return" },
     ],
     notes:
@@ -419,26 +418,26 @@ export const SLIDES: SlideSpec[] = [
       {
         effect: "Dual-World Wormhole",
         scene: "Forest × Alien Canyon",
-        splats: "740k (10.7 MB SPZ)",
-        technique: "Per-object SplatGenerator + FBM aperture + zero-gap Einstein lensing",
+        splats: "1.36M (18.9 MB SPZ)",
+        technique: "Per-object SplatGenerator + Einstein lensing + spherical Morris-Thorne refraction",
       },
       {
         effect: "Neon Tokyo Parallax",
         scene: "Kabukichō Alleyway",
-        splats: "270k (4.2 MB SPZ)",
+        splats: "400k (5.7 MB SPZ)",
         technique: "Opposing FG/BG depth shear + chroma emissive isolation + bloom",
       },
       {
         effect: "Volumetric Smoke & Ash",
         scene: "Carved Stone Buddha",
-        splats: "165k (2.0 MB SPZ)",
+        splats: "240k (2.9 MB SPZ)",
         technique: "Diagonal burn front + 3D curl advection + dual puff/ember scaling",
       },
       {
         effect: "B&W LiDAR Shockwave",
         scene: "Grace Cathedral Nave",
-        splats: "540k (8.1 MB SPZ · 88×)",
-        technique: "Nave importance sampling + stochastic decimation + pure-white shell",
+        splats: "1.56M (24.1 MB SPZ · 30×)",
+        technique: "3D voxel-density equalization + stochastic decimation + pure-white shell",
       },
     ],
     notes:
