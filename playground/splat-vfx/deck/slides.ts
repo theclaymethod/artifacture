@@ -79,8 +79,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
     label: "Dual-World 16:9 3DGS (1.36M · 18.9 MB)",
-    url: "./assets/forest-clearing-wide-opt.spz",
-    secondaryUrl: "./assets/alien-dimension-wide-opt.spz",
+    url: "./assets/forest-clearing-wide-opt.spz?v=3",
+    secondaryUrl: "./assets/alien-dimension-wide-opt.spz?v=3",
     placement: "dual_world",
     layout: "extSplats",
     sh: false,
@@ -94,7 +94,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   tokyo_alley: {
     id: "tokyo_alley",
     label: "Tokyo Neon Alley (400k · 5.7 MB)",
-    url: "./assets/tokyo-alley-opt.spz",
+    url: "./assets/tokyo-alley-opt.spz?v=3",
     placement: "catalog",
     layout: "extSplats",
     sh: false,
@@ -108,7 +108,7 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   buddha: {
     id: "buddha",
     label: "Carved Stone Buddha (240k · 2.9 MB)",
-    url: "./assets/buddha-opt.spz",
+    url: "./assets/buddha-opt.spz?v=3",
     placement: "normalized",
     layout: "extSplats",
     sh: false,
@@ -121,8 +121,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   grace: {
     id: "grace",
-    label: "Grace Cathedral (1.56M · 24.1 MB)",
-    url: "./assets/grace-cathedral-opt.spz",
+    label: "Grace Cathedral (1.62M · 24.9 MB)",
+    url: "./assets/grace-cathedral-opt.spz?v=3",
     placement: "catalog",
     layout: "extSplats",
     sh: false,
@@ -143,7 +143,7 @@ export const SLIDES: SlideSpec[] = [
     kicker: "WEBGPU + TSL · @SPARKJSDEV/RADIX",
     title: "Programmable 3D Gaussian Splatting",
     lead:
-      "This deck renders live 3D Gaussian splats directly in WebGPU. All five scenes use 3D voxel-density-equalized Morton-sorted SPZ compression (51.5 MB total, 15× smaller than raw captures) so every transition runs smoothly in real-time TSL compute shaders.",
+      "This deck renders live 3D Gaussian splats directly in WebGPU. All five scenes use floater-filtered, voxel-density-equalized Morton-sorted SPZ compression (52.4 MB total, 14.5× smaller than raw captures) so every transition runs smoothly in real-time TSL compute shaders.",
     metrics: [
       { label: "Renderer", value: "Three.js WebGPU + Radix" },
       { label: "Active Scene", value: "1.36M Dual-World · 18.9 MB" },
@@ -371,17 +371,17 @@ export const SLIDES: SlideSpec[] = [
     id: "grace-lidar",
     scene: "grace",
     layout: "left",
-    kicker: "05 · FULL-VOLUME 30× COMPRESSED CATHEDRAL · MONOCHROME LIDAR",
+    kicker: "05 · FULL-VOLUME 29× COMPRESSED CATHEDRAL · MONOCHROME LIDAR",
     title: "Stark B&W Spherical Point-Cloud Matrix",
     lead:
-      "Voxel-density-equalized Grace Cathedral (715 MB 10M SH3 compressed 30× to 24.1 MB Morton-sorted SPZ across all 79k 3D voxels): a pure achromatic spherical wavefront sweeps across pews, Gothic vaults, transepts, organ pipes, and the rose window before contracting back to color.",
+      "Floater-filtered, voxel-density-equalized Grace Cathedral (715 MB 10M SH3 compressed 29× to 24.9 MB Morton-sorted SPZ across 88k 3D voxels): a pure achromatic spherical wavefront sweeps across pews, Gothic vaults, transepts, organ pipes, and the rose window before contracting back to color.",
     bullets: [
-      "3D voxel-density equalization retains 100% of the cathedral interior (nave, back nave, transepts, and 33m vaults) at 1.56M splats",
+      "Floater rejection (<code>maxScale ≤ 0.28m</code>) + 3D voxel equalization retains 100% of the cathedral interior at 1.62M splats",
       "Stochastic hash decimation thins interior fill splats so crisp white particles float in pure black space",
       "Scale clamping (<code>dotRefScale = min(fxScale, 12)</code>) keeps pinpoint dot radii sharp across a 50-meter nave",
     ],
     metrics: [
-      { label: "Compressed Asset", value: "1.56M SPZ · 24.1 MB (30×)" },
+      { label: "Compressed Asset", value: "1.62M SPZ · 24.9 MB (29×)" },
       { label: "Sweep Radius", value: "52m Full Nave Return" },
     ],
     notes:
@@ -436,8 +436,8 @@ export const SLIDES: SlideSpec[] = [
       {
         effect: "B&W LiDAR Shockwave",
         scene: "Grace Cathedral Nave",
-        splats: "1.56M (24.1 MB SPZ · 30×)",
-        technique: "3D voxel-density equalization + stochastic decimation + pure-white shell",
+        splats: "1.62M (24.9 MB SPZ · 29×)",
+        technique: "Floater rejection + 3D voxel equalization + pure-white LiDAR shell",
       },
     ],
     notes:

@@ -188,7 +188,7 @@ function fetchSplatCached(url: string, meta: SceneAssetSpec): Promise<LoadedEntr
   const key = `${url}::${meta.layout}::${String(meta.sh)}`;
   let p = parsedCache.get(key);
   if (!p) {
-    p = loadSplatFile(url, { name: url, worker: true, layout: meta.layout, sh: meta.sh });
+    p = loadSplatFile(url, { name: url.split("?")[0], worker: true, layout: meta.layout, sh: meta.sh });
     parsedCache.set(key, p);
   }
   return p;

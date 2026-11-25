@@ -142,33 +142,37 @@ const JOBS = [
     name: 'grace-cathedral',
     input: 'grace-interior-10m.rdx',
     output: 'grace-cathedral-opt.spz',
-    targetCount: 1_560_000,
-    minOpacity: 0.06,
-    maxScale: 3.0,
-    scaleComp: 1.12,
-    voxelSize: 0.6,
-    densityGamma: 0.58,
-    // ZERO bounding-box deletion! Preserve 100% of Grace Cathedral (front nave,
-    // back nave, north & south transepts, high vaults, stained glass, organ, pews).
+    targetCount: 1_620_000,
+    minOpacity: 0.15,
+    // 99% of real Grace Cathedral architecture has maxScale <= 0.28m; larger splats are giant blurry mid-air floaters!
+    maxScale: 0.28,
+    scaleComp: 1.18,
+    voxelSize: 0.55,
+    densityFloor: 16,
+    densityGamma: 0.34,
+    // ZERO interior box cutouts! Preserve 100% of Grace Cathedral (front nave, back nave,
+    // north & south transepts, high 33m vaults, stained glass, organ, pews) while eliminating giant floaters.
     scoreSplat: (wx, wy, wz, sx, sy, sz, op, r, g, b) => {
-      const area = sx * sy + sy * sz + sx * sz;
-      // Lower area exponent (0.32) preserves crisp fine Gothic masonry ribs,
-      // carved capitals, pew edges, organ pipes, and stained-glass mullions.
-      let imp = op * Math.pow(area, 0.32);
+      // Reject stray scan outliers far outside the cathedral envelope
+      if (wx < -56.0 || wx > 40.0 || wy < 4.0 || wy > 34.5 || wz < -28.0 || wz > 20.0) return 0;
 
-      // Gentle boost (NEVER a cliff!) for central hero nave sightline & stained-glass rose window
-      const inCentralSightline = wx >= -20.0 && wx <= 40.0 && Math.abs(wz + 3.0) <= 14.0;
+      const area = sx * sy + sy * sz + sx * sz;
+      // Preserve crisp architectural detail (ribs, capitals, pews, organ pipes, rose window)
+      let imp = op * Math.pow(area, 0.38);
+
+      // Gentle sightline boost (NEVER a cliff) for central nave, ceiling vaults, organ, and rose window
+      const inCentralSightline = wx >= -22.0 && wx <= 40.0 && Math.abs(wz + 3.0) <= 15.0;
       if (inCentralSightline) {
-        imp *= 1.38;
-        if (wx >= 12.0) imp *= 1.25;
+        imp *= 1.45;
+        if (wx >= 12.0) imp *= 1.2;
       }
 
       const maxC = Math.max(r, g, b);
       const minC = Math.min(r, g, b);
       const chroma = maxC - minC;
       const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      if (chroma > 0.14) imp *= 1.55;
-      if (lum > 0.55) imp *= 1.22;
+      if (chroma > 0.14) imp *= 1.5;
+      if (lum > 0.55) imp *= 1.2;
       return imp;
     },
   },
@@ -263,7 +267,12 @@ for (const job of JOBS) {
     const { x: sx, y: sy, z: sz } = rec.scales;
 
     let imp = job.scoreSplat(wx, wy, wz, sx, sy, sz, rec.opacity, rec.rgb.r, rec.rgb.g, rec.rgb.b);
-    const density = voxelCounts.get(voxelKeys[i]) || 1;
+    if (imp <= 0) {
+      validFlags[i] = 0;
+      scores[i] = -1e9;
+      continue;
+    }
+    const density = Math.max(voxelCounts.get(voxelKeys[i]) || 1, job.densityFloor || 1);
     imp /= Math.pow(density, job.densityGamma);
     // Mild stratified jitter so flat surfaces sample evenly without moire banding
     imp *= 0.86 + 0.28 * hash01(i);

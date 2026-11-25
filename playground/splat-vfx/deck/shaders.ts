@@ -200,11 +200,12 @@ export function createMainFxModifier(u: DeckUniforms): SplatModifier {
     );
     const insideOrShell = clamp(insideSphere.add(ringGlow), 0.0, 1.0);
     const dotRefScale = min(u.uFxScale, float(12.0));
-    const lidarDotRad = clamp(length(baseScales).mul(0.064), dotRefScale.mul(0.00052), dotRefScale.mul(0.002)).toVar();
+    const lidarDotRad = clamp(length(baseScales).mul(0.088), dotRefScale.mul(0.00072), dotRefScale.mul(0.0024)).toVar();
     scales.assign(
       mix(scales, vec3(lidarDotRad).mul(float(1.0).add(ringGlow.mul(0.32))), wShockEff.mul(insideOrShell).mul(0.988)),
     );
-    const keepThresh = mix(float(0.68), float(0.28), smoothstep(0.1, 0.58, lum));
+    // Keep 70-96% of architectural splats visible during B&W LiDAR sweep so vaults, pillars & pews stay rich and complete
+    const keepThresh = mix(float(0.3), float(0.04), smoothstep(0.06, 0.5, lum));
     const keepMask = smoothstep(keepThresh.sub(0.07), keepThresh.add(0.05), seed);
     const particleKeep = clamp(keepMask.add(ringGlow.mul(0.75)).add(scanContours.mul(0.75)), 0.0, 1.0);
     opacity.assign(opacity.mul(mix(float(1.0), mix(float(1.0), particleKeep, insideSphere), wShockEff)));
