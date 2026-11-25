@@ -1,19 +1,27 @@
 import crypto from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import pixelmatch from 'pixelmatch';
 import type { Page } from 'playwright';
 import { PNG } from 'pngjs';
 import { launchVerifyBrowser, settlePageForCapture } from './browser.ts';
-import { auditPageGeometry, type GeometrySummary } from './geometry.ts';
+import {
+  auditPageGeometry,
+  DEFAULT_GEOMETRY_THRESHOLDS,
+  type GeometrySummary,
+  type GeometryThresholds,
+} from './geometry.ts';
 import { analyzePngBuffer, inspectWebGpuSurface, type WebGpuInspection } from './webgpu-check.ts';
 
-export type ReviewSurface = 'slides' | 'explainer' | 'video';
+export type ReviewSurface = 'slides' | 'html-slides' | 'explainer' | 'video';
 
 export interface ReviewOptions {
   readonly surface: ReviewSurface;
+  /** HTTP(S) URL, file:// URL, or local .html file path */
   readonly url: string;
   readonly outDir: string;
+  readonly viewport?: { readonly width: number; readonly height: number };
   readonly pages?: readonly number[];
   readonly allPages?: boolean;
   readonly seekTimes?: readonly number[];
@@ -56,6 +64,11 @@ export interface ReviewReport {
   readonly videoDeterminism?: VideoDeterminismReport;
 }
 
+function resolveTargetUrl(input: string): string {
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(input)) return input;
+  return pathToFileURL(path.resolve(input)).href;
+}
+
 function sha256Hex(buf: Buffer): string {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
@@ -65,19 +78,24 @@ function isBlockingConsoleError(text: string): boolean {
   return true;
 }
 
+function isBenignHttpFailure(status: number, url: string): boolean {
+  return status === 404 && /\/favicon\.ico(?:[?#]|$)/i.test(url);
+}
+
 async function captureCurrentView(
   page: Page,
   outDir: string,
   id: string,
   label: string,
   rootSelector?: string,
+  thresholds?: GeometryThresholds,
 ): Promise<{
   entry: Omit<CaptureEntry, 'consoleErrors' | 'pageErrors' | 'httpFailures'>;
   pngBuffer: Buffer;
 }> {
   await settlePageForCapture(page, 250);
   const webgpu = await inspectWebGpuSurface(page, { rootSelector });
-  const geometry = await auditPageGeometry(page, { rootSelector });
+  const geometry = await auditPageGeometry(page, { rootSelector, thresholds });
   const pngBuffer = await page.screenshot({ type: 'png' });
   const metrics = analyzePngBuffer(pngBuffer);
   const file = `${id}.png`;
@@ -119,6 +137,13 @@ function renderContactSheetHtml(
     .map((cap) => {
       const geoCount = cap.geometry.violations.length;
       const errCount = cap.consoleErrors.length + cap.pageErrors.length + cap.httpFailures.length;
+      const detailLine =
+        geoCount > 0
+          ? `<div class="row err">${cap.geometry.violations
+              .slice(0, 3)
+              .map((v) => `${v.kind}: ${v.textSample}`)
+              .join(' · ')}</div>`
+          : '';
       return `
       <article class="card">
         <img src="./${cap.file}" alt="${cap.label}" />
@@ -127,6 +152,7 @@ function renderContactSheetHtml(
           <div class="row">${cap.width}x${cap.height} · stddev ${cap.stddev}</div>
           <div class="row">GPU: ${cap.webgpu.readyCount} ready / ${cap.webgpu.fallbackCount} fallback · adapter ${cap.webgpu.hasAdapter}</div>
           <div class="row">Geometry issues: ${geoCount} · Errors: ${errCount}${cap.drillVerified ? ' · Drill OK' : ''}</div>
+          ${detailLine}
         </div>
       </article>`;
     })
@@ -147,6 +173,7 @@ function renderContactSheetHtml(
   .meta { padding: 12px 14px; }
   .title { font-weight: 600; margin-bottom: 4px; }
   .row { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; color: #a1a1aa; }
+  .row.err { color: #f87171; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -159,17 +186,23 @@ function renderContactSheetHtml(
 }
 
 /**
- * Runs a single-pass live Chromium review for slides, explainer, or video surfaces.
+ * Runs a single-pass live Chromium review for slides, standalone html-slides, explainer, or video surfaces.
  */
 export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
   const outDir = path.resolve(opts.outDir);
   await mkdir(outDir, { recursive: true });
+  const targetUrl = resolveTargetUrl(opts.url);
 
+  const expectWebGpu = opts.expectWebGpu ?? opts.surface !== 'html-slides';
   const launched = await launchVerifyBrowser({
-    webgpu: opts.expectWebGpu ?? true,
+    webgpu: expectWebGpu,
     headless: opts.headless ?? true,
     autoHeadedFallback: true,
   });
+
+  const defaultViewport =
+    opts.surface === 'html-slides' ? { width: 1280, height: 720 } : { width: 1440, height: 900 };
+  const viewport = opts.viewport ?? defaultViewport;
 
   const captures: CaptureEntry[] = [];
   let videoDeterminism: VideoDeterminismReport | undefined;
@@ -180,8 +213,7 @@ export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
 
   try {
     const context = await launched.browser.newContext({
-      viewport:
-        opts.surface === 'slides' ? { width: 1440, height: 900 } : { width: 1440, height: 900 },
+      viewport,
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
@@ -194,12 +226,12 @@ export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
       }
     });
     page.on('response', (res) => {
-      if (res.status() >= 400) {
+      if (res.status() >= 400 && !isBenignHttpFailure(res.status(), res.url())) {
         httpFailures.push(`${res.status()} ${res.url()}`);
       }
     });
 
-    await page.goto(opts.url, { waitUntil: 'networkidle' });
+    await page.goto(targetUrl, { waitUntil: 'networkidle' });
 
     const drainErrors = () => ({
       consoleErrors: consoleErrors.splice(0),
@@ -282,6 +314,79 @@ export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
         const afterIndex = Number.parseInt(afterStr ?? String(currentIndex), 10);
         if (afterIndex === currentIndex) break;
       }
+    } else if (opts.surface === 'html-slides') {
+      const detectedCount = await page.evaluate(() => {
+        const candidates = [
+          'section.slide',
+          '[data-slide]',
+          '.slide',
+          'section[id^="slide"]',
+          'main > section',
+        ];
+        for (const sel of candidates) {
+          const n = document.querySelectorAll(sel).length;
+          if (n > 1) return n;
+        }
+        return 0;
+      });
+      const targetPages = opts.pages && opts.pages.length > 0 ? new Set(opts.pages) : null;
+      const maxSlides = detectedCount > 0 ? Math.min(detectedCount, 64) : 64;
+
+      const htmlSlidesThresholds: GeometryThresholds = {
+        ...DEFAULT_GEOMETRY_THRESHOLDS,
+        stageFontMinPx: 11.5,
+        denseCardFontMinPx: 10.5,
+      };
+
+      const getSlideFingerprint = () =>
+        page.evaluate(() => {
+          const text = (document.body.innerText ?? '').replace(/\s+/g, ' ').trim();
+          const active = document.querySelector(
+            '.slide.active, [data-slide].active, section:not([hidden])',
+          );
+          const id = active?.getAttribute('data-slide') ?? active?.id ?? '';
+          return `${id}|${text.slice(0, 320)}`;
+        });
+
+      const seenFingerprints = new Set<string>();
+      for (let idx = 1; idx <= maxSlides; idx += 1) {
+        if (idx > 1) {
+          const prevFp = await getSlideFingerprint();
+          await page.keyboard.press('ArrowRight');
+          await page.waitForTimeout(220);
+          let nextFp = await getSlideFingerprint();
+          if (nextFp === prevFp) {
+            // Fallback to ?slide=N query parameter navigation
+            const sep = targetUrl.includes('?') ? '&' : '?';
+            const cleanBase = targetUrl.split('#')[0];
+            await page.goto(`${cleanBase}${sep}slide=${idx}`, { waitUntil: 'networkidle' });
+            await page.waitForTimeout(180);
+            nextFp = await getSlideFingerprint();
+          }
+          if (nextFp === prevFp || seenFingerprints.has(nextFp)) {
+            if (detectedCount === 0) break;
+          }
+        }
+        seenFingerprints.add(await getSlideFingerprint());
+
+        if (!targetPages || targetPages.has(idx)) {
+          const { entry } = await captureCurrentView(
+            page,
+            outDir,
+            `slide-${String(idx).padStart(2, '0')}`,
+            `Slide ${idx}`,
+            undefined,
+            htmlSlidesThresholds,
+          );
+          captures.push({
+            ...entry,
+            ...drainErrors(),
+          });
+        }
+
+        if (!opts.allPages && !opts.pages) break;
+        if (targetPages && idx >= Math.max(...Array.from(targetPages))) break;
+      }
     } else if (opts.surface === 'explainer') {
       const viewports: Array<{ id: string; label: string; width: number; height: number }> = [
         {
@@ -350,7 +455,6 @@ export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
     await launched.close();
   }
 
-  const expectWebGpu = opts.expectWebGpu ?? true;
   const ok =
     captures.length > 0 &&
     captures.every((cap) => {
@@ -375,7 +479,7 @@ export async function runReview(opts: ReviewOptions): Promise<ReviewReport> {
   const partial = {
     ok,
     surface: opts.surface,
-    url: opts.url,
+    url: targetUrl,
     browserMode: launched.mode,
     outDir,
     captures,

@@ -5,14 +5,15 @@ export {
   resolveChromiumBinary,
   settlePageForCapture,
 } from './browser.ts';
-export type { PlaceholderHit, ProjectCheckReport } from './check.ts';
-export { runProjectChecks } from './check.ts';
+export type { HtmlCheckIssue, PlaceholderHit, ProjectCheckReport } from './check.ts';
+export { checkStandaloneHtml, runProjectChecks } from './check.ts';
 export type {
   GeometrySummary,
   GeometryThresholds,
   GeometryViolation,
   RawElementMetric,
   RawSvgTextMetric,
+  RectBox,
 } from './geometry.ts';
 export {
   auditPageGeometry,

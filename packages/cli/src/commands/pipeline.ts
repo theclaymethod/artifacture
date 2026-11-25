@@ -72,10 +72,14 @@ export async function runCheck(
   }
   const lines = [
     `WGSL checked: ${report.wgsl.length} (${report.wgsl.filter((w) => !w.ok).length} failed)`,
+    `HTML/SVG issues: ${report.htmlIssues.length}`,
     `Placeholders: ${report.placeholders.length}`,
   ];
   for (const w of report.wgsl.filter((item) => !item.ok)) {
     lines.push(`  FAIL ${w.file}: ${w.error ?? 'validation failed'}`);
+  }
+  for (const issue of report.htmlIssues) {
+    lines.push(`  HTML ${issue.file}:${issue.line} [${issue.kind}] ${issue.message}`);
   }
   for (const hit of report.placeholders) {
     lines.push(`  PLACEHOLDER ${hit.file}:${hit.line} (${hit.token})`);
@@ -86,6 +90,7 @@ export async function runCheck(
 export async function runReviewCli(opts: {
   url: string;
   surface: ReviewSurface;
+  viewport?: { width: number; height: number };
   outDir?: string;
   pages?: number[];
   allPages?: boolean;
@@ -95,6 +100,7 @@ export async function runReviewCli(opts: {
   const report = await runReview({
     url: opts.url,
     surface: opts.surface,
+    viewport: opts.viewport,
     outDir: opts.outDir ?? path.join(process.cwd(), '.artifacture-review', opts.surface),
     pages: opts.pages,
     allPages: opts.allPages,
@@ -117,6 +123,17 @@ export async function runReviewCli(opts: {
         errorCount: c.webgpu.errorCount,
       },
       geometryViolations: c.geometry.violations.length,
+      ...(c.geometry.violations.length > 0
+        ? {
+            violations: c.geometry.violations.slice(0, 8).map((v) => ({
+              kind: v.kind,
+              tag: v.tag,
+              text: v.textSample,
+              measured: v.measured,
+              threshold: v.threshold,
+            })),
+          }
+        : {}),
       drillVerified: c.drillVerified ?? null,
       errors: c.consoleErrors.length + c.pageErrors.length + c.httpFailures.length,
     })),

@@ -66,13 +66,13 @@ const HELP_TEXT = [
   '  artifacture docs [overview|slides|explainer|video|gpu|playground|list]',
   '  artifacture shaders [dir] [--emit] [--json]',
   '  artifacture stills [dir]',
-  '  artifacture check [dir] [--json]',
-  '  artifacture review <url> --surface <slides|explainer|video> [--pages 1,2] [--all] [--out dir] [--seek 0,1.5,0] [--no-webgpu]',
+  '  artifacture check [dir-or-html] [--json]',
+  '  artifacture review <url-or-html> --surface <slides|html-slides|explainer|video> [--viewport 1280x720] [--pages 1,2] [--all] [--out dir] [--seek 0,1.5,0] [--no-webgpu]',
   '  artifacture playground status [--repo path] [--json]',
   '  artifacture skills [install-dir]',
 ].join('\n');
 
-const VALUE_FLAGS = new Set(['--surface', '--pages', '--out', '--seek', '--repo']);
+const VALUE_FLAGS = new Set(['--surface', '--viewport', '--pages', '--out', '--seek', '--repo']);
 
 export async function runCli(argv: readonly string[]): Promise<CliResult> {
   const [command, ...rest] = argv;
@@ -108,10 +108,28 @@ export async function runCli(argv: readonly string[]): Promise<CliResult> {
       case 'review': {
         const url = pos[0];
         const surface = getFlagValue(rest, '--surface') as ReviewSurface | undefined;
-        if (!url || (surface !== 'slides' && surface !== 'explainer' && surface !== 'video')) {
+        if (
+          !url ||
+          (surface !== 'slides' &&
+            surface !== 'html-slides' &&
+            surface !== 'explainer' &&
+            surface !== 'video')
+        ) {
           throw new Error(
-            'Usage: artifacture review <url> --surface <slides|explainer|video> [--pages 1,2] [--all] [--out dir]',
+            'Usage: artifacture review <url-or-html> --surface <slides|html-slides|explainer|video> [--viewport 1280x720] [--pages 1,2] [--all] [--out dir]',
           );
+        }
+        const vpRaw = getFlagValue(rest, '--viewport');
+        let viewport: { width: number; height: number } | undefined;
+        if (vpRaw) {
+          const m = /^(\d+)x(\d+)$/i.exec(vpRaw.trim());
+          if (!m) {
+            throw new Error(`Invalid --viewport "${vpRaw}". Expected format like 1280x720.`);
+          }
+          viewport = {
+            width: Number.parseInt(m[1], 10),
+            height: Number.parseInt(m[2], 10),
+          };
         }
         const pagesRaw = getFlagValue(rest, '--pages');
         const pages = pagesRaw
@@ -131,11 +149,16 @@ export async function runCli(argv: readonly string[]): Promise<CliResult> {
         const res = await runReviewCli({
           url,
           surface,
+          viewport,
           outDir: getFlagValue(rest, '--out'),
           pages,
           allPages: hasFlag(rest, '--all'),
           seekTimes,
-          expectWebGpu: !hasFlag(rest, '--no-webgpu'),
+          expectWebGpu: hasFlag(rest, '--no-webgpu')
+            ? false
+            : surface === 'html-slides'
+              ? false
+              : true,
         });
         return { exitCode: res.ok ? 0 : 1, stdout: res.output, stderr: '' };
       }

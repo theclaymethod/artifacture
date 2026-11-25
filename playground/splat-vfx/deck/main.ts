@@ -309,7 +309,7 @@ async function mountScene(sceneId: DeckSceneId): Promise<void> {
   }
 }
 
-// Sequential background-prefetch so remaining scenes (4.2 + 2.0 + 8.1 MB) never compete with initial Slide 1 paint
+// Sequential background-prefetch so remaining scenes (5.7 + 2.9 + 24.9 MB) never compete with initial Slide 1 paint
 async function prefetchLightScenes() {
   for (const id of ["tokyo_alley", "buddha", "grace"] as const) {
     try {

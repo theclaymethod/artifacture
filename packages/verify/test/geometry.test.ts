@@ -2,6 +2,7 @@ import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 import {
   analyzePngBuffer,
+  checkStandaloneHtml,
   evaluateGeometryIssues,
   evaluateSvgGeometryIssues,
   type RawElementMetric,
@@ -77,6 +78,78 @@ describe('@artifacture/verify geometry and PNG inspection', () => {
       }),
     ]);
     expect(vpClip.viewportClipCount).toBe(1);
+  });
+
+  it('catches SVG frame edge clipping, tiny SVG labels, and body-to-nav overlaps', () => {
+    const svgIssues = evaluateSvgGeometryIssues([
+      {
+        svgIndex: 0,
+        textSample: '44.1 = 758.8 - 714.7',
+        left: 1090,
+        top: 40,
+        right: 1185,
+        bottom: 54,
+        fontSizePx: 12,
+        svgBox: { left: 0, top: 0, right: 1140, bottom: 420 },
+      },
+      {
+        svgIndex: 0,
+        textSample: 'micro label',
+        left: 100,
+        top: 120,
+        right: 150,
+        bottom: 130,
+        fontSizePx: 8.5,
+        svgBox: { left: 0, top: 0, right: 1140, bottom: 420 },
+      },
+    ]);
+    expect(svgIssues.filter((v) => v.kind === 'svg-edge-clip')).toHaveLength(1);
+    expect(svgIssues.filter((v) => v.kind === 'svg-undersized-text')).toHaveLength(1);
+
+    const navCollision = evaluateGeometryIssues(
+      [
+        sampleMetric({
+          textSample: 'Bottom bullet colliding with fixed footer nav',
+          insideNav: false,
+          rect: { left: 60, top: 650, right: 560, bottom: 684 },
+          viewport: { width: 1280, height: 720 },
+        }),
+        sampleMetric({
+          textSample: '01 / 04',
+          insideNav: true,
+          rect: { left: 1080, top: 664, right: 1240, bottom: 704 },
+          viewport: { width: 1280, height: 720 },
+        }),
+      ],
+      1,
+      undefined,
+      [],
+      [{ left: 0, top: 660, right: 1280, bottom: 720 }],
+    );
+    expect(navCollision.navOverlapCount).toBe(1);
+  });
+
+  it('flags invalid HTML tags inside SVG, framework tag typos, and broken inline scripts', () => {
+    const broken = `<!doctype html>
+<html><body>
+  <motion-div class="card"></motion-div>
+  <svg viewBox="0 0 200 100"><text x="10" y="20"><code>bad()</code></text></svg>
+  <script>function broken( { return 1; }</script>
+</body></html>`;
+    const issues = checkStandaloneHtml(broken, 'broken.html');
+    expect(issues.map((i) => i.kind).sort()).toEqual([
+      'inline-script-syntax',
+      'malformed-tag',
+      'svg-invalid-html-tag',
+    ]);
+
+    const clean = `<!doctype html>
+<html><body>
+  <div class="card"><code>ok()</code></div>
+  <svg viewBox="0 0 200 100"><text x="10" y="20"><tspan>ok()</tspan></text></svg>
+  <script>const x = 1 + 2; console.log(x);</script>
+</body></html>`;
+    expect(checkStandaloneHtml(clean, 'clean.html')).toEqual([]);
   });
 
   it('computes non-zero RGB stddev from encoded PNG pixel data', () => {
