@@ -204,7 +204,7 @@ export function createMainFxModifier(u: DeckUniforms): SplatModifier {
     scales.assign(
       mix(scales, vec3(lidarDotRad).mul(float(1.0).add(ringGlow.mul(0.32))), wShockEff.mul(insideOrShell).mul(0.988)),
     );
-    const keepThresh = mix(float(0.62), float(0.22), smoothstep(0.1, 0.58, lum));
+    const keepThresh = mix(float(0.45), float(0.14), smoothstep(0.1, 0.58, lum));
     const keepMask = smoothstep(keepThresh.sub(0.07), keepThresh.add(0.05), seed);
     const particleKeep = clamp(keepMask.add(ringGlow.mul(0.75)).add(scanContours.mul(0.75)), 0.0, 1.0);
     opacity.assign(opacity.mul(mix(float(1.0), mix(float(1.0), particleKeep, insideSphere), wShockEff)));

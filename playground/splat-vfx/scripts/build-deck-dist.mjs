@@ -79,13 +79,13 @@ ensureCopy(
   path.join(SITE_DIR, 'vendor/three/examples/jsm/tsl/display/BloomNode.js'),
 );
 
-// 3. Compact 3DGS .spz assets under /splat-deck/assets/ (all < 25 MiB Cloudflare Static Assets limit)
+// 3. Perceptually optimized 3DGS .spz assets under /splat-deck/assets/ (~25 MB total!)
 const SPZ_ASSETS = [
-  'forest-clearing-wide.spz',
-  'alien-dimension-wide.spz',
-  'tokyo-alley.spz',
-  'buddha.spz',
-  'grace-cathedral-lite.spz',
+  'forest-clearing-wide-opt.spz',
+  'alien-dimension-wide-opt.spz',
+  'tokyo-alley-opt.spz',
+  'buddha-opt.spz',
+  'grace-cathedral-opt.spz',
 ];
 
 let totalBytes = 0;

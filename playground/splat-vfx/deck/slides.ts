@@ -78,9 +78,9 @@ export interface SlideSpec {
 export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
-    label: "Dual-World 16:9 3DGS (2.36M)",
-    url: "./assets/forest-clearing-wide.spz",
-    secondaryUrl: "./assets/alien-dimension-wide.spz",
+    label: "Dual-World 16:9 3DGS (740k · 10.7 MB)",
+    url: "./assets/forest-clearing-wide-opt.spz",
+    secondaryUrl: "./assets/alien-dimension-wide-opt.spz",
     placement: "dual_world",
     layout: "extSplats",
     sh: false,
@@ -93,8 +93,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   tokyo_alley: {
     id: "tokyo_alley",
-    label: "Tokyo Neon Alley (500k)",
-    url: "./assets/tokyo-alley.spz",
+    label: "Tokyo Neon Alley (270k · 4.2 MB)",
+    url: "./assets/tokyo-alley-opt.spz",
     placement: "catalog",
     layout: "extSplats",
     sh: false,
@@ -107,8 +107,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   buddha: {
     id: "buddha",
-    label: "Carved Stone Buddha (262k)",
-    url: "./assets/buddha.spz",
+    label: "Carved Stone Buddha (165k · 2.0 MB)",
+    url: "./assets/buddha-opt.spz",
     placement: "normalized",
     layout: "extSplats",
     sh: false,
@@ -121,8 +121,8 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   },
   grace: {
     id: "grace",
-    label: "Grace Cathedral (1.15M SPZ · 17 MB)",
-    url: "./assets/grace-cathedral-lite.spz",
+    label: "Grace Cathedral (540k · 8.1 MB)",
+    url: "./assets/grace-cathedral-opt.spz",
     placement: "catalog",
     layout: "extSplats",
     sh: false,
@@ -143,10 +143,10 @@ export const SLIDES: SlideSpec[] = [
     kicker: "WEBGPU + TSL · @SPARKJSDEV/RADIX",
     title: "Programmable 3D Gaussian Splatting",
     lead:
-      "This deck renders live 3D Gaussian splats directly in WebGPU. Every camera move, spatial portal, curl advection plume, and 10M-splat LiDAR sweep runs in real-time TSL compute shaders.",
+      "This deck renders live 3D Gaussian splats directly in WebGPU. All five scenes are perceptually pruned and quantized to 25 MB total (30× smaller than raw captures) so every transition runs smoothly in real-time TSL compute shaders.",
     metrics: [
       { label: "Renderer", value: "Three.js WebGPU + Radix" },
-      { label: "Active Scene", value: "2,359,296 Splats" },
+      { label: "Active Scene", value: "740k Dual-World · 10.7 MB" },
       { label: "Controls", value: "← → Navigate · O Orbit · R Replay" },
     ],
     notes:
@@ -183,7 +183,7 @@ export const SLIDES: SlideSpec[] = [
       "Rim debris splats tear away and align tangentially along orbital vectors using quaternion basis construction",
     ],
     metrics: [
-      { label: "Splat Budget", value: "2.36M Unified Sort" },
+      { label: "Splat Budget", value: "740k Unified Sort · 10.7 MB" },
       { label: "Portal Edge", value: "3-Octave FBM + Curl" },
     ],
     notes:
@@ -265,7 +265,7 @@ export const SLIDES: SlideSpec[] = [
       "Near-camera clip fading removes foreground pop as the crane glides past hanging signs",
     ],
     metrics: [
-      { label: "Scene", value: "500k Splats · SH0" },
+      { label: "Scene", value: "270k Splats · 4.2 MB SPZ" },
       { label: "Parallax", value: "Opposing FG/BG + Shear" },
     ],
     notes:
@@ -343,7 +343,7 @@ export const SLIDES: SlideSpec[] = [
       "Press <code>R</code> at any time to re-trigger the dissolution from intact carved stone",
     ],
     metrics: [
-      { label: "Scene", value: "261,888 Splats · SH0" },
+      { label: "Scene", value: "165k Splats · 2.0 MB SPZ" },
       { label: "Advection", value: "Analytic 3D Curl Field" },
     ],
     notes:
@@ -372,17 +372,17 @@ export const SLIDES: SlideSpec[] = [
     id: "grace-lidar",
     scene: "grace",
     layout: "left",
-    kicker: "05 · 41× COMPRESSED GOTHIC NAVE · MONOCHROME LIDAR",
+    kicker: "05 · 88× COMPRESSED GOTHIC NAVE · MONOCHROME LIDAR",
     title: "Stark B&W Spherical Point-Cloud Matrix",
     lead:
-      "Nave-importance-sampled Grace Cathedral (715 MB 10M SH3 compressed 41× to 17.4 MB SH0 SPZ): a pure achromatic spherical wavefront sweeps across pews, Gothic arches, organ pipes, and the rose window before contracting back to color.",
+      "Nave-importance-sampled Grace Cathedral (715 MB 10M SH3 compressed 88× to 8.1 MB SH0 SPZ): a pure achromatic spherical wavefront sweeps across pews, Gothic arches, organ pipes, and the rose window before contracting back to color.",
     bullets: [
-      "Solid-angle importance sampling + stained-glass chroma weighting retains full architectural clarity at 1.15M splats",
+      "Solid-angle importance sampling + stained-glass chroma weighting retains full architectural clarity at 540k splats",
       "Stochastic hash decimation thins interior fill splats so crisp white particles float in pure black space",
       "Scale clamping (<code>dotRefScale = min(fxScale, 12)</code>) keeps pinpoint dot radii sharp across a 50-meter nave",
     ],
     metrics: [
-      { label: "Compressed Asset", value: "1.15M SPZ · 17.4 MB (41×)" },
+      { label: "Compressed Asset", value: "540k SPZ · 8.1 MB (88×)" },
       { label: "Sweep Radius", value: "52m Full Nave Return" },
     ],
     notes:
@@ -419,26 +419,26 @@ export const SLIDES: SlideSpec[] = [
       {
         effect: "Dual-World Wormhole",
         scene: "Forest × Alien Canyon",
-        splats: "2,359,296 (SH0)",
+        splats: "740k (10.7 MB SPZ)",
         technique: "Per-object SplatGenerator + FBM aperture + zero-gap Einstein lensing",
       },
       {
         effect: "Neon Tokyo Parallax",
         scene: "Kabukichō Alleyway",
-        splats: "500,000 (SH0)",
-        technique: "Opposing FG/BG depth shear + chroma emissive isolation + AgX bloom",
+        splats: "270k (4.2 MB SPZ)",
+        technique: "Opposing FG/BG depth shear + chroma emissive isolation + bloom",
       },
       {
         effect: "Volumetric Smoke & Ash",
         scene: "Carved Stone Buddha",
-        splats: "261,888 (SH0)",
+        splats: "165k (2.0 MB SPZ)",
         technique: "Diagonal burn front + 3D curl advection + dual puff/ember scaling",
       },
       {
         effect: "B&W LiDAR Shockwave",
         scene: "Grace Cathedral Nave",
-        splats: "1,150,000 (17.4 MB SPZ)",
-        technique: "41× importance-sampled SPZ + stochastic decimation + pure-white shell",
+        splats: "540k (8.1 MB SPZ · 88×)",
+        technique: "Nave importance sampling + stochastic decimation + pure-white shell",
       },
     ],
     notes:

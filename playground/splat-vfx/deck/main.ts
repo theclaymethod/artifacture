@@ -309,11 +309,15 @@ async function mountScene(sceneId: DeckSceneId): Promise<void> {
   }
 }
 
-// Background-prefetch remaining scenes (Tokyo 7MB + Buddha 3MB + compressed Grace Cathedral 17MB) after boot
-function prefetchLightScenes() {
-  void fetchSplatCached(DECK_SCENES.tokyo_alley.url, DECK_SCENES.tokyo_alley).catch(() => {});
-  void fetchSplatCached(DECK_SCENES.buddha.url, DECK_SCENES.buddha).catch(() => {});
-  void fetchSplatCached(DECK_SCENES.grace.url, DECK_SCENES.grace).catch(() => {});
+// Sequential background-prefetch so remaining scenes (4.2 + 2.0 + 8.1 MB) never compete with initial Slide 1 paint
+async function prefetchLightScenes() {
+  for (const id of ["tokyo_alley", "buddha", "grace"] as const) {
+    try {
+      await fetchSplatCached(DECK_SCENES[id].url, DECK_SCENES[id]);
+    } catch {
+      // Ignore speculative prefetch failures; mountScene will retry on demand
+    }
+  }
 }
 
 // ── Slide State & Continuous Transition Engine ─────────────────────────────
