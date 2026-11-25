@@ -53,7 +53,13 @@ const btnOrbit = document.getElementById("btn-orbit")!;
 const btnNotes = document.getElementById("btn-notes")!;
 const btnOverview = document.getElementById("btn-overview")!;
 const btnHide = document.getElementById("btn-hide")!;
+const btnHub = document.getElementById("btn-hub");
 const btnCloseOverview = document.getElementById("btn-close-overview")!;
+
+const IS_STANDALONE = !window.location.pathname.startsWith("/deck");
+if (IS_STANDALONE && btnHub) {
+  btnHub.style.display = "none";
+}
 
 // ── WebGPU + Radix Renderer Setup ──────────────────────────────────────────
 
@@ -211,7 +217,11 @@ async function mountScene(sceneId: DeckSceneId): Promise<void> {
   if (activeSceneId === sceneId) return;
   const seq = ++loadSeq;
   const meta = DECK_SCENES[sceneId];
-  setLoadingState(true, `Loading ${meta.label}...`);
+  const loadingMsg =
+    sceneId === "grace" && meta.url.startsWith("http")
+      ? "Streaming Grace Cathedral (10M SH3 · 715 MB)..."
+      : `Loading ${meta.label}...`;
+  setLoadingState(true, loadingMsg);
 
   try {
     if (meta.placement === "dual_world" && meta.secondaryUrl) {
@@ -519,7 +529,7 @@ function renderSlideContent(slide: SlideSpec) {
       <div class="summary-actions">
         <button class="action-link" id="btn-summary-orbit" type="button">Explore Live in Free Orbit (O)</button>
         <button class="action-link secondary" id="btn-summary-restart" type="button">Restart From Wormhole</button>
-        <a class="action-link secondary" href="../fx-lab/">Open 9-Mode FX Lab →</a>
+        ${IS_STANDALONE ? "" : '<a class="action-link secondary" href="../fx-lab/">Open 9-Mode FX Lab →</a>'}
       </div>`
     : "";
 

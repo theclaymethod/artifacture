@@ -75,6 +75,10 @@ export interface SlideSpec {
   };
 }
 
+const IS_LOCAL_DEV =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost");
+
 export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
@@ -122,7 +126,9 @@ export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   grace: {
     id: "grace",
     label: "Grace Cathedral (10M SH3)",
-    url: "/assets/grace-interior-10m.rdx",
+    url: IS_LOCAL_DEV
+      ? "/assets/grace-interior-10m.rdx"
+      : "https://storage.googleapis.com/forge-dev-public/asundqui/radix/261015/rdx-sh/grace-interior-10m.rdx",
     placement: "catalog",
     layout: "packedSplats",
     sh: "packed",

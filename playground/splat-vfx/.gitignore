@@ -10,4 +10,9 @@ assets/jade-king-mpm/
 *.wav
 *.webm
 captures/
+deck-dist/
+.cloudflare/
+.wrangler/
+node_modules/
+package-lock.json
 .DS_Store

@@ -1,0 +1,14 @@
+{
+  "name": "gaussian-splat-deck",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build:deck": "node scripts/build-deck-dist.mjs",
+    "deploy": "node scripts/build-deck-dist.mjs && cf deploy"
+  },
+  "devDependencies": {
+    "cf": "^1.0.0-beta.21",
+    "wrangler": "^4.168.0"
+  }
+}
