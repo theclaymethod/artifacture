@@ -356,7 +356,7 @@ export function createMainFxModifier(u: DeckUniforms): SplatModifier {
 
 // ── Dual-World Dimensional Wormhole Modifiers (Object Space) ───────────────
 
-export const ALIEN_WORLD_OFFSET = new THREE.Vector3(0.14, 0.92, -6.0);
+export const ALIEN_WORLD_OFFSET = new THREE.Vector3(0.24, 0.55, -6.0);
 
 export function createWormholeModifiers(u: DeckUniforms) {
   const evalPortalField = (pWorld: TslNode) => {
@@ -368,7 +368,7 @@ export function createWormholeModifiers(u: DeckUniforms) {
     const openAmt = smoothstep(0.06, 0.58, prog).mul(wAmt).toVar();
 
     const bhPos = u.uFxCenter.toVar();
-    const baseR = float(0.98).toVar();
+    const baseR = float(1.06).toVar();
     const signedDist = u.uCamPos.z.sub(bhPos.z).toVar();
     const bhD = max(signedDist, float(0.35)).toVar();
     const crossedAmt = smoothstep(2.55, 0.45, signedDist).mul(openAmt).toVar();

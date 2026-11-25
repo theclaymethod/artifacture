@@ -390,8 +390,8 @@ function evalContinuousTransition(tr: ActiveTransition, uRaw: number) {
     const pEmerge = 1 - Math.pow(1 - uEmergeRaw, 2.4);
 
     // Bridge from forest pose -> portal throat (-6.05) -> alien emergence pose
-    const throatPos: [number, number, number] = [0.14, 0.96, -6.05];
-    const throatTgt: [number, number, number] = [0.05, 1.48, -14.5];
+    const throatPos: [number, number, number] = [0.24, 0.55, -6.05];
+    const throatTgt: [number, number, number] = [0.2, 0.68, -14.5];
 
     const posA = lerp3(forestSlide.camera.pos, throatPos, pLaunch);
     const pos = lerp3(posA, alienSlide.camera.pos, pEmerge);
@@ -399,7 +399,7 @@ function evalContinuousTransition(tr: ActiveTransition, uRaw: number) {
     const tgt = lerp3(tgtA, alienSlide.camera.target, pEmerge);
 
     const warpKick = Math.sin(Math.pow(clamp((dirU - 0.08) / 0.84, 0, 1), 1.35) * Math.PI);
-    const fov = lerp(forestSlide.camera.fov, alienSlide.camera.fov, smooth01(dirU)) + 23.0 * warpKick;
+    const fov = lerp(forestSlide.camera.fov, alienSlide.camera.fov, smooth01(dirU)) + 22.0 * warpKick;
     const roll = warpKick * (tr.reverse ? -0.105 : 0.115);
 
     applyCameraPose(pos, tgt, fov, roll);

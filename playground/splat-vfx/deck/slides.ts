@@ -78,16 +78,16 @@ export interface SlideSpec {
 export const DECK_SCENES: Record<DeckSceneId, SceneAssetSpec> = {
   dual_world: {
     id: "dual_world",
-    label: "Dual-World 3DGS (2.36M)",
-    url: "/assets/forest-clearing.spz",
-    secondaryUrl: "/assets/alien-dimension.spz",
+    label: "Dual-World 16:9 3DGS (2.36M)",
+    url: "/assets/forest-clearing-wide.spz",
+    secondaryUrl: "/assets/alien-dimension-wide.spz",
     placement: "dual_world",
     layout: "extSplats",
     sh: false,
     flipX: true,
     preBlur: false,
     targetSpan: 10,
-    fxCenter: [0.14, 1.05, -6.2],
+    fxCenter: [0.24, 0.55, -6.2],
     fxScale: 2.2,
     floorY: -1.1,
   },
@@ -152,11 +152,11 @@ export const SLIDES: SlideSpec[] = [
     notes:
       "Start on the intact blue-hour forest creek clearing. Both the forest (1.18M) and the hidden alien dimension (1.18M) are already mounted inside one GPU SplatCollection. Mention you can press O at any moment to orbit freely and verify it is live 3D geometry.",
     camera: {
-      pos: [-0.12, 0.06, -0.35],
-      target: [-0.24, 0.38, -6.2],
-      fov: 48,
+      pos: [0.0, 0.0, -0.25],
+      target: [0.0, 0.04, -6.2],
+      fov: 38.5,
       roll: 0.0,
-      driftAmp: [0.04, 0.018, 0.05],
+      driftAmp: [0.03, 0.014, 0.04],
       driftSpeed: 0.35,
     },
     fx: {
@@ -189,11 +189,11 @@ export const SLIDES: SlideSpec[] = [
     notes:
       "Notice there was no scene reload from Slide 1—the camera simply pushed forward down the creek while the wormhole modifier opened the aperture. Next advance will physically launch the camera through the membrane.",
     camera: {
-      pos: [-0.14, 0.16, -0.95],
-      target: [-0.34, 0.96, -6.2],
-      fov: 53,
+      pos: [0.04, 0.14, -1.05],
+      target: [-0.08, 0.42, -6.2],
+      fov: 40,
       roll: 0.0,
-      driftAmp: [0.04, 0.018, 0.05],
+      driftAmp: [0.03, 0.014, 0.04],
       driftSpeed: 0.42,
     },
     fx: {
@@ -218,10 +218,10 @@ export const SLIDES: SlideSpec[] = [
     kicker: "02 · CONTINUOUS TRAVERSAL",
     title: "Gravitational Slingshot Into a Second World",
     lead:
-      "Advancing from Slide 2 accelerates the camera along an exponential gravity ramp (u^2.35) with a dynamic warp-FOV kick (53° → 78° → 56°) and outward throat-rush splat shear right across the membrane.",
+      "Advancing from Slide 2 accelerates the camera along an exponential gravity ramp (u^2.35) with a dynamic warp-FOV kick (40° → 62° → 39°) and outward throat-rush splat shear right across the membrane.",
     bullets: [
       "Monotonic portal axis (<code>signedDist = cam.z − portal.z</code>) prevents projection sign flips during zero-crossing",
-      "Alien world origin sits dead-on <code>z = −6.0</code> so native SHARP parallax takes over with zero disocclusion holes",
+      "Alien world origin sits dead-on <code>z = −6.0</code> so native 16:9 SHARP parallax takes over edge-to-edge with zero disocclusion holes",
     ],
     metrics: [
       { label: "Launch Curve", value: "p = u^2.35 + FOV Kick" },
@@ -230,11 +230,11 @@ export const SLIDES: SlideSpec[] = [
     notes:
       "The camera physically crossed z = -6.2 through the wormhole into the warm alien canyon. Press Left Arrow if you want to show the audience the reverse traversal back out into the forest.",
     camera: {
-      pos: [0.02, 1.16, -7.25],
-      target: [-0.14, 1.72, -16.5],
-      fov: 46,
+      pos: [0.24, 0.56, -6.55],
+      target: [0.18, 0.72, -16.5],
+      fov: 39,
       roll: 0.0,
-      driftAmp: [0.05, 0.02, 0.05],
+      driftAmp: [0.04, 0.016, 0.04],
       driftSpeed: 0.34,
     },
     fx: {
@@ -349,9 +349,9 @@ export const SLIDES: SlideSpec[] = [
     notes:
       "The dissolution loops cleanly so you can talk over it, or press R to reset to intact stone right before explaining the dual-population puff vs ember split.",
     camera: {
-      pos: [-0.64, 0.06, 2.68],
-      target: [-0.52, 0.04, 0.0],
-      fov: 48,
+      pos: [-0.66, 0.14, 2.92],
+      target: [-0.52, 0.18, 0.0],
+      fov: 49,
       roll: -0.01,
       driftAmp: [0.1, 0.03, 0.04],
       driftSpeed: 0.35,
