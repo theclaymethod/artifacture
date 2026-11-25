@@ -83,7 +83,8 @@ type SceneId =
   | "snow"
   | "ruin_archway"
   | "singularity_clearing"
-  | "forest_clearing";
+  | "forest_clearing"
+  | "forest_clearing_wide";
 
 interface SceneMeta {
   label: string;
@@ -108,6 +109,26 @@ interface SceneMeta {
 }
 
 const SCENES: Record<SceneId, SceneMeta> = {
+  forest_clearing_wide: {
+    label: "Dimensional Forest Wormhole (16:9 Wide)",
+    sourceTag: "2.36M Dual-World 16:9 3DGS · Forest Clearing Wide × Alien Canyon Wide",
+    url: "./assets/forest-clearing-wide.spz",
+    placement: "catalog",
+    layout: "extSplats",
+    sh: false,
+    preBlur: false,
+    sky: false,
+    flipX: true,
+    targetSpan: 12.0,
+    fxCenter: [0.06, 0.55, -6.2],
+    fxScale: 1.0,
+    floorY: -0.46,
+    viewPos: [0.0, 0.0, -0.2],
+    viewTarget: [0.04, 0.18, -6.2],
+    fov: 38.5,
+    yawOffset: 0.0,
+    yawAmp: 0.05,
+  },
   forest_clearing: {
     label: "Dimensional Forest Wormhole",
     sourceTag: "2.36M Dual-World 3DGS · Forest Clearing × Alien Dimension",
@@ -1945,8 +1966,8 @@ const forestPortalOutModifier: SplatModifier = (splat) => {
   return out;
 };
 
-// Native SHARP sweet-spot origin of alien-dimension.spz sits RIGHT at the portal exit (0.14, 0.92, -6.0)!
-const ALIEN_OFFSET = new THREE.Vector3(0.14, 0.92, -6.0);
+// Native SHARP sweet-spot origin of alien-dimension(.spz / -wide.spz) sits RIGHT at the portal exit!
+const uAlienOffset = uniform(new THREE.Vector3(0.14, 0.92, -6.0));
 const ALIEN_SCALE = 1.0;
 
 const alienPortalInModifier: SplatModifier = (splat) => {
@@ -1957,11 +1978,11 @@ const alienPortalInModifier: SplatModifier = (splat) => {
   const baseRgb = splat.get("rgb").toVar();
   const opacity = splat.get("opacity").toVar();
 
-  // Alien objectToWorld is Translate(0.14, 0.92, -6.0) * Scale(1.0) * Rx(180deg)
+  // Alien objectToWorld is Translate(uAlienOffset) * Scale(1.0) * Rx(180deg)
   const pWorld = vec3(
-    pObj.x.mul(ALIEN_SCALE).add(ALIEN_OFFSET.x),
-    pObj.y.negate().mul(ALIEN_SCALE).add(ALIEN_OFFSET.y),
-    pObj.z.negate().mul(ALIEN_SCALE).add(ALIEN_OFFSET.z),
+    pObj.x.mul(ALIEN_SCALE).add(uAlienOffset.x),
+    pObj.y.negate().mul(ALIEN_SCALE).add(uAlienOffset.y),
+    pObj.z.negate().mul(ALIEN_SCALE).add(uAlienOffset.z),
   ).toVar();
 
   const f = evalWormholePortalField(pWorld);
@@ -2008,9 +2029,9 @@ const alienPortalInModifier: SplatModifier = (splat) => {
   const nearCamAlien = smoothstep(0.35, 0.95, length(warpedWorld.sub(uCamPos)));
 
   const pObjOut = vec3(
-    warpedWorld.x.sub(ALIEN_OFFSET.x).div(ALIEN_SCALE),
-    warpedWorld.y.sub(ALIEN_OFFSET.y).div(-ALIEN_SCALE),
-    warpedWorld.z.sub(ALIEN_OFFSET.z).div(-ALIEN_SCALE),
+    warpedWorld.x.sub(uAlienOffset.x).div(ALIEN_SCALE),
+    warpedWorld.y.sub(uAlienOffset.y).div(-ALIEN_SCALE),
+    warpedWorld.z.sub(uAlienOffset.z).div(-ALIEN_SCALE),
   );
   out.get("center").assign(pObjOut);
   out.get("scales").assign(scales);
@@ -2228,15 +2249,22 @@ async function loadAndBindScene(
         window.artifactureFx.mpmDurationSec = mpm.durationSec;
       }
       setMode("mpm");
-    } else if (id === "forest_clearing") {
+    } else if (id === "forest_clearing" || id === "forest_clearing_wide") {
       splatRenderer.modifier = undefined;
+      const isWide = id === "forest_clearing_wide";
+      const alienUrl = isWide ? "./assets/alien-dimension-wide.spz" : "./assets/alien-dimension.spz";
+      if (isWide) {
+        uAlienOffset.value.set(0.06, 0.55, -6.0);
+      } else {
+        uAlienOffset.value.set(0.14, 0.92, -6.0);
+      }
       const [forestLoaded, alienLoaded] = await Promise.all([
         loadSplatFile(url, { name: url, worker: true, layout, sh }),
-        loadSplatFile("./assets/alien-dimension.spz", { name: "./assets/alien-dimension.spz", worker: true, layout, sh }),
+        loadSplatFile(alienUrl, { name: alienUrl, worker: true, layout, sh }),
       ]);
       const forestFit = new THREE.Matrix4().makeRotationFromQuaternion(scanRotation(meta.up));
       const alienFit = new THREE.Matrix4()
-        .makeTranslation(ALIEN_OFFSET.x, ALIEN_OFFSET.y, ALIEN_OFFSET.z)
+        .makeTranslation(uAlienOffset.value.x, uAlienOffset.value.y, uAlienOffset.value.z)
         .multiply(new THREE.Matrix4().makeScale(ALIEN_SCALE, ALIEN_SCALE, ALIEN_SCALE))
         .multiply(new THREE.Matrix4().makeRotationFromQuaternion(scanRotation(undefined)));
 
